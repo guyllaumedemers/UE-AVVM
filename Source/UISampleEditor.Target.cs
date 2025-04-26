@@ -28,5 +28,9 @@ public class UISampleEditorTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
 		ExtraModuleNames.Add("UISample");
+
+		bUsePCHFiles = false;
+		bUseUnityBuild = false;
+		bForceUnityBuild = false;
 	}
 }
