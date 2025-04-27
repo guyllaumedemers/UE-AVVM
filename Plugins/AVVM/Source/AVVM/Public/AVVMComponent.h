@@ -22,8 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "Components/ActorComponent.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMComponent.generated.h"
+
+class UAVVMPresenter;
 
 /**
  *	Class description:
@@ -35,4 +38,17 @@ UCLASS(ClassGroup=("AVVM"), meta=(BlueprintSpawnableComponent))
 class AVVM_API UAVVMComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
+public:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+protected:
+	// @gdemers A collection of Presenter Classes to be added to a given Actor.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSubclassOf<UAVVMPresenter>> PresenterClasses;
+
+	// @gdemers A collection of Presenters owned by the Component Outer.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TObjectPtr<UAVVMPresenter>> TransientPresenters;
 };

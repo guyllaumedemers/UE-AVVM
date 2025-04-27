@@ -25,6 +25,29 @@
 
 #include "AVVMSubsystem.generated.h"
 
+class UAVVMPresenter;
+class UMVVMViewModelBase;
+
+/**
+ *	Class description:
+ *
+ *	FPresenterContextArgs encapsulate arguments of UAVVMSubsystem api for better code readability.
+ */
+USTRUCT(BlueprintType)
+struct AVVM_API FPresenterContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bIsClassDefaultObject = false;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	UWorld* WorldContext = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	UAVVMPresenter* Presenter = nullptr;
+};
+
 /**
  *	Class description:
  *
@@ -35,4 +58,36 @@ UCLASS(ClassGroup=("AVVM"))
 class AVVM_API UAVVMSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
+
+public:
+	inline static UAVVMSubsystem* Get(const UWorld* WorldContext);
+	static bool Static_UnregisterPresenter(const FPresenterContextArgs& Context);
+	static UMVVMViewModelBase* Static_RegisterPresenter(const FPresenterContextArgs& Context);
+
+protected:
+	struct FViewModelKVP
+	{
+		UMVVMViewModelBase* GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+		                                UObject* Outer);
+
+		bool RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass);
+
+	private:
+		// @gdemers A given Actor can be referenced by multiple UAVVMPresenter and a ViewModel instance may have to be rebound
+		// to a View, reusing already created View Model class.
+		TMap<const TSubclassOf<UMVVMViewModelBase>, TStrongObjectPtr<UMVVMViewModelBase>> ViewModelClassToViewModelInstance;
+
+		// @gdemers RefCount target the number of user of the Actor.
+		uint32 RefCounter = 0;
+	};
+
+	UMVVMViewModelBase* GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+	                                AActor* Outer);
+
+	bool RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+	                     AActor* Outer);
+
+	// @gdemers A collection of unique Actors to a set of ViewModel bound by the TypedOuter<AActor>().
+	// TWeakObjectPtr<AACtor> will remain valid throughout the PIE session as the AActor referenced is the TypedOuter.
+	TMap<TWeakObjectPtr<AActor>, FViewModelKVP> ActorToViewModelCollection;
 };

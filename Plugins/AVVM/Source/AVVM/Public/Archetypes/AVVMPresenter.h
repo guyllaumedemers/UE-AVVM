@@ -21,9 +21,12 @@
 
 #include "CoreMinimal.h"
 
+#include "Templates/SubclassOf.h"
 #include "UObject/Object.h"
 
-#include "UAVVMPresenter.generated.h"
+#include "AVVMPresenter.generated.h"
+
+class UMVVMViewModelBase;
 
 /**
  *	Class description:
@@ -33,7 +36,17 @@
  *	the UAVVMSubsystem.
  */
 UCLASS(Abstract, BlueprintType)
-class AVVM_API UUAVVMPresenter : public UObject
+class AVVM_API UAVVMPresenter : public UObject
 {
 	GENERATED_BODY()
+
+public:
+	UAVVMPresenter();
+	virtual void BeginDestroy() override;
+
+protected:
+	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const PURE_VIRTUAL(GetViewModelClass, return nullptr;)
+	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
+
+	friend class UAVVMSubsystem;
 };

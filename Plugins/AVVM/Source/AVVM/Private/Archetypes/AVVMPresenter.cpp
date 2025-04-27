@@ -17,4 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Archetypes/UAVVMPresenter.h"
+#include "Archetypes/AVVMPresenter.h"
+
+#include "AVVMSubsystem.h"
+
+UAVVMPresenter::UAVVMPresenter()
+{
+	FPresenterContextArgs ContextArgs;
+	ContextArgs.bIsClassDefaultObject = IsTemplate(RF_ClassDefaultObject);
+	ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
+	ContextArgs.Presenter = this;
+	UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
+}
+
+void UAVVMPresenter::BeginDestroy()
+{
+	UObject::BeginDestroy();
+
+	FPresenterContextArgs ContextArgs;
+	ContextArgs.bIsClassDefaultObject = IsTemplate(RF_ClassDefaultObject);
+	ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
+	ContextArgs.Presenter = this;
+	UAVVMSubsystem::Static_UnregisterPresenter(ContextArgs);
+}

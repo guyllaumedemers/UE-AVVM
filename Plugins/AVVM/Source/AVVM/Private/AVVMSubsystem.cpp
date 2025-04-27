@@ -18,3 +18,98 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMSubsystem.h"
+
+#include "MVVMViewModelBase.h"
+#include "Archetypes/AVVMPresenter.h"
+
+UAVVMSubsystem* UAVVMSubsystem::Get(const UWorld* WorldContext)
+{
+	return UWorld::GetSubsystem<UAVVMSubsystem>(WorldContext);
+}
+
+bool UAVVMSubsystem::Static_UnregisterPresenter(const FPresenterContextArgs& Context)
+{
+	if (Context.bIsClassDefaultObject)
+	{
+		return false;
+	}
+
+	auto* AVVMSubsystem = UAVVMSubsystem::Get(Context.WorldContext);
+	if (IsValid(AVVMSubsystem))
+	{
+		const UAVVMPresenter* Presenter = Context.Presenter;
+		const TSubclassOf<UMVVMViewModelBase>& ViewModelClass = Presenter->GetViewModelClass();
+		AActor* OuterKey = Presenter->GetOuterKey();
+		return AVVMSubsystem->RemoveOrDestroy(ViewModelClass, OuterKey);
+	}
+
+	return false;
+}
+
+UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FPresenterContextArgs& Context)
+{
+	if (Context.bIsClassDefaultObject)
+	{
+		return nullptr;
+	}
+
+	auto* AVVMSubsystem = UAVVMSubsystem::Get(Context.WorldContext);
+	if (IsValid(AVVMSubsystem))
+	{
+		const UAVVMPresenter* Presenter = Context.Presenter;
+		const TSubclassOf<UMVVMViewModelBase>& ViewModelClass = Presenter->GetViewModelClass();
+		AActor* OuterKey = Presenter->GetOuterKey();
+		return AVVMSubsystem->GetOrCreate(ViewModelClass, OuterKey);
+	}
+
+	return nullptr;
+}
+
+UMVVMViewModelBase* UAVVMSubsystem::FViewModelKVP::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+                                                               UObject* Outer)
+{
+	if (!ViewModelClassToViewModelInstance.Contains(ViewModelClass))
+	{
+		TStrongObjectPtr<UMVVMViewModelBase>& SearchResult = ViewModelClassToViewModelInstance.Add(ViewModelClass);
+		SearchResult = TStrongObjectPtr(NewObject<UMVVMViewModelBase>(Outer, ViewModelClass->GetClass()));
+		++RefCounter;
+		return SearchResult.Get();
+	}
+	else
+	{
+		return ViewModelClassToViewModelInstance[ViewModelClass].Get();
+	}
+}
+
+bool UAVVMSubsystem::FViewModelKVP::RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass)
+{
+	if (ViewModelClassToViewModelInstance.Contains(ViewModelClass))
+	{
+		ViewModelClassToViewModelInstance.Remove(ViewModelClass);
+		--RefCounter;
+	}
+
+	return (false == !!RefCounter);
+}
+
+UMVVMViewModelBase* UAVVMSubsystem::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+                                                AActor* Outer)
+{
+	const TWeakObjectPtr<AActor> WeakObjectPtr = MakeWeakObjectPtr<AActor>(Outer);
+	FViewModelKVP& SearchResult = ActorToViewModelCollection.FindOrAdd(WeakObjectPtr);
+	return SearchResult.GetOrCreate(ViewModelClass, this);
+}
+
+bool UAVVMSubsystem::RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+                                     AActor* Outer)
+{
+	const TWeakObjectPtr<AActor> WeakObjectPtr = MakeWeakObjectPtr<AActor>(Outer);
+	FViewModelKVP& SearchResult = ActorToViewModelCollection.FindOrAdd(WeakObjectPtr);
+	const bool bIsEmpty = SearchResult.RemoveOrDestroy(ViewModelClass);
+	if (bIsEmpty)
+	{
+		ActorToViewModelCollection.Remove(WeakObjectPtr);
+	}
+
+	return bIsEmpty;
+}

@@ -18,3 +18,25 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMComponent.h"
+
+#include "Archetypes/AVVMPresenter.h"
+
+void UAVVMComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	for (auto Iterator{PresenterClasses.CreateIterator()}; Iterator; ++Iterator)
+	{
+		if (Iterator)
+		{
+			auto* Presenter = NewObject<UAVVMPresenter>(this, Iterator->Get());
+			TransientPresenters.AddUnique(Presenter);
+		}
+	}
+}
+
+void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	TransientPresenters.Empty();
+}
