@@ -5,7 +5,7 @@ UE-AVVM. Actor, View, ViewModel. Based on the **RAII** principle, this architect
 It follows the core architecture of **Unreal Engine** and ensure consistent data between Travels (as it's being rebuilt with the owning Actor).
 
 This system is a work in-progress and has for end goal to remove some of the drawback affecting data persistency which comes with "Global" ViewModel usage. It's core benefit being that active ViewModel "presenting" can easily
-be swapped at Runtime based on the Actor it's owned by and "present" new data with running complex control flow for project specific use-case.
+be swapped at Runtime based on the Actor it's owned by and "present" new data without running complex control flow for project specific use-case.
 
 ### Project Miro
 
