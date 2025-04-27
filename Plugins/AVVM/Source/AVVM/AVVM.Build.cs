@@ -35,6 +35,7 @@ public class AVVM : ModuleRules
 				"Engine",
 				"FieldNotification",
 				"ModelViewViewModel",
+				"StructUtils",
 				"UMG"
 			});
 

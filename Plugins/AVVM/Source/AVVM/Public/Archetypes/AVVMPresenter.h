@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Templates/SubclassOf.h"
 #include "UObject/Object.h"
 
@@ -31,12 +32,32 @@ class UMVVMViewModelBase;
 /**
  *	Class description:
  *
+ *	UAVVMObserver register with the UAVVMNotificationSubsystem to be notified of "Gameplay event" through Tag Channels.
+ */
+UINTERFACE(BlueprintType)
+class UAVVMObserver : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class IAVVMObserver
+{
+	GENERATED_BODY()
+
+public:
+	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
+};
+
+/**
+ *	Class description:
+ *
  *	UAVVMPresenter is a UObject type that bridge the "Gameplay code" and "UI code". It's an Abstract Class
  *	that define a Key-Value pair information required for caching an Actor to a "Manual" type ViewModel on
  *	the UAVVMSubsystem.
  */
 UCLASS(Abstract, BlueprintType)
-class AVVM_API UAVVMPresenter : public UObject
+class AVVM_API UAVVMPresenter : public UObject,
+                                public IAVVMObserver
 {
 	GENERATED_BODY()
 
@@ -44,9 +65,21 @@ public:
 	UAVVMPresenter();
 	virtual void BeginDestroy() override;
 
+	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
+	virtual void StopPresenting() PURE_VIRTUAL(StopPresenting, return;);
+
+	// @gdemers api for the notification system
+	virtual FGameplayTagContainer GetChannelTags() const override { return ChannelTags; };
+
 protected:
-	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const PURE_VIRTUAL(GetViewModelClass, return nullptr;)
+	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const PURE_VIRTUAL(GetViewModelClass, return ViewModelClass;)
 	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer ChannelTags = FGameplayTagContainer::EmptyContainer;
 
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
 

@@ -60,6 +60,7 @@ class AVVM_API UAVVMSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Deinitialize() override;
 
 	inline static UAVVMSubsystem* Get(const UWorld* WorldContext);
@@ -80,7 +81,8 @@ protected:
 	private:
 		// @gdemers A given Actor can be referenced by multiple UAVVMPresenter and a ViewModel instance may have to be rebound
 		// to a View, reusing already created View Model class.
-		TMap<const TSubclassOf<UMVVMViewModelBase>, TStrongObjectPtr<UMVVMViewModelBase>> ViewModelClassToViewModelInstance;
+		TMap<const TSubclassOf<UMVVMViewModelBase>, TStrongObjectPtr<UMVVMViewModelBase>>
+		ViewModelClassToViewModelInstance;
 
 		// @gdemers RefCount target the number of user of the Actor.
 		uint32 RefCounter = 0;

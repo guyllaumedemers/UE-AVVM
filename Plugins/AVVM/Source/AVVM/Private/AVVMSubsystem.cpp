@@ -22,6 +22,15 @@
 #include "MVVMViewModelBase.h"
 #include "Archetypes/AVVMPresenter.h"
 
+bool UAVVMSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+{
+	const UWorld* World = GetWorld();
+	const bool bIsGameClient = ensure(IsValid(World)) && World->IsGameWorld()
+		                           ? World->GetNetMode() >= ENetMode::NM_Client
+		                           : false;
+	return bIsGameClient;
+}
+
 void UAVVMSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
