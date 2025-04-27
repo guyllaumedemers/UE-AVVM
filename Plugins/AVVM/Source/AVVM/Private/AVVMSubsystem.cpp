@@ -22,6 +22,12 @@
 #include "MVVMViewModelBase.h"
 #include "Archetypes/AVVMPresenter.h"
 
+void UAVVMSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+	ActorToViewModelCollection.Empty();
+}
+
 UAVVMSubsystem* UAVVMSubsystem::Get(const UWorld* WorldContext)
 {
 	return UWorld::GetSubsystem<UAVVMSubsystem>(WorldContext);
@@ -63,6 +69,11 @@ UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FPresenterCon
 	}
 
 	return nullptr;
+}
+
+UAVVMSubsystem::FViewModelKVP::~FViewModelKVP()
+{
+	ViewModelClassToViewModelInstance.Empty();
 }
 
 UMVVMViewModelBase* UAVVMSubsystem::FViewModelKVP::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,

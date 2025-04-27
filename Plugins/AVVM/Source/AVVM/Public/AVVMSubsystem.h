@@ -60,13 +60,18 @@ class AVVM_API UAVVMSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
+	virtual void Deinitialize() override;
+
 	inline static UAVVMSubsystem* Get(const UWorld* WorldContext);
+
 	static bool Static_UnregisterPresenter(const FPresenterContextArgs& Context);
 	static UMVVMViewModelBase* Static_RegisterPresenter(const FPresenterContextArgs& Context);
 
 protected:
 	struct FViewModelKVP
 	{
+		~FViewModelKVP();
+
 		UMVVMViewModelBase* GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
 		                                UObject* Outer);
 
@@ -89,5 +94,5 @@ protected:
 
 	// @gdemers A collection of unique Actors to a set of ViewModel bound by the TypedOuter<AActor>().
 	// TWeakObjectPtr<AACtor> will remain valid throughout the PIE session as the AActor referenced is the TypedOuter.
-	TMap<TWeakObjectPtr<AActor>, FViewModelKVP> ActorToViewModelCollection;
+	TMap<const TWeakObjectPtr<AActor>, FViewModelKVP> ActorToViewModelCollection;
 };
