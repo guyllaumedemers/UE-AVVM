@@ -13,5 +13,5 @@ Mind map for GameFeaturePlugin. [GameFeaturePlugin](https://miro.com/app/board/u
 
 #### Preview
 
-![Mindmap]([https://github.com/guyllaumedemers/Math/blob/master/Res/VertexTransformPipeline.png](https://github.com/guyllaumedemers/Mind-map/blob/master/Res/Mind%20Maps.jpg))
+![Mindmap](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/MindmapPreview.jpg)
 
