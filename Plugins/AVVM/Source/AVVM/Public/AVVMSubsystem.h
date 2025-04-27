@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,16 +17,22 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-using UnrealBuildTool;
-using System.Collections.Generic;
+#pragma once
 
-public class UISampleTarget : TargetRules
+#include "CoreMinimal.h"
+
+#include "Subsystems/WorldSubsystem.h"
+
+#include "AVVMSubsystem.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMSubsystem is based on CRUD principle. It Create/Read/Update/Destroy "Manual" ViewModel type with the
+ *	using UMVVM plugin api.
+ */
+UCLASS(ClassGroup=("AVVM"))
+class AVVM_API UAVVMSubsystem : public UWorldSubsystem
 {
-	public UISampleTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
-		ExtraModuleNames.Add("UISample");
-	}
-}
+	GENERATED_BODY()
+};

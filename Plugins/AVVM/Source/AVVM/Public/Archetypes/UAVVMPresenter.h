@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,16 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-using UnrealBuildTool;
-using System.Collections.Generic;
+#pragma once
 
-public class UISampleTarget : TargetRules
+#include "CoreMinimal.h"
+
+#include "UObject/Object.h"
+
+#include "UAVVMPresenter.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMPresenter is a UObject type that bridge the "Gameplay code" and "UI code". It's an Abstract Class
+ *	that define a Key-Value pair information required for caching an Actor to a "Manual" type ViewModel on
+ *	the UAVVMSubsystem.
+ */
+UCLASS(Abstract, BlueprintType)
+class AVVM_API UUAVVMPresenter : public UObject
 {
-	public UISampleTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
-		ExtraModuleNames.Add("UISample");
-	}
-}
+	GENERATED_BODY()
+};

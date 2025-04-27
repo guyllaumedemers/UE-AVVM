@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,16 +17,22 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-using UnrealBuildTool;
-using System.Collections.Generic;
+#pragma once
 
-public class UISampleTarget : TargetRules
+#include "CoreMinimal.h"
+
+#include "Components/ActorComponent.h"
+
+#include "AVVMComponent.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMComponent is a runtime component added to Actor through GameFeature_AddComponent. Based on CRUD principle, it's job is to instance a UObject type (UPresenter)
+ *	which bridge the "Gameplay code" and "UI code".
+ */
+UCLASS(ClassGroup=("AVVM"), meta=(BlueprintSpawnableComponent))
+class AVVM_API UAVVMComponent : public UActorComponent
 {
-	public UISampleTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
-		ExtraModuleNames.Add("UISample");
-	}
-}
+	GENERATED_BODY()
+};
