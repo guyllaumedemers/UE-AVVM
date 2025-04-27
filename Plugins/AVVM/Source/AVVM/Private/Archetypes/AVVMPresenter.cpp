@@ -27,7 +27,7 @@ UAVVMPresenter::UAVVMPresenter()
 	ContextArgs.bIsClassDefaultObject = IsTemplate(RF_ClassDefaultObject);
 	ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
 	ContextArgs.Presenter = this;
-	UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
+	ViewModel = UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
 }
 
 void UAVVMPresenter::BeginDestroy()

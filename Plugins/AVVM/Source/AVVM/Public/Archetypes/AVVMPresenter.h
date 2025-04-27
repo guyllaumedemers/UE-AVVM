@@ -48,5 +48,7 @@ protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const PURE_VIRTUAL(GetViewModelClass, return nullptr;)
 	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
 
+	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
+
 	friend class UAVVMSubsystem;
 };
