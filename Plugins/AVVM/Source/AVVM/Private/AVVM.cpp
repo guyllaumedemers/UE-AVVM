@@ -20,3 +20,6 @@
 #include "AVVM.h"
 
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVM)
+
+// @gdemers define global LLM tag
+LLM_DEFINE_TAG(AVVMTag);

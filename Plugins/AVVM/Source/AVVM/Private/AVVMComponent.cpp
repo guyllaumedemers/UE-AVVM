@@ -21,9 +21,17 @@
 
 #include "Archetypes/AVVMPresenter.h"
 
+// @gdemers extern symbol for global access to custom LLM_tag
+extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
+
 void UAVVMComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	TRACE_BOOKMARK(TEXT("Presenter.Create, TypedOuter: %s"), *Outer->GetFName().ToString());
+
+	LLM_SCOPE_BYTAG(AVVMTag);
 
 	for (auto Iterator{PresenterClasses.CreateIterator()}; Iterator; ++Iterator)
 	{
@@ -38,5 +46,11 @@ void UAVVMComponent::BeginPlay()
 void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	TRACE_BOOKMARK(TEXT("Presenter.Destruct, TypedOuter: %s"), *Outer->GetFName().ToString());
+
+	LLM_SCOPE_BYTAG(AVVMTag);
+
 	TransientPresenters.Empty();
 }
