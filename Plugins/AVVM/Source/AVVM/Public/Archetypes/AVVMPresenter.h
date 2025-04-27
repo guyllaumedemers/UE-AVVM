@@ -35,12 +35,12 @@ class UMVVMViewModelBase;
  *	UAVVMObserver register with the UAVVMNotificationSubsystem to be notified of "Gameplay event" through Tag Channels.
  */
 UINTERFACE(BlueprintType)
-class UAVVMObserver : public UInterface
+class AVVM_API UAVVMObserver : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class IAVVMObserver
+class AVVM_API IAVVMObserver
 {
 	GENERATED_BODY()
 
