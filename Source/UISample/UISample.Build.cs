@@ -34,6 +34,7 @@ public class UISample : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"GameFeatures",
+			"ModularGameplay"
 		});
 	}
 }

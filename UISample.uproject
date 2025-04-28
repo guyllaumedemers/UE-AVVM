@@ -20,6 +20,14 @@
       "Enabled": true
     },
     {
+      "Name": "Demo",
+      "Enabled": true
+    },
+    {
+      "Name": "ModularGameplay",
+      "Enabled": true
+    },
+    {
       "Name": "ModelViewViewModel",
       "Enabled": true
     },
