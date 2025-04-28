@@ -25,7 +25,7 @@
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const UWorld* World = GetWorld();
-	const bool bIsGameClient = ensure(IsValid(World)) && World->IsGameWorld()
+	const bool bIsGameClient = IsValid(World) && World->IsGameWorld()
 		                           ? World->GetNetMode() >= ENetMode::NM_Client
 		                           : false;
 	return bIsGameClient;
