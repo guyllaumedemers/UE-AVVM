@@ -31,8 +31,9 @@ void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 	UE_LOG(LogUI, Log, TEXT("UAVVMCheatExtension::Removed."));
 }
 
-void UAVVMCheatExtension::Cheat_NotifyTagChannel(const FString& TagChannel,
-                                                 const FString& PayloadRegistryId)
+void UAVVMCheatExtension::Cheat_NotifyTagChannel(const FString& TagChannel)
 {
-	// TODO @gdemers Add implementation details
+	// TODO @gdemers Add missing implementation details
+	// TagChannel - act both as the target channel with the Notification Subsystem but also as the ItemName
+	// for the target RegistryId.
 }

@@ -45,7 +45,8 @@ public:
 
 	// @gdemers cheat function which interface with the UAVVMNotificationSubsystem. It "inject"
 	// a Payload referenced via Data Registry Id.
+	// TagChannel - act both as the target channel with the Notification Subsystem but also as the ItemName
+	// for the target RegistryId.
 	UFUNCTION(Exec)
-	void Cheat_NotifyTagChannel(const FString& TagChannel,
-	                            const FString& PayloadRegistryId);
+	void Cheat_NotifyTagChannel(const FString& TagChannel);
 };
