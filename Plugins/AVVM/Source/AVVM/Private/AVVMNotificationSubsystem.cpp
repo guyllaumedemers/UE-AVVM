@@ -40,38 +40,109 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldC
 	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(WorldContext);
 }
 
-void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FObserverContextArgs& Context)
+void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FNotificationContextArgs& NotificationContext)
 {
-	if (Context.bIsClassDefaultObject)
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContext);
+	if (IsValid(AVVMNotificationSubsystem))
+	{
+		AVVMNotificationSubsystem->BroadcastChannel(NotificationContext.Payload, NotificationContext.ChannelTag);
+	}
+}
+
+void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FObserverContextArgs& ObserverContext)
+{
+	if (ObserverContext.bIsClassDefaultObject)
 	{
 		return;
 	}
 
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(Context.WorldContext);
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContext);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		const TScriptInterface<IAVVMObserver> Presenter = Context.Observer;
-		// TODO @gdemers finish Impl
+		const TScriptInterface<IAVVMObserver> Presenter = ObserverContext.Observer;
+		AVVMNotificationSubsystem->RemoveOrDestroy(Presenter, Presenter->GetChannelTags());
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_RegisterObserver(const FObserverContextArgs& Context)
+void UAVVMNotificationSubsystem::Static_RegisterObserver(const FObserverContextArgs& ObserverContext)
 {
-	if (Context.bIsClassDefaultObject)
+	if (ObserverContext.bIsClassDefaultObject)
 	{
 		return;
 	}
 
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(Context.WorldContext);
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContext);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		const TScriptInterface<IAVVMObserver> Presenter = Context.Observer;
-		// TODO @gdemers finish Impl
+		const TScriptInterface<IAVVMObserver> Presenter = ObserverContext.Observer;
+		AVVMNotificationSubsystem->CreateOrAdd(Presenter, Presenter->GetChannelTags());
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FGameplayTag& ChannelTag,
-                                                         const FInstancedStruct& Payload)
+UAVVMNotificationSubsystem::FTagChannelObserverCollection::~FTagChannelObserverCollection()
 {
-	// TODO @gdemers finish Impl
+	Observers.Empty();
+}
+
+void UAVVMNotificationSubsystem::FTagChannelObserverCollection::ResolveObservers(const FInstancedStruct& Payload,
+                                                                                 TArray<TScriptInterface<IAVVMObserver>>& Out) const
+{
+	// TODO Cast payload to type from which we can resolve OuterKey type
+}
+
+void UAVVMNotificationSubsystem::FTagChannelObserverCollection::RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer)
+{
+	Observers.Remove(Observer);
+}
+
+void UAVVMNotificationSubsystem::FTagChannelObserverCollection::CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer)
+{
+	Observers.Add(Observer);
+}
+
+void UAVVMNotificationSubsystem::BroadcastChannel(const FInstancedStruct& Payload,
+                                                  const FGameplayTag& ChannelTag) const
+{
+	const FTagChannelObserverCollection* SearchResult = TagChannels.Find(ChannelTag);
+	if (!ensure(SearchResult != nullptr))
+	{
+		return;
+	}
+
+	// @gdemers filter observers based on information given by payload so only the Observers using the same OuterKey
+	// type will receive the notification for the given event. This allow to filter the event based on a specific Context Actor.
+	TArray<TScriptInterface<IAVVMObserver>> OutResult;
+	SearchResult->ResolveObservers(Payload, OutResult);
+
+	for (auto Iterator{OutResult.CreateIterator()}; Iterator; ++Iterator)
+	{
+		if (ensure(Iterator->GetInterface() != nullptr
+				&& Iterator->GetObject() != nullptr))
+		{
+			(*Iterator)->Broadcast(ChannelTag, Payload);
+		}
+	}
+}
+
+void UAVVMNotificationSubsystem::RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer,
+                                                 const FGameplayTagContainer& TagContainer)
+{
+	for (const FGameplayTag& Tag : TagContainer)
+	{
+		FTagChannelObserverCollection* ObserverCollection = TagChannels.Find(Tag);
+		if (ensure(ObserverCollection != nullptr))
+		{
+			ObserverCollection->RemoveOrDestroy(Observer);
+		}
+	}
+}
+
+void UAVVMNotificationSubsystem::CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer,
+                                             const FGameplayTagContainer& TagContainer)
+{
+	for (const FGameplayTag& Tag : TagContainer)
+	{
+		FTagChannelObserverCollection& ObserverCollection = TagChannels.FindOrAdd(Tag);
+		ObserverCollection.CreateOrAdd(Observer);
+	}
 }

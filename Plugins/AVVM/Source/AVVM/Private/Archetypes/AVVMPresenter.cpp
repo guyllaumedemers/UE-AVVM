@@ -19,24 +19,51 @@
 //SOFTWARE.
 #include "Archetypes/AVVMPresenter.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMSubsystem.h"
 
 UAVVMPresenter::UAVVMPresenter()
 {
-	FPresenterContextArgs ContextArgs;
-	ContextArgs.bIsClassDefaultObject = IsTemplate(RF_ClassDefaultObject);
-	ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
-	ContextArgs.Presenter = this;
-	ViewModel = UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
+	const bool bIsClassDefault = IsTemplate(RF_ClassDefaultObject);
+	UWorld* World = UAVVMPresenter::GetWorld();
+
+	{
+		FPresenterContextArgs ContextArgs;
+		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
+		ContextArgs.WorldContext = World;
+		ContextArgs.Presenter = this;
+		ViewModel = UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
+	}
+
+	{
+		FObserverContextArgs ContextArgs;
+		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
+		ContextArgs.WorldContext = World;
+		ContextArgs.Observer = this;
+		UAVVMNotificationSubsystem::Static_RegisterObserver(ContextArgs);
+	}
 }
 
 void UAVVMPresenter::BeginDestroy()
 {
 	UObject::BeginDestroy();
 
-	FPresenterContextArgs ContextArgs;
-	ContextArgs.bIsClassDefaultObject = IsTemplate(RF_ClassDefaultObject);
-	ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
-	ContextArgs.Presenter = this;
-	UAVVMSubsystem::Static_UnregisterPresenter(ContextArgs);
+	const bool bIsClassDefault = IsTemplate(RF_ClassDefaultObject);
+	UWorld* World = UAVVMPresenter::GetWorld();
+
+	{
+		FPresenterContextArgs ContextArgs;
+		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
+		ContextArgs.WorldContext = World;
+		ContextArgs.Presenter = this;
+		UAVVMSubsystem::Static_UnregisterPresenter(ContextArgs);
+	}
+
+	{
+		FObserverContextArgs ContextArgs;
+		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
+		ContextArgs.WorldContext = World;
+		ContextArgs.Observer = this;
+		UAVVMNotificationSubsystem::Static_UnregisterObserver(ContextArgs);
+	}
 }

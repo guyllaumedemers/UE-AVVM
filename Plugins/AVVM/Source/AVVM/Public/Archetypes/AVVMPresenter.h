@@ -27,6 +27,7 @@
 
 #include "AVVMPresenter.generated.h"
 
+struct FInstancedStruct;
 class UMVVMViewModelBase;
 
 /**
@@ -46,6 +47,7 @@ class AVVM_API IAVVMObserver
 
 public:
 	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
+	virtual void Broadcast(const FGameplayTag& ChannelTag, const FInstancedStruct& Payload) PURE_VIRTUAL(Broadcast, return;);
 };
 
 /**
@@ -73,13 +75,18 @@ public:
 
 protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const PURE_VIRTUAL(GetViewModelClass, return ViewModelClass;)
-	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
+	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return GetTypedOuter<AActor>();)
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
 
+	// @gdemers notification channels to listen
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer ChannelTags = FGameplayTagContainer::EmptyContainer;
+
+	// @gdemers primarylayout.layer.tag or hud.extensionpoint.tag
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag TargetTag = FGameplayTag::EmptyTag;
 
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
 

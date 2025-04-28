@@ -22,7 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
-#inclued "StructUtils/InstancedStruct.h"
+#include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
 
 #include "AVVMNotificationSubsystem.generated.h"
@@ -50,6 +50,26 @@ struct AVVM_API FObserverContextArgs
 };
 
 /**
+ *	Class description:
+ *
+ *	FNotificationContextArgs encapsulate arguments of UAVVMNotificationSubsystem api for better code readability.
+ */
+USTRUCT(BlueprintType)
+struct AVVM_API FNotificationContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	UWorld* WorldContext = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FInstancedStruct Payload;
+};
+
+/**
 *	Class description:
  *
  *	UAVVMNotificationSubsystem notify Presenters of a "Gameplay event" through Tag Channels. This system is expected to reduce
@@ -69,25 +89,32 @@ public:
 
 	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
 
-	static void Static_UnregisterObserver(const FObserverContextArgs& Context);
-	static void Static_RegisterObserver(const FObserverContextArgs& Context);
-	static void Static_BroadcastChannel(const FGameplayTag& ChannelTag, const FInstancedStruct& Payload);
+	static void Static_BroadcastChannel(const FNotificationContextArgs& NotificationContext);
+	static void Static_UnregisterObserver(const FObserverContextArgs& ObserverContext);
+	static void Static_RegisterObserver(const FObserverContextArgs& ObserverContext);
 
 protected:
 	struct FTagChannelObserverCollection
 	{
 		~FTagChannelObserverCollection();
 
-		void CreateOrAdd(const FGameplayTagContainer& TagChannels,
-		                 const TScriptInterface<IAVVMObserver>& Observer);
-
-		bool RemoveOrDestroy(const FGameplayTagContainer& TagChannels,
-		                     const TScriptInterface<IAVVMObserver>& Observer);
+		void ResolveObservers(const FInstancedStruct& Payload, TArray<TScriptInterface<IAVVMObserver>>& Out) const;
+		void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer);
+		void CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer);
 
 	private:
 		// @gdemers a collection of all observers that listen for a given channel.
-		TSet<TScriptInterface<IAVVMObserver>> Observers;
+		TArray<TScriptInterface<IAVVMObserver>> Observers;
 	};
+
+	void BroadcastChannel(const FInstancedStruct& Payload,
+	                      const FGameplayTag& ChannelTag) const;
+
+	void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer,
+	                     const FGameplayTagContainer& TagContainer);
+
+	void CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer,
+	                 const FGameplayTagContainer& TagContainer);
 
 	// @gdemers a collection of all channels we can broadcast and notify observers with based on provided "Gameplay event".
 	TMap<FGameplayTag, FTagChannelObserverCollection> TagChannels;
