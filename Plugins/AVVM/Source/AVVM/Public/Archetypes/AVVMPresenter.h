@@ -22,12 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "StructUtils/InstancedStruct.h"
 #include "Templates/SubclassOf.h"
 #include "UObject/Object.h"
 
 #include "AVVMPresenter.generated.h"
 
-struct FInstancedStruct;
+struct FNotificationPayload;
 class UMVVMViewModelBase;
 
 /**
@@ -47,7 +48,7 @@ class AVVM_API IAVVMObserver
 
 public:
 	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
-	virtual void Broadcast(const FGameplayTag& ChannelTag, const FInstancedStruct& Payload) PURE_VIRTUAL(Broadcast, return;);
+	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;);
 };
 
 /**

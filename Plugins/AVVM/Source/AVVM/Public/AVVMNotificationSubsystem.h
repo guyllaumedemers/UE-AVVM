@@ -66,7 +66,18 @@ struct AVVM_API FNotificationContextArgs
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FInstancedStruct Payload;
+	TInstancedStruct<FNotificationPayload> Payload;
+};
+
+/**
+ *	Class description:
+ *
+ *	FNotificationPayload. Base Class of a notification Payload.
+ */
+USTRUCT(BlueprintType)
+struct AVVM_API FNotificationPayload
+{
+	GENERATED_BODY()
 };
 
 /**
@@ -99,7 +110,7 @@ protected:
 	{
 		~FTagChannelObserverCollection();
 
-		void ResolveObservers(const FInstancedStruct& Payload, TArray<TScriptInterface<IAVVMObserver>>& Out) const;
+		void ResolveObservers(const TInstancedStruct<FNotificationPayload>& Payload, TArray<TScriptInterface<IAVVMObserver>>& Out) const;
 		void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer);
 		void CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer);
 
@@ -108,7 +119,7 @@ protected:
 		TArray<TScriptInterface<IAVVMObserver>> Observers;
 	};
 
-	void BroadcastChannel(const FInstancedStruct& Payload,
+	void BroadcastChannel(const TInstancedStruct<FNotificationPayload>& Payload,
 	                      const FGameplayTag& ChannelTag) const;
 
 	void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer,

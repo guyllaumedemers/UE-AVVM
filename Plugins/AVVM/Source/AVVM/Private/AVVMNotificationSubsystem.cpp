@@ -92,7 +92,7 @@ UAVVMNotificationSubsystem::FTagChannelObserverCollection::~FTagChannelObserverC
 	Observers.Empty();
 }
 
-void UAVVMNotificationSubsystem::FTagChannelObserverCollection::ResolveObservers(const FInstancedStruct& Payload,
+void UAVVMNotificationSubsystem::FTagChannelObserverCollection::ResolveObservers(const TInstancedStruct<FNotificationPayload>& Payload,
                                                                                  TArray<TScriptInterface<IAVVMObserver>>& Out) const
 {
 	TRACE_BOOKMARK(TEXT("FTagChannelObserverCollection.ResolveObservers"));
@@ -109,7 +109,7 @@ void UAVVMNotificationSubsystem::FTagChannelObserverCollection::CreateOrAdd(cons
 	Observers.Add(Observer);
 }
 
-void UAVVMNotificationSubsystem::BroadcastChannel(const FInstancedStruct& Payload,
+void UAVVMNotificationSubsystem::BroadcastChannel(const TInstancedStruct<FNotificationPayload>& Payload,
                                                   const FGameplayTag& ChannelTag) const
 {
 	const FTagChannelObserverCollection* SearchResult = TagChannels.Find(ChannelTag);
