@@ -17,6 +17,8 @@ Mind map for the UE-AVVM system and general use case built using **Overwatch 2**
 
 [MVVM](https://miro.com/app/board/uXjVI9IeVNQ=/?share_link_id=266249431038)
 
+[DataRegistry](https://miro.com/app/board/uXjVI8q9jKI=/)
+
 #### Preview
 
 ![Mindmap](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/MindmapPreview.jpg)
