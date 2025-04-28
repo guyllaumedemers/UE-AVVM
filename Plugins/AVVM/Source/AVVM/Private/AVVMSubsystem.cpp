@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMSubsystem.h"
 
+#include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Archetypes/AVVMPresenter.h"
 
@@ -29,6 +30,12 @@ bool UAVVMSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 		                           ? World->GetNetMode() >= ENetMode::NM_Client
 		                           : false;
 	return bIsGameClient;
+}
+
+void UAVVMSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	UE_LOG(LogUI, Log, TEXT("UAVVMSubsystem::Initialize. Running On Client."));
 }
 
 void UAVVMSubsystem::Deinitialize()

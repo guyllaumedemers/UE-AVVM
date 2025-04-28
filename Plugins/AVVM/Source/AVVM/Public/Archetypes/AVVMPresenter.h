@@ -54,7 +54,7 @@ public:
  *	Class description:
  *
  *	UAVVMPresenter is a UObject type that bridge the "Gameplay code" and "UI code". It's an Abstract Class
- *	that define a Key-Value pair information required for caching an Actor to a "Manual" type ViewModel on
+ *	that define a Key-Value pair information required for mapping an Actor to a "Manual" type ViewModel on
  *	the UAVVMSubsystem.
  */
 UCLASS(Abstract, BlueprintType)

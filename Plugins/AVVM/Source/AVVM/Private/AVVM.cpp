@@ -21,5 +21,8 @@
 
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVM)
 
+// @gdemers define global LOG category
+DEFINE_LOG_CATEGORY(LogUI);
+
 // @gdemers define global LLM tag
 LLM_DEFINE_TAG(AVVMTag);

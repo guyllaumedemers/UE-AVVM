@@ -76,7 +76,7 @@ struct AVVM_API FNotificationContextArgs
  *	the amount of boiler plate required for Presenter to listen to "Gameplay event".
  *
  *	Use UAVVMNotificationSubsystem::Static_BroadcastChannel in Game Code to broadcast to the expected Presenter UObject instead of
- *	having the Presenter fetch from it's Outer Actor Game content to listen for state change events.
+ *	having the Presenter fetch from it's Outer Actor and listen for state change events.
  */
 UCLASS()
 class AVVM_API UAVVMNotificationSubsystem : public UWorldSubsystem
@@ -85,6 +85,7 @@ class AVVM_API UAVVMNotificationSubsystem : public UWorldSubsystem
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
 	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
@@ -117,5 +118,5 @@ protected:
 	                 const FGameplayTagContainer& TagContainer);
 
 	// @gdemers a collection of all channels we can broadcast and notify observers with based on provided "Gameplay event".
-	TMap<FGameplayTag, FTagChannelObserverCollection> TagChannels;
+	TMap<const FGameplayTag, FTagChannelObserverCollection> TagChannels;
 };

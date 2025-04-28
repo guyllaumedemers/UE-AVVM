@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMNotificationSubsystem.h"
 
+#include "AVVM.h"
 #include "Archetypes/AVVMPresenter.h"
 
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -28,6 +29,12 @@ bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 		                           ? World->GetNetMode() >= ENetMode::NM_Client
 		                           : false;
 	return bIsGameClient;
+}
+
+void UAVVMNotificationSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	UE_LOG(LogUI, Log, TEXT("UAVVMNotificationSubsystem::Initialize. Running On Client."));
 }
 
 void UAVVMNotificationSubsystem::Deinitialize()
@@ -88,7 +95,8 @@ UAVVMNotificationSubsystem::FTagChannelObserverCollection::~FTagChannelObserverC
 void UAVVMNotificationSubsystem::FTagChannelObserverCollection::ResolveObservers(const FInstancedStruct& Payload,
                                                                                  TArray<TScriptInterface<IAVVMObserver>>& Out) const
 {
-	// TODO Cast payload to type from which we can resolve OuterKey type
+	TRACE_BOOKMARK(TEXT("FTagChannelObserverCollection.ResolveObservers"));
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("Resolving Observers"));
 }
 
 void UAVVMNotificationSubsystem::FTagChannelObserverCollection::RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer)
@@ -117,8 +125,7 @@ void UAVVMNotificationSubsystem::BroadcastChannel(const FInstancedStruct& Payloa
 
 	for (auto Iterator{OutResult.CreateIterator()}; Iterator; ++Iterator)
 	{
-		if (ensure(Iterator->GetInterface() != nullptr
-				&& Iterator->GetObject() != nullptr))
+		if (Iterator->GetInterface() != nullptr && Iterator->GetObject() != nullptr)
 		{
 			(*Iterator)->Broadcast(ChannelTag, Payload);
 		}
