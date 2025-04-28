@@ -33,6 +33,7 @@ bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void UAVVMNotificationSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
+	TagChannels.Empty();
 }
 
 UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldContext)
