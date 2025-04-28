@@ -28,4 +28,4 @@
  *	See link for additional details : https://github.com/guyllaumedemers/Mind-map. 
  */
 
-CORE_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
+AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);

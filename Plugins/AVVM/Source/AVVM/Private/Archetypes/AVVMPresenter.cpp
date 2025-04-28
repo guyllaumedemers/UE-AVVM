@@ -21,6 +21,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSubsystem.h"
+#include "MVVMViewModelBase.h"
 
 UAVVMPresenter::UAVVMPresenter()
 {

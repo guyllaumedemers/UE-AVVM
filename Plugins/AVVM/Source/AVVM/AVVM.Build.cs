@@ -34,6 +34,7 @@ public class AVVM : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"FieldNotification",
+				"GameplayTags",
 				"ModelViewViewModel",
 				"StructUtils",
 				"UMG"
