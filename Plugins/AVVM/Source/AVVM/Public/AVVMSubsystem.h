@@ -31,10 +31,10 @@ class UMVVMViewModelBase;
 /**
  *	Class description:
  *
- *	FPresenterContextArgs encapsulate arguments of UAVVMSubsystem api for better code readability.
+ *	FAVVMPresenterContextArgs encapsulate arguments of UAVVMSubsystem api for better code readability.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FPresenterContextArgs
+struct AVVM_API FAVVMPresenterContextArgs
 {
 	GENERATED_BODY()
 
@@ -66,13 +66,13 @@ public:
 
 	inline static UAVVMSubsystem* Get(const UWorld* WorldContext);
 
-	static bool Static_UnregisterPresenter(const FPresenterContextArgs& Context);
-	static UMVVMViewModelBase* Static_RegisterPresenter(const FPresenterContextArgs& Context);
+	static bool Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context);
+	static UMVVMViewModelBase* Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context);
 
 protected:
-	struct FViewModelKVP
+	struct FAVVMViewModelKVP
 	{
-		~FViewModelKVP();
+		~FAVVMViewModelKVP();
 
 		UMVVMViewModelBase* GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
 		                                UObject* Outer);
@@ -96,5 +96,5 @@ protected:
 
 	// @gdemers A collection of unique Actors to a set of ViewModel bound by the TypedOuter<AActor>().
 	// TWeakObjectPtr<AACtor> will remain valid throughout the PIE session as the AActor referenced is the TypedOuter.
-	TMap<const TWeakObjectPtr<AActor>, FViewModelKVP> ActorToViewModelCollection;
+	TMap<const TWeakObjectPtr<AActor>, FAVVMViewModelKVP> ActorToViewModelCollection;
 };

@@ -32,6 +32,7 @@ public class AVVM : ModuleRules
 				"CommonUI",
 				"Core",
 				"CoreUObject",
+				"DataRegistry",
 				"Engine",
 				"FieldNotification",
 				"GameplayTags",

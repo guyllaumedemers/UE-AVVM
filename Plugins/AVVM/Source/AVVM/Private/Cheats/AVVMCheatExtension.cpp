@@ -18,3 +18,21 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Cheats/AVVMCheatExtension.h"
+
+#include "AVVM.h"
+
+void UAVVMCheatExtension::AddedToCheatManager_Implementation()
+{
+	UE_LOG(LogUI, Log, TEXT("UAVVMCheatExtension::Added."));
+}
+
+void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
+{
+	UE_LOG(LogUI, Log, TEXT("UAVVMCheatExtension::Removed."));
+}
+
+void UAVVMCheatExtension::Cheat_NotifyTagChannel(const FString& TagChannel,
+                                                 const FString& PayloadRegistryId)
+{
+	// TODO @gdemers Add implementation details
+}

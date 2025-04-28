@@ -17,35 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-#include "GameFramework/CheatManager.h"
-
-#include "AVVMCheatExtension.generated.h"
-
-/**
-*	Class description:
- *
- *	UAVVMCheatExtension is added through UGameFeatureAction_AddCheats and extend the UCheatManager without requiring deriving from
- *	the base class.
- *
- *	It exposed new console commands for testing the UAVVMNotificationSubsystem, allowing to broadcast specific tag channels and/or
- *	interface with the UAVVMPresenter Model to "inject" stub data to derive types.
- */
-UCLASS(BlueprintType)
-class AVVM_API UAVVMCheatExtension : public UCheatManagerExtension
-{
-	GENERATED_BODY()
-
-public:
-	virtual void AddedToCheatManager_Implementation() override;
-	virtual void RemovedFromCheatManager_Implementation() override;
-
-	// @gdemers cheat function which interface with the UAVVMNotificationSubsystem. It "inject"
-	// a Payload referenced via Data Registry Id.
-	UFUNCTION(Exec)
-	void Cheat_NotifyTagChannel(const FString& TagChannel,
-	                            const FString& PayloadRegistryId);
-};
+#include "Cheats/AVVMCheatData.h"

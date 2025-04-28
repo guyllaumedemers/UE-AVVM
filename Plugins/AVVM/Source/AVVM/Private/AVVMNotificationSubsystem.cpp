@@ -53,7 +53,7 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldC
 	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(WorldContext);
 }
 
-void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FNotificationContextArgs& NotificationContext)
+void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext)
 {
 	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContext);
 	if (IsValid(AVVMNotificationSubsystem))
@@ -62,7 +62,7 @@ void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FNotificationCont
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FObserverContextArgs& ObserverContext)
+void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
 	if (ObserverContext.bIsClassDefaultObject)
 	{
@@ -77,7 +77,7 @@ void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FObserverContex
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_RegisterObserver(const FObserverContextArgs& ObserverContext)
+void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
 	if (ObserverContext.bIsClassDefaultObject)
 	{
@@ -92,32 +92,32 @@ void UAVVMNotificationSubsystem::Static_RegisterObserver(const FObserverContextA
 	}
 }
 
-UAVVMNotificationSubsystem::FTagChannelObserverCollection::~FTagChannelObserverCollection()
+UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::~FAVVMTagChannelObserverCollection()
 {
 	Observers.Empty();
 }
 
-void UAVVMNotificationSubsystem::FTagChannelObserverCollection::ResolveObservers(const TInstancedStruct<FNotificationPayload>& Payload,
-                                                                                 TArray<TScriptInterface<IAVVMObserver>>& Out) const
+void UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::ResolveObservers(const TInstancedStruct<FAVVMNotificationPayload>& Payload,
+                                                                                     TArray<TScriptInterface<IAVVMObserver>>& Out) const
 {
 	TRACE_BOOKMARK(TEXT("FTagChannelObserverCollection.ResolveObservers"));
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("Resolving Observers"));
 }
 
-void UAVVMNotificationSubsystem::FTagChannelObserverCollection::RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer)
+void UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer)
 {
 	Observers.Remove(Observer);
 }
 
-void UAVVMNotificationSubsystem::FTagChannelObserverCollection::CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer)
+void UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer)
 {
 	Observers.Add(Observer);
 }
 
-void UAVVMNotificationSubsystem::BroadcastChannel(const TInstancedStruct<FNotificationPayload>& Payload,
+void UAVVMNotificationSubsystem::BroadcastChannel(const TInstancedStruct<FAVVMNotificationPayload>& Payload,
                                                   const FGameplayTag& ChannelTag) const
 {
-	const FTagChannelObserverCollection* SearchResult = TagChannels.Find(ChannelTag);
+	const FAVVMTagChannelObserverCollection* SearchResult = TagChannels.Find(ChannelTag);
 	if (!ensure(SearchResult != nullptr))
 	{
 		return;
@@ -142,7 +142,7 @@ void UAVVMNotificationSubsystem::RemoveOrDestroy(const TScriptInterface<IAVVMObs
 {
 	for (const FGameplayTag& Tag : TagContainer)
 	{
-		FTagChannelObserverCollection* ObserverCollection = TagChannels.Find(Tag);
+		FAVVMTagChannelObserverCollection* ObserverCollection = TagChannels.Find(Tag);
 		if (ensure(ObserverCollection != nullptr))
 		{
 			ObserverCollection->RemoveOrDestroy(Observer);
@@ -155,7 +155,7 @@ void UAVVMNotificationSubsystem::CreateOrAdd(const TScriptInterface<IAVVMObserve
 {
 	for (const FGameplayTag& Tag : TagContainer)
 	{
-		FTagChannelObserverCollection& ObserverCollection = TagChannels.FindOrAdd(Tag);
+		FAVVMTagChannelObserverCollection& ObserverCollection = TagChannels.FindOrAdd(Tag);
 		ObserverCollection.CreateOrAdd(Observer);
 	}
 }

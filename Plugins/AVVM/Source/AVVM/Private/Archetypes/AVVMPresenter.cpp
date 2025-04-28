@@ -29,7 +29,7 @@ UAVVMPresenter::UAVVMPresenter()
 	UWorld* World = UAVVMPresenter::GetWorld();
 
 	{
-		FPresenterContextArgs ContextArgs;
+		FAVVMPresenterContextArgs ContextArgs;
 		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Presenter = this;
@@ -37,7 +37,7 @@ UAVVMPresenter::UAVVMPresenter()
 	}
 
 	{
-		FObserverContextArgs ContextArgs;
+		FAVVMObserverContextArgs ContextArgs;
 		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Observer = this;
@@ -53,7 +53,7 @@ void UAVVMPresenter::BeginDestroy()
 	UWorld* World = UAVVMPresenter::GetWorld();
 
 	{
-		FPresenterContextArgs ContextArgs;
+		FAVVMPresenterContextArgs ContextArgs;
 		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Presenter = this;
@@ -61,7 +61,7 @@ void UAVVMPresenter::BeginDestroy()
 	}
 
 	{
-		FObserverContextArgs ContextArgs;
+		FAVVMObserverContextArgs ContextArgs;
 		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Observer = this;

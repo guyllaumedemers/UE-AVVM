@@ -54,7 +54,7 @@ UAVVMSubsystem* UAVVMSubsystem::Get(const UWorld* WorldContext)
 	return UWorld::GetSubsystem<UAVVMSubsystem>(WorldContext);
 }
 
-bool UAVVMSubsystem::Static_UnregisterPresenter(const FPresenterContextArgs& Context)
+bool UAVVMSubsystem::Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context)
 {
 	if (Context.bIsClassDefaultObject)
 	{
@@ -73,7 +73,7 @@ bool UAVVMSubsystem::Static_UnregisterPresenter(const FPresenterContextArgs& Con
 	return false;
 }
 
-UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FPresenterContextArgs& Context)
+UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context)
 {
 	if (Context.bIsClassDefaultObject)
 	{
@@ -92,12 +92,12 @@ UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FPresenterCon
 	return nullptr;
 }
 
-UAVVMSubsystem::FViewModelKVP::~FViewModelKVP()
+UAVVMSubsystem::FAVVMViewModelKVP::~FAVVMViewModelKVP()
 {
 	ViewModelClassToViewModelInstance.Empty();
 }
 
-UMVVMViewModelBase* UAVVMSubsystem::FViewModelKVP::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
+UMVVMViewModelBase* UAVVMSubsystem::FAVVMViewModelKVP::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
                                                                UObject* Outer)
 {
 	if (!ViewModelClassToViewModelInstance.Contains(ViewModelClass))
@@ -113,7 +113,7 @@ UMVVMViewModelBase* UAVVMSubsystem::FViewModelKVP::GetOrCreate(const TSubclassOf
 	}
 }
 
-bool UAVVMSubsystem::FViewModelKVP::RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass)
+bool UAVVMSubsystem::FAVVMViewModelKVP::RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass)
 {
 	if (ViewModelClassToViewModelInstance.Contains(ViewModelClass))
 	{
@@ -128,7 +128,7 @@ UMVVMViewModelBase* UAVVMSubsystem::GetOrCreate(const TSubclassOf<UMVVMViewModel
                                                 AActor* Outer)
 {
 	const TWeakObjectPtr<AActor> WeakObjectPtr = MakeWeakObjectPtr<AActor>(Outer);
-	FViewModelKVP& SearchResult = ActorToViewModelCollection.FindOrAdd(WeakObjectPtr);
+	FAVVMViewModelKVP& SearchResult = ActorToViewModelCollection.FindOrAdd(WeakObjectPtr);
 	return SearchResult.GetOrCreate(ViewModelClass, this);
 }
 
@@ -136,7 +136,7 @@ bool UAVVMSubsystem::RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& View
                                      AActor* Outer)
 {
 	const TWeakObjectPtr<AActor> WeakObjectPtr = MakeWeakObjectPtr<AActor>(Outer);
-	FViewModelKVP& SearchResult = ActorToViewModelCollection.FindOrAdd(WeakObjectPtr);
+	FAVVMViewModelKVP& SearchResult = ActorToViewModelCollection.FindOrAdd(WeakObjectPtr);
 	const bool bIsEmpty = SearchResult.RemoveOrDestroy(ViewModelClass);
 	if (bIsEmpty)
 	{

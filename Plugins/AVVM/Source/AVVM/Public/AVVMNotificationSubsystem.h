@@ -32,10 +32,10 @@ class IAVVMObserver;
 /**
  *	Class description:
  *
- *	FObserverContextArgs encapsulate arguments of UAVVMNotificationSubsystem api for better code readability.
+ *	FAVVMObserverContextArgs encapsulate arguments of UAVVMNotificationSubsystem api for better code readability.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FObserverContextArgs
+struct AVVM_API FAVVMObserverContextArgs
 {
 	GENERATED_BODY()
 
@@ -52,10 +52,10 @@ struct AVVM_API FObserverContextArgs
 /**
  *	Class description:
  *
- *	FNotificationContextArgs encapsulate arguments of UAVVMNotificationSubsystem api for better code readability.
+ *	FAVVMNotificationContextArgs encapsulate arguments of UAVVMNotificationSubsystem api for better code readability.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FNotificationContextArgs
+struct AVVM_API FAVVMNotificationContextArgs
 {
 	GENERATED_BODY()
 
@@ -66,16 +66,16 @@ struct AVVM_API FNotificationContextArgs
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TInstancedStruct<FNotificationPayload> Payload;
+	TInstancedStruct<FAVVMNotificationPayload> Payload;
 };
 
 /**
  *	Class description:
  *
- *	FNotificationPayload. Base Class of a notification Payload.
+ *	FAVVMNotificationPayload. Base Class of a notification Payload.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FNotificationPayload
+struct AVVM_API FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 };
@@ -101,16 +101,16 @@ public:
 
 	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
 
-	static void Static_BroadcastChannel(const FNotificationContextArgs& NotificationContext);
-	static void Static_UnregisterObserver(const FObserverContextArgs& ObserverContext);
-	static void Static_RegisterObserver(const FObserverContextArgs& ObserverContext);
+	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
+	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);
+	static void Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext);
 
 protected:
-	struct FTagChannelObserverCollection
+	struct FAVVMTagChannelObserverCollection
 	{
-		~FTagChannelObserverCollection();
+		~FAVVMTagChannelObserverCollection();
 
-		void ResolveObservers(const TInstancedStruct<FNotificationPayload>& Payload, TArray<TScriptInterface<IAVVMObserver>>& Out) const;
+		void ResolveObservers(const TInstancedStruct<FAVVMNotificationPayload>& Payload, TArray<TScriptInterface<IAVVMObserver>>& Out) const;
 		void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer);
 		void CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer);
 
@@ -119,7 +119,7 @@ protected:
 		TArray<TScriptInterface<IAVVMObserver>> Observers;
 	};
 
-	void BroadcastChannel(const TInstancedStruct<FNotificationPayload>& Payload,
+	void BroadcastChannel(const TInstancedStruct<FAVVMNotificationPayload>& Payload,
 	                      const FGameplayTag& ChannelTag) const;
 
 	void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer,
@@ -129,5 +129,5 @@ protected:
 	                 const FGameplayTagContainer& TagContainer);
 
 	// @gdemers a collection of all channels we can broadcast and notify observers with based on provided "Gameplay event".
-	TMap<const FGameplayTag, FTagChannelObserverCollection> TagChannels;
+	TMap<const FGameplayTag, FAVVMTagChannelObserverCollection> TagChannels;
 };

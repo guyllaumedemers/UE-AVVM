@@ -20,6 +20,10 @@
       "Enabled": true
     },
     {
+      "Name": "DataRegistry",
+      "Enabled": true
+    },
+    {
       "Name": "Demo",
       "Enabled": true
     },
