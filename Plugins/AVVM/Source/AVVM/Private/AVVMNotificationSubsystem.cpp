@@ -25,10 +25,15 @@
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const UWorld* PieOrGameWorld = Cast<UWorld>(Outer);
-	const bool bIsGameClient = IsValid(PieOrGameWorld) && PieOrGameWorld->IsGameWorld()
-		                           ? PieOrGameWorld->GetNetMode() >= ENetMode::NM_Client
-		                           : false;
-	return bIsGameClient;
+	if (IsValid(PieOrGameWorld))
+	{
+		const bool bIsGameClient = PieOrGameWorld->IsGameWorld() && !PieOrGameWorld->IsNetMode(NM_DedicatedServer);
+		return bIsGameClient;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void UAVVMNotificationSubsystem::Initialize(FSubsystemCollectionBase& Collection)
