@@ -29,6 +29,7 @@
 #include "AVVMPresenter.generated.h"
 
 struct FAVVMNotificationPayload;
+class UCommonUserWidget;
 class UMVVMViewModelBase;
 
 /**
@@ -48,7 +49,8 @@ class AVVM_API IAVVMObserver
 
 public:
 	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
-	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;);
+	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;)
+	;
 };
 
 /**
@@ -84,6 +86,11 @@ protected:
 	// @gdemers notification channels to listen
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer ChannelTags = FGameplayTagContainer::EmptyContainer;
+
+	// @gdemers widget to be pushed onto the target tag. UCommonActivatableWidget for menus, UCommonUserWidget
+	// for HUD elements.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UCommonUserWidget> WidgetClass = nullptr;
 
 	// @gdemers primarylayout.layer.tag or hud.extensionpoint.tag
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
