@@ -78,14 +78,21 @@ public:
 			})
 		);
 
-		// Setup a cancel delegate so that we can resume input if this handler is canceled.
-		StreamingHandle->BindCancelDelegate(FStreamableDelegate::CreateWeakLambda(this,
-			[this, StateFunc, SuspendInputToken]()
-			{
-				UCommonUIExtensions::ResumeInputForPlayer(GetOwningPlayer(), SuspendInputToken);
-				StateFunc(EAsyncWidgetLayerState::Canceled, nullptr);
-			})
-		);
+		if (StreamingHandle.IsValid())
+		{
+			// Setup a cancel delegate so that we can resume input if this handler is canceled.
+			StreamingHandle->BindCancelDelegate(FStreamableDelegate::CreateWeakLambda(this,
+				[this, StateFunc, SuspendInputToken]()
+				{
+					UCommonUIExtensions::ResumeInputForPlayer(GetOwningPlayer(), SuspendInputToken);
+					StateFunc(EAsyncWidgetLayerState::Canceled, nullptr);
+				})
+			);
+		}
+		else
+		{
+			UCommonUIExtensions::ResumeInputForPlayer(GetOwningPlayer(), SuspendInputToken);
+		}
 
 		return StreamingHandle;
 	}
