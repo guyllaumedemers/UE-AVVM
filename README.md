@@ -13,7 +13,7 @@ Mind map for the UE-AVVM system and general use case built using **Overwatch 2**
 
 ### UE-Miro
 
-[GameFeaturePlugin](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267)
+[GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267)
 
 [MVVM](https://miro.com/app/board/uXjVI9IeVNQ=/?share_link_id=266249431038)
 
