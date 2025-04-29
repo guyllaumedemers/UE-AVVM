@@ -22,31 +22,12 @@
 #include "CoreMinimal.h"
 
 #include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMSettings.generated.h"
 
 enum class EAVVMObserverResolverFlag : uint8;
-
-/**
- *	Class description:
- *
- *	UAVVMResolverFactoryImpl. project specific interface that define what Executioner UObject should be created based on the received
- *	flag.
- */
-UINTERFACE(BlueprintType)
-class AVVM_API UAVVMResolverFactoryImpl : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class AVVM_API IAVVMResolverFactoryImpl
-{
-	GENERATED_BODY()
-
-public:
-	// @gdemers factory method to override with project impl.
-	virtual TScriptInterface<IAVVMResolverExecutioner> Factory(const EAVVMObserverResolverFlag ResolverFlag) const PURE_VIRTUAL(Factory, return nullptr;);
-};
+class IAVVMObserver;
 
 /**
  *	Class description:
@@ -71,6 +52,27 @@ public:
 	// @gdemers filter the list of observers based on class implementation.
 	virtual TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,
 	                                                       const TArray<TScriptInterface<IAVVMObserver>>& Observers) const PURE_VIRTUAL(Filter, return {};);
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMResolverFactoryImpl. project specific interface that define what Executioner UObject should be created based on the received
+ *	flag.
+ */
+UINTERFACE(BlueprintType)
+class AVVM_API UAVVMResolverFactoryImpl : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVM_API IAVVMResolverFactoryImpl
+{
+	GENERATED_BODY()
+
+public:
+	// @gdemers factory method to override with project impl.
+	virtual TScriptInterface<IAVVMResolverExecutioner> Factory(const EAVVMObserverResolverFlag ResolverFlag) const PURE_VIRTUAL(Factory, return nullptr;);
 };
 
 /**

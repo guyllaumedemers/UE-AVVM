@@ -109,7 +109,7 @@ UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(const EAV
 	static TScriptInterface<IAVVMResolverFactoryImpl> GlobalResolver;
 	if (GlobalResolver.GetInterface() == nullptr && GlobalResolver.GetObject() == nullptr)
 	{
-		const TSubclassOf<UObject> ResolverClass = UAVVMSettings::GetFactoryResolverClass();
+		const TSubclassOf<UObject>& ResolverClass = UAVVMSettings::GetFactoryResolverClass();
 		GlobalResolver = NewObject<UObject>(ResolverClass);
 	}
 

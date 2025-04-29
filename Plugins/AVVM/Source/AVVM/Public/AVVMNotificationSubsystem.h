@@ -28,6 +28,7 @@
 #include "AVVMNotificationSubsystem.generated.h"
 
 class IAVVMObserver;
+class IAVVMResolverExecutioner;
 
 /**
  *	Class description:
@@ -81,7 +82,7 @@ struct AVVM_API FAVVMNotificationContextArgs
 
 	// @gdemers define based on what general condition the observers collection should be filtered by.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TEnumAsByte<EAVVMObserverResolverFlag> ResolverFlag = EAVVMObserverResolverFlag::None;
+	EAVVMObserverResolverFlag ResolverFlag = EAVVMObserverResolverFlag::None;
 
 	// @gdemers define the value for a proper match of the above requirement.
 	UPROPERTY(Transient, BlueprintReadOnly)
