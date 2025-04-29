@@ -28,13 +28,15 @@ public class UISample : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
+			"CommonGame",
 			"Core",
 			"CoreUObject",
 			"Engine",
 			"InputCore",
 			"EnhancedInput",
 			"GameFeatures",
-			"ModularGameplay"
+			"ModularGameplay",
+			"ModularGameplayActors"
 		});
 	}
 }
