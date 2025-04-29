@@ -26,4 +26,10 @@ class MODULARGAMEPLAYACTORS_API AModularGameMode : public AGameMode
 
 public:
 	AModularGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	// @gdemers BEGIN-CHANGE
+	virtual void PreInitializeComponents() override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	// @gdemers END-CHANGE
 };

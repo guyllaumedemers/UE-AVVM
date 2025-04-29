@@ -15,6 +15,5 @@
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
-	"ExplicitlyLoaded": true,
 	"BuiltInInitialFeatureState": "Active"
 }

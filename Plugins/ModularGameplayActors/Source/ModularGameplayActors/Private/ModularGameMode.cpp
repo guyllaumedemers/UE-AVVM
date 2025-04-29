@@ -6,6 +6,7 @@
 #include "ModularPawn.h"
 #include "ModularPlayerController.h"
 #include "ModularPlayerState.h"
+#include "Components/GameFrameworkComponentManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularGameMode)
 
@@ -27,3 +28,25 @@ AModularGameMode::AModularGameMode(const FObjectInitializer& ObjectInitializer)
 	DefaultPawnClass = AModularPawn::StaticClass();
 }
 
+// @gdemers BEGIN-CHANGE
+void AModularGameMode::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+}
+
+void AModularGameMode::BeginPlay()
+{
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
+
+	Super::BeginPlay();
+}
+
+void AModularGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
+
+	Super::EndPlay(EndPlayReason);
+}
+// @gdemers END-CHANGE
