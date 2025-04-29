@@ -49,8 +49,7 @@ class AVVM_API IAVVMObserver
 
 public:
 	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
-	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;)
-	;
+	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;);
 };
 
 /**
