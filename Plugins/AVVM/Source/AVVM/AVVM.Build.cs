@@ -33,6 +33,7 @@ public class AVVM : ModuleRules
 				"Core",
 				"CoreUObject",
 				"DataRegistry",
+				"DeveloperSettings",
 				"Engine",
 				"FieldNotification",
 				"GameplayTags",
