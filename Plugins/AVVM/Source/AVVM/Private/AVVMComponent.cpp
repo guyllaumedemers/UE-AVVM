@@ -33,6 +33,9 @@ void UAVVMComponent::BeginPlay()
 
 	LLM_SCOPE_BYTAG(AVVMTag);
 
+	// @gdemers presenters are created synchronously which makes it safe to broadcast events in the AActor::BeginPlay()
+	// as all presenters will have registered with the notification subsystem.
+	// just make sure, your derived AActor class doesn't execute code BEFORE the call to the super::BeginPlay().
 	for (auto Iterator{PresenterClasses.CreateIterator()}; Iterator; ++Iterator)
 	{
 		if (Iterator)

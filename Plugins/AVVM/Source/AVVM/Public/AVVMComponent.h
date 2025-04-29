@@ -31,7 +31,7 @@ class UAVVMPresenter;
 /**
  *	Class description:
  *
- *	UAVVMComponent is a runtime component added to Actor through GameFeature_AddComponent. Based on CRUD principle, it's job is to instance a UObject type (UPresenter)
+ *	UAVVMComponent is a runtime component added to Actor through GameFeature_AddComponent - Client Only. Based on CRUD principle, it's job is to instance a UObject type (UPresenter)
  *	which bridge the "Gameplay code" and "UI code".
  */
 UCLASS(ClassGroup=("AVVM"), meta=(BlueprintSpawnableComponent))
