@@ -13,7 +13,7 @@ Mind map for the UE-AVVM system and general use case built using **Overwatch 2**
 
 ### UE-Miro
 
-[GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267)
+[GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267) - UGameFeatureData are name dependent. UGameFeaturePluginStateMachine cannot register/load/activate unless it's named identical to the GameFeature plugin it represent.
 
 [MVVM](https://miro.com/app/board/uXjVI8PJltw=/?share_link_id=952318299614)
 
