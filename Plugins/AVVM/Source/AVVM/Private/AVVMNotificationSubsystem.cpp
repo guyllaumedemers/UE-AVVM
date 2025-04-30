@@ -21,6 +21,7 @@
 
 #include "AVVM.h"
 #include "AVVMSettings.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "Archetypes/AVVMPresenter.h"
 
 // @gdemers extern symbol for global access to custom LLM_tag
@@ -107,7 +108,9 @@ UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(const EAV
 	// only handle local creation of a context type that perform filtering behaviour.
 	// we also benefit from lazy initialization of this entity.
 	static TScriptInterface<IAVVMResolverFactoryImpl> GlobalResolver;
-	if (GlobalResolver.GetInterface() == nullptr && GlobalResolver.GetObject() == nullptr)
+
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMResolverFactoryImpl>(GlobalResolver);
+	if (!bIsValid)
 	{
 		const TSubclassOf<UObject>& ResolverClass = UAVVMSettings::GetFactoryResolverClass();
 		GlobalResolver = NewObject<UObject>(ResolverClass);
@@ -119,8 +122,8 @@ UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(const EAV
 TArray<TScriptInterface<IAVVMObserver>> UAVVMNotificationSubsystem::FAVVMResolverContext::Filter(const FString& MatchRequirement,
                                                                                                  const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
-	if (Pimpl.GetInterface() != nullptr &&
-		Pimpl.GetObject() != nullptr)
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMResolverExecutioner>(Pimpl);
+	if (bIsValid)
 	{
 		return Pimpl->Filter(MatchRequirement, Observers);
 	}
@@ -171,8 +174,8 @@ void UAVVMNotificationSubsystem::BroadcastChannel(const FAVVMNotificationContext
 
 	for (auto Iterator{OutResult.CreateIterator()}; Iterator; ++Iterator)
 	{
-		if (Iterator->GetInterface() != nullptr &&
-			Iterator->GetObject() != nullptr)
+		const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMObserver>(*Iterator);
+		if (bIsValid)
 		{
 			(*Iterator)->Broadcast(NotificationContext.ChannelTag, NotificationContext.Payload);
 		}

@@ -76,7 +76,7 @@ public:
 	virtual FGameplayTagContainer GetChannelTags() const override { return ChannelTags; };
 
 protected:
-	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const PURE_VIRTUAL(GetViewModelClass, return ViewModelClass;)
+	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
 	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return GetTypedOuter<AActor>();)
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
