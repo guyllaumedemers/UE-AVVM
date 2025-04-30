@@ -38,13 +38,10 @@ struct AVVM_API FAVVMPresenterContextArgs
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bIsClassDefaultObject = false;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	UWorld* WorldContext = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	UAVVMPresenter* Presenter = nullptr;
 };
 

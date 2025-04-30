@@ -24,6 +24,21 @@
 #include "MVVMSubsystem.h"
 #include "View/MVVMView.h"
 
+UWorld* UAVVMUtilityFunctionLibrary::BP_GetWorld(const UObject* Target)
+{
+	return IsValid(Target) ? Target->GetWorld() : nullptr;
+}
+
+FString UAVVMUtilityFunctionLibrary::GetMatchRequirement_ActorName(const UObject* Target)
+{
+	return IsValid(Target) ? Target->GetName() : FString();
+}
+
+FString UAVVMUtilityFunctionLibrary::GetMatchRequirement_ActorClassName(const UObject* Target)
+{
+	return IsValid(Target) ? Target->GetClass()->GetName() : FString();
+}
+
 void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
                                                 UCommonUserWidget* Target)
 {

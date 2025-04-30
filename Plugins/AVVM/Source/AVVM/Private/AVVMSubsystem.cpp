@@ -56,18 +56,13 @@ UAVVMSubsystem* UAVVMSubsystem::Get(const UWorld* WorldContext)
 
 bool UAVVMSubsystem::Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context)
 {
-	if (Context.bIsClassDefaultObject)
-	{
-		return false;
-	}
-
 	auto* AVVMSubsystem = UAVVMSubsystem::Get(Context.WorldContext);
 	if (IsValid(AVVMSubsystem))
 	{
 		const UAVVMPresenter* Presenter = Context.Presenter;
 		const TSubclassOf<UMVVMViewModelBase>& ViewModelClass = Presenter->GetViewModelClass();
 		AActor* OuterKey = Presenter->GetOuterKey();
-		return AVVMSubsystem->RemoveOrDestroy(ViewModelClass, OuterKey);
+		return IsValid(ViewModelClass) ? AVVMSubsystem->RemoveOrDestroy(ViewModelClass, OuterKey) : false;
 	}
 
 	return false;
@@ -75,18 +70,13 @@ bool UAVVMSubsystem::Static_UnregisterPresenter(const FAVVMPresenterContextArgs&
 
 UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context)
 {
-	if (Context.bIsClassDefaultObject)
-	{
-		return nullptr;
-	}
-
 	auto* AVVMSubsystem = UAVVMSubsystem::Get(Context.WorldContext);
 	if (IsValid(AVVMSubsystem))
 	{
 		const UAVVMPresenter* Presenter = Context.Presenter;
 		const TSubclassOf<UMVVMViewModelBase>& ViewModelClass = Presenter->GetViewModelClass();
 		AActor* OuterKey = Presenter->GetOuterKey();
-		return AVVMSubsystem->GetOrCreate(ViewModelClass, OuterKey);
+		return IsValid(ViewModelClass) ? AVVMSubsystem->GetOrCreate(ViewModelClass, OuterKey) : nullptr;
 	}
 
 	return nullptr;
@@ -98,7 +88,7 @@ UAVVMSubsystem::FAVVMViewModelKVP::~FAVVMViewModelKVP()
 }
 
 UMVVMViewModelBase* UAVVMSubsystem::FAVVMViewModelKVP::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
-                                                               UObject* Outer)
+                                                                   UObject* Outer)
 {
 	if (!ViewModelClassToViewModelInstance.Contains(ViewModelClass))
 	{

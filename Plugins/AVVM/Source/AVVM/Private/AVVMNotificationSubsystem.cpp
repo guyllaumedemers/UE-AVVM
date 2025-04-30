@@ -58,15 +58,6 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldC
 	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(WorldContext);
 }
 
-void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext)
-{
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContext);
-	if (IsValid(AVVMNotificationSubsystem))
-	{
-		AVVMNotificationSubsystem->BroadcastChannel(NotificationContext);
-	}
-}
-
 void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
 	if (ObserverContext.bIsClassDefaultObject)
@@ -97,7 +88,16 @@ void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverCont
 	}
 }
 
-UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(const EAVVMObserverResolverFlag ResolverFlag)
+void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext)
+{
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContext);
+	if (IsValid(AVVMNotificationSubsystem))
+	{
+		AVVMNotificationSubsystem->BroadcastChannel(NotificationContext);
+	}
+}
+
+UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(UObject* Outer, const EAVVMObserverResolverFlag ResolverFlag)
 {
 	// TODO investigate!!
 	// @gdemers FAVVMResolverContext may be created too often
@@ -113,7 +113,8 @@ UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(const EAV
 	if (!bIsValid)
 	{
 		const TSubclassOf<UObject>& ResolverClass = UAVVMSettings::GetFactoryResolverClass();
-		GlobalResolver = NewObject<UObject>(ResolverClass);
+		ensureAlwaysMsgf(IsValid(ResolverClass), TEXT("UAVVMSettings::GetFactoryResolverClass IsNull"));
+		GlobalResolver = NewObject<UObject>(Outer, ResolverClass);
 	}
 
 	Pimpl = GlobalResolver->Factory(ResolverFlag);
@@ -168,7 +169,7 @@ void UAVVMNotificationSubsystem::BroadcastChannel(const FAVVMNotificationContext
 	// @gdemers filter observers for the given channel. based on user requirements, we can filter the collection to restrict the message
 	// to only broadcast for Observers that share the unique instance, or be more general and broadcast for a shared actor class.
 	TArray<TScriptInterface<IAVVMObserver>> OutResult;
-	SearchResult->ResolveObservers(FAVVMResolverContext(NotificationContext.ResolverFlag),
+	SearchResult->ResolveObservers(FAVVMResolverContext(NotificationContext.WorldContext, NotificationContext.ResolverFlag),
 	                               NotificationContext.MatchRequirement,
 	                               OutResult);
 

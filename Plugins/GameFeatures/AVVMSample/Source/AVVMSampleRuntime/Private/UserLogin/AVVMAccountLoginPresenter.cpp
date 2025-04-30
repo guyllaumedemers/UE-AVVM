@@ -17,24 +17,18 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-// ReSharper disable CppIncompleteSwitchStatement
-// ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
-#include "AVVMSampleFactoryImpl.h"
+#include "UserLogin/AVVMAccountLoginPresenter.h"
 
-#include "AVVMNotificationSubsystem.h"
+#include "AVVM.h"
+#include "GameFramework/GameMode.h"
 
-TScriptInterface<IAVVMResolverExecutioner> UAVVMSampleFactoryImpl::Factory(const EAVVMObserverResolverFlag ResolverFlag) const
+void UAVVMAccountLoginPresenter::Broadcast(const FGameplayTag& ChannelTag,
+                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMResolverExecutioner> Out = nullptr;
-	switch (ResolverFlag)
-	{
-		case EAVVMObserverResolverFlag::ActorName:
-			Out = NewObject<UAVVMSampleActorNameExecutioner>();
-			break;
-		case EAVVMObserverResolverFlag::ActorClassName:
-			Out = NewObject<UAVVMSampleActorClassNameExecutioner>();
-			break;
-	}
+	UE_LOG(LogUI, Log, TEXT("Broadcasting Channel: %s"), *ChannelTag.ToString());
+}
 
-	return Out;
+AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
+{
+	return GetTypedOuter<AGameMode>();
 }

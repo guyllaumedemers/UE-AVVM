@@ -40,13 +40,13 @@ struct AVVM_API FAVVMObserverContextArgs
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	bool bIsClassDefaultObject = false;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	UWorld* WorldContext = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TScriptInterface<IAVVMObserver> Observer = nullptr;
 };
 
@@ -74,21 +74,21 @@ struct AVVM_API FAVVMNotificationContextArgs
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	UWorld* WorldContext = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
 	// @gdemers define based on what general condition the observers collection should be filtered by.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMObserverResolverFlag ResolverFlag = EAVVMObserverResolverFlag::None;
 
 	// @gdemers define the value for a proper match of the above requirement.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString MatchRequirement = TEXT("");
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TInstancedStruct<FAVVMNotificationPayload> Payload;
 };
 
@@ -124,9 +124,11 @@ public:
 
 	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
 
-	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
 	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);
 	static void Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
+	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
 
 protected:
 	/**
@@ -136,7 +138,7 @@ protected:
 	 */
 	struct FAVVMResolverContext
 	{
-		explicit FAVVMResolverContext(const EAVVMObserverResolverFlag ResolverFlag);
+		explicit FAVVMResolverContext(UObject* Outer, const EAVVMObserverResolverFlag ResolverFlag);
 		~FAVVMResolverContext() = default;
 
 		TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,

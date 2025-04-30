@@ -42,8 +42,18 @@ public:
 	template <typename T>
 	static bool IsScriptInterfaceValid(const TScriptInterface<T>& Target);
 
+	// @gdemers unreal doesnt allow fetching the current world from BP.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AVVM|Utility", meta=(WorldContext="Target"))
+	static UWorld* BP_GetWorld(const UObject* Target);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AVVM|Utility", meta=(WorldContext="Target"))
+	static FString GetMatchRequirement_ActorName(const UObject* Target);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AVVM|Utility", meta=(WorldContext="Target"))
+	static FString GetMatchRequirement_ActorClassName(const UObject* Target);
+
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AVVM|Utility")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
 	                          UCommonUserWidget* Target);
 };
