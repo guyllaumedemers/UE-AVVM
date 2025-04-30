@@ -20,11 +20,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AVVM.h"
 
+#include "AVVM.h"
 #include "UObject/Object.h"
 
-#include "AVVMSampleFactoryImpl.generated.h"
+#include "UISampleFactoryImpl.generated.h"
 
 /**
  *	Class description:
@@ -32,9 +32,9 @@
  *	UAVVMSampleFactoryImpl. provide implementation details about the UObject class to instance
  *	based on received flags.
  */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMSampleFactoryImpl : public UObject,
-                                                     public IAVVMResolverFactoryImpl
+UCLASS(BlueprintType, Blueprintable)
+class UISAMPLE_API USampleFactoryImpl : public UObject,
+                                        public IAVVMResolverFactoryImpl
 {
 	GENERATED_BODY()
 
@@ -48,9 +48,9 @@ public:
  *	UAVVMSampleActorNameExecutioner. provide an implementation on how filtering should be perform using the Actor Name. Impplying we care about the unique
  *	instance of this Actor Class.
  */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMSampleActorNameExecutioner : public UObject,
-                                                              public IAVVMResolverExecutioner
+UCLASS(BlueprintType, Blueprintable)
+class UISAMPLE_API USampleActorNameExecutioner : public UObject,
+                                                 public IAVVMResolverExecutioner
 {
 	GENERATED_BODY()
 
@@ -65,9 +65,9 @@ public:
  *	UAVVMSampleActorClassNameExecutioner. provide an implementation on how filtering should be perform using the Actor Class Name. Impplying we care about
  *	this Actor Class and not the instance.
  */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMSampleActorClassNameExecutioner : public UObject,
-                                                                   public IAVVMResolverExecutioner
+UCLASS(BlueprintType, Blueprintable)
+class UISAMPLE_API USampleActorClassNameExecutioner : public UObject,
+                                                      public IAVVMResolverExecutioner
 {
 	GENERATED_BODY()
 

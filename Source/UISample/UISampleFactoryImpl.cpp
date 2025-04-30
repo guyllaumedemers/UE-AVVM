@@ -19,34 +19,34 @@
 //SOFTWARE.
 // ReSharper disable CppIncompleteSwitchStatement
 // ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
-#include "AVVMSampleFactoryImpl.h"
+#include "UISampleFactoryImpl.h"
 
 #include "AVVMNotificationSubsystem.h"
 
-TScriptInterface<IAVVMResolverExecutioner> UAVVMSampleFactoryImpl::Factory(const EAVVMObserverResolverFlag ResolverFlag) const
+TScriptInterface<IAVVMResolverExecutioner> USampleFactoryImpl::Factory(const EAVVMObserverResolverFlag ResolverFlag) const
 {
 	TScriptInterface<IAVVMResolverExecutioner> Out = nullptr;
 	switch (ResolverFlag)
 	{
 		case EAVVMObserverResolverFlag::ActorName:
-			Out = NewObject<UAVVMSampleActorNameExecutioner>();
+			Out = NewObject<USampleActorNameExecutioner>();
 			break;
 		case EAVVMObserverResolverFlag::ActorClassName:
-			Out = NewObject<UAVVMSampleActorClassNameExecutioner>();
+			Out = NewObject<USampleActorClassNameExecutioner>();
 			break;
 	}
 
 	return Out;
 }
 
-TArray<TScriptInterface<IAVVMObserver>> UAVVMSampleActorNameExecutioner::Filter(const FString& MatchRequirement,
-                                                                                const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
+TArray<TScriptInterface<IAVVMObserver>> USampleActorNameExecutioner::Filter(const FString& MatchRequirement,
+                                                                            const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
 	return TArray<TScriptInterface<IAVVMObserver>>{};
 }
 
-TArray<TScriptInterface<IAVVMObserver>> UAVVMSampleActorClassNameExecutioner::Filter(const FString& MatchRequirement,
-                                                                                     const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
+TArray<TScriptInterface<IAVVMObserver>> USampleActorClassNameExecutioner::Filter(const FString& MatchRequirement,
+                                                                                 const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
 	return TArray<TScriptInterface<IAVVMObserver>>{};
 }

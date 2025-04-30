@@ -28,6 +28,7 @@ public class UISample : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
+			"AVVM",
 			"CommonGame",
 			"Core",
 			"CoreUObject",

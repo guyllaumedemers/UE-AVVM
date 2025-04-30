@@ -31,7 +31,7 @@
  *
  *	UAVVMSettings define a set of Project Settings.
  */
-UCLASS(config="Game", meta=(DisplayName="UAVVMSettings"))
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMSettings"))
 class AVVM_API UAVVMSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -46,6 +46,6 @@ public:
 	static TSubclassOf<UObject> GetFactoryResolverClass();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Config, meta=(MustImplement="/Script/AVVM/AVVMResolverFactoryImpl"))
+	UPROPERTY(EditDefaultsOnly, Config, meta=(MustImplement="/Script/AVVM.AVVMResolverFactoryImpl"))
 	TSubclassOf<UObject> FactoryResolverClass = nullptr;
 };

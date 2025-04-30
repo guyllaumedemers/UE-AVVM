@@ -79,7 +79,7 @@ protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
 	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return GetTypedOuter<AActor>();)
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM/AVVMViewModelFNameHelper"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
 
 	// @gdemers notification channels to listen
