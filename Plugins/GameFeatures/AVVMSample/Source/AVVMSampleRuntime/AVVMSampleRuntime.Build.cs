@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,35 +17,27 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
 
-#include "CoreMinimal.h"
+using UnrealBuildTool;
 
-#include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
-
-#include "AVVMSettings.generated.h"
-
-/**
- *	Class description:
- *
- *	UAVVMSettings define a set of Project Settings.
- */
-UCLASS(config="Game", meta=(DisplayName="UAVVMSettings"))
-class AVVM_API UAVVMSettings : public UDeveloperSettings
+public class AVVMSampleRuntime : ModuleRules
 {
-	GENERATED_BODY()
-
-public:
-	UAVVMSettings()
+	public AVVMSampleRuntime(ReadOnlyTargetRules Target) : base(Target)
 	{
-		CategoryName = TEXT("AVVM");
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"Core",
+				"CoreUObject",
+				"Engine",
+			});
+
+
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+			});
 	}
-
-	UFUNCTION(BlueprintCallable)
-	static TSubclassOf<UObject> GetFactoryResolverClass();
-
-protected:
-	UPROPERTY(EditDefaultsOnly, Config, meta=(MustImplement="/Script/AVVM/AVVMResolverFactoryImpl"))
-	TSubclassOf<UObject> FactoryResolverClass = nullptr;
-};
+}

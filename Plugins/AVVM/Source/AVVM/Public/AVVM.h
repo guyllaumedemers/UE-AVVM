@@ -19,13 +19,76 @@
 //SOFTWARE.
 #pragma once
 
+#include "AVVM.generated.h"
+
+enum class EAVVMObserverResolverFlag : uint8;
+class IAVVMObserver;
+
+AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
+
 /**
  *	Plugin Description :
  *
- *	AVVM's plugin allow user to quickly setup an architecture resembling Unreal Actor Model. The View Model
- *	life-cycle follows RAII principle and is dependent on it's owning TypedOuter<Actor>().
+ *	UE-AVVM. Actor, View, ViewModel. Based on the RAII principle, this architecture benefit from Ref-counting "Manual"
+ *	ViewModel instance, using it's TypedOuter, and is managed via a World Subsystem.
  *
- *	See link for additional details : https://github.com/guyllaumedemers/Mind-map. 
+ *	It follows the core architecture of Unreal Engine and ensure consistent data
+ *	between Travels (as it's being rebuilt with the owning Actor).
+ *
+ *	This system is a work in-progress and has for end goal to remove some of the drawback affecting data persistency which comes
+ *	with "Global" ViewModel usage.
+ *	It's core benefit being that active ViewModel "presenting" can easily be swapped at Runtime based on the Actor it's owned by and
+ *	"present" new data without running complex control flow for project specific use-case.
+ *
+ *	See Github link for more! : https://github.com/guyllaumedemers/UE-AVVM.
  */
 
-AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
+// ---------------------------------------------------------------------------------------------------------------------//
+//									Required implementation in project													//
+// ---------------------------------------------------------------------------------------------------------------------//
+
+/**
+ *	Class description:
+ *
+ *	UAVVMResolverExecutioner. define an interface to be implemented by a UObject class. Like a predicate, we expect the implementation
+ *	to define hard constraint for equality.
+ *
+ *	Example : UActorNameExecutioner -> Search through the observer collection for a match based on the Actor::GetFName()::ToString().Equals(MatchRequirement)
+ *	vs. UActorClassExecutioner -> Search through the observer collection for a match based on the Actor::GetClass()::ToString().Equals(MatchRequirement)
+ */
+UINTERFACE(BlueprintType)
+class AVVM_API UAVVMResolverExecutioner : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVM_API IAVVMResolverExecutioner
+{
+	GENERATED_BODY()
+
+public:
+	// @gdemers filter the list of observers based on class implementation.
+	virtual TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,
+	                                                       const TArray<TScriptInterface<IAVVMObserver>>& Observers) const PURE_VIRTUAL(Filter, return {};);
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMResolverFactoryImpl. project specific interface that define what Executioner UObject should be created based on the received
+ *	flag.
+ */
+UINTERFACE(BlueprintType)
+class AVVM_API UAVVMResolverFactoryImpl : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVM_API IAVVMResolverFactoryImpl
+{
+	GENERATED_BODY()
+
+public:
+	// @gdemers factory method to override with project impl.
+	virtual TScriptInterface<IAVVMResolverExecutioner> Factory(const EAVVMObserverResolverFlag ResolverFlag) const PURE_VIRTUAL(Factory, return nullptr;);
+};

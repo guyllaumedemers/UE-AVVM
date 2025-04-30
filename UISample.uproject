@@ -16,6 +16,10 @@
       "Enabled": true
     },
     {
+      "Name": "AVVMSample",
+      "Enabled": true
+    },
+    {
       "Name": "CommonGame",
       "Enabled": true
     },
@@ -29,10 +33,6 @@
     },
     {
       "Name": "DataRegistry",
-      "Enabled": true
-    },
-    {
-      "Name": "Demo",
       "Enabled": true
     },
     {
