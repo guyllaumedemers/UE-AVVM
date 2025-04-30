@@ -59,14 +59,13 @@ public:
  *	that define a Key-Value pair information required for mapping an Actor to a "Manual" type ViewModel on
  *	the UAVVMSubsystem.
  */
-UCLASS(Abstract, BlueprintType)
+UCLASS(Abstract, BlueprintType, Blueprintable)
 class AVVM_API UAVVMPresenter : public UObject,
                                 public IAVVMObserver
 {
 	GENERATED_BODY()
 
 public:
-	UAVVMPresenter();
 	virtual void PostInitProperties() override;
 	virtual void BeginDestroy() override;
 

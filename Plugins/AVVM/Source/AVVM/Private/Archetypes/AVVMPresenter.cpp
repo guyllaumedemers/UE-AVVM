@@ -24,14 +24,21 @@
 #include "AVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
 
-UAVVMPresenter::UAVVMPresenter()
+void UAVVMPresenter::PostInitProperties()
 {
+	UObject::PostInitProperties();
+
 	const bool bIsClassDefault = IsTemplate(RF_ClassDefaultObject);
+	if (bIsClassDefault)
+	{
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("Adding UAVVMPresenter::%s"), *GetClass()->GetName());
 	UWorld* World = UAVVMPresenter::GetWorld();
 
 	{
 		FAVVMPresenterContextArgs ContextArgs;
-		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Presenter = this;
 		ViewModel = UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
@@ -39,17 +46,10 @@ UAVVMPresenter::UAVVMPresenter()
 
 	{
 		FAVVMObserverContextArgs ContextArgs;
-		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Observer = this;
 		UAVVMNotificationSubsystem::Static_RegisterObserver(ContextArgs);
 	}
-}
-
-void UAVVMPresenter::PostInitProperties()
-{
-	UObject::PostInitProperties();
-	UE_LOG(LogUI, Log, TEXT("New UAVVMPresenter::%s"), *GetClass()->GetName());
 }
 
 void UAVVMPresenter::BeginDestroy()
@@ -57,11 +57,16 @@ void UAVVMPresenter::BeginDestroy()
 	UObject::BeginDestroy();
 
 	const bool bIsClassDefault = IsTemplate(RF_ClassDefaultObject);
+	if (bIsClassDefault)
+	{
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("Removing UAVVMPresenter::%s"), *GetClass()->GetName());
 	UWorld* World = UAVVMPresenter::GetWorld();
 
 	{
 		FAVVMPresenterContextArgs ContextArgs;
-		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Presenter = this;
 		UAVVMSubsystem::Static_UnregisterPresenter(ContextArgs);
@@ -69,7 +74,6 @@ void UAVVMPresenter::BeginDestroy()
 
 	{
 		FAVVMObserverContextArgs ContextArgs;
-		ContextArgs.bIsClassDefaultObject = bIsClassDefault;
 		ContextArgs.WorldContext = World;
 		ContextArgs.Observer = this;
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(ContextArgs);
