@@ -44,8 +44,8 @@ public:
 
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
 	UFUNCTION(BlueprintCallable)
-	void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
-	                   UCommonUserWidget* Target);
+	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
+	                          UCommonUserWidget* Target);
 };
 
 template <typename T>
