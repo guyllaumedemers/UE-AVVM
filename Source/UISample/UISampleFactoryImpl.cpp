@@ -43,7 +43,7 @@ TScriptInterface<IAVVMResolverExecutioner> USampleFactoryImpl::Factory(const EAV
 TArray<TScriptInterface<IAVVMObserver>> USampleActorNameExecutioner::Filter(const FString& MatchRequirement,
                                                                             const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
-	const auto CompareActorWithRequirement = [](AActor* Actor, const FString& Requirement)
+	const auto CompareActorWithRequirement = [](const AActor* Actor, const FString& Requirement)
 	{
 		return IsValid(Actor) && Actor->GetName().Equals(Requirement);
 	};
@@ -64,7 +64,7 @@ TArray<TScriptInterface<IAVVMObserver>> USampleActorNameExecutioner::Filter(cons
 TArray<TScriptInterface<IAVVMObserver>> USampleActorClassNameExecutioner::Filter(const FString& MatchRequirement,
                                                                                  const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
-	const auto CompareActorClassWithRequirement = [](AActor* Actor, const FString& Requirement)
+	const auto CompareActorClassWithRequirement = [](const AActor* Actor, const FString& Requirement)
 	{
 		return IsValid(Actor) && Actor->GetClass()->GetName().Equals(Requirement);
 	};

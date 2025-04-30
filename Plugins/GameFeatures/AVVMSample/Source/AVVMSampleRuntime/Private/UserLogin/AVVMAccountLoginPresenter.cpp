@@ -20,15 +20,74 @@
 #include "UserLogin/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
+#include "PrimaryGameLayout.h"
 #include "GameFramework/GameMode.h"
-
-void UAVVMAccountLoginPresenter::Broadcast(const FGameplayTag& ChannelTag,
-                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	UE_LOG(LogUI, Log, TEXT("Broadcasting Channel: %s"), *ChannelTag.ToString());
-}
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 {
 	return GetTypedOuter<AGameMode>();
+}
+
+bool UAVVMAccountLoginPresenter::Broadcast(const FGameplayTag& ChannelTag,
+                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	bool bIsReplyHandled = Super::Broadcast(ChannelTag, Payload);
+	if (!bIsReplyHandled)
+	{
+	}
+
+	return bIsReplyHandled;
+}
+
+void UAVVMAccountLoginPresenter::StartPresenting()
+{
+	const auto Callback = [Caller = TWeakObjectPtr(this)](EAsyncWidgetLayerState State,
+	                                                      UCommonActivatableWidget* ActivatableWidget)
+	{
+		if (Caller.IsValid())
+		{
+			Caller->OnPresenterStartCompleted(State, ActivatableWidget);
+		}
+		else
+		{
+			UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(ActivatableWidget);
+			if (ensure(IsValid(GameLayout)))
+			{
+				GameLayout->FindAndRemoveWidgetFromLayer(ActivatableWidget);
+			}
+		}
+	};
+
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(this);
+	if (ensure(IsValid(GameLayout)))
+	{
+		GameLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(TargetTag,
+		                                                                  true,
+		                                                                  WidgetClass.Get(),
+		                                                                  Callback);
+	}
+}
+
+void UAVVMAccountLoginPresenter::StopPresenting()
+{
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(this);
+	if (ensure(IsValid(GameLayout)))
+	{
+		GameLayout->FindAndRemoveWidgetFromLayer(PresentingWidget.Get());
+	}
+}
+
+void UAVVMAccountLoginPresenter::OnPresenterStartCompleted(EAsyncWidgetLayerState State,
+                                                           UCommonActivatableWidget* ActivatableWidget)
+{
+	if (!IsValid(ActivatableWidget))
+	{
+		return;
+	}
+
+	if (State == EAsyncWidgetLayerState::AfterPush)
+	{
+		UE_LOG(LogUI, Log, TEXT("Presenting %s"), *ActivatableWidget->GetName());
+		PresentingWidget = ActivatableWidget;
+	}
 }

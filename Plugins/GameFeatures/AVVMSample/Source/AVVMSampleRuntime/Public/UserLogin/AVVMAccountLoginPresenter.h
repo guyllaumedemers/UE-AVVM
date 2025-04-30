@@ -25,6 +25,9 @@
 
 #include "AVVMAccountLoginPresenter.generated.h"
 
+enum class EAsyncWidgetLayerState : uint8;
+class UCommonActivatableWidget;
+
 /**
  *	Class description:
  *
@@ -36,9 +39,18 @@ class AVVMSAMPLERUNTIME_API UAVVMAccountLoginPresenter : public UAVVMPresenter
 	GENERATED_BODY()
 
 public:
-	virtual void Broadcast(const FGameplayTag& ChannelTag,
+	virtual AActor* GetOuterKey() const override;
+
+	virtual bool Broadcast(const FGameplayTag& ChannelTag,
 	                       const TInstancedStruct<FAVVMNotificationPayload>& Payload) override;
 
 protected:
-	virtual AActor* GetOuterKey() const override;
+	virtual void StartPresenting() override;
+	virtual void StopPresenting() override;
+
+	void OnPresenterStartCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
+
+	// @gdemers UCommonActivatableWidgetContainerBase handle memory lifetime for Actiavatable Widget.
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UCommonActivatableWidget> PresentingWidget = nullptr;
 };

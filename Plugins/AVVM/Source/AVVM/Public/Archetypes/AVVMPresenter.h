@@ -50,7 +50,7 @@ class AVVM_API IAVVMObserver
 public:
 	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
 	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
-	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;);
+	virtual bool Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return false;);
 };
 
 /**
@@ -70,15 +70,15 @@ public:
 	virtual void PostInitProperties() override;
 	virtual void BeginDestroy() override;
 
-	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
-	virtual void StopPresenting() PURE_VIRTUAL(StopPresenting, return;);
-
-	// @gdemers api for the notification system
+	virtual AActor* GetOuterKey() const override { return GetTypedOuter<AActor>(); };
 	virtual FGameplayTagContainer GetChannelTags() const override { return ChannelTags; };
+	virtual bool Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) override;
+
+	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
 
 protected:
-	virtual AActor* GetOuterKey() const override { return GetTypedOuter<AActor>(); };
-	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
+	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
+	virtual void StopPresenting() PURE_VIRTUAL(StartPresenting, return;);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
@@ -97,6 +97,4 @@ protected:
 	FGameplayTag TargetTag = FGameplayTag::EmptyTag;
 
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
-
-	friend class UAVVMSubsystem;
 };

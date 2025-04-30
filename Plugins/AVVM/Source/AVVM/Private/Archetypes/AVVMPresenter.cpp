@@ -79,3 +79,9 @@ void UAVVMPresenter::BeginDestroy()
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(ContextArgs);
 	}
 }
+
+bool UAVVMPresenter::Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Broadcasting Channel: %s"), *ChannelTag.ToString());
+	return false;
+}
