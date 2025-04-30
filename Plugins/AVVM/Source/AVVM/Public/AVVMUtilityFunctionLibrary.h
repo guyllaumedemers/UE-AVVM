@@ -25,6 +25,9 @@
 
 #include "AVVMUtilityFunctionLibrary.generated.h"
 
+class IAVVMViewModelFNameHelper;
+class UCommonUserWidget;
+
 /**
  *	Class description:
  *
@@ -38,6 +41,11 @@ class AVVM_API UAVVMUtilityFunctionLibrary : public UBlueprintFunctionLibrary
 public:
 	template <typename T>
 	static bool IsScriptInterfaceValid(const TScriptInterface<T>& Target);
+
+	// @gdemers handle binding "Manual" ViewModel type to a Widget
+	UFUNCTION(BlueprintCallable)
+	void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
+	                   UCommonUserWidget* Target);
 };
 
 template <typename T>

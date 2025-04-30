@@ -67,6 +67,7 @@ class AVVM_API UAVVMPresenter : public UObject,
 
 public:
 	UAVVMPresenter();
+	virtual void PostInitProperties() override;
 	virtual void BeginDestroy() override;
 
 	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
@@ -79,7 +80,7 @@ protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
 	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return GetTypedOuter<AActor>();)
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM/AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
 
 	// @gdemers notification channels to listen

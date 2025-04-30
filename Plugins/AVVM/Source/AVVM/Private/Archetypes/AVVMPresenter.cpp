@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Archetypes/AVVMPresenter.h"
 
+#include "AVVM.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
@@ -43,6 +44,12 @@ UAVVMPresenter::UAVVMPresenter()
 		ContextArgs.Observer = this;
 		UAVVMNotificationSubsystem::Static_RegisterObserver(ContextArgs);
 	}
+}
+
+void UAVVMPresenter::PostInitProperties()
+{
+	UObject::PostInitProperties();
+	UE_LOG(LogUI, Log, TEXT("New UAVVMPresenter::%s"), *GetClass()->GetName());
 }
 
 void UAVVMPresenter::BeginDestroy()

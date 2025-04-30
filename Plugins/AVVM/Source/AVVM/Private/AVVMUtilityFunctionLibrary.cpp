@@ -18,3 +18,26 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMUtilityFunctionLibrary.h"
+
+#include "AVVM.h"
+#include "CommonUserWidget.h"
+#include "MVVMSubsystem.h"
+#include "View/MVVMView.h"
+
+void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
+                                                UCommonUserWidget* Target)
+{
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
+	if (!ensureAlwaysMsgf(bIsValid, TEXT("ViewModelBase doesn't impl: IAVVMViewModelFNameHelper")))
+	{
+		return;
+	}
+
+	UMVVMView* MVVMView = UMVVMSubsystem::GetViewFromUserWidget(Target);
+	if (IsValid(MVVMView))
+	{
+		const FName ViewModelFName = ViewModelFNameHelper->GetViewModelFName();
+		UObject* ViewModel = ViewModelFNameHelper.GetObject();
+		MVVMView->SetViewModel(ViewModelFName, ViewModel);
+	}
+}

@@ -92,3 +92,27 @@ public:
 	// @gdemers factory method to override with project impl.
 	virtual TScriptInterface<IAVVMResolverExecutioner> Factory(const EAVVMObserverResolverFlag ResolverFlag) const PURE_VIRTUAL(Factory, return nullptr;);
 };
+
+// ---------------------------------------------------------------------------------------------------------------------//
+//													Other Utilities														//
+// ---------------------------------------------------------------------------------------------------------------------//
+
+/**
+ *	Class description:
+ *
+ *	UAVVMViewModelFNameHelper. Provide the ViewModel subsystem an abstract approach to binding a ViewModel name to
+ *	a Widget.
+ */
+UINTERFACE(BlueprintType)
+class AVVM_API UAVVMViewModelFNameHelper : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVM_API IAVVMViewModelFNameHelper
+{
+	GENERATED_BODY()
+
+public:
+	virtual FName GetViewModelFName() const PURE_VIRTUAL(GetViewModelFName, return NAME_None;);
+};
