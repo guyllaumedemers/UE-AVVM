@@ -48,6 +48,7 @@ class AVVM_API IAVVMObserver
 	GENERATED_BODY()
 
 public:
+	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
 	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
 	virtual void Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return;);
 };
@@ -76,8 +77,8 @@ public:
 	virtual FGameplayTagContainer GetChannelTags() const override { return ChannelTags; };
 
 protected:
+	virtual AActor* GetOuterKey() const override { return GetTypedOuter<AActor>(); };
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
-	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return GetTypedOuter<AActor>();)
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;

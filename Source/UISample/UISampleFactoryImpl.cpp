@@ -22,6 +22,7 @@
 #include "UISampleFactoryImpl.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "Archetypes/AVVMPresenter.h"
 
 TScriptInterface<IAVVMResolverExecutioner> USampleFactoryImpl::Factory(const EAVVMObserverResolverFlag ResolverFlag) const
 {
@@ -42,11 +43,41 @@ TScriptInterface<IAVVMResolverExecutioner> USampleFactoryImpl::Factory(const EAV
 TArray<TScriptInterface<IAVVMObserver>> USampleActorNameExecutioner::Filter(const FString& MatchRequirement,
                                                                             const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
-	return TArray<TScriptInterface<IAVVMObserver>>{};
+	const auto CompareActorWithRequirement = [](AActor* Actor, const FString& Requirement)
+	{
+		return IsValid(Actor) && Actor->GetName().Equals(Requirement);
+	};
+
+	TArray<TScriptInterface<IAVVMObserver>> Out;
+	for (const auto& Observer : Observers)
+	{
+		const bool bDoesMatch = CompareActorWithRequirement(Observer->GetOuterKey(), MatchRequirement);
+		if (bDoesMatch)
+		{
+			Out.Add(Observer);
+		}
+	}
+
+	return Out;
 }
 
 TArray<TScriptInterface<IAVVMObserver>> USampleActorClassNameExecutioner::Filter(const FString& MatchRequirement,
                                                                                  const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
 {
-	return TArray<TScriptInterface<IAVVMObserver>>{};
+	const auto CompareActorClassWithRequirement = [](AActor* Actor, const FString& Requirement)
+	{
+		return IsValid(Actor) && Actor->GetClass()->GetName().Equals(Requirement);
+	};
+
+	TArray<TScriptInterface<IAVVMObserver>> Out;
+	for (const auto& Observer : Observers)
+	{
+		const bool bDoesMatch = CompareActorClassWithRequirement(Observer->GetOuterKey(), MatchRequirement);
+		if (bDoesMatch)
+		{
+			Out.Add(Observer);
+		}
+	}
+
+	return Out;
 }
