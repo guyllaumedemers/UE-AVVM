@@ -93,7 +93,7 @@ UMVVMViewModelBase* UAVVMSubsystem::FAVVMViewModelKVP::GetOrCreate(const TSubcla
 	if (!ViewModelClassToViewModelInstance.Contains(ViewModelClass))
 	{
 		TStrongObjectPtr<UMVVMViewModelBase>& SearchResult = ViewModelClassToViewModelInstance.Add(ViewModelClass);
-		SearchResult = TStrongObjectPtr(NewObject<UMVVMViewModelBase>(Outer, ViewModelClass->GetClass()));
+		SearchResult = TStrongObjectPtr(NewObject<UMVVMViewModelBase>(Outer, ViewModelClass.Get()));
 		++RefCounter;
 		return SearchResult.Get();
 	}
