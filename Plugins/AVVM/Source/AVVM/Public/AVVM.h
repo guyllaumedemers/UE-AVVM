@@ -41,57 +41,6 @@ AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
  *	"present" new data without running complex control flow for project specific use-case.
  *
  *	See Github link for more! : https://github.com/guyllaumedemers/UE-AVVM.
- */
-
-// ---------------------------------------------------------------------------------------------------------------------//
-//									Required implementation in project													//
-// ---------------------------------------------------------------------------------------------------------------------//
-
-/**
- *	Class description:
- *
- *	UAVVMResolverExecutioner. define an interface to be implemented by a UObject class. Like a predicate, we expect the implementation
- *	to define hard constraint for equality.
- *
- *	Example : UActorNameExecutioner -> Search through the observer collection for a match based on the Actor::GetFName()::ToString().Equals(MatchRequirement)
- *	vs. UActorClassExecutioner -> Search through the observer collection for a match based on the Actor::GetClass()::ToString().Equals(MatchRequirement)
- */
-UINTERFACE(BlueprintType)
-class AVVM_API UAVVMResolverExecutioner : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class AVVM_API IAVVMResolverExecutioner
-{
-	GENERATED_BODY()
-
-public:
-	// @gdemers filter the list of observers based on class implementation.
-	virtual TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,
-	                                                       const TArray<TScriptInterface<IAVVMObserver>>& Observers) const PURE_VIRTUAL(Filter, return {};);
-};
-
-/**
- *	Class description:
- *
- *	UAVVMResolverFactoryImpl. project specific interface that define what Executioner UObject should be created based on the received
- *	flag.
- */
-UINTERFACE(BlueprintType)
-class AVVM_API UAVVMResolverFactoryImpl : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class AVVM_API IAVVMResolverFactoryImpl
-{
-	GENERATED_BODY()
-
-public:
-	// @gdemers factory method to override with project impl.
-	virtual TScriptInterface<IAVVMResolverExecutioner> Factory(const EAVVMObserverResolverFlag ResolverFlag) const PURE_VIRTUAL(Factory, return nullptr;);
-};
 
 // ---------------------------------------------------------------------------------------------------------------------//
 //													Other Utilities														//
