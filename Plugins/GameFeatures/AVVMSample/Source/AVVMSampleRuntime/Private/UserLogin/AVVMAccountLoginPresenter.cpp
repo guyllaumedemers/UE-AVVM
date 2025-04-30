@@ -20,6 +20,7 @@
 #include "UserLogin/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "PrimaryGameLayout.h"
 #include "GameFramework/GameMode.h"
 
@@ -31,12 +32,21 @@ AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 bool UAVVMAccountLoginPresenter::Broadcast(const FGameplayTag& ChannelTag,
                                            const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	bool bIsReplyHandled = Super::Broadcast(ChannelTag, Payload);
-	if (!bIsReplyHandled)
+	bool bReplyHandled = Super::Broadcast(ChannelTag, Payload);
+
+	TArray<FGameplayTag> Tags = ChannelTags.GetGameplayTagArray();
+	while (!bReplyHandled && !Tags.IsEmpty())
 	{
+		// TODO @gddemers how would I map tags to actions here ?
+		const FGameplayTag ComparisonTag = Tags.Top();
+		bReplyHandled = UAVVMUtilityFunctionLibrary::DoesExecute(ChannelTag, ComparisonTag, Payload, {});
+		if (!bReplyHandled)
+		{
+			Tags.Pop();
+		}
 	}
 
-	return bIsReplyHandled;
+	return bReplyHandled;
 }
 
 void UAVVMAccountLoginPresenter::StartPresenting()
