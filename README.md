@@ -11,10 +11,6 @@ be swapped at Runtime based on the Actor it's owned by and "present" new data wi
 
 Mind map for the UE-AVVM system and general use case built using **Overwatch 2** for reference. [Note : This mind map is built based on experience gained during production of COOP multiplayer for a AAA game.](https://miro.com/welcomeonboard/bmZmV0ZtQko0Q1U1Y1BjcUdlOEVubkNaWlY5Ulo1Zm44dURNbTI2YlJ2ZFhSNkRZVFNSMVROVzQ3MXpKZ0V0NlMyb1VVY3d1bENxeTFhS2VZcG44L3BrK1c4REtRNkJ4MGhJYjlidlhDdVZKMVZTcVhYck1zcHFVd0t5aGxQK0JyVmtkMG5hNDA3dVlncnBvRVB2ZXBnPT0hdjE=?share_link_id=554815863683)
 
-#### Notes
-
-The more I progress into the development of this system (more specifically, on the notification system) and the more I come to realise that the bottleneck of the plugin is with the notification subsystem. Looking back, it seems like the benefit of fetching ActorComponent from the Presenter held by the Actor would allow better management of events and reduce the overhead caused by the notification/tagging system.
-
 ### UE-Miro
 
 [GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267) - UGameFeatureData are name dependent. UGameFeaturePluginStateMachine cannot register/load/activate unless it's named identical to the GameFeature plugin it represent.
