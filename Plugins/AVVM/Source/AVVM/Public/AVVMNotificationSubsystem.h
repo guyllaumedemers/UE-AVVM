@@ -44,7 +44,7 @@ struct AVVM_API FAVVMObserverContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UWorld* WorldContext = nullptr;
+	UObject* WorldContextObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
@@ -64,7 +64,7 @@ struct AVVM_API FAVVMNotificationContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UWorld* WorldContext = nullptr;
+	UObject* WorldContextObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
@@ -109,7 +109,10 @@ public:
 
 	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
 
-	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext, const UObject* DelegateOwner);
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
+	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static void Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")

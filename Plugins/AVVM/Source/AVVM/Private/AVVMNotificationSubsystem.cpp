@@ -56,19 +56,22 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldC
 	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(WorldContext);
 }
 
-void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext,
-                                                           const UObject* DelegateOwner)
+void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContext);
+	const UObject* WorldContextObject = ObserverContext.WorldContextObject;
+	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(World);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		AVVMNotificationSubsystem->RemoveOrDestroy(ObserverContext.ChannelTag, DelegateOwner);
+		AVVMNotificationSubsystem->RemoveOrDestroy(ObserverContext.ChannelTag, WorldContextObject);
 	}
 }
 
 void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContext);
+	const UObject* WorldContextObject = ObserverContext.WorldContextObject;
+	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(World);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		AVVMNotificationSubsystem->CreateOrAdd(ObserverContext.ChannelTag, ObserverContext.Callback);
@@ -77,7 +80,9 @@ void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverCont
 
 void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext)
 {
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContext);
+	const UObject* WorldContextObject = NotificationContext.WorldContextObject;
+	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(World);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		AVVMNotificationSubsystem->BroadcastChannel(NotificationContext);

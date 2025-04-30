@@ -67,6 +67,8 @@ void UAVVMPresenter::BeginDestroy()
 	}
 
 	{
-		BP_UnregisterNotificationChannels();
+		// TOD @gdemers investigate how UObject destruction flow behave with the GC. invoking BP code in BeginDestroy
+		// isnt allowed and will assert.
+		// BP_UnregisterNotificationChannels();
 	}
 }
