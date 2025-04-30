@@ -38,3 +38,15 @@ TScriptInterface<IAVVMResolverExecutioner> UAVVMSampleFactoryImpl::Factory(const
 
 	return Out;
 }
+
+TArray<TScriptInterface<IAVVMObserver>> UAVVMSampleActorNameExecutioner::Filter(const FString& MatchRequirement,
+                                                                                const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
+{
+	return TArray<TScriptInterface<IAVVMObserver>>{};
+}
+
+TArray<TScriptInterface<IAVVMObserver>> UAVVMSampleActorClassNameExecutioner::Filter(const FString& MatchRequirement,
+                                                                                     const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
+{
+	return TArray<TScriptInterface<IAVVMObserver>>{};
+}

@@ -53,6 +53,10 @@ class AVVMSAMPLERUNTIME_API UAVVMSampleActorNameExecutioner : public UObject,
                                                               public IAVVMResolverExecutioner
 {
 	GENERATED_BODY()
+
+public:
+	virtual TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,
+	                                                       const TArray<TScriptInterface<IAVVMObserver>>& Observers) const override;
 };
 
 /**
@@ -66,4 +70,8 @@ class AVVMSAMPLERUNTIME_API UAVVMSampleActorClassNameExecutioner : public UObjec
                                                                    public IAVVMResolverExecutioner
 {
 	GENERATED_BODY()
+
+public:
+	virtual TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,
+	                                                       const TArray<TScriptInterface<IAVVMObserver>>& Observers) const override;
 };
