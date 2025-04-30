@@ -20,8 +20,6 @@
 #include "AVVMNotificationSubsystem.h"
 
 #include "AVVM.h"
-#include "AVVMSettings.h"
-#include "AVVMUtilityFunctionLibrary.h"
 #include "Archetypes/AVVMPresenter.h"
 
 // @gdemers extern symbol for global access to custom LLM_tag
@@ -58,33 +56,22 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldC
 	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(WorldContext);
 }
 
-void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
+void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext,
+                                                           const UObject* DelegateOwner)
 {
-	if (ObserverContext.bIsClassDefaultObject)
-	{
-		return;
-	}
-
 	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContext);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		const TScriptInterface<IAVVMObserver> Presenter = ObserverContext.Observer;
-		AVVMNotificationSubsystem->RemoveOrDestroy(Presenter->GetChannelTags(), Presenter);
+		AVVMNotificationSubsystem->RemoveOrDestroy(ObserverContext.ChannelTag, DelegateOwner);
 	}
 }
 
 void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
-	if (ObserverContext.bIsClassDefaultObject)
-	{
-		return;
-	}
-
 	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContext);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		const TScriptInterface<IAVVMObserver> Presenter = ObserverContext.Observer;
-		AVVMNotificationSubsystem->CreateOrAdd(Presenter->GetChannelTags(), Presenter);
+		AVVMNotificationSubsystem->CreateOrAdd(ObserverContext.ChannelTag, ObserverContext.Callback);
 	}
 }
 
@@ -97,111 +84,28 @@ void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotification
 	}
 }
 
-UAVVMNotificationSubsystem::FAVVMResolverContext::FAVVMResolverContext(UObject* Outer, const EAVVMObserverResolverFlag ResolverFlag)
-{
-	// TODO investigate!!
-	// @gdemers FAVVMResolverContext may be created too often
-	TRACE_BOOKMARK(TEXT("FAVVMResolverContext::FAVVMResolverContext()"));
-	LLM_SCOPE_BYTAG(AVVMTag);
-
-	// @gdemers having this static should be fairly safe, even in PIE, with multiple world, as this factory
-	// only handle local creation of a context type that perform filtering behaviour.
-	// we also benefit from lazy initialization of this entity.
-	static TScriptInterface<IAVVMResolverFactoryImpl> GlobalResolver;
-
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMResolverFactoryImpl>(GlobalResolver);
-	if (!bIsValid)
-	{
-		const TSubclassOf<UObject>& ResolverClass = UAVVMSettings::GetFactoryResolverClass();
-		ensureAlwaysMsgf(IsValid(ResolverClass), TEXT("UAVVMSettings::GetFactoryResolverClass IsNull"));
-		GlobalResolver = NewObject<UObject>(Outer, ResolverClass);
-	}
-
-	Pimpl = GlobalResolver->Factory(ResolverFlag);
-}
-
-TArray<TScriptInterface<IAVVMObserver>> UAVVMNotificationSubsystem::FAVVMResolverContext::Filter(const FString& MatchRequirement,
-                                                                                                 const TArray<TScriptInterface<IAVVMObserver>>& Observers) const
-{
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMResolverExecutioner>(Pimpl);
-	if (bIsValid)
-	{
-		return Pimpl->Filter(MatchRequirement, Observers);
-	}
-	else
-	{
-		return TArray<TScriptInterface<IAVVMObserver>>{};
-	}
-}
-
-UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::~FAVVMTagChannelObserverCollection()
-{
-	Observers.Empty();
-}
-
-void UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::ResolveObservers(const FAVVMResolverContext& Context,
-                                                                                     const FString& MatchRequirement,
-                                                                                     TArray<TScriptInterface<IAVVMObserver>>& Out) const
-{
-	TRACE_BOOKMARK(TEXT("FTagChannelObserverCollection.ResolveObservers"));
-	TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT("Resolving Observers"));
-	Out = Context.Filter(MatchRequirement, Observers);
-}
-
-void UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer)
-{
-	Observers.RemoveSwap(Observer);
-}
-
-void UAVVMNotificationSubsystem::FAVVMTagChannelObserverCollection::CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer)
-{
-	Observers.Add(Observer);
-}
-
 void UAVVMNotificationSubsystem::BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext) const
 {
-	const FAVVMTagChannelObserverCollection* SearchResult = TagChannels.Find(NotificationContext.ChannelTag);
-	if (!ensure(SearchResult != nullptr))
+	const FAVVMOnChannelNotifiedMulticastDelegate* SearchResult = TagChannels.Find(NotificationContext.ChannelTag);
+	if (ensure(SearchResult != nullptr))
 	{
-		return;
-	}
-
-	// @gdemers filter observers for the given channel. based on user requirements, we can filter the collection to restrict the message
-	// to only broadcast for Observers that share the unique instance, or be more general and broadcast for a shared actor class.
-	TArray<TScriptInterface<IAVVMObserver>> OutResult;
-	SearchResult->ResolveObservers(FAVVMResolverContext(NotificationContext.WorldContext, NotificationContext.ResolverFlag),
-	                               NotificationContext.MatchRequirement,
-	                               OutResult);
-
-	for (auto Iterator{OutResult.CreateIterator()}; Iterator; ++Iterator)
-	{
-		const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMObserver>(*Iterator);
-		if (bIsValid)
-		{
-			(*Iterator)->Broadcast(NotificationContext.ChannelTag, NotificationContext.Payload);
-		}
+		SearchResult->Broadcast(NotificationContext.Payload);
 	}
 }
 
-void UAVVMNotificationSubsystem::RemoveOrDestroy(const FGameplayTagContainer& TagContainer,
-                                                 const TScriptInterface<IAVVMObserver>& Observer)
+void UAVVMNotificationSubsystem::RemoveOrDestroy(const FGameplayTag& ChannelTag,
+                                                 const UObject* DelegateOwner)
 {
-	for (const FGameplayTag& Tag : TagContainer)
+	FAVVMOnChannelNotifiedMulticastDelegate* MulticastDelegate = TagChannels.Find(ChannelTag);
+	if (ensure(MulticastDelegate != nullptr))
 	{
-		FAVVMTagChannelObserverCollection* ObserverCollection = TagChannels.Find(Tag);
-		if (ensure(ObserverCollection != nullptr))
-		{
-			ObserverCollection->RemoveOrDestroy(Observer);
-		}
+		MulticastDelegate->RemoveAll(DelegateOwner);
 	}
 }
 
-void UAVVMNotificationSubsystem::CreateOrAdd(const FGameplayTagContainer& TagContainer,
-                                             const TScriptInterface<IAVVMObserver>& Observer)
+void UAVVMNotificationSubsystem::CreateOrAdd(const FGameplayTag& ChannelTag,
+                                             const FAVVMOnChannelNotifiedSingleCastDelegate& Callback)
 {
-	for (const FGameplayTag& Tag : TagContainer)
-	{
-		FAVVMTagChannelObserverCollection& ObserverCollection = TagChannels.FindOrAdd(Tag);
-		ObserverCollection.CreateOrAdd(Observer);
-	}
+	FAVVMOnChannelNotifiedMulticastDelegate& MulticastDelegate = TagChannels.FindOrAdd(ChannelTag);
+	MulticastDelegate.AddUnique(Callback);
 }

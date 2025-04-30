@@ -56,17 +56,3 @@ void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMView
 		MVVMView->SetViewModel(ViewModelFName, ViewModel);
 	}
 }
-
-bool UAVVMUtilityFunctionLibrary::DoesExecute(const FGameplayTag& SrcTag,
-                                              const FGameplayTag& ComparisonTag,
-                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload,
-                                              TMulticastDelegate<void(const TInstancedStruct<FAVVMNotificationPayload>&)> Callback)
-{
-	const bool bReplyHandled = SrcTag.MatchesTagExact(ComparisonTag);
-	if (bReplyHandled)
-	{
-		Callback.Broadcast(Payload);
-	}
-
-	return bReplyHandled;
-}

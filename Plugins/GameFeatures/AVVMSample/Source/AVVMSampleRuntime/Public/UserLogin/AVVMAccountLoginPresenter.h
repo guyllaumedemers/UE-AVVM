@@ -21,7 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "Archetypes/AVVMPresenter.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMAccountLoginPresenter.generated.h"
 
@@ -41,14 +43,17 @@ class AVVMSAMPLERUNTIME_API UAVVMAccountLoginPresenter : public UAVVMPresenter
 public:
 	virtual AActor* GetOuterKey() const override;
 
-	virtual bool Broadcast(const FGameplayTag& ChannelTag,
-	                       const TInstancedStruct<FAVVMNotificationPayload>& Payload) override;
-
 protected:
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 
 	void OnPresenterStartCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	// @gdemers UCommonActivatableWidgetContainerBase handle memory lifetime for Actiavatable Widget.
 	UPROPERTY(Transient)

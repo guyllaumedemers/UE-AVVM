@@ -27,8 +27,11 @@
 
 #include "AVVMNotificationSubsystem.generated.h"
 
-class IAVVMObserver;
-class IAVVMResolverExecutioner;
+struct FAVVMNotificationPayload;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAVVMOnChannelNotifiedMulticastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
 
 /**
  *	Class description:
@@ -41,27 +44,13 @@ struct AVVM_API FAVVMObserverContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsClassDefaultObject = false;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
 	UWorld* WorldContext = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TScriptInterface<IAVVMObserver> Observer = nullptr;
-};
+	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
-/**
- *	Class description:
- *
- *	EAVVMObserverResolverFlag define flags for how the notification system should filter the collection of Observers object
- *	listening to a channel.
- */
-UENUM(BlueprintType)
-enum class EAVVMObserverResolverFlag : uint8
-{
-	None,
-	ActorName,
-	ActorClassName
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
 };
 
 /**
@@ -79,14 +68,6 @@ struct AVVM_API FAVVMNotificationContextArgs
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
-
-	// @gdemers define based on what general condition the observers collection should be filtered by.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	EAVVMObserverResolverFlag ResolverFlag = EAVVMObserverResolverFlag::None;
-
-	// @gdemers define the value for a proper match of the above requirement.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString MatchRequirement = TEXT("");
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TInstancedStruct<FAVVMNotificationPayload> Payload;
@@ -111,6 +92,10 @@ struct AVVM_API FAVVMNotificationPayload
  *
  *	Use UAVVMNotificationSubsystem::Static_BroadcastChannel in Game Code to broadcast to the expected Presenter UObject instead of
  *	having the Presenter fetch from it's Outer Actor and listen for state change events.
+ *
+ *	It's expected that the Channel Tags are being composed as follow when registering new Presenters.
+ *
+ *	example : ModuleName.ChannelName.PresenterClass.GameplayEventType
  */
 UCLASS()
 class AVVM_API UAVVMNotificationSubsystem : public UWorldSubsystem
@@ -124,56 +109,17 @@ public:
 
 	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
 
-	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);
+	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext, const UObject* DelegateOwner);
 	static void Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
 
 protected:
-	/**
-	 *	Class Description :
-	 *
-	 *	FAVVMResolverContext generate a Context Object based on flag received and filter a collection based on match requirement.
-	 */
-	struct FAVVMResolverContext
-	{
-		explicit FAVVMResolverContext(UObject* Outer, const EAVVMObserverResolverFlag ResolverFlag);
-		~FAVVMResolverContext() = default;
-
-		TArray<TScriptInterface<IAVVMObserver>> Filter(const FString& MatchRequirement,
-		                                               const TArray<TScriptInterface<IAVVMObserver>>& Observers) const;
-
-	private:
-		TScriptInterface<IAVVMResolverExecutioner> Pimpl = nullptr;
-	};
-
-	/**
-	 *	Class Description :
-	 *
-	 *	FAVVMTagChannelObserverCollection encapsulate a collection of Observer that listen to a Notification channel.
-	 */
-	struct FAVVMTagChannelObserverCollection
-	{
-		~FAVVMTagChannelObserverCollection();
-
-		void ResolveObservers(const FAVVMResolverContext& Context, const FString& MatchRequirement, TArray<TScriptInterface<IAVVMObserver>>& Out) const;
-		void RemoveOrDestroy(const TScriptInterface<IAVVMObserver>& Observer);
-		void CreateOrAdd(const TScriptInterface<IAVVMObserver>& Observer);
-
-	private:
-		// @gdemers a collection of all observers that listen for a given channel.
-		TArray<TScriptInterface<IAVVMObserver>> Observers;
-	};
-
 	void BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext) const;
-
-	void RemoveOrDestroy(const FGameplayTagContainer& TagContainer,
-	                     const TScriptInterface<IAVVMObserver>& Observer);
-
-	void CreateOrAdd(const FGameplayTagContainer& TagContainer,
-	                 const TScriptInterface<IAVVMObserver>& Observer);
+	void RemoveOrDestroy(const FGameplayTag& ChannelTag, const UObject* DelegateOwner);
+	void CreateOrAdd(const FGameplayTag& ChannelTag, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
 
 	// @gdemers a collection of all channels we can broadcast and notify observers with based on provided "Gameplay event".
-	TMap<const FGameplayTag, FAVVMTagChannelObserverCollection> TagChannels;
+	TMap<const FGameplayTag, FAVVMOnChannelNotifiedMulticastDelegate> TagChannels;
 };

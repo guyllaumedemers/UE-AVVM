@@ -23,7 +23,6 @@
 
 #include "GameplayTags.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMUtilityFunctionLibrary.generated.h"
 
@@ -59,12 +58,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AVVM|Utility")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
 	                          UCommonUserWidget* Target);
-
-	// @gdemers utility function to be used when running comparison against tag channels
-	static bool DoesExecute(const FGameplayTag& SrcTag,
-	                        const FGameplayTag& ComparisonTag,
-	                        const TInstancedStruct<FAVVMNotificationPayload>& Payload,
-	                        TMulticastDelegate<void(const TInstancedStruct<FAVVMNotificationPayload>&)> Callback);
 };
 
 template <typename T>

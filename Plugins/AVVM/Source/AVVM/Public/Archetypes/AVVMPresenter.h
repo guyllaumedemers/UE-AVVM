@@ -21,8 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
-#include "StructUtils/InstancedStruct.h"
+#include "GameplayTags.h"
 #include "Templates/SubclassOf.h"
 #include "UObject/Object.h"
 
@@ -35,34 +34,15 @@ class UMVVMViewModelBase;
 /**
  *	Class description:
  *
- *	UAVVMObserver register with the UAVVMNotificationSubsystem to be notified of "Gameplay event" through Tag Channels.
- */
-UINTERFACE(BlueprintType)
-class AVVM_API UAVVMObserver : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class AVVM_API IAVVMObserver
-{
-	GENERATED_BODY()
-
-public:
-	virtual AActor* GetOuterKey() const PURE_VIRTUAL(GetOuterKey, return nullptr;)
-	virtual FGameplayTagContainer GetChannelTags() const PURE_VIRTUAL(GetChannelTags, return FGameplayTagContainer::EmptyContainer;);
-	virtual bool Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) PURE_VIRTUAL(Broadcast, return false;);
-};
-
-/**
- *	Class description:
- *
  *	UAVVMPresenter is a UObject type that bridge the "Gameplay code" and "UI code". It's an Abstract Class
  *	that define a Key-Value pair information required for mapping an Actor to a "Manual" type ViewModel on
  *	the UAVVMSubsystem.
+ *
+ *	Note : Derive types are expected to setup their own requirements with the UAVVMNotificationSubsystem
+ *	so to bind implementation specific events/callbacks.
  */
 UCLASS(Abstract, BlueprintType, Blueprintable)
-class AVVM_API UAVVMPresenter : public UObject,
-                                public IAVVMObserver
+class AVVM_API UAVVMPresenter : public UObject
 {
 	GENERATED_BODY()
 
@@ -70,22 +50,15 @@ public:
 	virtual void PostInitProperties() override;
 	virtual void BeginDestroy() override;
 
-	virtual AActor* GetOuterKey() const override { return GetTypedOuter<AActor>(); };
-	virtual FGameplayTagContainer GetChannelTags() const override { return ChannelTags; };
-	virtual bool Broadcast(const FGameplayTag& ChannelTag, const TInstancedStruct<FAVVMNotificationPayload>& Payload) override;
-
-	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
-
 protected:
+	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
+	virtual AActor* GetOuterKey() const { return GetTypedOuter<AActor>(); }
+
 	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
 	virtual void StopPresenting() PURE_VIRTUAL(StartPresenting, return;);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
-
-	// @gdemers notification channels to listen
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer ChannelTags = FGameplayTagContainer::EmptyContainer;
 
 	// @gdemers widget to be pushed onto the target tag. UCommonActivatableWidget for menus, UCommonUserWidget
 	// for HUD elements.
@@ -97,4 +70,6 @@ protected:
 	FGameplayTag TargetTag = FGameplayTag::EmptyTag;
 
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
+
+	friend class UAVVMSubsystem;
 };

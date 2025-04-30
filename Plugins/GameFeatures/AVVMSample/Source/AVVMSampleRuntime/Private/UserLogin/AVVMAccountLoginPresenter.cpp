@@ -20,33 +20,12 @@
 #include "UserLogin/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
 #include "PrimaryGameLayout.h"
 #include "GameFramework/GameMode.h"
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 {
 	return GetTypedOuter<AGameMode>();
-}
-
-bool UAVVMAccountLoginPresenter::Broadcast(const FGameplayTag& ChannelTag,
-                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	bool bReplyHandled = Super::Broadcast(ChannelTag, Payload);
-
-	TArray<FGameplayTag> Tags = ChannelTags.GetGameplayTagArray();
-	while (!bReplyHandled && !Tags.IsEmpty())
-	{
-		// TODO @gddemers how would I map tags to actions here ?
-		const FGameplayTag ComparisonTag = Tags.Top();
-		bReplyHandled = UAVVMUtilityFunctionLibrary::DoesExecute(ChannelTag, ComparisonTag, Payload, {});
-		if (!bReplyHandled)
-		{
-			Tags.Pop();
-		}
-	}
-
-	return bReplyHandled;
 }
 
 void UAVVMAccountLoginPresenter::StartPresenting()
@@ -100,4 +79,14 @@ void UAVVMAccountLoginPresenter::OnPresenterStartCompleted(EAsyncWidgetLayerStat
 		UE_LOG(LogUI, Log, TEXT("Presenting %s"), *ActivatableWidget->GetName());
 		PresentingWidget = ActivatableWidget;
 	}
+}
+
+void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
 }
