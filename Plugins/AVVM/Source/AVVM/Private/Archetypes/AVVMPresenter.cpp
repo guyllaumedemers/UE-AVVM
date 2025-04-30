@@ -34,13 +34,16 @@ void UAVVMPresenter::PostInitProperties()
 	}
 
 	UE_LOG(LogUI, Log, TEXT("Adding UAVVMPresenter::%s"), *GetClass()->GetName());
-	UWorld* World = UAVVMPresenter::GetWorld();
 
 	{
 		FAVVMPresenterContextArgs ContextArgs;
-		ContextArgs.WorldContext = World;
+		ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
 		ContextArgs.Presenter = this;
 		ViewModel = UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
+	}
+
+	{
+		BP_RegisterNotificationChannels();
 	}
 }
 
@@ -55,12 +58,15 @@ void UAVVMPresenter::BeginDestroy()
 	}
 
 	UE_LOG(LogUI, Log, TEXT("Removing UAVVMPresenter::%s"), *GetClass()->GetName());
-	UWorld* World = UAVVMPresenter::GetWorld();
 
 	{
 		FAVVMPresenterContextArgs ContextArgs;
-		ContextArgs.WorldContext = World;
+		ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
 		ContextArgs.Presenter = this;
 		UAVVMSubsystem::Static_UnregisterPresenter(ContextArgs);
+	}
+
+	{
+		BP_UnregisterNotificationChannels();
 	}
 }

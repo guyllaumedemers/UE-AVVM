@@ -54,6 +54,12 @@ protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
 	virtual AActor* GetOuterKey() const { return GetTypedOuter<AActor>(); }
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_RegisterNotificationChannels();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_UnregisterNotificationChannels();
+
 	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
 	virtual void StopPresenting() PURE_VIRTUAL(StartPresenting, return;);
 
