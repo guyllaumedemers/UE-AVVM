@@ -68,7 +68,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMLoginContextData : public FAVVMNotificationPay
  *
  *	UAVVMOnlineInterface abstract project backend microservice.
  */
-UINTERFACE(BlueprintType)
+UINTERFACE(BlueprintType, Blueprintable)
 class AVVMSAMPLERUNTIME_API UAVVMOnlineInterface : public UInterface
 {
 	GENERATED_BODY()

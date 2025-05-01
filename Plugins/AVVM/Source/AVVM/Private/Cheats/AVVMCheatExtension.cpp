@@ -126,7 +126,7 @@ void UAVVMCheatExtension::OnSoftObjectAcquired()
 			continue;
 		}
 
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *LookAtRegistryId.ItemName.ToString());
+		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *LookAtChannelTag.ToString());
 
 		FAVVMNotificationContextArgs ContextArgs;
 		ContextArgs.ChannelTag = LookAtChannelTag;

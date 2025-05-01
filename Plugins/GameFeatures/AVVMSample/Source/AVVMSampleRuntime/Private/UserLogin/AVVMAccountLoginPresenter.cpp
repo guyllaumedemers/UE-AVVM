@@ -42,6 +42,13 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StopPresenter(const T
 void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Login Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	// TODO @gdemers fix issue where BP_Implemented interface arent recognized!
 	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
 	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
 	if (!bIsValid)

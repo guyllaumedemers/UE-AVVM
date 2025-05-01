@@ -49,7 +49,7 @@ AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
  *	UAVVMViewModelFNameHelper. Provide the ViewModel subsystem an abstract approach to binding a ViewModel name to
  *	a Widget.
  */
-UINTERFACE(BlueprintType)
+UINTERFACE(BlueprintType, Blueprintable)
 class AVVM_API UAVVMViewModelFNameHelper : public UInterface
 {
 	GENERATED_BODY()

@@ -22,7 +22,6 @@
 #include "CoreMinimal.h"
 
 #include "AVVMCheatData.h"
-#include "AVVMNotificationSubsystem.h"
 #include "DataRegistryTypes.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
