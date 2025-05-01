@@ -11,6 +11,10 @@ be swapped at Runtime based on the Actor it's owned by and "present" new data wi
 
 Mind map for the UE-AVVM system and general use case built using **Overwatch 2** for reference. [Note : This mind map is built based on experience gained during production of COOP multiplayer for a AAA game.](https://miro.com/welcomeonboard/bmZmV0ZtQko0Q1U1Y1BjcUdlOEVubkNaWlY5Ulo1Zm44dURNbTI2YlJ2ZFhSNkRZVFNSMVROVzQ3MXpKZ0V0NlMyb1VVY3d1bENxeTFhS2VZcG44L3BrK1c4REtRNkJ4MGhJYjlidlhDdVZKMVZTcVhYck1zcHFVd0t5aGxQK0JyVmtkMG5hNDA3dVlncnBvRVB2ZXBnPT0hdjE=?share_link_id=554815863683)
 
+#### Cheats
+
+To iterate quicker on the development process and prove that systems are feature complete, I started adding cheats through the cheat_extension. These are pushed through the GameFeature plugin. See UAVVMCheatExtension for more information! Additionally, to test the various notification channels, make sure to properly inject channel tags that follow the plugin define nomenclature. i.e : ModuleName.ChannelName.PresenterClass.GameplayEventType.
+
 ### UE-Miro
 
 [GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267) - UGameFeatureData are name dependent. UGameFeaturePluginStateMachine cannot register/load/activate unless it's named identical to the GameFeature plugin it represent.
