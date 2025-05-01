@@ -52,6 +52,11 @@ void UAVVMComponent::BeginPlay()
 			TransientPresenters.AddUnique(Presenter);
 		}
 	}
+
+	for (auto& Presenter : TransientPresenters)
+	{
+		Presenter->SafeBeginPlay();
+	}
 }
 
 void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -69,6 +74,11 @@ void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	TRACE_BOOKMARK(TEXT("Presenter.Destruct, TypedOuter: %s"), *Outer->GetFName().ToString());
 
 	LLM_SCOPE_BYTAG(AVVMTag);
+
+	for (auto& Presenter : TransientPresenters)
+	{
+		Presenter->SafeEndPlay();
+	}
 
 	TransientPresenters.Empty();
 }

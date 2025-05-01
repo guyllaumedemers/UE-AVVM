@@ -23,16 +23,8 @@
 #include "AVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
 
-void UAVVMPresenter::PostInitProperties()
+void UAVVMPresenter::SafeBeginPlay()
 {
-	UObject::PostInitProperties();
-
-	const bool bIsClassDefault = IsTemplate(RF_ClassDefaultObject);
-	if (bIsClassDefault)
-	{
-		return;
-	}
-
 	UE_LOG(LogUI, Log, TEXT("Adding UAVVMPresenter::%s"), *GetClass()->GetName());
 
 	{
@@ -47,16 +39,8 @@ void UAVVMPresenter::PostInitProperties()
 	}
 }
 
-void UAVVMPresenter::BeginDestroy()
+void UAVVMPresenter::SafeEndPlay()
 {
-	UObject::BeginDestroy();
-
-	const bool bIsClassDefault = IsTemplate(RF_ClassDefaultObject);
-	if (bIsClassDefault)
-	{
-		return;
-	}
-
 	UE_LOG(LogUI, Log, TEXT("Removing UAVVMPresenter::%s"), *GetClass()->GetName());
 
 	{
@@ -67,8 +51,6 @@ void UAVVMPresenter::BeginDestroy()
 	}
 
 	{
-		// TOD @gdemers investigate how UObject destruction flow behave with the GC. invoking BP code in BeginDestroy
-		// isnt allowed and will assert.
-		// BP_UnregisterNotificationChannels();
+		BP_UnregisterNotificationChannels();
 	}
 }

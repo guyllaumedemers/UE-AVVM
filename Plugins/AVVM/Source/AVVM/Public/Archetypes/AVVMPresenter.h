@@ -47,8 +47,8 @@ class AVVM_API UAVVMPresenter : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void PostInitProperties() override;
-	virtual void BeginDestroy() override;
+	virtual void SafeBeginPlay();
+	virtual void SafeEndPlay();
 
 protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
@@ -77,5 +77,6 @@ protected:
 
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
 
+	friend class UAVVMComponent;
 	friend class UAVVMSubsystem;
 };
