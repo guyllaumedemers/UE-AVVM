@@ -21,6 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMCheatData.h"
+#include "AVVMNotificationSubsystem.h"
+#include "DataRegistryTypes.h"
+#include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
 
 #include "AVVMCheatExtension.generated.h"
@@ -45,8 +49,25 @@ public:
 
 	// @gdemers cheat function which interface with the UAVVMNotificationSubsystem. It "inject"
 	// a Payload referenced via Data Registry Id.
-	// TagChannel - act both as the target channel with the Notification Subsystem but also as the ItemName
-	// for the target RegistryId.
-	UFUNCTION(Exec)
-	void Cheat_NotifyTagChannel(const FString& TagChannel);
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.NotifyTagChannel")
+	void AVVM_NotifyTagChannel(const FString& TagChannel,
+	                           const FString& CheatRegistryId);
+
+protected:
+	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
+	void OnSoftObjectAcquired();
+
+	void AddStreamableHandle(const FDataRegistryId& RegistryId,
+	                         const TSharedPtr<FStreamableHandle> StreamableHandle);
+
+	void ClearAllStreamableHandle();
+
+	void PushRequest(const TPair<FDataRegistryId, FGameplayTag>& Request);
+	void PopRequest();
+	void ClearAllRequests();
+
+	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
+
+	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
+	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests;
 };

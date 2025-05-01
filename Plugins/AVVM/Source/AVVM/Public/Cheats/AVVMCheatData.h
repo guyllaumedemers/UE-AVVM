@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "Engine/DataAsset.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -32,7 +33,7 @@
  *	FAVVMCheatData. Base Class for "stub" data. Expected to be derived and extended based on project requirements.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FAVVMCheatData
+struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 };
@@ -51,6 +52,10 @@ class AVVM_API UAVVMCheatDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(BlueprintCallable)
+	const TInstancedStruct<FAVVMCheatData>& GetData() const { return CheatData; }
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TInstancedStruct<FAVVMCheatData> CheatData;
@@ -67,7 +72,6 @@ struct AVVM_API FAVVMCheatDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
-protected:
 	// @gdemers softptr to the resource asset that contain data specific to the payload
 	// we expect the CheatExtension to be provided with.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
