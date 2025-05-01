@@ -20,12 +20,44 @@
 #include "UserLogin/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "PrimaryGameLayout.h"
 #include "GameFramework/GameMode.h"
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 {
 	return GetTypedOuter<AGameMode>();
+}
+
+void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
+}
+
+void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!bIsValid)
+	{
+		return;
+	}
+
+	const auto* LoginContextData = Payload.GetPtr<FAVVMLoginContextData>();
+	if (ensure(LoginContextData != nullptr))
+	{
+		UE_LOG(LogUI, Log, TEXT("Sending Login Request. In-Progress..."));
+
+		IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+		Callback.AddUObject(this, &UAVVMAccountLoginPresenter::OnLoginRequestCompleted);
+		OnlineInterface->RequestLogin(*LoginContextData, Callback);
+	}
 }
 
 void UAVVMAccountLoginPresenter::StartPresenting()
@@ -81,12 +113,16 @@ void UAVVMAccountLoginPresenter::OnPresenterStartCompleted(EAsyncWidgetLayerStat
 	}
 }
 
-void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
+                                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	StartPresenting();
-}
-
-void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StopPresenting();
+	UE_LOG(LogUI, Log, TEXT("Login Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// TODO do transition to something
+	}
+	else
+	{
+		// TODO push prompt throught CommonGame plugin
+	}
 }

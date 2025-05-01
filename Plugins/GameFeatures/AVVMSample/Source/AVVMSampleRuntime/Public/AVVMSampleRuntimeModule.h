@@ -18,3 +18,29 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #pragma once
+
+#include "Modules/ModuleInterface.h"
+
+/**
+ *	Plugin Description :
+ *
+ *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class that would provide
+ *	boiler plate code support for generic multiplayer-game project architecture.
+ */
+class FAVVMSampleRuntime : public IModuleInterface
+{
+public:
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+
+	static TSharedRef<IConsoleVariable> GetCVarOnlineRequestReturnedStatus();
+
+private:
+	/**
+	 *	Variable Description :
+	 *
+	 *	CVar to allow user testing of 'fake' online request being made without an actual backend hooked. (Cuz thats way too much work and UCommonUser plugin
+	 *	isn't so friendly)
+	 */
+	static TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
+};

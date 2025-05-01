@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMSampleRuntimeModule.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -29,6 +30,76 @@
 
 enum class EAsyncWidgetLayerState : uint8;
 class UCommonActivatableWidget;
+
+/**
+ *	Class description:
+ *
+ *	FAVVMUserAccount encapsulate data specific to your game representation of the user
+ *	account.
+ *
+ *	example : Level, Money, Prestige, etc...
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMUserAccount
+{
+	GENERATED_BODY()
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMLoginContextData encapsulate information about the user input when
+ *	trying to login.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMLoginContextData : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Username = FString();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Password = FString();
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMOnlineInterface abstract project backend microservice.
+ */
+UINTERFACE(BlueprintType)
+class AVVMSAMPLERUNTIME_API UAVVMOnlineInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMSAMPLERUNTIME_API IAVVMOnlineInterface
+{
+	GENERATED_BODY()
+
+public:
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate,
+	                                     const bool /*bWasSuccess*/,
+	                                     const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
+
+	// @gdemers execute login request with backend
+	virtual void RequestLogin(const FAVVMLoginContextData& ContextData, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	};
+
+	// @gdemers submit local changes to backend services
+	virtual void PushAccount(const TInstancedStruct<FAVVMUserAccount>& ContextData, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+};
+
 
 /**
  *	Class description:
@@ -44,16 +115,23 @@ public:
 	virtual AActor* GetOuterKey() const override;
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_TryLogin(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 
-	void OnPresenterStartCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
+	void OnPresenterStartCompleted(EAsyncWidgetLayerState State,
+	                               UCommonActivatableWidget* ActivatableWidget);
 
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-	
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void OnLoginRequestCompleted(const bool bWasSuccess,
+	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	// @gdemers UCommonActivatableWidgetContainerBase handle memory lifetime for Actiavatable Widget.
 	UPROPERTY(Transient)

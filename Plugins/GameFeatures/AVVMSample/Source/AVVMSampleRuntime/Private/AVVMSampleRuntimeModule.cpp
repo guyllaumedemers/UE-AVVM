@@ -20,4 +20,27 @@
 
 #include "AVVMSampleRuntimeModule.h"
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMSampleRuntime)
+TSharedPtr<IConsoleVariable> FAVVMSampleRuntime::CVarOnlineRequestReturnedStatus = nullptr;
+
+void FAVVMSampleRuntime::StartupModule()
+{
+	IConsoleVariable* NewCVar = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("OnlineRequestReturnedStatus"),
+			                         false,
+			                         TEXT("Inject the Completion Status of a request being 'faked' when interfacing with incomplete backend."));
+
+	CVarOnlineRequestReturnedStatus = MakeShareable<IConsoleVariable>(NewCVar);
+}
+
+void FAVVMSampleRuntime::ShutdownModule()
+{
+	IConsoleManager::Get().UnregisterConsoleObject(CVarOnlineRequestReturnedStatus.Get());
+	CVarOnlineRequestReturnedStatus.Reset();
+}
+
+TSharedRef<IConsoleVariable> FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()
+{
+	return CVarOnlineRequestReturnedStatus.ToSharedRef();
+}
+
+IMPLEMENT_MODULE(FAVVMSampleRuntime, AVVMSampleRuntime)

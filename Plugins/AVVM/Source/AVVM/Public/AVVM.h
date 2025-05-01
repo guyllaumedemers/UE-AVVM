@@ -21,9 +21,6 @@
 
 #include "AVVM.generated.h"
 
-enum class EAVVMObserverResolverFlag : uint8;
-class IAVVMObserver;
-
 AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
 
 /**
