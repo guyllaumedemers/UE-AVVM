@@ -136,6 +136,6 @@ void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
 	}
 	else
 	{
-		// TODO push prompt throught CommonGame plugin
+		BP_OnLoginRequestFailure(Payload);
 	}
 }

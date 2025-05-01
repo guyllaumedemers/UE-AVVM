@@ -133,6 +133,10 @@ protected:
 	void OnLoginRequestCompleted(const bool bWasSuccess,
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	// @gdemers expect to make use of CommonUser UBlueprintAsyncActionBase
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnLoginRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	// @gdemers UCommonActivatableWidgetContainerBase handle memory lifetime for Actiavatable Widget.
 	UPROPERTY(Transient)
 	TWeakObjectPtr<UCommonActivatableWidget> PresentingWidget = nullptr;

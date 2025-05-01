@@ -95,7 +95,9 @@ UCommonGameDialog::UCommonGameDialog()
 
 void UCommonGameDialog::SetupDialog(UCommonGameDialogDescriptor* Descriptor, FCommonMessagingResultDelegate ResultCallback)
 {
-
+	// @gdemers BEGIN-CHANGE
+	BP_SetupDialog(Descriptor);
+	// @gdemers BEGIN-END
 }
 
 void UCommonGameDialog::KillDialog()

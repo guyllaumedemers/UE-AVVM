@@ -28,7 +28,10 @@ public:
 	}
 };
 
-UCLASS()
+// @gdemers BEGIN-CHANGE
+// UCLASS()
+UCLASS(BlueprintType, Blueprintable)
+// @gdemers BEGIN-END
 class COMMONGAME_API UCommonGameDialogDescriptor : public UObject
 {
 	GENERATED_BODY()
@@ -49,8 +52,16 @@ public:
 	FText Body;
 
 	/** The confirm button's input action to use. */
-	UPROPERTY(BlueprintReadWrite)
+	// @gdemers BEGIN-CHANGE
+	// UPROPERTY(BlueprintReadWrite)
+	// TArray<FConfirmationDialogAction> ButtonActions;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FConfirmationDialogAction> ButtonActions;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UCommonGameDialog> WidgetClass = nullptr;
+	// @gdemers BEGIN-END
 };
 
 
@@ -65,4 +76,10 @@ public:
 	virtual void SetupDialog(UCommonGameDialogDescriptor* Descriptor, FCommonMessagingResultDelegate ResultCallback);
 
 	virtual void KillDialog();
+	
+	// @gdemers BEGIN-CHANGE
+protected:
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_SetupDialog(UCommonGameDialogDescriptor* Descriptor);
+	// @gdemers BEGIN-END
 };
