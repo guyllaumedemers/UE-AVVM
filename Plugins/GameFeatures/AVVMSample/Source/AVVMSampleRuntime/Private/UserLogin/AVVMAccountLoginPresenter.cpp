@@ -20,13 +20,13 @@
 #include "UserLogin/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
+#include "AVVMGameMode.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "PrimaryGameLayout.h"
-#include "GameFramework/GameMode.h"
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AGameMode>();
+	return GetTypedOuter<AAVVMGameMode>();
 }
 
 void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -48,22 +48,31 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 		return;
 	}
 
-	// TODO @gdemers fix issue where BP_Implemented interface arent recognized!
+	// @gdemers BP implemented interface cannot be resolved when Cast<> or TScriptInterface::Ctor are called and will return null. Interface support
+	// is required natively!
 	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
 	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
-	if (!bIsValid)
+	if (!ensure(bIsValid))
 	{
 		return;
 	}
 
 	const auto* LoginContextData = Payload.GetPtr<FAVVMLoginContextData>();
-	if (ensure(LoginContextData != nullptr))
+	if (LoginContextData != nullptr)
 	{
 		UE_LOG(LogUI, Log, TEXT("Sending Login Request. In-Progress..."));
 
 		IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
 		Callback.AddUObject(this, &UAVVMAccountLoginPresenter::OnLoginRequestCompleted);
 		OnlineInterface->RequestLogin(*LoginContextData, Callback);
+	}
+	else
+	{
+		UE_LOG(LogUI, Log, TEXT("Sending Empty Login Request. In-Progress..."));
+
+		IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+		Callback.AddUObject(this, &UAVVMAccountLoginPresenter::OnLoginRequestCompleted);
+		OnlineInterface->RequestLogin(FAVVMLoginContextData{}, Callback);
 	}
 }
 
