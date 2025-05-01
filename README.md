@@ -13,7 +13,7 @@ Mind map for the UE-AVVM system and general use case built using **Overwatch 2**
 
 #### Cheats
 
-To iterate quicker on the development process and prove that systems are feature complete, I started adding cheats through the cheat_extension. These are pushed through the GameFeature plugin. See UAVVMCheatExtension for more information! Additionally, to test the various notification channels, make sure to properly inject channel tags that follow the plugin define nomenclature. i.e : ModuleName.ChannelName.PresenterClass.GameplayEventType.
+To iterate quicker on the development process and prove that systems are feature complete, I started adding cheats through the cheat_extension. These are pushed through the GameFeature plugin. See UAVVMCheatExtension for more information! Additionally, to test the various notification channels, make sure to properly inject channel tags that follow the plugin define nomenclature. i.e : **ModuleName.ChannelName.PresenterClass.GameplayEventType**.
 
 ### UE-Miro
 
