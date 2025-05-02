@@ -23,6 +23,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSampleRuntimeModule.h"
+#include "OnlineSubsystemTypes.h"
 
 #include "AVVMOnlineInterface.generated.h"
 
@@ -53,9 +54,6 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayloa
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FName UniqueNetId = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FAVVMPlayerWallet Wallet;
@@ -109,6 +107,10 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
+
+	// @gdemers convert using FUniqueNetIdString::Create()
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString UniqueNetId = FString();
 
 	// @gdemers backend representation of your profile account.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

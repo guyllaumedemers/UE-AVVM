@@ -34,7 +34,8 @@ public class AVVMSampleRuntime : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"ModularGameplayActors",
-				"ModelViewViewModel"
+				"ModelViewViewModel",
+				"OnlineSubsystem"
 			});
 
 
