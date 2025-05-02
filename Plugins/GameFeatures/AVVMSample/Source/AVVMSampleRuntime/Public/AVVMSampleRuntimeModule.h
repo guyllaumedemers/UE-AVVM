@@ -68,7 +68,7 @@ struct FAVVMScopedDebugger
 #endif
 
 #if UE_AVVM_DEBUGGER_ENABLED
-#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback) auto ScopedDebugger = FAVVMScopedDebugger(Callback);
+#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback) FAVVMScopedDebugger ScopedDebugger(Callback);
 #else
 #define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback)
 #endif
