@@ -22,8 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "Archetypes/AVVMPresenter.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerConfigurationPresenter.generated.h"
+
+struct FAVVMPlayerConnection;
 
 /**
  *	Class description:
@@ -37,4 +40,23 @@ class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationPresenter : public UAVVMPres
 
 public:
 	virtual AActor* GetOuterKey() const override;
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_RemotePlayerLevelUp(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_RemotePlayerProfileChanged(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
+	bool DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemoteConnection) const;
+
+	virtual void StartPresenting() override;
+	virtual void StopPresenting() override;
 };

@@ -17,26 +17,18 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Player/AVVMPlayerConfigurationViewModel.h"
 
-#include "CoreMinimal.h"
-
-#include "AVVMNotificationSubsystem.h"
-#include "Archetypes/AVVMPresenter.h"
-#include "StructUtils/InstancedStruct.h"
-
-#include "AVVMQuicktimeEventManagerPresenter.generated.h"
-
-/**
- *	Class description:
- *
- *	UAVVMQuicktimeEventManagerPresenter handle any "Fire-n-Forget" events triggered from Gameplay or Backend.
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMQuicktimeEventManagerPresenter : public UAVVMPresenter
+void UAVVMPlayerConfigurationViewModel::SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	GENERATED_BODY()
+	const auto* NewPlayerConnnection = Payload.GetPtr<FAVVMPlayerConnection>();
+	if (NewPlayerConnnection != nullptr)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(PlayerConnection, *NewPlayerConnnection);
+	}
+}
 
-public:
-	virtual AActor* GetOuterKey() const override;
-};
+bool UAVVMPlayerConfigurationViewModel::DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemotePlayerConnection)
+{
+	return (PlayerConnection == RemotePlayerConnection);
+}

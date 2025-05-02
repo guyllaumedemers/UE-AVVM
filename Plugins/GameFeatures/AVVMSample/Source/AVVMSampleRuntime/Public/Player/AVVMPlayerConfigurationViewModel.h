@@ -21,22 +21,26 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
-#include "Archetypes/AVVMPresenter.h"
-#include "StructUtils/InstancedStruct.h"
+#include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlineInterface.h"
 
-#include "AVVMQuicktimeEventManagerPresenter.generated.h"
+#include "AVVMPlayerConfigurationViewModel.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMQuicktimeEventManagerPresenter handle any "Fire-n-Forget" events triggered from Gameplay or Backend.
+ *	UAVVMPlayerConfigurationViewModel encapsulate information about the remote player.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMQuicktimeEventManagerPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationViewModel : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual AActor* GetOuterKey() const override;
+	void SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	bool DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemotePlayerConnection);
+
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	FAVVMPlayerConnection PlayerConnection;
 };
