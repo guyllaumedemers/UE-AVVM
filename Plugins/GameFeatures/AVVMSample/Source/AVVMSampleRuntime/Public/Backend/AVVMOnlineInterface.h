@@ -25,6 +25,8 @@
 #include "AVVMSampleRuntimeModule.h"
 #include "StructUtils/InstancedStruct.h"
 
+#include "AVVMOnlineInterface.generated.h"
+
 /**
  *	Class description:
  *
