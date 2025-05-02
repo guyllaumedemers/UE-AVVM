@@ -64,11 +64,11 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 
 	// @gdemers we obviously wouldnt commit an empty player account. we expect the online subsystem to run validation on the account
 	// before executing any request to overwrite the backend data.
-	const auto* PlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
-	if (PlayerProfile != nullptr)
+	const auto* ModifiedPlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
+	if (ModifiedPlayerProfile != nullptr)
 	{
 		UE_LOG(LogUI, Log, TEXT("Committing Player Profile Request. In-Progress..."));
-		OnlineInterface->CommitModifiedPlayerProfile(*PlayerProfile, Callback);
+		OnlineInterface->CommitModifiedPlayerProfile(*ModifiedPlayerProfile, Callback);
 	}
 	else
 	{
@@ -126,7 +126,7 @@ void UAVVMPlayerProfilePresenter::StopPresenting()
 }
 
 void UAVVMPlayerProfilePresenter::OnCommitPlayerProfileCompleted(const bool bWasSuccess,
-                                                                        const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+                                                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	UE_LOG(LogUI, Log, TEXT("Committing Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)

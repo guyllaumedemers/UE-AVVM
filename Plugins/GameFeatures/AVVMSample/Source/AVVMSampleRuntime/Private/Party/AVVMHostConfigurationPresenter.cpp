@@ -18,3 +18,138 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Party/AVVMHostConfigurationPresenter.h"
+
+#include "AVVM.h"
+#include "AVVMGameMode.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "Backend/AVVMOnlineInterfaceUtils.h"
+
+AActor* UAVVMHostConfigurationPresenter::GetOuterKey() const
+{
+	return GetTypedOuter<AAVVMGameMode>();
+}
+
+void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
+}
+
+void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, OnlineInterface);
+	if (!bIsFirstPlayerHosting)
+	{
+		UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request. Failure! Only the Owner of the Party can update the Host configuration!"));
+		return;
+	}
+
+	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted);
+
+	const auto* ModifiedHostConfiguration = Payload.GetPtr<FAVVMHostConfiguration>();
+	if (ModifiedHostConfiguration != nullptr)
+	{
+		UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request. In-Progress..."));
+		OnlineInterface->CommitModifiedHostConfiguration(*ModifiedHostConfiguration, Callback);
+	}
+	else
+	{
+		UE_LOG(LogUI, Log, TEXT("Commit Empty Host Configuration Request. In-Progress..."));
+		OnlineInterface->CommitModifiedHostConfiguration(FAVVMHostConfiguration{}, Callback);
+	}
+}
+
+void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Force Pull Host Configuration Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnForcePullHostConfigurationCompleted);
+
+	UE_LOG(LogUI, Log, TEXT("Force Pull Host Configuration Request. In-Progress..."));
+	OnlineInterface->ForcePullHostConfiguration(Callback);
+}
+
+void UAVVMHostConfigurationPresenter::SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMHostConfigurationPresenter::StartPresenting()
+{
+	// TODO @gdemers we do not know if the PartyManager is a View that takes in all the screen
+	// or simply a portion of the user HUD, etc... TBD by design for your project needs!
+	// Most Importantly, we do not know if we should push :
+	//	A) On a layer Stack
+	//	B) On an extension Point
+}
+
+void UAVVMHostConfigurationPresenter::StopPresenting()
+{
+}
+
+void UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted(const bool bWasSuccess,
+                                                                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update host configuration onSuccess
+		SetHostConfiguration(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMHostConfigurationPresenter::OnForcePullHostConfigurationCompleted(const bool bWasSuccess,
+                                                                            const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Force Pull Host Configuration Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update host configuration onSuccess
+		SetHostConfiguration(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}

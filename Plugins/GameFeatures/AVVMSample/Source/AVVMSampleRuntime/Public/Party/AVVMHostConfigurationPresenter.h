@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Archetypes/AVVMPresenter.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMHostConfigurationPresenter.generated.h"
 
@@ -35,4 +36,37 @@ UCLASS()
 class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationPresenter : public UAVVMPresenter
 {
 	GENERATED_BODY()
+
+public:
+	virtual AActor* GetOuterKey() const override;
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_CommitModifiedHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ForcePullHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	virtual void StartPresenting() override;
+	virtual void StopPresenting() override;
+
+	void OnCommitModifiedHostConfigurationCompleted(const bool bWasSuccess,
+	                                                const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void OnForcePullHostConfigurationCompleted(const bool bWasSuccess,
+	                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

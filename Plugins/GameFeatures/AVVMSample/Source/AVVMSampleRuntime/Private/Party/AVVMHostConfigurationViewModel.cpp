@@ -17,29 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Party/AVVMHostConfigurationViewModel.h"
 
-#include "CoreMinimal.h"
-
-#include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterface.h"
-
-#include "AVVMPartyManagerViewModel.generated.h"
-
-/**
- *	Class description:
- *
- *	UAVVMPartyManagerViewModel encapsulate information about the Parties that are "joinable" to the player. (if theres one!)
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBase
+void UAVVMHostConfigurationViewModel::SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	GENERATED_BODY()
-
-public:
-	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMParty> Parties;
-};
+}

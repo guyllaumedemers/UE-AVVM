@@ -21,25 +21,32 @@
 
 #include "CoreMinimal.h"
 
-#include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterface.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "AVVMPartyManagerViewModel.generated.h"
+#include "AVVMOnlineInterfaceUtils.generated.h"
+
+class IAVVMOnlineInterface;
+class ULocalPlayer;
 
 /**
  *	Class description:
  *
- *	UAVVMPartyManagerViewModel encapsulate information about the Parties that are "joinable" to the player. (if theres one!)
+ *	UAVVMOnlineInterfaceUtils expose a set of utility function defined by the online service.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	UFUNCTION(BlueprintCallable)
+	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
+	                      const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
 
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMParty> Parties;
+	UFUNCTION(BlueprintCallable)
+	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
+	                                 const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
+
+	UFUNCTION(BlueprintCallable)
+	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
 };

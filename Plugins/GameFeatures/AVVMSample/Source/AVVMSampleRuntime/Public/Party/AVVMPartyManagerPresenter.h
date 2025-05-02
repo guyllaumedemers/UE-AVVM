@@ -50,7 +50,7 @@ protected:
 	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_PullAvailableParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_ForcePullParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 

@@ -18,3 +18,12 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Party/AVVMPartyManagerViewModel.h"
+
+void UAVVMPartyManagerViewModel::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	const auto* NewParties = Payload.GetPtr<FAVVMPartyCollection>();
+	if (NewParties != nullptr)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(Parties, *NewParties);
+	}
+}

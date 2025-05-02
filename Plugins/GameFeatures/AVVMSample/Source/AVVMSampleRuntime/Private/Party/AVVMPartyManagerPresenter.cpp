@@ -39,7 +39,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const T
 	StopPresenting();
 }
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_PullAvailableParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
 	if (!ensureAlways(IsValid(Outer)))

@@ -43,10 +43,10 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayloa
 /**
  *	Class description:
  *
- *	FAVVMParty define a group of person that a player can join.
+ *	FAVVMHostConfiguration define a configuration for a play session.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
+struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 };
@@ -55,11 +55,44 @@ struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
  *	Class description:
  *
  *	FAVVMPlayerConnection encapsulate the player status when part of a party.
+ *
+ *	example : information about the visual representation of the player.
  */
 USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMParty define a group of person that a player can join and information about how their session is configured.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FAVVMHostConfiguration HostConfiguration;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<FAVVMPlayerConnection> PlayerConnections;
+};
+
+/*
+ *	Class description:
+ *
+ *	FAVVMPartyCollection encapsulate a set of parties.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMPartyCollection : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<FAVVMParty> Parties;
 };
 
 /**
@@ -99,6 +132,8 @@ public:
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate,
 	                                     const bool /*bWasSuccess*/,
 	                                     const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
+
+	virtual bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr) const { return true; }
 
 	// @gdemers execute login request with backend
 	virtual void RequestLogin(const FAVVMLoginContext& LoginContext, FAVVMOnlineResquestDelegate Callback)
@@ -141,6 +176,20 @@ public:
 	// @gdemers bonus function for when entering the game default map! our expectation is that whatever service we are tied to will
 	// return us all available groups/entities that are "joinable" through user interaction.
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+
+	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfiguration& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+
+	virtual void ForcePullHostConfiguration(FAVVMOnlineResquestDelegate Callback)
 	{
 		bool bCompletionStatus;
 		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);

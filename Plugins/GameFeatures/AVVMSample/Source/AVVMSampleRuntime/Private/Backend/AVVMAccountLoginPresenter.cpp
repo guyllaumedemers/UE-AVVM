@@ -61,11 +61,11 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMAccountLoginPresenter::OnLoginRequestCompleted);
 
-	const auto* LoginContextData = Payload.GetPtr<FAVVMLoginContext>();
-	if (LoginContextData != nullptr)
+	const auto* LoginContext = Payload.GetPtr<FAVVMLoginContext>();
+	if (LoginContext != nullptr)
 	{
 		UE_LOG(LogUI, Log, TEXT("Sending Login Request. In-Progress..."));
-		OnlineInterface->RequestLogin(*LoginContextData, Callback);
+		OnlineInterface->RequestLogin(*LoginContext, Callback);
 	}
 	else
 	{

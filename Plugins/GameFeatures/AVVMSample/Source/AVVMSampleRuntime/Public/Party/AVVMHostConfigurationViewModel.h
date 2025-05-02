@@ -24,22 +24,22 @@
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlineInterface.h"
 
-#include "AVVMPartyManagerViewModel.generated.h"
+#include "AVVMHostConfigurationViewModel.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMPartyManagerViewModel encapsulate information about the Parties that are "joinable" to the player. (if theres one!)
+ *	UAVVMHostConfigurationViewModel encapsulate information about the current Host configuration that you are connected to.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationViewModel : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
 
 public:
-	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMParty> Parties;
+	FAVVMHostConfiguration HostConfiguration;
 };
