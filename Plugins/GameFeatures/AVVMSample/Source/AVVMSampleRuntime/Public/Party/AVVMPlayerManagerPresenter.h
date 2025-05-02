@@ -22,39 +22,20 @@
 #include "CoreMinimal.h"
 
 #include "Archetypes/AVVMPresenter.h"
-#include "StructUtils/InstancedStruct.h"
 
-#include "AVVMPartyManagerPresenter.generated.h"
+#include "AVVMPlayerManagerPresenter.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMPartyManagerPresenter encapsulate information about the available groups that are hosted by the backend or party created
- *	by other players (from the active world).
+ *	UAVVMPlayerManagerPresenter encapsulate information about the players that are locally and remotely "present"
+ *	in a group/level.
  *
- *	example : players that are in a group before leaving town or private lan games, etc...
+ *	Note : This setup is specific to situation where we are not connected to a server! If a server host our session, the player
+ *	representation will be managed by their own UAVVMPlayerStatePresenter which will exist on the APlayerState.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPartyManagerPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerPresenter : public UAVVMPresenter
 {
 	GENERATED_BODY()
-
-public:
-	virtual AActor* GetOuterKey() const override;
-
-protected:
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	virtual void StartPresenting() override;
-	virtual void StopPresenting() override;
 };
