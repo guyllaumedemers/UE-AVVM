@@ -47,7 +47,7 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RefreshAllPlayers(co
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers call to external system which create a static representation of a player or does something similar.
-	BP_AddNewPlayerConnection(Payload);
+	BP_ConnectPlayer(Payload);
 	UE_LOG(LogUI, Log, TEXT("[Remote] Adding new Player Connection!"));
 	SetPlayerConnections(Payload);
 }
@@ -55,7 +55,7 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlay
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteDisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers call to external system which destroy a static representation of a player or does something similar.
-	BP_RemoveNewPlayerConnection(Payload);
+	BP_DisconnectPlayer(Payload);
 	UE_LOG(LogUI, Log, TEXT("[Remote] Removing existing Player Connection!"));
 	SetPlayerConnections(Payload);
 }

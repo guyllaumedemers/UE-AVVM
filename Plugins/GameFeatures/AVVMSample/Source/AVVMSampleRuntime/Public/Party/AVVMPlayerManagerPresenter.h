@@ -67,8 +67,8 @@ protected:
 	virtual void StopPresenting() override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_AddNewPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_ConnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_RemoveNewPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };
