@@ -32,7 +32,7 @@
  *
  *	FAVVMPlayerProfile define a user profile information.
  *
- *	example : Level, Money, Prestige, etc...
+ *	example : Level, Loadout, Money, Prestige, etc...
  */
 USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayload
@@ -62,6 +62,9 @@ USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FAVVMPlayerProfile PlayerProfile;
 };
 
 /**
