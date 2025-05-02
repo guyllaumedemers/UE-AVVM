@@ -17,4 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UserLogin/AVVMAcountLoginViewModel.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Archetypes/AVVMPresenter.h"
+
+#include "AVVMPartyManagerPresenter.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMPlayerProfilePresenter encapsulate information about the players that are locally and remotely "present"
+ *	in a group/level.
+ *
+ *	Note : This setup is specific to situation where we are not connected to a server! If a server host our session, the player
+ *	representation will be managed by their own UAVVMPlayerStatePresenter which will exist on the APlayerState.
+ */
+UCLASS()
+class AVVMSAMPLERUNTIME_API UAVVMPartyManagerPresenter : public UAVVMPresenter
+{
+	GENERATED_BODY()
+};

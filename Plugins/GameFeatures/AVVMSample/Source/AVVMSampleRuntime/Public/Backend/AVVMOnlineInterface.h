@@ -23,24 +23,17 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSampleRuntimeModule.h"
-#include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
-
-#include "AVVMAccountLoginPresenter.generated.h"
-
-enum class EAsyncWidgetLayerState : uint8;
-class UCommonActivatableWidget;
 
 /**
  *	Class description:
  *
- *	FAVVMUserAccount encapsulate data specific to your game representation of the user
- *	account.
+ *	FAVVMPlayerProfile define a user profile information.
  *
  *	example : Level, Money, Prestige, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMUserAccount
+struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 };
@@ -91,53 +84,19 @@ public:
 		Callback.Broadcast(bCompletionStatus, {});
 	};
 
-	// @gdemers submit local changes to backend services
-	virtual void PushAccount(const TInstancedStruct<FAVVMUserAccount>& ContextData, FAVVMOnlineResquestDelegate Callback)
+	// @gdemers commit local changes to backend services
+	virtual void CommitModifiedPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& ContextData, FAVVMOnlineResquestDelegate Callback)
 	{
 		bool bCompletionStatus;
 		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
 		Callback.Broadcast(bCompletionStatus, {});
 	}
-};
 
-
-/**
- *	Class description:
- *
- *	UAVVMAccountLoginPresenter handle user login request.
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMAccountLoginPresenter : public UAVVMPresenter
-{
-	GENERATED_BODY()
-
-public:
-	virtual AActor* GetOuterKey() const override;
-
-protected:
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_TryLogin(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	virtual void StartPresenting() override;
-	virtual void StopPresenting() override;
-
-	void OnPresenterStartCompleted(EAsyncWidgetLayerState State,
-	                               UCommonActivatableWidget* ActivatableWidget);
-
-	void OnLoginRequestCompleted(const bool bWasSuccess,
-	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	// @gdemers expect to make use of CommonUser UBlueprintAsyncActionBase
-	UFUNCTION(BlueprintImplementableEvent)
-	void BP_OnLoginRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	// @gdemers UCommonActivatableWidgetContainerBase handle memory lifetime for Actiavatable Widget.
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UCommonActivatableWidget> PresentingWidget = nullptr;
+	// @gdemers bonus function for when coming back from gameplay and having to pull the local player backend latest data!
+	virtual void ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& ContextData, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
 };

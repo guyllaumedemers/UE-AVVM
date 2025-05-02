@@ -17,24 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Backend/AVVMPlayerProfileViewModel.h"
 
-#include "CoreMinimal.h"
-
-#include "ModularGameMode.h"
-#include "Backend/AVVMOnlineInterface.h"
-
-#include "AVVMGameMode.generated.h"
-
-/**
- *	Class description:
- *
- *	AAVVMGameMode. Actor type that handle interaction with online service general use case, amoung
- *	other things.
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API AAVVMGameMode : public AModularGameMode,
-                                            public IAVVMOnlineInterface
+void UAVVMPlayerProfileViewModel::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	GENERATED_BODY()
-};
+	const auto* NewPlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
+	if (NewPlayerProfile != nullptr)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(PlayerProfile, *NewPlayerProfile);
+	}
+}

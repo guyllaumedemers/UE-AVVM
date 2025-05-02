@@ -21,20 +21,28 @@
 
 #include "CoreMinimal.h"
 
-#include "ModularGameMode.h"
-#include "Backend/AVVMOnlineInterface.h"
+#include "AVVMOnlineInterface.h"
+#include "MVVMViewModelBase.h"
+#include "StructUtils/InstancedStruct.h"
 
-#include "AVVMGameMode.generated.h"
+#include "AVVMPlayerProfileViewModel.generated.h"
 
 /**
  *	Class description:
  *
- *	AAVVMGameMode. Actor type that handle interaction with online service general use case, amoung
- *	other things.
+ *	UAVVMPlayerProfileViewModel. View Model class that display backend representation of the player.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API AAVVMGameMode : public AModularGameMode,
-                                            public IAVVMOnlineInterface
+class AVVMSAMPLERUNTIME_API UAVVMPlayerProfileViewModel : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
+
+public:
+	// @gdemers we cast the received payload to our expected type so the MVVM plugin
+	// can properly exposed aggregated variable of Notification Payload.
+	void SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	FAVVMPlayerProfile PlayerProfile;
 };

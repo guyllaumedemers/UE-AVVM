@@ -17,11 +17,12 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UserLogin/AVVMAccountLoginPresenter.h"
+#include "AVVMSampleRuntime/Public/Backend/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
 #include "AVVMGameMode.h"
 #include "AVVMUtilityFunctionLibrary.h"
+#include "MVVMViewModelBase.h"
 #include "PrimaryGameLayout.h"
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
@@ -114,16 +115,16 @@ void UAVVMAccountLoginPresenter::StopPresenting()
 void UAVVMAccountLoginPresenter::OnPresenterStartCompleted(EAsyncWidgetLayerState State,
                                                            UCommonActivatableWidget* ActivatableWidget)
 {
-	if (!IsValid(ActivatableWidget))
+	if (!IsValid(ActivatableWidget) || State != EAsyncWidgetLayerState::AfterPush)
 	{
 		return;
 	}
 
-	if (State == EAsyncWidgetLayerState::AfterPush)
-	{
-		UE_LOG(LogUI, Log, TEXT("Presenting %s"), *ActivatableWidget->GetName());
-		PresentingWidget = ActivatableWidget;
-	}
+	UE_LOG(LogUI, Log, TEXT("Presenting %s"), *ActivatableWidget->GetName());
+	PresentingWidget = ActivatableWidget;
+
+	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
+	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableWidget);
 }
 
 void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
@@ -132,7 +133,9 @@ void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
 	UE_LOG(LogUI, Log, TEXT("Login Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
-		// TODO do transition to something
+		// @gdemers our received payload should aggregate our player representation
+		// and allow notification to the PlayerProfilePresenter, initialize and present however design expect.
+		BP_OnLoginRequestSuccess(Payload);
 	}
 	else
 	{
