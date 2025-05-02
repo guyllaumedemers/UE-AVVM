@@ -23,7 +23,6 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSampleRuntimeModule.h"
-#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMOnlineInterface.generated.h"
 
@@ -38,6 +37,8 @@ USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 };
 
 /**
@@ -49,6 +50,8 @@ USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	bool operator==(const FAVVMHostConfiguration& Rhs) const;
 
 	// @gdemers define the experience the players of a party will go through
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -72,6 +75,8 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 {
 	GENERATED_BODY()
 
+	bool operator==(const FAVVMPlayerConnection& Rhs) const;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FAVVMPlayerProfile PlayerProfile;
 };
@@ -85,6 +90,8 @@ USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	bool operator==(const FAVVMParty& Rhs) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FAVVMHostConfiguration HostConfiguration;
@@ -103,6 +110,8 @@ struct AVVMSAMPLERUNTIME_API FAVVMPartyCollection : public FAVVMNotificationPayl
 {
 	GENERATED_BODY()
 
+	bool operator==(const FAVVMPartyCollection& Rhs) const;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<FAVVMParty> Parties;
 };
@@ -117,6 +126,8 @@ USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMLoginContext : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	bool operator==(const FAVVMLoginContext& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Username = FString();

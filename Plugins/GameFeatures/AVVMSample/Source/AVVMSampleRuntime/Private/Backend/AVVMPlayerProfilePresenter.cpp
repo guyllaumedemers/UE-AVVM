@@ -59,7 +59,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnCommitPlayerProfileCompleted);
 
 	// @gdemers we obviously wouldnt commit an empty player account. we expect the online subsystem to run validation on the account
@@ -93,7 +93,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfi
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted);
 
 	UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request. In-Progress..."));

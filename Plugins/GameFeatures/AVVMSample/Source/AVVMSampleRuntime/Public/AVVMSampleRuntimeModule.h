@@ -22,6 +22,7 @@
 #include "Modules/ModuleInterface.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "StructUtils/InstancedStruct.h"
 
 /**
  *	Plugin Description :

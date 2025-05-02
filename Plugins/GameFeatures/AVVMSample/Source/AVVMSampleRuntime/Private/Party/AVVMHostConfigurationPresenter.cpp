@@ -62,7 +62,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted);
 
 	const auto* ModifiedHostConfiguration = Payload.GetPtr<FAVVMHostConfiguration>();
@@ -94,7 +94,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostCon
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnForcePullHostConfigurationCompleted);
 
 	UE_LOG(LogUI, Log, TEXT("Force Pull Host Configuration Request. In-Progress..."));

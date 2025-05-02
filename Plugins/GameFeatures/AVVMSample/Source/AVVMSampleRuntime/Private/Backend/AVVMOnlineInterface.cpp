@@ -18,3 +18,33 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Backend/AVVMOnlineInterface.h"
+
+bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMPartyCollection::operator==(const FAVVMPartyCollection& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMLoginContext::operator==(const FAVVMLoginContext& Rhs) const
+{
+	return true;
+}

@@ -55,7 +55,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(cons
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted);
 
 	UE_LOG(LogUI, Log, TEXT("Force Pull Parties Request. In-Progress..."));
@@ -78,7 +78,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted);
 
 	const auto* Party = Payload.GetPtr<FAVVMParty>();
@@ -110,7 +110,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInst
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted);
 
 	const auto* Party = Payload.GetPtr<FAVVMParty>();

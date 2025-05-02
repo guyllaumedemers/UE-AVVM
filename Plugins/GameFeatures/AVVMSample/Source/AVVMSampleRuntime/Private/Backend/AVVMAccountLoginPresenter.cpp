@@ -58,7 +58,7 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 		return;
 	}
 
-	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMAccountLoginPresenter::OnLoginRequestCompleted);
 
 	const auto* LoginContext = Payload.GetPtr<FAVVMLoginContext>();

@@ -41,5 +41,5 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMParty> Parties;
+	FAVVMPartyCollection Parties;
 };
