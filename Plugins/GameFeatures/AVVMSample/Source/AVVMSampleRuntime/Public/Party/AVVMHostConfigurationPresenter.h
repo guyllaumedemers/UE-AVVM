@@ -26,7 +26,10 @@
 #include "AVVMHostConfigurationPresenter.generated.h"
 
 /**
- * 
+ *	Class description:
+ *
+ *	UAVVMHostConfigurationPresenter is the local representation of "YOUR" Party. It tracks the choices made by the host of the party
+ *	which define the "gameplay" elements users will encounter following travel.
  */
 UCLASS()
 class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationPresenter : public UAVVMPresenter
