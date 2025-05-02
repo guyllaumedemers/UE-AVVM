@@ -34,6 +34,11 @@ bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
 	return true;
 }
 
+bool FAVVMPlayerConnectionCollection::operator==(const FAVVMPlayerConnectionCollection& Rhs) const
+{
+	return true;
+}
+
 bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
 {
 	return true;
