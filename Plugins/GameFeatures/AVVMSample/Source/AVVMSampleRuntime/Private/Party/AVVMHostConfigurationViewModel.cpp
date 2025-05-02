@@ -21,4 +21,9 @@
 
 void UAVVMHostConfigurationViewModel::SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	const auto* NewHostConfiguration = Payload.GetPtr<FAVVMHostConfiguration>();
+	if (NewHostConfiguration != nullptr)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(HostConfiguration, *NewHostConfiguration);
+	}
 }

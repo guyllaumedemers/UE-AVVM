@@ -23,6 +23,7 @@
 #include "AVVMGameMode.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Backend/AVVMOnlineInterfaceUtils.h"
+#include "Party/AVVMHostConfigurationViewModel.h"
 
 AActor* UAVVMHostConfigurationPresenter::GetOuterKey() const
 {
@@ -101,8 +102,22 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostCon
 	OnlineInterface->ForcePullHostConfiguration(Callback);
 }
 
+void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_RefreshHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Force Refresh Host Configuration Request. Execute..."));
+	SetHostConfiguration(Payload);
+}
+
 void UAVVMHostConfigurationPresenter::SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	// @gdemers additional data could be defined to properly log output here!
+	UE_LOG(LogUI, Log, TEXT("Updating local Host Configuration!"));
+
+	auto* HostConfigurationViewModel = Cast<UAVVMHostConfigurationViewModel>(ViewModel.Get());
+	if (IsValid(HostConfigurationViewModel))
+	{
+		HostConfigurationViewModel->SetHostConfiguration(Payload);
+	}
 }
 
 void UAVVMHostConfigurationPresenter::StartPresenting()
