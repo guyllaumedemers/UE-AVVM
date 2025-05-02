@@ -40,13 +40,11 @@ class AVVMSAMPLERUNTIME_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctio
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
-	                      const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
-
-	UFUNCTION(BlueprintCallable)
 	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
 	                                 const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
 
-	UFUNCTION(BlueprintCallable)
+	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
+	                      const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
+
 	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
 };
