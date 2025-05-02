@@ -99,4 +99,18 @@ public:
 		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
 		Callback.Broadcast(bCompletionStatus, {});
 	}
+
+	virtual void ConnectPlayerToParty(const TInstancedStruct<FAVVMNotificationPayload>& ContextData, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+
+	virtual void DisconnectPlayerFromParty(const TInstancedStruct<FAVVMNotificationPayload>& ContextData, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
 };
