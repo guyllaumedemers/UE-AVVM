@@ -49,6 +49,15 @@ USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	// @gdemers define the experience the players of a party will go through
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString GameplayGameMode;
+
+	// @gdemers define any other project specific information that should be run for setting up the gameplay
+	// experience
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Options;
 };
 
 /**
