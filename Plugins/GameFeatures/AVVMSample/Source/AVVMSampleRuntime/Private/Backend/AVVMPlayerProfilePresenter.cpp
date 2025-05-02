@@ -62,8 +62,24 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnPlayerProfileCommitRequestCompleted);
 
-	UE_LOG(LogUI, Log, TEXT("Committing Player Profile Request. In-Progress..."));
-	OnlineInterface->CommitModifiedPlayerProfile(Payload, Callback);
+	const auto* PlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
+	if (PlayerProfile != nullptr)
+	{
+		UE_LOG(LogUI, Log, TEXT("Committing Player Profile Request. In-Progress..."));
+		OnlineInterface->CommitModifiedPlayerProfile(*PlayerProfile, Callback);
+	}
+	else
+	{
+		UE_LOG(LogUI, Log, TEXT("Committing Empty Player Profile Request. In-Progress..."));
+		OnlineInterface->CommitModifiedPlayerProfile(FAVVMPlayerProfile{}, Callback);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	// @gdemers executed whenever we have to refresh from most-likely a seamless travel
+	// between world.
+	SetPlayerProfile(Payload);
 }
 
 void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

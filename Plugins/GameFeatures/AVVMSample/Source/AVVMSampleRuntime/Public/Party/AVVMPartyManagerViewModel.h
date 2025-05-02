@@ -17,40 +17,33 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Party/AVVMPartyManagerPresenter.h"
+#pragma once
 
-AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
-{
-	return Super::GetOuterKey();
-}
+#include "CoreMinimal.h"
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StartPresenting();
-}
+#include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlineInterface.h"
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StopPresenting();
-}
+#include "AVVMPartyManagerViewModel.generated.h"
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+/**
+ *	Class description:
+ *
+ *	UAVVMPartyManagerViewModel encapsulate information about the Parties that are "joinable" to the player. (if theres one!)
+ */
+UCLASS()
+class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBase
 {
-}
+	GENERATED_BODY()
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
+public:
+	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-void UAVVMPartyManagerPresenter::BP_OnNotifcationReceived_PullAvailableParties()
-{
-}
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TArray<FAVVMParty> Parties;
 
-void UAVVMPartyManagerPresenter::StartPresenting()
-{
-	// TODO @gdemers define what the PartyManager presenter does
-}
-
-void UAVVMPartyManagerPresenter::StopPresenting()
-{
-}
+	// @gdemers if ever parties support being filtered through some user input.
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TArray<FAVVMParty> FilteredParties;
+};

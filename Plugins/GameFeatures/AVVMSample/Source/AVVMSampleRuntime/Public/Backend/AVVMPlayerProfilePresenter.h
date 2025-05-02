@@ -51,6 +51,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_CommitModifiedPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	void SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;

@@ -17,40 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Party/AVVMPartyManagerPresenter.h"
-
-AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
-{
-	return Super::GetOuterKey();
-}
-
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StartPresenting();
-}
-
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StopPresenting();
-}
-
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
-
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
-
-void UAVVMPartyManagerPresenter::BP_OnNotifcationReceived_PullAvailableParties()
-{
-}
-
-void UAVVMPartyManagerPresenter::StartPresenting()
-{
-	// TODO @gdemers define what the PartyManager presenter does
-}
-
-void UAVVMPartyManagerPresenter::StopPresenting()
-{
-}
+#include "Party/AVVMPartyManagerViewModel.h"

@@ -54,6 +54,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotifcationReceived_PullAvailableParties();
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;

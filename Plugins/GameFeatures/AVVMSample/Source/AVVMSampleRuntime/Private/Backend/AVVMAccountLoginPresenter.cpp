@@ -61,7 +61,7 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMAccountLoginPresenter::OnLoginRequestCompleted);
 
-	const auto* LoginContextData = Payload.GetPtr<FAVVMLoginContextData>();
+	const auto* LoginContextData = Payload.GetPtr<FAVVMLoginContext>();
 	if (LoginContextData != nullptr)
 	{
 		UE_LOG(LogUI, Log, TEXT("Sending Login Request. In-Progress..."));
@@ -70,7 +70,7 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 	else
 	{
 		UE_LOG(LogUI, Log, TEXT("Sending Empty Login Request. In-Progress..."));
-		OnlineInterface->RequestLogin(FAVVMLoginContextData{}, Callback);
+		OnlineInterface->RequestLogin(FAVVMLoginContext{}, Callback);
 	}
 }
 
