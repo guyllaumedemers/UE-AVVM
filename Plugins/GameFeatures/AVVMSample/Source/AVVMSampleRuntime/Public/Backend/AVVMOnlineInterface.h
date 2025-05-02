@@ -81,6 +81,22 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 	FAVVMPlayerProfile PlayerProfile;
 };
 
+/*
+ *	Class description:
+ *
+ *	FAVVMPlayerConnectionCollection encapsulate a set of Players connected to a Party.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnectionCollection : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerConnectionCollection& Rhs) const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<FAVVMPlayerConnection> PlayerConnections;
+};
+
 /**
  *	Class description:
  *
@@ -97,7 +113,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
 	FAVVMHostConfiguration HostConfiguration;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<FAVVMPlayerConnection> PlayerConnections;
+	FAVVMPlayerConnectionCollection PlayerConnections;
 };
 
 /*

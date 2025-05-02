@@ -102,9 +102,9 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostCon
 	OnlineInterface->ForcePullHostConfiguration(Callback);
 }
 
-void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_RefreshHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_RemoteRefreshHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Force Refresh Host Configuration Request. Execute..."));
+	UE_LOG(LogUI, Log, TEXT("Remote Refresh Host Configuration Request. Execute..."));
 	SetHostConfiguration(Payload);
 }
 

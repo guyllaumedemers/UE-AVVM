@@ -53,8 +53,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_ForcePullHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	// @gdemers api with "remote" naming imply : in response to backend events.
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_RefreshHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_RemoteRefreshHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 

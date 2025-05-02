@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerPresenter.h"
 
+#include "AVVM.h"
 #include "AVVMGameMode.h"
+#include "Party/AVVMPlayerManagerViewModel.h"
 
 AActor* UAVVMPlayerManagerPresenter::GetOuterKey() const
 {
@@ -36,12 +38,37 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StopPresenter(const 
 	StopPresenting();
 }
 
-void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RefreshAllPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	UE_LOG(LogUI, Log, TEXT("[Local] Refreshing all Players Visual representation!"));
+	SetPlayerConnections(Payload);
 }
 
-void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	// @gdemers call to external system which create a static representation of a player or does something similar.
+	BP_AddNewPlayerConnection(Payload);
+	UE_LOG(LogUI, Log, TEXT("[Remote] Adding new Player Connection!"));
+	SetPlayerConnections(Payload);
+}
+
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteDisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	// @gdemers call to external system which destroy a static representation of a player or does something similar.
+	BP_RemoveNewPlayerConnection(Payload);
+	UE_LOG(LogUI, Log, TEXT("[Remote] Removing existing Player Connection!"));
+	SetPlayerConnections(Payload);
+}
+
+void UAVVMPlayerManagerPresenter::SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Updating Player Connections!"));
+
+	auto* HostConfigurationViewModel = Cast<UAVVMPlayerManagerViewModel>(ViewModel.Get());
+	if (IsValid(HostConfigurationViewModel))
+	{
+		HostConfigurationViewModel->SetPlayerConnections(Payload);
+	}
 }
 
 void UAVVMPlayerManagerPresenter::StartPresenting()

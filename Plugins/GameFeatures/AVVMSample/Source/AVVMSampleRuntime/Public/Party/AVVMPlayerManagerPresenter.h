@@ -49,13 +49,26 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-	
+
+	// @gdemers when first entering a new group.
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_RefreshAllPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	// @gdemers api with "remote" naming imply : in response to backend events.
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_RemoteConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_RemoteDisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_AddNewPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_RemoveNewPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };
