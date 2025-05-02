@@ -49,6 +49,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerLe
 		// we expect some validation to be run before executing any code here as ALL players configuration will try
 		// executing the following code.
 		UE_LOG(LogUI, Log, TEXT("[Remote] Has Level Up!"));
+		BP_EmotePlayer(Payload);
 		SetPlayerConnection(Payload);
 	}
 }
@@ -59,6 +60,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerPr
 	if (ensure(RemoteConnection != nullptr) && DoesMatchPlayerConnection(*RemoteConnection))
 	{
 		UE_LOG(LogUI, Log, TEXT("[Remote] Player Profile Changed!"));
+		BP_StripNakedPlayer(Payload);
 		SetPlayerConnection(Payload);
 	}
 }

@@ -59,4 +59,10 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_EmotePlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_StripNakedPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };
