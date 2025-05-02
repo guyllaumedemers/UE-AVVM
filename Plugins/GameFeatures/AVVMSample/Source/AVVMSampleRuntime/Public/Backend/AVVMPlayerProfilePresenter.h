@@ -59,12 +59,17 @@ protected:
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 
-	void OnPlayerProfileCommitRequestCompleted(const bool bWasSuccess,
-	                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void OnCommitPlayerProfileCompleted(const bool bWasSuccess,
+	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void OnForcePullPlayerProfileCompleted(const bool bWasSuccess,
+	                                       const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	// @gdemers expect the type erased payload to provide error context information
+	// for the messaging system.
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_OnCommitRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void BP_OnCommitRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

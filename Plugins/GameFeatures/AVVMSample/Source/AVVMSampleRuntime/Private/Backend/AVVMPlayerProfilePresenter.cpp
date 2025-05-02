@@ -60,8 +60,10 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 	}
 
 	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
-	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnPlayerProfileCommitRequestCompleted);
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnCommitPlayerProfileCompleted);
 
+	// @gdemers we obviously wouldnt commit an empty player account. we expect the online subsystem to run validation on the account
+	// before executing any request to overwrite the backend data.
 	const auto* PlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
 	if (PlayerProfile != nullptr)
 	{
@@ -77,9 +79,25 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	// @gdemers executed whenever we have to refresh from most-likely a seamless travel
-	// between world.
-	SetPlayerProfile(Payload);
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted);
+
+	UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request. In-Progress..."));
+	OnlineInterface->ForcePullPlayerProfile(Callback);
 }
 
 void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -107,7 +125,7 @@ void UAVVMPlayerProfilePresenter::StopPresenting()
 {
 }
 
-void UAVVMPlayerProfilePresenter::OnPlayerProfileCommitRequestCompleted(const bool bWasSuccess,
+void UAVVMPlayerProfilePresenter::OnCommitPlayerProfileCompleted(const bool bWasSuccess,
                                                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	UE_LOG(LogUI, Log, TEXT("Committing Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
@@ -117,10 +135,27 @@ void UAVVMPlayerProfilePresenter::OnPlayerProfileCommitRequestCompleted(const bo
 		SetPlayerProfile(Payload);
 
 		// @gdemers run any additional behaviour here!
-		BP_OnCommitRequestSuccess(Payload);
+		BP_OnRequestSuccess(Payload);
 	}
 	else
 	{
-		BP_OnCommitRequestFailure(Payload);
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool bWasSuccess, const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update profile onSuccess
+		SetPlayerProfile(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
 	}
 }

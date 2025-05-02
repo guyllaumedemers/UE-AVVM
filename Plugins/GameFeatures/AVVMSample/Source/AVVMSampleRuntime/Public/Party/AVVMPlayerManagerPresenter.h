@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Archetypes/AVVMPresenter.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerManagerPresenter.generated.h"
 
@@ -38,4 +39,23 @@ UCLASS()
 class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerPresenter : public UAVVMPresenter
 {
 	GENERATED_BODY()
+
+public:
+	virtual AActor* GetOuterKey() const override;
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	virtual void StartPresenting() override;
+	virtual void StopPresenting() override;
 };

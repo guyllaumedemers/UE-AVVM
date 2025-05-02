@@ -18,3 +18,39 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerPresenter.h"
+
+AActor* UAVVMPlayerManagerPresenter::GetOuterKey() const
+{
+	return Super::GetOuterKey();
+}
+
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
+}
+
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMPlayerManagerPresenter::StartPresenting()
+{
+	// TODO @gdemers we do not know if the PartyManager is a View that takes in all the screen
+	// or simply a portion of the user HUD, etc... TBD by design for your project needs!
+	// Most Importantly, we do not know if we should push :
+	//	A) On a layer Stack
+	//	B) On an extension Point
+}
+
+void UAVVMPlayerManagerPresenter::StopPresenting()
+{
+}

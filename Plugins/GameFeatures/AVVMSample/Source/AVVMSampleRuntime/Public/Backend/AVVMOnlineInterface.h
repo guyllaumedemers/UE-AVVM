@@ -117,7 +117,7 @@ public:
 	}
 
 	// @gdemers bonus function for when coming back from gameplay and having to pull the local player backend latest data!
-	virtual void ForcePullPlayerProfile(const FAVVMPlayerProfile& PlayerContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void ForcePullPlayerProfile(FAVVMOnlineResquestDelegate Callback)
 	{
 		bool bCompletionStatus;
 		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
@@ -140,7 +140,7 @@ public:
 
 	// @gdemers bonus function for when entering the game default map! our expectation is that whatever service we are tied to will
 	// return us all available groups/entities that are "joinable" through user interaction.
-	virtual void ForcePullParties(const TArray<FAVVMParty>& PartyContexts, FAVVMOnlineResquestDelegate Callback)
+	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
 	{
 		bool bCompletionStatus;
 		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);

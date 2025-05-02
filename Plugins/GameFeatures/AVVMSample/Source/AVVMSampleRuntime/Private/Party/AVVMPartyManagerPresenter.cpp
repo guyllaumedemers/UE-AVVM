@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "Party/AVVMPartyManagerPresenter.h"
 
+#include "AVVM.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "Backend/AVVMOnlineInterface.h"
+#include "Party/AVVMPartyManagerViewModel.h"
+
 AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
 {
 	return Super::GetOuterKey();
@@ -34,23 +39,68 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const T
 	StopPresenting();
 }
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_PullAvailableParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Force Pull Parties Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted);
+
+	UE_LOG(LogUI, Log, TEXT("Force Pull Parties Request. In-Progress..."));
+	OnlineInterface->ForcePullParties(Callback);
 }
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-}
+	// @gdemers additional data could be defined to properly log output here!
+	UE_LOG(LogUI, Log, TEXT("Updating local Parties!"));
 
-void UAVVMPartyManagerPresenter::BP_OnNotifcationReceived_PullAvailableParties()
-{
+	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
+	if (IsValid(PartyManagerViewModel))
+	{
+		PartyManagerViewModel->SetParties(Payload);
+	}
 }
 
 void UAVVMPartyManagerPresenter::StartPresenting()
 {
-	// TODO @gdemers define what the PartyManager presenter does
+	// TODO @gdemers we do not know if the PartyManager is a View that takes in all the screen
+	// or simply a portion of the user HUD, etc... TBD by design for your project needs!
+	// Most Importantly, we do not know if we should push :
+	//	A) On a layer Stack
+	//	B) On an extension Point
 }
 
 void UAVVMPartyManagerPresenter::StopPresenting()
 {
+}
+
+void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSuccess,
+                                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Force Pull Parties Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update parties onSuccess
+		SetParties(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
 }
