@@ -23,7 +23,6 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSampleRuntimeModule.h"
-#include "OnlineSubsystemTypes.h"
 
 #include "AVVMOnlineInterface.generated.h"
 
@@ -73,12 +72,12 @@ struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPa
 
 	// @gdemers define the experience the players of a party will go through
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString GameplayGameMode;
+	FString GameplayGameMode = FString();
 
 	// @gdemers define any other project specific information that should be run for setting up the gameplay
 	// experience
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString Options;
+	FString Options = FString();
 };
 
 /**
