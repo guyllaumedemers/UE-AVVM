@@ -24,19 +24,15 @@
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "AVVMPlayerManagerPresenter.generated.h"
+#include "AVVMEmotePresenter.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMPlayerManagerPresenter encapsulate information about the players that are locally and remotely "present"
- *	in a group/level.
- *
- *	Note : This setup is specific to situation where we are not connected to a server! If a server host our session, the player
- *	representation will be managed by their own UAVVMPlayerStatePresenter which will exist on the APlayerState.
+ *	UAVVMEmotePresenter execute emote on the target player.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMEmotePresenter : public UAVVMPresenter
 {
 	GENERATED_BODY()
 
@@ -50,28 +46,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	// @gdemers when first entering a new group.
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_RefreshAllPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	// @gdemers api with "remote" naming imply : in response to backend events.
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_RemoteConnectNewPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_RemoteDisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	void SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void BP_RefreshPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void BP_ConnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void BP_DisconnectPlayer(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

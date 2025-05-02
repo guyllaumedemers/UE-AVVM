@@ -49,6 +49,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerLe
 		// we expect some validation to be run before executing any code here as ALL players configuration will try
 		// executing the following code.
 		UE_LOG(LogUI, Log, TEXT("[Remote] Has Level Up!"));
+		// @gdemers trigger emote event for separate system which handle showing above head animation like league of legend does.
 		BP_EmotePlayer(Payload);
 		SetPlayerConnection(Payload);
 	}
@@ -60,6 +61,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerPr
 	if (ensure(RemoteConnection != nullptr) && DoesMatchPlayerConnection(*RemoteConnection))
 	{
 		UE_LOG(LogUI, Log, TEXT("[Remote] Player Profile Changed!"));
+		// @gdemers trigger equipping event for any external system which should receive the modified entry/equipped item that changed.
 		BP_StripNakedPlayer(Payload);
 		SetPlayerConnection(Payload);
 	}
