@@ -19,9 +19,11 @@
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerPresenter.h"
 
+#include "AVVMGameMode.h"
+
 AActor* UAVVMPlayerManagerPresenter::GetOuterKey() const
 {
-	return Super::GetOuterKey();
+	return GetTypedOuter<AAVVMGameMode>();
 }
 
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

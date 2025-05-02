@@ -133,8 +133,10 @@ void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
 	UE_LOG(LogUI, Log, TEXT("Login Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
-		// @gdemers our received payload should aggregate our player representation
-		// and allow notification to the PlayerProfilePresenter, initialize and present however design expect.
+		// @gdemers Post-login, we expect to broadcast to the following systems :
+		//		A) PlayerProfilePresenter		- initializing our profile with payload data from login callback. i.e this call!
+		//		B) PartyManagerPresenter		- running an initial force fetch of all available options.
+		//		C) HostConfigurationPresenter	- running an initial force fetch of a default party.
 		BP_OnLoginRequestSuccess(Payload);
 	}
 	else

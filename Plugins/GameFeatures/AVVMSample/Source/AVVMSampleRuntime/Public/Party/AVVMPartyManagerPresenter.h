@@ -52,12 +52,24 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_ForcePullParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_JoinParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 
 	void OnForcePullPartiesCompleted(const bool bWasSuccess,
+	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void OnPartyJoinRequestCompleted(const bool bWasSuccess,
+	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void OnPartyExitRequestCompleted(const bool bWasSuccess,
 	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)

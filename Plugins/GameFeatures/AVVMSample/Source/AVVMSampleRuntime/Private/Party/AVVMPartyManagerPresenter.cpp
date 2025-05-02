@@ -62,6 +62,70 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(cons
 	OnlineInterface->ForcePullParties(Callback);
 }
 
+void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Join Party Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted);
+
+	const auto* Party = Payload.GetPtr<FAVVMParty>();
+	if (Party != nullptr)
+	{
+		UE_LOG(LogUI, Log, TEXT("Join Party Request Request. In-Progress..."));
+		OnlineInterface->JoinParty(*Party, Callback);
+	}
+	else
+	{
+		UE_LOG(LogUI, Log, TEXT("Join Empty Party Request Request. In-Progress..."));
+		OnlineInterface->JoinParty(FAVVMParty{}, Callback);
+	}
+}
+
+void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI, Log, TEXT("Exit Party Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
+		return;
+	}
+
+	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	IAVVMOnlineInterface::FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted);
+
+	const auto* Party = Payload.GetPtr<FAVVMParty>();
+	if (Party != nullptr)
+	{
+		UE_LOG(LogUI, Log, TEXT("Exit Party Request Request. In-Progress..."));
+		OnlineInterface->ExitParty(*Party, Callback);
+	}
+	else
+	{
+		UE_LOG(LogUI, Log, TEXT("Exit Empty Party Request Request. In-Progress..."));
+		OnlineInterface->ExitParty(FAVVMParty{}, Callback);
+	}
+}
+
 void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers additional data could be defined to properly log output here!
@@ -97,6 +161,40 @@ void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSucc
 		SetParties(Payload);
 
 		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted(const bool bWasSuccess,
+                                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Join Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers Post-Join, we expect to broadcast to the following systems :
+		//		A) HostConfigurationPresenter	- initialize our Host Configuration with payload data (i.e FAVVMParty)
+		//		B) PlayerManagerPresenter		- run initial logic for creating players on HUD or other design requirements. (maybe 3d static representation)
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSuccess,
+                                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers Post-Exit, we expect to broadcast to the following systems :
+		//		A) HostConfigurationPresenter	- reset our Host Configuration with payload data (i.e FAVVMParty)(now expected to be default/empty)
+		//		B) PlayerManagerPresenter		- run initial logic for destroying players on HUD or other design requirements. (maybe 3d static representation)
 		BP_OnRequestSuccess(Payload);
 	}
 	else

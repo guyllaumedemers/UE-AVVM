@@ -173,6 +173,20 @@ public:
 		Callback.Broadcast(bCompletionStatus, {});
 	}
 
+	virtual void JoinParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+
+	virtual void ExitParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+
 	// @gdemers bonus function for when entering the game default map! our expectation is that whatever service we are tied to will
 	// return us all available groups/entities that are "joinable" through user interaction.
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
