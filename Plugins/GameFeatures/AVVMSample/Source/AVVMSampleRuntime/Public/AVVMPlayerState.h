@@ -21,35 +21,19 @@
 
 #include "CoreMinimal.h"
 
-#include "ModularCharacter.h"
+#include "ModularPlayerState.h"
 #include "Backend/AVVMOnlineInterface.h"
 
-#include "AVVMCharacter.generated.h"
+#include "AVVMPlayerState.generated.h"
 
 /**
  *	Class description:
  *
- *	AAVVMCharacter. Actor type that handle interaction with online service general use case, amoung
- *	other things.
+ *	AAVVMPlayerState TBD.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API AAVVMCharacter : public AModularCharacter,
-                                             public IAVVMOnlineInterface
+class AVVMSAMPLERUNTIME_API AAVVMPlayerState : public AModularPlayerState,
+                                               public IAVVMOnlineInterface
 {
 	GENERATED_BODY()
-
-public:
-	// Sets default values for this character's properties
-	AAVVMCharacter();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };

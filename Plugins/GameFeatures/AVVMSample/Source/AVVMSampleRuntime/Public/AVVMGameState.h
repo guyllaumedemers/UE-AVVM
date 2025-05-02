@@ -17,32 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMCharacter.h"
+#pragma once
 
+#include "CoreMinimal.h"
 
-// Sets default values
-AAVVMCharacter::AAVVMCharacter()
+#include "ModularGameState.h"
+#include "Backend/AVVMOnlineInterface.h"
+
+#include "AVVMGameState.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	AAVVMGameState TBD.
+ */
+UCLASS()
+class AVVMSAMPLERUNTIME_API AAVVMGameState : public AModularGameState,
+                                             public IAVVMOnlineInterface
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-}
-
-// Called when the game starts or when spawned
-void AAVVMCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AAVVMCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-// Called to bind functionality to input
-void AAVVMCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
+	GENERATED_BODY()
+};
