@@ -19,12 +19,22 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineInterface.h"
 
+bool FAVVMPlayerWallet::operator==(const FAVVMPlayerWallet& Rhs) const
+{
+	return true;
+}
+
 bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 {
 	return true;
 }
 
 bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMRuntimeResources::operator==(const FAVVMRuntimeResources& Rhs) const
 {
 	return true;
 }

@@ -26,6 +26,20 @@
 
 #include "AVVMOnlineInterface.generated.h"
 
+/*
+ *	Class description:
+ *
+ *	FAVVMPlayerWallet encapsulate currencies that your profile own. Crypto, event coupons,
+ *	coins, etc...
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerWallet& Rhs) const;
+};
+
 /**
  *	Class description:
  *
@@ -39,6 +53,12 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayloa
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FName UniqueNetId = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FAVVMPlayerWallet Wallet;
 };
 
 /**
@@ -66,6 +86,19 @@ struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPa
 /**
  *	Class description:
  *
+ *	FAVVMRuntimeResources encapsulate any items that can be gathered by the user during gameplay.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResources : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMRuntimeResources& Rhs) const;
+};
+
+/**
+ *	Class description:
+ *
  *	FAVVMPlayerConnection encapsulate the player status when part of a party.
  *
  *	example : information about the visual representation of the player.
@@ -77,8 +110,13 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
 
+	// @gdemers backend representation of your profile account.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FAVVMPlayerProfile PlayerProfile;
+
+	// @gdemers only available during gameplay. otherwise empty when disconnected from server.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FAVVMRuntimeResources RuntimeResources;
 };
 
 /*
