@@ -21,6 +21,8 @@
 
 #include "Modules/ModuleInterface.h"
 
+#include "AVVMNotificationSubsystem.h"
+
 /**
  *	Plugin Description :
  *
@@ -44,3 +46,28 @@ private:
 	 */
 	static TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
 };
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
+
+#if !UE_BUILD_SHIPPING
+#if not defined UE_AVVM_DEBUGGER_ENABLED
+#define UE_AVVM_DEBUGGER_ENABLED 1
+#endif
+struct FAVVMScopedDebugger
+{
+	FAVVMScopedDebugger() = default;
+
+	FAVVMScopedDebugger(const FAVVMOnlineResquestDelegate& Callback)
+	{
+		bool bCompletionStatus;
+		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
+		Callback.Broadcast(bCompletionStatus, {});
+	}
+};
+#endif
+
+#if UE_AVVM_DEBUGGER_ENABLED
+#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback) auto ScopedDebugger = FAVVMScopedDebugger(Callback);
+#else
+#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback)
+#endif

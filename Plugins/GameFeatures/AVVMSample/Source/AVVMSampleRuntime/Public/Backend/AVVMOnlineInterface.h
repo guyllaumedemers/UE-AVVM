@@ -141,84 +141,60 @@ class AVVMSAMPLERUNTIME_API IAVVMOnlineInterface
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate,
-	                                     const bool /*bWasSuccess*/,
-	                                     const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
-
 	virtual bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr) const { return true; }
 
 	// @gdemers execute login request with backend
 	virtual void RequestLogin(const FAVVMLoginContext& LoginContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	};
 
 	// @gdemers commit local changes to backend services
 	virtual void CommitModifiedPlayerProfile(const FAVVMPlayerProfile& PlayerContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	// @gdemers bonus function for when coming back from gameplay and having to pull the local player backend latest data!
 	virtual void ForcePullPlayerProfile(FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ConnectPlayerToParty(const FAVVMPlayerConnection& ConnectionContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void DisconnectPlayerFromParty(const FAVVMPlayerConnection& ConnectionContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void JoinParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ExitParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	// @gdemers bonus function for when entering the game default map! our expectation is that whatever service we are tied to will
 	// return us all available groups/entities that are "joinable" through user interaction.
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfiguration& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullHostConfiguration(FAVVMOnlineResquestDelegate Callback)
 	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 };
