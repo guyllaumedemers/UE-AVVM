@@ -31,8 +31,8 @@
  *
  *	UAVVMOnlineInterface abstract project parser from our plugin.
  */
-UINTERFACE()
-class UAVVMOnlineJsonParser : public UInterface
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMSAMPLERUNTIME_API UAVVMOnlineJsonParser : public UInterface
 {
 	GENERATED_BODY()
 };
