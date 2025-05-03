@@ -118,11 +118,11 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 		return;
 	}
 
-	const TCHAR* EventTypeString = EnumToString(PlayerRequest->RequestType);
+	const FString EventTypeString(EnumToString(PlayerRequest->RequestType));
 	UE_LOG(LogUI,
 	       Log,
 	       TEXT("Processing Player Request. Type: %s, In-Progress..."),
-	       (EventTypeString != nullptr) ? EventTypeString : *TEXT(""));
+	       *EventTypeString);
 
 	const bool bShouldKickPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Kick);
 	if (bShouldKickPlayer)
