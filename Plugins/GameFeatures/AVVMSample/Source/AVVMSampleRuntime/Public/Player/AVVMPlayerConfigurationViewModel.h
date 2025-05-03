@@ -39,7 +39,7 @@ class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationViewModel : public UMVVMView
 	GENERATED_BODY()
 
 public:
-	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerManagerViewModel"); };
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerConfigurationViewModel"); };
 	void SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 	bool DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemotePlayerConnection);
 
