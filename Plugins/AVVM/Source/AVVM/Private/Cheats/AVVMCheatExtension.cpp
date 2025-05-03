@@ -38,8 +38,8 @@ void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 	ClearAllRequests();
 }
 
-void UAVVMCheatExtension::AVVM_NotifyTagChannel(const FString& TagChannel,
-                                                const FString& CheatRegistryId)
+void UAVVMCheatExtension::NotifyTagChannelWithPayload(const FString& TagChannel,
+                                                      const FString& PayloadRegistryId)
 {
 	if (!ensureAlways(FGameplayTag::IsValidGameplayTagString(TagChannel)))
 	{
@@ -54,14 +54,14 @@ void UAVVMCheatExtension::AVVM_NotifyTagChannel(const FString& TagChannel,
 		return;
 	}
 
-	const auto SearchRegistryId = FDataRegistryId{UAVVMSettings::GetCheatRegistryType(), FName(CheatRegistryId)};
+	const auto SearchRegistryId = FDataRegistryId{UAVVMSettings::GetCheatRegistryType(), FName(PayloadRegistryId)};
 	if (!ensureAlways(DataRegistrySubsystem->IsValidDataRegistryId(SearchRegistryId)))
 	{
 		UE_LOG(LogUI, Log, TEXT("Resource.Acquisition.%s. Failed!"), *SearchRegistryId.ToString());
 		return;
 	}
 
-	const auto& ChannelTag = FGameplayTag::RequestGameplayTag(FName(TagChannel));
+	const auto ChannelTag = FGameplayTag::RequestGameplayTag(FName(TagChannel));
 
 	const TSharedPtr<FStreamableHandle>* SearchResult = StreamableHandles.Find(SearchRegistryId);
 	if (SearchResult != nullptr)
@@ -82,6 +82,22 @@ void UAVVMCheatExtension::AVVM_NotifyTagChannel(const FString& TagChannel,
 		Callback.BindUObject(this, &UAVVMCheatExtension::OnRegistryIdAcquired);
 		ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(SearchRegistryId, Callback), TEXT("Delegate couldn't be schedule."));
 	}
+}
+
+void UAVVMCheatExtension::NotifyTagChannelWithoutPayload(const FString& TagChannel)
+{
+	if (!ensureAlways(FGameplayTag::IsValidGameplayTagString(TagChannel)))
+	{
+		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Invalid Tag Channel!"), *GetName(), *TagChannel);
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *TagChannel);
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = FGameplayTag::RequestGameplayTag(FName(TagChannel));
+	ContextArgs.WorldContextObject = this;
+	ContextArgs.Payload = TInstancedStruct<FAVVMNotificationPayload>{};
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
 }
 
 void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result)
