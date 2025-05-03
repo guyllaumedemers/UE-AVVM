@@ -68,55 +68,21 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 
 void UAVVMAccountLoginPresenter::StartPresenting()
 {
-	const auto Callback = [Caller = TWeakObjectPtr(this)](EAsyncWidgetLayerState State,
-	                                                      UCommonActivatableWidget* ActivatableWidget)
-	{
-		if (Caller.IsValid())
-		{
-			Caller->OnPresenterStartCompleted(State, ActivatableWidget);
-		}
-		else
-		{
-			UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(ActivatableWidget);
-			if (ensure(IsValid(GameLayout)))
-			{
-				GameLayout->FindAndRemoveWidgetFromLayer(ActivatableWidget);
-			}
-		}
-	};
-
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(this);
-	if (ensure(IsValid(GameLayout)))
-	{
-		GameLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(TargetTag,
-		                                                                  true,
-		                                                                  WidgetClass.Get(),
-		                                                                  Callback);
-	}
+	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
+	ContextArgs.LayerTag = TargetTag;
+	ContextArgs.WidgetClass = WidgetClass;
+	PushContentToPrimaryGameLayout(this, ContextArgs);
 }
 
 void UAVVMAccountLoginPresenter::StopPresenting()
 {
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(this);
-	if (ensure(IsValid(GameLayout)))
-	{
-		GameLayout->FindAndRemoveWidgetFromLayer(PresentingWidget.Get());
-	}
+	PopContentToPrimaryGameLayout(this, ActivatableView.Get());
 }
 
-void UAVVMAccountLoginPresenter::OnPresenterStartCompleted(EAsyncWidgetLayerState State,
-                                                           UCommonActivatableWidget* ActivatableWidget)
+void UAVVMAccountLoginPresenter::BindViewModel() const
 {
-	if (!IsValid(ActivatableWidget) || State != EAsyncWidgetLayerState::AfterPush)
-	{
-		return;
-	}
-
-	UE_LOG(LogUI, Log, TEXT("Presenting %s"), *ActivatableWidget->GetName());
-	PresentingWidget = ActivatableWidget;
-
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableWidget);
+	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }
 
 void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,

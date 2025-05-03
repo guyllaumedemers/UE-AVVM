@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTags.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "AVVMUtilityFunctionLibrary.generated.h"

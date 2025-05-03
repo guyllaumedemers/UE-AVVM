@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -36,7 +37,8 @@ class UCommonActivatableWidget;
  *	UAVVMAccountLoginPresenter handle user login request.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMAccountLoginPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMAccountLoginPresenter : public UAVVMPresenter,
+                                                         public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
@@ -55,9 +57,7 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
-
-	void OnPresenterStartCompleted(EAsyncWidgetLayerState State,
-	                               UCommonActivatableWidget* ActivatableWidget);
+	virtual void BindViewModel() const override;
 
 	void OnLoginRequestCompleted(const bool bWasSuccess,
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
@@ -68,8 +68,4 @@ protected:
 	// @gdemers expect to make use of CommonUser UBlueprintAsyncActionBase
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnLoginRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	// @gdemers UCommonActivatableWidgetContainerBase handle memory lifetime for Actiavatable Widget.
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UCommonActivatableWidget> PresentingWidget = nullptr;
 };
