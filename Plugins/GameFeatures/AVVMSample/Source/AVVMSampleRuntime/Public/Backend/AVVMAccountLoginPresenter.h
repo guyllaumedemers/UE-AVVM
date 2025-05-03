@@ -28,9 +28,6 @@
 
 #include "AVVMAccountLoginPresenter.generated.h"
 
-enum class EAsyncWidgetLayerState : uint8;
-class UCommonActivatableWidget;
-
 /**
  *	Class description:
  *

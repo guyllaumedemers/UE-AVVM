@@ -21,6 +21,7 @@
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
+#include "CommonActivatableWidget.h"
 #include "PrimaryGameLayout.h"
 
 void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
@@ -53,7 +54,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 	}
 }
 
-void IAVVMPrimaryGameLayoutInterface::PopContentToPrimaryGameLayout(UObject* Outer,
+void IAVVMPrimaryGameLayoutInterface::PopContentToPrimaryGameLayout(const UObject* Outer,
                                                                     UCommonActivatableWidget* Target)
 {
 	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(Outer);

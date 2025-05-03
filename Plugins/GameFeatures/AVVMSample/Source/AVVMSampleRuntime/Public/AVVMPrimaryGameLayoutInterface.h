@@ -65,7 +65,7 @@ class AVVMSAMPLERUNTIME_API IAVVMPrimaryGameLayoutInterface
 
 protected:
 	void PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs);
-	void PopContentToPrimaryGameLayout(UObject* Outer, UCommonActivatableWidget* Target);
+	void PopContentToPrimaryGameLayout(const UObject* Outer, UCommonActivatableWidget* Target);
 	void OnPushWidgetCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
 	virtual void BindViewModel() const PURE_VIRTUAL(BindViewModel, return;);
 

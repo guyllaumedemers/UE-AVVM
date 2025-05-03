@@ -20,7 +20,6 @@
 #include "Party/AVVMPartyManagerPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
 #include "Backend/AVVMOnlineInterface.h"
 #include "Backend/AVVMOnlineInterfaceUtils.h"
 #include "Party/AVVMPartyManagerViewModel.h"
