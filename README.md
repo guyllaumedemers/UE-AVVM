@@ -35,8 +35,6 @@ Note : Cheats are really how this system will be tested and build upon. Resource
 
 [CommonGame](https://miro.com/app/board/uXjVI8F91lE=/?share_link_id=765292763899)
 
-[CommonUser](https://miro.com/app/board/uXjVI8F9wkE=/?share_link_id=331050441984)
-
 #### Preview
 
 ![Mindmap](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/MindmapPreview.jpg)
