@@ -83,7 +83,7 @@ protected:
 	void OnKickFromPartyRequestCompleted(const bool bWasSuccess,
 	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	void TryInvitePlayer(const FString& UniqueNetId, const FString& PartyUniqueId);
+	void TryInvitePlayer(const FString& SrcUniqueNetId, const FString& DestUniqueNetId);
 
 	void OnInvitePlayerCompleted(const bool bWasSuccess,
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);

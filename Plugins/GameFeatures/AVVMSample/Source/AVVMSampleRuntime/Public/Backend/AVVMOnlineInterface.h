@@ -286,10 +286,6 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerRequest : public FAVVMNotificationPayloa
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FString DestPlayerUniqueNetId = FString();
 
-	// @gdemers optional party id.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString PartyUniqueId = FString();
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAVVMPlayerRequestType RequestType;
 };
@@ -365,7 +361,7 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void InviteInParty(const FString& UniqueNetId, const FString& PartyUniqueId, FAVVMOnlineResquestDelegate Callback)
+	virtual void InviteInParty(const FString& SrcUniqueNetId, const FString& DestUniqueNetId, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
