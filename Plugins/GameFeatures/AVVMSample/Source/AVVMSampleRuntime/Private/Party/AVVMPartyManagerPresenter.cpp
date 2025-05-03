@@ -133,8 +133,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Invite);
 	if (bShouldInvitePlayer)
 	{
-		TryInvitePlayer(PlayerRequest->DestPlayerUniqueNetId,
-		                PlayerRequest->PartyUniqueId);
+		TryInvitePlayer(PlayerRequest->SrcPlayerUniqueNetId,
+		                PlayerRequest->DestPlayerUniqueNetId);
 	}
 }
 
@@ -245,7 +245,7 @@ void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FString& PlayerUniqueNe
 void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWasSuccess,
                                                                  const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogUI, Log, TEXT("Kick Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update parties onSuccess
@@ -285,7 +285,7 @@ void UAVVMPartyManagerPresenter::TryInvitePlayer(const FString& SrcUniqueNetId, 
 void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
                                                          const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogUI, Log, TEXT("Invite Player to Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update parties onSuccess
