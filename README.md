@@ -25,6 +25,10 @@ To iterate quicker on the development process and prove fatures from the system,
 
 Note : Cheats are really how this system will be tested and build upon. Resources to implement proper **Backend** behaviour are not available, and implementing one is out-of-scope for this project. To test any **Backend** request, simply have your **Actor** type implement the **AVVMOnlineInterface** and extend on the exposed virtual calls.
 
+##### Tip
+
+Check **AVVMSample** plugin, under **GameFeaturePlugin**, for details about our project architecture!
+
 ### UE-Miro
 
 [GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267) - UGameFeatureData are name dependent. UGameFeaturePluginStateMachine cannot register/load/activate unless it's named identical to the GameFeature plugin it represent.
