@@ -189,7 +189,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 
 	// @gdemers backend profile as json
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString PlayerProfile;
+	FString PlayerProfile = FString();
 
 	// @gdemers transient state in which a player connection can be.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -201,11 +201,11 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 
 	// @gdemers backend challenges as json (convert into a collection)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString RuntimeChallenges;
+	FString RuntimeChallenges = FString();
 
 	// @gdemers backend resources as json (convert into a collection)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString RuntimeResources;
+	FString RuntimeResources = FString();
 };
 
 /**
@@ -221,10 +221,51 @@ struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
 	bool operator==(const FAVVMParty& Rhs) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString HostConfiguration;
+	FString HostConfiguration = FString();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString PlayerConnections;
+	FString PlayerConnections = FString();
+};
+
+/**
+ *	Class description:
+ *
+ *	EAVVMPlayerRequestType define a set of possible actions a request can execute.
+ */
+UENUM(BlueprintType)
+enum class EAVVMPlayerRequestType : uint8
+{
+	Invite,
+	Block,
+	Kick,
+	Mute,
+	Censor,
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMPlayerRequest a request which target a player, remote or local, and execute an action.
+ *
+ *	example : kick player out of party, invite friend, etc...
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMPlayerRequest : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerRequest& Rhs) const;
+
+	// @gdemers caller
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString SrcPlayerUniqueNetId = FString();
+
+	// @gdemers receiver
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString DestPlayerUniqueNetId = FString();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	EAVVMPlayerRequestType RequestType;
 };
 
 /**
@@ -263,21 +304,21 @@ class AVVMSAMPLERUNTIME_API IAVVMOnlineInterface
 	GENERATED_BODY()
 
 public:
-	virtual bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr) const { return true; }
+	virtual bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr) const
+	{
+		return true;
+	}
 
-	// @gdemers execute login request with backend
 	virtual void RequestLogin(const FAVVMLoginContext& LoginContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	};
 
-	// @gdemers commit local changes to backend services
 	virtual void CommitModifiedPlayerProfile(const FAVVMPlayerProfile& PlayerContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	// @gdemers bonus function for when coming back from gameplay and having to pull the local player backend latest data!
 	virtual void ForcePullPlayerProfile(FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
@@ -303,8 +344,11 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	// @gdemers bonus function for when entering the game default map! our expectation is that whatever service we are tied to will
-	// return us all available groups/entities that are "joinable" through user interaction.
+	virtual void KickFromParty(const FAVVMPlayerRequest& RequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);

@@ -60,6 +60,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_KickFromParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;

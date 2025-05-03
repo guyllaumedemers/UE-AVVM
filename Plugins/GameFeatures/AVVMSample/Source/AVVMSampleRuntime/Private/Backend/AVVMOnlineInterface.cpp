@@ -54,6 +54,11 @@ bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
 	return true;
 }
 
+bool FAVVMPlayerRequest::operator==(const FAVVMPlayerRequest& Rhs) const
+{
+	return true;
+}
+
 bool FAVVMLoginContext::operator==(const FAVVMLoginContext& Rhs) const
 {
 	return true;

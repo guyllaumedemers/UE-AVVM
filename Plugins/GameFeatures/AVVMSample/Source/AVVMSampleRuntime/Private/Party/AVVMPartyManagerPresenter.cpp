@@ -73,12 +73,12 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 	const auto* Party = Payload.GetPtr<FAVVMParty>();
 	if (Party != nullptr)
 	{
-		UE_LOG(LogUI, Log, TEXT("Join Party Request Request. In-Progress..."));
+		UE_LOG(LogUI, Log, TEXT("Join Party Request. In-Progress..."));
 		OnlineInterface->JoinParty(*Party, Callback);
 	}
 	else
 	{
-		UE_LOG(LogUI, Log, TEXT("Join Empty Party Request Request. In-Progress..."));
+		UE_LOG(LogUI, Log, TEXT("Join Empty Party Request. In-Progress..."));
 		OnlineInterface->JoinParty(FAVVMParty{}, Callback);
 	}
 }
@@ -95,16 +95,43 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInst
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted);
 
+	// @gdemers implicit that only the local player can exit a party. other actions
+	// are name specific.
 	const auto* Party = Payload.GetPtr<FAVVMParty>();
 	if (Party != nullptr)
 	{
-		UE_LOG(LogUI, Log, TEXT("Exit Party Request Request. In-Progress..."));
+		UE_LOG(LogUI, Log, TEXT("Exit Party Request. In-Progress..."));
 		OnlineInterface->ExitParty(*Party, Callback);
 	}
 	else
 	{
-		UE_LOG(LogUI, Log, TEXT("Exit Empty Party Request Request. In-Progress..."));
+		UE_LOG(LogUI, Log, TEXT("Exit Empty Party Request. In-Progress..."));
 		OnlineInterface->ExitParty(FAVVMParty{}, Callback);
+	}
+}
+
+void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_KickFromParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted);
+
+	const auto* PlayerRequest = Payload.GetPtr<FAVVMPlayerRequest>();
+	if (PlayerRequest != nullptr)
+	{
+		UE_LOG(LogUI, Log, TEXT("Kick Player from Party Request. In-Progress..."));
+		OnlineInterface->KickFromParty(*PlayerRequest, Callback);
+	}
+	else
+	{
+		UE_LOG(LogUI, Log, TEXT("Kick Empty Player from Party Request. In-Progress..."));
+		OnlineInterface->KickFromParty(FAVVMPlayerRequest{}, Callback);
 	}
 }
 
