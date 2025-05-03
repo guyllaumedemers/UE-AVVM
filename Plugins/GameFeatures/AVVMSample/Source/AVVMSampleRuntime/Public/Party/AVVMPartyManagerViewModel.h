@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlineInterface.h"
 
@@ -32,11 +33,13 @@
  *	UAVVMPartyManagerViewModel encapsulate information about the Parties that are "joinable" to the player. (if theres one!)
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBase,
+                                                         public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPartyManagerViewModel"); };
 	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

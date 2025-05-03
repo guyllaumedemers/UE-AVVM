@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlineInterface.h"
 
@@ -32,11 +33,13 @@
  *	UAVVMHostConfigurationViewModel encapsulate information about the current Host configuration that you are connected to.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationViewModel : public UMVVMViewModelBase,
+                                                              public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMHostConfigurationViewModel"); };
 	void SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

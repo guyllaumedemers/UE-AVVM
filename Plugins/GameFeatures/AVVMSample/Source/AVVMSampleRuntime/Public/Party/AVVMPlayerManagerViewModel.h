@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlineInterface.h"
 
@@ -32,11 +33,13 @@
  *	UAVVMPlayerManagerViewModel encapsulate information about the Player Connected to 'this' session/group.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerViewModel : public UMVVMViewModelBase,
+                                                          public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerManagerViewModel"); };
 	void SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

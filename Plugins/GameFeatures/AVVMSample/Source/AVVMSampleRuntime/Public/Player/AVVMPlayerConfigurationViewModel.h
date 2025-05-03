@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlineInterface.h"
 
@@ -32,11 +33,13 @@
  *	UAVVMPlayerConfigurationViewModel encapsulate information about the remote player.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationViewModel : public UMVVMViewModelBase,
+                                                                public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerManagerViewModel"); };
 	void SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 	bool DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemotePlayerConnection);
 

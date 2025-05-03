@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "AVVMOnlineInterface.h"
 #include "MVVMViewModelBase.h"
 #include "StructUtils/InstancedStruct.h"
@@ -33,11 +34,13 @@
  *	UAVVMPlayerProfileViewModel. View Model class that display backend representation of the player.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerProfileViewModel : public UMVVMViewModelBase
+class AVVMSAMPLERUNTIME_API UAVVMPlayerProfileViewModel : public UMVVMViewModelBase,
+                                                          public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerProfileViewModel"); };
 	// @gdemers we cast the received payload to our expected type so the MVVM plugin
 	// can properly exposed aggregated variable of Notification Payload.
 	void SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
