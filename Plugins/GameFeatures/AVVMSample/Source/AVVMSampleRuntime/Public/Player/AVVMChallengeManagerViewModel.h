@@ -17,27 +17,33 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/AVVMQuicktimeEventManagerPresenter.h"
+#pragma once
 
-#include "AVVMGameState.h"
+#include "CoreMinimal.h"
 
-AActor* UAVVMQuicktimeEventManagerPresenter::GetOuterKey() const
+#include "AVVM.h"
+#include "AVVMNotificationSubsystem.h"
+#include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlineInterface.h"
+
+#include "AVVMChallengeManagerViewModel.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMChallengeManagerViewModel encapsulate information about the available challenges for the local player.
+ */
+UCLASS()
+class AVVMSAMPLERUNTIME_API UAVVMChallengeManagerViewModel : public UMVVMViewModelBase,
+                                                             public IAVVMViewModelFNameHelper
 {
-	return GetTypedOuter<AAVVMGameState>();
-}
+	GENERATED_BODY()
 
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
+public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMChallengeManagerViewModel"); };
+	void SetChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
-
-void UAVVMQuicktimeEventManagerPresenter::StartPresenting()
-{
-}
-
-void UAVVMQuicktimeEventManagerPresenter::StopPresenting()
-{
-}
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	FAVVMRuntimeChallenges Challenges;
+};

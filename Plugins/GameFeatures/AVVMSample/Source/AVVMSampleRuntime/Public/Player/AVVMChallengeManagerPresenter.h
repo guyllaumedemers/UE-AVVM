@@ -21,26 +21,22 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
-#include "AVVMUIExtensionInterface.h"
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "AVVMQuicktimeEventManagerPresenter.generated.h"
+#include "AVVMChallengeManagerPresenter.generated.h"
 
 /**
- *	Class description:
+*	Class description:
  *
- *	UAVVMQuicktimeEventManagerPresenter handle any "Fire-n-Forget" events triggered from Gameplay or Backend.
- *
- *	Note : More than a single FUIExtensionHandle will be cached on this system. Quicktime notification are fire-n-forget
- *	events which are invoked from a variadic number of systems.
- *
- *	FUIExtensionHandle should be discard once the fire-n-forget animation for a given QTE is complete. TBD!
+ *	UAVVMChallengesPresenter define a set of events that are to be completed to earn rewards in gameplay. For gameplay
+ *	specific notification, the expected source from which should be push content is via the
+ *	UAVVMQuicktimeEventManagerPresenter.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMQuicktimeEventManagerPresenter : public UAVVMPresenter,
-                                                                  public IAVVMUIExtensionInterface
+class AVVMSAMPLERUNTIME_API UAVVMChallengeManagerPresenter : public UAVVMPresenter,
+                                                       public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
@@ -55,8 +51,23 @@ protected:
 	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_RemoteQuicktimeEventFired(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_ForcePullChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ClaimChallengeRewards(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+	virtual void BindViewModel() const override;
+
+	void OnForcePullChallengesCompleted(const bool bWasSuccess,
+	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

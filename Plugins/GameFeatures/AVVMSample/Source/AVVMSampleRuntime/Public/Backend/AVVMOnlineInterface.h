@@ -92,6 +92,29 @@ struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResources : public FAVVMNotificationPay
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMRuntimeResources& Rhs) const;
+
+	// @gdemers options that define a collection of resources, most-likely json representation
+	// of the backend resources.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Options = FString();
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMRuntimeChallenges encapsulate the progress of any challenges that are available to the player during gameplay.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMRuntimeChallenges : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMRuntimeChallenges& Rhs) const;
+
+	// @gdemers options that define a collection of challenges, most-likely json representation
+	// of the backend challenges.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Options = FString();
 };
 
 /**
@@ -132,6 +155,9 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 	// @gdemers transient state in which a player connection can be.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FAVVMRuntimeChallenges RuntimeChallenges;
 
 	// @gdemers only available during gameplay. otherwise empty when disconnected from server.
 	// could be health, stamina or any gathered items, etc...
@@ -279,6 +305,16 @@ public:
 	}
 
 	virtual void ForcePullHostConfiguration(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void ClaimChallenge(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void ForcePullChallenges(FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}

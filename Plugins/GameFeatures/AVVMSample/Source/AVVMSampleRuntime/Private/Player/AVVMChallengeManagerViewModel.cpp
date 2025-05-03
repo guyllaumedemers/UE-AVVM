@@ -17,27 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/AVVMQuicktimeEventManagerPresenter.h"
+#include "Player/AVVMChallengeManagerViewModel.h"
 
-#include "AVVMGameState.h"
-
-AActor* UAVVMQuicktimeEventManagerPresenter::GetOuterKey() const
+void UAVVMChallengeManagerViewModel::SetChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return GetTypedOuter<AAVVMGameState>();
-}
-
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
-
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
-
-void UAVVMQuicktimeEventManagerPresenter::StartPresenting()
-{
-}
-
-void UAVVMQuicktimeEventManagerPresenter::StopPresenting()
-{
+	const auto* NewChallenges = Payload.GetPtr<FAVVMRuntimeChallenges>();
+	if (NewChallenges != nullptr)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(Challenges, *NewChallenges);
+	}
 }

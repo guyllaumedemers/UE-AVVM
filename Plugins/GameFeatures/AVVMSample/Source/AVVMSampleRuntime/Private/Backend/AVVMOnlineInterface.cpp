@@ -39,6 +39,11 @@ bool FAVVMRuntimeResources::operator==(const FAVVMRuntimeResources& Rhs) const
 	return true;
 }
 
+bool FAVVMRuntimeChallenges::operator==(const FAVVMRuntimeChallenges& Rhs) const
+{
+	return true;
+}
+
 bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
 {
 	return true;
