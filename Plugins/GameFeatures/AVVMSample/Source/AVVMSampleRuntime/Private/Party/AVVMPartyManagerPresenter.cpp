@@ -146,7 +146,7 @@ void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotifica
 	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
 	if (IsValid(PartyManagerViewModel))
 	{
-		PartyManagerViewModel->SetParties(GetOuterKey(), Payload);
+		PartyManagerViewModel->SetParties(FAVVMSampleRuntime::GetJsonParser(), Payload);
 	}
 }
 

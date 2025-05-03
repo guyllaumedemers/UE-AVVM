@@ -21,6 +21,7 @@
 
 #include "Modules/ModuleInterface.h"
 
+#include "CoreMinimal.h"
 #include "AVVMNotificationSubsystem.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -37,6 +38,7 @@ public:
 	virtual void ShutdownModule() override;
 
 	static TSharedRef<IConsoleVariable> GetCVarOnlineRequestReturnedStatus();
+	static UObject* GetJsonParser();
 
 private:
 	/**
@@ -46,6 +48,7 @@ private:
 	 *	isn't so friendly)
 	 */
 	static TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
+	static TStrongObjectPtr<UObject> JsonParser;
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);

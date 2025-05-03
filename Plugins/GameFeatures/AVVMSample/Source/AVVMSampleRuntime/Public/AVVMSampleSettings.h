@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,36 +17,32 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class AVVMSampleRuntime : ModuleRules
+#include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
+
+#include "AVVMSampleSettings.generated.h"
+
+/**
+*	Class description:
+ *
+ *	UAVVMSampleSettings. project settings that define global variable to be accessed by plugin system.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMSampleSettings"))
+class AVVMSAMPLERUNTIME_API UAVVMSampleSettings : public UDeveloperSettings
 {
-	public AVVMSampleRuntime(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayTags",
-				"ModularGameplayActors",
-				"ModelViewViewModel",
-				"OnlineSubsystem"
-			});
+public:
+	UAVVMSampleSettings();
 
+	UFUNCTION(BlueprintCallable)
+	static TSubclassOf<UObject> GetJsonParserClass();
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CommonGame",
-				"CommonUI",
-				"UIExtension"
-			});
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta=(MustImplement="AVVMOnlineJsonParser"))
+	TSubclassOf<UObject> JsonParserClass = nullptr;
+};

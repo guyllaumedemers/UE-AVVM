@@ -20,7 +20,11 @@
 
 #include "AVVMSampleRuntimeModule.h"
 
+#include "AVVMSampleSettings.h"
+#include "Engine.h"
+
 TSharedPtr<IConsoleVariable> FAVVMSampleRuntime::CVarOnlineRequestReturnedStatus = nullptr;
+TStrongObjectPtr<UObject> FAVVMSampleRuntime::JsonParser = nullptr;
 
 void FAVVMSampleRuntime::StartupModule()
 {
@@ -30,17 +34,31 @@ void FAVVMSampleRuntime::StartupModule()
 			                         TEXT("Inject the Completion Status of a request being 'faked' when interfacing with incomplete backend."));
 
 	CVarOnlineRequestReturnedStatus = MakeShareable<IConsoleVariable>(NewCVar);
+
+	const TSubclassOf<UObject> ParserClass = UAVVMSampleSettings::GetJsonParserClass();
+	if (IsValid(ParserClass))
+	{
+		UObject* Parser = NewObject<UObject>(GEngine, ParserClass.Get());
+		JsonParser = TStrongObjectPtr<UObject>(Parser);
+	}
 }
 
 void FAVVMSampleRuntime::ShutdownModule()
 {
 	IConsoleManager::Get().UnregisterConsoleObject(CVarOnlineRequestReturnedStatus.Get());
 	CVarOnlineRequestReturnedStatus.Reset();
+
+	JsonParser.Reset();
 }
 
 TSharedRef<IConsoleVariable> FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()
 {
 	return CVarOnlineRequestReturnedStatus.ToSharedRef();
+}
+
+UObject* FAVVMSampleRuntime::GetJsonParser()
+{
+	return JsonParser.Get();
 }
 
 IMPLEMENT_MODULE(FAVVMSampleRuntime, AVVMSampleRuntime)
