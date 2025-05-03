@@ -34,6 +34,10 @@ void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StopPresente
 {
 }
 
+void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_RemoteQuicktimeEventFired(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
 void UAVVMQuicktimeEventManagerPresenter::StartPresenting()
 {
 }
