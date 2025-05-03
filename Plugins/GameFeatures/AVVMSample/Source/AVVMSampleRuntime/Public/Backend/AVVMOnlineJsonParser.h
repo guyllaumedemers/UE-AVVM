@@ -42,17 +42,17 @@ class AVVMSAMPLERUNTIME_API IAVVMOnlineJsonParser
 	GENERATED_BODY()
 
 public:
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMPlayerWallet& OutPlayerWallet)
 	{
 	};
 
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMPlayerProfile& OutPlayerProfile)
 	{
 	};
 
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMHostConfiguration& OutHostConfiguration)
 	{
 	};
@@ -62,7 +62,7 @@ public:
 	{
 	};
 
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMParty& OutParty)
 	{
 	};
@@ -72,7 +72,7 @@ public:
 	{
 	};
 
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMPlayerConnection& OutPlayerConnection)
 	{
 	};
@@ -82,7 +82,7 @@ public:
 	{
 	};
 
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMRuntimeChallenge& OutPlayerChallenge)
 	{
 	};
@@ -92,7 +92,7 @@ public:
 	{
 	};
 
-	virtual void FromJson(const FAVVMStringPayload& Payload,
+	virtual void FromJson(const FString& Payload,
 	                      FAVVMRuntimeResource& OutPlayerResource)
 	{
 	};
