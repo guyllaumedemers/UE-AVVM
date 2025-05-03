@@ -22,6 +22,7 @@
 #include "AVVM.h"
 #include "AVVMGameMode.h"
 #include "AVVMUtilityFunctionLibrary.h"
+#include "Backend/AVVMOnlineInterfaceUtils.h"
 #include "Backend/AVVMPlayerProfileViewModel.h"
 
 AActor* UAVVMPlayerProfilePresenter::GetOuterKey() const
@@ -45,15 +46,8 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_StopPresenter(const 
 
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Committing Player Profile Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -79,15 +73,8 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

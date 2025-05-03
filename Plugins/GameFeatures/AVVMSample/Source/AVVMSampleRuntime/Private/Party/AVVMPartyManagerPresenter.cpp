@@ -22,6 +22,7 @@
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Backend/AVVMOnlineInterface.h"
+#include "Backend/AVVMOnlineInterfaceUtils.h"
 #include "Party/AVVMPartyManagerViewModel.h"
 
 AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
@@ -41,15 +42,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const T
 
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Force Pull Parties Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -64,15 +58,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(cons
 
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Join Party Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -96,15 +83,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Exit Party Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

@@ -42,15 +42,8 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -81,15 +74,8 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Force Pull Host Configuration Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

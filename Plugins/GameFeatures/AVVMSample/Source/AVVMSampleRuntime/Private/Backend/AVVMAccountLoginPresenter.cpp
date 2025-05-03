@@ -24,6 +24,7 @@
 #include "AVVMUtilityFunctionLibrary.h"
 #include "MVVMViewModelBase.h"
 #include "PrimaryGameLayout.h"
+#include "Backend/AVVMOnlineInterfaceUtils.h"
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 {
@@ -42,17 +43,8 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StopPresenter(const T
 
 void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* Outer = Cast<UObject>(GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI, Log, TEXT("Login Request. Failure! Outer doesn't Implement %s"), *UAVVMOnlineInterface::StaticClass()->GetName());
-		return;
-	}
-
-	// @gdemers BP implemented interface cannot be resolved when Cast<> or TScriptInterface::Ctor are called and will return null. Interface support
-	// is required natively!
-	auto OnlineInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineInterfaceUtils.h"
 
+#include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Backend/AVVMOnlineInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -35,6 +36,39 @@ bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetI
 	{
 		return false;
 	}
+}
+
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineInterface>& OutInterface)
+{
+	if (!IsValid(DerivedChild))
+	{
+		return false;
+	}
+
+	auto* Outer = Cast<UObject>(DerivedChild->GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI,
+		       Log,
+		       TEXT("%s Outer doesn't Implement %s"),
+		       *DerivedChild->GetName(),
+		       *UAVVMOnlineInterface::StaticClass()->GetName());
+		return false;
+	}
+
+	OutInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+
+	// @gdemers BP_implemented interface wont be reachable from TScriptInterface<IAVVMOnlineInterface> 
+	const bool bImplement = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OutInterface);
+	if (!ensureAlways(bImplement))
+	{
+		UE_LOG(LogUI,
+		       Log,
+		       TEXT("IAVVMOnlineInterface is Null. Does %s implement IAVVMOnlineInterface in Blueprint? If so, Update to support Natively!"),
+		       *Outer->GetName());
+	}
+
+	return bImplement;
 }
 
 bool UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(const UObject* WorldContextObject,

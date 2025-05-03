@@ -40,6 +40,9 @@ class AVVMSAMPLERUNTIME_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctio
 
 public:
 	UFUNCTION(BlueprintCallable)
+	static bool GetOuterOnlineInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineInterface>& OutInterface);
+	
+	UFUNCTION(BlueprintCallable)
 	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
 	                                 const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
 
