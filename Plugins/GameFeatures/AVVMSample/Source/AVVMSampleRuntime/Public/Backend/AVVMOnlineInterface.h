@@ -96,6 +96,19 @@ struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResources : public FAVVMNotificationPay
 /**
  *	Class description:
  *
+ *	EAVVMPlayerStatus define a set of possible state our player can be in.
+ */
+UENUM(BlueprintType)
+enum class EAVVMPlayerStatus : uint8
+{
+	Default,
+	Ready,
+	PendingAction
+};
+
+/**
+ *	Class description:
+ *
  *	FAVVMPlayerConnection encapsulate the player status when part of a party.
  *
  *	example : information about the visual representation of the player.
@@ -114,6 +127,10 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 	// @gdemers backend representation of your profile account.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FAVVMPlayerProfile PlayerProfile;
+
+	// @gdemers transient state in which a player connection can be.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	EAVVMPlayerStatus PlayerStatus;
 
 	// @gdemers only available during gameplay. otherwise empty when disconnected from server.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
