@@ -27,9 +27,6 @@
 
 #include "AVVMUIExtensionInterface.generated.h"
 
-class UCommonUserWidget;
-class UMVVMViewModelBase;
-
 /**
  *	Class description:
  *
