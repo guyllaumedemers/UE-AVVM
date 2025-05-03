@@ -44,6 +44,11 @@ void UAVVMPresenter::SafeEndPlay()
 	UE_LOG(LogUI, Log, TEXT("Removing UAVVMPresenter::%s"), *GetClass()->GetName());
 
 	{
+		// @gdemers ensure cleanup during destroy sequence so our UI remains in a valid state!
+		StopPresenting();
+	}
+
+	{
 		FAVVMPresenterContextArgs ContextArgs;
 		ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
 		ContextArgs.Presenter = this;

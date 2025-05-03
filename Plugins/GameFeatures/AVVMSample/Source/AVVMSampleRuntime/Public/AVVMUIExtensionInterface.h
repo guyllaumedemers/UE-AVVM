@@ -60,7 +60,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMUIExtensionContextArgs
  *	IAVVMUIExtensionInterface or IAVVMPrimaryGameLayoutInterface.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class UAVVMUIExtensionInterface : public UInterface
+class AVVMSAMPLERUNTIME_API UAVVMUIExtensionInterface : public UInterface
 {
 	GENERATED_BODY()
 };
