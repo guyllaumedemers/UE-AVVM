@@ -51,7 +51,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPrimaryGameLayoutContextArgs
  *	Class description:
  *
  *	UAVVMPrimaryGameLayoutInterface define reusable api to be implemented by presenter class to handle
- *	recurrent actions like Start/Stop presenting.
+ *	recurrent actions like Start/Stop presenting which interface with Unreal Layering system.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMSAMPLERUNTIME_API UAVVMPrimaryGameLayoutInterface : public UInterface
