@@ -38,8 +38,8 @@ void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 	ClearAllRequests();
 }
 
-void UAVVMCheatExtension::NotifyTagChannelWithPayload(const FString& TagChannel,
-                                                      const FString& PayloadRegistryId)
+void UAVVMCheatExtension::NotifyChannelWithPayload(const FString& TagChannel,
+                                                   const FString& PayloadRegistryId)
 {
 	if (!ensureAlways(FGameplayTag::IsValidGameplayTagString(TagChannel)))
 	{
@@ -84,7 +84,7 @@ void UAVVMCheatExtension::NotifyTagChannelWithPayload(const FString& TagChannel,
 	}
 }
 
-void UAVVMCheatExtension::NotifyTagChannelWithoutPayload(const FString& TagChannel)
+void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 {
 	if (!ensureAlways(FGameplayTag::IsValidGameplayTagString(TagChannel)))
 	{

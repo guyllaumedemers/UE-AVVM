@@ -49,11 +49,11 @@ public:
 	// @gdemers cheat function which interface with the UAVVMNotificationSubsystem. It "inject"
 	// a Payload referenced via Data Registry Id.
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.NotifyTagChannel.Payload")
-	void NotifyTagChannelWithPayload(const FString& TagChannel,
-	                                 const FString& PayloadRegistryId);
+	void NotifyChannelWithPayload(const FString& TagChannel,
+	                              const FString& PayloadRegistryId);
 
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.NotifyTagChannel.NoPayload")
-	void NotifyTagChannelWithoutPayload(const FString& TagChannel);
+	void NotifyChannelNoPayload(const FString& TagChannel);
 
 protected:
 	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
