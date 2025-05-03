@@ -66,7 +66,9 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 
-	// @gdemers TBD in your project!
+	// @gdemers Options[0] = {CurrencyId={}, Amount={}}
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<FString> Options;
 };
 
 /**
@@ -136,7 +138,9 @@ struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResource : public FAVVMNotificationPayl
 
 	bool operator==(const FAVVMRuntimeResource& Rhs) const;
 
-	// @gdemers TBD in your project!
+	// @gdemers {ResourceId={}, Amount={}}
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Options = FString();
 };
 
 /**
@@ -151,7 +155,9 @@ struct AVVMSAMPLERUNTIME_API FAVVMRuntimeChallenge : public FAVVMNotificationPay
 
 	bool operator==(const FAVVMRuntimeChallenge& Rhs) const;
 
-	// @gdemers TBD in your project!
+	// @gdemers {ChallengeId={}, ChallengeProgress={}, ChallengeGoal={}}
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Options = FString();
 };
 
 /**
