@@ -18,3 +18,25 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMUIExtensionInterface.h"
+
+FUIExtensionHandle IAVVMUIExtensionInterface::PushContentToExtensionPoint(const FAVVMUIExtensionContextArgs& ContextArgs)
+{
+	auto* ExtensionSubsystem = UWorld::GetSubsystem<UUIExtensionSubsystem>(ContextArgs.World);
+	if (IsValid(ExtensionSubsystem))
+	{
+		return ExtensionSubsystem->RegisterExtensionAsData(
+				ContextArgs.ExtensionPointTag,
+				ContextArgs.ContextObject,
+				ContextArgs.ViewModel,
+				NULL);
+	}
+	else
+	{
+		return FUIExtensionHandle();
+	}
+}
+
+void IAVVMUIExtensionInterface::PopContentToExtensionPoint(FUIExtensionHandle& ExtensionHandle)
+{
+	ExtensionHandle.Unregister();
+}

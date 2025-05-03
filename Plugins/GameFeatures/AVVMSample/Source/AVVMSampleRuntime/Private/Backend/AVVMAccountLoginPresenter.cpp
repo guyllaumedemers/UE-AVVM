@@ -76,7 +76,7 @@ void UAVVMAccountLoginPresenter::StartPresenting()
 
 void UAVVMAccountLoginPresenter::StopPresenting()
 {
-	PopContentToPrimaryGameLayout(this, ActivatableView.Get());
+	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
 }
 
 void UAVVMAccountLoginPresenter::BindViewModel() const

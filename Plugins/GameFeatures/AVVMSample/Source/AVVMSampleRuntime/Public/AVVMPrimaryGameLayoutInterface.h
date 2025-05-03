@@ -52,6 +52,9 @@ struct AVVMSAMPLERUNTIME_API FAVVMPrimaryGameLayoutContextArgs
  *
  *	UAVVMPrimaryGameLayoutInterface define reusable api to be implemented by presenter class to handle
  *	recurrent actions like Start/Stop presenting which interface with Unreal Layering system.
+*	
+ *	Note : It's expected that your Presenter class only implement one of the following interface :
+ *	IAVVMPrimaryGameLayoutInterface or IAVVMUIExtensionInterface.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMSAMPLERUNTIME_API UAVVMPrimaryGameLayoutInterface : public UInterface
@@ -65,8 +68,8 @@ class AVVMSAMPLERUNTIME_API IAVVMPrimaryGameLayoutInterface
 
 protected:
 	void PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs);
-	void PopContentToPrimaryGameLayout(const UObject* Outer, UCommonActivatableWidget* Target);
-	void OnPushWidgetCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
+	void PopContentFromPrimaryGameLayout(const UObject* Outer, UCommonActivatableWidget* Target);
+	void OnPushActivatableWidgetCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
 	virtual void BindViewModel() const PURE_VIRTUAL(BindViewModel, return;);
 
 	TWeakObjectPtr<UCommonActivatableWidget> ActivatableView = nullptr;

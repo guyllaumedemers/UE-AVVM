@@ -21,15 +21,46 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTags.h"
+#include "UIExtensionSystem.h"
 #include "UObject/Interface.h"
 
 #include "AVVMUIExtensionInterface.generated.h"
 
+class UCommonUserWidget;
+class UMVVMViewModelBase;
+
 /**
  *	Class description:
  *
- *	IAVVMUIExtensionInterface define reusable api to be implemented by presenter class to handle
+ *	FAVVMUIExtensionContextArgs encapsulate arguments to pass to the UI Extension Point.
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMUIExtensionContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UWorld* World = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UObject* ContextObject = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite, meta=(MustImplement="NotifyFieldValueChanged"))
+	UObject* ViewModel = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag ExtensionPointTag = FGameplayTag::EmptyTag;
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMUIExtensionInterface define reusable api to be implemented by presenter class to handle
  *	recurrent actions like Start/Stop presenting which interface with Unreal Extension Point system.
+ *
+ *	Note : It's expected that your Presenter class only implement one of the following interface :
+ *	IAVVMUIExtensionInterface or IAVVMPrimaryGameLayoutInterface.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class UAVVMUIExtensionInterface : public UInterface
@@ -42,4 +73,9 @@ class AVVMSAMPLERUNTIME_API IAVVMUIExtensionInterface
 	GENERATED_BODY()
 
 protected:
+	// @gdemers please implement FOnConfigureWidgetForData ConfigureWidgetForData; on the target ExtensionPointWidget
+	// in order to act on the received ExtensionRequest which will contain the ViewModel
+	// as Data and allow VM binding to be setup via UAVVMUtilityFunctionLibrary::BindViewModel.
+	FUIExtensionHandle PushContentToExtensionPoint(const FAVVMUIExtensionContextArgs& ContextArgs);
+	void PopContentToExtensionPoint(FUIExtensionHandle& ExtensionHandle);
 };

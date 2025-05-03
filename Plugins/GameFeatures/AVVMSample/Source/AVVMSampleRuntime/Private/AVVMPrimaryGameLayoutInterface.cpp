@@ -32,7 +32,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 		const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(Caller);
 		if (bIsValid)
 		{
-			Caller->OnPushWidgetCompleted(State, ActivatableWidget);
+			Caller->OnPushActivatableWidgetCompleted(State, ActivatableWidget);
 		}
 		else
 		{
@@ -54,8 +54,8 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 	}
 }
 
-void IAVVMPrimaryGameLayoutInterface::PopContentToPrimaryGameLayout(const UObject* Outer,
-                                                                    UCommonActivatableWidget* Target)
+void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObject* Outer,
+                                                                      UCommonActivatableWidget* Target)
 {
 	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(Outer);
 	if (ensure(IsValid(GameLayout)))
@@ -64,8 +64,8 @@ void IAVVMPrimaryGameLayoutInterface::PopContentToPrimaryGameLayout(const UObjec
 	}
 }
 
-void IAVVMPrimaryGameLayoutInterface::OnPushWidgetCompleted(EAsyncWidgetLayerState State,
-                                                            UCommonActivatableWidget* ActivatableWidget)
+void IAVVMPrimaryGameLayoutInterface::OnPushActivatableWidgetCompleted(EAsyncWidgetLayerState State,
+                                                                       UCommonActivatableWidget* ActivatableWidget)
 {
 	if (!IsValid(ActivatableWidget) || State != EAsyncWidgetLayerState::AfterPush)
 	{
