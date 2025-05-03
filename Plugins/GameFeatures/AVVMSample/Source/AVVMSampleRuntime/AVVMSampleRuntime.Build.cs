@@ -44,7 +44,8 @@ public class AVVMSampleRuntime : ModuleRules
 			new string[]
 			{
 				"CommonGame",
-				"CommonUI"
+				"CommonUI",
+				"UIExtension"
 			});
 	}
 }
