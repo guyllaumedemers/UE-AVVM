@@ -38,6 +38,10 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
+
+	// @gdemers define in a json format whatever currencies we care about.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Options = FString();
 };
 
 /**

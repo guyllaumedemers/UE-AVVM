@@ -36,7 +36,7 @@
  */
 UCLASS()
 class AVVMSAMPLERUNTIME_API UAVVMChallengeManagerPresenter : public UAVVMPresenter,
-                                                       public IAVVMPrimaryGameLayoutInterface
+                                                             public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
