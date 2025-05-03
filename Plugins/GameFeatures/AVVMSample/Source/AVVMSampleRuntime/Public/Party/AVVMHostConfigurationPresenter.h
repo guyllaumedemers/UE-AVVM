@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMUIExtensionInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -33,7 +34,8 @@
  *	which define the "gameplay" elements users will encounter following travel.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationPresenter : public UAVVMPresenter,
+                                                              public IAVVMUIExtensionInterface
 {
 	GENERATED_BODY()
 

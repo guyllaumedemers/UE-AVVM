@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -35,7 +36,8 @@
  *	example : players that are in a group before leaving town or private lan games, etc...
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPartyManagerPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMPartyManagerPresenter : public UAVVMPresenter,
+                                                         public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
@@ -62,6 +64,7 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+	virtual void BindViewModel() const override;
 
 	void OnForcePullPartiesCompleted(const bool bWasSuccess,
 	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);

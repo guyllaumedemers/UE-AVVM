@@ -20,6 +20,8 @@
 #include "Party/AVVMPartyManagerPresenter.h"
 
 #include "AVVM.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "CommonActivatableWidget.h"
 #include "Backend/AVVMOnlineInterface.h"
 #include "Backend/AVVMOnlineInterfaceUtils.h"
 #include "Party/AVVMPartyManagerViewModel.h"
@@ -119,15 +121,21 @@ void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotifica
 
 void UAVVMPartyManagerPresenter::StartPresenting()
 {
-	// TODO @gdemers we do not know if the PartyManager is a View that takes in all the screen
-	// or simply a portion of the user HUD, etc... TBD by design for your project needs!
-	// Most Importantly, we do not know if we should push :
-	//	A) On a layer Stack
-	//	B) On an extension Point
+	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
+	ContextArgs.LayerTag = TargetTag;
+	ContextArgs.WidgetClass = WidgetClass;
+	PushContentToPrimaryGameLayout(this, ContextArgs);
 }
 
 void UAVVMPartyManagerPresenter::StopPresenting()
 {
+	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+}
+
+void UAVVMPartyManagerPresenter::BindViewModel() const
+{
+	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
+	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }
 
 void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSuccess,

@@ -107,15 +107,17 @@ void UAVVMHostConfigurationPresenter::SetHostConfiguration(const TInstancedStruc
 
 void UAVVMHostConfigurationPresenter::StartPresenting()
 {
-	// TODO @gdemers we do not know if the PartyManager is a View that takes in all the screen
-	// or simply a portion of the user HUD, etc... TBD by design for your project needs!
-	// Most Importantly, we do not know if we should push :
-	//	A) On a layer Stack
-	//	B) On an extension Point
+	FAVVMUIExtensionContextArgs ContextArgs;
+	ContextArgs.ExtensionPointTag = TargetTag;
+	ContextArgs.World = GetWorld();
+	ContextArgs.ContextObject = this;
+	ContextArgs.ViewModel = ViewModel.Get();
+	ExtensionRequestHandle = PushContentToExtensionPoint(ContextArgs);
 }
 
 void UAVVMHostConfigurationPresenter::StopPresenting()
 {
+	PopContentToExtensionPoint(ExtensionRequestHandle);
 }
 
 void UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted(const bool bWasSuccess,

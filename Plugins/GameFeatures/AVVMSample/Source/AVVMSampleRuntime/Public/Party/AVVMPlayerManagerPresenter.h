@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -36,7 +37,8 @@
  *	representation will be managed by their own UAVVMPlayerStatePresenter which will exist on the APlayerState.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerPresenter : public UAVVMPresenter,
+                                                          public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
@@ -65,6 +67,7 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+	virtual void BindViewModel() const override;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_RefreshPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload);

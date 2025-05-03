@@ -83,7 +83,8 @@ struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPa
 /**
  *	Class description:
  *
- *	FAVVMRuntimeResources encapsulate any items that can be gathered by the user during gameplay.
+ *	FAVVMRuntimeResources encapsulate any items that can be gathered by the user during gameplay or general
+ *	information about the player - i.e health, stamina, etc...
  */
 USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResources : public FAVVMNotificationPayload
@@ -133,6 +134,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 	EAVVMPlayerStatus PlayerStatus;
 
 	// @gdemers only available during gameplay. otherwise empty when disconnected from server.
+	// could be health, stamina or any gathered items, etc...
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FAVVMRuntimeResources RuntimeResources;
 };

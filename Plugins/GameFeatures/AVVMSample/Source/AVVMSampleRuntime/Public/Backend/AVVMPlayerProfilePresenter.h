@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -34,7 +35,8 @@
  *	example : Loadout, Level, achievements, etc...
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerProfilePresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMPlayerProfilePresenter : public UAVVMPresenter,
+                                                          public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
@@ -58,6 +60,7 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+	virtual void BindViewModel() const override;
 
 	void OnCommitPlayerProfileCompleted(const bool bWasSuccess,
 	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);

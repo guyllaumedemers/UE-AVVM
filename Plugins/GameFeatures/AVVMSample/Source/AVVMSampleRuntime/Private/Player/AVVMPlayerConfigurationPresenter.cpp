@@ -91,13 +91,15 @@ bool UAVVMPlayerConfigurationPresenter::DoesMatchPlayerConnection(const FAVVMPla
 
 void UAVVMPlayerConfigurationPresenter::StartPresenting()
 {
-	// TODO @gdemers we do not know if the PartyManager is a View that takes in all the screen
-	// or simply a portion of the user HUD, etc... TBD by design for your project needs!
-	// Most Importantly, we do not know if we should push :
-	//	A) On a layer Stack
-	//	B) On an extension Point
+	FAVVMUIExtensionContextArgs ContextArgs;
+	ContextArgs.ExtensionPointTag = TargetTag;
+	ContextArgs.World = GetWorld();
+	ContextArgs.ContextObject = this;
+	ContextArgs.ViewModel = ViewModel.Get();
+	ExtensionRequestHandle = PushContentToExtensionPoint(ContextArgs);
 }
 
 void UAVVMPlayerConfigurationPresenter::StopPresenting()
 {
+	PopContentToExtensionPoint(ExtensionRequestHandle);
 }

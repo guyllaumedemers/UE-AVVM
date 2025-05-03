@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMUIExtensionInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -34,7 +35,8 @@ struct FAVVMPlayerConnection;
  *	UAVVMPlayerConfigurationPresenter encapsulate information about the remote player.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationPresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationPresenter : public UAVVMPresenter,
+                                                                public IAVVMUIExtensionInterface
 {
 	GENERATED_BODY()
 

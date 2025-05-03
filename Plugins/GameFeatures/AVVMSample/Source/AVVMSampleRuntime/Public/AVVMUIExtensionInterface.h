@@ -75,4 +75,6 @@ protected:
 	// as Data and allow VM binding to be setup via UAVVMUtilityFunctionLibrary::BindViewModel.
 	FUIExtensionHandle PushContentToExtensionPoint(const FAVVMUIExtensionContextArgs& ContextArgs);
 	void PopContentToExtensionPoint(FUIExtensionHandle& ExtensionHandle);
+
+	FUIExtensionHandle ExtensionRequestHandle;
 };
