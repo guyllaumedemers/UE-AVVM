@@ -37,5 +37,5 @@ Note : Cheats are really how this system will be tested and build upon. Resource
 
 #### Preview
 
-![Mindmap](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/MindmapPreview.jpg)
+![UE-AVVM](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM.jpg)
 
