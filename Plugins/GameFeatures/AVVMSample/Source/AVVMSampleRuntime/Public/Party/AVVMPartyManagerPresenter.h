@@ -61,7 +61,7 @@ protected:
 	void BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_KickFromParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_ProcessPlayerRequest(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
@@ -77,6 +77,16 @@ protected:
 
 	void OnPartyExitRequestCompleted(const bool bWasSuccess,
 	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void TryKickFromPlayer(const FString& UniqueNetId);
+
+	void OnKickFromPartyRequestCompleted(const bool bWasSuccess,
+	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void TryInvitePlayer(const FString& UniqueNetId, const FString& PartyUniqueId);
+
+	void OnInvitePlayerCompleted(const bool bWasSuccess,
+	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);

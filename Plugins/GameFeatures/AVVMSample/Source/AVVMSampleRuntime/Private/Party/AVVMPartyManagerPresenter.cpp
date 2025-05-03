@@ -110,28 +110,31 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInst
 	}
 }
 
-void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_KickFromParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
-	if (!ensure(bIsValid))
+	const auto* PlayerRequest = Payload.GetPtr<FAVVMPlayerRequest>();
+	if (!ensure(PlayerRequest != nullptr))
 	{
 		return;
 	}
 
-	FAVVMOnlineResquestDelegate Callback;
-	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted);
+	const TCHAR* EventTypeString = EnumToString(PlayerRequest->RequestType);
+	UE_LOG(LogUI,
+	       Log,
+	       TEXT("Processing Player Request. Type: %s, In-Progress..."),
+	       (EventTypeString != nullptr) ? EventTypeString : *TEXT(""));
 
-	const auto* PlayerRequest = Payload.GetPtr<FAVVMPlayerRequest>();
-	if (PlayerRequest != nullptr)
+	const bool bShouldKickPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Kick);
+	if (bShouldKickPlayer)
 	{
-		UE_LOG(LogUI, Log, TEXT("Kick Player from Party Request. In-Progress..."));
-		OnlineInterface->KickFromParty(*PlayerRequest, Callback);
+		TryKickFromPlayer(PlayerRequest->DestPlayerUniqueNetId);
 	}
-	else
+
+	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Invite);
+	if (bShouldInvitePlayer)
 	{
-		UE_LOG(LogUI, Log, TEXT("Kick Empty Player from Party Request. In-Progress..."));
-		OnlineInterface->KickFromParty(FAVVMPlayerRequest{}, Callback);
+		TryInvitePlayer(PlayerRequest->DestPlayerUniqueNetId,
+		                PlayerRequest->PartyUniqueId);
 	}
 }
 
@@ -190,6 +193,9 @@ void UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted(const bool bWasSucc
 	UE_LOG(LogUI, Log, TEXT("Join Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
+		// @gdemers update parties onSuccess
+		SetParties(Payload);
+
 		// @gdemers Post-Join, we expect to broadcast to the following systems :
 		//		A) HostConfigurationPresenter	- initialize our Host Configuration with payload data (i.e FAVVMParty)
 		//		B) PlayerManagerPresenter		- run initial logic for creating players on HUD or other design requirements. (maybe 3d static representation)
@@ -207,9 +213,85 @@ void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSucc
 	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
+		// @gdemers update parties onSuccess
+		SetParties(Payload);
+
 		// @gdemers Post-Exit, we expect to broadcast to the following systems :
 		//		A) HostConfigurationPresenter	- reset our Host Configuration with payload data (i.e FAVVMParty)(now expected to be default/empty)
 		//		B) PlayerManagerPresenter		- run initial logic for destroying players on HUD or other design requirements. (maybe 3d static representation)
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FString& PlayerUniqueNetId)
+{
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted);
+	UE_LOG(LogUI, Log, TEXT("Kick Player from Party Request. In-Progress..."));
+	OnlineInterface->KickFromParty(PlayerUniqueNetId, Callback);
+}
+
+void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWasSuccess,
+                                                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update parties onSuccess
+		SetParties(Payload);
+
+		// @gdemers Post-KickFromParty, we expect to broadcast to the following systems :
+		//	if we were the one being kicked :
+		//		A) HostConfigurationPresenter	- reset our Host Configuration with payload data (i.e FAVVMParty)(now expected to be default/empty)
+		//		B) PlayerManagerPresenter		- run initial logic for destroying players on HUD or other design requirements. (maybe 3d static representation)
+		//	else
+		//		A) PlayerManagerPresenter		- destroy the player that got kicked.
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::TryInvitePlayer(const FString& UniqueNetId, const FString& PartyUniqueId)
+{
+	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnInvitePlayerCompleted);
+	UE_LOG(LogUI, Log, TEXT("Invite Player to Party Request. In-Progress..."));
+	OnlineInterface->InviteInParty(UniqueNetId, PartyUniqueId, Callback);
+}
+
+void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
+                                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update parties onSuccess
+		SetParties(Payload);
+
+		// @gdemers Post-InviteToParty, we expect to broadcast to the following systems :
+		//		A) PlayerManagerPresenter		- run logic for creating a new players on HUD or other design requirements. (maybe 3d static representation)
+		// other behaviour for the newly added player should resolve the same as if the player directly invoked Join.
 		BP_OnRequestSuccess(Payload);
 	}
 	else

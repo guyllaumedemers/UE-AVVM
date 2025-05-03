@@ -31,7 +31,7 @@
  *	Class description:
  *
  *	UAVVMPlayerManagerPresenter encapsulate information about the players that are locally and remotely "present"
- *	in a group/level.
+ *	in a group/level. It handle the visual representation of players in world or on screen.
  *
  *	Note : This setup is specific to situation where we are not connected to a server! If a server host our session, the player
  *	representation will be managed by their own UAVVMPlayerStatePresenter which will exist on the APlayerState.

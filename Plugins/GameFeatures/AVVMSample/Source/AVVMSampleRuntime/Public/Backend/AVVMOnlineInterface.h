@@ -221,6 +221,9 @@ struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
 	bool operator==(const FAVVMParty& Rhs) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString PartyUniqueId = FString();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FString HostConfiguration = FString();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -242,6 +245,25 @@ enum class EAVVMPlayerRequestType : uint8
 	Censor,
 };
 
+inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
+{
+	switch (State)
+	{
+		case EAVVMPlayerRequestType::Invite:
+			return TEXT("Invite");
+		case EAVVMPlayerRequestType::Block:
+			return TEXT("Block");
+		case EAVVMPlayerRequestType::Kick:
+			return TEXT("Kick");
+		case EAVVMPlayerRequestType::Mute:
+			return TEXT("Mute");
+		case EAVVMPlayerRequestType::Censor:
+			return TEXT("Censor");
+	}
+	ensure(false);
+	return TEXT("Unknown");
+}
+
 /**
  *	Class description:
  *
@@ -256,13 +278,17 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerRequest : public FAVVMNotificationPayloa
 
 	bool operator==(const FAVVMPlayerRequest& Rhs) const;
 
-	// @gdemers caller
+	// @gdemers caller.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FString SrcPlayerUniqueNetId = FString();
 
-	// @gdemers receiver
+	// @gdemers receiver.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FString DestPlayerUniqueNetId = FString();
+
+	// @gdemers optional party id.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString PartyUniqueId = FString();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAVVMPlayerRequestType RequestType;
@@ -324,16 +350,6 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void ConnectPlayerToParty(const FAVVMPlayerConnection& ConnectionContext, FAVVMOnlineResquestDelegate Callback)
-	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
-	}
-
-	virtual void DisconnectPlayerFromParty(const FAVVMPlayerConnection& ConnectionContext, FAVVMOnlineResquestDelegate Callback)
-	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
-	}
-
 	virtual void JoinParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
@@ -344,7 +360,12 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void KickFromParty(const FAVVMPlayerRequest& RequestContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void KickFromParty(const FString& UniqueNetId, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void InviteInParty(const FString& UniqueNetId, const FString& PartyUniqueId, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
