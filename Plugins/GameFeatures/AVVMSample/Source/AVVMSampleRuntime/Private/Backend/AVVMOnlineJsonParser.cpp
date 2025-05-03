@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+﻿///Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,37 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-#include "AVVM.h"
-#include "AVVMNotificationSubsystem.h"
-#include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterface.h"
-
-#include "AVVMChallengeManagerViewModel.generated.h"
-
-class IAVVMOnlineJsonParser;
-
-/**
- *	Class description:
- *
- *	UAVVMChallengeManagerViewModel encapsulate information about the available challenges for the local player.
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMChallengeManagerViewModel : public UMVVMViewModelBase,
-                                                             public IAVVMViewModelFNameHelper
-{
-	GENERATED_BODY()
-
-public:
-	virtual FName GetViewModelFName() const override { return TEXT("UAVVMChallengeManagerViewModel"); };
-
-	void SetChallenges(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
-	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMRuntimeChallenge> Challenges;
-};
+#include "Backend/AVVMOnlineJsonParser.h"

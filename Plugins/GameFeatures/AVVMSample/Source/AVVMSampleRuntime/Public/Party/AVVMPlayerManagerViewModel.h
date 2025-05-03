@@ -27,6 +27,8 @@
 
 #include "AVVMPlayerManagerViewModel.generated.h"
 
+class IAVVMOnlineJsonParser;
+
 /**
  *	Class description:
  *
@@ -40,9 +42,12 @@ class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerViewModel : public UMVVMViewModelB
 
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerManagerViewModel"); };
-	void SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetPlayerConnections(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+	                          const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:
+	// @gdemers backend payload resolving into a collection of player connections.
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMPlayerConnectionCollection PlayerConnections;
+	TArray<FAVVMPlayerConnection> PlayerConnections;
 };

@@ -1,0 +1,99 @@
+﻿//Copyright(c) 2025 gdemers
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files(the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions :
+//
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Backend/AVVMOnlineInterface.h"
+#include "UObject/Interface.h"
+
+#include "AVVMOnlineJsonParser.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMOnlineInterface abstract project parser from our plugin.
+ */
+UINTERFACE()
+class UAVVMOnlineJsonParser : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMSAMPLERUNTIME_API IAVVMOnlineJsonParser
+{
+	GENERATED_BODY()
+
+public:
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMPlayerWallet& OutPlayerWallet)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMPlayerProfile& OutPlayerProfile)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMHostConfiguration& OutHostConfiguration)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      TArray<FAVVMParty>& OutParties)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMParty& OutParty)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      TArray<FAVVMPlayerConnection>& OutPlayerConnections)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMPlayerConnection& OutPlayerConnection)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMRuntimeChallenge& OutPlayerChallenge)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      TArray<FAVVMRuntimeResource>& OutPlayerResources)
+	{
+	};
+
+	virtual void FromJson(const FAVVMStringPayload& Payload,
+	                      FAVVMRuntimeResource& OutPlayerResource)
+	{
+	};
+};

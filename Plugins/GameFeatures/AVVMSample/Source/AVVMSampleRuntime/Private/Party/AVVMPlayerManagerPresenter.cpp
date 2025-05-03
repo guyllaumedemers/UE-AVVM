@@ -23,6 +23,7 @@
 #include "AVVMGameMode.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
+#include "Backend/AVVMOnlineJsonParser.h"
 #include "Party/AVVMPlayerManagerViewModel.h"
 
 AActor* UAVVMPlayerManagerPresenter::GetOuterKey() const
@@ -69,10 +70,10 @@ void UAVVMPlayerManagerPresenter::SetPlayerConnections(const TInstancedStruct<FA
 {
 	UE_LOG(LogUI, Log, TEXT("Updating Player Connections!"));
 
-	auto* HostConfigurationViewModel = Cast<UAVVMPlayerManagerViewModel>(ViewModel.Get());
-	if (IsValid(HostConfigurationViewModel))
+	auto* PlayerManagerViewModel = Cast<UAVVMPlayerManagerViewModel>(ViewModel.Get());
+	if (IsValid(PlayerManagerViewModel))
 	{
-		HostConfigurationViewModel->SetPlayerConnections(Payload);
+		PlayerManagerViewModel->SetPlayerConnections(GetOuterKey(), Payload);
 	}
 }
 

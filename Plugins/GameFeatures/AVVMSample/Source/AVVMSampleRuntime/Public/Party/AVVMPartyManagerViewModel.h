@@ -27,6 +27,8 @@
 
 #include "AVVMPartyManagerViewModel.generated.h"
 
+class IAVVMOnlineJsonParser;
+
 /**
  *	Class description:
  *
@@ -40,9 +42,11 @@ class AVVMSAMPLERUNTIME_API UAVVMPartyManagerViewModel : public UMVVMViewModelBa
 
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPartyManagerViewModel"); };
-	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetParties(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+	                const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMPartyCollection Parties;
+	TArray<FAVVMParty> Parties;
 };

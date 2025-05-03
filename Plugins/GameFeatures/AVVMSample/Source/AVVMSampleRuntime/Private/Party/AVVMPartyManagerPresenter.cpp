@@ -24,6 +24,7 @@
 #include "CommonActivatableWidget.h"
 #include "Backend/AVVMOnlineInterface.h"
 #include "Backend/AVVMOnlineInterfaceUtils.h"
+#include "Backend/AVVMOnlineJsonParser.h"
 #include "Party/AVVMPartyManagerViewModel.h"
 
 AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
@@ -115,7 +116,7 @@ void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotifica
 	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
 	if (IsValid(PartyManagerViewModel))
 	{
-		PartyManagerViewModel->SetParties(Payload);
+		PartyManagerViewModel->SetParties(GetOuterKey(), Payload);
 	}
 }
 

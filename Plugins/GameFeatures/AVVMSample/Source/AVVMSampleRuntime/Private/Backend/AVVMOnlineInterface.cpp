@@ -34,12 +34,12 @@ bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
 	return true;
 }
 
-bool FAVVMRuntimeResources::operator==(const FAVVMRuntimeResources& Rhs) const
+bool FAVVMRuntimeResource::operator==(const FAVVMRuntimeResource& Rhs) const
 {
 	return true;
 }
 
-bool FAVVMRuntimeChallenges::operator==(const FAVVMRuntimeChallenges& Rhs) const
+bool FAVVMRuntimeChallenge::operator==(const FAVVMRuntimeChallenge& Rhs) const
 {
 	return true;
 }
@@ -49,17 +49,7 @@ bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
 	return true;
 }
 
-bool FAVVMPlayerConnectionCollection::operator==(const FAVVMPlayerConnectionCollection& Rhs) const
-{
-	return true;
-}
-
 bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
-{
-	return true;
-}
-
-bool FAVVMPartyCollection::operator==(const FAVVMPartyCollection& Rhs) const
 {
 	return true;
 }

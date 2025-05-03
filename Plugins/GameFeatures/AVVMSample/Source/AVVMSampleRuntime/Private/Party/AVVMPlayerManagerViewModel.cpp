@@ -19,11 +19,23 @@
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerViewModel.h"
 
-void UAVVMPlayerManagerViewModel::SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+#include "AVVMUtilityFunctionLibrary.h"
+#include "Backend/AVVMOnlineJsonParser.h"
+
+void UAVVMPlayerManagerViewModel::SetPlayerConnections(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+                                                       const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* NewPlayerConnections = Payload.GetPtr<FAVVMPlayerConnectionCollection>();
-	if (NewPlayerConnections != nullptr)
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(JsonParser);
+	if (!ensureAlways(bIsValid))
 	{
-		UE_MVVM_SET_PROPERTY_VALUE(PlayerConnections, *NewPlayerConnections);
+		return;
+	}
+
+	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
+	if (StringPayload != nullptr)
+	{
+		TArray<FAVVMPlayerConnection> OutResult;
+		JsonParser->FromJson(*StringPayload, OutResult);
+		UE_MVVM_SET_PROPERTY_VALUE(PlayerConnections, OutResult);
 	}
 }

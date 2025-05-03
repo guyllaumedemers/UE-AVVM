@@ -26,6 +26,33 @@
 
 #include "AVVMOnlineInterface.generated.h"
 
+/**
+ *	Class description:
+ *
+ *	FAVVMStringPayload encapsulate a json representation for user defined types. When unfold, the
+ *	FString returned from backend should resolve like so.
+ *
+ *	example : TArray<FAVVMParty> Parties = USomeUtilsApi::FromJson(InputStringPayload);
+ *
+ *	IMPORTANT : Online Subsystem service should manage forwarding already resolved types. By the time it reach this
+ *	system, we should know our type.
+ *
+ *	Note : Exception being when we manage a collection of a known type!
+ */
+USTRUCT(BlueprintType)
+struct AVVMSAMPLERUNTIME_API FAVVMStringPayload : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	// @gdemers encapsulate a collection of user defined type.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Payload = FString();
+};
+
+// ---------------------------------------------------------------------------------------------------------------------//
+//							SomeUtils::To/FromJson api should be define for most Struct type here						//
+// ---------------------------------------------------------------------------------------------------------------------//
+
 /*
  *	Class description:
  *
@@ -39,9 +66,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 
-	// @gdemers define in a json format whatever currencies we care about.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString Options = FString();
+	// @gdemers TBD in your project!
 };
 
 /**
@@ -49,7 +74,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
  *
  *	FAVVMPlayerProfile define a user profile information.
  *
- *	example : Level, Loadout, Money, Prestige, etc...
+ *	example : profile name, xp, wallet, etc...
  */
 USTRUCT(BlueprintType)
 struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayload
@@ -59,7 +84,21 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayloa
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FAVVMPlayerWallet Wallet;
+	FString Gamertag = FString();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Xp = FString();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Wallet = FString();
+
+	// @gdemers placeholder. conditional to your game if achievements are tracked.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Achievements = FString();
+
+	// @gdemers placeholder. conditional to your game if presets of type are allowed.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Presets = FString();
 };
 
 /**
@@ -87,38 +126,32 @@ struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPa
 /**
  *	Class description:
  *
- *	FAVVMRuntimeResources encapsulate any items that can be gathered by the user during gameplay or general
+ *	FAVVMRuntimeResource encapsulate any item that can be gathered by the user during gameplay or general
  *	information about the player - i.e health, stamina, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResources : public FAVVMNotificationPayload
+struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResource : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	bool operator==(const FAVVMRuntimeResources& Rhs) const;
+	bool operator==(const FAVVMRuntimeResource& Rhs) const;
 
-	// @gdemers options that define a collection of resources, most-likely json representation
-	// of the backend resources.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString Options = FString();
+	// @gdemers TBD in your project!
 };
 
 /**
  *	Class description:
  *
- *	FAVVMRuntimeChallenges encapsulate the progress of any challenges that are available to the player during gameplay.
+ *	FAVVMRuntimeChallenge encapsulate the progress of any challenge that are available to the player during gameplay.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMRuntimeChallenges : public FAVVMNotificationPayload
+struct AVVMSAMPLERUNTIME_API FAVVMRuntimeChallenge : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	bool operator==(const FAVVMRuntimeChallenges& Rhs) const;
+	bool operator==(const FAVVMRuntimeChallenge& Rhs) const;
 
-	// @gdemers options that define a collection of challenges, most-likely json representation
-	// of the backend challenges.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString Options = FString();
+	// @gdemers TBD in your project!
 };
 
 /**
@@ -148,41 +181,25 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
 
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
 
-	// @gdemers convert using FUniqueNetIdString::Create()
+	// @gdemers backend profile as json
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FString UniqueNetId = FString();
-
-	// @gdemers backend representation of your profile account.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FAVVMPlayerProfile PlayerProfile;
+	FString PlayerProfile;
 
 	// @gdemers transient state in which a player connection can be.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus;
 
+	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FAVVMRuntimeChallenges RuntimeChallenges;
+	FString UniqueNetId = FString();
 
-	// @gdemers only available during gameplay. otherwise empty when disconnected from server.
-	// could be health, stamina or any gathered items, etc...
+	// @gdemers backend challenges as json (convert into a collection)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FAVVMRuntimeResources RuntimeResources;
-};
+	FString RuntimeChallenges;
 
-/*
- *	Class description:
- *
- *	FAVVMPlayerConnectionCollection encapsulate a set of Players connected to a Party.
- */
-USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnectionCollection : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMPlayerConnectionCollection& Rhs) const;
-
+	// @gdemers backend resources as json (convert into a collection)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<FAVVMPlayerConnection> PlayerConnections;
+	FString RuntimeResources;
 };
 
 /**
@@ -198,26 +215,10 @@ struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
 	bool operator==(const FAVVMParty& Rhs) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FAVVMHostConfiguration HostConfiguration;
+	FString HostConfiguration;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FAVVMPlayerConnectionCollection PlayerConnections;
-};
-
-/*
- *	Class description:
- *
- *	FAVVMPartyCollection encapsulate a set of parties.
- */
-USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPartyCollection : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMPartyCollection& Rhs) const;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TArray<FAVVMParty> Parties;
+	FString PlayerConnections;
 };
 
 /**
@@ -313,7 +314,7 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void ClaimChallenge(FAVVMOnlineResquestDelegate Callback)
+	virtual void ClaimChallenge(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}

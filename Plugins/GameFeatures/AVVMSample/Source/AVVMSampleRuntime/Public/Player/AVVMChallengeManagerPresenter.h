@@ -65,6 +65,9 @@ protected:
 	void OnForcePullChallengesCompleted(const bool bWasSuccess,
 	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	void OnClaimChallengeRewardsCompleted(const bool bWasSuccess,
+	                                      const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 

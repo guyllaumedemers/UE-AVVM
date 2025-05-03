@@ -19,11 +19,23 @@
 //SOFTWARE.
 #include "Player/AVVMChallengeManagerViewModel.h"
 
-void UAVVMChallengeManagerViewModel::SetChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+#include "AVVMUtilityFunctionLibrary.h"
+#include "Backend/AVVMOnlineJsonParser.h"
+
+void UAVVMChallengeManagerViewModel::SetChallenges(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+                                                   const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* NewChallenges = Payload.GetPtr<FAVVMRuntimeChallenges>();
-	if (NewChallenges != nullptr)
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(JsonParser);
+	if (!ensureAlways(bIsValid))
 	{
-		UE_MVVM_SET_PROPERTY_VALUE(Challenges, *NewChallenges);
+		return;
+	}
+
+	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
+	if (StringPayload != nullptr)
+	{
+		TArray<FAVVMRuntimeChallenge> OutResult;
+		JsonParser->FromJson(*StringPayload, OutResult);
+		UE_MVVM_SET_PROPERTY_VALUE(Challenges, OutResult);
 	}
 }
