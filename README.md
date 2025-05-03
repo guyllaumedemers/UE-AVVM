@@ -17,7 +17,7 @@ Here's an example case explaning our expectations :
 
 ### Project Miro
 
-Mind map for the UE-AVVM system and general use case built using **Overwatch 2** for reference. [Note : This mind map is built based on experience gained during production of COOP multiplayer for a AAA game.](https://miro.com/welcomeonboard/bmZmV0ZtQko0Q1U1Y1BjcUdlOEVubkNaWlY5Ulo1Zm44dURNbTI2YlJ2ZFhSNkRZVFNSMVROVzQ3MXpKZ0V0NlMyb1VVY3d1bENxeTFhS2VZcG44L3BrK1c4REtRNkJ4MGhJYjlidlhDdVZKMVZTcVhYck1zcHFVd0t5aGxQK0JyVmtkMG5hNDA3dVlncnBvRVB2ZXBnPT0hdjE=?share_link_id=554815863683)
+Mind map for the UE-AVVM system and general use case built using **Overwatch 2** for reference. [Note : This mind map is built based on experience gained during production of COOP multiplayer for a AAA game.](https://miro.com/app/board/uXjVI663y_k=/?share_link_id=72860067020)
 
 #### Cheats
 
@@ -34,8 +34,6 @@ Note : Cheats are really how this system will be tested and build upon. Resource
 [DataRegistry](https://miro.com/app/board/uXjVI8q9jKI=/)
 
 [CommonGame](https://miro.com/app/board/uXjVI8F91lE=/?share_link_id=765292763899)
-
-[CommonUser](https://miro.com/app/board/uXjVI8F9wkE=/?share_link_id=331050441984)
 
 #### Preview
 
