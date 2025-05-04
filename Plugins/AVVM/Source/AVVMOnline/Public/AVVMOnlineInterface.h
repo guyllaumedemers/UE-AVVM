@@ -243,6 +243,7 @@ enum class EAVVMPlayerRequestType : uint8
 	Kick,
 	Mute,
 	Censor,
+	Trade
 };
 
 inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
@@ -259,6 +260,8 @@ inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
 			return TEXT("Mute");
 		case EAVVMPlayerRequestType::Censor:
 			return TEXT("Censor");
+		case EAVVMPlayerRequestType::Trade:
+			return TEXT("Trade");
 	}
 	ensure(false);
 	return TEXT("Unknown");
@@ -288,6 +291,10 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAVVMPlayerRequestType RequestType;
+
+	// @gdemers payload can represent any data sent over the network, maybe during a trade, etc...
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FString Payload = FString();
 };
 
 /**
@@ -458,6 +465,47 @@ public:
 	}
 
 	virtual void ForcePullBattlePass(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMOnlineStoreInterface. Abstract the subsystem interfacing with the microservice
+ *	for the game store and the content that can be purchased outside gameplay.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineStoreInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMONLINE_API IAVVMOnlineStoreInterface
+{
+	GENERATED_BODY()
+
+public:
+	// @gdemers local request only.
+	virtual void SellItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	// @gdemers local request only.
+	virtual void BuyItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	// @gdemers networked request between two players.
+	virtual void TradeItem(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void ForcePullShopContent(FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
