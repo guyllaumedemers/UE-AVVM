@@ -20,13 +20,14 @@
 #include "Party/AVVMHostConfigurationPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMGameMode.h"
-#include "Backend/AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineInterface.h"
+#include "AVVMOnlineInterfaceUtils.h"
+#include "GameFramework/GameMode.h"
 #include "Party/AVVMHostConfigurationViewModel.h"
 
 AActor* UAVVMHostConfigurationPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMGameMode>();
+	return GetTypedOuter<AGameMode>();
 }
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

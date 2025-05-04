@@ -19,11 +19,11 @@
 //SOFTWARE.
 #include "Backend/AVVMQuicktimeEventManagerPresenter.h"
 
-#include "AVVMGameState.h"
+#include "GameFramework/GameStateBase.h"
 
 AActor* UAVVMQuicktimeEventManagerPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMGameState>();
+	return GetTypedOuter<AGameStateBase>();
 }
 
 void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

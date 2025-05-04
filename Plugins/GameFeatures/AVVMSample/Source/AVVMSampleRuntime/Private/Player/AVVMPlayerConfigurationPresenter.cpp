@@ -20,12 +20,13 @@
 #include "Player/AVVMPlayerConfigurationPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMPlayerState.h"
+#include "AVVMOnlineInterface.h"
+#include "GameFramework/PlayerState.h"
 #include "Player/AVVMPlayerConfigurationViewModel.h"
 
 AActor* UAVVMPlayerConfigurationPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMPlayerState>();
+	return GetTypedOuter<APlayerState>();
 }
 
 void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

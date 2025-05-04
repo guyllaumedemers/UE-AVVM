@@ -22,12 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
+#include "AVVMOnlineInterface.h"
+#include "AVVMOnlineJsonParser.h"
 #include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterface.h"
 
 #include "AVVMPartyManagerViewModel.generated.h"
-
-class IAVVMOnlineJsonParser;
 
 /**
  *	Class description:

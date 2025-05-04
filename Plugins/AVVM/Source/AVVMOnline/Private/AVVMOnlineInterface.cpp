@@ -17,23 +17,49 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AVVMOnlineInterface.h"
 
-#include "CoreMinimal.h"
-
-#include "ModularPlayerState.h"
-#include "Backend/AVVMOnlineInterface.h"
-
-#include "AVVMPlayerState.generated.h"
-
-/**
- *	Class description:
- *
- *	AAVVMPlayerState TBD.
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API AAVVMPlayerState : public AModularPlayerState,
-                                               public IAVVMOnlineInterface
+bool FAVVMPlayerWallet::operator==(const FAVVMPlayerWallet& Rhs) const
 {
-	GENERATED_BODY()
-};
+	return true;
+}
+
+bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMRuntimeResource::operator==(const FAVVMRuntimeResource& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMRuntimeChallenge::operator==(const FAVVMRuntimeChallenge& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMPlayerRequest::operator==(const FAVVMPlayerRequest& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMLoginContext::operator==(const FAVVMLoginContext& Rhs) const
+{
+	return true;
+}

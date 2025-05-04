@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Player/AVVMChallengeManagerViewModel.h"
 
+#include "AVVMOnlineJsonParser.h"
 #include "AVVMUtilityFunctionLibrary.h"
-#include "Backend/AVVMOnlineJsonParser.h"
 
 void UAVVMChallengeManagerViewModel::SetChallenges(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
                                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload)

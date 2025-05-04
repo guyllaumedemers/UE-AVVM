@@ -21,28 +21,19 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
 #include "AVVMOnlineInterface.h"
-#include "MVVMViewModelBase.h"
+#include "ModularPlayerState.h"
 
-#include "AVVMHostConfigurationViewModel.generated.h"
+#include "AVVMPlayerState.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMHostConfigurationViewModel encapsulate information about the current Host configuration that you are connected to.
+ *	AAVVMPlayerState TBD.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMHostConfigurationViewModel : public UMVVMViewModelBase,
-                                                              public IAVVMViewModelFNameHelper
+class AVVMONLINE_API AAVVMPlayerState : public AModularPlayerState,
+                                        public IAVVMOnlineInterface
 {
 	GENERATED_BODY()
-
-public:
-	virtual FName GetViewModelFName() const override { return TEXT("UAVVMHostConfigurationViewModel"); };
-	void SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMHostConfiguration HostConfiguration;
 };

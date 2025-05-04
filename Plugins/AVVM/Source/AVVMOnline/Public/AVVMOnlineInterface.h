@@ -22,7 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMSampleRuntimeModule.h"
+#include "AVVMOnline.h"
 
 #include "AVVMOnlineInterface.generated.h"
 
@@ -40,7 +40,7 @@
  *	Note : Exception being when we manage a collection of a known type!
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMStringPayload : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -60,7 +60,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMStringPayload : public FAVVMNotificationPayloa
  *	coins, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -79,7 +79,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerWallet : public FAVVMNotificationPayload
  *	example : profile name, xp, wallet, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -109,7 +109,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerProfile : public FAVVMNotificationPayloa
  *	FAVVMHostConfiguration define a configuration for a play session.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -132,7 +132,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMHostConfiguration : public FAVVMNotificationPa
  *	information about the player - i.e health, stamina, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResource : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMRuntimeResource : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -149,7 +149,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMRuntimeResource : public FAVVMNotificationPayl
  *	FAVVMRuntimeChallenge encapsulate the progress of any challenge that are available to the player during gameplay.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMRuntimeChallenge : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMRuntimeChallenge : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -181,7 +181,7 @@ enum class EAVVMPlayerStatus : uint8
  *	example : information about the visual representation of the player.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -214,7 +214,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerConnection : public FAVVMNotificationPay
  *	FAVVMParty define a group of person that a player can join and information about how their session is configured.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMParty : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -272,7 +272,7 @@ inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
  *	example : kick player out of party, invite friend, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPlayerRequest : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -297,7 +297,7 @@ struct AVVMSAMPLERUNTIME_API FAVVMPlayerRequest : public FAVVMNotificationPayloa
  *	trying to login.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMLoginContext : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMLoginContext : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
@@ -316,12 +316,12 @@ struct AVVMSAMPLERUNTIME_API FAVVMLoginContext : public FAVVMNotificationPayload
  *	UAVVMOnlineInterface abstract project backend microservice.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class AVVMSAMPLERUNTIME_API UAVVMOnlineInterface : public UInterface
+class AVVMONLINE_API UAVVMOnlineInterface : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMSAMPLERUNTIME_API IAVVMOnlineInterface
+class AVVMONLINE_API IAVVMOnlineInterface
 {
 	GENERATED_BODY()
 

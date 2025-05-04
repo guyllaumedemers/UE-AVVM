@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Party/AVVMPartyManagerViewModel.h"
 
+#include "AVVMOnlineJsonParser.h"
 #include "AVVMUtilityFunctionLibrary.h"
-#include "Backend/AVVMOnlineJsonParser.h"
 
 void UAVVMPartyManagerViewModel::SetParties(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)

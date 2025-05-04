@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Backend/AVVMOnlineInterface.h"
+#include "AVVMOnlineInterface.h"
 #include "UObject/Interface.h"
 
 #include "AVVMOnlineJsonParser.generated.h"
@@ -32,12 +32,12 @@
  *	UAVVMOnlineInterface abstract project parser from our plugin.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class AVVMSAMPLERUNTIME_API UAVVMOnlineJsonParser : public UInterface
+class AVVMONLINE_API UAVVMOnlineJsonParser : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMSAMPLERUNTIME_API IAVVMOnlineJsonParser
+class AVVMONLINE_API IAVVMOnlineJsonParser
 {
 	GENERATED_BODY()
 

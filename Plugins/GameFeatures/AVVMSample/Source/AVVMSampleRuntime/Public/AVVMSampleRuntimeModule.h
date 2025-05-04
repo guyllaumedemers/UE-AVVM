@@ -19,59 +19,12 @@
 //SOFTWARE.
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
 
-#include "CoreMinimal.h"
-#include "AVVMNotificationSubsystem.h"
-#include "StructUtils/InstancedStruct.h"
-
 /**
- *	Plugin Description :
+*	Plugin Description :
  *
- *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class that would provide
- *	boiler plate code support for generic multiplayer-game project architecture.
+ *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
+ *	that would provide boiler plate code support for generic multiplayer-game project architecture.
  */
-class FAVVMSampleRuntime : public IModuleInterface
-{
-public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-
-	static TSharedRef<IConsoleVariable> GetCVarOnlineRequestReturnedStatus();
-	static UObject* GetJsonParser();
-
-private:
-	/**
-	 *	Variable Description :
-	 *
-	 *	CVar to allow user testing of 'fake' online request being made without an actual backend hooked. (Cuz thats way too much work and UCommonUser plugin
-	 *	isn't so friendly)
-	 */
-	static TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
-	static TStrongObjectPtr<UObject> JsonParser;
-};
-
-DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
-
-#if !UE_BUILD_SHIPPING
-#if not defined UE_AVVM_DEBUGGER_ENABLED
-#define UE_AVVM_DEBUGGER_ENABLED 1
-#endif
-struct FAVVMScopedDebugger
-{
-	FAVVMScopedDebugger() = default;
-
-	FAVVMScopedDebugger(const FAVVMOnlineResquestDelegate& Callback)
-	{
-		bool bCompletionStatus;
-		FAVVMSampleRuntime::GetCVarOnlineRequestReturnedStatus()->GetValue(bCompletionStatus);
-		Callback.Broadcast(bCompletionStatus, {});
-	}
-};
-#endif
-
-#if UE_AVVM_DEBUGGER_ENABLED
-#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback) FAVVMScopedDebugger ScopedDebugger(Callback);
-#else
-#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback)
-#endif

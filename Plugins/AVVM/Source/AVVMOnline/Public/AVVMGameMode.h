@@ -21,8 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMOnlineInterface.h"
 #include "ModularGameMode.h"
-#include "Backend/AVVMOnlineInterface.h"
 
 #include "AVVMGameMode.generated.h"
 
@@ -33,8 +33,8 @@
  *	other things.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API AAVVMGameMode : public AModularGameMode,
-                                            public IAVVMOnlineInterface
+class AVVMONLINE_API AAVVMGameMode : public AModularGameMode,
+                                     public IAVVMOnlineInterface
 {
 	GENERATED_BODY()
 };

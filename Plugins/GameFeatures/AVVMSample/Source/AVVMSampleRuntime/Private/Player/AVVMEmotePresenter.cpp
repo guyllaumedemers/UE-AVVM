@@ -19,11 +19,11 @@
 //SOFTWARE.
 #include "Player/AVVMEmotePresenter.h"
 
-#include "AVVMPlayerState.h"
+#include "GameFramework/PlayerState.h"
 
 AActor* UAVVMEmotePresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMPlayerState>();
+	return GetTypedOuter<APlayerState>();
 }
 
 void UAVVMEmotePresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

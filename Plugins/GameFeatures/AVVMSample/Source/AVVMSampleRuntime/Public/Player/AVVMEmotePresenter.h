@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 

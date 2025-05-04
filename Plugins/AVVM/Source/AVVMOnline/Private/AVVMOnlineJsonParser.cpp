@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+﻿///Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,37 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-#include "Kismet/BlueprintFunctionLibrary.h"
-
-#include "AVVMOnlineInterfaceUtils.generated.h"
-
-class IAVVMOnlineInterface;
-class ULocalPlayer;
-
-/**
- *	Class description:
- *
- *	UAVVMOnlineInterfaceUtils expose a set of utility function defined by the online service.
- */
-UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable)
-	static bool GetOuterOnlineInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineInterface>& OutInterface);
-	
-	UFUNCTION(BlueprintCallable)
-	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
-	                                 const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
-
-	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
-	                      const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
-
-	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
-};
+#include "AVVMOnlineJsonParser.h"

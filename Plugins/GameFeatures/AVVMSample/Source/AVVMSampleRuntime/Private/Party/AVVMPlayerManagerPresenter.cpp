@@ -20,15 +20,15 @@
 #include "Party/AVVMPlayerManagerPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMGameMode.h"
+#include "AVVMOnline.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
-#include "Backend/AVVMOnlineJsonParser.h"
+#include "GameFramework/GameMode.h"
 #include "Party/AVVMPlayerManagerViewModel.h"
 
 AActor* UAVVMPlayerManagerPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMGameMode>();
+	return GetTypedOuter<AGameMode>();
 }
 
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -73,7 +73,7 @@ void UAVVMPlayerManagerPresenter::SetPlayerConnections(const TInstancedStruct<FA
 	auto* PlayerManagerViewModel = Cast<UAVVMPlayerManagerViewModel>(ViewModel.Get());
 	if (IsValid(PlayerManagerViewModel))
 	{
-		PlayerManagerViewModel->SetPlayerConnections(FAVVMSampleRuntime::GetJsonParser(), Payload);
+		PlayerManagerViewModel->SetPlayerConnections(FAVVMOnlineModule::GetJsonParser(), Payload);
 	}
 }
 

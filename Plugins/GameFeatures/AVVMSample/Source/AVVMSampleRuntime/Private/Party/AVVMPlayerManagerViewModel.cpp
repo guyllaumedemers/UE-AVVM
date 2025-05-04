@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerViewModel.h"
 
+#include "AVVMOnlineJsonParser.h"
 #include "AVVMUtilityFunctionLibrary.h"
-#include "Backend/AVVMOnlineJsonParser.h"
 
 void UAVVMPlayerManagerViewModel::SetPlayerConnections(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
                                                        const TInstancedStruct<FAVVMNotificationPayload>& Payload)

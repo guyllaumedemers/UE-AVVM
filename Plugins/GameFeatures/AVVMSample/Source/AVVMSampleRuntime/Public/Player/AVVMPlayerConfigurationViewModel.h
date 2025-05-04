@@ -22,8 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
+#include "AVVMOnlineInterface.h"
 #include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterface.h"
 
 #include "AVVMPlayerConfigurationViewModel.generated.h"
 

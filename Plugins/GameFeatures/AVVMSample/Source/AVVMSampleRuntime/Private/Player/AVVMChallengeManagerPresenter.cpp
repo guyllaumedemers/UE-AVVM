@@ -20,18 +20,17 @@
 #include "Player/AVVMChallengeManagerPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMGameMode.h"
+#include "AVVMOnlineInterface.h"
+#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterface.h"
-#include "Backend/AVVMOnlineInterfaceUtils.h"
-#include "Backend/AVVMOnlineJsonParser.h"
+#include "GameFramework/GameMode.h"
 #include "Player/AVVMChallengeManagerViewModel.h"
 
 AActor* UAVVMChallengeManagerPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMGameMode>();
+	return GetTypedOuter<AGameMode>();
 }
 
 void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -92,7 +91,7 @@ void UAVVMChallengeManagerPresenter::SetChallenges(const TInstancedStruct<FAVVMN
 	auto* ChallengeManagerViewModel = Cast<UAVVMChallengeManagerViewModel>(ViewModel.Get());
 	if (IsValid(ChallengeManagerViewModel))
 	{
-		ChallengeManagerViewModel->SetChallenges(FAVVMSampleRuntime::GetJsonParser(), Payload);
+		ChallengeManagerViewModel->SetChallenges(FAVVMOnlineModule::GetJsonParser(), Payload);
 	}
 }
 

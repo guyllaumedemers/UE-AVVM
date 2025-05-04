@@ -17,49 +17,32 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/AVVMOnlineInterface.h"
+#pragma once
 
-bool FAVVMPlayerWallet::operator==(const FAVVMPlayerWallet& Rhs) const
-{
-	return true;
-}
+#include "CoreMinimal.h"
 
-bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
-{
-	return true;
-}
+#include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
 
-bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
-{
-	return true;
-}
+#include "AVVMOnlineSettings.generated.h"
 
-bool FAVVMRuntimeResource::operator==(const FAVVMRuntimeResource& Rhs) const
+/**
+*	Class description:
+ *
+ *	UAVVMOnlineSettings. project settings that define global variable to be accessed by plugin system.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMSampleSettings"))
+class AVVMONLINE_API UAVVMOnlineSettings : public UDeveloperSettings
 {
-	return true;
-}
+	GENERATED_BODY()
 
-bool FAVVMRuntimeChallenge::operator==(const FAVVMRuntimeChallenge& Rhs) const
-{
-	return true;
-}
+public:
+	UAVVMOnlineSettings();
 
-bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
-{
-	return true;
-}
+	UFUNCTION(BlueprintCallable)
+	static TSubclassOf<UObject> GetJsonParserClass();
 
-bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
-{
-	return true;
-}
-
-bool FAVVMPlayerRequest::operator==(const FAVVMPlayerRequest& Rhs) const
-{
-	return true;
-}
-
-bool FAVVMLoginContext::operator==(const FAVVMLoginContext& Rhs) const
-{
-	return true;
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta=(MustImplement="AVVMOnlineJsonParser"))
+	TSubclassOf<UObject> JsonParserClass = nullptr;
+};

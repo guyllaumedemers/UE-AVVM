@@ -20,15 +20,16 @@
 #include "Backend/AVVMAccountLoginPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMGameMode.h"
+#include "AVVMOnlineInterface.h"
+#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlineInterfaceUtils.h"
+#include "GameFramework/GameMode.h"
 
 AActor* UAVVMAccountLoginPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AAVVMGameMode>();
+	return GetTypedOuter<AGameMode>();
 }
 
 void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

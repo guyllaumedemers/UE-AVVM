@@ -21,28 +21,33 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "AVVMSampleSettings.generated.h"
+#include "AVVMOnlineInterfaceUtils.generated.h"
+
+class IAVVMOnlineInterface;
+class ULocalPlayer;
 
 /**
-*	Class description:
+ *	Class description:
  *
- *	UAVVMSampleSettings. project settings that define global variable to be accessed by plugin system.
+ *	UAVVMOnlineInterfaceUtils expose a set of utility function defined by the online service.
  */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMSampleSettings"))
-class AVVMSAMPLERUNTIME_API UAVVMSampleSettings : public UDeveloperSettings
+UCLASS()
+class AVVMONLINE_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	UAVVMSampleSettings();
+	UFUNCTION(BlueprintCallable)
+	static bool GetOuterOnlineInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineInterface>& OutInterface);
 
 	UFUNCTION(BlueprintCallable)
-	static TSubclassOf<UObject> GetJsonParserClass();
+	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
+	                                 const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta=(MustImplement="AVVMOnlineJsonParser"))
-	TSubclassOf<UObject> JsonParserClass = nullptr;
+	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
+	                      const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
+
+	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
 };

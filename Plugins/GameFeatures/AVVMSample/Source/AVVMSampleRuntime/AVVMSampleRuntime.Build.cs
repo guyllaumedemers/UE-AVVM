@@ -30,6 +30,7 @@ public class AVVMSampleRuntime : ModuleRules
 			new string[]
 			{
 				"AVVM",
+				"AVVMOnline",
 				"Core",
 				"CoreUObject",
 				"DeveloperSettings",
@@ -37,7 +38,8 @@ public class AVVMSampleRuntime : ModuleRules
 				"GameplayTags",
 				"ModularGameplayActors",
 				"ModelViewViewModel",
-				"OnlineSubsystem"
+				"OnlineSubsystem",
+				"StructUtils"
 			});
 
 
