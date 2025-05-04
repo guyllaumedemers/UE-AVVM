@@ -500,6 +500,8 @@ public:
 	}
 
 	// @gdemers networked request between two players.
+	// Note : trading and sending gift are really the same action, the difference is simply in the payload exchange, one end
+	// of the interaction being empty. re-use the same api if required!
 	virtual void TradeItem(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
