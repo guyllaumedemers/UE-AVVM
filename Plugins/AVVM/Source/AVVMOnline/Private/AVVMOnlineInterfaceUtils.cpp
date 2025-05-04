@@ -19,13 +19,12 @@
 //SOFTWARE.
 #include "AVVMOnlineInterfaceUtils.h"
 
-#include "AVVM.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
-                                          const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface)
+                                          const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
 	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
 	if (bIsValid)
@@ -38,41 +37,35 @@ bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetI
 	}
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineInterface>& OutInterface)
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface)
 {
-	if (!IsValid(DerivedChild))
-	{
-		return false;
-	}
+	return GetInterface<UAVVMOnlineIdentityInterface,
+	                    IAVVMOnlineIdentityInterface>(DerivedChild, OutInterface);
+}
 
-	auto* Outer = Cast<UObject>(DerivedChild->GetImplementingOuterObject(UAVVMOnlineInterface::StaticClass()));
-	if (!ensureAlways(IsValid(Outer)))
-	{
-		UE_LOG(LogUI,
-		       Log,
-		       TEXT("%s Outer doesn't Implement %s"),
-		       *DerivedChild->GetName(),
-		       *UAVVMOnlineInterface::StaticClass()->GetName());
-		return false;
-	}
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(const UObject* DerivedChild,
+                                                             TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlinePartyInterface,
+	                    IAVVMOnlinePartyInterface>(DerivedChild, OutInterface);
+}
 
-	OutInterface = TScriptInterface<IAVVMOnlineInterface>(Outer);
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
+                                                                  TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineChallengesInterface,
+	                    IAVVMOnlineChallengesInterface>(DerivedChild, OutInterface);
+}
 
-	// @gdemers BP_implemented interface wont be reachable from TScriptInterface<IAVVMOnlineInterface> 
-	const bool bImplement = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OutInterface);
-	if (!ensureAlways(bImplement))
-	{
-		UE_LOG(LogUI,
-		       Log,
-		       TEXT("IAVVMOnlineInterface is Null. Does %s implement IAVVMOnlineInterface in Blueprint? If so, Update to support Natively!"),
-		       *Outer->GetName());
-	}
-
-	return bImplement;
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
+                                                                  TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineBattlePassInterface,
+	                    IAVVMOnlineBattlePassInterface>(DerivedChild, OutInterface);
 }
 
 bool UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(const UObject* WorldContextObject,
-                                                     const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface)
+                                                     const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
 	const UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 	const ULocalPlayer* Player = IsValid(GameInstance) ? GameInstance->GetFirstGamePlayer() : nullptr;

@@ -44,8 +44,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const T
 
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -60,8 +60,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(cons
 
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -85,8 +85,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -229,8 +229,8 @@ void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSucc
 
 void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FString& PlayerUniqueNetId)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -267,8 +267,8 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 
 void UAVVMPartyManagerPresenter::TryInvitePlayer(const FString& SrcUniqueNetId, const FString& DestUniqueNetId)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

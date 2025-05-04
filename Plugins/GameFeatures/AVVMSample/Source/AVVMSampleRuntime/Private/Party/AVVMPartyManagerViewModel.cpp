@@ -19,10 +19,10 @@
 //SOFTWARE.
 #include "Party/AVVMPartyManagerViewModel.h"
 
-#include "AVVMOnlineJsonParser.h"
+#include "AVVMOnlineStringParser.h"
 #include "AVVMUtilityFunctionLibrary.h"
 
-void UAVVMPartyManagerViewModel::SetParties(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+void UAVVMPartyManagerViewModel::SetParties(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(JsonParser);
@@ -35,7 +35,7 @@ void UAVVMPartyManagerViewModel::SetParties(const TScriptInterface<IAVVMOnlineJs
 	if (StringPayload != nullptr)
 	{
 		TArray<FAVVMParty> OutResult;
-		JsonParser->FromJson(*StringPayload, OutResult);
+		JsonParser->FromString(*StringPayload, OutResult);
 		UE_MVVM_SET_PROPERTY_VALUE(Parties, OutResult);
 	}
 }

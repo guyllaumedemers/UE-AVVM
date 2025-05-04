@@ -44,8 +44,8 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_StopPresenter(const T
 
 void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

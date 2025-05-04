@@ -21,11 +21,16 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "AVVMOnlineInterfaceUtils.generated.h"
 
-class IAVVMOnlineInterface;
+class IAVVMOnlineBattlePassInterface;
+class IAVVMOnlineChallengesInterface;
+class IAVVMOnlineIdentityInterface;
+class IAVVMOnlinePartyInterface;
 class ULocalPlayer;
 
 /**
@@ -40,14 +45,67 @@ class AVVMONLINE_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrar
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool GetOuterOnlineInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineInterface>& OutInterface);
+	static bool GetOuterOnlineIdentityInterface(const UObject* DerivedChild,
+	                                            TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface);
+
+	UFUNCTION(BlueprintCallable)
+	static bool GetOuterOnlinePartyInterface(const UObject* DerivedChild,
+	                                         TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface);
+
+	UFUNCTION(BlueprintCallable)
+	static bool GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
+	                                              TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface);
+
+	UFUNCTION(BlueprintCallable)
+	static bool GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
+	                                              TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface);
 
 	UFUNCTION(BlueprintCallable)
 	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
-	                                 const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
+	                                 const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
 
 	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
-	                      const TScriptInterface<IAVVMOnlineInterface>& OnlineInterface);
+	                      const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
 
 	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
+
+private:
+	template <typename UInterfaceClass, typename IInterfaceClass>
+	static bool GetInterface(const UObject* DerivedChild,
+	                         TScriptInterface<IInterfaceClass>& OutInterface);
 };
+
+template <typename UInterfaceClass, typename IInterfaceClass>
+bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
+                                             TScriptInterface<IInterfaceClass>& OutInterface)
+{
+	if (!IsValid(DerivedChild))
+	{
+		return false;
+	}
+
+	auto* Outer = Cast<UObject>(DerivedChild->GetImplementingOuterObject(UInterfaceClass::StaticClass()));
+	if (!ensureAlways(IsValid(Outer)))
+	{
+		UE_LOG(LogUI,
+		       Log,
+		       TEXT("%s doesn't Implement %s"),
+		       *DerivedChild->GetName(),
+		       *UInterfaceClass::StaticClass()->GetName());
+		return false;
+	}
+
+	OutInterface = TScriptInterface<IInterfaceClass>(Outer);
+
+	const bool bImplement = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OutInterface);
+	if (!ensureAlways(bImplement))
+	{
+		UE_LOG(LogUI,
+		       Log,
+		       TEXT("%s is Null. Does %s implement the interface in Blueprint? If so, Update to support the interface Natively!"),
+		       *UInterfaceClass::StaticClass()->GetName(),
+		       *Outer->GetName());
+	}
+
+	return bImplement;
+}

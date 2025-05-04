@@ -311,17 +311,18 @@ struct AVVMONLINE_API FAVVMLoginContext : public FAVVMNotificationPayload
 };
 
 /**
- *	Class description:
+*	Class description:
  *
- *	UAVVMOnlineInterface abstract project backend microservice.
+ *	UAVVMOnlineIdentityInterface. Abstract the subsystem interfacing with the microservice
+ *	for tracking the player identity, login/logout actions and account modification.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class AVVMONLINE_API UAVVMOnlineInterface : public UInterface
+class AVVMONLINE_API UAVVMOnlineIdentityInterface : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMONLINE_API IAVVMOnlineInterface
+class AVVMONLINE_API IAVVMOnlineIdentityInterface
 {
 	GENERATED_BODY()
 
@@ -346,6 +347,34 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
+	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfiguration& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void ForcePullHostConfiguration(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+};
+
+/**
+*	Class description:
+ *
+ *	UAVVMOnlinePartyInterface. Abstract the subsystem interfacing with the microservice
+ *	for tracking available groups/party/sessions, etc...
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlinePartyInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMONLINE_API IAVVMOnlinePartyInterface
+{
+	GENERATED_BODY()
+
+public:
 	virtual void JoinParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
@@ -370,23 +399,65 @@ public:
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
+};
 
-	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfiguration& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
-	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
-	}
+/**
+*	Class description:
+ *
+ *	UAVVMOnlineChallengesInterface. Abstract the subsystem interfacing with the microservice
+ *	for (Player) Challenges progression.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineChallengesInterface : public UInterface
+{
+	GENERATED_BODY()
+};
 
-	virtual void ForcePullHostConfiguration(FAVVMOnlineResquestDelegate Callback)
-	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
-	}
+class AVVMONLINE_API IAVVMOnlineChallengesInterface
+{
+	GENERATED_BODY()
 
+public:
 	virtual void ClaimChallenge(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullChallenges(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMOnlineBattlePassInterface. Abstract the subsystem interfacing with the microservice
+ *	for Battle Pass progression.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineBattlePassInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMONLINE_API IAVVMOnlineBattlePassInterface
+{
+	GENERATED_BODY()
+
+public:
+	virtual bool CanAccessBattlePass(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		return true;
+	}
+
+	virtual void ClaimBattlePass(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void ForcePullBattlePass(FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}

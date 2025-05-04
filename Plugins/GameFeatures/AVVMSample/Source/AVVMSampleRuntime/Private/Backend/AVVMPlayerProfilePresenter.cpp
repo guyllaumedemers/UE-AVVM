@@ -48,8 +48,8 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_StopPresenter(const 
 
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -75,8 +75,8 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

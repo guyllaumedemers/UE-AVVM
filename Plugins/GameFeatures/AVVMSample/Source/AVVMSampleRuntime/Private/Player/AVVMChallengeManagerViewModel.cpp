@@ -19,10 +19,10 @@
 //SOFTWARE.
 #include "Player/AVVMChallengeManagerViewModel.h"
 
-#include "AVVMOnlineJsonParser.h"
+#include "AVVMOnlineStringParser.h"
 #include "AVVMUtilityFunctionLibrary.h"
 
-void UAVVMChallengeManagerViewModel::SetChallenges(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+void UAVVMChallengeManagerViewModel::SetChallenges(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
                                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(JsonParser);
@@ -35,7 +35,7 @@ void UAVVMChallengeManagerViewModel::SetChallenges(const TScriptInterface<IAVVMO
 	if (StringPayload != nullptr)
 	{
 		TArray<FAVVMRuntimeChallenge> OutResult;
-		JsonParser->FromJson(*StringPayload, OutResult);
+		JsonParser->FromString(*StringPayload, OutResult);
 		UE_MVVM_SET_PROPERTY_VALUE(Challenges, OutResult);
 	}
 }

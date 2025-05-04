@@ -42,8 +42,8 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -74,8 +74,8 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

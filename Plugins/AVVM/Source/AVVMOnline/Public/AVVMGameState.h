@@ -33,7 +33,7 @@
  */
 UCLASS()
 class AVVMONLINE_API AAVVMGameState : public AModularGameState,
-                                      public IAVVMOnlineInterface
+                                      public IAVVMOnlineIdentityInterface
 {
 	GENERATED_BODY()
 };

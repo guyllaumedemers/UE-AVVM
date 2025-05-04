@@ -23,7 +23,7 @@
 
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
-#include "AVVMOnlineJsonParser.h"
+#include "AVVMOnlineStringParser.h"
 #include "MVVMViewModelBase.h"
 
 #include "AVVMPlayerManagerViewModel.generated.h"
@@ -42,7 +42,7 @@ class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerViewModel : public UMVVMViewModelB
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerManagerViewModel"); };
 
-	void SetPlayerConnections(const TScriptInterface<IAVVMOnlineJsonParser>& JsonParser,
+	void SetPlayerConnections(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
 	                          const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:
