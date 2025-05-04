@@ -22,9 +22,11 @@
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMSampleRuntimeModule.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "GameFramework/GameMode.h"
+#include "Kismet/GameplayStatics.h"
 #include "Party/AVVMPartyManagerViewModel.h"
 
 AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
@@ -127,14 +129,13 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 	const bool bShouldKickPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Kick);
 	if (bShouldKickPlayer)
 	{
-		TryKickFromPlayer(PlayerRequest->DestPlayerUniqueNetId);
+		TryKickFromPlayer(*PlayerRequest);
 	}
 
 	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Invite);
 	if (bShouldInvitePlayer)
 	{
-		TryInvitePlayer(PlayerRequest->SrcPlayerUniqueNetId,
-		                PlayerRequest->DestPlayerUniqueNetId);
+		TryInvitePlayer(*PlayerRequest);
 	}
 }
 
@@ -227,8 +228,16 @@ void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSucc
 	}
 }
 
-void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FString& PlayerUniqueNetId)
+void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
+#if UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION
+	const bool bIsHost = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, GetOuterKey());
+	if (!bIsHost)
+	{
+		return;
+	}
+#endif
+
 	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
 	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
@@ -239,7 +248,7 @@ void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FString& PlayerUniqueNe
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted);
 	UE_LOG(LogUI, Log, TEXT("Kick Player from Party Request. In-Progress..."));
-	OnlineInterface->KickFromParty(PlayerUniqueNetId, Callback);
+	OnlineInterface->KickFromParty(PlayerRequest, Callback);
 }
 
 void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWasSuccess,
@@ -265,7 +274,7 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 	}
 }
 
-void UAVVMPartyManagerPresenter::TryInvitePlayer(const FString& SrcUniqueNetId, const FString& DestUniqueNetId)
+void UAVVMPartyManagerPresenter::TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
 	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
@@ -279,7 +288,7 @@ void UAVVMPartyManagerPresenter::TryInvitePlayer(const FString& SrcUniqueNetId, 
 	UE_LOG(LogUI, Log, TEXT("Invite Player to Party Request. In-Progress..."));
 
 	// @gdemers expect the backend to resolve the party id based on the SrcUniqueNetId as he's part of the existing Party.
-	OnlineInterface->InviteInParty(SrcUniqueNetId, DestUniqueNetId, Callback);
+	OnlineInterface->InviteInParty(PlayerRequest, Callback);
 }
 
 void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,

@@ -27,6 +27,8 @@
 
 #include "AVVMPartyManagerPresenter.generated.h"
 
+struct FAVVMPlayerRequest;
+
 /**
  *	Class description:
  *
@@ -78,12 +80,12 @@ protected:
 	void OnPartyExitRequestCompleted(const bool bWasSuccess,
 	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	void TryKickFromPlayer(const FString& UniqueNetId);
+	void TryKickFromPlayer(const FAVVMPlayerRequest& PlayeRequest);
 
 	void OnKickFromPartyRequestCompleted(const bool bWasSuccess,
 	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	void TryInvitePlayer(const FString& SrcUniqueNetId, const FString& DestUniqueNetId);
+	void TryInvitePlayer(const FAVVMPlayerRequest& PlayeRequest);
 
 	void OnInvitePlayerCompleted(const bool bWasSuccess,
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);

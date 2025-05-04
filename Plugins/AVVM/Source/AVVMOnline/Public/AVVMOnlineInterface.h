@@ -279,6 +279,11 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	explicit FAVVMPlayerRequest(const FString& NewSrcPlayerUniqueNetId,
+	                            const FString& NewDestPlayerUniqueNetId,
+	                            const EAVVMPlayerRequestType NewRequestType,
+	                            const FString& NewPayload);
+
 	bool operator==(const FAVVMPlayerRequest& Rhs) const;
 
 	// @gdemers caller.
@@ -392,12 +397,12 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void KickFromParty(const FString& UniqueNetId, FAVVMOnlineResquestDelegate Callback)
+	virtual void KickFromParty(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void InviteInParty(const FString& SrcUniqueNetId, const FString& DestUniqueNetId, FAVVMOnlineResquestDelegate Callback)
+	virtual void InviteInParty(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}

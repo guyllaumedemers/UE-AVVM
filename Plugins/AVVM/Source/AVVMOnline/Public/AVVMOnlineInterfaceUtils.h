@@ -68,6 +68,7 @@ public:
 	                      const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
 
 	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
+	static ULocalPlayer* GetFirstLocalPlayer(const UObject* WorldContextObject);
 
 private:
 	template <typename UInterfaceClass, typename IInterfaceClass>

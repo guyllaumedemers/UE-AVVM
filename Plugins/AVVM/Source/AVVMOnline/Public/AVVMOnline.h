@@ -53,10 +53,13 @@ private:
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
 
-#if !UE_BUILD_SHIPPING
 #if not defined UE_AVVM_DEBUGGER_ENABLED
-#define UE_AVVM_DEBUGGER_ENABLED 1
+#define UE_AVVM_DEBUGGER_ENABLED 0
 #endif
+
+#if !UE_BUILD_SHIPPING
+#define UE_AVVM_DEBUGGER_ENABLED 1
+
 struct FAVVMScopedDebugger
 {
 	FAVVMScopedDebugger() = default;

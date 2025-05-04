@@ -28,3 +28,16 @@
  *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
  *	that would provide boiler plate code support for generic multiplayer-game project architecture.
  */
+
+#if not defined UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED
+#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 0
+#endif
+
+#if !UE_BUILD_SHIPPING
+#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 1
+// @gdemers TODO maybe UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED should be specific to some console arguments
+// being passed to the main executable ?
+#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED
+#else
+#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 1
+#endif

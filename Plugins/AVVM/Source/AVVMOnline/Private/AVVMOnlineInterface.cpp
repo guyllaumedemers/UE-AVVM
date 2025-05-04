@@ -54,6 +54,17 @@ bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
 	return true;
 }
 
+FAVVMPlayerRequest::FAVVMPlayerRequest(const FString& NewSrcPlayerUniqueNetId,
+                                       const FString& NewDestPlayerUniqueNetId,
+                                       const EAVVMPlayerRequestType NewRequestType,
+                                       const FString& NewPayload)
+	: SrcPlayerUniqueNetId(NewSrcPlayerUniqueNetId)
+	, DestPlayerUniqueNetId(NewDestPlayerUniqueNetId)
+	, RequestType(NewRequestType)
+	, Payload(NewPayload)
+{
+}
+
 bool FAVVMPlayerRequest::operator==(const FAVVMPlayerRequest& Rhs) const
 {
 	return true;
