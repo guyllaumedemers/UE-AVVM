@@ -279,6 +279,7 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerRequest() = default;
 	explicit FAVVMPlayerRequest(const FString& NewSrcPlayerUniqueNetId,
 	                            const FString& NewDestPlayerUniqueNetId,
 	                            const EAVVMPlayerRequestType NewRequestType,
