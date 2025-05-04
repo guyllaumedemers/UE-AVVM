@@ -29,15 +29,11 @@
  *	that would provide boiler plate code support for generic multiplayer-game project architecture.
  */
 
-#if not defined UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED
+// @gdemers expect preprocessor to be defined in target.cs, or not!
+#if defined UE_AVVM_EXECUTE_ONLINE_ACTIONS_UNFILTERED 1
 #define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 0
+#else
+#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 1
 #endif
 
-#if !UE_BUILD_SHIPPING
-#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 1
-// @gdemers TODO maybe UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED should be specific to some console arguments
-// being passed to the main executable ?
 #define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED
-#else
-#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 1
-#endif
