@@ -61,4 +61,4 @@ UObject* FAVVMOnlineModule::GetJsonParser()
 	return JsonParser.Get();
 }
 
-IMPLEMENT_MODULE(FAVVMOnlineModule, AVVMOnlineModule)
+IMPLEMENT_MODULE(FAVVMOnlineModule, AVVMOnline)
