@@ -107,7 +107,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	inline static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
+	static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);

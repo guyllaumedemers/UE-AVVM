@@ -61,7 +61,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	inline static UAVVMSubsystem* Get(const UWorld* WorldContext);
+	static UAVVMSubsystem* Get(const UWorld* WorldContext);
 
 	static bool Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context);
 	static UMVVMViewModelBase* Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context);
