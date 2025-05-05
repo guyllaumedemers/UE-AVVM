@@ -61,6 +61,10 @@ public:
 	                                              TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface);
 
 	UFUNCTION(BlueprintCallable)
+	static bool GetOuterOnlineStoreInterface(const UObject* DerivedChild,
+	                                         TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface);
+
+	UFUNCTION(BlueprintCallable)
 	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
 	                                 const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
 

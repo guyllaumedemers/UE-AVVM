@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -20,20 +20,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
+
+#include "AVVM.h"
+#include "AVVMOnlineInterface.h"
+#include "AVVMOnlineStringParser.h"
+#include "AVVMNotificationSubsystem.h"
+#include "MVVMViewModelBase.h"
+
+#include "AVVMStoreViewModel.generated.h"
 
 /**
-*	Plugin Description :
+*	Class description:
  *
- *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
- *	that would provide boiler plate code support for generic multiplayer-game project architecture.
+ *	UAVVMStoreViewModel. View Model class that display backend representation of the store (specific to the local player).
  */
+UCLASS()
+class AVVMSAMPLERUNTIME_API UAVVMStoreViewModel : public UMVVMViewModelBase,
+                                                  public IAVVMViewModelFNameHelper
+{
+	GENERATED_BODY()
 
-// @gdemers expect preprocessor to be defined in target.cs, or not!
-#if defined UE_AVVM_EXECUTE_ONLINE_ACTIONS_UNFILTERED
-#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 0
-#else
-#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 1
-#endif
+public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMStoreViewModel"); };
 
-#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED
+	void SetStoreItems(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TArray<FAVVMRuntimeResource> StoreItems;
+};

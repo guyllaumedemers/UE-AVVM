@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,23 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Backend/AVVMStoreViewModel.h"
 
-#include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
+#include "AVVMUtilityFunctionLibrary.h"
 
-/**
-*	Plugin Description :
- *
- *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
- *	that would provide boiler plate code support for generic multiplayer-game project architecture.
- */
+void UAVVMStoreViewModel::SetStoreItems(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+                                        const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(JsonParser);
+	if (!ensureAlways(bIsValid))
+	{
+		return;
+	}
 
-// @gdemers expect preprocessor to be defined in target.cs, or not!
-#if defined UE_AVVM_EXECUTE_ONLINE_ACTIONS_UNFILTERED
-#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 0
-#else
-#define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 1
-#endif
-
-#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED
+	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
+	if (StringPayload != nullptr)
+	{
+		TArray<FAVVMRuntimeResource> OutResult;
+		JsonParser->FromString(*StringPayload, OutResult);
+		UE_MVVM_SET_PROPERTY_VALUE(StoreItems, OutResult);
+	}
+}

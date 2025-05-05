@@ -21,7 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMStorePresenter.generated.h"
 
@@ -33,7 +35,45 @@
  *	Note : This system specifically exist outside of gameplay. 
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMStorePresenter : public UAVVMPresenter
+class AVVMSAMPLERUNTIME_API UAVVMStorePresenter : public UAVVMPresenter,
+                                                  public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
+
+public:
+	virtual AActor* GetOuterKey() const override;
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ForcePullShopContent(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_SellItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_BuyItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_TradeItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void SetItems(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	virtual void StartPresenting() override;
+	virtual void StopPresenting() override;
+	virtual void BindViewModel() const override;
+
+	void OnForcePullChallengesCompleted(const bool bWasSuccess,
+	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

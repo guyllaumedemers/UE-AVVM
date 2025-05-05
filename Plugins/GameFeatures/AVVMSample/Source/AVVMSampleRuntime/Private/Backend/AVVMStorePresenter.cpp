@@ -18,3 +18,103 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Backend/AVVMStorePresenter.h"
+
+#include "AVVM.h"
+#include "AVVMOnlineInterface.h"
+#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "CommonActivatableWidget.h"
+#include "MVVMViewModelBase.h"
+#include "Backend/AVVMStoreViewModel.h"
+#include "GameFramework/GameMode.h"
+
+AActor* UAVVMStorePresenter::GetOuterKey() const
+{
+	return GetTypedOuter<AGameMode>();
+}
+
+void UAVVMStorePresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UAVVMStorePresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
+}
+
+void UAVVMStorePresenter::BP_OnNotificationReceived_ForcePullShopContent(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMStorePresenter::OnForcePullChallengesCompleted);
+
+	UE_LOG(LogUI, Log, TEXT("Force Pull Store Content Request. In-Progress..."));
+	OnlineInterface->ForcePullShopContent(Callback);
+}
+
+void UAVVMStorePresenter::BP_OnNotificationReceived_SellItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMStorePresenter::BP_OnNotificationReceived_BuyItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMStorePresenter::BP_OnNotificationReceived_TradeItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMStorePresenter::SetItems(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Updating local Items!"));
+
+	auto* StoreViewModel = Cast<UAVVMStoreViewModel>(ViewModel.Get());
+	if (IsValid(StoreViewModel))
+	{
+		StoreViewModel->SetStoreItems(FAVVMOnlineModule::GetJsonParser(), Payload);
+	}
+}
+
+void UAVVMStorePresenter::StartPresenting()
+{
+	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
+	ContextArgs.LayerTag = TargetTag;
+	ContextArgs.WidgetClass = WidgetClass;
+	PushContentToPrimaryGameLayout(this, ContextArgs);
+}
+
+void UAVVMStorePresenter::StopPresenting()
+{
+	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+}
+
+void UAVVMStorePresenter::BindViewModel() const
+{
+	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
+	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+}
+
+void UAVVMStorePresenter::OnForcePullChallengesCompleted(const bool bWasSuccess,
+                                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Force Pull Store Content Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update store items onSuccess
+		SetItems(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}

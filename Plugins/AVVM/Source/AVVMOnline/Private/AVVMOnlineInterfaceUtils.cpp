@@ -64,6 +64,13 @@ bool UAVVMOnlineInterfaceUtils::GetOuterOnlineBattlePassInterface(const UObject*
 	                    IAVVMOnlineBattlePassInterface>(DerivedChild, OutInterface);
 }
 
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(const UObject* DerivedChild,
+                                                             TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineStoreInterface,
+	                    IAVVMOnlineStoreInterface>(DerivedChild, OutInterface);
+}
+
 bool UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(const UObject* WorldContextObject,
                                                      const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
