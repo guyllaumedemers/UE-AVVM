@@ -29,15 +29,14 @@
 /**
  *	Class description:
  *
- *	FAVVMStringPayload encapsulate a json representation for user defined types. When unfold, the
+ *	FAVVMStringPayload encapsulate a string representation for a collection of user defined types. example : TArray<FAVVMPlayerConnections>. When unfold, the
  *	FString returned from backend should resolve like so.
  *
- *	example : TArray<FAVVMParty> Parties = USomeUtilsApi::FromJson(InputStringPayload);
+ *	example : TArray<FAVVMPlayerConnections> PlayerConnections = USomeUtilsApi::FromJson(InputStringPayload);
  *
- *	IMPORTANT : Online Subsystem service should manage forwarding already resolved types. By the time it reach this
- *	system, we should know our type.
- *
- *	Note : Exception being when we manage a collection of a known type!
+ *	IMPORTANT : For single types, the Online Subsystem service should manage forwarding already resolved types. To maintain our system simple,
+ *	a collection types should be resolved at the View Model level when receiving the "erase" type. i.e handled through TInstancedStruct<FAVVMNotificationPayload> which
+ *	would in that case be resolved as such : TInstancedStruct<FAVVMNotificationPayload>()->GetPtr<FAVVMStringPayload>().
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
