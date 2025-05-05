@@ -129,7 +129,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 	const bool bShouldKickPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Kick);
 	if (bShouldKickPlayer)
 	{
-		TryKickFromPlayer(*PlayerRequest);
+		TryKickPlayer(*PlayerRequest);
 	}
 
 	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Invite);
@@ -228,12 +228,13 @@ void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSucc
 	}
 }
 
-void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FAVVMPlayerRequest& PlayerRequest)
+void UAVVMPartyManagerPresenter::TryKickPlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 #if UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION
-	const bool bIsHost = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, GetOuterKey());
-	if (!bIsHost)
+	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, GetOuterKey());
+	if (!bIsFirstPlayerHosting)
 	{
+		UE_LOG(LogUI, Log, TEXT("Try Kick Player Request. Failure! Only the Owner of the Party can kick a player!"));
 		return;
 	}
 #endif
@@ -254,7 +255,7 @@ void UAVVMPartyManagerPresenter::TryKickFromPlayer(const FAVVMPlayerRequest& Pla
 void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWasSuccess,
                                                                  const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Kick Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogUI, Log, TEXT("Kick Player from Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update parties onSuccess

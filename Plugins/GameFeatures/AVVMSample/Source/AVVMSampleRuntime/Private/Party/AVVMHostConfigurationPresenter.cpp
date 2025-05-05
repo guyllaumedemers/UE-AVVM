@@ -43,21 +43,21 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
-	if (!ensure(bIsValid))
-	{
-		return;
-	}
-
 #if UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION
-	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, OnlineInterface);
+	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, GetOuterKey());
 	if (!bIsFirstPlayerHosting)
 	{
 		UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request. Failure! Only the Owner of the Party can update the Host configuration!"));
 		return;
 	}
 #endif
+
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted);
