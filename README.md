@@ -27,7 +27,7 @@ Note : Cheats are really how this system will be tested and build upon. Resource
 
 ##### Tip
 
-Check **AVVMSample** plugin, under **GameFeaturePlugin**, for details about the project architecture! Also, a quick look at **Modules** default scripts might save your some headache!
+Check **AVVMSample** plugin, under **GameFeaturePlugin**, for details about the project architecture! Also, a quick look at **Modules** default scripts might save you some headache!
 
 ### UE-Miro
 
