@@ -61,14 +61,68 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_ForcePullShopContent(const T
 
 void UAVVMStorePresenter::BP_OnNotificationReceived_SellItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMStorePresenter::OnSellItemCompleted);
+
+	const auto* Resource = Payload.GetPtr<FAVVMRuntimeResource>();
+	if (!ensure(Resource != nullptr))
+	{
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("Sell Item Request. In-Progress..."));
+	OnlineInterface->SellItem(*Resource, Callback);
 }
 
 void UAVVMStorePresenter::BP_OnNotificationReceived_BuyItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMStorePresenter::OnBuyItemCompleted);
+
+	const auto* Resource = Payload.GetPtr<FAVVMRuntimeResource>();
+	if (!ensure(Resource != nullptr))
+	{
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("Buy Item Request. In-Progress..."));
+	OnlineInterface->BuyItem(*Resource, Callback);
 }
 
 void UAVVMStorePresenter::BP_OnNotificationReceived_TradeItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMStorePresenter::OnTradeItemCompleted);
+
+	const auto* PlayerRequest = Payload.GetPtr<FAVVMPlayerRequest>();
+	if (!ensure(PlayerRequest != nullptr))
+	{
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("Starting Trade Request. In-Progress..."));
+	OnlineInterface->TradeItem(*PlayerRequest, Callback);
 }
 
 void UAVVMStorePresenter::SetItems(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -110,6 +164,57 @@ void UAVVMStorePresenter::OnForcePullChallengesCompleted(const bool bWasSuccess,
 		// @gdemers update store items onSuccess
 		SetItems(Payload);
 
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMStorePresenter::OnSellItemCompleted(const bool bWasSuccess,
+                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Sell Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update store items onSuccess
+		SetItems(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMStorePresenter::OnBuyItemCompleted(const bool bWasSuccess,
+                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Buy Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers update store items onSuccess
+		SetItems(Payload);
+
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMStorePresenter::OnTradeItemCompleted(const bool bWasSuccess,
+                                               const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Trade Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
 		// @gdemers run any additional behaviour here!
 		BP_OnRequestSuccess(Payload);
 	}

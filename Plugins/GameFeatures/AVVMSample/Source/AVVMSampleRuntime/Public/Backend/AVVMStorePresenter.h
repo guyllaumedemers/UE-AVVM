@@ -71,6 +71,15 @@ protected:
 	void OnForcePullChallengesCompleted(const bool bWasSuccess,
 	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	void OnSellItemCompleted(const bool bWasSuccess,
+	                         const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void OnBuyItemCompleted(const bool bWasSuccess,
+	                        const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void OnTradeItemCompleted(const bool bWasSuccess,
+	                          const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
