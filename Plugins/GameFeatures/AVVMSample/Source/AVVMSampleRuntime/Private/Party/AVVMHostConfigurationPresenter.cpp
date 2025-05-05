@@ -22,6 +22,7 @@
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMSampleRuntimeModule.h"
 #include "GameFramework/GameMode.h"
 #include "Party/AVVMHostConfigurationViewModel.h"
 
@@ -49,12 +50,14 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 		return;
 	}
 
+#if UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION
 	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, OnlineInterface);
 	if (!bIsFirstPlayerHosting)
 	{
 		UE_LOG(LogUI, Log, TEXT("Commit Modified Host Configuration Request. Failure! Only the Owner of the Party can update the Host configuration!"));
 		return;
 	}
+#endif
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted);
