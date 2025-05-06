@@ -1,46 +1,50 @@
 ﻿{
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "1.0",
-	"FriendlyName": "AVVM",
-	"Description": "Actor View ViewModel",
-	"Category": "Other",
-	"CreatedBy": "@gdemers",
-	"CreatedByURL": "",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
-	"Modules": [
-		{
-			"Name": "AVVM",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "AVVMOnline",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "CommonUI",
-			"Enabled": true
-		},
-		{
-			"Name": "DataRegistry",
-			"Enabled": true
-		},
-		{
-			"Name": "ModelViewViewModel",
-			"Enabled": true
-		},
-		{
-			"Name": "StructUtils",
-			"Enabled": true
-		}
-	]
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "AVVM",
+  "Description": "Actor View ViewModel",
+  "Category": "Other",
+  "CreatedBy": "@gdemers",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "AVVM",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "AVVMOnline",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "CommonUI",
+      "Enabled": true
+    },
+    {
+      "Name": "DataRegistry",
+      "Enabled": true
+    },
+    {
+      "Name": "ImGui",
+      "Enabled": true
+    },
+    {
+      "Name": "ModelViewViewModel",
+      "Enabled": true
+    },
+    {
+      "Name": "StructUtils",
+      "Enabled": true
+    }
+  ]
 }
