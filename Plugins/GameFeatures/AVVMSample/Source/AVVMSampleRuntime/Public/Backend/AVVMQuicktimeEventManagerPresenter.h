@@ -23,6 +23,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMUIExtensionInterface.h"
+#include "UIExtensionSystem.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -59,4 +60,9 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+
+	void ClearHandles();
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<FGameplayTag, FUIExtensionHandle> ExtensionHandles;
 };
