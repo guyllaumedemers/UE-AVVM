@@ -20,13 +20,15 @@
 #include "AVVMPrimaryGameLayoutInterface.h"
 
 #include "AVVM.h"
+#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "PrimaryGameLayout.h"
 
 void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
 {
-	if (!IsValid(Outer))
+	ULocalPlayer* FirstLocalPlayer = UAVVMOnlineInterfaceUtils::GetFirstLocalPlayer(Outer);
+	if (!IsValid(FirstLocalPlayer))
 	{
 		return;
 	}
@@ -49,7 +51,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 		}
 	};
 
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(Outer);
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(FirstLocalPlayer);
 	if (ensure(IsValid(GameLayout)))
 	{
 		GameLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(ContextArgs.LayerTag,
@@ -62,12 +64,13 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObject* Outer,
                                                                       UCommonActivatableWidget* Target)
 {
-	if (!IsValid(Outer))
+	ULocalPlayer* FirstLocalPlayer = UAVVMOnlineInterfaceUtils::GetFirstLocalPlayer(Outer);
+	if (!IsValid(FirstLocalPlayer))
 	{
 		return;
 	}
 
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(Outer);
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(FirstLocalPlayer);
 	if (ensure(IsValid(GameLayout)))
 	{
 		GameLayout->FindAndRemoveWidgetFromLayer(Target);
