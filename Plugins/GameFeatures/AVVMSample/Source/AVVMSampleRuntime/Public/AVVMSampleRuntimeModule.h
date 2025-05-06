@@ -29,7 +29,7 @@
  *	that would provide boiler plate code support for generic multiplayer-game project architecture.
  */
 
-// @gdemers expect preprocessor to be defined in target.cs, or not!
+// @gdemers expect preprocessor to be defined in build.cs, or not!
 #if defined UE_AVVM_EXECUTE_ONLINE_ACTIONS_UNFILTERED
 #define UE_AVVM_ONLINE_REQUEST_BRANCHING_ENABLED 0
 #else
