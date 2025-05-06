@@ -29,6 +29,10 @@ Note : Cheats are really how this system will be tested and build upon. Resource
 
 Check **AVVMSample** plugin, under **GameFeaturePlugin**, for details about the project architecture! Also, a quick look at **Modules** default scripts might save you some headache!
 
+##### Warnings
+
+ImGui plugin was added as a submodule, so it likely that any deprecation fixes made locally aren't commited to the following project. Those changes are minimal enough to keep it as such and not have to fork the existing plugin to address them on the local copy.
+
 ### UE-Miro
 
 [GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267) - UGameFeatureData are name dependent. UGameFeaturePluginStateMachine cannot register/load/activate unless it's named identical to the GameFeature plugin it represent.
