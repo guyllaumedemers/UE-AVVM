@@ -26,6 +26,11 @@
 
 void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
 {
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
 	const auto Callback = [Caller = TScriptInterface<IAVVMPrimaryGameLayoutInterface>(Outer)](EAsyncWidgetLayerState State,
 	                                                                                          UCommonActivatableWidget* ActivatableWidget)
 	{
@@ -57,6 +62,11 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObject* Outer,
                                                                       UCommonActivatableWidget* Target)
 {
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
 	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(Outer);
 	if (ensure(IsValid(GameLayout)))
 	{
