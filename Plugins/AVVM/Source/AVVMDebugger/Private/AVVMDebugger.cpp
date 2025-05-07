@@ -20,6 +20,7 @@
 
 #include "AVVMDebugger.h"
 
+#include "AVVMDebuggerInputHandler.h"
 #include "ImGuiDelegates.h"
 #include "ImGuiModule.h"
 #include "Engine/GameInstance.h"
@@ -69,11 +70,17 @@ void FAVVMDebuggerModule::StartupModule()
 	// Even if they exposed a set of Delegates to their api, it cannot be bound to in the Startup function due to the call to Utilities::GetWorldContextIndex
 	// returning INVALID_INDEX and FImGuiDelegatesContainer::WorldDebugDelegates.FindOrAdd failing to find a valid Key. (all due to the World not being yet created!)
 	GameInstanceDelegateHandle = FWorldDelegates::OnStartGameInstance.AddRaw(this, &FAVVMDebuggerModule::OnStartGameInstance);
+	PIEStartDelegateHandle = FWorldDelegates::OnPIEStarted.AddRaw(this, &FAVVMDebuggerModule::OnPIEStart);
+	PIEEndDelegateHandle = FWorldDelegates::OnPIEEnded.AddRaw(this, &FAVVMDebuggerModule::OnPIEEnd);
 }
 
 void FAVVMDebuggerModule::ShutdownModule()
 {
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceDelegateHandle);
+	FWorldDelegates::OnPIEStarted.Remove(PIEStartDelegateHandle);
+	FWorldDelegates::OnPIEEnded.Remove(PIEEndDelegateHandle);
+	ClearImGuiDelegates();
+	ClearInputHandler();
 }
 
 FAVVMDebuggerModule& FAVVMDebuggerModule::Get()
@@ -93,7 +100,20 @@ FAVVMImGuiDebugContext& FAVVMDebuggerModule::GetDebuggerContext()
 
 void FAVVMDebuggerModule::OnStartGameInstance(UGameInstance* Game)
 {
+	CreateInputHandler();
 	RegisterImGuiDelegates();
+}
+
+void FAVVMDebuggerModule::OnPIEStart(UGameInstance* Game)
+{
+	CreateInputHandler();
+	RegisterImGuiDelegates();
+}
+
+void FAVVMDebuggerModule::OnPIEEnd(UGameInstance* Game)
+{
+	ClearInputHandler();
+	ClearImGuiDelegates();
 }
 
 void FAVVMDebuggerModule::RegisterImGuiDelegates()
@@ -113,6 +133,30 @@ void FAVVMDebuggerModule::RegisterImGuiDelegates()
 void FAVVMDebuggerModule::ClearImGuiDelegates()
 {
 	FImGuiDelegates::OnWorldEarlyDebug().Remove(ImGuiDelegateHandle);
+}
+
+void FAVVMDebuggerModule::CreateInputHandler()
+{
+	UAVVMDebuggerInputHandler* Target = InputHandler.Get();
+	if (!IsValid(Target))
+	{
+		Target = NewObject<UAVVMDebuggerInputHandler>(GEngine, UAVVMDebuggerInputHandler::StaticClass() /*Should be fetched from Project Settings*/);
+		InputHandler = TStrongObjectPtr<UAVVMDebuggerInputHandler>(Target);
+	}
+
+	if (ensureAlways(IsValid(Target)))
+	{
+		Target->SafeBegin();
+	}
+}
+
+void FAVVMDebuggerModule::ClearInputHandler()
+{
+	UAVVMDebuggerInputHandler* Target = InputHandler.Get();
+	if (ensureAlways(IsValid(Target)))
+	{
+		Target->SafeEnd();
+	}
 }
 
 void FAVVMDebuggerModule::OnWorldDrawDebug()

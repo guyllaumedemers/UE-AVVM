@@ -27,6 +27,7 @@
 
 #include "AVVMDebugger.generated.h"
 
+class UAVVMDebuggerInputHandler;
 class UGameInstance;
 
 /**
@@ -103,13 +104,21 @@ public:
 
 private:
 	void OnStartGameInstance(UGameInstance* Game);
+	void OnPIEStart(UGameInstance* Game);
+	void OnPIEEnd(UGameInstance* Game);
 	void RegisterImGuiDelegates();
 	void ClearImGuiDelegates();
+	void CreateInputHandler();
+	void ClearInputHandler();
 	// @gdemers imgui is a Immediate mode rendering library which render on tick
 	// as such, application tick will execute this call which we can use to render our ImGui Context Class
 	void OnWorldDrawDebug();
 
+	TStrongObjectPtr<UAVVMDebuggerInputHandler> InputHandler = nullptr;
+
 	FAVVMImGuiDebugContext DebugContext;
 	FDelegateHandle GameInstanceDelegateHandle;
+	FDelegateHandle PIEStartDelegateHandle;
+	FDelegateHandle PIEEndDelegateHandle;
 	FDelegateHandle ImGuiDelegateHandle;
 };

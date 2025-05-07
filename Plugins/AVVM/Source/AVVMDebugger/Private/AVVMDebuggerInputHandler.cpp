@@ -34,19 +34,32 @@ void FAVVMDebuggerInputPreprocessor::Tick(const float DeltaTime,
 	// so an implementation is required!
 }
 
-bool FAVVMDebuggerInputPreprocessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+bool FAVVMDebuggerInputPreprocessor::HandleKeyDownEvent(FSlateApplication& SlateApp,
+                                                        const FKeyEvent& InKeyEvent)
 {
 	return false;
 }
 
 void UAVVMDebuggerInputHandler::SafeBegin()
 {
-	DebuggerPreprocessor = MakeShared<FAVVMDebuggerInputPreprocessor>();
-	DebuggerPreprocessor->RegisterKeys(Keys);
-	ensureAlways(FSlateApplication::Get().RegisterInputPreProcessor(DebuggerPreprocessor));
+	if (!DebuggerPreprocessor.IsValid())
+	{
+		DebuggerPreprocessor = MakeShared<FAVVMDebuggerInputPreprocessor>();
+		DebuggerPreprocessor->RegisterKeys(Keys);
+	}
+
+	const int32 SearchResult = FSlateApplication::Get().FindInputPreProcessor(DebuggerPreprocessor, EInputPreProcessorType::Game);
+	if (SearchResult == INDEX_NONE)
+	{
+		ensureAlways(FSlateApplication::Get().RegisterInputPreProcessor(DebuggerPreprocessor));
+	}
 }
 
 void UAVVMDebuggerInputHandler::SafeEnd()
 {
-	FSlateApplication::Get().UnregisterInputPreProcessor(DebuggerPreprocessor);
+	if (DebuggerPreprocessor.IsValid())
+	{
+		FSlateApplication::Get().UnregisterInputPreProcessor(DebuggerPreprocessor);
+		DebuggerPreprocessor.Reset();
+	}
 }
