@@ -29,11 +29,13 @@
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this, GetDescriptors());
 }
 
 void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
+	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
 	ClearAllStreamableHandle();
 	ClearAllRequests();
 }

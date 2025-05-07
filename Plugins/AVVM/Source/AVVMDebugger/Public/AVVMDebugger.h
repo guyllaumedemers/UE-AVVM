@@ -21,40 +21,100 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
+#include "Modules/ModuleManager.h"
 #include "ImGuiModuleProperties.h"
+
+#include "AVVMDebugger.generated.h"
 
 class UGameInstance;
 
 /**
  *	Class Description :
  *
- *	FAVVMImGuiDebuggerContext represent the Context Object which will manage drawing our debugger.
+ *	FAVVMImGuiDescriptorItem define a singular entry in a ImGui Slot.
  */
-struct FAVVMImGuiDebuggerContext
+USTRUCT(BlueprintType)
+struct AVVMDEBUGGER_API FAVVMImGuiDescriptorItem
 {
-	FAVVMImGuiDebuggerContext() = default;
-	FAVVMImGuiDebuggerContext(FImGuiModuleProperties& InProperties);
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FString Label = FString();
+
+	// @gdemers TODO define the expected properties for the Descriptor item. Has to be flexible enough to not have to define ImGui types.
+	// support types incovation call that return bool or void and execute callbacks on interaction.
+};
+
+/**
+*	Class description:
+*
+*	UAVVMImGuiDescriptor. Expose the required interface to register/build advanced menus using ImGui.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMDEBUGGER_API UAVVMImGuiDescriptor : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMDEBUGGER_API IAVVMImGuiDescriptor
+{
+	GENERATED_BODY()
+
+public:
+	virtual bool Begin() const PURE_VIRTUAL(Begin, return false;);
+	virtual void End() const PURE_VIRTUAL(End, return;);
+
+protected:
+	virtual TArray<FAVVMImGuiDescriptorItem> GetDescriptors() const PURE_VIRTUAL(GetDescriptors, return TArray<FAVVMImGuiDescriptorItem>(););
+};
+
+/**
+ *	Class Description :
+ *
+ *	FAVVMImGuiDebugContext represent the Context Object which draw our debugger.
+ */
+struct AVVMDEBUGGER_API FAVVMImGuiDebugContext
+{
+	FAVVMImGuiDebugContext() = default;
+	FAVVMImGuiDebugContext(FImGuiModuleProperties& InProperties);
+
+	void AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor, const TArray<FAVVMImGuiDescriptorItem>& Items);
+	void RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor);
 	void Draw();
 
 private:
+	// @gdemers imgui properties handling inputs and demo
 	FImGuiModuleProperties* Properties = nullptr;
 
 	/**
 	 *	Class Description :
 	 *
-	 *	FAVVMImGuiDebuggerProperties define a set of properties that work along the existing FImGuiModuleProperties. This separation
+	 *	FAVVMImGuiDebugProperties define a set of properties that work along the existing FImGuiModuleProperties. This separation
 	 *	is to facilitate handling of both system as we most-likely don't want possible overlap to happen while running our plugin.
 	 */
-	struct FAVVMImGuiDebuggerProperties
+	struct FAVVMImGuiDebugProperties
 	{
-		bool CanPresent(FImGuiModuleProperties* ImGuiProperties) const { return (ImGuiProperties != nullptr) && !ImGuiProperties->ShowDemo() && bShowAVVMDebugger; };
-		bool bShowAVVMDebugger = false;
+		bool CanPresent(const FImGuiModuleProperties* ImGuiProperties) const { return (ImGuiProperties != nullptr) && !ImGuiProperties->ShowDemo() && bShowDebugContext; };
+		bool bShowDebugContext = false;
 	};
 
-	// @gdemers instance properties
-	FAVVMImGuiDebuggerProperties CustomProperties;
+	/**
+	 *	Class Description :
+	 *
+	 *	FAVVMImGuiDescriptorCollection works around TMap constraint with storing KVP collection types.
+	 */
+	struct FAVVMImGuiDescriptorCollection
+	{
+		TArray<FAVVMImGuiDescriptorItem> Items;
+	};
+
+	// @gdemers plugin properties.
+	FAVVMImGuiDebugProperties CustomProperties;
+
+	// @gdemers collection type of whats to be rendered in immediate mode.
+	typedef TMap<TScriptInterface<IAVVMImGuiDescriptor>, FAVVMImGuiDescriptorCollection> FAVVMDescriptorCollection;
+	FAVVMDescriptorCollection Descriptors;
 };
 
 /**
@@ -69,16 +129,40 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	AVVMDEBUGGER_API static FAVVMDebuggerModule& Get();
+	AVVMDEBUGGER_API static bool IsAvailable();
+	AVVMDEBUGGER_API FAVVMImGuiDebugContext& GetDebuggerContext();
+
 private:
 	void OnStartGameInstance(UGameInstance* Game);
 	void RegisterImGuiDelegates();
 	void ClearImGuiDelegates();
 	// @gdemers imgui is a Immediate mode rendering library which render on tick
-	// as such, application tick will execute this call which we can use to render our slate
-	// widget.
+	// as such, application tick will execute this call which we can use to render our ImGui Context Class
 	void OnWorldDrawDebug();
 
-	FAVVMImGuiDebuggerContext AVVMDebuggerContext;
+	FAVVMImGuiDebugContext DebugContext;
 	FDelegateHandle GameInstanceDelegateHandle;
 	FDelegateHandle ImGuiDelegateHandle;
+};
+
+/**
+ *	Class Description :
+ *
+ *	FAVVMScopedDescriptor process descriptor items as a group. [it's just a Test atm!]
+ */
+USTRUCT(BlueprintType)
+struct AVVMDEBUGGER_API FAVVMScopedDescriptor
+{
+	GENERATED_BODY()
+
+	FAVVMScopedDescriptor() = default;
+
+	FAVVMScopedDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor,
+	                      const TArray<FAVVMImGuiDescriptorItem>& Items);
+
+	~FAVVMScopedDescriptor();
+
+	FSimpleDelegate OnScopeExited;
+	bool bShouldEnd = false;
 };

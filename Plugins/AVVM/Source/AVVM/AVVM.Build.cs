@@ -29,6 +29,7 @@ public class AVVM : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMDebugger",
 				"CommonUI",
 				"Core",
 				"CoreUObject",
@@ -39,7 +40,7 @@ public class AVVM : ModuleRules
 				"GameplayTags",
 				"ModelViewViewModel",
 				"StructUtils",
-				"UMG"
+				"UMG",
 			});
 
 

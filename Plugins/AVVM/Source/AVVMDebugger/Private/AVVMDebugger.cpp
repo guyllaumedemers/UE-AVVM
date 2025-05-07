@@ -24,21 +24,43 @@
 #include "ImGuiModule.h"
 #include "Engine/GameInstance.h"
 
-FAVVMImGuiDebuggerContext::FAVVMImGuiDebuggerContext(FImGuiModuleProperties& InProperties)
+FAVVMImGuiDebugContext::FAVVMImGuiDebugContext(FImGuiModuleProperties& InProperties)
 {
 	Properties = &InProperties;
 }
 
-void FAVVMImGuiDebuggerContext::Draw()
+void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor,
+                                           const TArray<FAVVMImGuiDescriptorItem>& Items)
 {
-	const bool bCanShowDebugger = CustomProperties.CanPresent(Properties);
-	if (!bCanShowDebugger)
+	FAVVMImGuiDescriptorCollection& OutCollection = Descriptors.Add(Descriptor);
+	OutCollection = {Items};
+}
+
+void FAVVMImGuiDebugContext::RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
+{
+	Descriptors.Remove(Descriptor);
+}
+
+void FAVVMImGuiDebugContext::Draw()
+{
+	const bool bCanDraw = CustomProperties.CanPresent(Properties);
+	if (!bCanDraw)
 	{
 		return;
 	}
 
+	for (auto Iterator = Descriptors.CreateIterator(); Iterator; ++Iterator)
 	{
-		ImGui::Text("Hello, world!");
+		UObject* Descriptor = Iterator.Key().GetObject();
+		if (IsValid(Descriptor))
+		{
+			const FAVVMImGuiDescriptorCollection& Collection = Iterator.Value();
+			FAVVMScopedDescriptor ScopedImGui(Descriptor, Collection.Items);
+		}
+		else
+		{
+			Iterator.RemoveCurrent();
+		}
 	}
 }
 
@@ -57,6 +79,21 @@ void FAVVMDebuggerModule::ShutdownModule()
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceDelegateHandle);
 }
 
+FAVVMDebuggerModule& FAVVMDebuggerModule::Get()
+{
+	return FModuleManager::LoadModuleChecked<FAVVMDebuggerModule>("AVVMDebugger");
+}
+
+bool FAVVMDebuggerModule::IsAvailable()
+{
+	return FModuleManager::Get().IsModuleLoaded("AVVMDebugger");
+}
+
+FAVVMImGuiDebugContext& FAVVMDebuggerModule::GetDebuggerContext()
+{
+	return DebugContext;
+}
+
 void FAVVMDebuggerModule::OnStartGameInstance(UGameInstance* Game)
 {
 	RegisterImGuiDelegates();
@@ -72,7 +109,7 @@ void FAVVMDebuggerModule::RegisterImGuiDelegates()
 	const bool bIsAvailable = FImGuiModule::IsAvailable();
 	if (bIsAvailable)
 	{
-		AVVMDebuggerContext = FAVVMImGuiDebuggerContext(FImGuiModule::Get().GetProperties());
+		DebugContext = FAVVMImGuiDebugContext(FImGuiModule::Get().GetProperties());
 	}
 }
 
@@ -83,7 +120,32 @@ void FAVVMDebuggerModule::ClearImGuiDelegates()
 
 void FAVVMDebuggerModule::OnWorldDrawDebug()
 {
-	AVVMDebuggerContext.Draw();
+	DebugContext.Draw();
+}
+
+FAVVMScopedDescriptor::FAVVMScopedDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor,
+                                             const TArray<FAVVMImGuiDescriptorItem>& Items)
+{
+	if (!ensure(IsValid(Descriptor.GetObject()) && Descriptor.GetInterface() != nullptr))
+	{
+		return;
+	}
+
+	OnScopeExited.BindWeakLambda(Descriptor.GetObject(), [Descriptor]() { Descriptor->End(); });
+
+	bShouldEnd = Descriptor->Begin();
+	if (bShouldEnd)
+	{
+		// @gdemers TODO Find a proper approach to defining ImGui elements with a Scope type.
+	}
+}
+
+FAVVMScopedDescriptor::~FAVVMScopedDescriptor()
+{
+	if (bShouldEnd)
+	{
+		OnScopeExited.ExecuteIfBound();
+	}
 }
 
 IMPLEMENT_MODULE(FAVVMDebuggerModule, AVVMDebugger)

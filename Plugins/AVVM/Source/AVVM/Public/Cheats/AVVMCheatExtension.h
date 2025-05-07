@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMCheatData.h"
+#include "AVVMDebugger.h"
 #include "DataRegistryTypes.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
@@ -38,7 +39,8 @@
  *	interface with the UAVVMPresenter Model to "inject" stub data to derive types.
  */
 UCLASS(BlueprintType)
-class AVVM_API UAVVMCheatExtension : public UCheatManagerExtension
+class AVVM_API UAVVMCheatExtension : public UCheatManagerExtension,
+                                     public IAVVMImGuiDescriptor
 {
 	GENERATED_BODY()
 
