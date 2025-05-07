@@ -17,38 +17,36 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AVVMDebuggerInputHandler.h"
 
-using UnrealBuildTool;
+#include "Application/SlateApplicationBase.h"
 
-public class AVVMDebugger : ModuleRules
+void FAVVMDebuggerInputPreprocessor::RegisterKeys(const TArray<FKey>& NewKeys)
 {
-	public AVVMDebugger(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	Keys = NewKeys;
+}
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"ApplicationCore",
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"ImGui",
-				"InputCore",
-				"Slate",
-				"SlateCore"
-			}
-		);
+void FAVVMDebuggerInputPreprocessor::Tick(const float DeltaTime,
+                                          FSlateApplication& SlateApp,
+                                          TSharedRef<ICursor> Cursor)
+{
+	// @gdemers we dont care about tick but the function is pure virtual in IInputProcessor
+	// so an implementation is required!
+}
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
+bool FAVVMDebuggerInputPreprocessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+	return false;
+}
 
-		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
-		);
-	}
+void UAVVMDebuggerInputHandler::SafeBegin()
+{
+	DebuggerPreprocessor = MakeShared<FAVVMDebuggerInputPreprocessor>();
+	DebuggerPreprocessor->RegisterKeys(Keys);
+	ensureAlways(FSlateApplication::Get().RegisterInputPreProcessor(DebuggerPreprocessor));
+}
+
+void UAVVMDebuggerInputHandler::SafeEnd()
+{
+	FSlateApplication::Get().UnregisterInputPreProcessor(DebuggerPreprocessor);
 }
