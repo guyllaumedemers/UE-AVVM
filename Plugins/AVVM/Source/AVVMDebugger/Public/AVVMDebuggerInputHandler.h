@@ -40,6 +40,8 @@ public:
 	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
 	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 
+	FSimpleDelegate OnToggleDebuggerContext;
+
 protected:
 	TArray<FKey> Keys;
 };
@@ -49,14 +51,15 @@ protected:
  *
  *	UAVVMDebuggerInputHandler represent the Context Object which handle invoking our debugger.
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class AVVMDEBUGGER_API UAVVMDebuggerInputHandler : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	void SafeBegin();
+	void SafeBegin(const FSimpleDelegate& PreprocessorCallback);
 	void SafeEnd();
+	TSharedPtr<FAVVMDebuggerInputPreprocessor> GetPreprocessor() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

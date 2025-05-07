@@ -31,6 +31,18 @@ FAVVMImGuiDebugContext::FAVVMImGuiDebugContext(FImGuiModuleProperties& InPropert
 	Properties = &InProperties;
 }
 
+FAVVMImGuiDebugContext::~FAVVMImGuiDebugContext()
+{
+	if (Properties != nullptr)
+	{
+		// @gdemers PIE End events aren't used which make any Clear call invalid between
+		// sessions. FImGuiModule::GetProperties don't have a reset function and persist between
+		// PIE session. Manual handling is required.
+		Properties->SetInputEnabled(false);
+		Properties->SetShowDemo(false);
+	}
+}
+
 void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
 	Descriptors.Add(Descriptor);
@@ -61,6 +73,21 @@ void FAVVMImGuiDebugContext::Draw()
 			Iterator.RemoveCurrent();
 		}
 	}
+}
+
+void FAVVMImGuiDebugContext::ToggleDebugger()
+{
+	bool bIsInputEnabled = false;
+	if (Properties != nullptr)
+	{
+		bIsInputEnabled = Properties->IsInputEnabled();
+		// @gdemers we never want the debug context to be active when opening
+		// this doesnt prevent invoking it when the input are already enabled, just
+		// being open on Input value Changed.
+		Properties->SetShowDemo(false);
+	}
+
+	CustomProperties.bShowDebugContext = bIsInputEnabled;
 }
 
 void FAVVMDebuggerModule::StartupModule()
@@ -121,7 +148,7 @@ void FAVVMDebuggerModule::RegisterImGuiDelegates()
 {
 	if (!ImGuiDelegateHandle.IsValid())
 	{
-		ImGuiDelegateHandle = FImGuiDelegates::OnWorldEarlyDebug().AddRaw(this, &FAVVMDebuggerModule::OnWorldDrawDebug);
+		ImGuiDelegateHandle = FImGuiDelegates::OnMultiContextDebug().AddRaw(this, &FAVVMDebuggerModule::OnMultiContextDebug);
 	}
 
 	const bool bIsAvailable = FImGuiModule::IsAvailable();
@@ -133,7 +160,7 @@ void FAVVMDebuggerModule::RegisterImGuiDelegates()
 
 void FAVVMDebuggerModule::ClearImGuiDelegates()
 {
-	FImGuiDelegates::OnWorldEarlyDebug().Remove(ImGuiDelegateHandle);
+	FImGuiDelegates::OnMultiContextDebug().Remove(ImGuiDelegateHandle);
 }
 
 void FAVVMDebuggerModule::CreateInputHandler()
@@ -147,7 +174,7 @@ void FAVVMDebuggerModule::CreateInputHandler()
 
 	if (ensureAlways(IsValid(Target)))
 	{
-		Target->SafeBegin();
+		Target->SafeBegin(FSimpleDelegate::CreateRaw(this, &FAVVMDebuggerModule::OnToggleDebugContext));
 	}
 }
 
@@ -158,11 +185,23 @@ void FAVVMDebuggerModule::ClearInputHandler()
 	{
 		Target->SafeEnd();
 	}
+
+	const bool bIsAvailable = FImGuiModule::IsAvailable();
+	if (bIsAvailable)
+	{
+		DebugContext = FAVVMImGuiDebugContext();
+	}
 }
 
-void FAVVMDebuggerModule::OnWorldDrawDebug()
+void FAVVMDebuggerModule::OnMultiContextDebug()
 {
 	DebugContext.Draw();
+}
+
+void FAVVMDebuggerModule::OnToggleDebugContext()
+{
+	FImGuiModule::Get().GetProperties().ToggleInput();
+	DebugContext.ToggleDebugger();
 }
 
 IMPLEMENT_MODULE(FAVVMDebuggerModule, AVVMDebugger)

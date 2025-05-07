@@ -58,10 +58,12 @@ struct AVVMDEBUGGER_API FAVVMImGuiDebugContext
 {
 	FAVVMImGuiDebugContext() = default;
 	FAVVMImGuiDebugContext(FImGuiModuleProperties& InProperties);
+	~FAVVMImGuiDebugContext();
 
 	void AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor);
 	void RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor);
 	void Draw();
+	void ToggleDebugger();
 
 private:
 	// @gdemers imgui properties handling inputs and demo
@@ -112,7 +114,8 @@ private:
 	void ClearInputHandler();
 	// @gdemers imgui is a Immediate mode rendering library which render on tick
 	// as such, application tick will execute this call which we can use to render our ImGui Context Class
-	void OnWorldDrawDebug();
+	void OnMultiContextDebug();
+	void OnToggleDebugContext();
 
 	// @gdemers the purpose of this input handler workaround issue created by the ImGuiInputHandler.
 	// Problem : Until you invoke from console the ToggleInput cheat, the visibility state of the SImGuiWidget won't be set 'Visible'

@@ -37,10 +37,21 @@ void FAVVMDebuggerInputPreprocessor::Tick(const float DeltaTime,
 bool FAVVMDebuggerInputPreprocessor::HandleKeyDownEvent(FSlateApplication& SlateApp,
                                                         const FKeyEvent& InKeyEvent)
 {
-	return false;
+	const FKey* SearchResult = Keys.FindByPredicate([OsKey = InKeyEvent.GetKey()](const FKey& Key)
+	{
+		return Key == OsKey;
+	});
+
+	const bool bFoundResult = (SearchResult != nullptr);
+	if (bFoundResult)
+	{
+		OnToggleDebuggerContext.ExecuteIfBound();
+	}
+
+	return bFoundResult;
 }
 
-void UAVVMDebuggerInputHandler::SafeBegin()
+void UAVVMDebuggerInputHandler::SafeBegin(const FSimpleDelegate& PreprocessorCallback)
 {
 	if (!DebuggerPreprocessor.IsValid())
 	{
@@ -49,8 +60,9 @@ void UAVVMDebuggerInputHandler::SafeBegin()
 	}
 
 	const int32 SearchResult = FSlateApplication::Get().FindInputPreProcessor(DebuggerPreprocessor, EInputPreProcessorType::Game);
-	if (SearchResult == INDEX_NONE)
+	if (DebuggerPreprocessor.IsValid() && SearchResult == INDEX_NONE)
 	{
+		DebuggerPreprocessor->OnToggleDebuggerContext = PreprocessorCallback;
 		ensureAlways(FSlateApplication::Get().RegisterInputPreProcessor(DebuggerPreprocessor));
 	}
 }
@@ -62,4 +74,9 @@ void UAVVMDebuggerInputHandler::SafeEnd()
 		FSlateApplication::Get().UnregisterInputPreProcessor(DebuggerPreprocessor);
 		DebuggerPreprocessor.Reset();
 	}
+}
+
+TSharedPtr<FAVVMDebuggerInputPreprocessor> UAVVMDebuggerInputHandler::GetPreprocessor() const
+{
+	return DebuggerPreprocessor;
 }

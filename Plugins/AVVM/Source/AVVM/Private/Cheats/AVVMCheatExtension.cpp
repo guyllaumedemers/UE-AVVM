@@ -106,10 +106,7 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 
 void UAVVMCheatExtension::Draw() const
 {
-	{
-		// TODO @gdemers define implementation details here
-		ImGui::Button("Hello world!");
-	}
+	ImGui::ShowTestWindow();
 }
 
 void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result)
