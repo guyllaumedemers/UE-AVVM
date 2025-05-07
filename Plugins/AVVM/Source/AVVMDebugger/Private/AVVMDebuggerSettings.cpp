@@ -17,39 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AVVMDebuggerSettings.h"
 
-using UnrealBuildTool;
-
-public class AVVMDebugger : ModuleRules
+UAVVMDebuggerSettings::UAVVMDebuggerSettings()
 {
-	public AVVMDebugger(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	CategoryName = TEXT("Game");
+}
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"ApplicationCore",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"ImGui",
-				"InputCore",
-				"Slate",
-				"SlateCore"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-
-		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
-		);
-	}
+TSubclassOf<UAVVMDebuggerInputHandler> UAVVMDebuggerSettings::GetInputHandlerClass()
+{
+	return GetDefault<UAVVMDebuggerSettings>()->InputHandlerClass;
 }

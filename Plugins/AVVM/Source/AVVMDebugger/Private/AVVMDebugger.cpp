@@ -21,6 +21,7 @@
 #include "AVVMDebugger.h"
 
 #include "AVVMDebuggerInputHandler.h"
+#include "AVVMDebuggerSettings.h"
 #include "ImGuiDelegates.h"
 #include "ImGuiModule.h"
 #include "Engine/GameInstance.h"
@@ -140,7 +141,7 @@ void FAVVMDebuggerModule::CreateInputHandler()
 	UAVVMDebuggerInputHandler* Target = InputHandler.Get();
 	if (!IsValid(Target))
 	{
-		Target = NewObject<UAVVMDebuggerInputHandler>(GEngine, UAVVMDebuggerInputHandler::StaticClass() /*Should be fetched from Project Settings*/);
+		Target = NewObject<UAVVMDebuggerInputHandler>(GEngine, UAVVMDebuggerSettings::GetInputHandlerClass());
 		InputHandler = TStrongObjectPtr<UAVVMDebuggerInputHandler>(Target);
 	}
 

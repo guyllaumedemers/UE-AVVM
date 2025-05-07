@@ -31,7 +31,7 @@
  *
  *	UAVVMOnlineSettings. project settings that define global variable to be accessed by plugin system.
  */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMSampleSettings"))
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMOnlineSettings"))
 class AVVMONLINE_API UAVVMOnlineSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

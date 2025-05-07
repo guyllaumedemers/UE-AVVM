@@ -17,39 +17,33 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class AVVMDebugger : ModuleRules
+#include "Engine/DeveloperSettings.h"
+
+#include "AVVMDebuggerSettings.generated.h"
+
+class UAVVMDebuggerInputHandler;
+
+/**
+*	Class description:
+*
+*	UAVVMDebuggerSettings define a set of properties to be access in code. 
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMDebuggerSettings"))
+class AVVMDEBUGGER_API UAVVMDebuggerSettings : public UDeveloperSettings
 {
-	public AVVMDebugger(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"ApplicationCore",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"ImGui",
-				"InputCore",
-				"Slate",
-				"SlateCore"
-			}
-		);
+public:
+	UAVVMDebuggerSettings();
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
+	UFUNCTION(BlueprintCallable)
+	static TSubclassOf<UAVVMDebuggerInputHandler> GetInputHandlerClass();
 
-		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
-		);
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	TSubclassOf<UAVVMDebuggerInputHandler> InputHandlerClass = nullptr;
+};
