@@ -27,6 +27,7 @@
 #include "DataRegistrySubsystem.h"
 #include "GameplayTagsManager.h"
 #include "Cheats/AVVMCheatData.h"
+#include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
 
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
@@ -232,14 +233,14 @@ TInstancedStruct<FAVVMCheatData> UAVVMCheatExtension::GetPayload(const TSharedPt
 	}
 }
 
-const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGathering) const
+inline char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGathering) const
 {
-	static TStringBuilderBase<char> StringBuilder;
+	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
 
 	if (bWasInitialized && !bForceGathering)
 	{
-		return StringBuilder.ToString();
+		return StringBuilder.GetData();
 	}
 
 	// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
@@ -249,28 +250,32 @@ const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGatherin
 	TArray<TSharedPtr<FGameplayTagNode>> OutNodes;
 	UGameplayTagsManager::Get().GetAllTagsFromSource(TEXT("AVVMSampleTags.ini"), OutNodes);
 
+	StringBuilder.Reset();
+
 	const int32 Num = OutNodes.Num();
 	for (int32 i = 0; i < Num; ++i)
 	{
-		StringBuilder.Append(OutNodes[i]->GetCompleteTagString().GetCharArray());
+		const auto AnsiChar = StringCast<ANSICHAR>(GetData(OutNodes[i]->GetCompleteTagString()));
+
+		StringBuilder.Append(AnsiChar);
 		if (i < (Num - 1))
 		{
-			StringBuilder.Append("\0");
+			StringBuilder.Append("\\0");
 		}
 	}
 
 	bWasInitialized = true;
-	return StringBuilder.ToString();
+	return StringBuilder.GetData();
 }
 
-const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGathering) const
+inline char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGathering) const
 {
-	static TStringBuilderBase<char> StringBuilder;
+	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
 
 	if (bWasInitialized && !bForceGathering)
 	{
-		return StringBuilder.ToString();
+		return StringBuilder.GetData();
 	}
 
 	auto* DataRegistrySubysstem = UDataRegistrySubsystem::Get();
@@ -290,26 +295,30 @@ const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGatherin
 	TArray<FDataRegistrySourceItemId> SourceItems;
 	Registry->GetAllSourceItems(SourceItems);
 
+	StringBuilder.Reset();
+
 	const int32 Num = SourceItems.Num();
 	for (int32 i = 0; i < Num; ++i)
 	{
-		StringBuilder.Append(SourceItems[i].ItemId.ToString().GetCharArray());
+		const auto AnsiChar = StringCast<ANSICHAR>(GetData(SourceItems[i].ItemId.ItemName.ToString()));
+
+		StringBuilder.Append(AnsiChar);
 		if (i < (Num - 1))
 		{
-			StringBuilder.Append("\0");
+			StringBuilder.Append("\\0");
 		}
 	}
 
 	bWasInitialized = true;
-	return StringBuilder.ToString();
+	return StringBuilder.GetData();
 }
 
-FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
+inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
 {
 	FString String(ConcatString);
 
 	TArray<FString> SplitArray;
-	const int32 Num = String.ParseIntoArray(SplitArray, TEXT("\0"));
+	const int32 Num = String.ParseIntoArray(SplitArray, TEXT("\\0"));
 	if (Num > Index)
 	{
 		return SplitArray[Index];

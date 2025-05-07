@@ -73,9 +73,9 @@ protected:
 	void ClearAllRequests();
 
 	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
-	const char* LazyGatherTagChannels(const bool bForceGathering) const;
-	const char* LazyGatherRegistryIds(const bool bForceGathering) const;
-	FString GetIndexedString(const char* ConcatString, const int32 Index) const;
+	inline char* LazyGatherTagChannels(const bool bForceGathering) const;
+	inline char* LazyGatherRegistryIds(const bool bForceGathering) const;
+	inline FString GetIndexedString(const char* ConcatString, const int32 Index) const;
 
 	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
 	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests;
