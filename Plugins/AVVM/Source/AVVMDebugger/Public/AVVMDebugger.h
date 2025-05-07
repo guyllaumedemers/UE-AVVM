@@ -30,26 +30,9 @@
 class UGameInstance;
 
 /**
- *	Class Description :
- *
- *	FAVVMImGuiDescriptorItem define a singular entry in a ImGui Slot.
- */
-USTRUCT(BlueprintType)
-struct AVVMDEBUGGER_API FAVVMImGuiDescriptorItem
-{
-	GENERATED_BODY()
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FString Label = FString();
-
-	// @gdemers TODO define the expected properties for the Descriptor item. Has to be flexible enough to not have to define ImGui types.
-	// support types incovation call that return bool or void and execute callbacks on interaction.
-};
-
-/**
 *	Class description:
 *
-*	UAVVMImGuiDescriptor. Expose the required interface to register/build advanced menus using ImGui.
+*	UAVVMImGuiDescriptor. draw behaviour specific to the implementer class.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMDEBUGGER_API UAVVMImGuiDescriptor : public UInterface
@@ -62,11 +45,7 @@ class AVVMDEBUGGER_API IAVVMImGuiDescriptor
 	GENERATED_BODY()
 
 public:
-	virtual bool Begin() const PURE_VIRTUAL(Begin, return false;);
-	virtual void End() const PURE_VIRTUAL(End, return;);
-
-protected:
-	virtual TArray<FAVVMImGuiDescriptorItem> GetDescriptors() const PURE_VIRTUAL(GetDescriptors, return TArray<FAVVMImGuiDescriptorItem>(););
+	virtual void Draw() const PURE_VIRTUAL(Draw, return;);
 };
 
 /**
@@ -79,7 +58,7 @@ struct AVVMDEBUGGER_API FAVVMImGuiDebugContext
 	FAVVMImGuiDebugContext() = default;
 	FAVVMImGuiDebugContext(FImGuiModuleProperties& InProperties);
 
-	void AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor, const TArray<FAVVMImGuiDescriptorItem>& Items);
+	void AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor);
 	void RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor);
 	void Draw();
 
@@ -99,22 +78,11 @@ private:
 		bool bShowDebugContext = false;
 	};
 
-	/**
-	 *	Class Description :
-	 *
-	 *	FAVVMImGuiDescriptorCollection works around TMap constraint with storing KVP collection types.
-	 */
-	struct FAVVMImGuiDescriptorCollection
-	{
-		TArray<FAVVMImGuiDescriptorItem> Items;
-	};
-
 	// @gdemers plugin properties.
 	FAVVMImGuiDebugProperties CustomProperties;
 
 	// @gdemers collection type of whats to be rendered in immediate mode.
-	typedef TMap<TScriptInterface<IAVVMImGuiDescriptor>, FAVVMImGuiDescriptorCollection> FAVVMDescriptorCollection;
-	FAVVMDescriptorCollection Descriptors;
+	TArray<TScriptInterface<IAVVMImGuiDescriptor>> Descriptors;
 };
 
 /**
@@ -144,25 +112,4 @@ private:
 	FAVVMImGuiDebugContext DebugContext;
 	FDelegateHandle GameInstanceDelegateHandle;
 	FDelegateHandle ImGuiDelegateHandle;
-};
-
-/**
- *	Class Description :
- *
- *	FAVVMScopedDescriptor process descriptor items as a group. [it's just a Test atm!]
- */
-USTRUCT(BlueprintType)
-struct AVVMDEBUGGER_API FAVVMScopedDescriptor
-{
-	GENERATED_BODY()
-
-	FAVVMScopedDescriptor() = default;
-
-	FAVVMScopedDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor,
-	                      const TArray<FAVVMImGuiDescriptorItem>& Items);
-
-	~FAVVMScopedDescriptor();
-
-	FSimpleDelegate OnScopeExited;
-	bool bShouldEnd = false;
 };

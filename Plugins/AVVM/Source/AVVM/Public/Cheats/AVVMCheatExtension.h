@@ -57,6 +57,8 @@ public:
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.NotifyTagChannel.NoPayload")
 	void NotifyChannelNoPayload(const FString& TagChannel);
 
+	virtual void Draw() const override;
+
 protected:
 	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
 	void OnSoftObjectAcquired();

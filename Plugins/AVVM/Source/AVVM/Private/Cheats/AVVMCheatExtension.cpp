@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Cheats/AVVMCheatExtension.h"
 
+#include <imgui.h>
+
 #include "AVVM.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSettings.h"
@@ -29,7 +31,7 @@
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
-	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this, GetDescriptors());
+	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
 }
 
 void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
@@ -100,6 +102,14 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 	ContextArgs.WorldContextObject = this;
 	ContextArgs.Payload = TInstancedStruct<FAVVMNotificationPayload>{};
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
+}
+
+void UAVVMCheatExtension::Draw() const
+{
+	{
+		// TODO @gdemers define implementation details here
+		ImGui::Button("Hello world!");
+	}
 }
 
 void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result)

@@ -29,11 +29,9 @@ FAVVMImGuiDebugContext::FAVVMImGuiDebugContext(FImGuiModuleProperties& InPropert
 	Properties = &InProperties;
 }
 
-void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor,
-                                           const TArray<FAVVMImGuiDescriptorItem>& Items)
+void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	FAVVMImGuiDescriptorCollection& OutCollection = Descriptors.Add(Descriptor);
-	OutCollection = {Items};
+	Descriptors.Add(Descriptor);
 }
 
 void FAVVMImGuiDebugContext::RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
@@ -51,11 +49,10 @@ void FAVVMImGuiDebugContext::Draw()
 
 	for (auto Iterator = Descriptors.CreateIterator(); Iterator; ++Iterator)
 	{
-		UObject* Descriptor = Iterator.Key().GetObject();
-		if (IsValid(Descriptor))
+		auto Descriptor = TScriptInterface<IAVVMImGuiDescriptor>(*Iterator);
+		if (IsValid(Descriptor.GetObject()) && Descriptor.GetInterface() != nullptr)
 		{
-			const FAVVMImGuiDescriptorCollection& Collection = Iterator.Value();
-			FAVVMScopedDescriptor ScopedImGui(Descriptor, Collection.Items);
+			Descriptor->Draw();
 		}
 		else
 		{
@@ -121,31 +118,6 @@ void FAVVMDebuggerModule::ClearImGuiDelegates()
 void FAVVMDebuggerModule::OnWorldDrawDebug()
 {
 	DebugContext.Draw();
-}
-
-FAVVMScopedDescriptor::FAVVMScopedDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor,
-                                             const TArray<FAVVMImGuiDescriptorItem>& Items)
-{
-	if (!ensure(IsValid(Descriptor.GetObject()) && Descriptor.GetInterface() != nullptr))
-	{
-		return;
-	}
-
-	OnScopeExited.BindWeakLambda(Descriptor.GetObject(), [Descriptor]() { Descriptor->End(); });
-
-	bShouldEnd = Descriptor->Begin();
-	if (bShouldEnd)
-	{
-		// @gdemers TODO Find a proper approach to defining ImGui elements with a Scope type.
-	}
-}
-
-FAVVMScopedDescriptor::~FAVVMScopedDescriptor()
-{
-	if (bShouldEnd)
-	{
-		OnScopeExited.ExecuteIfBound();
-	}
 }
 
 IMPLEMENT_MODULE(FAVVMDebuggerModule, AVVMDebugger)
