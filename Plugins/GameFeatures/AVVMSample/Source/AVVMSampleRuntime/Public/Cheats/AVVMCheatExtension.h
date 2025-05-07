@@ -79,6 +79,6 @@ protected:
 
 	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
 	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests;
-	bool bHasTagChanged = false;
 	bool bHasRegistriesChanged = false;
+	bool bHasTagChanged = false;
 };

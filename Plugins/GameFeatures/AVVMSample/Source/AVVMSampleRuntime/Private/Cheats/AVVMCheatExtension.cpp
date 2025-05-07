@@ -112,20 +112,20 @@ void UAVVMCheatExtension::Draw()
 		ImGui::BeginGroup();
 
 		// TODO @gdemers react to data change so I can temp update the flags that trigger a regathering of resources
-		static int32 CurrentTagChannel = 0;
+		static int32 CurrentTagChannelIndex = 0;
 		ImGui::Combo("Tag Channel",
-		             &CurrentTagChannel,
+		             &CurrentTagChannelIndex,
 		             LazyGatherTagChannels(bHasTagChanged));
 
-		static int32 CurrentRegistryId = 0;
+		static int32 CurrentRegistryIdIndex = 0;
 		ImGui::Combo("Payload Registry Id",
-		             &CurrentRegistryId,
+		             &CurrentRegistryIdIndex,
 		             LazyGatherRegistryIds(bHasRegistriesChanged));
 
 		if (ImGui::Button("Notify"))
 		{
-			const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannel);
-			const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryId);
+			const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannelIndex);
+			const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryIdIndex);
 			NotifyChannelWithPayload(Channel, Payload);
 		}
 
@@ -306,6 +306,16 @@ const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGatherin
 
 FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
 {
-	// @gdemers TODO parse string with '\0' delim to find correct indexed string value 
-	return FString();
+	FString String(ConcatString);
+
+	TArray<FString> SplitArray;
+	const int32 Num = String.ParseIntoArray(SplitArray, TEXT("\0"));
+	if (Num > Index)
+	{
+		return SplitArray[Index];
+	}
+	else
+	{
+		return FString();
+	}
 }
