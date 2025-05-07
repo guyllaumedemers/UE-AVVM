@@ -114,6 +114,10 @@ private:
 	// as such, application tick will execute this call which we can use to render our ImGui Context Class
 	void OnWorldDrawDebug();
 
+	// @gdemers the purpose of this input handler workaround issue created by the ImGuiInputHandler.
+	// Problem : Until you invoke from console the ToggleInput cheat, the visibility state of the SImGuiWidget won't be set 'Visible'
+	// and instead is default to 'HitTestInvisible'. By doing so, they basically prevent any input from being processed
+	// and whatever key is bound in Project settings cannot be invoked.
 	TStrongObjectPtr<UAVVMDebuggerInputHandler> InputHandler = nullptr;
 
 	FAVVMImGuiDebugContext DebugContext;
