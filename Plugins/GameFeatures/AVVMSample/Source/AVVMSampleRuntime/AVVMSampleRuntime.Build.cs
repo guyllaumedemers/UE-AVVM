@@ -30,6 +30,7 @@ public class AVVMSampleRuntime : ModuleRules
 			new string[]
 			{
 				"AVVM",
+				"AVVMDebugger",
 				"AVVMOnline",
 				"Core",
 				"CoreUObject",
@@ -48,7 +49,14 @@ public class AVVMSampleRuntime : ModuleRules
 			{
 				"CommonGame",
 				"CommonUI",
-				"UIExtension"
+				"DataRegistry",
+				"ImGui",
+				"UIExtension",
 			});
+
+		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
+		PrivateDefinitions.Add(
+			string.Format("IMPLOT_API=DLLIMPORT")
+		);
 	}
 }

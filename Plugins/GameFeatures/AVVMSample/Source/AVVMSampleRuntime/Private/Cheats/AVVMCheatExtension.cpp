@@ -25,6 +25,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSettings.h"
 #include "DataRegistrySubsystem.h"
+#include "GameplayTagsManager.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Engine/AssetManager.h"
 
@@ -104,9 +105,32 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
 }
 
-void UAVVMCheatExtension::Draw() const
+void UAVVMCheatExtension::Draw()
 {
-	ImGui::ShowTestWindow();
+	if (ImGui::CollapsingHeader("Cheats"))
+	{
+		ImGui::BeginGroup();
+
+		// TODO @gdemers react to data change so I can temp update the flags that trigger a regathering of resources
+		static int32 CurrentTagChannel = 0;
+		ImGui::Combo("Tag Channel",
+		             &CurrentTagChannel,
+		             LazyGatherTagChannels(bHasTagChanged));
+
+		static int32 CurrentRegistryId = 0;
+		ImGui::Combo("Payload Registry Id",
+		             &CurrentRegistryId,
+		             LazyGatherRegistryIds(bHasRegistriesChanged));
+
+		if (ImGui::Button("Notify"))
+		{
+			const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannel);
+			const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryId);
+			NotifyChannelWithPayload(Channel, Payload);
+		}
+
+		ImGui::EndGroup();
+	}
 }
 
 void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result)
@@ -206,4 +230,82 @@ TInstancedStruct<FAVVMCheatData> UAVVMCheatExtension::GetPayload(const TSharedPt
 	{
 		return {};
 	}
+}
+
+const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGathering) const
+{
+	static TStringBuilderBase<char> StringBuilder;
+	static bool bWasInitialized = false;
+
+	if (bWasInitialized && !bForceGathering)
+	{
+		return StringBuilder.ToString();
+	}
+
+	// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
+	// find an alternative so we can use it in non-shipping build!
+
+	// @gdemers im hard coding the .ini file name here but it could be exposed if necessary.
+	TArray<TSharedPtr<FGameplayTagNode>> OutNodes;
+	UGameplayTagsManager::Get().GetAllTagsFromSource(TEXT("AVVMSampleTags.ini"), OutNodes);
+
+	const int32 Num = OutNodes.Num();
+	for (int32 i = 0; i < Num; ++i)
+	{
+		StringBuilder.Append(OutNodes[i]->GetCompleteTagString().GetCharArray());
+		if (i < (Num - 1))
+		{
+			StringBuilder.Append("\0");
+		}
+	}
+
+	bWasInitialized = true;
+	return StringBuilder.ToString();
+}
+
+const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGathering) const
+{
+	static TStringBuilderBase<char> StringBuilder;
+	static bool bWasInitialized = false;
+
+	if (bWasInitialized && !bForceGathering)
+	{
+		return StringBuilder.ToString();
+	}
+
+	auto* DataRegistrySubysstem = UDataRegistrySubsystem::Get();
+	if (!IsValid(DataRegistrySubysstem))
+	{
+		return nullptr;
+	}
+
+	const UDataRegistry* Registry = DataRegistrySubysstem->GetRegistryForType(UAVVMSettings::GetCheatRegistryType());
+	if (!IsValid(Registry))
+	{
+		return nullptr;
+	}
+
+	// @gdemers TODO UDataRegistry::GetAllSourceItems is wrapped in #if WITH_EDITOR only preprocessor
+	// find an alternative so we can use it in non-shipping build!
+	TArray<FDataRegistrySourceItemId> SourceItems;
+	Registry->GetAllSourceItems(SourceItems);
+
+	const int32 Num = SourceItems.Num();
+	for (int32 i = 0; i < Num; ++i)
+	{
+		StringBuilder.Append(SourceItems[i].ItemId.ToString().GetCharArray());
+		if (i < (Num - 1))
+		{
+			StringBuilder.Append("\0");
+		}
+	}
+
+	bWasInitialized = true;
+	return StringBuilder.ToString();
+}
+
+FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
+{
+	// @gdemers TODO parse string with '\0' delim to find correct indexed string value 
+	return FString();
 }

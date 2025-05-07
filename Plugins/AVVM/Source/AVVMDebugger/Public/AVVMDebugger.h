@@ -46,7 +46,7 @@ class AVVMDEBUGGER_API IAVVMImGuiDescriptor
 	GENERATED_BODY()
 
 public:
-	virtual void Draw() const PURE_VIRTUAL(Draw, return;);
+	virtual void Draw() PURE_VIRTUAL(Draw, return;);
 };
 
 /**

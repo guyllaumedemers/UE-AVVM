@@ -61,18 +61,27 @@ void FAVVMImGuiDebugContext::Draw()
 		return;
 	}
 
-	for (auto Iterator = Descriptors.CreateIterator(); Iterator; ++Iterator)
+	const auto RenderAll = [](TArray<TScriptInterface<IAVVMImGuiDescriptor>>& OutDescriptors)
 	{
-		auto Descriptor = TScriptInterface<IAVVMImGuiDescriptor>(*Iterator);
-		if (IsValid(Descriptor.GetObject()) && Descriptor.GetInterface() != nullptr)
+		for (auto Iterator = OutDescriptors.CreateIterator(); Iterator; ++Iterator)
 		{
-			Descriptor->Draw();
+			auto Descriptor = TScriptInterface<IAVVMImGuiDescriptor>(*Iterator);
+			if (IsValid(Descriptor.GetObject()) && Descriptor.GetInterface() != nullptr)
+			{
+				Descriptor->Draw();
+			}
+			else
+			{
+				Iterator.RemoveCurrent();
+			}
 		}
-		else
-		{
-			Iterator.RemoveCurrent();
-		}
-	}
+	};
+
+	static bool* bShouldCloseWindow = nullptr;
+	ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiCond_FirstUseEver);
+	ImGui::Begin("Debug Window", bShouldCloseWindow);
+	RenderAll(Descriptors);
+	ImGui::End();
 }
 
 void FAVVMImGuiDebugContext::ToggleDebugger()

@@ -21,9 +21,9 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMCheatData.h"
 #include "AVVMDebugger.h"
 #include "DataRegistryTypes.h"
+#include "Cheats/AVVMCheatData.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
 
@@ -39,8 +39,8 @@
  *	interface with the UAVVMPresenter Model to "inject" stub data to derive types.
  */
 UCLASS(BlueprintType)
-class AVVM_API UAVVMCheatExtension : public UCheatManagerExtension,
-                                     public IAVVMImGuiDescriptor
+class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension,
+                                                  public IAVVMImGuiDescriptor
 {
 	GENERATED_BODY()
 
@@ -57,7 +57,7 @@ public:
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.NotifyTagChannel.NoPayload")
 	void NotifyChannelNoPayload(const FString& TagChannel);
 
-	virtual void Draw() const override;
+	virtual void Draw() override;
 
 protected:
 	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
@@ -73,7 +73,12 @@ protected:
 	void ClearAllRequests();
 
 	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
+	const char* LazyGatherTagChannels(const bool bForceGathering) const;
+	const char* LazyGatherRegistryIds(const bool bForceGathering) const;
+	FString GetIndexedString(const char* ConcatString, const int32 Index) const;
 
 	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
 	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests;
+	bool bHasTagChanged = false;
+	bool bHasRegistriesChanged = false;
 };

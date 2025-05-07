@@ -29,7 +29,6 @@ public class AVVM : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMDebugger",
 				"CommonUI",
 				"Core",
 				"CoreUObject",
@@ -47,12 +46,6 @@ public class AVVM : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"ImGui"
 			});
-
-		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
-		);
 	}
 }
