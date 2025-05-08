@@ -17,6 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+// ReSharper disable CppIncompleteSwitchStatement
+// ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
 #pragma once
 
 #include "CoreMinimal.h"
@@ -192,7 +194,7 @@ struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 
 	// @gdemers transient state in which a player connection can be.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	EAVVMPlayerStatus PlayerStatus;
+	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
 
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -237,6 +239,7 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 UENUM(BlueprintType)
 enum class EAVVMPlayerRequestType : uint8
 {
+	None,
 	Invite,
 	Block,
 	Kick,
@@ -295,7 +298,7 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 	FString DestPlayerUniqueNetId = FString();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	EAVVMPlayerRequestType RequestType;
+	EAVVMPlayerRequestType RequestType = EAVVMPlayerRequestType::None;
 
 	// @gdemers payload can represent any data sent over the network, maybe during a trade, etc...
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

@@ -73,8 +73,8 @@ protected:
 	void ClearAllRequests();
 
 	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
-	inline char* LazyGatherTagChannels(const bool bForceGathering) const;
-	inline char* LazyGatherRegistryIds(const bool bForceGathering) const;
+	inline const char* LazyGatherTagChannels(const bool bForceGathering) const;
+	inline const char* LazyGatherRegistryIds(const bool bForceGathering) const;
 	inline FString GetIndexedString(const char* ConcatString, const int32 Index) const;
 
 	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;

@@ -233,14 +233,14 @@ TInstancedStruct<FAVVMCheatData> UAVVMCheatExtension::GetPayload(const TSharedPt
 	}
 }
 
-inline char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGathering) const
+inline const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
 
 	if (bWasInitialized && !bForceGathering)
 	{
-		return StringBuilder.GetData();
+		return *StringBuilder;
 	}
 
 	// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
@@ -252,39 +252,36 @@ inline char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGatheri
 
 	StringBuilder.Reset();
 
-	const int32 Num = OutNodes.Num();
-	for (int32 i = 0; i < Num; ++i)
+	for (int32 i = 0; i < OutNodes.Num(); ++i)
 	{
-		const auto AnsiChar = StringCast<ANSICHAR>(GetData(OutNodes[i]->GetCompleteTagString()));
-
-		StringBuilder.Append(AnsiChar);
-		if (i < (Num - 1))
-		{
-			StringBuilder.Append("\\0");
-		}
+		const FString TagString = OutNodes[i]->GetCompleteTagString();
+		const TArray<TCHAR> CharArray = TagString.GetCharArray();
+		StringBuilder.Append(CharArray);
+		StringBuilder.Append("\0"/*enfore null termination between entries*/);
 	}
 
 	bWasInitialized = true;
-	return StringBuilder.GetData();
+	// @gdemers operator* and ToString enforce null termination
+	return *StringBuilder/*last entry will be \0\0 as expected by ImGui::Combo*/;
 }
 
-inline char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGathering) const
+inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
 
 	if (bWasInitialized && !bForceGathering)
 	{
-		return StringBuilder.GetData();
+		return *StringBuilder;
 	}
 
-	auto* DataRegistrySubysstem = UDataRegistrySubsystem::Get();
-	if (!IsValid(DataRegistrySubysstem))
+	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(DataRegistrySubsystem))
 	{
 		return nullptr;
 	}
 
-	const UDataRegistry* Registry = DataRegistrySubysstem->GetRegistryForType(UAVVMSettings::GetCheatRegistryType());
+	const UDataRegistry* Registry = DataRegistrySubsystem->GetRegistryForType(UAVVMSettings::GetCheatRegistryType());
 	if (!IsValid(Registry))
 	{
 		return nullptr;
@@ -297,34 +294,27 @@ inline char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGatheri
 
 	StringBuilder.Reset();
 
-	const int32 Num = SourceItems.Num();
-	for (int32 i = 0; i < Num; ++i)
+	for (int32 i = 0; i < SourceItems.Num(); ++i)
 	{
-		const auto AnsiChar = StringCast<ANSICHAR>(GetData(SourceItems[i].ItemId.ItemName.ToString()));
-
-		StringBuilder.Append(AnsiChar);
-		if (i < (Num - 1))
-		{
-			StringBuilder.Append("\\0");
-		}
+		const FString TagString = SourceItems[i].ItemId.ItemName.ToString();
+		const TArray<TCHAR> CharArray = TagString.GetCharArray();
+		StringBuilder.Append(CharArray);
+		StringBuilder.Append("\0");
 	}
 
 	bWasInitialized = true;
-	return StringBuilder.GetData();
+	return *StringBuilder;
 }
 
 inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
 {
-	FString String(ConcatString);
+	int32 ReverseCount = Index;
+	const char* Head = ConcatString;
+	while (*Head && ReverseCount > 0)
+	{
+		Head += strlen(Head) + 1;
+		--ReverseCount;
+	}
 
-	TArray<FString> SplitArray;
-	const int32 Num = String.ParseIntoArray(SplitArray, TEXT("\\0"));
-	if (Num > Index)
-	{
-		return SplitArray[Index];
-	}
-	else
-	{
-		return FString();
-	}
+	return FString(Head);
 }
