@@ -25,6 +25,10 @@
 #include "Engine/DataAsset.h"
 #include "StructUtils/InstancedStruct.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include "AVVMCheatData.generated.h"
 
 /**
@@ -56,6 +60,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TInstancedStruct<FAVVMCheatData>& GetData() const { return CheatData; }
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TInstancedStruct<FAVVMCheatData> CheatData;
@@ -71,6 +79,10 @@ USTRUCT(BlueprintType)
 struct AVVM_API FAVVMCheatDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
 	// @gdemers softptr to the resource asset that contain data specific to the payload
 	// we expect the CheatExtension to be provided with.

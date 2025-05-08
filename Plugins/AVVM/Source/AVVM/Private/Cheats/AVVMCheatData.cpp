@@ -18,3 +18,19 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Cheats/AVVMCheatData.h"
+
+#if WITH_EDITOR
+EDataValidationResult UAVVMCheatDataAsset::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CheatData.IsValid() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
+	Context.AddError(NSLOCTEXT("UAVVMCheatDataAsset", "", "No valid FInstancedStruct specified!"));
+	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+}
+
+EDataValidationResult FAVVMCheatDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = !CheatDataAsset.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
+	Context.AddError(NSLOCTEXT("FAVVMCheatDataTableRow", "", "No valid UDataAsset specified!"));
+	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+}
+#endif

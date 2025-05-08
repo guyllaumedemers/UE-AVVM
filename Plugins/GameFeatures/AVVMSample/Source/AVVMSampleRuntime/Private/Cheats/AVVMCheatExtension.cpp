@@ -121,7 +121,6 @@ void UAVVMCheatExtension::Draw()
 	{
 		ImGui::BeginGroup();
 
-		// TODO @gdemers react to data change so I can temp update the flags that trigger a regathering of resources
 		static int32 CurrentTagChannelIndex = 0;
 		ImGui::Combo("Tag Channel",
 		             &CurrentTagChannelIndex,
@@ -334,6 +333,7 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
 {
 	int32 ReverseCount = Index;
+	
 	const char* Head = ConcatString;
 	while (*Head && ReverseCount > 0)
 	{
