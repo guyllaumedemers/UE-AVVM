@@ -125,6 +125,7 @@ void UAVVMCheatExtension::Draw()
 
 		if (ImGui::Button("Notify"))
 		{
+			// @gdemers caching return value from Lazy*Function isnt possible. the null terminate character split the single character array into a singular entry when assigned to char*.
 			const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannelIndex);
 			const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryIdIndex);
 			NotifyChannelWithPayload(Channel, Payload);
@@ -252,12 +253,25 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceG
 
 	StringBuilder.Reset();
 
+	int32 MaxNumberChilds = 0;
 	for (int32 i = 0; i < OutNodes.Num(); ++i)
 	{
-		const FString TagString = OutNodes[i]->GetCompleteTagString();
-		const TArray<TCHAR> CharArray = TagString.GetCharArray();
-		StringBuilder.Append(CharArray);
-		StringBuilder.Append("\0"/*enfore null termination between entries*/);
+		const TSharedPtr<FGameplayTagNode> Node = OutNodes[i];
+		const TArray<TSharedPtr<FGameplayTagNode>> Children = Node->GetChildTagNodes();
+
+		const int32 NumChildren = Children.Num();
+		if (NumChildren > MaxNumberChilds)
+		{
+			MaxNumberChilds = NumChildren;
+			StringBuilder.Reset();
+		}
+		else
+		{
+			const FString TagString = Node->GetCompleteTagString();
+			const TArray<TCHAR> CharArray = TagString.GetCharArray();
+			StringBuilder.Append(CharArray);
+			StringBuilder.Append("\0"/*enfore null termination between entries*/);
+		}
 	}
 
 	bWasInitialized = true;
