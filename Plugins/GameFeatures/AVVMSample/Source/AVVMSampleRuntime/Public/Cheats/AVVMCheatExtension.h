@@ -73,9 +73,12 @@ protected:
 	void ClearAllRequests();
 
 	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
-	inline const char* LazyGatherTagChannels(const bool bForceGathering) const;
-	inline const char* LazyGatherRegistryIds(const bool bForceGathering) const;
+	inline const char* LazyGatherTagChannels(bool& bForceGathering) const;
+	inline const char* LazyGatherRegistryIds(bool& bForceGathering) const;
 	inline FString GetIndexedString(const char* ConcatString, const int32 Index) const;
+
+	// @gdemers handle gameplay tag changes at runtime.
+	void OnGameplayTagTreeChanged();
 
 	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
 	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests;

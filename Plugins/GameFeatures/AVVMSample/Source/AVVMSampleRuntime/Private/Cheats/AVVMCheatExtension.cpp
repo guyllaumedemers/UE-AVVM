@@ -26,6 +26,7 @@
 #include "AVVMSettings.h"
 #include "DataRegistrySubsystem.h"
 #include "GameplayTagsManager.h"
+#include "GameplayTagsModule.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
@@ -33,12 +34,20 @@
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+
+	// @gdemers hard reset between PIE sessions as the CheatExtension wasnt in memory
+	// when editor changed was applied! for Runtime, we listen to the Module event so if a GFP is added with tags, we can process.
+	bHasTagChanged = true;
+	bHasRegistriesChanged = true;
+	IGameplayTagsModule::OnGameplayTagTreeChanged.AddUObject(this, &UAVVMCheatExtension::OnGameplayTagTreeChanged);
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
 }
 
 void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
+
+	IGameplayTagsModule::OnGameplayTagTreeChanged.RemoveAll(this);
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
 	ClearAllStreamableHandle();
 	ClearAllRequests();
@@ -234,7 +243,7 @@ TInstancedStruct<FAVVMCheatData> UAVVMCheatExtension::GetPayload(const TSharedPt
 	}
 }
 
-inline const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceGathering) const
+inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
@@ -253,16 +262,16 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceG
 
 	StringBuilder.Reset();
 
-	int32 MaxNumberChilds = 0;
+	int32 CurrentTagDepth = 0;
 	for (int32 i = 0; i < OutNodes.Num(); ++i)
 	{
 		const TSharedPtr<FGameplayTagNode> Node = OutNodes[i];
 		const TArray<TSharedPtr<FGameplayTagNode>> Children = Node->GetChildTagNodes();
 
-		const int32 NumChildren = Children.Num();
-		if (NumChildren > MaxNumberChilds)
+		const int32 NewTagDepth = Children.Num();
+		if (NewTagDepth > CurrentTagDepth)
 		{
-			MaxNumberChilds = NumChildren;
+			CurrentTagDepth = NewTagDepth;
 			StringBuilder.Reset();
 		}
 		else
@@ -270,16 +279,17 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(const bool bForceG
 			const FString TagString = Node->GetCompleteTagString();
 			const TArray<TCHAR> CharArray = TagString.GetCharArray();
 			StringBuilder.Append(CharArray);
-			StringBuilder.Append("\0"/*enfore null termination between entries*/);
+			StringBuilder.Append("\0"/*enforce null termination between entries*/);
 		}
 	}
 
 	bWasInitialized = true;
+	bForceGathering = false;
 	// @gdemers operator* and ToString enforce null termination
 	return *StringBuilder/*last entry will be \0\0 as expected by ImGui::Combo*/;
 }
 
-inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceGathering) const
+inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
@@ -317,6 +327,7 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(const bool bForceG
 	}
 
 	bWasInitialized = true;
+	bForceGathering = false;
 	return *StringBuilder;
 }
 
@@ -331,4 +342,9 @@ inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, c
 	}
 
 	return FString(Head);
+}
+
+void UAVVMCheatExtension::OnGameplayTagTreeChanged()
+{
+	bHasTagChanged = true;
 }
