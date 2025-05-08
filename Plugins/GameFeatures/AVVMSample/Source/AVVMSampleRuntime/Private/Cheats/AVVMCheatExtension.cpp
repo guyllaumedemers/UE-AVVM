@@ -30,6 +30,11 @@
 #include "Cheats/AVVMCheatData.h"
 #include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
+#include "ProfilingDebugging/CountersTrace.h"
+
+// @gdemers for tracing how frequently these are being rebuilt if ever it becomes a problem!
+TRACE_DECLARE_INT_COUNTER(ComboTagRebuild, TEXT("Combo Tag Rebuild Count"));
+TRACE_DECLARE_INT_COUNTER(ComboRegistryRebuild, TEXT("Combo Registry Rebuild Count"));
 
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 {
@@ -267,6 +272,9 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 		return *StringBuilder;
 	}
 
+	TRACE_BOOKMARK(TEXT("UAVVMCheatExtension.LazyGatherTagChannels"));
+	TRACE_COUNTER_INCREMENT(ComboTagRebuild);
+
 	// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
 	// find an alternative so we can use it in non-shipping build!
 
@@ -312,6 +320,9 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 	{
 		return *StringBuilder;
 	}
+
+	TRACE_BOOKMARK(TEXT("UAVVMCheatExtension.LazyGatherRegistryIds"));
+	TRACE_COUNTER_INCREMENT(ComboRegistryRebuild);
 
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem))
