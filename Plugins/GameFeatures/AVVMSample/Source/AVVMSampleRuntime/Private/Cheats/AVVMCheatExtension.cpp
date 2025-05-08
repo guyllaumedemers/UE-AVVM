@@ -36,19 +36,34 @@ void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
 
 	// @gdemers hard reset between PIE sessions as the CheatExtension wasnt in memory
-	// when editor changed was applied! for Runtime, we listen to the Module event so if a GFP is added with tags, we can process.
-	bHasTagChanged = true;
+	// when editor changed was applied! for Runtime, we listen to the Module event so if a GFP is adding data registries or tags, we can process.
 	bHasRegistriesChanged = true;
-	IGameplayTagsModule::OnGameplayTagTreeChanged.AddUObject(this, &UAVVMCheatExtension::OnGameplayTagTreeChanged);
+	bHasTagChanged = true;
+
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
+	IGameplayTagsModule::OnGameplayTagTreeChanged.AddUObject(this, &UAVVMCheatExtension::OnGameplayTagTreeChanged);
+
+	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
+	if (IsValid(DataRegistrySubsystem))
+	{
+		// @gdemers upon activating a new GFP_DataRegistry, the subsystem will broadcast this event! (each time)
+		DataRegistrySubsystem->OnSubsystemInitialized().AddUObject(this, &UAVVMCheatExtension::OnDataRegistrySubsystemChanged);
+	}
 }
 
 void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
 
-	IGameplayTagsModule::OnGameplayTagTreeChanged.RemoveAll(this);
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
+	IGameplayTagsModule::OnGameplayTagTreeChanged.RemoveAll(this);
+
+	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
+	if (IsValid(DataRegistrySubsystem))
+	{
+		DataRegistrySubsystem->OnSubsystemInitialized().RemoveAll(this);
+	}
+
 	ClearAllStreamableHandle();
 	ClearAllRequests();
 }
@@ -333,7 +348,7 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
 {
 	int32 ReverseCount = Index;
-	
+
 	const char* Head = ConcatString;
 	while (*Head && ReverseCount > 0)
 	{
@@ -342,6 +357,11 @@ inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, c
 	}
 
 	return FString(Head);
+}
+
+void UAVVMCheatExtension::OnDataRegistrySubsystemChanged()
+{
+	bHasRegistriesChanged = true;
 }
 
 void UAVVMCheatExtension::OnGameplayTagTreeChanged()

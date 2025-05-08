@@ -77,7 +77,8 @@ protected:
 	inline const char* LazyGatherRegistryIds(bool& bForceGathering) const;
 	inline FString GetIndexedString(const char* ConcatString, const int32 Index) const;
 
-	// @gdemers handle gameplay tag changes at runtime.
+	// @gdemers handle data registry/gameplay tag changes at runtime. (most-likely triggered from GFP)
+	void OnDataRegistrySubsystemChanged();
 	void OnGameplayTagTreeChanged();
 
 	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
