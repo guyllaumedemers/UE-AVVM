@@ -334,8 +334,8 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 		return nullptr;
 	}
 
-	// @gdemers calls GetAllCachedItems internally which expect the item to be in memory. Should safe since the DataRegistry is not dynamically added, rather
-	// is loaded from engine startup and cache a DataTable.
+	// @gdemers calls GetAllCachedItems internally which expect the item to be in memory. Should be safe since the DataRegistry is not dynamically added, rather
+	// is loaded from engine startup and cache a DataTable (with a define ItemStruct).
 	TArray<FName> SourceItemNames;
 	Registry->GetItemNames(SourceItemNames);
 
