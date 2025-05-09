@@ -30,6 +30,7 @@
 #include "Cheats/AVVMCheatData.h"
 #include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
+#include "HAL/FileManagerGeneric.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 // @gdemers for tracing how frequently these are being rebuilt if ever it becomes a problem!
@@ -275,12 +276,26 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 	TRACE_BOOKMARK(TEXT("UAVVMCheatExtension.LazyGatherTagChannels"));
 	TRACE_COUNTER_INCREMENT(ComboTagRebuild);
 
-	// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
-	// find an alternative so we can use it in non-shipping build!
+	TArray<FString> SearchPaths;
+	UGameplayTagsManager::Get().GetTagSourceSearchPaths(SearchPaths);
 
-	// @gdemers im hard coding the .ini file name here but it could be exposed if necessary.
+	const TArray<FString> FilteredTagSourcePaths = SearchPaths.FilterByPredicate([](const FString& TagSourcePath)
+	{
+		return TagSourcePath.Contains(TEXT("AVVM"));
+	});
+
 	TArray<TSharedPtr<FGameplayTagNode>> OutNodes;
-	UGameplayTagsManager::Get().GetAllTagsFromSource(TEXT("AVVMSampleTags.ini"), OutNodes);
+	for (const FString& TagSourcePath : FilteredTagSourcePaths)
+	{
+		TArray<FString> SearchFiles;
+		FFileManagerGeneric::Get().FindFiles(SearchFiles, *TagSourcePath, TEXT(".ini"));
+		for (const FString& File : SearchFiles)
+		{
+			// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
+			// find an alternative so we can use it in non-shipping build!
+			UGameplayTagsManager::Get().GetAllTagsFromSource(*File, OutNodes);
+		}
+	}
 
 	StringBuilder.Reset();
 
@@ -296,7 +311,7 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 			CurrentTagDepth = NewTagDepth;
 			StringBuilder.Reset();
 		}
-		else
+		else if (NewTagDepth == CurrentTagDepth /*Only children with expected Depth are allowed*/)
 		{
 			const FString TagString = Node->GetCompleteTagString();
 			const TArray<TCHAR> CharArray = TagString.GetCharArray();
