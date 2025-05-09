@@ -27,6 +27,7 @@
 #include "DataRegistrySubsystem.h"
 #include "GameplayTagsManager.h"
 #include "GameplayTagsModule.h"
+#include "GameplayTagsSettings.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
@@ -276,44 +277,26 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 	TRACE_BOOKMARK(TEXT("UAVVMCheatExtension.LazyGatherTagChannels"));
 	TRACE_COUNTER_INCREMENT(ComboTagRebuild);
 
-	TArray<FString> SearchPaths;
-	UGameplayTagsManager::Get().GetTagSourceSearchPaths(SearchPaths);
-
-	const TArray<FString> FilteredTagSourcePaths = SearchPaths.FilterByPredicate([](const FString& TagSourcePath)
-	{
-		return TagSourcePath.Contains(TEXT("AVVM"));
-	});
-
-	TArray<TSharedPtr<FGameplayTagNode>> OutNodes;
-	for (const FString& TagSourcePath : FilteredTagSourcePaths)
-	{
-		TArray<FString> SearchFiles;
-		FFileManagerGeneric::Get().FindFiles(SearchFiles, *TagSourcePath, TEXT(".ini"));
-		for (const FString& File : SearchFiles)
-		{
-			// @gdemers TODO UGameplayTagsManager::Get().GetAllTagsFromSource is wrapped in #if WITH_EDITOR only preprocessor
-			// find an alternative so we can use it in non-shipping build!
-			UGameplayTagsManager::Get().GetAllTagsFromSource(*File, OutNodes);
-		}
-	}
+	TArray<const FGameplayTagSource*> OutTagSources;
+	// @gdemers notes : FindTagsWithSource doesn't get the path of the asset correctly. The impl details act on the TagSource->ConfigFileName (which is what I care about and
+	// is the correct path) and append it.
+	// Because they append the ConfigFileName path, it prevents retrieval of the tag list for the given Tag source.
+	// UGameplayTagsManager::Get().FindTagsWithSource(TagSourcePath, OutTags);
+	// Alternative, retrieve ALL tags under a /Tags directory, which is more intrusive than the previous approach!
+	UGameplayTagsManager::Get().FindTagSourcesWithType(EGameplayTagSourceType::TagList, OutTagSources);
 
 	StringBuilder.Reset();
-
-	int32 CurrentTagDepth = 0;
-	for (int32 i = 0; i < OutNodes.Num(); ++i)
+	for (int32 i = 0; i < OutTagSources.Num(); ++i)
 	{
-		const TSharedPtr<FGameplayTagNode> Node = OutNodes[i];
-		const TArray<TSharedPtr<FGameplayTagNode>> Children = Node->GetChildTagNodes();
-
-		const int32 NewTagDepth = Children.Num();
-		if (NewTagDepth > CurrentTagDepth)
+		if (OutTagSources[i] == nullptr)
 		{
-			CurrentTagDepth = NewTagDepth;
-			StringBuilder.Reset();
+			continue;
 		}
-		else if (NewTagDepth == CurrentTagDepth /*Only children with expected Depth are allowed*/)
+
+		const TObjectPtr<UGameplayTagsList>& TagListObject = OutTagSources[i]->SourceTagList;
+		for (const FGameplayTagTableRow& TagTableRow : TagListObject->GameplayTagList)
 		{
-			const FString TagString = Node->GetCompleteTagString();
+			const FString TagString = TagTableRow.Tag.ToString();
 			const TArray<TCHAR> CharArray = TagString.GetCharArray();
 			StringBuilder.Append(CharArray);
 			StringBuilder.Append("\0"/*enforce null termination between entries*/);
