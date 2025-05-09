@@ -334,16 +334,16 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 		return nullptr;
 	}
 
-	// @gdemers TODO UDataRegistry::GetAllSourceItems is wrapped in #if WITH_EDITOR only preprocessor
-	// find an alternative so we can use it in non-shipping build!
-	TArray<FDataRegistrySourceItemId> SourceItems;
-	Registry->GetAllSourceItems(SourceItems);
+	// @gdemers calls GetAllCachedItems internally which expect the item to be in memory. Should safe since the DataRegistry is not dynamically added, rather
+	// is loaded from engine startup and cache a DataTable.
+	TArray<FName> SourceItemNames;
+	Registry->GetItemNames(SourceItemNames);
 
 	StringBuilder.Reset();
 
-	for (int32 i = 0; i < SourceItems.Num(); ++i)
+	for (int32 i = 0; i < SourceItemNames.Num(); ++i)
 	{
-		const FString TagString = SourceItems[i].ItemId.ItemName.ToString();
+		const FString TagString = SourceItemNames[i].ToString();
 		const TArray<TCHAR> CharArray = TagString.GetCharArray();
 		StringBuilder.Append(CharArray);
 		StringBuilder.Append("\0");
