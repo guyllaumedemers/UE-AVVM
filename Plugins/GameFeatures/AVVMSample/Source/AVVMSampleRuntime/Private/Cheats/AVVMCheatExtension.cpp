@@ -297,7 +297,7 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 		for (const FGameplayTagTableRow& TagTableRow : TagListObject->GameplayTagList)
 		{
 			const FString TagString = TagTableRow.Tag.ToString();
-			const TArray<TCHAR> CharArray = TagString.GetCharArray();
+			const TArray<TCHAR>& CharArray = TagString.GetCharArray();
 			StringBuilder.Append(CharArray);
 			StringBuilder.Append("\0"/*enforce null termination between entries*/);
 		}
@@ -344,7 +344,7 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 	for (int32 i = 0; i < SourceItemNames.Num(); ++i)
 	{
 		const FString TagString = SourceItemNames[i].ToString();
-		const TArray<TCHAR> CharArray = TagString.GetCharArray();
+		const TArray<TCHAR>& CharArray = TagString.GetCharArray();
 		StringBuilder.Append(CharArray);
 		StringBuilder.Append("\0");
 	}
