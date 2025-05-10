@@ -45,6 +45,6 @@ void UAVVMPartyManagerViewModel::SetLocalParty(const TInstancedStruct<FAVVMNotif
 	const auto* NewLocalParty = Payload.GetPtr<FAVVMParty>();
 	if (NewLocalParty != nullptr)
 	{
-		UE_MVVM_SET_PROPERTY_VALUE(LocalParty, NewLocalParty);
+		UE_MVVM_SET_PROPERTY_VALUE(LocalParty, *NewLocalParty);
 	}
 }

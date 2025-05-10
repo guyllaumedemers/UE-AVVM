@@ -34,6 +34,9 @@ AActor* UAVVMHostConfigurationPresenter::GetOuterKey() const
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	StartPresenting();
+
+	// @gdemers we have now part of a party (post-join or post-exit) and can display the party host configuration.
+	SetHostConfiguration(Payload);
 }
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
