@@ -60,9 +60,8 @@ protected:
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_OnLoginRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	// @gdemers expect to make use of CommonUser UBlueprintAsyncActionBase
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_OnLoginRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

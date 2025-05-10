@@ -23,6 +23,7 @@
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMOnlineStringParser.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "AVVMOnlineInterfaceUtils.generated.h"
@@ -44,27 +45,27 @@ class AVVMONLINE_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrar
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineIdentityInterface(const UObject* DerivedChild,
 	                                            TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlinePartyInterface(const UObject* DerivedChild,
 	                                         TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
 	                                              TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
 	                                              TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineStoreInterface(const UObject* DerivedChild,
 	                                         TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
 	                                 const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
 
@@ -72,12 +73,38 @@ public:
 	                      const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
 
 	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static ULocalPlayer* GetFirstLocalPlayer(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializePlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializeHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializeParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializePlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializePlayerChallenge(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString SerializePlayerResource(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 private:
 	template <typename UInterfaceClass, typename IInterfaceClass>
 	static bool GetInterface(const UObject* DerivedChild,
 	                         TScriptInterface<IInterfaceClass>& OutInterface);
+
+	template <typename TPayload>
+	static FString SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };
 
 template <typename UInterfaceClass, typename IInterfaceClass>
@@ -113,4 +140,26 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 	}
 
 	return bImplement;
+}
+
+template <typename TPayload>
+FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	const auto& StringParser = TScriptInterface<IAVVMOnlineStringParser>(FAVVMOnlineModule::GetJsonParser());
+	if (!ensureAlways(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(StringParser)))
+	{
+		UE_LOG(LogUI, Log, TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
+		return FString();
+	}
+
+	const auto* Data = Payload.GetPtr<TPayload>();
+	if (!ensureAlways(Data != nullptr))
+	{
+		UE_LOG(LogUI, Log, TEXT("TPayload isn't of received type."))
+		return FString();
+	}
+
+	FString OutFormat;
+	StringParser->ToString(*Data, OutFormat);
+	return OutFormat;
 }

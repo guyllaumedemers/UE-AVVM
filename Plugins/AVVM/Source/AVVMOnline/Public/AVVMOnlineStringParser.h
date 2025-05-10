@@ -43,92 +43,92 @@ class AVVMONLINE_API IAVVMOnlineStringParser
 
 public:
 	virtual void FromString(const FString& Payload,
-	                        FAVVMPlayerWallet& OutPlayerWallet)
+	                        FAVVMPlayerWallet& OutPlayerWallet) const
 	{
 	};
 
 	virtual void ToString(const FAVVMPlayerWallet& PlayerWallet,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 
 	virtual void FromString(const FString& Payload,
-	                        FAVVMPlayerProfile& OutPlayerProfile)
+	                        FAVVMPlayerProfile& OutPlayerProfile) const
 	{
 	};
 
 	virtual void ToString(const FAVVMPlayerProfile& PlayerProfile,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 
 	virtual void FromString(const FString& Payload,
-	                        FAVVMHostConfiguration& OutHostConfiguration)
+	                        FAVVMHostConfiguration& OutHostConfiguration) const
 	{
 	};
 
 	virtual void ToString(const FAVVMHostConfiguration& HostConfiguration,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 
 	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMParty>& OutParties)
+	                        TArray<FAVVMParty>& OutParties) const
 	{
 	};
 
 	virtual void FromString(const FString& Payload,
-	                        FAVVMParty& OutParty)
+	                        FAVVMParty& OutParty) const
 	{
 	};
 
 	virtual void ToString(const FAVVMParty& Party,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 
 	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMPlayerConnection>& OutPlayerConnections)
+	                        TArray<FAVVMPlayerConnection>& OutPlayerConnections) const
 	{
 	};
 
 	virtual void FromString(const FString& Payload,
-	                        FAVVMPlayerConnection& OutPlayerConnection)
+	                        FAVVMPlayerConnection& OutPlayerConnection) const
 	{
 	};
 
 	virtual void ToString(const FAVVMPlayerConnection& PlayerConnection,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 
 	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges)
+	                        TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges) const
 	{
 	};
 
 	virtual void FromString(const FString& Payload,
-	                        FAVVMRuntimeChallenge& OutPlayerChallenge)
+	                        FAVVMRuntimeChallenge& OutPlayerChallenge) const
 	{
 	};
 
 	virtual void ToString(const FAVVMRuntimeChallenge& PlayerChallenge,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 
 	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMRuntimeResource>& OutPlayerResources)
+	                        TArray<FAVVMRuntimeResource>& OutPlayerResources) const
 	{
 	};
 
 	virtual void FromString(const FString& Payload,
-	                        FAVVMRuntimeResource& OutPlayerResource)
+	                        FAVVMRuntimeResource& OutPlayerResource) const
 	{
 	};
 
 	virtual void ToString(const FAVVMRuntimeResource& PlayerResource,
-	                      FString& OutFormat)
+	                      FString& OutFormat) const
 	{
 	};
 };

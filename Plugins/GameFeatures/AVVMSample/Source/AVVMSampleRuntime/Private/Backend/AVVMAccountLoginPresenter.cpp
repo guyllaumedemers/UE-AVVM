@@ -96,10 +96,10 @@ void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
 		//		A) PlayerProfilePresenter		- initializing our profile with payload data from login callback. i.e this call!
 		//		B) PartyManagerPresenter		- running an initial force fetch of all available options.
 		//		C) HostConfigurationPresenter	- running an initial force fetch of a default party.
-		BP_OnLoginRequestSuccess(Payload);
+		BP_OnRequestSuccess(Payload);
 	}
 	else
 	{
-		BP_OnLoginRequestFailure(Payload);
+		BP_OnRequestFailure(Payload);
 	}
 }

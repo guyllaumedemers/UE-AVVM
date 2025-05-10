@@ -114,3 +114,38 @@ ULocalPlayer* UAVVMOnlineInterfaceUtils::GetFirstLocalPlayer(const UObject* Worl
 		return nullptr;
 	}
 }
+
+FString UAVVMOnlineInterfaceUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMPlayerWallet>(Payload);
+}
+
+FString UAVVMOnlineInterfaceUtils::SerializePlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMPlayerProfile>(Payload);
+}
+
+FString UAVVMOnlineInterfaceUtils::SerializeHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMHostConfiguration>(Payload);
+}
+
+FString UAVVMOnlineInterfaceUtils::SerializeParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMParty>(Payload);
+}
+
+FString UAVVMOnlineInterfaceUtils::SerializePlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMPlayerConnection>(Payload);
+}
+
+FString UAVVMOnlineInterfaceUtils::SerializePlayerChallenge(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMRuntimeChallenge>(Payload);
+}
+
+FString UAVVMOnlineInterfaceUtils::SerializePlayerResource(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	return SerializeToString<FAVVMRuntimeResource>(Payload);
+}
