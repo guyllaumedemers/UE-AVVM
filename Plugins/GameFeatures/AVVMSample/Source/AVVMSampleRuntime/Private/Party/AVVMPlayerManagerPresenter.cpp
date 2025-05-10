@@ -34,6 +34,10 @@ AActor* UAVVMPlayerManagerPresenter::GetOuterKey() const
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	StartPresenting();
+
+	// @gdemers can happen post-join/post-exit (and invoked through BP_OnNotificationReceived_RefreshAllPlayers) which also imply
+	// that we have just entered a new party.
+	SetPlayerConnections(Payload);
 }
 
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
