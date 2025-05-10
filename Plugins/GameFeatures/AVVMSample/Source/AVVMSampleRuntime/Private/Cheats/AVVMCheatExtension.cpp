@@ -31,7 +31,6 @@
 #include "Cheats/AVVMCheatData.h"
 #include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
-#include "HAL/FileManagerGeneric.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 // @gdemers for tracing how frequently these are being rebuilt if ever it becomes a problem!
@@ -144,14 +143,18 @@ void UAVVMCheatExtension::Draw()
 		ImGui::BeginGroup();
 
 		static int32 CurrentTagChannelIndex = 0;
-		ImGui::Combo("Tag Channel",
-		             &CurrentTagChannelIndex,
-		             LazyGatherTagChannels(bHasTagChanged));
+		static const char* NotificationChannelTitle = "Notification Tag";
+		ImGui::Combo(NotificationChannelTitle, &CurrentTagChannelIndex, LazyGatherTagChannels(bHasTagChanged));
 
 		static int32 CurrentRegistryIdIndex = 0;
-		ImGui::Combo("Payload Registry Id",
-		             &CurrentRegistryIdIndex,
-		             LazyGatherRegistryIds(bHasRegistriesChanged));
+		static const char* RegistryIdItemNameTitle = "ItemName";
+		ImGui::Combo(RegistryIdItemNameTitle, &CurrentRegistryIdIndex, LazyGatherRegistryIds(bHasRegistriesChanged));
+
+		static bool bShouldLinkComboBox = false;
+		static const char* LinkTitle = "Link";
+		ImGui::Checkbox(LinkTitle, &bShouldLinkComboBox);
+
+		HandleComboBoxLinkage(bShouldLinkComboBox, CurrentTagChannelIndex, CurrentRegistryIdIndex);
 
 		if (ImGui::Button("Notify"))
 		{
@@ -366,6 +369,42 @@ inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, c
 	}
 
 	return FString(Head);
+}
+
+void UAVVMCheatExtension::HandleComboBoxLinkage(const bool bIsComboBoxLinked,
+                                                const int32& TagChannelIndex,
+                                                int32& OutRegistryIndex)
+{
+	static int32 PreviousTagChannelIndex = 0;
+	static bool bWasInitialized = false;
+
+	const bool bDidTagChannelIndexChanged = (TagChannelIndex != PreviousTagChannelIndex);
+	if (bWasInitialized && !bDidTagChannelIndexChanged)
+	{
+		return;
+	}
+
+	bWasInitialized = true;
+	if (bIsComboBoxLinked)
+	{
+		const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), TagChannelIndex);
+
+		TArray<FString> SplitsA;
+		Channel.ParseIntoArray(SplitsA, TEXT("."));
+
+		const FString& Back = SplitsA.Last();
+
+		int32 Counter = 0;
+		const char* Head = LazyGatherRegistryIds(bHasRegistriesChanged);
+		while (*Head && (Head != Back))
+		{
+			Head += strlen(Head) + 1;
+			++Counter;
+		}
+
+		PreviousTagChannelIndex = TagChannelIndex;
+		OutRegistryIndex = Counter;
+	}
 }
 
 void UAVVMCheatExtension::OnDataRegistrySubsystemChanged()
