@@ -98,6 +98,27 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static FString SerializePlayerResource(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetPlayerWallet(const FString& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetPlayerProfile(const FString& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetHostConfiguration(const FString& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetParty(const FString& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetPlayerConnection(const FString& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetPlayerChallenge(const FString& Payload);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TInstancedStruct<FAVVMNotificationPayload> GetPlayerResource(const FString& Payload);
+
 private:
 	template <typename UInterfaceClass, typename IInterfaceClass>
 	static bool GetInterface(const UObject* DerivedChild,
@@ -105,6 +126,9 @@ private:
 
 	template <typename TPayload>
 	static FString SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	template <typename TPayload>
+	static TInstancedStruct<FAVVMNotificationPayload> DeserializeString(const FString& Payload);
 };
 
 template <typename UInterfaceClass, typename IInterfaceClass>
@@ -162,4 +186,19 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 	FString OutFormat;
 	StringParser->ToString(*Data, OutFormat);
 	return OutFormat;
+}
+
+template <typename TPayload>
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::DeserializeString(const FString& Payload)
+{
+	const auto& StringParser = TScriptInterface<IAVVMOnlineStringParser>(FAVVMOnlineModule::GetJsonParser());
+	if (!ensureAlways(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(StringParser)))
+	{
+		UE_LOG(LogUI, Log, TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
+		return TInstancedStruct<FAVVMNotificationPayload>();
+	}
+
+	TPayload OutPayload;
+	StringParser->FromString(Payload, OutPayload);
+	return TInstancedStruct<TPayload>::Make(OutPayload);
 }
