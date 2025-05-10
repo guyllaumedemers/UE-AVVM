@@ -44,7 +44,7 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_StopPresenter(const 
 void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RefreshAllPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers event received post-join of a party and where we expect to initialize all player representation
-	// expect to create player states which own their AVVMComponent and AVVMPlayerConfigurationPresenter each.
+	// and create player states which own a AVVMComponent/AVVMPlayerConfigurationPresenter.
 	BP_RefreshPlayers(Payload);
 	UE_LOG(LogUI, Log, TEXT("[Local] Refreshing all Players Visual representation!"));
 	SetPlayerConnections(Payload);

@@ -130,12 +130,14 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 	if (bShouldKickPlayer)
 	{
 		TryKickPlayer(*PlayerRequest);
+		return;
 	}
 
 	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Invite);
 	if (bShouldInvitePlayer)
 	{
 		TryInvitePlayer(*PlayerRequest);
+		return;
 	}
 }
 

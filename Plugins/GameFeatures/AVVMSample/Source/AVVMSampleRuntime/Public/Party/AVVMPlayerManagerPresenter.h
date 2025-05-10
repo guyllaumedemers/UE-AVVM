@@ -70,6 +70,12 @@ protected:
 	virtual void BindViewModel() const override;
 
 	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void BP_RefreshPlayers(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)

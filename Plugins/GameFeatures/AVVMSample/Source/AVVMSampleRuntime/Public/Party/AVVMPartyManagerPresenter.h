@@ -80,12 +80,12 @@ protected:
 	void OnPartyExitRequestCompleted(const bool bWasSuccess,
 	                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	void TryKickPlayer(const FAVVMPlayerRequest& PlayeRequest);
+	void TryKickPlayer(const FAVVMPlayerRequest& PlayerRequest);
 
 	void OnKickFromPartyRequestCompleted(const bool bWasSuccess,
 	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	void TryInvitePlayer(const FAVVMPlayerRequest& PlayeRequest);
+	void TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest);
 
 	void OnInvitePlayerCompleted(const bool bWasSuccess,
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);

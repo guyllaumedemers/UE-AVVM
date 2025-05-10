@@ -89,6 +89,28 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfi
 	OnlineInterface->ForcePullPlayerProfile(Callback);
 }
 
+void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ProcessPlayerRequest(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	const auto* PlayerRequest = Payload.GetPtr<FAVVMPlayerRequest>();
+	if (!ensure(PlayerRequest != nullptr))
+	{
+		return;
+	}
+
+	const FString EventTypeString(EnumToString(PlayerRequest->RequestType));
+	UE_LOG(LogUI,
+	       Log,
+	       TEXT("Processing Player Request. Type: %s, In-Progress..."),
+	       *EventTypeString);
+
+	const bool bShouldTrade = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Trade);
+	if (bShouldTrade)
+	{
+		TryTrade(*PlayerRequest);
+		return;
+	}
+}
+
 void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers additional data could be defined to properly log output here!
@@ -146,6 +168,37 @@ void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool b
 		// @gdemers update profile onSuccess
 		SetPlayerProfile(Payload);
 
+		// @gdemers run any additional behaviour here!
+		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::TryTrade(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnTradeCompleted);
+	UE_LOG(LogUI, Log, TEXT("Trade Request. In-Progress..."));
+
+	OnlineInterface->Trade(PlayerRequest, Callback);
+}
+
+void UAVVMPlayerProfilePresenter::OnTradeCompleted(const bool bWasSuccess,
+                                                   const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Trade Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
 		// @gdemers run any additional behaviour here!
 		BP_OnRequestSuccess(Payload);
 	}

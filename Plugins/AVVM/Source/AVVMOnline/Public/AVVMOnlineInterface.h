@@ -371,6 +371,14 @@ public:
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
+
+	// @gdemers networked request between two players.
+	// Note : trading and sending gift are really the same action, the difference is simply in the payload exchange, one end
+	// of the interaction being empty. re-use the same api if required!
+	virtual void Trade(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
 };
 
 /**
@@ -503,14 +511,6 @@ public:
 
 	// @gdemers local request only.
 	virtual void BuyItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
-	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
-	}
-
-	// @gdemers networked request between two players.
-	// Note : trading and sending gift are really the same action, the difference is simply in the payload exchange, one end
-	// of the interaction being empty. re-use the same api if required!
-	virtual void TradeItem(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}

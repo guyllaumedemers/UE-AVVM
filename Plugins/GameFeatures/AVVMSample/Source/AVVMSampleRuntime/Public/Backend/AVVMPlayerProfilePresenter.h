@@ -27,6 +27,8 @@
 
 #include "AVVMPlayerProfilePresenter.generated.h"
 
+struct FAVVMPlayerRequest;
+
 /**
  *	Class description:
  *
@@ -56,6 +58,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_ProcessPlayerRequest(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	void SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
@@ -67,6 +72,11 @@ protected:
 
 	void OnForcePullPlayerProfileCompleted(const bool bWasSuccess,
 	                                       const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void TryTrade(const FAVVMPlayerRequest& PlayerRequest);
+
+	void OnTradeCompleted(const bool bWasSuccess,
+	                      const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	// @gdemers expect the type erased payload to provide error context information
 	// for the messaging system.

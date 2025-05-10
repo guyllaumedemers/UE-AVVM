@@ -59,26 +59,20 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_BuyItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_TradeItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
 	void SetItems(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 	virtual void BindViewModel() const override;
 
-	void OnForcePullChallengesCompleted(const bool bWasSuccess,
-	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void OnForcePullShopContentCompleted(const bool bWasSuccess,
+	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void OnSellItemCompleted(const bool bWasSuccess,
 	                         const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void OnBuyItemCompleted(const bool bWasSuccess,
 	                        const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-	void OnTradeItemCompleted(const bool bWasSuccess,
-	                          const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
