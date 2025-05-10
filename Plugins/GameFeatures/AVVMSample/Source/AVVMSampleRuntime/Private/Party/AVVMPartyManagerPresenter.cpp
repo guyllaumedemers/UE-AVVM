@@ -281,7 +281,7 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 		// @gdemers Post-KickFromParty, we expect the backend to execute the following calls :
 		//		A) Execute the callback from the caller that requested the kick operation
 		//		B) Notify all Party members of a Player Removal (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteDisconnectPlayer)
-		//		C) Notify the Player that was kicked of his new status/party
+		//		C) Execute a new Join Party for the kicked player which will reinit it's visual state.
 
 		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
 		// will refresh the content of the party.
@@ -321,6 +321,7 @@ void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
 		// @gdemers Post-InvitePlayer, we expect the backend to execute the following calls :
 		//		A) Execute the callback from the caller that requested the invite operation
 		//		B) Notify all Party members of a new Player Connection (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlayer)
+		//		C) Execute a new Join Party for the invited player which will reinit it's visual state.
 
 		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
 		// will refresh the content of the party.
