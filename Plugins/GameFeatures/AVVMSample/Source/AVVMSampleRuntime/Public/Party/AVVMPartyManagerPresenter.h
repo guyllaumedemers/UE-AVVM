@@ -66,6 +66,7 @@ protected:
 	void BP_OnNotificationReceived_ProcessPlayerRequest(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void SetLocalParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;

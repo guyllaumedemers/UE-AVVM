@@ -39,3 +39,12 @@ void UAVVMPartyManagerViewModel::SetParties(const TScriptInterface<IAVVMOnlineSt
 		UE_MVVM_SET_PROPERTY_VALUE(Parties, OutResult);
 	}
 }
+
+void UAVVMPartyManagerViewModel::SetLocalParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	const auto* NewLocalParty = Payload.GetPtr<FAVVMParty>();
+	if (NewLocalParty != nullptr)
+	{
+		UE_MVVM_SET_PROPERTY_VALUE(LocalParty, NewLocalParty);
+	}
+}

@@ -145,13 +145,23 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 
 void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	// @gdemers additional data could be defined to properly log output here!
 	UE_LOG(LogUI, Log, TEXT("Updating local Parties!"));
 
 	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
 	if (IsValid(PartyManagerViewModel))
 	{
 		PartyManagerViewModel->SetParties(FAVVMOnlineModule::GetJsonParser(), Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::SetLocalParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Updating local Party!"));
+
+	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
+	if (IsValid(PartyManagerViewModel))
+	{
+		PartyManagerViewModel->SetLocalParty(Payload);
 	}
 }
 
@@ -198,8 +208,8 @@ void UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted(const bool bWasSucc
 	UE_LOG(LogUI, Log, TEXT("Join Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
-		// @gdemers update parties onSuccess
-		SetParties(Payload);
+		// @gdemers update local party onSuccess
+		SetLocalParty(Payload);
 
 		// @gdemers Post-Join, we expect to broadcast to the following systems :
 		//		A) HostConfigurationPresenter	- initialize our Host Configuration with payload data (i.e FAVVMParty)
@@ -218,8 +228,8 @@ void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSucc
 	UE_LOG(LogUI, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
-		// @gdemers update parties onSuccess
-		SetParties(Payload);
+		// @gdemers update local party onSuccess
+		SetLocalParty(Payload);
 
 		// @gdemers Post-Exit, we expect to broadcast to the following systems :
 		//		A) HostConfigurationPresenter	- reset our Host Configuration with payload data (i.e FAVVMParty)(now expected to be default/empty)
@@ -262,8 +272,8 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 	UE_LOG(LogUI, Log, TEXT("Kick Player from Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
-		// @gdemers update parties onSuccess
-		SetParties(Payload);
+		// @gdemers update local party onSuccess
+		SetLocalParty(Payload);
 
 		// @gdemers Post-KickFromParty, we expect to broadcast to the following systems :
 		//	if we were the one being kicked :
@@ -302,8 +312,8 @@ void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
 	UE_LOG(LogUI, Log, TEXT("Invite Player to Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
-		// @gdemers update parties onSuccess
-		SetParties(Payload);
+		// @gdemers update local party onSuccess
+		SetLocalParty(Payload);
 
 		// @gdemers Post-InviteToParty, we expect to broadcast to the following systems :
 		//		A) PlayerManagerPresenter		- run logic for creating a new players on HUD or other design requirements. (maybe 3d static representation)

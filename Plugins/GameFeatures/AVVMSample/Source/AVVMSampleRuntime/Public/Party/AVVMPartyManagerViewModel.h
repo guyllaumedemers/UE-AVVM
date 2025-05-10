@@ -45,7 +45,12 @@ public:
 	void SetParties(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
 	                const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	void SetLocalParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
 	TArray<FAVVMParty> Parties;
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	FAVVMParty LocalParty;
 };
