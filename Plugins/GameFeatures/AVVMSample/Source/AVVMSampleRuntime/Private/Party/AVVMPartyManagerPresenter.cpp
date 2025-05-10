@@ -26,7 +26,6 @@
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "GameFramework/GameMode.h"
-#include "Kismet/GameplayStatics.h"
 #include "Party/AVVMPartyManagerViewModel.h"
 
 AActor* UAVVMPartyManagerPresenter::GetOuterKey() const
@@ -193,8 +192,12 @@ void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSucc
 		// @gdemers update parties onSuccess
 		SetParties(Payload);
 
-		// @gdemers run any additional behaviour here!
-		BP_OnRequestSuccess(Payload);
+		// @gdemers Post-ForcePullParties, we expect the backend to execute the following calls :
+		//		A) Execute the callback from the caller that requested the kick operation
+		//		B) Return a set of parties, bound to a ViewModel that an already presenting screen (i.e Party Selection View) display if applicable.
+
+		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
+		// will refresh the content of the party.
 	}
 	else
 	{
@@ -275,13 +278,13 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 		// @gdemers update local party onSuccess
 		SetLocalParty(Payload);
 
-		// @gdemers Post-KickFromParty, we expect to broadcast to the following systems :
-		//	if we were the one being kicked :
-		//		A) HostConfigurationPresenter	- reset our Host Configuration with payload data (i.e FAVVMParty)(now expected to be default/empty)
-		//		B) PlayerManagerPresenter		- run initial logic for destroying players on HUD or other design requirements. (maybe 3d static representation)
-		//	else
-		//		A) PlayerManagerPresenter		- destroy the player that got kicked.
-		BP_OnRequestSuccess(Payload);
+		// @gdemers Post-KickFromParty, we expect the backend to execute the following calls :
+		//		A) Execute the callback from the caller that requested the kick operation
+		//		B) Notify all Party members of a Player Removal (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteDisconnectPlayer)
+		//		C) Notify the Player that was kicked of his new status/party
+
+		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
+		// will refresh the content of the party.
 	}
 	else
 	{
@@ -315,10 +318,12 @@ void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
 		// @gdemers update local party onSuccess
 		SetLocalParty(Payload);
 
-		// @gdemers Post-InviteToParty, we expect to broadcast to the following systems :
-		//		A) PlayerManagerPresenter		- run logic for creating a new players on HUD or other design requirements. (maybe 3d static representation)
-		// other behaviour for the newly added player should resolve the same as if the player directly invoked Join.
-		BP_OnRequestSuccess(Payload);
+		// @gdemers Post-InvitePlayer, we expect the backend to execute the following calls :
+		//		A) Execute the callback from the caller that requested the invite operation
+		//		B) Notify all Party members of a new Player Connection (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlayer)
+
+		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
+		// will refresh the content of the party.
 	}
 	else
 	{
