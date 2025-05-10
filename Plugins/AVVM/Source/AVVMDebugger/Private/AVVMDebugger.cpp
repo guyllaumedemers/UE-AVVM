@@ -190,7 +190,7 @@ void FAVVMDebuggerModule::CreateInputHandler()
 void FAVVMDebuggerModule::ClearInputHandler()
 {
 	UAVVMDebuggerInputHandler* Target = InputHandler.Get();
-	if (ensureAlways(IsValid(Target)))
+	if (IsValid(Target))
 	{
 		Target->SafeEnd();
 	}

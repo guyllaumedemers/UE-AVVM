@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Player/AVVMChallengeManagerPresenter.h"
+#include "Backend/AVVMChallengeManagerPresenter.h"
 
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
@@ -26,7 +26,7 @@
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "GameFramework/GameMode.h"
-#include "Player/AVVMChallengeManagerViewModel.h"
+#include "Backend/AVVMChallengeManagerViewModel.h"
 
 AActor* UAVVMChallengeManagerPresenter::GetOuterKey() const
 {

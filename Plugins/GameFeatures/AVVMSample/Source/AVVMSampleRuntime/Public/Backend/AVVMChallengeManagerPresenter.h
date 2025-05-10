@@ -30,8 +30,10 @@
 /**
 *	Class description:
  *
- *	UAVVMChallengesPresenter define a set of events that are to be completed to earn rewards in gameplay. For gameplay
- *	specific notification, the expected source from which should be push content is via the
+ *	UAVVMChallengesPresenter define a set of objectives to be completed to earn rewards during gameplay. Can be inspected when in a
+ *	serverless configuration. (via backend calls)
+ *
+ *	Note : For gameplay specific notification, like QTE notification showing updates, the expected notification source is via the
  *	UAVVMQuicktimeEventManagerPresenter.
  */
 UCLASS()
