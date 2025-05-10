@@ -80,6 +80,8 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 	}
 	else
 	{
+		// @gdemers joining an empty party imply being in our default state, i.e post-login we make a request
+		// to create a new party.
 		UE_LOG(LogUI, Log, TEXT("Join Empty Party Request. In-Progress..."));
 		OnlineInterface->JoinParty(FAVVMParty{}, Callback);
 	}

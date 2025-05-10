@@ -94,8 +94,7 @@ void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
 	{
 		// @gdemers Post-login, we expect to broadcast to the following systems :
 		//		A) PlayerProfilePresenter		- initializing our profile with payload data from login callback. i.e this call!
-		//		B) PartyManagerPresenter		- running an initial force fetch of all available options.
-		//		C) HostConfigurationPresenter	- running an initial force fetch of a default party.
+		//		B) PartyManagerPresenter		- run an initial request to join a new party
 		BP_OnRequestSuccess(Payload);
 	}
 	else
