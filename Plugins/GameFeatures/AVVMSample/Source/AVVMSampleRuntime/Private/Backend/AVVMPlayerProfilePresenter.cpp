@@ -200,8 +200,8 @@ void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool b
 
 void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
-	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
+	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -211,8 +211,7 @@ void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& Play
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted);
 	UE_LOG(LogUI, Log, TEXT("Invite Player Request. In-Progress..."));
 
-	// @gdemers expect the backend to resolve the party id based on the SrcUniqueNetId as he's part of the existing Party.
-	OnlineInterface->InviteInParty(PlayerRequest, Callback);
+	OnlineInterface->InviteFriend(PlayerRequest, Callback);
 }
 
 void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess,

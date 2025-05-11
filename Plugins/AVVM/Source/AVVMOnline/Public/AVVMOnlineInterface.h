@@ -419,11 +419,6 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void InviteInParty(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
-	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
-	}
-
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
@@ -453,6 +448,11 @@ public:
 	}
 
 	virtual void RemoveFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void InviteFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
