@@ -133,6 +133,20 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 		TryKickPlayer(*PlayerRequest);
 		return;
 	}
+
+	const bool bShouldMutePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::MutePlayer);
+	if (bShouldMutePlayer)
+	{
+		TryMutePlayer(*PlayerRequest);
+		return;
+	}
+
+	const bool bShouldCensorPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::CensorPlayer);
+	if (bShouldCensorPlayer)
+	{
+		TryCensorPlayer(*PlayerRequest);
+		return;
+	}
 }
 
 void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -278,6 +292,66 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 
 		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
 		// will refresh the content of the party.
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::TryMutePlayer(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlineMessagingInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineMessagingInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnMutePlayerRequestCompleted);
+	UE_LOG(LogUI, Log, TEXT("Mute Player Request. In-Progress..."));
+	OnlineInterface->MutePlayer(PlayerRequest, Callback);
+}
+
+void UAVVMPartyManagerPresenter::OnMutePlayerRequestCompleted(const bool bWasSuccess,
+                                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Mute Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers we should notify any messaging system presenter to add a visual feedback for muted player
+		BP_MutePlayer(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPartyManagerPresenter::TryCensorPlayer(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlineMessagingInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineMessagingInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnCensorPlayerRequestCompleted);
+	UE_LOG(LogUI, Log, TEXT("Censor Player Request. In-Progress..."));
+	OnlineInterface->CensorPlayer(PlayerRequest, Callback);
+}
+
+void UAVVMPartyManagerPresenter::OnCensorPlayerRequestCompleted(const bool bWasSuccess,
+                                                                const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Censor Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers we should notify any messaging system presenter to add a visual feedback for censored player
+		BP_CensorPlayer(Payload);
 	}
 	else
 	{

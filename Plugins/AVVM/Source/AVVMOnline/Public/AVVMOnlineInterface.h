@@ -466,6 +466,34 @@ public:
 /**
 *	Class description:
  *
+ *	UAVVMOnlineMessagingInterface. Abstract the subsystem interfacing with the microservice
+ *	for messaging channels between players. (mic, chat, email, etc...)
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineMessagingInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMONLINE_API IAVVMOnlineMessagingInterface
+{
+	GENERATED_BODY()
+
+public:
+	virtual void MutePlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void CensorPlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+};
+
+/**
+*	Class description:
+ *
  *	UAVVMOnlineChallengesInterface. Abstract the subsystem interfacing with the microservice
  *	for (Player) Challenges progression.
  */

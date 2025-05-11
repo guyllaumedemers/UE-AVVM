@@ -56,6 +56,12 @@ bool UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(const UObject* Der
 	                    IAVVMOnlineFriendInterface>(DerivedChild, OutInterface);
 }
 
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineMessagingInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineMessagingInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineMessagingInterface,
+	                    IAVVMOnlineMessagingInterface>(DerivedChild, OutInterface);
+}
+
 bool UAVVMOnlineInterfaceUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
                                                                   TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
 {

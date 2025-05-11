@@ -86,9 +86,25 @@ protected:
 	void OnKickFromPartyRequestCompleted(const bool bWasSuccess,
 	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	void TryMutePlayer(const FAVVMPlayerRequest& PlayerRequest);
+
+	void OnMutePlayerRequestCompleted(const bool bWasSuccess,
+	                                  const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void TryCensorPlayer(const FAVVMPlayerRequest& PlayerRequest);
+
+	void OnCensorPlayerRequestCompleted(const bool bWasSuccess,
+	                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_MutePlayer(const TInstancedStruct<FAVVMNotificationPayload>& PlayerRequest);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_CensorPlayer(const TInstancedStruct<FAVVMNotificationPayload>& PlayerRequest);
 };
