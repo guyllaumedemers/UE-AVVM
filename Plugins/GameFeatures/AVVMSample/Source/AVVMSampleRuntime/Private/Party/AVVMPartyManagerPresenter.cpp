@@ -134,7 +134,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 		return;
 	}
 
-	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Invite);
+	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::InviteFriend);
 	if (bShouldInvitePlayer)
 	{
 		TryInvitePlayer(*PlayerRequest);

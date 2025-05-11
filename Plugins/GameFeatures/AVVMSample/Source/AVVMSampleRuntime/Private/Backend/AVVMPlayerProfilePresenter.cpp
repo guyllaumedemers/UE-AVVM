@@ -109,6 +109,20 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ProcessPlayerRequest
 		TryTrade(*PlayerRequest);
 		return;
 	}
+
+	const bool bShouldAddFriend = (PlayerRequest->RequestType == EAVVMPlayerRequestType::AddFriend);
+	if (bShouldAddFriend)
+	{
+		TryAddFriend(*PlayerRequest);
+		return;
+	}
+
+	const bool bShouldRemoveFriend = (PlayerRequest->RequestType == EAVVMPlayerRequestType::RemoveFriend);
+	if (bShouldRemoveFriend)
+	{
+		TryRemoveFriend(*PlayerRequest);
+		return;
+	}
 }
 
 void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -170,6 +184,71 @@ void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool b
 
 		// @gdemers run any additional behaviour here!
 		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::TryAddFriend(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnAddFriendCompleted);
+	UE_LOG(LogUI, Log, TEXT("Adding new Friend Request. In-Progress..."));
+
+	OnlineInterface->AddFriend(PlayerRequest, Callback);
+}
+
+void UAVVMPlayerProfilePresenter::OnAddFriendCompleted(const bool bWasSuccess,
+                                                       const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	// @gdemers note that friend request are pending until accepted by the receiving end of the request.
+	UE_LOG(LogUI, Log, TEXT("Friend Request Add Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
+		// imply that we aren't using steam service and have a custom screen in the game for displaying this information.
+		BP_AddFriend(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::TryRemoveFriend(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnRemoveFriendCompleted);
+	UE_LOG(LogUI, Log, TEXT("Removing Friend Request. In-Progress..."));
+
+	OnlineInterface->RemoveFriend(PlayerRequest, Callback);
+}
+
+void UAVVMPlayerProfilePresenter::OnRemoveFriendCompleted(const bool bWasSuccess,
+                                                          const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Friend Request Remove Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
+		// imply that we aren't using steam service and have a custom screen in the game for displaying this information.
+		BP_RemoveFriend(Payload);
 	}
 	else
 	{

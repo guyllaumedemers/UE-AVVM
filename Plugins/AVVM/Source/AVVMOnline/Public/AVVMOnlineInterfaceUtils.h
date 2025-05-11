@@ -54,6 +54,10 @@ public:
 	                                         TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static bool GetOuterOnlineFriendInterface(const UObject* DerivedChild,
+	                                          TScriptInterface<IAVVMOnlineFriendInterface>& OutInterface);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
 	                                              TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface);
 

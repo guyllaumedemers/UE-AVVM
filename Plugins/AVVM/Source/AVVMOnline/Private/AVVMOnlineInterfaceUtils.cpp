@@ -50,6 +50,12 @@ bool UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(const UObject* Deri
 	                    IAVVMOnlinePartyInterface>(DerivedChild, OutInterface);
 }
 
+bool UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineFriendInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineFriendInterface,
+	                    IAVVMOnlineFriendInterface>(DerivedChild, OutInterface);
+}
+
 bool UAVVMOnlineInterfaceUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
                                                                   TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
 {

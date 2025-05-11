@@ -73,6 +73,16 @@ protected:
 	void OnForcePullPlayerProfileCompleted(const bool bWasSuccess,
 	                                       const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	void TryAddFriend(const FAVVMPlayerRequest& PlayerRequest);
+
+	void OnAddFriendCompleted(const bool bWasSuccess,
+	                          const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	void TryRemoveFriend(const FAVVMPlayerRequest& PlayerRequest);
+
+	void OnRemoveFriendCompleted(const bool bWasSuccess,
+	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	void TryTrade(const FAVVMPlayerRequest& PlayerRequest);
 
 	void OnTradeCompleted(const bool bWasSuccess,
@@ -85,4 +95,10 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_AddFriend(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_RemoveFriend(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 };

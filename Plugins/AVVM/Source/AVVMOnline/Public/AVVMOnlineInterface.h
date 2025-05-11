@@ -240,7 +240,9 @@ UENUM(BlueprintType)
 enum class EAVVMPlayerRequestType : uint8
 {
 	None,
-	Invite,
+	InviteFriend,
+	AddFriend,
+	RemoveFriend,
 	Block,
 	Kick,
 	Mute,
@@ -252,8 +254,12 @@ inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
 {
 	switch (State)
 	{
-		case EAVVMPlayerRequestType::Invite:
+		case EAVVMPlayerRequestType::InviteFriend:
 			return TEXT("Invite");
+		case EAVVMPlayerRequestType::AddFriend:
+			return TEXT("AddFriend");
+		case EAVVMPlayerRequestType::RemoveFriend:
+			return TEXT("RemoveFriend");
 		case EAVVMPlayerRequestType::Block:
 			return TEXT("Block");
 		case EAVVMPlayerRequestType::Kick:
@@ -419,6 +425,34 @@ public:
 	}
 
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+};
+
+/**
+*	Class description:
+ *
+ *	UAVVMOnlineFriendInterface. Abstract the subsystem interfacing with the microservice
+ *	for a user Friends.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineFriendInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMONLINE_API IAVVMOnlineFriendInterface
+{
+	GENERATED_BODY()
+
+public:
+	virtual void AddFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void RemoveFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
