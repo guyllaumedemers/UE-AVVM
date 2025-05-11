@@ -133,13 +133,6 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 		TryKickPlayer(*PlayerRequest);
 		return;
 	}
-
-	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::InviteFriend);
-	if (bShouldInvitePlayer)
-	{
-		TryInvitePlayer(*PlayerRequest);
-		return;
-	}
 }
 
 void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -282,46 +275,6 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 		//		A) Execute the callback from the caller that requested the kick operation
 		//		B) Notify all Party members of a Player Removal (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteDisconnectPlayer)
 		//		C) Execute a new Join Party for the kicked player which will reinit it's visual state.
-
-		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
-		// will refresh the content of the party.
-	}
-	else
-	{
-		BP_OnRequestFailure(Payload);
-	}
-}
-
-void UAVVMPartyManagerPresenter::TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest)
-{
-	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
-	if (!ensure(bIsValid))
-	{
-		return;
-	}
-
-	FAVVMOnlineResquestDelegate Callback;
-	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnInvitePlayerCompleted);
-	UE_LOG(LogUI, Log, TEXT("Invite Player to Party Request. In-Progress..."));
-
-	// @gdemers expect the backend to resolve the party id based on the SrcUniqueNetId as he's part of the existing Party.
-	OnlineInterface->InviteInParty(PlayerRequest, Callback);
-}
-
-void UAVVMPartyManagerPresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
-                                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	UE_LOG(LogUI, Log, TEXT("Invite Player to Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
-	if (bWasSuccess)
-	{
-		// @gdemers update local party onSuccess
-		SetLocalParty(Payload);
-
-		// @gdemers Post-InvitePlayer, we expect the backend to execute the following calls :
-		//		A) Execute the callback from the caller that requested the invite operation
-		//		B) Notify all Party members of a new Player Connection (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlayer)
-		//		C) Execute a new Join Party for the invited player which will reinit it's visual state.
 
 		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
 		// will refresh the content of the party.

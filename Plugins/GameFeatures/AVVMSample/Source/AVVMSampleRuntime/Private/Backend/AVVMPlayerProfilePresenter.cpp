@@ -123,6 +123,13 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ProcessPlayerRequest
 		TryRemoveFriend(*PlayerRequest);
 		return;
 	}
+
+	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::InviteFriend);
+	if (bShouldInvitePlayer)
+	{
+		TryInvitePlayer(*PlayerRequest);
+		return;
+	}
 }
 
 void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -184,6 +191,47 @@ void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool b
 
 		// @gdemers run any additional behaviour here!
 		BP_OnRequestSuccess(Payload);
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted);
+	UE_LOG(LogUI, Log, TEXT("Invite Player Request. In-Progress..."));
+
+	// @gdemers expect the backend to resolve the party id based on the SrcUniqueNetId as he's part of the existing Party.
+	OnlineInterface->InviteInParty(PlayerRequest, Callback);
+}
+
+void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
+                                                          const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Invite Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
+		// imply that we aren't using steam service and have a custom screen in the game for displaying this information.
+		BP_InviteFriend(Payload);
+
+		// @gdemers Post-InvitePlayer, we expect the backend to execute the following calls :
+		//		A) Execute the callback from the caller that requested the invite operation
+		//		B) Notify all Party members of a new Player Connection (i.e UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlayer)
+		//		C) Execute a new Join Party for the invited player which will reinit it's visual state.
+
+		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
+		// will refresh the content of the party.
 	}
 	else
 	{

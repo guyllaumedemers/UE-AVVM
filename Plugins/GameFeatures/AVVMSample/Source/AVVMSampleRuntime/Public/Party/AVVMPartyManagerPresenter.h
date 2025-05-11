@@ -86,11 +86,6 @@ protected:
 	void OnKickFromPartyRequestCompleted(const bool bWasSuccess,
 	                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
-	void TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest);
-
-	void OnInvitePlayerCompleted(const bool bWasSuccess,
-	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestSuccess(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 

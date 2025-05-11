@@ -73,6 +73,11 @@ protected:
 	void OnForcePullPlayerProfileCompleted(const bool bWasSuccess,
 	                                       const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	void TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest);
+
+	void OnInvitePlayerCompleted(const bool bWasSuccess,
+	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	void TryAddFriend(const FAVVMPlayerRequest& PlayerRequest);
 
 	void OnAddFriendCompleted(const bool bWasSuccess,
@@ -95,6 +100,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnRequestFailure(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_InviteFriend(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_AddFriend(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
