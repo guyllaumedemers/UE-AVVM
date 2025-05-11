@@ -124,7 +124,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ProcessPlayerRequest
 		return;
 	}
 
-	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::InviteFriend);
+	const bool bShouldInvitePlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::InvitePlayer);
 	if (bShouldInvitePlayer)
 	{
 		TryInvitePlayer(*PlayerRequest);
@@ -211,7 +211,7 @@ void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& Play
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted);
 	UE_LOG(LogUI, Log, TEXT("Invite Player Request. In-Progress..."));
 
-	OnlineInterface->InviteFriend(PlayerRequest, Callback);
+	OnlineInterface->InvitePlayer(PlayerRequest, Callback);
 }
 
 void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
@@ -222,7 +222,7 @@ void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess
 	{
 		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
 		// imply that we aren't using steam service and have a custom screen in the game for displaying this information.
-		BP_InviteFriend(Payload);
+		BP_InvitePlayer(Payload);
 
 		// @gdemers Post-InvitePlayer, we expect the backend to execute the following calls :
 		//		A) Execute the callback from the caller that requested the invite operation
@@ -231,6 +231,38 @@ void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess
 
 		// @gdemers OnSucess, nothing should happen here! the above statement will be handled from a backend party update call which
 		// will refresh the content of the party.
+	}
+	else
+	{
+		BP_OnRequestFailure(Payload);
+	}
+}
+
+void UAVVMPlayerProfilePresenter::TryBlockPlayer(const FAVVMPlayerRequest& PlayerRequest)
+{
+	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
+	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	if (!ensure(bIsValid))
+	{
+		return;
+	}
+
+	FAVVMOnlineResquestDelegate Callback;
+	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnBlockPlayerCompleted);
+	UE_LOG(LogUI, Log, TEXT("Block Player Request. In-Progress..."));
+
+	OnlineInterface->BlockPlayer(PlayerRequest, Callback);
+}
+
+void UAVVMPlayerProfilePresenter::OnBlockPlayerCompleted(const bool bWasSuccess,
+                                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	UE_LOG(LogUI, Log, TEXT("Block Request Add Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	if (bWasSuccess)
+	{
+		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
+		// imply that we aren't using steam service and have a custom screen in the game for displaying this information.
+		BP_BlockPlayer(Payload);
 	}
 	else
 	{

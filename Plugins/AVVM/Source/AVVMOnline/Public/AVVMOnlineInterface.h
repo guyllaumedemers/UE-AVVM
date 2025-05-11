@@ -240,13 +240,13 @@ UENUM(BlueprintType)
 enum class EAVVMPlayerRequestType : uint8
 {
 	None,
-	InviteFriend,
 	AddFriend,
 	RemoveFriend,
-	Block,
-	Kick,
-	Mute,
-	Censor,
+	InvitePlayer, // @gdemers more generic, not restricted to friends. Allow sending a request when two players are in the same world. (and not only via profile access)
+	BlockPlayer,
+	KickPlayer,
+	MutePlayer,
+	CensorPlayer,
 	Trade
 };
 
@@ -254,20 +254,20 @@ inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
 {
 	switch (State)
 	{
-		case EAVVMPlayerRequestType::InviteFriend:
-			return TEXT("Invite");
 		case EAVVMPlayerRequestType::AddFriend:
 			return TEXT("AddFriend");
 		case EAVVMPlayerRequestType::RemoveFriend:
 			return TEXT("RemoveFriend");
-		case EAVVMPlayerRequestType::Block:
-			return TEXT("Block");
-		case EAVVMPlayerRequestType::Kick:
-			return TEXT("Kick");
-		case EAVVMPlayerRequestType::Mute:
-			return TEXT("Mute");
-		case EAVVMPlayerRequestType::Censor:
-			return TEXT("Censor");
+		case EAVVMPlayerRequestType::InvitePlayer:
+			return TEXT("InvitePlayer");
+		case EAVVMPlayerRequestType::BlockPlayer:
+			return TEXT("BlockPlayer");
+		case EAVVMPlayerRequestType::KickPlayer:
+			return TEXT("KickPlayer");
+		case EAVVMPlayerRequestType::MutePlayer:
+			return TEXT("MutePlayer");
+		case EAVVMPlayerRequestType::CensorPlayer:
+			return TEXT("CensorPlayer");
 		case EAVVMPlayerRequestType::Trade:
 			return TEXT("Trade");
 	}
@@ -452,7 +452,12 @@ public:
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void InviteFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void InvitePlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
+	{
+		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+	}
+
+	virtual void BlockPlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
 	}

@@ -127,7 +127,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 	       TEXT("Processing Player Request. Type: %s, In-Progress..."),
 	       *EventTypeString);
 
-	const bool bShouldKickPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::Kick);
+	const bool bShouldKickPlayer = (PlayerRequest->RequestType == EAVVMPlayerRequestType::KickPlayer);
 	if (bShouldKickPlayer)
 	{
 		TryKickPlayer(*PlayerRequest);
