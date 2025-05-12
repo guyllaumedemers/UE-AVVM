@@ -34,7 +34,13 @@
  */
 UCLASS()
 class AVVMONLINE_API AAVVMGameMode : public AModularGameMode,
-                                     public IAVVMOnlineIdentityInterface
+                                     public IAVVMOnlineBattlePassInterface,
+                                     public IAVVMOnlineChallengesInterface,
+                                     public IAVVMOnlineFriendInterface,
+                                     public IAVVMOnlineIdentityInterface,
+                                     public IAVVMOnlineMessagingInterface,
+                                     public IAVVMOnlinePartyInterface,
+                                     public IAVVMOnlineStoreInterface
 {
 	GENERATED_BODY()
 };

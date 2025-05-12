@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMOnlineInterface.h"
 #include "ModularGameState.h"
 
 #include "AVVMGameState.generated.h"
@@ -32,8 +31,7 @@
  *	AAVVMGameState TBD.
  */
 UCLASS()
-class AVVMONLINE_API AAVVMGameState : public AModularGameState,
-                                      public IAVVMOnlineIdentityInterface
+class AVVMONLINE_API AAVVMGameState : public AModularGameState
 {
 	GENERATED_BODY()
 };
