@@ -48,7 +48,10 @@ void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 	bHasRegistriesChanged = true;
 	bHasTagChanged = true;
 
+#if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
+#endif
+
 	IGameplayTagsModule::OnGameplayTagTreeChanged.AddUObject(this, &UAVVMCheatExtension::OnGameplayTagTreeChanged);
 
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
@@ -63,7 +66,10 @@ void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 {
 	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
 
+#if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
+#endif
+
 	IGameplayTagsModule::OnGameplayTagTreeChanged.RemoveAll(this);
 
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();

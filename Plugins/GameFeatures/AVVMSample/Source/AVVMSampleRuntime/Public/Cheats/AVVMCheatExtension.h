@@ -21,14 +21,14 @@
 
 #include "CoreMinimal.h"
 
-#if WITH_AVVM_DEBUGGER
-#include "AVVMDebugger.h"
-#endif
-
 #include "DataRegistryTypes.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
+
+#if WITH_AVVM_DEBUGGER
+#include "AVVMDebugger.h"
+#endif
 
 #include "AVVMCheatExtension.generated.h"
 
@@ -44,8 +44,7 @@
 UCLASS(BlueprintType)
 class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
-                                                  ,
-                                                  public IAVVMImGuiDescriptor
+                                                  , public IAVVMImGuiDescriptor
 #endif
 {
 	GENERATED_BODY()

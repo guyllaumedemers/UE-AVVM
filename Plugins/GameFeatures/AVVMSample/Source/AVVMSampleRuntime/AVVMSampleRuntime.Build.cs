@@ -55,12 +55,6 @@ public class AVVMSampleRuntime : ModuleRules
 		// is enabled. Set your project editor .target.cs to enable it!
 		if (Target.bBuildDeveloperTools)
 		{
-			PublicDefinitions.AddRange(
-				new string[]
-				{
-					"WITH_AVVM_DEBUGGER"
-				});
-
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{

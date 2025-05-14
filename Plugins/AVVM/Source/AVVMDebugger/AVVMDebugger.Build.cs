@@ -46,6 +46,12 @@ public class AVVMDebugger : ModuleRules
 			{
 			}
 		);
+		
+		PublicDefinitions.AddRange(
+			new string[]
+			{
+				"UE_ENABLE_AVVM_DEBUGGER"
+			});
 
 		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
 		PrivateDefinitions.Add(
