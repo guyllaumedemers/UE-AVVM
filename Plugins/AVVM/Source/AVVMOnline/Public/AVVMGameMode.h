@@ -29,8 +29,7 @@
 /**
  *	Class description:
  *
- *	AAVVMGameMode. Actor type that handle interaction with online service general use case, amoung
- *	other things.
+ *	AAVVMGameMode. Actor type that handle interaction with online service general use case, among other things.
  */
 UCLASS()
 class AVVMONLINE_API AAVVMGameMode : public AModularGameMode,

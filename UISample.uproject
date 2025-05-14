@@ -56,10 +56,6 @@
       "Enabled": true
     },
     {
-      "Name": "StructUtils",
-      "Enabled": true
-    },
-    {
       "Name": "UIExtension",
       "Enabled": true
     }
