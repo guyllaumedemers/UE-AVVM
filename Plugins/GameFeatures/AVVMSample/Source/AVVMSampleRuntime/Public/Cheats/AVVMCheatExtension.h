@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMSampleRuntimeModule.h"
 #include "DataRegistryTypes.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Engine/StreamableManager.h"
