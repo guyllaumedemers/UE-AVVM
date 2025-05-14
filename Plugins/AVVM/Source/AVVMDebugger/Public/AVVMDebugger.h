@@ -106,8 +106,10 @@ public:
 
 private:
 	void OnStartGameInstance(UGameInstance* Game);
+#if WITH_EDITOR
 	void OnPIEStart(UGameInstance* Game);
 	void OnPIEEnd(UGameInstance* Game);
+#endif
 	void RegisterImGuiDelegates();
 	void ClearImGuiDelegates();
 	void CreateInputHandler();

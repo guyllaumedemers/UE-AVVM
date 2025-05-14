@@ -21,12 +21,7 @@
     },
     {
       "Name": "AVVMDebugger",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "AVVMGameplay",
-      "Type": "Runtime",
+      "Type": "DeveloperTool",
       "LoadingPhase": "Default"
     },
     {

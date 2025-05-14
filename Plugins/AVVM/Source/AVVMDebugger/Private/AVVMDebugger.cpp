@@ -107,15 +107,19 @@ void FAVVMDebuggerModule::StartupModule()
 	// Even if they exposed a set of Delegates to their api, it cannot be bound to in the Startup function due to the call to Utilities::GetWorldContextIndex
 	// returning INVALID_INDEX and FImGuiDelegatesContainer::WorldDebugDelegates.FindOrAdd failing to find a valid Key. (all due to the World not being yet created!)
 	GameInstanceDelegateHandle = FWorldDelegates::OnStartGameInstance.AddRaw(this, &FAVVMDebuggerModule::OnStartGameInstance);
+#if WITH_EDITOR
 	PIEStartDelegateHandle = FWorldDelegates::OnPIEStarted.AddRaw(this, &FAVVMDebuggerModule::OnPIEStart);
 	PIEEndDelegateHandle = FWorldDelegates::OnPIEEnded.AddRaw(this, &FAVVMDebuggerModule::OnPIEEnd);
+#endif
 }
 
 void FAVVMDebuggerModule::ShutdownModule()
 {
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceDelegateHandle);
+#if WITH_EDITOR
 	FWorldDelegates::OnPIEStarted.Remove(PIEStartDelegateHandle);
 	FWorldDelegates::OnPIEEnded.Remove(PIEEndDelegateHandle);
+#endif
 	ClearImGuiDelegates();
 	ClearInputHandler();
 }
@@ -141,6 +145,7 @@ void FAVVMDebuggerModule::OnStartGameInstance(UGameInstance* Game)
 	RegisterImGuiDelegates();
 }
 
+#if WITH_EDITOR
 void FAVVMDebuggerModule::OnPIEStart(UGameInstance* Game)
 {
 	CreateInputHandler();
@@ -152,6 +157,7 @@ void FAVVMDebuggerModule::OnPIEEnd(UGameInstance* Game)
 	ClearInputHandler();
 	ClearImGuiDelegates();
 }
+#endif
 
 void FAVVMDebuggerModule::RegisterImGuiDelegates()
 {

@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "Cheats/AVVMCheatExtension.h"
 
-#include <imgui.h>
-
 #include "AVVM.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSettings.h"
@@ -29,9 +27,13 @@
 #include "GameplayTagsModule.h"
 #include "GameplayTagsSettings.h"
 #include "Cheats/AVVMCheatData.h"
-#include "Containers/StringFwd.h"
 #include "Engine/AssetManager.h"
 #include "ProfilingDebugging/CountersTrace.h"
+
+#if WITH_AVVM_DEBUGGER
+#include "Containers/StringFwd.h"
+#include <imgui.h>
+#endif
 
 // @gdemers for tracing how frequently these are being rebuilt if ever it becomes a problem!
 TRACE_DECLARE_INT_COUNTER(ComboTagRebuild, TEXT("Combo Tag Rebuild Count"));
@@ -136,6 +138,7 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
 }
 
+#if WITH_AVVM_DEBUGGER
 void UAVVMCheatExtension::Draw()
 {
 	if (ImGui::CollapsingHeader("Cheats"))
@@ -167,6 +170,7 @@ void UAVVMCheatExtension::Draw()
 		ImGui::EndGroup();
 	}
 }
+#endif
 
 void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result)
 {
@@ -267,6 +271,7 @@ TInstancedStruct<FAVVMCheatData> UAVVMCheatExtension::GetPayload(const TSharedPt
 	}
 }
 
+#if WITH_AVVM_DEBUGGER
 inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
@@ -406,6 +411,7 @@ void UAVVMCheatExtension::HandleComboBoxLinkage(const bool bIsComboBoxLinked,
 		OutRegistryIndex = Counter;
 	}
 }
+#endif
 
 void UAVVMCheatExtension::OnDataRegistrySubsystemChanged()
 {

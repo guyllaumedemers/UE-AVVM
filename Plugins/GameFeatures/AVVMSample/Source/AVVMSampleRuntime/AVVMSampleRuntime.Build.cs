@@ -30,7 +30,6 @@ public class AVVMSampleRuntime : ModuleRules
 			new string[]
 			{
 				"AVVM",
-				"AVVMDebugger",
 				"AVVMOnline",
 				"Core",
 				"CoreUObject",
@@ -39,8 +38,7 @@ public class AVVMSampleRuntime : ModuleRules
 				"GameplayTags",
 				"ModularGameplayActors",
 				"ModelViewViewModel",
-				"OnlineSubsystem",
-				"StructUtils"
+				"OnlineSubsystem"
 			});
 
 
@@ -50,13 +48,35 @@ public class AVVMSampleRuntime : ModuleRules
 				"CommonGame",
 				"CommonUI",
 				"DataRegistry",
-				"ImGui",
 				"UIExtension",
 			});
 
-		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
-		);
+		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
+		// is enabled. Set your project editor .target.cs to enable it!
+		if (Target.bBuildDeveloperTools)
+		{
+			PublicDefinitions.AddRange(
+				new string[]
+				{
+					"WITH_AVVM_DEBUGGER"
+				});
+
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMDebugger",
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"ImGui"
+				});
+
+			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
+			PrivateDefinitions.Add(
+				string.Format("IMPLOT_API=DLLIMPORT")
+			);
+		}
 	}
 }

@@ -21,7 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#if WITH_AVVM_DEBUGGER
 #include "AVVMDebugger.h"
+#endif
+
 #include "DataRegistryTypes.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Engine/StreamableManager.h"
@@ -39,8 +42,11 @@
  *	interface with the UAVVMPresenter Model to "inject" stub data to derive types.
  */
 UCLASS(BlueprintType)
-class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension,
+class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension
+#if WITH_AVVM_DEBUGGER
+                                                  ,
                                                   public IAVVMImGuiDescriptor
+#endif
 {
 	GENERATED_BODY()
 
@@ -57,7 +63,9 @@ public:
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.NotifyTagChannel.NoPayload")
 	void NotifyChannelNoPayload(const FString& TagChannel);
 
+#if WITH_AVVM_DEBUGGER
 	virtual void Draw() override;
+#endif
 
 protected:
 	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
@@ -74,6 +82,7 @@ protected:
 
 	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
 
+#if WITH_AVVM_DEBUGGER
 	inline const char* LazyGatherTagChannels(bool& bForceGathering) const;
 	inline const char* LazyGatherRegistryIds(bool& bForceGathering) const;
 
@@ -83,6 +92,7 @@ protected:
 	inline void HandleComboBoxLinkage(const bool bIsComboBoxLinked,
 	                                  const int32& TagChannelIndex,
 	                                  int32& OutRegistryIndex);
+#endif
 
 	// @gdemers handle data registry/gameplay tag changes at runtime. (most-likely triggered from GFP)
 	void OnDataRegistrySubsystemChanged();

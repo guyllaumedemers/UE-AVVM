@@ -38,7 +38,6 @@ public class AVVM : ModuleRules
 				"FieldNotification",
 				"GameplayTags",
 				"ModelViewViewModel",
-				"StructUtils",
 				"UMG",
 			});
 
