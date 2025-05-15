@@ -23,6 +23,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "AVVMNotificationSubsystem.h"
 
 #include "AVVMQuicktimeEventInterface.generated.h"
@@ -117,46 +118,53 @@ public:
 	// @gdemers a player lost connection, who was it ?
 	virtual void Disconnect()
 	{
-		// @gdemers how can I test my system
+		UE_LOG(LogUI, Log, TEXT("Disconnecting."));
 	};
 
 	// @gdemers a player gain connection, who was it ?
 	virtual void Connect()
 	{
+		UE_LOG(LogUI, Log, TEXT("Connecting."));
 	};
 
 	// @gdemers the game ended and we won! show the After Action Report (if any)
 	virtual void Win()
 	{
+		UE_LOG(LogUI, Log, TEXT("Game Won."));
 	};
 
 	// @gdemers the game ended and we lost! show the After Action Report (if any)
 	virtual void Lose()
 	{
+		UE_LOG(LogUI, Log, TEXT("Game Lost."));
 	};
 
 	// @gdemers a kill was recorded
 	virtual void Kill()
 	{
 		// @gdemers access the replicated actor which tracks the last player whi died
+		UE_LOG(LogUI, Log, TEXT("Kill."));
 	};
 
 	// @gdemers a killstreak was recorded
 	virtual void Killstreak()
 	{
 		// @gdemers access the replicated actor which tracks the last player to have earn a killstreak
+		UE_LOG(LogUI, Log, TEXT("Killstreak."));
 	};
 
 	// @gdemers an objective was captured
 	virtual void CaptureObjective()
 	{
 		// @gdemers access the replicated actor which tracks the last objective that was captured
+		UE_LOG(LogUI, Log, TEXT("Capturing new Objective."));
 	};
 
 	// @gdemers an area was discovered
 	virtual void DiscoverArea()
 	{
 		// @gdemers access the replicated actor which tracks the last area that was discovered
+		UE_LOG(LogUI, Log, TEXT("Discovering new Area."));
 	};
 };
 

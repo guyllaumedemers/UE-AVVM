@@ -49,4 +49,8 @@ class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayPlayerStateCheatExtension : pub
 public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
+
+#if WITH_AVVM_DEBUGGER
+	virtual void Draw() override;
+#endif
 };

@@ -43,3 +43,9 @@ void UAVVMGameplayPlayerStateCheatExtension::RemovedFromCheatManager_Implementat
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
 #endif
 }
+
+#if WITH_AVVM_DEBUGGER
+void UAVVMGameplayPlayerStateCheatExtension::Draw()
+{
+}
+#endif

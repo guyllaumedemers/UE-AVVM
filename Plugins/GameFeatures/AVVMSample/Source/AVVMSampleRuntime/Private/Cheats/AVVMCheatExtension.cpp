@@ -147,34 +147,36 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 #if WITH_AVVM_DEBUGGER
 void UAVVMCheatExtension::Draw()
 {
-	if (ImGui::CollapsingHeader("Cheats"))
+	if (!ImGui::CollapsingHeader("Cheats"))
 	{
-		ImGui::BeginGroup();
-
-		static int32 CurrentTagChannelIndex = 0;
-		static const char* NotificationChannelTitle = "Notification Tag";
-		ImGui::Combo(NotificationChannelTitle, &CurrentTagChannelIndex, LazyGatherTagChannels(bHasTagChanged));
-
-		static int32 CurrentRegistryIdIndex = 0;
-		static const char* RegistryIdItemNameTitle = "ItemName";
-		ImGui::Combo(RegistryIdItemNameTitle, &CurrentRegistryIdIndex, LazyGatherRegistryIds(bHasRegistriesChanged));
-
-		static bool bShouldLinkComboBox = false;
-		static const char* LinkTitle = "Link";
-		ImGui::Checkbox(LinkTitle, &bShouldLinkComboBox);
-
-		HandleComboBoxLinkage(bShouldLinkComboBox, CurrentTagChannelIndex, CurrentRegistryIdIndex);
-
-		if (ImGui::Button("Notify"))
-		{
-			// @gdemers caching return value from Lazy*Function isnt possible. the null terminate character split the single character array into a singular entry when assigned to char*.
-			const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannelIndex);
-			const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryIdIndex);
-			NotifyChannelWithPayload(Channel, Payload);
-		}
-
-		ImGui::EndGroup();
+		return;
 	}
+
+	ImGui::BeginGroup();
+
+	static int32 CurrentTagChannelIndex = 0;
+	static const char* const NotificationChannelTitle = "Notification Tag";
+	ImGui::Combo(NotificationChannelTitle, &CurrentTagChannelIndex, LazyGatherTagChannels(bHasTagChanged));
+
+	static int32 CurrentRegistryIdIndex = 0;
+	static const char* const RegistryIdItemNameTitle = "ItemName";
+	ImGui::Combo(RegistryIdItemNameTitle, &CurrentRegistryIdIndex, LazyGatherRegistryIds(bHasRegistriesChanged));
+
+	static bool bShouldLinkComboBox = false;
+	static const char* const LinkTitle = "Link";
+	ImGui::Checkbox(LinkTitle, &bShouldLinkComboBox);
+
+	HandleComboBoxLinkage(bShouldLinkComboBox, CurrentTagChannelIndex, CurrentRegistryIdIndex);
+
+	if (ImGui::Button("Notify"))
+	{
+		// @gdemers caching return value from Lazy*Function isnt possible. the null terminate character split the single character array into a singular entry when assigned to char*.
+		const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannelIndex);
+		const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryIdIndex);
+		NotifyChannelWithPayload(Channel, Payload);
+	}
+
+	ImGui::EndGroup();
 }
 #endif
 

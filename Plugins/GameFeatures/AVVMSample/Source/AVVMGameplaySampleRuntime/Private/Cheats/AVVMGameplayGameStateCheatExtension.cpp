@@ -124,5 +124,57 @@ void UAVVMGameplayGameStateCheatExtension::DiscoverArea()
 #if WITH_AVVM_DEBUGGER
 void UAVVMGameplayGameStateCheatExtension::Draw()
 {
+	if (!ImGui::CollapsingHeader("Gameplay"))
+	{
+		return;
+	}
+
+	ImGui::BeginGroup();
+
+	static const char* const ExecuteOnlineDisconnectTitle = "ExecuteOnlineDisconnectTitle";
+	static bool bCanExecuteOnlineDisconnect = false;
+	ImGui::Checkbox(ExecuteOnlineDisconnectTitle, &bCanExecuteOnlineDisconnect);
+
+	if (ImGui::Button("Disconnect"))
+	{
+		Disconnect(bCanExecuteOnlineDisconnect);
+	}
+
+	ImGui::EndGroup();
+
+	if (ImGui::Button("Connect"))
+	{
+		Connect();
+	}
+
+	if (ImGui::Button("Win"))
+	{
+		Win();
+	}
+
+	if (ImGui::Button("Lose"))
+	{
+		Lose();
+	}
+
+	if (ImGui::Button("Kill"))
+	{
+		Kill();
+	}
+
+	if (ImGui::Button("Killstreak"))
+	{
+		Killstreak();
+	}
+
+	if (ImGui::Button("CaptureObjective"))
+	{
+		CaptureObjective();
+	}
+
+	if (ImGui::Button("DiscoverArea"))
+	{
+		DiscoverArea();
+	}
 }
 #endif
