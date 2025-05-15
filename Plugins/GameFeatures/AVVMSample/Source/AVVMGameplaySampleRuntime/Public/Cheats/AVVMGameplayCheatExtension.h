@@ -24,6 +24,10 @@
 #include "AVVMGameplaySampleRuntime.h"
 #include "GameFramework/CheatManager.h"
 
+#if WITH_AVVM_DEBUGGER
+#include "AVVMDebugger.h"
+#endif
+
 #include "AVVMGameplayCheatExtension.generated.h"
 
 /**
