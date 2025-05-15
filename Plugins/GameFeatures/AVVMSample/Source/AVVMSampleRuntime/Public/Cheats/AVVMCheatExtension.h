@@ -45,7 +45,8 @@
 UCLASS(BlueprintType)
 class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
-                                                  , public IAVVMImGuiDescriptor
+                                                  ,
+                                                  public IAVVMImGuiDescriptor
 #endif
 {
 	GENERATED_BODY()

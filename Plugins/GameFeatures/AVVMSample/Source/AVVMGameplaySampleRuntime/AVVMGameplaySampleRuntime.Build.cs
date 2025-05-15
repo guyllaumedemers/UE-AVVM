@@ -39,6 +39,7 @@ public class AVVMGameplaySampleRuntime : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMGameplay"
 			}
 		);
 

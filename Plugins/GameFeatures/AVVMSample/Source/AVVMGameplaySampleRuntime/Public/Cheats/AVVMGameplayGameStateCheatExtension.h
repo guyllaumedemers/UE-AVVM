@@ -41,7 +41,8 @@
 UCLASS(BlueprintType)
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
-												  , public IAVVMImGuiDescriptor
+                                                                           ,
+                                                                           public IAVVMImGuiDescriptor
 #endif
 {
 	GENERATED_BODY()
@@ -49,4 +50,18 @@ class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : publi
 public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
+
+	// @gdemers fake disconnecting yourself. we use the local player as we only want to remove from HUD the
+	// local player representation from a possible group of people.
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Disconnect")
+	void Disconnect(const bool bCanExecuteOnlineDisconnect = false);
+
+	// @gdemers fake connecting yourself. we use the local player as we only want to add to the HUD the
+	// local player representation to a possible group of people.
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Connect")
+	void Connect();
+
+#if WITH_AVVM_DEBUGGER
+	virtual void Draw() override;
+#endif
 };

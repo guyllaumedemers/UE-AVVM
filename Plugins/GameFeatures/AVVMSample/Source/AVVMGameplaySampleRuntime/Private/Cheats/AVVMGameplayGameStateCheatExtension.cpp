@@ -20,6 +20,10 @@
 #include "Cheats/AVVMGameplayGameStateCheatExtension.h"
 
 #include "AVVM.h"
+#include "AVVMQuicktimeEventInterface.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "GameFramework/GameState.h"
+#include "Kismet/GameplayStatics.h"
 
 #if WITH_AVVM_DEBUGGER
 #include "Containers/StringFwd.h"
@@ -43,3 +47,29 @@ void UAVVMGameplayGameStateCheatExtension::RemovedFromCheatManager_Implementatio
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
 #endif
 }
+
+void UAVVMGameplayGameStateCheatExtension::Disconnect(const bool bCanExecuteOnlineDisconnect)
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->Disconnect();
+	}
+
+	// execute backend call based on 'bCanExecuteOnlineDisconnect' value.
+}
+
+void UAVVMGameplayGameStateCheatExtension::Connect()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->Connect();
+	}
+}
+
+#if WITH_AVVM_DEBUGGER
+void UAVVMGameplayGameStateCheatExtension::Draw()
+{
+}
+#endif
