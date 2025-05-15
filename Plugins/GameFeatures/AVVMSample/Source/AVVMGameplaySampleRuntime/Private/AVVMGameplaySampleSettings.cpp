@@ -19,32 +19,32 @@
 //SOFTWARE.
 #include "AVVMGameplaySampleSettings.h"
 
-const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetHealthComponentClass()
+TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetHealthComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->HealthComponentClass;
 }
 
-const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetStaminaComponentClass()
+TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetStaminaComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->StaminaComponentClass;
 }
 
-const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetStatusEffectComponentClass()
+TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetStatusEffectComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->StatusEffectComponentClass;
 }
 
-const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetAbilityComponentClass()
+TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetAbilityComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->AbilityComponentClass;
 }
 
-const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetCurrencyComponentClass()
+TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetCurrencyComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->CurrencyComponentClass;
 }
 
-const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetInteractionComponentClass()
+TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetInteractionComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->InteractionComponentClass;
 }

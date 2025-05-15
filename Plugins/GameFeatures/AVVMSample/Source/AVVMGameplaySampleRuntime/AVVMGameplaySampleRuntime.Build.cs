@@ -33,6 +33,7 @@ public class AVVMGameplaySampleRuntime : ModuleRules
 				"AVVMGameplay",
 				"Core",
 				"CoreUObject",
+				"DeveloperSettings",
 				"Engine",
 			}
 		);

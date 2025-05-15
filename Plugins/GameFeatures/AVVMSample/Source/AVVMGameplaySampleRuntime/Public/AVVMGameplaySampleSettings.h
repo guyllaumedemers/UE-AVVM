@@ -21,11 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "Components/ActorComponent.h"
 #include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMGameplaySampleSettings.generated.h"
-
-class UActorComponent;
 
 /**
 *	Class description:
@@ -41,22 +41,22 @@ class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplaySampleSettings : public UDevelo
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static const TSubclassOf<UActorComponent>& GetHealthComponentClass();
+	static TSubclassOf<UActorComponent> GetHealthComponentClass();
 
 	UFUNCTION(BlueprintCallable)
-	static const TSubclassOf<UActorComponent>& GetStaminaComponentClass();
+	static TSubclassOf<UActorComponent> GetStaminaComponentClass();
 
 	UFUNCTION(BlueprintCallable)
-	static const TSubclassOf<UActorComponent>& GetStatusEffectComponentClass();
+	static TSubclassOf<UActorComponent> GetStatusEffectComponentClass();
 
 	UFUNCTION(BlueprintCallable)
-	static const TSubclassOf<UActorComponent>& GetAbilityComponentClass();
+	static TSubclassOf<UActorComponent> GetAbilityComponentClass();
 
 	UFUNCTION(BlueprintCallable)
-	static const TSubclassOf<UActorComponent>& GetCurrencyComponentClass();
+	static TSubclassOf<UActorComponent> GetCurrencyComponentClass();
 
 	UFUNCTION(BlueprintCallable)
-	static const TSubclassOf<UActorComponent>& GetInteractionComponentClass();
+	static TSubclassOf<UActorComponent> GetInteractionComponentClass();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
