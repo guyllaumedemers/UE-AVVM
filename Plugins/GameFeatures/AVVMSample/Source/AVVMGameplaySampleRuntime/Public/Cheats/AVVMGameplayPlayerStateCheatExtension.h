@@ -51,6 +51,45 @@ public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
 
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Die")
+	void Die(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Raise")
+	void Raise(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Stun")
+	void Stun(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Exhaust")
+	void Exhaust(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.StartCasting")
+	void StartCasting(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.StopCasting")
+	void StopCasting(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.EarnMoney")
+	void EarnMoney(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.SpendMoney")
+	void SpendMoney(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.StartInteractingWithWorld")
+	void StartInteractingWithWorld(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.StopInteractingWithWorld")
+	void StopInteractingWithWorld(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.ConsumeItem")
+	void ConsumeItem(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.StartTalkingToNpc")
+	void StartTalkingToNpc(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.StopTalkingToNpc")
+	void StopTalkingToNpc(const int32 PlayerIndex = 0);
+
 #if WITH_AVVM_DEBUGGER
 	virtual void Draw() override;
 #endif

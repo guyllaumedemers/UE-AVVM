@@ -235,6 +235,16 @@ public:
 		UE_LOG(LogUI, Log, TEXT("Player Exhausted."));
 	}
 
+	virtual void StartCasting(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Started Casting."));
+	}
+
+	virtual void StopCasting(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Stopped Casting."));
+	}
+
 	// @gdemers most-likely an action that is replicated (so use an AInfo - held by the PlayerState) to all players if currencies
 	// are shown in a leaderboard or simply on the HUD
 	virtual void EarnMoney(const UActorComponent* Component)
@@ -260,5 +270,15 @@ public:
 	virtual void ConsumeItem(const UActorComponent* Component)
 	{
 		UE_LOG(LogUI, Log, TEXT("Player Consumed Item."));
+	}
+
+	virtual void StartTalkingToNpc(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Started Talking to NPC."));
+	}
+
+	virtual void StopTalkingToNpc(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Stopped Talking to NPC."));
 	}
 };
