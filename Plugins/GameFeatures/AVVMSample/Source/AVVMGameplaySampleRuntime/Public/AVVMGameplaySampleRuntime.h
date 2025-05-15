@@ -64,11 +64,6 @@ struct FAVVMGameplayScopedDebugger
 		}
 	}
 
-	UActorComponent* operator()() const
-	{
-		return TransientComponent.Get();
-	}
-
 private:
 	TStrongObjectPtr<UActorComponent> TransientComponent = nullptr;
 };
