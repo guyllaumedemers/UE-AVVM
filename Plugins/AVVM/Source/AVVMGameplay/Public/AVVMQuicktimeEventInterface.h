@@ -142,28 +142,28 @@ public:
 	// @gdemers a kill was recorded
 	virtual void Kill()
 	{
-		// @gdemers access the replicated actor which tracks the last player whi died
+		// @gdemers Whomever dies, register itself to the AInfo tracking player death. In TQueue<T> OnRep_, we call TScriptInterface<ThisClass>(SomeGameState)->Kill
+		// i.e this call. In the override, the GameState will notify through the AVVM system and provide payload information.
+		// Note : GameState should be owning the AInfo tracking the player death.
+		// IMPORTANT - This behaviour is similar for all following implementations!
 		UE_LOG(LogUI, Log, TEXT("Kill."));
 	};
 
 	// @gdemers a killstreak was recorded
 	virtual void Killstreak()
 	{
-		// @gdemers access the replicated actor which tracks the last player to have earn a killstreak
 		UE_LOG(LogUI, Log, TEXT("Killstreak."));
 	};
 
 	// @gdemers an objective was captured
 	virtual void CaptureObjective()
 	{
-		// @gdemers access the replicated actor which tracks the last objective that was captured
 		UE_LOG(LogUI, Log, TEXT("Capturing new Objective."));
 	};
 
 	// @gdemers an area was discovered
 	virtual void DiscoverArea()
 	{
-		// @gdemers access the replicated actor which tracks the last area that was discovered
 		UE_LOG(LogUI, Log, TEXT("Discovering new Area."));
 	};
 };
