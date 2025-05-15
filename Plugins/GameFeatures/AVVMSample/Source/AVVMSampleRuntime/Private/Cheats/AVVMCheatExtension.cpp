@@ -152,6 +152,9 @@ void UAVVMCheatExtension::Draw()
 		return;
 	}
 
+	const char* const TagChannels = LazyGatherTagChannels(bHasTagChanged);
+	const char* const RegistryIds = LazyGatherRegistryIds(bHasRegistriesChanged);
+
 	{
 		// @gdemers notification system
 		ImGui::Text("Notification");
@@ -161,7 +164,7 @@ void UAVVMCheatExtension::Draw()
 
 		static int32 CurrentTagChannelIndex = 0;
 		static const char* const NotificationChannelTitle = "AVVMTagChannel";
-		ImGui::Combo(NotificationChannelTitle, &CurrentTagChannelIndex, LazyGatherTagChannels(bHasTagChanged));
+		ImGui::Combo(NotificationChannelTitle, &CurrentTagChannelIndex, TagChannels);
 
 		ImGui::SameLine();
 
@@ -177,7 +180,7 @@ void UAVVMCheatExtension::Draw()
 
 		static int32 CurrentRegistryIdIndex = 0;
 		static const char* const RegistryIdItemNameTitle = "RegistryId.ItemName";
-		ImGui::Combo(RegistryIdItemNameTitle, &CurrentRegistryIdIndex, LazyGatherRegistryIds(bHasRegistriesChanged));
+		ImGui::Combo(RegistryIdItemNameTitle, &CurrentRegistryIdIndex, RegistryIds);
 
 		ImGui::SameLine();
 
@@ -185,9 +188,8 @@ void UAVVMCheatExtension::Draw()
 
 		if (ImGui::Button("Notify", {ImGui::GetContentRegionAvailWidth(), 0}))
 		{
-			// @gdemers caching return value from Lazy*Function isnt possible. the null terminate character split the single character array into a singular entry when assigned to char*.
-			const FString Channel = GetIndexedString(LazyGatherTagChannels(bHasTagChanged), CurrentTagChannelIndex);
-			const FString Payload = GetIndexedString(LazyGatherRegistryIds(bHasRegistriesChanged), CurrentRegistryIdIndex);
+			const FString Channel = GetIndexedString(TagChannels, CurrentTagChannelIndex);
+			const FString Payload = GetIndexedString(RegistryIds, CurrentRegistryIdIndex);
 			NotifyChannelWithPayload(Channel, Payload);
 		}
 
