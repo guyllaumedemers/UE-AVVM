@@ -138,21 +138,25 @@ public:
 	// @gdemers a kill was recorded
 	virtual void Kill()
 	{
+		// @gdemers access the replicated actor which tracks the last player whi died
 	};
 
 	// @gdemers a killstreak was recorded
 	virtual void Killstreak()
 	{
+		// @gdemers access the replicated actor which tracks the last player to have earn a killstreak
 	};
 
 	// @gdemers an objective was captured
 	virtual void CaptureObjective()
 	{
+		// @gdemers access the replicated actor which tracks the last objective that was captured
 	};
 
 	// @gdemers an area was discovered
 	virtual void DiscoverArea()
 	{
+		// @gdemers access the replicated actor which tracks the last area that was discovered
 	};
 };
 
