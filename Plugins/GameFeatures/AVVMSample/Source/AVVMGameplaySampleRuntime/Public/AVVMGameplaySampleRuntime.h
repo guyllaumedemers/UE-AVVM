@@ -79,7 +79,7 @@ private:
 #if UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED
 #define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Interface, ComponentClass, Pawn, Callback) FAVVMGameplayScopedDebugger ScopedDebugger(Interface, ComponentClass, Pawn, Callback)
 #else
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Pawn, ComponentClass)
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Interface, ComponentClass, Pawn, Callback)
 #endif
 
 // @gdemers this handle imgui conditional existence
