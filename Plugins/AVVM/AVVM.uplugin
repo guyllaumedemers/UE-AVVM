@@ -25,6 +25,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "AVVMGameplay",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "AVVMOnline",
       "Type": "Runtime",
       "LoadingPhase": "Default"

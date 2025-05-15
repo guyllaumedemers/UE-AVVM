@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMQuicktimeEventInterface.h"
 #include "ModularGameState.h"
 
 #include "AVVMGameState.generated.h"
@@ -28,10 +29,13 @@
 /**
  *	Class description:
  *
- *	AAVVMGameState TBD.
+ *	AAVVMGameState. Modular Actor that receive a collection of Presenters (Client-Only) dynamically
+ *	and define a set of unique events to communicate with them. (See IAVVMQuicktimeEventGameStateInterface)
  */
 UCLASS()
-class AVVMONLINE_API AAVVMGameState : public AModularGameState
+class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
+                                        public IAVVMQuicktimeEventGameStateInterface
+
 {
 	GENERATED_BODY()
 };

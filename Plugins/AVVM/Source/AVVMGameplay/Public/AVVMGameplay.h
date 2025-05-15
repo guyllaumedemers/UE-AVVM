@@ -17,30 +17,19 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
 
-public class AVVMOnline : ModuleRules
-{
-	public AVVMOnline(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
-}
+/**
+ *	Plugin Description :
+ *
+ *	FAVVMGameplayModule define a set of utilities to be used in the GameFeature plugin Module FAVVMSampleRuntime. In this module, we define
+ *	the base Actor Class that implement the AVVMOnline interfaces and gameplay specific interfaces.
+ *
+ *	IMPORTANT :
+ *
+ *	Be aware that these actors will be available on both : Server and Client! Presenters dynamically added via the GPF_AddComponent will however
+ *	not be present on the Server! (if configured properly)
+ */

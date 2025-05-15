@@ -32,14 +32,14 @@
  *	AAVVMGameMode. Actor type that handle interaction with online service general use case, among other things.
  */
 UCLASS()
-class AVVMONLINE_API AAVVMGameMode : public AModularGameMode,
-                                     public IAVVMOnlineBattlePassInterface,
-                                     public IAVVMOnlineChallengesInterface,
-                                     public IAVVMOnlineFriendInterface,
-                                     public IAVVMOnlineIdentityInterface,
-                                     public IAVVMOnlineMessagingInterface,
-                                     public IAVVMOnlinePartyInterface,
-                                     public IAVVMOnlineStoreInterface
+class AVVMGAMEPLAY_API AAVVMGameMode : public AModularGameMode,
+                                       public IAVVMOnlineBattlePassInterface,
+                                       public IAVVMOnlineChallengesInterface,
+                                       public IAVVMOnlineFriendInterface,
+                                       public IAVVMOnlineIdentityInterface,
+                                       public IAVVMOnlineMessagingInterface,
+                                       public IAVVMOnlinePartyInterface,
+                                       public IAVVMOnlineStoreInterface
 {
 	GENERATED_BODY()
 };

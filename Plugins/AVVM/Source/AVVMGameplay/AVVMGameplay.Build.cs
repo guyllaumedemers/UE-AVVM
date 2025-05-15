@@ -20,9 +20,9 @@
 
 using UnrealBuildTool;
 
-public class AVVMOnline : ModuleRules
+public class AVVMGameplay : ModuleRules
 {
-	public AVVMOnline(ReadOnlyTargetRules Target) : base(Target)
+	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -30,10 +30,12 @@ public class AVVMOnline : ModuleRules
 			new string[]
 			{
 				"AVVM",
+				"AVVMOnline",
 				"Core",
 				"CoreUObject",
-				"DeveloperSettings",
 				"Engine",
+				"ModularGameplayActors",
+				"Slate",
 			}
 		);
 

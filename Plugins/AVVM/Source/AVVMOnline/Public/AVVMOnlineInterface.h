@@ -355,27 +355,27 @@ public:
 
 	virtual void RequestLogin(const FAVVMLoginContext& LoginContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	};
 
 	virtual void CommitModifiedPlayerProfile(const FAVVMPlayerProfile& PlayerContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullPlayerProfile(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfiguration& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullHostConfiguration(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	// @gdemers networked request between two players.
@@ -383,7 +383,7 @@ public:
 	// of the interaction being empty. re-use the same api if required!
 	virtual void Trade(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };
 
@@ -406,22 +406,22 @@ class AVVMONLINE_API IAVVMOnlinePartyInterface
 public:
 	virtual void JoinParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ExitParty(const FAVVMParty& PartyContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void KickFromParty(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullParties(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };
 
@@ -444,22 +444,22 @@ class AVVMONLINE_API IAVVMOnlineFriendInterface
 public:
 	virtual void AddFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void RemoveFriend(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void InvitePlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void BlockPlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };
 
@@ -482,12 +482,12 @@ class AVVMONLINE_API IAVVMOnlineMessagingInterface
 public:
 	virtual void MutePlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void CensorPlayer(const FAVVMPlayerRequest& PlayerRequestContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };
 
@@ -510,12 +510,12 @@ class AVVMONLINE_API IAVVMOnlineChallengesInterface
 public:
 	virtual void ClaimChallenge(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullChallenges(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };
 
@@ -538,18 +538,18 @@ class AVVMONLINE_API IAVVMOnlineBattlePassInterface
 public:
 	virtual bool CanAccessBattlePass(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 		return true;
 	}
 
 	virtual void ClaimBattlePass(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullBattlePass(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };
 
@@ -573,17 +573,17 @@ public:
 	// @gdemers local request only.
 	virtual void SellItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	// @gdemers local request only.
 	virtual void BuyItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
 	virtual void ForcePullShopContent(FAVVMOnlineResquestDelegate Callback)
 	{
-		AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback);
+		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 };

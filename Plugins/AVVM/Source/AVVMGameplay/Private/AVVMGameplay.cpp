@@ -17,43 +17,6 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/AVVMQuicktimeEventManagerPresenter.h"
-
-#include "GameFramework/GameStateBase.h"
-
-AActor* UAVVMQuicktimeEventManagerPresenter::GetOuterKey() const
-{
-	return GetTypedOuter<AGameStateBase>();
-}
-
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StartPresenting();
-}
-
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	StopPresenting();
-}
-
-void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_RemoteQuicktimeEventFired(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-}
-
-void UAVVMQuicktimeEventManagerPresenter::StartPresenting()
-{
-	ClearHandles();
-}
-
-void UAVVMQuicktimeEventManagerPresenter::StopPresenting()
-{
-	ClearHandles();
-}
-
-void UAVVMQuicktimeEventManagerPresenter::ClearHandles()
-{
-	for (auto& [ExtensionPointTag, UIExtensionHandle] : ExtensionHandles)
-	{
-		UIExtensionHandle.Unregister();
-	}
-}
+#include "AVVMGameplay.h"
+    
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMGameplay)

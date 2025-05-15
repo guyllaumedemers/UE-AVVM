@@ -17,21 +17,43 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Gameplay/AVVMQuicktimeEventManagerPresenter.h"
 
-#include "CoreMinimal.h"
+#include "GameFramework/GameStateBase.h"
 
-#include "ModularPlayerState.h"
-
-#include "AVVMPlayerState.generated.h"
-
-/**
- *	Class description:
- *
- *	AAVVMPlayerState TBD.
- */
-UCLASS()
-class AVVMONLINE_API AAVVMPlayerState : public AModularPlayerState
+AActor* UAVVMQuicktimeEventManagerPresenter::GetOuterKey() const
 {
-	GENERATED_BODY()
-};
+	return GetTypedOuter<AGameStateBase>();
+}
+
+void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
+}
+
+void UAVVMQuicktimeEventManagerPresenter::BP_OnNotificationReceived_RemoteQuicktimeEventFired(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+}
+
+void UAVVMQuicktimeEventManagerPresenter::StartPresenting()
+{
+	ClearHandles();
+}
+
+void UAVVMQuicktimeEventManagerPresenter::StopPresenting()
+{
+	ClearHandles();
+}
+
+void UAVVMQuicktimeEventManagerPresenter::ClearHandles()
+{
+	for (auto& [ExtensionPointTag, UIExtensionHandle] : ExtensionHandles)
+	{
+		UIExtensionHandle.Unregister();
+	}
+}

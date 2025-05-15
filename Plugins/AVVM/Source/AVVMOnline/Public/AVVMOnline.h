@@ -54,7 +54,7 @@ private:
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
 
 #if !UE_BUILD_SHIPPING
-#define UE_AVVM_DEBUGGER_ENABLED 1
+#define UE_AVVM_ONLINE_DEBUGGER_ENABLED 1
 
 struct FAVVMScopedDebugger
 {
@@ -68,11 +68,11 @@ struct FAVVMScopedDebugger
 	}
 };
 #else
-#define UE_AVVM_DEBUGGER_ENABLED 0
+#define UE_AVVM_ONLINE_DEBUGGER_ENABLED 0
 #endif
 
-#if UE_AVVM_DEBUGGER_ENABLED
-#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback) FAVVMScopedDebugger ScopedDebugger(Callback);
+#if UE_AVVM_ONLINE_DEBUGGER_ENABLED
+#define AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback) FAVVMScopedDebugger ScopedDebugger(Callback);
 #else
-#define AVVM_EXECUTE_SCOPED_DEBUGLOG(Callback)
+#define AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback)
 #endif
