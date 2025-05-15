@@ -27,7 +27,7 @@
 #include "AVVMPlayerState.generated.h"
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	AAVVMPlayerState. Modular Actor that receive a collection of Presenters (Client-Only) dynamically
  *	and define a set of unique events to communicate with them. (See IAVVMQuicktimeEventPlayerStateInterface)
