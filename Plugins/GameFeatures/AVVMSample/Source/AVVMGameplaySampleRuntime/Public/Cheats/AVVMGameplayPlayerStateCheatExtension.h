@@ -28,28 +28,7 @@
 #include "AVVMDebugger.h"
 #endif
 
-#include "AVVMGameplayCheatExtension.generated.h"
-
-/**
- *	Class description:
- *
- *	UAVVMGameplayGameStateCheatExtension is added through UGameFeatureAction_AddCheats and extend the UCheatManager without requiring deriving from
- *	the base class.
- *
- *	It exposed new console commands for testing the QuicktimeEvents specific to the Game State.
- */
-UCLASS(BlueprintType)
-class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : public UCheatManagerExtension
-#if WITH_AVVM_DEBUGGER
-												  , public IAVVMImGuiDescriptor
-#endif
-{
-	GENERATED_BODY()
-
-public:
-	virtual void AddedToCheatManager_Implementation() override;
-	virtual void RemovedFromCheatManager_Implementation() override;
-};
+#include "AVVMGameplayPlayerStateCheatExtension.generated.h"
 
 /**
  *	Class description:

@@ -17,24 +17,29 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Cheats/AVVMGameplayCheatExtension.h"
+#include "Cheats/AVVMGameplayGameStateCheatExtension.h"
+
+#include "AVVM.h"
+
+#if WITH_AVVM_DEBUGGER
+#include "Containers/StringFwd.h"
+#include <imgui.h>
+#endif
 
 void UAVVMGameplayGameStateCheatExtension::AddedToCheatManager_Implementation()
 {
-	Super::AddedToCheatManager_Implementation();
+	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+
+#if WITH_AVVM_DEBUGGER
+	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
+#endif
 }
 
 void UAVVMGameplayGameStateCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	Super::RemovedFromCheatManager_Implementation();
-}
+	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
 
-void UAVVMGameplayPlayerStateCheatExtension::AddedToCheatManager_Implementation()
-{
-	Super::AddedToCheatManager_Implementation();
-}
-
-void UAVVMGameplayPlayerStateCheatExtension::RemovedFromCheatManager_Implementation()
-{
-	Super::RemovedFromCheatManager_Implementation();
+#if WITH_AVVM_DEBUGGER
+	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
+#endif
 }
