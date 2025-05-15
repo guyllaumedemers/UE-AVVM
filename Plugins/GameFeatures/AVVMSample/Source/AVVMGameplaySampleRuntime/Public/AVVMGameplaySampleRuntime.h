@@ -22,6 +22,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+#include "AVVMQuicktimeEventInterface.h"
+
 /**
  *	Plugin Description :
  *
@@ -29,6 +31,58 @@
  *	that provide boiler plate code support gameplay behaviour.
 */
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnExecuteDebugEvent, const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>&, const UActorComponent*)
+
+#if !UE_BUILD_SHIPPING
+#define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 1
+
+#include "GameFramework/Pawn.h"
+
+struct FAVVMGameplayScopedDebugger
+{
+	FAVVMGameplayScopedDebugger() = default;
+
+	FAVVMGameplayScopedDebugger(const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& PlayerStateInterface,
+	                            const TSubclassOf<UActorComponent>& ComponentClass,
+	                            APawn* Pawn,
+	                            const FAVVMOnExecuteDebugEvent::FDelegate& Callback)
+	{
+		if (IsValid(Pawn))
+		{
+			UActorComponent* Component = Pawn->AddComponentByClass(ComponentClass, true, FTransform::Identity, true);
+			TransientComponent = TStrongObjectPtr<UActorComponent>(Component);
+			Callback.ExecuteIfBound(PlayerStateInterface, Component);
+		}
+	}
+
+	~FAVVMGameplayScopedDebugger()
+	{
+		UActorComponent* Component = TransientComponent.Get();
+		if (IsValid(Component))
+		{
+			Component->DestroyComponent();
+		}
+	}
+
+	UActorComponent* operator()() const
+	{
+		return TransientComponent.Get();
+	}
+
+private:
+	TStrongObjectPtr<UActorComponent> TransientComponent = nullptr;
+};
+#else
+#define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 0
+#endif
+
+#if UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Interface, ComponentClass, Pawn, Callback) FAVVMGameplayScopedDebugger ScopedDebugger(Interface, ComponentClass, Pawn, Callback)
+#else
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Pawn, ComponentClass)
+#endif
+
+// @gdemers this handle imgui conditional existence
 #if defined UE_ENABLE_AVVM_DEBUGGER
 #define WITH_AVVM_DEBUGGER 1
 #else

@@ -17,52 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AVVMGameplaySampleSettings.h"
 
-using UnrealBuildTool;
-
-public class AVVMGameplaySampleRuntime : ModuleRules
+const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetHealthComponentClass()
 {
-	public AVVMGameplaySampleRuntime(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	return GetDefault<UAVVMGameplaySampleSettings>()->HealthComponentClass;
+}
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"Engine",
-			}
-		);
+const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetStaminaComponentClass()
+{
+	return GetDefault<UAVVMGameplaySampleSettings>()->StaminaComponentClass;
+}
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
+const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetStatusEffectComponentClass()
+{
+	return GetDefault<UAVVMGameplaySampleSettings>()->StatusEffectComponentClass;
+}
 
-		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
-		// is enabled. Set your project editor .target.cs to enable it!
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMDebugger",
-				});
+const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetAbilityComponentClass()
+{
+	return GetDefault<UAVVMGameplaySampleSettings>()->AbilityComponentClass;
+}
 
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
+const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetCurrencyComponentClass()
+{
+	return GetDefault<UAVVMGameplaySampleSettings>()->CurrencyComponentClass;
+}
 
-			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
-		}
-	}
+const TSubclassOf<UActorComponent>& UAVVMGameplaySampleSettings::GetInteractionComponentClass()
+{
+	return GetDefault<UAVVMGameplaySampleSettings>()->InteractionComponentClass;
 }

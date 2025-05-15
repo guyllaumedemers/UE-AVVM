@@ -36,6 +36,7 @@
 #define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 0
 #endif
 
+// @gdemers this handle imgui conditional existence
 #if defined UE_ENABLE_AVVM_DEBUGGER
 #define WITH_AVVM_DEBUGGER 1
 #else
