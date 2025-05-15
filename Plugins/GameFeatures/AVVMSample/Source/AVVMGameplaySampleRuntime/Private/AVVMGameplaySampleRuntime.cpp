@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,27 +17,6 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
-
-/**
- *	Plugin Description :
- *
- *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
- *	that would provide boiler plate code support for generic multiplayer-game project architecture.
- */
-
-// @gdemers expect preprocessor to be defined in build.cs, or not!
-#if defined UE_AVVM_ENABLE_ONLINE_REQUEST_BRANCHING
-#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 1
-#else
-#define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 0
-#endif
-
-#if defined UE_ENABLE_AVVM_DEBUGGER
-#define WITH_AVVM_DEBUGGER 1
-#else
-#define WITH_AVVM_DEBUGGER 0
-#endif
+#include "AVVMGameplaySampleRuntime.h"
+    
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMGameplaySampleRuntime)

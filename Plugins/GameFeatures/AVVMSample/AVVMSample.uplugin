@@ -1,53 +1,58 @@
 {
-  "FileVersion": 3,
-  "Version": 1,
-  "VersionName": "1.0",
-  "FriendlyName": "AVVMSample",
-  "Description": "",
-  "Category": "Game Features",
-  "CreatedBy": "@gdemers",
-  "CreatedByURL": "",
-  "DocsURL": "",
-  "MarketplaceURL": "",
-  "SupportURL": "",
-  "EnabledByDefault": false,
-  "CanContainContent": true,
-  "IsBetaVersion": false,
-  "IsExperimentalVersion": false,
-  "Installed": false,
-  "ExplicitlyLoaded": true,
-  "BuiltInInitialFeatureState": "Active",
-  "Modules": [
-    {
-      "Name": "AVVMSampleRuntime",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "AVVM",
-      "Enabled": true
-    },
-    {
-      "Name": "CommonGame",
-      "Enabled": true
-    },
-    {
-      "Name": "CommonUI",
-      "Enabled": true
-    },
-    {
-      "Name": "ModularGameplayActors",
-      "Enabled": true
-    },
-    {
-      "Name": "ModelViewViewModel",
-      "Enabled": true
-    },
-    {
-      "Name": "UIExtension",
-      "Enabled": true
-    }
-  ]
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "AVVMSample",
+	"Description": "",
+	"Category": "Game Features",
+	"CreatedBy": "@gdemers",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"ExplicitlyLoaded": true,
+	"BuiltInInitialFeatureState": "Active",
+	"Modules": [
+		{
+			"Name": "AVVMSampleRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "AVVMGameplaySampleRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "AVVM",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonGame",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "ModularGameplayActors",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
+			"Enabled": true
+		},
+		{
+			"Name": "UIExtension",
+			"Enabled": true
+		}
+	]
 }

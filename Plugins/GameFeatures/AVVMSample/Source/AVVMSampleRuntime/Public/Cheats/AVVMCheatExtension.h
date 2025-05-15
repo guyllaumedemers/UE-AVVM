@@ -34,7 +34,7 @@
 #include "AVVMCheatExtension.generated.h"
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	UAVVMCheatExtension is added through UGameFeatureAction_AddCheats and extend the UCheatManager without requiring deriving from
  *	the base class.

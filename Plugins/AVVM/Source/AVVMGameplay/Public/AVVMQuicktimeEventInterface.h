@@ -117,6 +117,7 @@ public:
 	// @gdemers a player lost connection, who was it ?
 	virtual void Disconnect()
 	{
+		// @gdemers how can I test my system
 	};
 
 	// @gdemers a player gain connection, who was it ?
