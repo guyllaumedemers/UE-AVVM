@@ -129,52 +129,75 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 		return;
 	}
 
-	ImGui::BeginGroup();
-
-	static const char* const ExecuteOnlineDisconnectTitle = "ExecuteOnlineDisconnectTitle";
-	static bool bCanExecuteOnlineDisconnect = false;
-	ImGui::Checkbox(ExecuteOnlineDisconnectTitle, &bCanExecuteOnlineDisconnect);
-
-	if (ImGui::Button("Disconnect"))
 	{
-		Disconnect(bCanExecuteOnlineDisconnect);
+		// @gdemers Backend
+		ImGui::Text("Online");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		static const char* const ExecuteOnlineDisconnectTitle = "ExecuteOnlineDisconnect";
+		static bool bCanExecuteOnlineDisconnect = false;
+		ImGui::Checkbox(ExecuteOnlineDisconnectTitle, &bCanExecuteOnlineDisconnect);
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Disconnect")) { Disconnect(bCanExecuteOnlineDisconnect); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Connect")) { Connect(); }
+
+		ImGui::EndGroup();
 	}
 
-	ImGui::EndGroup();
-
-	if (ImGui::Button("Connect"))
 	{
-		Connect();
+		// @gdemers AAR
+		ImGui::Text("After Action Report");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Lose")) { Lose(); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Win")) { Win(); }
+
+		ImGui::EndGroup();
 	}
 
-	if (ImGui::Button("Win"))
+
 	{
-		Win();
+		// @gdemers Leaderboard
+		ImGui::Text("Leaderboard");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Kill")) { Kill(); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Killstreak")) { Killstreak(); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("CaptureObjective")) { CaptureObjective(); }
+
+		ImGui::EndGroup();
 	}
 
-	if (ImGui::Button("Lose"))
 	{
-		Lose();
-	}
+		// @gdemers Open notification
+		ImGui::Text("GameplayEvent");
+		ImGui::Separator();
 
-	if (ImGui::Button("Kill"))
-	{
-		Kill();
-	}
+		ImGui::BeginGroup();
 
-	if (ImGui::Button("Killstreak"))
-	{
-		Killstreak();
-	}
+		if (ImGui::Button("DiscoverArea")) { DiscoverArea(); }
 
-	if (ImGui::Button("CaptureObjective"))
-	{
-		CaptureObjective();
-	}
-
-	if (ImGui::Button("DiscoverArea"))
-	{
-		DiscoverArea();
+		ImGui::EndGroup();
 	}
 }
 #endif
