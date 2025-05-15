@@ -50,13 +50,12 @@ void UAVVMGameplayGameStateCheatExtension::RemovedFromCheatManager_Implementatio
 
 void UAVVMGameplayGameStateCheatExtension::Disconnect(const bool bCanExecuteOnlineDisconnect)
 {
+	// TODO @gdemers execute backend call based on 'bCanExecuteOnlineDisconnect' value.
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
 	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Disconnect();
 	}
-
-	// execute backend call based on 'bCanExecuteOnlineDisconnect' value.
 }
 
 void UAVVMGameplayGameStateCheatExtension::Connect()
@@ -65,6 +64,60 @@ void UAVVMGameplayGameStateCheatExtension::Connect()
 	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Connect();
+	}
+}
+
+void UAVVMGameplayGameStateCheatExtension::Win()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->Win();
+	}
+}
+
+void UAVVMGameplayGameStateCheatExtension::Lose()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->Lose();
+	}
+}
+
+void UAVVMGameplayGameStateCheatExtension::Kill()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->Kill();
+	}
+}
+
+void UAVVMGameplayGameStateCheatExtension::Killstreak()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->Killstreak();
+	}
+}
+
+void UAVVMGameplayGameStateCheatExtension::CaptureObjective()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->CaptureObjective();
+	}
+}
+
+void UAVVMGameplayGameStateCheatExtension::DiscoverArea()
+{
+	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
+	if (UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler))
+	{
+		QuickTimeEventHandler->DiscoverArea();
 	}
 }
 

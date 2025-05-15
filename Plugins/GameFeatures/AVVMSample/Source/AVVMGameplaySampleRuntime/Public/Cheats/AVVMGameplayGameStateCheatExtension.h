@@ -60,6 +60,24 @@ public:
 	// local player representation to a possible group of people.
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Connect")
 	void Connect();
+	
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Win")
+	void Win();
+	
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Lose")
+	void Lose();
+	
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Kill")
+	void Kill();
+	
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Killstreak")
+	void Killstreak();
+	
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.CaptureObjective")
+	void CaptureObjective();
+	
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.DiscoverArea")
+	void DiscoverArea();
 
 #if WITH_AVVM_DEBUGGER
 	virtual void Draw() override;
