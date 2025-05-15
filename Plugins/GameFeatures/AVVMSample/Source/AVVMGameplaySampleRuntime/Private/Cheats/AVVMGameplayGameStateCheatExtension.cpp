@@ -124,7 +124,7 @@ void UAVVMGameplayGameStateCheatExtension::DiscoverArea()
 #if WITH_AVVM_DEBUGGER
 void UAVVMGameplayGameStateCheatExtension::Draw()
 {
-	if (!ImGui::CollapsingHeader("Gameplay"))
+	if (!ImGui::CollapsingHeader("Cheats [GameState]"))
 	{
 		return;
 	}

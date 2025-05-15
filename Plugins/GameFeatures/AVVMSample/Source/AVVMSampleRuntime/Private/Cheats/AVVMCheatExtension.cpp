@@ -147,7 +147,7 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 #if WITH_AVVM_DEBUGGER
 void UAVVMCheatExtension::Draw()
 {
-	if (!ImGui::CollapsingHeader("Cheats"))
+	if (!ImGui::CollapsingHeader("Cheats [GameMode]"))
 	{
 		return;
 	}

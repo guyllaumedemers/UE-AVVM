@@ -364,5 +364,119 @@ void UAVVMGameplayPlayerStateCheatExtension::StopTalkingToNpc(const int32 Player
 #if WITH_AVVM_DEBUGGER
 void UAVVMGameplayPlayerStateCheatExtension::Draw()
 {
+	if (!ImGui::CollapsingHeader("Cheats [PlayerState]"))
+	{
+		return;
+	}
+
+	// @gdemers user selected index
+	static int PlayerIndex = 0;
+
+	{
+		static const char* const PlayerIndexTitle = "Player Index";
+		if (ImGui::InputInt(PlayerIndexTitle, &PlayerIndex))
+		{
+			static constexpr int MaxNumPlayers = 4;
+			PlayerIndex = FMath::Clamp(PlayerIndex, 0, MaxNumPlayers);
+		}
+
+		ImGui::Dummy({ImGui::GetContentRegionAvailWidth(), 0});
+	}
+
+	{
+		// @gdemers Gameplay Events - Health
+		ImGui::Text("Health");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Die")) { Die(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Connect")) { Raise(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		ImGui::EndGroup();
+	}
+
+	{
+		// @gdemers Gameplay Events - Status Effect
+		ImGui::Text("Status Effect");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Stun")) { Stun(PlayerIndex); }
+
+		ImGui::EndGroup();
+	}
+
+	{
+		// @gdemers Gameplay Events - Stamina
+		ImGui::Text("Stamina");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Exhaust")) { Exhaust(PlayerIndex); }
+
+		ImGui::EndGroup();
+	}
+
+	{
+		// TODO @gdemers this section is a bit underspecified! What are we casting exactly ? can we inject from cmd line ?
+		// @gdemers Gameplay Events - Abilities
+		ImGui::Text("Abilities");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Start Casting")) { StartCasting(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Stop Casting")) { StopCasting(PlayerIndex); }
+
+		ImGui::EndGroup();
+	}
+
+	{
+		// TODO @gdemers this section is a bit underspecified! What are we interacting with exactly ? can we inject from cmd line ?
+		// @gdemers Gameplay Events - World Interactions
+		ImGui::Text("World Interactions");
+		ImGui::Separator();
+
+		ImGui::BeginGroup();
+
+		if (ImGui::Button("Earn Money")) { EarnMoney(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Spend Money")) { SpendMoney(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Start Interaction")) { StartInteractingWithWorld(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Stop Interaction Money")) { StopInteractingWithWorld(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Consume Item")) { ConsumeItem(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Start Talking to NPC")) { StartTalkingToNpc(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Stop Talking to NPC")) { StopTalkingToNpc(PlayerIndex); }
+
+		ImGui::EndGroup();
+	}
 }
 #endif
