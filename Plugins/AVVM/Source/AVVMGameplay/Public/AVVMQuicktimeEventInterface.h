@@ -213,4 +213,52 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventPlayerStateInterface
 	GENERATED_BODY()
 
 public:
+	// @gdemers a player died.
+	// Note : Most systems will forward their component and be casted in the PlayerState derived type.
+	virtual void Die(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Died."));
+	}
+
+	virtual void Raise(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Raised."));
+	}
+
+	virtual void Stun(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Stunned."));
+	}
+
+	virtual void Exhaust(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Exhausted."));
+	}
+
+	// @gdemers most-likely an action that is replicated (so use an AInfo - held by the PlayerState) to all players if currencies
+	// are shown in a leaderboard or simply on the HUD
+	virtual void EarnMoney(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Earned Money."));
+	}
+
+	virtual void SpendMoney(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Spent Money."));
+	}
+
+	virtual void StartInteractingWithWorld(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Started Interacting with World."));
+	}
+
+	virtual void StopInteractingWithWorld(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Stopped Interacting with World."));
+	}
+
+	virtual void ConsumeItem(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Consumed Item."));
+	}
 };

@@ -41,7 +41,8 @@
 UCLASS(BlueprintType)
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayPlayerStateCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
-													  , public IAVVMImGuiDescriptor
+                                                                             ,
+                                                                             public IAVVMImGuiDescriptor
 #endif
 {
 	GENERATED_BODY()
