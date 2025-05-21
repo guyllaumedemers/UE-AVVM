@@ -49,6 +49,50 @@ void UAVVMGameplayPlayerStateCheatExtension::RemovedFromCheatManager_Implementat
 #endif
 }
 
+void UAVVMGameplayPlayerStateCheatExtension::Damage(const int32 PlayerIndex)
+{
+	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
+	if (!IsValid(PlayerState))
+	{
+		return;
+	}
+
+	const APawn* Pawn = PlayerState->GetPawn();
+	if (!IsValid(Pawn))
+	{
+		return;
+	}
+
+	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
+	if (ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler),
+	                     TEXT("Player State doesn't implement IAVVMQuicktimeEventPlayerStateInterface!")))
+	{
+		QuickTimeEventHandler->Damage(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetHealthComponentClass()));
+	}
+}
+
+void UAVVMGameplayPlayerStateCheatExtension::Heal(const int32 PlayerIndex)
+{
+	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
+	if (!IsValid(PlayerState))
+	{
+		return;
+	}
+
+	const APawn* Pawn = PlayerState->GetPawn();
+	if (!IsValid(Pawn))
+	{
+		return;
+	}
+
+	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
+	if (ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(QuickTimeEventHandler),
+	                     TEXT("Player State doesn't implement IAVVMQuicktimeEventPlayerStateInterface!")))
+	{
+		QuickTimeEventHandler->Heal(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetHealthComponentClass()));
+	}
+}
+
 void UAVVMGameplayPlayerStateCheatExtension::Die(const int32 PlayerIndex)
 {
 	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);

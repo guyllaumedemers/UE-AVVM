@@ -51,6 +51,12 @@ public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
 
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Damage")
+	void Damage(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Heal")
+	void Heal(const int32 PlayerIndex = 0);
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.PlayerState.Die")
 	void Die(const int32 PlayerIndex = 0);
 

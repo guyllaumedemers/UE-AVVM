@@ -213,6 +213,18 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventPlayerStateInterface
 	GENERATED_BODY()
 
 public:
+	// @gdemers have owning player state broadcast delegate to child presenter.
+	// similar behaviour is expected. in some cases, the behaviour can be more advanced. Like when dying! as you maybe have to notify various systems.
+	virtual void Damage(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Damaged."));
+	}
+
+	virtual void Heal(const UActorComponent* Component)
+	{
+		UE_LOG(LogUI, Log, TEXT("Player Healed."));
+	}
+
 	// @gdemers a player died.
 	// Note : Most systems will forward their component and be casted in the PlayerState derived type.
 	virtual void Die(const UActorComponent* Component)
