@@ -37,4 +37,14 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
                                           public IAVVMQuicktimeEventPlayerStateInterface
 {
 	GENERATED_BODY()
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+	// @gdemers example property of a bank system. each player has it's own bank which
+	// handle content that ARE NOT tied to the user account (so not inventory, or profile currencies. so only in-game resources that can be gathered!)
+	// note : this could aggregate damage dealt by this user, number of death/raise, etc... ALL types or simply in-game resources gathered.
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	TObjectPtr<AInfo> Bank = nullptr;
 };
