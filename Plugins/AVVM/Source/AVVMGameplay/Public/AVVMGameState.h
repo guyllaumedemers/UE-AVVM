@@ -38,4 +38,17 @@ class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
 
 {
 	GENERATED_BODY()
+
+protected:
+	// @gdemers here im just defining example cases of replicated systems that would allow
+	// 1. updating a collection of data specific to the system.
+	// 2. react post-replication and update presenters owned by the game state.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<AInfo> PlayerDeaths;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<AInfo> PlayerKillstreaks;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<AInfo> CaptureObjectives;
 };

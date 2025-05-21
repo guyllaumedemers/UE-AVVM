@@ -142,10 +142,8 @@ public:
 	// @gdemers a kill was recorded
 	virtual void Kill()
 	{
-		// @gdemers Whomever dies, register itself to the AInfo tracking player death. In TQueue<T> OnRep_, we call TScriptInterface<ThisClass>(SomeGameState)->Kill
-		// i.e this call. In the override, the GameState will notify through the AVVM system and provide payload information.
-		// Note : GameState should be owning the AInfo tracking the player death.
-		// IMPORTANT - This behaviour is similar for all following implementations!
+		// @gdemers Post-Player Died. the AInfo (which we updated last), update its replicated properties. OnRep_, 'this' call, TScriptInterface<ThisClass>(SomeGameState)->Kill
+		// is invoked. Through our GameState, we can notify the relevant presenters of a player death events on all remote players.
 		UE_LOG(LogUI, Log, TEXT("Kill."));
 	};
 
@@ -164,6 +162,8 @@ public:
 	// @gdemers an area was discovered
 	virtual void DiscoverArea()
 	{
+		// @gdemers same principles can be applied here. a player could enter an area, consume a token which would no longer make the area "non-discovered", and push the information
+		// of the area to the AInfo of the game state so whenever a player actually discover the area, all players gets notified OnRep_.
 		UE_LOG(LogUI, Log, TEXT("Discovering new Area."));
 	};
 };
@@ -217,6 +217,9 @@ public:
 	// Note : Most systems will forward their component and be casted in the PlayerState derived type.
 	virtual void Die(const UActorComponent* Component)
 	{
+		// @gdemers Example case : Whomever dies, invoke 'this' call, IAVVMQuicktimeEventPlayerStateInterface::Die from the Health component of the player.
+		// From the override of the interface, we can register our newly killed player to the GameState replicated AInfo property. (See IAVVMQuicktimeEventGameStateInterface::kill for whats next!)
+		// Note : using dynamic dispatch, we create separation of concerns in the Health Component module as we only need to know about "Engine", and "AVVMGameplay".
 		UE_LOG(LogUI, Log, TEXT("Player Died."));
 	}
 
