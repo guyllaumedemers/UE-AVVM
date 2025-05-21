@@ -47,6 +47,10 @@ protected:
 	// @gdemers here im just defining example cases of replicated systems that would allow
 	// 1. updating a collection of data specific to the system.
 	// 2. react post-replication and update presenters owned by the game state.
+
+	// @gdemers these systems are queues of data to tracking which entry was recorded last.
+	// they are simple 'Recording' systems for pushing sequentially content on the HUD, maybe for a PvP game
+	// or COOP game, etc...
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> PlayerDeaths = nullptr;
 
