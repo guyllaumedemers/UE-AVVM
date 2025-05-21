@@ -44,31 +44,14 @@ struct FAVVMGameplayScopedDebugger
 {
 	FAVVMGameplayScopedDebugger() = default;
 
-	FAVVMGameplayScopedDebugger(const UObject* WorldContextObject,
-	                            const int32 PlayerIndex,
-	                            const TSubclassOf<UActorComponent>& ComponentClass,
-	                            const FAVVMOnExecuteDebugEvent::FDelegate& Callback)
-	{
-		APlayerState* PlayerState = UGameplayStatics::GetPlayerState(WorldContextObject, PlayerIndex);
-		if (!IsValid(PlayerState))
-		{
-			return;
-		}
-
-		const APawn* Pawn = PlayerState->GetPawn();
-		if (IsValid(Pawn))
-		{
-			Callback.ExecuteIfBound(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
-			                        Pawn->GetComponentByClass(ComponentClass));
-		}
-	}
+	// TODO @gdemers we should scopped tdebug the impletation called by the cheat, not the cheat itself
 };
 #else
 #define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 0
 #endif
 
 #if UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback) FAVVMGameplayScopedDebugger ScopedDebugger(WorldContextObject, PlayerIndex, ComponentClass, Callback)
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback)
 #else
 #define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback)
 #endif
