@@ -30,9 +30,8 @@
 /**
 *	Class description:
  *
- *	UAVVMGameplaySampleSettings. project settings that define global variable.
- *
- *	Notes : Component Classes defined here are Proxies! Those aren't the real deal, they allow debugging only!
+ *	UAVVMGameplaySampleSettings. project settings that define global variable for targeting Actor Components
+ *	held by an Actor when doing debugging or running cheats.
  */
 UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMGameplaySampleSettings"))
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplaySampleSettings : public UDeveloperSettings

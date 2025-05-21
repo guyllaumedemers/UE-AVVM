@@ -23,6 +23,8 @@
 #include "Modules/ModuleManager.h"
 
 #include "AVVMQuicktimeEventInterface.h"
+#include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 /**
  *	Plugin Description :
@@ -42,39 +44,33 @@ struct FAVVMGameplayScopedDebugger
 {
 	FAVVMGameplayScopedDebugger() = default;
 
-	FAVVMGameplayScopedDebugger(const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& PlayerStateInterface,
+	FAVVMGameplayScopedDebugger(const UObject* WorldContextObject,
+	                            const int32 PlayerIndex,
 	                            const TSubclassOf<UActorComponent>& ComponentClass,
-	                            APawn* Pawn,
 	                            const FAVVMOnExecuteDebugEvent::FDelegate& Callback)
 	{
+		APlayerState* PlayerState = UGameplayStatics::GetPlayerState(WorldContextObject, PlayerIndex);
+		if (!IsValid(PlayerState))
+		{
+			return;
+		}
+
+		const APawn* Pawn = PlayerState->GetPawn();
 		if (IsValid(Pawn))
 		{
-			UActorComponent* Component = Pawn->AddComponentByClass(ComponentClass, true, FTransform::Identity, true);
-			TransientComponent = TStrongObjectPtr<UActorComponent>(Component);
-			Callback.ExecuteIfBound(PlayerStateInterface, Component);
+			Callback.ExecuteIfBound(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+			                        Pawn->GetComponentByClass(ComponentClass));
 		}
 	}
-
-	~FAVVMGameplayScopedDebugger()
-	{
-		UActorComponent* Component = TransientComponent.Get();
-		if (IsValid(Component))
-		{
-			Component->DestroyComponent();
-		}
-	}
-
-private:
-	TStrongObjectPtr<UActorComponent> TransientComponent = nullptr;
 };
 #else
 #define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 0
 #endif
 
 #if UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Interface, ComponentClass, Pawn, Callback) FAVVMGameplayScopedDebugger ScopedDebugger(Interface, ComponentClass, Pawn, Callback)
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback) FAVVMGameplayScopedDebugger ScopedDebugger(WorldContextObject, PlayerIndex, ComponentClass, Callback)
 #else
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(Interface, ComponentClass, Pawn, Callback) Callback.ExecuteIfBound(Interface, nullptr);
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback) Callback.ExecuteIfBound(Interface, nullptr);
 #endif
 
 // @gdemers this handle imgui conditional existence

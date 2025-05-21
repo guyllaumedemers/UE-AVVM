@@ -51,12 +51,6 @@ void UAVVMGameplayPlayerStateCheatExtension::RemovedFromCheatManager_Implementat
 
 void UAVVMGameplayPlayerStateCheatExtension::Die(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -67,20 +61,14 @@ void UAVVMGameplayPlayerStateCheatExtension::Die(const int32 PlayerIndex)
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetHealthComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::Raise(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -91,20 +79,14 @@ void UAVVMGameplayPlayerStateCheatExtension::Raise(const int32 PlayerIndex)
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetHealthComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::Stun(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -115,20 +97,14 @@ void UAVVMGameplayPlayerStateCheatExtension::Stun(const int32 PlayerIndex)
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetStatusEffectComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::Exhaust(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -139,20 +115,14 @@ void UAVVMGameplayPlayerStateCheatExtension::Exhaust(const int32 PlayerIndex)
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetStaminaComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::StartCasting(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -163,20 +133,14 @@ void UAVVMGameplayPlayerStateCheatExtension::StartCasting(const int32 PlayerInde
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetAbilityComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::StopCasting(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -187,20 +151,14 @@ void UAVVMGameplayPlayerStateCheatExtension::StopCasting(const int32 PlayerIndex
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetAbilityComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::EarnMoney(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -211,20 +169,14 @@ void UAVVMGameplayPlayerStateCheatExtension::EarnMoney(const int32 PlayerIndex)
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetCurrencyComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::SpendMoney(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -235,20 +187,14 @@ void UAVVMGameplayPlayerStateCheatExtension::SpendMoney(const int32 PlayerIndex)
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetCurrencyComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::StartInteractingWithWorld(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -259,20 +205,14 @@ void UAVVMGameplayPlayerStateCheatExtension::StartInteractingWithWorld(const int
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetInteractionComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::StopInteractingWithWorld(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -283,20 +223,14 @@ void UAVVMGameplayPlayerStateCheatExtension::StopInteractingWithWorld(const int3
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetInteractionComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::ConsumeItem(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -307,20 +241,14 @@ void UAVVMGameplayPlayerStateCheatExtension::ConsumeItem(const int32 PlayerIndex
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetInteractionComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::StartTalkingToNpc(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -331,20 +259,14 @@ void UAVVMGameplayPlayerStateCheatExtension::StartTalkingToNpc(const int32 Playe
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetInteractionComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
 void UAVVMGameplayPlayerStateCheatExtension::StopTalkingToNpc(const int32 PlayerIndex)
 {
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
 	const auto Callback = [](const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>& QuickTimeEventHandler,
 	                         const UActorComponent* ActorComponent)
 	{
@@ -355,9 +277,9 @@ void UAVVMGameplayPlayerStateCheatExtension::StopTalkingToNpc(const int32 Player
 		}
 	};
 
-	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState),
+	AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(this,
+	                                      PlayerIndex,
 	                                      UAVVMGameplaySampleSettings::GetInteractionComponentClass(),
-	                                      PlayerState->GetPawn(),
 	                                      FAVVMOnExecuteDebugEvent::FDelegate::CreateWeakLambda(this, Callback));
 }
 
@@ -426,8 +348,6 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 	}
 
 	{
-		// TODO @gdemers this section is a bit underspecified! What are we casting exactly ? can we inject from cmd line ?
-		// @gdemers Gameplay Events - Abilities
 		ImGui::Text("Abilities");
 		ImGui::Separator();
 
