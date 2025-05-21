@@ -49,3 +49,7 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 ![UE-AVVM](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM.jpg)
 
+## GameFeature Plugin Sample Modules
+
+To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime** and **Bank**. Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
+
