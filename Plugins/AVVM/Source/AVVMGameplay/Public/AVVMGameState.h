@@ -44,6 +44,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
+	// @gdemers IMPORTANT - ANY SETTER function defined on those systems should be SERVER_AUTHORITATIVE_ONLY. i.e WITH_SERVER
+	// and the client side should only be able to use GETTER functions.
+	
 	// @gdemers here im just defining example cases of replicated systems that would allow
 	// 1. updating a collection of data specific to the system.
 	// 2. react post-replication and update presenters owned by the game state.
