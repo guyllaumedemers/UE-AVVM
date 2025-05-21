@@ -40,6 +40,7 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
 	GENERATED_BODY()
 
 public:
+	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:

@@ -19,7 +19,18 @@
 //SOFTWARE.
 #include "AVVMGameState.h"
 
+#include "Net/UnrealNetwork.h"
+
+AAVVMGameState::AAVVMGameState(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bReplicates = true;
+}
+
 void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
+	// no need to mark the AInfo with DOREPLIFETIME
 }

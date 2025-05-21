@@ -41,6 +41,7 @@ class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
 	GENERATED_BODY()
 
 public:
+	AAVVMGameState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
