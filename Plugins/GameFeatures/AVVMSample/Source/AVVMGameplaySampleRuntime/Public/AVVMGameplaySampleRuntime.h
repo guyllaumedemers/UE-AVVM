@@ -70,7 +70,7 @@ struct FAVVMGameplayScopedDebugger
 #if UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED
 #define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback) FAVVMGameplayScopedDebugger ScopedDebugger(WorldContextObject, PlayerIndex, ComponentClass, Callback)
 #else
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback) Callback.ExecuteIfBound(Interface, nullptr);
+#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback)
 #endif
 
 // @gdemers this handle imgui conditional existence
