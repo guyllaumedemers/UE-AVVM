@@ -23,8 +23,6 @@
 #include "Modules/ModuleManager.h"
 
 #include "AVVMQuicktimeEventInterface.h"
-#include "GameFramework/PlayerState.h"
-#include "Kismet/GameplayStatics.h"
 
 /**
  *	Plugin Description :

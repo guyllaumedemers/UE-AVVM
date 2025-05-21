@@ -23,6 +23,7 @@
 
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularGameState.h"
+#include "GameFramework/Info.h"
 
 #include "AVVMGameState.generated.h"
 
@@ -39,19 +40,22 @@ class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
 {
 	GENERATED_BODY()
 
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	// @gdemers here im just defining example cases of replicated systems that would allow
 	// 1. updating a collection of data specific to the system.
 	// 2. react post-replication and update presenters owned by the game state.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> PlayerDeaths = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> PlayerKillstreaks = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> CaptureObjectives = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> DiscoveredArea = nullptr;
 };
