@@ -58,7 +58,7 @@ protected:
 	TObjectPtr<AInfo> PlayerKillstreaks = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> CaptureObjectives = nullptr;
+	TObjectPtr<AInfo> CapturedObjectives = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> DiscoveredArea = nullptr;

@@ -23,6 +23,7 @@
 
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularPlayerState.h"
+#include "GameFramework/Info.h"
 
 #include "AVVMPlayerState.generated.h"
 
@@ -42,9 +43,18 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
+	// @gdemers IMPORTANT - ANY SETTER function defined on those systems should be SERVER_AUTHORITATIVE_ONLY. i.e WITH_SERVER
+	// and the client side should only be able to use GETTER functions.
+
 	// @gdemers example property of a bank system. each player has it's own bank which
 	// handle content that ARE NOT tied to the user account (so not inventory, or profile currencies. so only in-game resources that can be gathered!)
 	// note : this could aggregate damage dealt by this user, number of death/raise, etc... ALL types or simply in-game resources gathered.
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> Bank = nullptr;
+
+	// @gdemers example property for any short-time lived, or not, placeable actor. lets say we want to show a visual representation of the level on screen
+	// with our visual actors representation. Our local system would fetch all player states from the game state and read from the collection type held by this replicated actors
+	// to generate position information about the in-world actors on screen.
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	TObjectPtr<AInfo> Pings = nullptr;
 };
