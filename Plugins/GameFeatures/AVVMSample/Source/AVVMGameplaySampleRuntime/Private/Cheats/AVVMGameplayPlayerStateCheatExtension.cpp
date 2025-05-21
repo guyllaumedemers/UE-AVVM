@@ -408,6 +408,14 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
+		if (ImGui::Button("Damage")) { Damage(PlayerIndex); }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Heal")) { Heal(PlayerIndex); }
+
+		ImGui::SameLine();
+
 		if (ImGui::Button("Die")) { Die(PlayerIndex); }
 
 		ImGui::SameLine();
