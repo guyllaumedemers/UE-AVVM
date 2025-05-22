@@ -30,20 +30,21 @@ class UInteraction;
 /**
 *	Class Description :
  *
- *	AInteractionManager handle replication over network of interactions locally scheduled by clients. 
+ *	UInteractionManager handle replication over network of interactions locally scheduled by clients. GFP _AddComponent is
+ *	expected to Target the AGameState actor for creation.
  */
 UCLASS()
-class INTERACTIONSAMPLE_API AInteractionManager : public AInfo
+class INTERACTIONSAMPLE_API UInteractionManager : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	AInteractionManager(const FObjectInitializer& ObjectInitializer);
+	UInteractionManager(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintPure)
-	static AInteractionManager* GetManager(const UObject* WorldContextObject);
+	static UInteractionManager* GetManager(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
 	void AttemptRecordBeginOverlap(const AActor* NewTarget,

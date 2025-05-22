@@ -22,15 +22,15 @@
   ],
   "Plugins": [
     {
-      "Name": "AVVM",
-      "Enabled": true
-    },
-    {
       "Name": "CommonUI",
       "Enabled": true
     },
     {
       "Name": "GameplayAbilities",
+      "Enabled": true
+    },
+    {
+      "Name": "Iris",
       "Enabled": true
     }
   ]

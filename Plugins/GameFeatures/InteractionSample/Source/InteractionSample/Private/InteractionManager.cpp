@@ -19,26 +19,26 @@
 //SOFTWARE.
 #include "InteractionManager.h"
 
-#include "AVVMGameState.h"
 #include "Interaction.h"
+#include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
-AInteractionManager::AInteractionManager(const FObjectInitializer& ObjectInitializer)
+UInteractionManager::UInteractionManager(const FObjectInitializer& ObjectInitializer)
 {
-	bReplicates = true;
+	SetIsReplicatedByDefault(true);
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-void AInteractionManager::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UInteractionManager::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AInteractionManager, BeginInteractions);
-	DOREPLIFETIME(AInteractionManager, EndInteractions);
+	DOREPLIFETIME(UInteractionManager, BeginInteractions);
+	DOREPLIFETIME(UInteractionManager, EndInteractions);
 }
 
-void AInteractionManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UInteractionManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -59,12 +59,12 @@ void AInteractionManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #endif
 }
 
-AInteractionManager* AInteractionManager::GetManager(const UObject* WorldContextObject)
+UInteractionManager* UInteractionManager::GetManager(const UObject* WorldContextObject)
 {
-	auto* GameState = Cast<AAVVMGameState>(UGameplayStatics::GetGameState(WorldContextObject));
-	if (IsValid(GameState))
+	AGameStateBase* GameStateBase = UGameplayStatics::GetGameState(WorldContextObject);
+	if (IsValid(GameStateBase))
 	{
-		return Cast<AInteractionManager>(GameState->GetInteractionManager());
+		return GameStateBase->GetComponentByClass<UInteractionManager>();
 	}
 	else
 	{
@@ -72,7 +72,7 @@ AInteractionManager* AInteractionManager::GetManager(const UObject* WorldContext
 	}
 }
 
-void AInteractionManager::AttemptRecordBeginOverlap(const AActor* NewTarget,
+void UInteractionManager::AttemptRecordBeginOverlap(const AActor* NewTarget,
                                                     const AActor* NewInstigator,
                                                     const bool bPreventContingency)
 {
@@ -94,7 +94,7 @@ void AInteractionManager::AttemptRecordBeginOverlap(const AActor* NewTarget,
 	}
 }
 
-void AInteractionManager::AttemptRecordEndOverlap(const AActor* NewTarget,
+void UInteractionManager::AttemptRecordEndOverlap(const AActor* NewTarget,
                                                   const AActor* NewInstigator)
 {
 	UE_LOG(LogTemp, Log, TEXT("Client: End Overlap detected! Can we proceed ?"));
@@ -110,7 +110,7 @@ void AInteractionManager::AttemptRecordEndOverlap(const AActor* NewTarget,
 	}
 }
 
-void AInteractionManager::ServerRPC_RecordBeginInteraction_Implementation(const AActor* NewTarget,
+void UInteractionManager::ServerRPC_RecordBeginInteraction_Implementation(const AActor* NewTarget,
                                                                           const AActor* NewInstigator)
 {
 	UE_LOG(LogTemp, Log, TEXT("ServerRPC executed! New Begin Interaction Recorded!"));
@@ -121,7 +121,7 @@ void AInteractionManager::ServerRPC_RecordBeginInteraction_Implementation(const 
 	BeginInteractions.Add(Transaction);
 }
 
-void AInteractionManager::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewTarget,
+void UInteractionManager::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewTarget,
                                                                         const AActor* NewInstigator)
 {
 	UE_LOG(LogTemp, Log, TEXT("ServerRPC executed! New End Interaction Recorded!"));
@@ -132,7 +132,7 @@ void AInteractionManager::ServerRPC_RecordEndInteraction_Implementation(const AA
 	EndInteractions.Add(Transaction);
 }
 
-void AInteractionManager::OnRep_NewBeginInteractionRecorded()
+void UInteractionManager::OnRep_NewBeginInteractionRecorded()
 {
 	UE_LOG(LogTemp, Log, TEXT("Begin Interaction Collection modified!"));
 	if (BeginInteractions.IsEmpty())
@@ -143,7 +143,7 @@ void AInteractionManager::OnRep_NewBeginInteractionRecorded()
 	// TODO @gdemers handle start presenting
 }
 
-void AInteractionManager::OnRep_NewEndInteractionRecorded()
+void UInteractionManager::OnRep_NewEndInteractionRecorded()
 {
 	UE_LOG(LogTemp, Log, TEXT("End Interaction Collection modified!"));
 	if (EndInteractions.IsEmpty())

@@ -33,15 +33,15 @@ public class InteractionSample : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
-				"GameplayTags"
+				"GameplayAbilities",
+				"GameplayTags",
+				"IrisCore"
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMGameplay",
-				"GameplayAbilities",
 			}
 		);
 	}

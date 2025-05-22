@@ -22,7 +22,6 @@
 #include "AbilitySystemComponent.h"
 #include "InteractionManager.h"
 #include "Components/PrimitiveComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 void UInteractionComponent::BeginPlay()
 {
@@ -88,7 +87,7 @@ void UInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent
 		return;
 	}
 
-	auto* InteractionManager = AInteractionManager::GetManager(this);
+	auto* InteractionManager = UInteractionManager::GetManager(this);
 	if (IsValid(InteractionManager))
 	{
 		// @gdemers we try adding this local overlap event and first validate the replicated state
@@ -119,7 +118,7 @@ void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* 
 		return;
 	}
 
-	auto* InteractionManager = AInteractionManager::GetManager(this);
+	auto* InteractionManager = UInteractionManager::GetManager(this);
 	if (IsValid(InteractionManager))
 	{
 		InteractionManager->AttemptRecordEndOverlap(WorldActor.Get(), OtherActor);
