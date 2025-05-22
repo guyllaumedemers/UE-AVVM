@@ -44,8 +44,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	// @gdemers IMPORTANT - ANY SETTER function defined on those systems should be SERVER_AUTHORITATIVE_ONLY. i.e WITH_SERVER
-	// and the client side should only be able to use GETTER functions.
+	// @gdemers here im just defining example cases of replicated systems that would allow
+	// 1. updating a collection of data specific to the system.
+	// 2. react post-replication and update presenters owned by the player state.
+	// Note : replicated system would be accessed from inside the api defined in : IAVVMQuicktimeEventPlayerStateInterface
 
 	// @gdemers example property of a bank system. each player has it's own bank which
 	// handle content that ARE NOT tied to the user account (so not inventory, or profile currencies. so only in-game resources that can be gathered!)

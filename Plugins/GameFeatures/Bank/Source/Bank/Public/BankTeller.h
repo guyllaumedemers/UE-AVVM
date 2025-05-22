@@ -64,6 +64,6 @@ protected:
 	void OnRep_NewTransactionRecorded();
 
 	// @gdemers a set of transaction recorded.
-	UPROPERTY(Transient, BlueprintReadWrite, ReplicatedUsing="OnRep_NewTransactionRecorded")
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewTransactionRecorded")
 	TArray<TObjectPtr<const UTransaction>> Transactions;
 };

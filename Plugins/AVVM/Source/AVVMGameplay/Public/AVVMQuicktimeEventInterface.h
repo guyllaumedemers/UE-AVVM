@@ -115,51 +115,43 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventGameStateInterface
 	GENERATED_BODY()
 
 public:
-	// @gdemers a player lost connection, who was it ?
 	virtual void Disconnect()
 	{
 		UE_LOG(LogUI, Log, TEXT("Disconnecting."));
 	};
 
-	// @gdemers a player gain connection, who was it ?
 	virtual void Connect()
 	{
 		UE_LOG(LogUI, Log, TEXT("Connecting."));
 	};
 
-	// @gdemers the game ended and we won! show the After Action Report (if any)
 	virtual void Win()
 	{
 		UE_LOG(LogUI, Log, TEXT("Game Won."));
 	};
 
-	// @gdemers the game ended and we lost! show the After Action Report (if any)
 	virtual void Lose()
 	{
 		UE_LOG(LogUI, Log, TEXT("Game Lost."));
 	};
 
-	// @gdemers a kill was recorded
 	virtual void Kill()
 	{
-		// @gdemers Post-Player Died. the AInfo (which we updated last), update its replicated properties. OnRep_, 'this' call, TScriptInterface<ThisClass>(SomeGameState)->Kill
-		// is invoked. Through our GameState, we can notify the relevant presenters of a player death events on all remote players.
+		// @gdemers Post-Death replication. the owned AInfo update its replicated properties. OnRep_, 'this' call, TScriptInterface<ThisClass>(SomeGameState)->Kill is invoked.
+		// Through our GameState, we can notify the relevant presenters of a player death events on all remote players.
 		UE_LOG(LogUI, Log, TEXT("Kill."));
 	};
 
-	// @gdemers a killstreak was recorded
 	virtual void Killstreak()
 	{
 		UE_LOG(LogUI, Log, TEXT("Killstreak."));
 	};
 
-	// @gdemers an objective was captured
 	virtual void CaptureObjective()
 	{
 		UE_LOG(LogUI, Log, TEXT("Capturing new Objective."));
 	};
 
-	// @gdemers an area was discovered
 	virtual void DiscoverArea()
 	{
 		// @gdemers same principles can be applied here. a player could enter an area, consume a token which would no longer make the area "non-discovered", and push the information
@@ -213,8 +205,6 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventPlayerStateInterface
 	GENERATED_BODY()
 
 public:
-	// @gdemers have owning player state broadcast delegate to child presenter.
-	// similar behaviour is expected. in some cases, the behaviour can be more advanced. Like when dying! as you maybe have to notify various systems.
 	virtual void Damage(const UActorComponent* Component)
 	{
 		UE_LOG(LogUI, Log, TEXT("Player Damaged."));
@@ -225,13 +215,16 @@ public:
 		UE_LOG(LogUI, Log, TEXT("Player Healed."));
 	}
 
-	// @gdemers a player died.
-	// Note : Most systems will forward their component and be casted in the PlayerState derived type.
 	virtual void Die(const UActorComponent* Component)
 	{
 		// @gdemers Example case : Whomever dies, invoke 'this' call, IAVVMQuicktimeEventPlayerStateInterface::Die from the Health component of the player.
-		// From the override of the interface, we can register our newly killed player to the GameState replicated AInfo property. (See IAVVMQuicktimeEventGameStateInterface::kill for whats next!)
-		// Note : using dynamic dispatch, we create separation of concerns in the Health Component module as we only need to know about "Engine", and "AVVMGameplay".
+		// From the override of the interface, we can execute various actions. we could :
+		//	A) fetch the derived game state, add the player to a replicated system that record a queue of players and play a new ui banner (on all clients) when the collection changed. (See IAVVMQuicktimeEventGameStateInterface::Kill)
+		//	B) fetch the replicated system held by the derived player state and record the death of the player, incrementing the player death count.
+		//	C) fetch the replicated system held by the derived player state and clear any world actors placed/owned by the dead actor so they are cleared (on all clients).
+		//	etc...
+		//	All of this is obviously depended on your project!
+		// Additionally, note that we heavily rely on interface dispatch here. It creates separation of concern in modules as they only need to know about "Engine", and "AVVMGameplay".
 		UE_LOG(LogUI, Log, TEXT("Player Died."));
 	}
 
@@ -260,8 +253,6 @@ public:
 		UE_LOG(LogUI, Log, TEXT("Player Stopped Casting."));
 	}
 
-	// @gdemers most-likely an action that is replicated (so use an AInfo - held by the PlayerState) to all players if currencies
-	// are shown in a leaderboard or simply on the HUD
 	virtual void EarnMoney(const UActorComponent* Component)
 	{
 		UE_LOG(LogUI, Log, TEXT("Player Earned Money."));
