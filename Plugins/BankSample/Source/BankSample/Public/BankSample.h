@@ -17,6 +17,12 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Bank.h"
-	
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, Bank)
+#pragma once
+
+#include "Modules/ModuleManager.h"
+
+/**
+ *	Plugin Description :
+ *
+ *	BankSample is a transaction system that record gameplay events and store data about players.
+ */

@@ -223,7 +223,7 @@ public:
 		//	B) fetch the replicated system held by the derived player state and record the death of the player, incrementing the player death count.
 		//	C) fetch the replicated system held by the derived player state and clear any world actors placed/owned by the dead actor so they are cleared (on all clients).
 		//	etc...
-		//	All of this is obviously depended on your project!
+		// All of this is obviously depended on your project!
 		// Additionally, note that we heavily rely on interface dispatch here. It creates separation of concern in modules as they only need to know about "Engine", and "AVVMGameplay".
 		UE_LOG(LogUI, Log, TEXT("Player Died."));
 	}

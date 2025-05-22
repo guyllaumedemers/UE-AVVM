@@ -20,9 +20,9 @@
 
 using UnrealBuildTool;
 
-public class Bank : ModuleRules
+public class BankSample : ModuleRules
 {
-	public Bank(ReadOnlyTargetRules Target) : base(Target)
+	public BankSample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 

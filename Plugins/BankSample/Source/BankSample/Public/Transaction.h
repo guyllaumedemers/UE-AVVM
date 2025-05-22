@@ -84,14 +84,14 @@ inline const TCHAR* EnumToString(ETransactionType State)
  *	UTransaction are replicated UObject that store replicated data.
  */
 UCLASS(BlueprintType)
-class BANK_API UTransaction : public UObject
+class BANKSAMPLE_API UTransaction : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual bool IsSupportedForNetworking() const override;
-	
+
 #if UE_WITH_IRIS
 	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
 #endif // UE_WITH_IRIS

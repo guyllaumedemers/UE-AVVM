@@ -33,10 +33,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTrans
 /**
  *	Class description:
  *
- *	ABankTeller handle any interaction that a Banking system would perform, but is replicated.
+ *	ABankTeller handle transaction that can be captured during gameplay and replicate across clients. this can aggregate damage dealt by this user,
+ *	number of death/raise, money spent, earned etc...
  */
 UCLASS(BlueprintType)
-class BANK_API ABankTeller : public AInfo
+class BANKSAMPLE_API ABankTeller : public AInfo
 {
 	GENERATED_BODY()
 
