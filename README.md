@@ -45,6 +45,8 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 [ImGui](https://miro.com/app/board/uXjVI5N81qQ=/?share_link_id=426653642808)
 
+[Actor Replication](https://miro.com/app/board/uXjVIxoRe8E=/?share_link_id=43947381721)
+
 #### Preview
 
 ![UE-AVVM](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM.jpg)
