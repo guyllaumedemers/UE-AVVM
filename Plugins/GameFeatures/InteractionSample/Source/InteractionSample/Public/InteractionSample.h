@@ -17,45 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameState.h"
+#pragma once
 
-#include "Net/UnrealNetwork.h"
+#include "Modules/ModuleManager.h"
 
-AAVVMGameState::AAVVMGameState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-	bReplicates = true;
-}
-
-void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
-}
-
-AInfo* AAVVMGameState::GetPlayerDeaths() const
-{
-	return PlayerDeaths;
-}
-
-AInfo* AAVVMGameState::GetPlayerKillstreaks() const
-{
-	return PlayerKillstreaks;
-}
-
-AInfo* AAVVMGameState::GetCapturedObjectives() const
-{
-	return CapturedObjectives;
-}
-
-AInfo* AAVVMGameState::GetDiscoveredArea() const
-{
-	return DiscoveredArea;
-}
-
-AInfo* AAVVMGameState::GetInteractionManager() const
-{
-	return InteractionManager;
-}
+/**
+ *	Plugin Description :
+ *
+ *	InteractionSample record interaction from local client with world content. This system expect clients
+ *	to be able to track remote actions from Autonomous & Simulated Proxy and display/update visual feedback
+ *	base on the state of the system.
+ */

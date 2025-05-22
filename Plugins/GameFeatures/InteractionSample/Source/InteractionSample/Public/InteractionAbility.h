@@ -17,45 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameState.h"
+#pragma once
 
-#include "Net/UnrealNetwork.h"
+#include "CoreMinimal.h"
 
-AAVVMGameState::AAVVMGameState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+#include "Abilities/GameplayAbility.h"
+
+#include "InteractionAbility.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class INTERACTIONSAMPLE_API UInteractionAbility : public UGameplayAbility
 {
-	bReplicates = true;
-}
+	GENERATED_BODY()
 
-void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
-}
-
-AInfo* AAVVMGameState::GetPlayerDeaths() const
-{
-	return PlayerDeaths;
-}
-
-AInfo* AAVVMGameState::GetPlayerKillstreaks() const
-{
-	return PlayerKillstreaks;
-}
-
-AInfo* AAVVMGameState::GetCapturedObjectives() const
-{
-	return CapturedObjectives;
-}
-
-AInfo* AAVVMGameState::GetDiscoveredArea() const
-{
-	return DiscoveredArea;
-}
-
-AInfo* AAVVMGameState::GetInteractionManager() const
-{
-	return InteractionManager;
-}
+	/**
+	 *	TODO - How to we handle the ability
+	 */
+};
