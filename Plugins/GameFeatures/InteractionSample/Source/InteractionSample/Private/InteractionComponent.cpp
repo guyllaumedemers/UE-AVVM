@@ -73,18 +73,18 @@ void UInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent
 		return;
 	}
 
+	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() == ROLE_AutonomousProxy); /*Controlled by Client*/
+	if (!bIsActorLocallyControlled)
+	{
+		return;
+	}
+
 	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
 		// @gdemers allow a gameplay ability to be executable due to tag condition
 		// being met!
 		AbilityComponent->AddLooseGameplayTag(EventTag);
-	}
-
-	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() == ROLE_AutonomousProxy); /*Controlled by Client*/
-	if (!bIsActorLocallyControlled)
-	{
-		return;
 	}
 
 	auto* InteractionManager = UInteractionManager::GetManager(this);
@@ -106,16 +106,16 @@ void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* 
 		return;
 	}
 
-	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
-	if (IsValid(AbilityComponent))
-	{
-		AbilityComponent->RemoveReplicatedLooseGameplayTag(EventTag);
-	}
-
 	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() == ROLE_AutonomousProxy); /*Controlled by Client*/
 	if (!bIsActorLocallyControlled)
 	{
 		return;
+	}
+
+	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
+	if (IsValid(AbilityComponent))
+	{
+		AbilityComponent->RemoveReplicatedLooseGameplayTag(EventTag);
 	}
 
 	auto* InteractionManager = UInteractionManager::GetManager(this);
