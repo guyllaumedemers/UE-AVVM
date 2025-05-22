@@ -26,14 +26,16 @@
 #include "InteractionAbility.generated.h"
 
 /**
- * 
+ *	Class Description :
+ *
+ *	
  */
 UCLASS()
 class INTERACTIONSAMPLE_API UInteractionAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
-	/**
-	 *	TODO - How to we handle the ability
-	 */
+public:
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 };

@@ -29,16 +29,16 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "InteractionStrategy.generated.h"
+#include "InteractionAbilityData.generated.h"
 
 /**
  *	Class Description :
  *
- *	FInteractionTransitionDetails describe the properties that define the interaction transition
+ *	FInteractionAbilityTransitionDetails describe the properties that define the interaction transition
  *	once the activation phase is complete.
  */
 USTRUCT(BlueprintType)
-struct INTERACTIONSAMPLE_API FInteractionTransitionDetails
+struct INTERACTIONSAMPLE_API FInteractionAbilityTransitionDetails
 {
 	GENERATED_BODY()
 
@@ -55,10 +55,10 @@ struct INTERACTIONSAMPLE_API FInteractionTransitionDetails
 /**
  *	Class Description :
  *
- *	FInteractionActivationDetails describe the properties that define the interaction.
+ *	FInteractionAbilityActivationDetails describe the properties that define the interaction.
  */
 USTRUCT(BlueprintType)
-struct INTERACTIONSAMPLE_API FInteractionActivationDetails
+struct INTERACTIONSAMPLE_API FInteractionAbilityActivationDetails
 {
 	GENERATED_BODY()
 
@@ -76,16 +76,16 @@ struct INTERACTIONSAMPLE_API FInteractionActivationDetails
 	TSubclassOf<UCommonUserWidget> PreviewInteractionWidgetClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FInteractionTransitionDetails TransitionDetails;
+	FInteractionAbilityTransitionDetails TransitionDetails;
 };
 
 /**
  *	Class Description :
  *
- *	UInteractionBehaviourDataAsset encapsulate an interaction properties that define how the interaction should be executed.
+ *	UInteractionAbilityDataAsset encapsulate an interaction properties that define how the interaction should be executed.
  */
 UCLASS(BlueprintType, Blueprintable)
-class INTERACTIONSAMPLE_API UInteractionBehaviourDataAsset : public UDataAsset
+class INTERACTIONSAMPLE_API UInteractionAbilityDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -96,14 +96,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FInteractionActivationDetails Data;
-};
-
-/**
- * 
- */
-UCLASS()
-class INTERACTIONSAMPLE_API UInteractionStrategy : public UObject
-{
-	GENERATED_BODY()
+	FInteractionAbilityActivationDetails Data;
 };

@@ -135,21 +135,9 @@ void UInteractionManager::ServerRPC_RecordEndInteraction_Implementation(const AA
 void UInteractionManager::OnRep_NewBeginInteractionRecorded()
 {
 	UE_LOG(LogTemp, Log, TEXT("Begin Interaction Collection modified!"));
-	if (BeginInteractions.IsEmpty())
-	{
-		return;
-	}
-
-	// TODO @gdemers handle start presenting
 }
 
 void UInteractionManager::OnRep_NewEndInteractionRecorded()
 {
 	UE_LOG(LogTemp, Log, TEXT("End Interaction Collection modified!"));
-	if (EndInteractions.IsEmpty())
-	{
-		return;
-	}
-
-	// TODO @gdemers handle stop presenting
 }
