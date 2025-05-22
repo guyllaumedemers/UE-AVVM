@@ -115,7 +115,7 @@ void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* 
 	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->RemoveReplicatedLooseGameplayTag(EventTag);
+		AbilityComponent->RemoveLooseGameplayTag(EventTag);
 	}
 
 	auto* InteractionManager = UInteractionManager::GetManager(this);
