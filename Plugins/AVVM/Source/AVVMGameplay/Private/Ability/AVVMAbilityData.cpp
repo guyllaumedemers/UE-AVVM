@@ -35,8 +35,7 @@ EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationCo
 }
 #endif
 
-bool UAVVMAbilityDataAsset::CanGrantAbility(const FGameplayTagContainer& ActorActiveTags,
-                                            const FGameplayTagContainer& ContextualTags) const
+bool UAVVMAbilityDataAsset::CanGrantAbility(const FGameplayTagContainer& ContextualTags) const
 {
 	return true;
 }

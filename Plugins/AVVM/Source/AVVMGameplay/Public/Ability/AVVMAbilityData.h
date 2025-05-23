@@ -48,8 +48,8 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	bool CanGrantAbility(const FGameplayTagContainer& ActorActiveTags/*actor specific*/,
-	                     const FGameplayTagContainer& ContextualTags/*world specific*/) const;
+	UFUNCTION(BlueprintCallable)
+	bool CanGrantAbility(const FGameplayTagContainer& ContextualTags/*world specific*/) const;
 
 	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;

@@ -22,10 +22,14 @@
 #if WITH_EDITOR
 EDataValidationResult UInteractionAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	const bool bAreAssetsValid = IsValid(ActivationInfo.PreviewInteractionWidgetClass) && IsValid(TransitionInfo.WidgetClass) && !TransitionInfo.CameraTransitionVfx.IsNull();
-	EDataValidationResult Result = bAreAssetsValid ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
-	Context.AddError(NSLOCTEXT("UInteractionAbilityDataAsset", "", "Missing TSubClassOf<T>, or TSoftObjectPtr<T>!"));
-	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (!IsValid(ActivationInfo.PreviewInteractionWidgetClass) || !IsValid(TransitionInfo.WidgetClass) || TransitionInfo.CameraTransitionVfx.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UInteractionAbilityDataAsset", "", "Missing TSubClassOf<T>, or TSoftObjectPtr<T>!"));
+	}
+
+	return Result;
 }
 #endif
 
