@@ -52,7 +52,7 @@ struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
  *	provide Context specific inputs to parent properties.
  */
 UCLASS(BlueprintType, Blueprintable)
-class AVVM_API UAVVMCheatDataAsset : public UPrimaryDataAsset
+class AVVM_API UAVVMCheatDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 

@@ -22,10 +22,16 @@
 #if WITH_EDITOR
 EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+
 	const bool bIsInputActionValid = !bIsPassiveAbility ? !AbilityInputAction.IsNull() : true;
-	EDataValidationResult Result = (!GameplayAbility.IsNull() && bIsInputActionValid) ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
-	Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "No valid TSoftClassPtr<T> specified!"));
-	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+	if (!bIsInputActionValid || GameplayAbility.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "No valid TSoftClassPtr<T> specified!"));
+	}
+
+	return Result;
 }
 #endif
 
@@ -53,8 +59,13 @@ const TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>>& UAVVMAbilityGroupDataAsset:
 #if WITH_EDITOR
 EDataValidationResult FAVVMAbilityGroupDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	EDataValidationResult Result = !AbilityGroupDataAsset.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
-	Context.AddError(NSLOCTEXT("FAVVMAbilityGroupDataTableRow", "", "No valid UDataAsset specified!"));
-	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (AbilityGroupDataAsset.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FAVVMAbilityGroupDataTableRow", "", "No valid UDataAsset specified!"));
+	}
+
+	return Result;
 }
 #endif

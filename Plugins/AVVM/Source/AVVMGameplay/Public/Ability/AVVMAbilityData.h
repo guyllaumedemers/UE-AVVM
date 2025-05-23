@@ -38,8 +38,8 @@ class UGameplayAbility;
  *
  *	UAVVMAbilityDataAsset represent a single ability and it's requirements for being granted.
  */
-UCLASS(BlueprintType, Blueprintable)
-class AVVMGAMEPLAY_API UAVVMAbilityDataAsset : public UPrimaryDataAsset
+UCLASS(BlueprintType, NotBlueprintable)
+class AVVMGAMEPLAY_API UAVVMAbilityDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -83,8 +83,8 @@ protected:
  *
  *	UAVVMAbilityGroupDataAsset represent a set of abilities to be granted to an Actor with an ASC.
  */
-UCLASS(BlueprintType, Blueprintable)
-class AVVMGAMEPLAY_API UAVVMAbilityGroupDataAsset : public UPrimaryDataAsset
+UCLASS(BlueprintType, NotBlueprintable)
+class AVVMGAMEPLAY_API UAVVMAbilityGroupDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 

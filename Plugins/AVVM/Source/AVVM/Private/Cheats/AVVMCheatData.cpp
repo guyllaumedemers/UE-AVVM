@@ -22,9 +22,14 @@
 #if WITH_EDITOR
 EDataValidationResult UAVVMCheatDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	EDataValidationResult Result = CheatData.IsValid() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
-	Context.AddError(NSLOCTEXT("UAVVMCheatDataAsset", "", "No valid FInstancedStruct specified!"));
-	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (!CheatData.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMCheatDataAsset", "", "No valid FInstancedStruct specified!"));
+	}
+
+	return Result;
 }
 #endif
 
@@ -36,8 +41,13 @@ const TInstancedStruct<FAVVMCheatData>& UAVVMCheatDataAsset::GetData() const
 #if WITH_EDITOR
 EDataValidationResult FAVVMCheatDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	EDataValidationResult Result = !CheatDataAsset.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
-	Context.AddError(NSLOCTEXT("FAVVMCheatDataTableRow", "", "No valid UDataAsset specified!"));
-	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (CheatDataAsset.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FAVVMCheatDataTableRow", "", "No valid UDataAsset specified!"));
+	}
+
+	return Result;
 }
 #endif
