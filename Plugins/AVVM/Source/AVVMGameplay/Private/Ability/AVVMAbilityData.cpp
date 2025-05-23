@@ -17,25 +17,28 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMPlayerState.h"
+#include "Ability/AVVMAbilityData.h"
 
-#include "Net/UnrealNetwork.h"
-
-AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+#if WITH_EDITOR
+EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	bReplicates = true;
+	EDataValidationResult Result = !GameplayAbility.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
+	Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "No valid TSoftClassPtr<T> specified!"));
+	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
+}
+#endif
+
+bool UAVVMAbilityDataAsset::CanGrantAbility(const FGameplayTagContainer& ActorActiveTags,
+                                            const FGameplayTagContainer& ContextualTags) const
+{
+	return true;
 }
 
-void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+#if WITH_EDITOR
+EDataValidationResult FAVVMAbilityGroupDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
+	EDataValidationResult Result = !AbilityGroupDataAsset.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
+	Context.AddError(NSLOCTEXT("FAVVMAbilityDataTableRow", "", "No valid UDataAsset specified!"));
+	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
 }
-
-UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
+#endif

@@ -44,12 +44,6 @@ public:
 	AAVVMGameState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	AInfo* GetPlayerDeaths() const;
-	AInfo* GetPlayerKillstreaks() const;
-	AInfo* GetCapturedObjectives() const;
-	AInfo* GetDiscoveredArea() const;
-	AInfo* GetInteractionManager() const;
-
 protected:
 	// @gdemers here im just defining example cases of replicated systems that would allow
 	// 1. updating a collection of data specific to the system.
@@ -70,7 +64,4 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AInfo> DiscoveredArea = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> InteractionManager = nullptr;
 };

@@ -31,45 +31,19 @@
 /**
  *	Class description:
  *
- *	EInteractionStatusType define a set of possible status the component can be in.
- */
-UENUM(BlueprintType)
-enum class EInteractionStatusType : uint8
-{
-	None,
-	Blocked,
-	Active,
-	Interrupted,
-	Completed
-};
-
-inline const TCHAR* EnumToString(EInteractionStatusType State)
-{
-	switch (State)
-	{
-		case EInteractionStatusType::Blocked:
-			return TEXT("Blocked");
-		case EInteractionStatusType::Active:
-			return TEXT("Active");
-		case EInteractionStatusType::Interrupted:
-			return TEXT("Interrupted");
-		case EInteractionStatusType::Completed:
-			return TEXT("Completed");
-	}
-	ensure(false);
-	return TEXT("Unknown");
-}
-
-/**
- *	Class description:
- *
  *	UInteractionComponent handle user interaction with world objects. We expect the GFP to _AddComponent to Actors defined in the Project
  *	and to be available ONLY the client side.
  *
  *	OnBeginOverlap/OnEndOverlap locally add loose tag for the ability system to execute behaviour based on locally controlled pawn via
  *	Input Pressed/Released.
+ *
+ *	Note : Im sceptical about converting this system to use an ability system component and custom AbilityTask_WaitforBeginOverlap/AbilityTask_WaitforEndOverlap,
+ *	the task overlap would end whenever capturing an overlap and push a blocking tag. it counter part task would wait for the end overlap
+ *	and remove the tag. Doing so would prevent second interaction from happening, if desired! A second player exiting the overlap would however trigger the EndOverlap.
+ *
+ *	The sequence would also have to be repeated... How would dormancy work with those ? Can Ability Task become dormant and be woken up after ?
  */
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -97,7 +71,7 @@ protected:
 	bool bShouldPreventContingency = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag EventTag = FGameplayTag::EmptyTag;
+	FGameplayTag GrantAbilityTag = FGameplayTag::EmptyTag;
 
 	TWeakObjectPtr<const AActor> WorldActor = nullptr;
 };

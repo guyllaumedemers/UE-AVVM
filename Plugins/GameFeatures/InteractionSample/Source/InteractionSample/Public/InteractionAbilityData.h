@@ -38,7 +38,7 @@
  *	once the activation phase is complete.
  */
 USTRUCT(BlueprintType)
-struct INTERACTIONSAMPLE_API FInteractionAbilityTransitionDetails
+struct INTERACTIONSAMPLE_API FInteractionAbilityTransitionInfo
 {
 	GENERATED_BODY()
 
@@ -58,7 +58,7 @@ struct INTERACTIONSAMPLE_API FInteractionAbilityTransitionDetails
  *	FInteractionAbilityActivationDetails describe the properties that define the interaction.
  */
 USTRUCT(BlueprintType)
-struct INTERACTIONSAMPLE_API FInteractionAbilityActivationDetails
+struct INTERACTIONSAMPLE_API FInteractionAbilityActivationInfo
 {
 	GENERATED_BODY()
 
@@ -74,9 +74,6 @@ struct INTERACTIONSAMPLE_API FInteractionAbilityActivationDetails
 	// @gdemers display visual feedback that we are in range for interaction.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UCommonUserWidget> PreviewInteractionWidgetClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FInteractionAbilityTransitionDetails TransitionDetails;
 };
 
 /**
@@ -96,5 +93,8 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FInteractionAbilityActivationDetails Data;
+	FInteractionAbilityActivationInfo ActivationInfo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FInteractionAbilityTransitionInfo TransitionInfo;
 };

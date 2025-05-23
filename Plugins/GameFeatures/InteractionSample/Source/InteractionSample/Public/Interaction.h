@@ -66,5 +66,5 @@ private:
 	void operator()(const AActor* NewTarget,
 	                const AActor* NewInstigator);
 
-	friend class UInteractionManager;
+	friend class UInteractionManagerComponent;
 };

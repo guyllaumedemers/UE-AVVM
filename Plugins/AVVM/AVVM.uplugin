@@ -45,6 +45,10 @@
       "Enabled": true
     },
     {
+      "Name": "GameplayAbilities",
+      "Enabled": true
+    },
+    {
       "Name": "ImGui",
       "Enabled": true
     },

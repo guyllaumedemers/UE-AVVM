@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AbilitySystemInterface.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularPlayerState.h"
 #include "GameFramework/Info.h"
@@ -35,6 +36,7 @@
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
+                                          public IAbilitySystemInterface,
                                           public IAVVMQuicktimeEventPlayerStateInterface
 {
 	GENERATED_BODY()
@@ -43,7 +45,11 @@ public:
 	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
 protected:
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;
 	// @gdemers here im just defining example cases of replicated systems that would allow
 	// 1. updating a collection of data specific to the system.
 	// 2. react post-replication and update presenters owned by the player state.

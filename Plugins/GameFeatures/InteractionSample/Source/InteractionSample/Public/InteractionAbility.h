@@ -28,7 +28,8 @@
 /**
  *	Class Description :
  *
- *	
+ *	UInteractionAbility define an instance ability the local client can interact with. Granted from a replicated
+ *	world object.
  */
 UCLASS()
 class INTERACTIONSAMPLE_API UInteractionAbility : public UGameplayAbility
@@ -36,6 +37,20 @@ class INTERACTIONSAMPLE_API UInteractionAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
-	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
-	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+	                           const FGameplayAbilitySpec& Spec) override;
+
+	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+	                             const FGameplayAbilitySpec& Spec) override;
+
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	                             const FGameplayAbilityActorInfo* ActorInfo,
+	                             const FGameplayAbilityActivationInfo ActivationInfo,
+	                             const FGameplayEventData* TriggerEventData) override;
+
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle,
+	                        const FGameplayAbilityActorInfo* ActorInfo,
+	                        const FGameplayAbilityActivationInfo ActivationInfo,
+	                        bool bReplicateEndAbility,
+	                        bool bWasCancelled) override;
 };

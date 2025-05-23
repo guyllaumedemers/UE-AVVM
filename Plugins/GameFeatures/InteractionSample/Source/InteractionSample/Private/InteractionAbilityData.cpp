@@ -22,6 +22,9 @@
 #if WITH_EDITOR
 EDataValidationResult UInteractionAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	return Super::IsDataValid(Context);
+	const bool bAreAssetsValid = IsValid(ActivationInfo.PreviewInteractionWidgetClass) && IsValid(TransitionInfo.WidgetClass) && !TransitionInfo.CameraTransitionVfx.IsNull();
+	EDataValidationResult Result = bAreAssetsValid ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
+	Context.AddError(NSLOCTEXT("UInteractionAbilityDataAsset", "", "Missing TSubClassOf<T>, or TSoftObjectPtr<T>!"));
+	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
 }
 #endif

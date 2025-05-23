@@ -34,6 +34,8 @@ public class AVVMGameplay : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"GameplayAbilities",
+				"GameplayTags",
 				"ModularGameplayActors",
 				"Slate",
 			}

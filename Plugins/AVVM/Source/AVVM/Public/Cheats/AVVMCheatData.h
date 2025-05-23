@@ -32,7 +32,7 @@
 #include "AVVMCheatData.generated.h"
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	FAVVMCheatData. Base Class for "stub" data. Expected to be derived and extended based on project requirements.
  */
@@ -43,7 +43,7 @@ struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
 };
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	UAVVMCheatDataAsset is binary asset type which define "stub" information about a running cheat. To be loaded/accessed during
  *	Cheats execution.
@@ -70,10 +70,10 @@ protected:
 };
 
 /**
-*	Class description:
-*
-*	FAVVMCheatDataTableRow. Struct Class referenced in UDataTable and accessed via a UDataRegistry. It's expected
-*	to be retrieved through UMetaDataRegistrySources_DataTable at Runtime.
+ *	Class description:
+ *
+ *	FAVVMCheatDataTableRow. Struct Class referenced in UDataTable and accessed via a UDataRegistry. It's expected
+ *	to be retrieved through UMetaDataRegistrySources_DataTable at Runtime.
  */
 USTRUCT(BlueprintType)
 struct AVVM_API FAVVMCheatDataTableRow : public FTableRowBase

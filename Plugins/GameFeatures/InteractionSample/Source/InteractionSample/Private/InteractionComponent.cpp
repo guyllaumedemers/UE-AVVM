@@ -20,7 +20,7 @@
 #include "InteractionComponent.h"
 
 #include "AbilitySystemComponent.h"
-#include "InteractionManager.h"
+#include "InteractionManagerComponent.h"
 #include "Components/PrimitiveComponent.h"
 
 void UInteractionComponent::BeginPlay()
@@ -84,10 +84,10 @@ void UInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent
 	{
 		// @gdemers allow a gameplay ability to be executable due to tag condition
 		// being met!
-		AbilityComponent->AddLooseGameplayTag(EventTag);
+		AbilityComponent->AddLooseGameplayTag(GrantAbilityTag);
 	}
 
-	auto* InteractionManager = UInteractionManager::GetManager(this);
+	auto* InteractionManager = UInteractionManagerComponent::GetManager(this);
 	if (IsValid(InteractionManager))
 	{
 		// @gdemers we try adding this local overlap event and first validate the replicated state
@@ -115,10 +115,10 @@ void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* 
 	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->RemoveLooseGameplayTag(EventTag);
+		AbilityComponent->RemoveLooseGameplayTag(GrantAbilityTag);
 	}
 
-	auto* InteractionManager = UInteractionManager::GetManager(this);
+	auto* InteractionManager = UInteractionManagerComponent::GetManager(this);
 	if (IsValid(InteractionManager))
 	{
 		InteractionManager->AttemptRecordEndOverlap(WorldActor.Get(), OtherActor);
