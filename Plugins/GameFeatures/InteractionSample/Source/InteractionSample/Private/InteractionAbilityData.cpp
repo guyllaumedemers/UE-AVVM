@@ -28,3 +28,13 @@ EDataValidationResult UInteractionAbilityDataAsset::IsDataValid(class FDataValid
 	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
 }
 #endif
+
+const FInteractionAbilityActivationInfo& UInteractionAbilityDataAsset::GetActivationInfo() const
+{
+	return ActivationInfo;
+}
+
+const FInteractionAbilityTransitionInfo& UInteractionAbilityDataAsset::GetTransitionInfo() const
+{
+	return TransitionInfo;
+}

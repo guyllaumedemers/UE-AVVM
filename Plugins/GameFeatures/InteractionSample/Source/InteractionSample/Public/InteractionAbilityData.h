@@ -91,6 +91,12 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	UFUNCTION(BlueprintCallable)
+	const FInteractionAbilityActivationInfo& GetActivationInfo() const;
+
+	UFUNCTION(BlueprintCallable)
+	const FInteractionAbilityTransitionInfo& GetTransitionInfo() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FInteractionAbilityActivationInfo ActivationInfo;

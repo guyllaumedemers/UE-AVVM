@@ -39,7 +39,7 @@ class UGameplayAbility;
  *	UAVVMAbilityDataAsset represent a single ability and it's requirements for being granted.
  */
 UCLASS(BlueprintType, Blueprintable)
-class AVVMGAMEPLAY_API UAVVMAbilityDataAsset : public UDataAsset
+class AVVMGAMEPLAY_API UAVVMAbilityDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -51,6 +51,13 @@ public:
 	bool CanGrantAbility(const FGameplayTagContainer& ActorActiveTags/*actor specific*/,
 	                     const FGameplayTagContainer& ContextualTags/*world specific*/) const;
 
+	UFUNCTION(BlueprintCallable)
+	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;
+
+	UFUNCTION(BlueprintCallable)
+	const TSoftObjectPtr<UInputAction>& GetInputAction() const;
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<UGameplayAbility> GameplayAbility = nullptr;
 
@@ -77,11 +84,15 @@ public:
  *	UAVVMAbilityGroupDataAsset represent a set of abilities to be granted to an Actor with an ASC.
  */
 UCLASS(BlueprintType, Blueprintable)
-class AVVMGAMEPLAY_API UAVVMAbilityGroupDataAsset : public UDataAsset
+class AVVMGAMEPLAY_API UAVVMAbilityGroupDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	const TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>>& GetAbilities() const;
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>> Abilities;
 };

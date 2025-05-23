@@ -52,17 +52,17 @@ struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
  *	provide Context specific inputs to parent properties.
  */
 UCLASS(BlueprintType, Blueprintable)
-class AVVM_API UAVVMCheatDataAsset : public UDataAsset
+class AVVM_API UAVVMCheatDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	const TInstancedStruct<FAVVMCheatData>& GetData() const { return CheatData; }
-
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+
+	UFUNCTION(BlueprintCallable)
+	const TInstancedStruct<FAVVMCheatData>& GetData() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

@@ -22,7 +22,8 @@
 #if WITH_EDITOR
 EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	EDataValidationResult Result = !GameplayAbility.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
+	const bool bIsInputActionValid = !bIsPassiveAbility ? !AbilityInputAction.IsNull() : true;
+	EDataValidationResult Result = (!GameplayAbility.IsNull() && bIsInputActionValid) ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
 	Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "No valid TSoftClassPtr<T> specified!"));
 	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
 }
@@ -34,11 +35,26 @@ bool UAVVMAbilityDataAsset::CanGrantAbility(const FGameplayTagContainer& ActorAc
 	return true;
 }
 
+const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDataAsset::GetGameplayAbilityClass() const
+{
+	return GameplayAbility;
+}
+
+const TSoftObjectPtr<UInputAction>& UAVVMAbilityDataAsset::GetInputAction() const
+{
+	return AbilityInputAction;
+}
+
+const TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>>& UAVVMAbilityGroupDataAsset::GetAbilities() const
+{
+	return Abilities;
+}
+
 #if WITH_EDITOR
 EDataValidationResult FAVVMAbilityGroupDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = !AbilityGroupDataAsset.IsNull() ? EDataValidationResult::Valid : EDataValidationResult::Invalid;
-	Context.AddError(NSLOCTEXT("FAVVMAbilityDataTableRow", "", "No valid UDataAsset specified!"));
+	Context.AddError(NSLOCTEXT("FAVVMAbilityGroupDataTableRow", "", "No valid UDataAsset specified!"));
 	return CombineDataValidationResults(Super::IsDataValid(Context), Result);
 }
 #endif
