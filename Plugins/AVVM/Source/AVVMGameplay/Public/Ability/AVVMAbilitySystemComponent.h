@@ -17,38 +17,27 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class AVVMGameplay : ModuleRules
+#include "AbilitySystemComponent.h"
+
+#include "AVVMAbilitySystemComponent.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMAbilitySystemComponent extend base behaviour from Unreal Ability system component and support
+ *	default initialization of Actor Abilities based on data received.
+ */
+UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class AVVMGAMEPLAY_API UAVVMAbilitySystemComponent : public UAbilitySystemComponent
 {
-	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMOnline",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModularGameplayActors",
-				"NetCore",
-				"Slate",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"EnhancedInput"
-			}
-		);
-	}
-}
+public:
+	// @gdemers handle granting abilities to an Actor.
+	UFUNCTION(BlueprintCallable)
+	void SetupAbilities(const TArray<UObject*>& Resources);
+};
