@@ -86,21 +86,21 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	ResourceHandles.Top()->GetLoadedAssets(OutStreamedAssets);
 
 	FKeepProcessingResources Callback;
-	Callback.BindDynamic(this, &UAVVMResourceManagerComponent::OnRegistriesPending);
+	Callback.BindDynamic(this, &UAVVMResourceManagerComponent::ProcessAdditionalResources);
 
-	const bool bResult = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(OwningOuter.Get(), OutStreamedAssets, Callback);
+	const bool bHasPendingRegistries = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(OwningOuter.Get(), OutStreamedAssets, Callback);
 	UE_LOG(LogUI,
 	       Log,
-	       TEXT("Resource Loader Update Status: Still Acquiring Resources ? %s"),
-	       bResult ? TEXT("False") : TEXT("True"));
+	       TEXT("Resource Loader Update Status: Is Done Acquiring Resources ? %s"),
+	       bHasPendingRegistries ? TEXT("False") : TEXT("True"));
 }
 
-void UAVVMResourceManagerComponent::OnRegistriesPending(const TArray<FDataRegistryId>& PendingRegistriesId)
+bool UAVVMResourceManagerComponent::ProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
 {
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem))
 	{
-		return;
+		return false;
 	}
 
 	for (const FDataRegistryId& RegistryId : PendingRegistriesId)
@@ -108,4 +108,6 @@ void UAVVMResourceManagerComponent::OnRegistriesPending(const TArray<FDataRegist
 		const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
 		ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(RegistryId, Callback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 	}
+
+	return !PendingRegistriesId.IsEmpty();
 }

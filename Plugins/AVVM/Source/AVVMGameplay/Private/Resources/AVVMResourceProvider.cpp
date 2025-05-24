@@ -18,3 +18,9 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Resources/AVVMResourceProvider.h"
+
+bool UAVVMResourceHandlingBlueprintFunctionLibrary::ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,
+                                                                                    const FKeepProcessingResources& Callback)
+{
+	return ensureAlwaysMsgf(Callback.IsBound(), TEXT("Error: Previously bound Delegate invalid!")) ? Callback.Execute(QueuedResourcesId) : false;
+}

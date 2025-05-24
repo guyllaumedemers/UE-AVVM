@@ -25,7 +25,7 @@
 
 #include "AVVMResourceProvider.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
+DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
 
 /**
  *	Class description:
@@ -44,14 +44,31 @@ class AVVMGAMEPLAY_API IAVVMResourceProvider
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	FDataRegistryId GetActorDefinitionResourceId() const;
 	virtual FDataRegistryId GetActorDefinitionResourceId_Implementation() const PURE_VIRTUAL(GetActorDefinitionResourceId_Implementation, return FDataRegistryId(););
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources,
 	                                   const FKeepProcessingResources& Callback) const;
 
 	virtual bool CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources,
 	                                                          const FKeepProcessingResources& Callback) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return false;);
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMResourceHandlingBlueprintFunctionLibrary define a set of api to allow reusability and circumvent some issues that arise
+ *	with design decision and how BP prevent Dynamic Delegates from being broadcast from BP code.
+ */
+UCLASS(BlueprintType)
+class AVVMGAMEPLAY_API UAVVMResourceHandlingBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,
+	                                            const FKeepProcessingResources& Callback);
 };

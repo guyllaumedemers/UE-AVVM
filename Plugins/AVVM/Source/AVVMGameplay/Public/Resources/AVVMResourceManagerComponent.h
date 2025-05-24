@@ -49,7 +49,7 @@ protected:
 	void OnSoftObjectAcquired();
 
 	UFUNCTION()
-	void OnRegistriesPending(const TArray<FDataRegistryId>& PendingRegistriesId);
+	bool ProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId);
 
 	TArray<TSharedPtr<FStreamableHandle>> ResourceHandles;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
