@@ -25,21 +25,50 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceProvider.h"
+
+// @gdemers extern symbol for global access to custom LLM_tag
+AVVM_API extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
+
+// @gdemers for tracing nested resources loading request
+TRACE_DECLARE_INT_COUNTER(RequestCounter, TEXT("Resource Component Loading Request Counter"));
+TRACE_DECLARE_INT_COUNTER(InstanceCounter, TEXT("Resource Component Instance Counter"));
 
 void UAVVMResourceManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const auto* ResourceRequester = GetTypedOuter<AActor>();
-	RequestExternalResourceAsync(ResourceRequester);
-	OwningOuter = ResourceRequester;
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	TRACE_COUNTER_INCREMENT(InstanceCounter);
+
+	UE_LOG(LogUI, Log, TEXT("Adding UAVVMResourceManagerComponent to Actor: %s"), *Outer->GetName())
+	LLM_SCOPE_BYTAG(AVVMTag);
+
+	RequestExternalResourceAsync(Outer);
+	OwningOuter = Outer;
 }
 
 void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	ResourceHandles.Reset();
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!ensure(IsValid(Outer)))
+	{
+		ResourceHandles.Empty();
+		return;
+	}
+
+	UE_LOG(LogUI, Log, TEXT("Removing UAVVMResourceManagerComponent to Actor: %s"), *Outer->GetName())
+	LLM_SCOPE_BYTAG(AVVMTag);
+
+	ResourceHandles.Empty();
 }
 
 void UAVVMResourceManagerComponent::RequestExternalResourceAsync(const AActor* Outer)
@@ -49,6 +78,8 @@ void UAVVMResourceManagerComponent::RequestExternalResourceAsync(const AActor* O
 	{
 		return;
 	}
+
+	TRACE_COUNTER_INCREMENT(RequestCounter);
 
 	const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
 	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(IAVVMResourceProvider::Execute_GetActorDefinitionResourceId(Outer), Callback),
@@ -98,10 +129,12 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 bool UAVVMResourceManagerComponent::ProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
 {
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(DataRegistrySubsystem))
+	if (!IsValid(DataRegistrySubsystem) || PendingRegistriesId.IsEmpty())
 	{
 		return false;
 	}
+
+	TRACE_COUNTER_INCREMENT(RequestCounter);
 
 	for (const FDataRegistryId& RegistryId : PendingRegistriesId)
 	{
@@ -109,5 +142,5 @@ bool UAVVMResourceManagerComponent::ProcessAdditionalResources(const TArray<FDat
 		ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(RegistryId, Callback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 	}
 
-	return !PendingRegistriesId.IsEmpty();
+	return true;
 }

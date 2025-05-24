@@ -25,4 +25,4 @@ IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVM)
 DEFINE_LOG_CATEGORY(LogUI);
 
 // @gdemers define global LLM tag
-LLM_DEFINE_TAG(AVVMTag);
+AVVM_API LLM_DEFINE_TAG(AVVMTag);

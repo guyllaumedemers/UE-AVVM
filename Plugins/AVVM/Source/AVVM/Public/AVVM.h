@@ -19,6 +19,9 @@
 //SOFTWARE.
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
+
 #include "AVVM.generated.h"
 
 AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);

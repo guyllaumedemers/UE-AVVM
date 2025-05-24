@@ -35,10 +35,9 @@ void UAVVMComponent::BeginPlay()
 		return;
 	}
 
-	const FString& ActorName = *Outer->GetFName().ToString();
+	const FString ActorName = *Outer->GetName();
 	UE_LOG(LogUI, Log, TEXT("Adding UAVVMComponent to Actor: %s"), *ActorName)
 	TRACE_BOOKMARK(TEXT("Presenter.Create, TypedOuter: %s"), *ActorName);
-
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 	// @gdemers presenters are created synchronously which makes it safe to broadcast events in the AActor::BeginPlay()
@@ -66,13 +65,13 @@ void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensure(IsValid(Outer)))
 	{
+		TransientPresenters.Empty();
 		return;
 	}
 
-	const FString& ActorName = *Outer->GetFName().ToString();
+	const FString ActorName = Outer->GetName();
 	UE_LOG(LogUI, Log, TEXT("Removing UAVVMComponent to Actor: %s"), *ActorName)
-	TRACE_BOOKMARK(TEXT("Presenter.Destruct, TypedOuter: %s"), *Outer->GetFName().ToString());
-
+	TRACE_BOOKMARK(TEXT("Presenter.Destroy, TypedOuter: %s"), *ActorName);
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 	for (auto& Presenter : TransientPresenters)

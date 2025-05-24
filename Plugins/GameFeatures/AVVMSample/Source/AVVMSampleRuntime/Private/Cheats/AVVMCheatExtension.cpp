@@ -36,8 +36,8 @@
 #endif
 
 // @gdemers for tracing how frequently these are being rebuilt if ever it becomes a problem!
-TRACE_DECLARE_INT_COUNTER(ComboTagRebuild, TEXT("Combo Tag Rebuild Count"));
-TRACE_DECLARE_INT_COUNTER(ComboRegistryRebuild, TEXT("Combo Registry Rebuild Count"));
+TRACE_DECLARE_INT_COUNTER(TagRebuildCounter, TEXT("Tag Rebuild Counter"));
+TRACE_DECLARE_INT_COUNTER(RegistryRebuildCounter, TEXT("Registry Rebuild Counter"));
 
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 {
@@ -309,7 +309,7 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 	}
 
 	TRACE_BOOKMARK(TEXT("UAVVMCheatExtension.LazyGatherTagChannels"));
-	TRACE_COUNTER_INCREMENT(ComboTagRebuild);
+	TRACE_COUNTER_INCREMENT(TagRebuildCounter);
 
 	TArray<const FGameplayTagSource*> OutTagSources;
 	// @gdemers notes : FindTagsWithSource doesn't get the path of the asset correctly. The impl details act on the TagSource->ConfigFileName (which is what I care about and
@@ -354,7 +354,7 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 	}
 
 	TRACE_BOOKMARK(TEXT("UAVVMCheatExtension.LazyGatherRegistryIds"));
-	TRACE_COUNTER_INCREMENT(ComboRegistryRebuild);
+	TRACE_COUNTER_INCREMENT(RegistryRebuildCounter);
 
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem))
