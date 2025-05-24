@@ -19,6 +19,60 @@
 //SOFTWARE.
 #include "Ability/AVVMAbilitySystemComponent.h"
 
+#include "AVVM.h"
+#include "Ability/AVVMAbilityData.h"
+#include "Engine/AssetManager.h"
+
 void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resources)
+{
+	const FGameplayTagContainer& ASCTags = GetOwnedGameplayTags();
+
+	TArray<FSoftObjectPath> DeferredGrantedAbilities;
+	for (const UObject* Resource : Resources)
+	{
+		const auto* AbilityAsset = Cast<UAVVMAbilityDataAsset>(Resource);
+		if (!IsValid(AbilityAsset))
+		{
+			continue;
+		}
+
+		if (!AbilityAsset->CanGrantAbility(ASCTags))
+		{
+			UE_LOG(LogUI, Log, TEXT("Failed to Grant Ability due to Blocking Tags: %s"), *AbilityAsset->GetName());
+			continue;
+		}
+
+		// TODO @gdemers need to brainstorm about how to handle input before going further!
+		UE_LOG(LogUI, Log, TEXT("New Ability Recorded for deferred Granting: %s"), *AbilityAsset->GetName());
+		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
+	}
+
+	if (!DeferredGrantedAbilities.IsEmpty())
+	{
+		FAbilityToken Token;
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred, Token);
+
+		TSharedPtr<FStreamableHandle>& OutResult = AbilityHandleSystem.FindOrAdd(Token.UniqueId);
+		OutResult = UAssetManager::Get().LoadAssetList(DeferredGrantedAbilities, Callback);
+	}
+}
+
+void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken AbilityToken)
+{
+	const TSharedPtr<FStreamableHandle>* OutResult = AbilityHandleSystem.Find(AbilityToken.UniqueId);
+	if (ensure(OutResult != nullptr && OutResult->IsValid()))
+	{
+		TArray<UObject*> OutStreamedAssets;
+		(*OutResult)->GetLoadedAssets(OutStreamedAssets);
+		GrantAbilities(OutStreamedAssets);
+	}
+}
+
+void UAVVMAbilitySystemComponent::GrantAbilities(const TArray<UObject*>& Abilities)
+{
+}
+
+void UAVVMAbilitySystemComponent::GrantAbility(const UGameplayAbility* Ability)
 {
 }

@@ -22,8 +22,31 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemComponent.h"
+#include "Engine/StreamableManager.h"
 
 #include "AVVMAbilitySystemComponent.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FAbilityToken describe a unique identifier that increment only when default construct. Can be safely
+ *	passed by copy around.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAbilityToken
+{
+	GENERATED_BODY()
+
+	explicit FAbilityToken() : UniqueId(++GlobalUniqueId)
+	{
+	}
+
+	UPROPERTY(Transient)
+	uint32 UniqueId = 0;
+
+private:
+	inline static uint32 GlobalUniqueId = 0;
+};
 
 /**
  *	Class description:
@@ -37,7 +60,15 @@ class AVVMGAMEPLAY_API UAVVMAbilitySystemComponent : public UAbilitySystemCompon
 	GENERATED_BODY()
 
 public:
-	// @gdemers handle granting abilities to an Actor.
 	UFUNCTION(BlueprintCallable)
 	void SetupAbilities(const TArray<UObject*>& Resources);
+
+protected:
+	UFUNCTION()
+	void OnAbilityGrantedDeferred(FAbilityToken AbilityToken);
+
+	void GrantAbilities(const TArray<UObject*>& Abilities);
+	void GrantAbility(const UGameplayAbility* Ability);
+
+	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 };

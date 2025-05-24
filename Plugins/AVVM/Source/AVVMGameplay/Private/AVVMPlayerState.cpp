@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMPlayerState.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AbilitySystemGlobals.h"
 
 AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -37,13 +37,5 @@ void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
 {
-	const auto InterfaceCheck = TScriptInterface<IAbilitySystemInterface>(GetPawn());
-	if (!ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!")))
-	{
-		return nullptr;
-	}
-	else
-	{
-		return InterfaceCheck->GetAbilitySystemComponent();
-	}
+	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetPawn());
 }
