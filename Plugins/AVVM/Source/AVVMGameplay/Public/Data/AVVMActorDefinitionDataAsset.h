@@ -46,25 +46,25 @@ class AVVMGAMEPLAY_API UAVVMActorDefinitionDataAsset : public UDataAsset
 #endif
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportPassiveAbilities = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportPassiveAbilities"))
 	FDataRegistryId PassiveAbilityGroupId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportActiveAbilities = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportActiveAbilities"))
 	FDataRegistryId ActiveAbilityGroupId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportCosmetic = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportCosmetic"))
 	FDataRegistryId CosmeticDefinitionId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportEquipment = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportEquipment"))
