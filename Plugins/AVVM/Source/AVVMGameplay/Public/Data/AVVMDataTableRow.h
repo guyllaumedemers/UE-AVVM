@@ -23,17 +23,20 @@
 
 #include "Engine/DataAsset.h"
 
-#include "AVVMSandboxDataTableRow.generated.h"
+#include "AVVMDataTableRow.generated.h"
 
 /**
  *	Class description:
  *
- *	FAVVMSandboxDataTableRow define an empty type to be derived from and load resources via the UAVVMResourceManagerComponent.
+ *	FAVVMDataTableRow define an empty type to be derived from and expose a list of FSoftObjectPath that should be asynchronously loaded to the Manager Component.
+ *	Users are expected to encapsulate data into UDataAsset or UObject derived type and append the ResourcePath list so the Manager Component can handle the loading of resources.
+ *	Note : Nested Registry Id should be handled at the Actor level, i.e derived implementer of IAVVMResourceProvider. Actor derived Classes are expected to handle the gathering of unloaded
+ *	RegistryIds and defer additional loading via IAVVMResourceProvider::CheckIsDoneAcquiringResources argument delegate.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMSandboxDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	virtual TArray<FSoftObjectPath> GetResources() const PURE_VIRTUAL(GetResources, return TArray<FSoftObjectPath>(););
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const PURE_VIRTUAL(GetResourcesPaths, return TArray<FSoftObjectPath>(););
 };

@@ -24,6 +24,7 @@
 #include "DataRegistryId.h"
 #include "DataRegistryTypes.h"
 #include "Components/ActorComponent.h"
+#include "Engine/StreamableManager.h"
 
 #include "AVVMResourceManagerComponent.generated.h"
 

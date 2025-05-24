@@ -22,25 +22,24 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
-#include "UObject/Interface.h"
 
-#include "AVVMResourceImplementer.generated.h"
+#include "AVVMResourceProvider.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
 
 /**
  *	Class description:
  *
- *	UAVVMResourceImplementer interface that any Actor supporting the Resource Manager component have to implement
- *	to be able to support async loading of resources and forwarding loaded content to external systems.
+ *	UAVVMResourceProvider provide Actor resource definition via Registry id and support runtime checking of async loaded resources.
+ *	It interface with the UAVVMResourceManagerComponent during the loading phase of the Resource Manager Component and forward loaded content to external systems.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class AVVMGAMEPLAY_API UAVVMResourceImplementer : public UInterface
+class AVVMGAMEPLAY_API UAVVMResourceProvider : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMGAMEPLAY_API IAVVMResourceImplementer
+class AVVMGAMEPLAY_API IAVVMResourceProvider
 {
 	GENERATED_BODY()
 
@@ -50,6 +49,9 @@ public:
 	virtual FDataRegistryId GetActorDefinitionResourceId_Implementation() const PURE_VIRTUAL(GetActorDefinitionResourceId_Implementation, return FDataRegistryId(););
 
 	UFUNCTION(BlueprintNativeEvent)
-	bool CheckIsDoneAcquiringResources(const TArray<const UObject*>& Resource, FKeepProcessingResources Callback) const;
-	virtual bool CheckIsDoneAcquiringResources_Implementation(const TArray<const UObject*>& Resource, FKeepProcessingResources Callback) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return false;);
+	bool CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources,
+	                                   const FKeepProcessingResources& Callback) const;
+
+	virtual bool CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources,
+	                                                          const FKeepProcessingResources& Callback) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return false;);
 };

@@ -45,7 +45,7 @@ EDataValidationResult FAVVMActorDefinitionDataTableRow::IsDataValid(class FDataV
 }
 #endif
 
-TArray<FSoftObjectPath> FAVVMActorDefinitionDataTableRow::GetResources() const
+TArray<FSoftObjectPath> FAVVMActorDefinitionDataTableRow::GetResourcesPaths() const
 {
 	return {ActorDefinition.ToSoftObjectPath()};
 }

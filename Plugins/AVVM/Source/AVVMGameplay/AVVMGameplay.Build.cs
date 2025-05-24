@@ -33,6 +33,7 @@ public class AVVMGameplay : ModuleRules
 				"AVVMOnline",
 				"Core",
 				"CoreUObject",
+				"DataRegistry",
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",

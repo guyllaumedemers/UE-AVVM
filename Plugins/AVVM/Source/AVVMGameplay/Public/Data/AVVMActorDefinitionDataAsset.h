@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMSandboxDataTableRow.h"
+#include "AVVMDataTableRow.h"
 #include "DataRegistryId.h"
 #include "Engine/DataAsset.h"
 
@@ -57,7 +57,7 @@ protected:
  *	for it's counter-part Actor type.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMActorDefinitionDataTableRow : public FAVVMSandboxDataTableRow
+struct AVVMGAMEPLAY_API FAVVMActorDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
@@ -65,7 +65,7 @@ struct AVVMGAMEPLAY_API FAVVMActorDefinitionDataTableRow : public FAVVMSandboxDa
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	virtual TArray<FSoftObjectPath> GetResources() const override;
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UAVVMActorDefinitionDataAsset> ActorDefinition = nullptr;

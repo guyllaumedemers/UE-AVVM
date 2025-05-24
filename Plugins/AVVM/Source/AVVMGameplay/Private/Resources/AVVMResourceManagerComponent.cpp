@@ -25,7 +25,7 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
-#include "Resources/AVVMResourceImplementer.h"
+#include "Resources/AVVMResourceProvider.h"
 
 void UAVVMResourceManagerComponent::BeginPlay()
 {
@@ -51,7 +51,7 @@ void UAVVMResourceManagerComponent::RequestExternalResourceAsync(const AActor* O
 	}
 
 	const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
-	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(IAVVMResourceImplementer::Execute_GetActorDefinitionResourceId(Outer), Callback),
+	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(IAVVMResourceProvider::Execute_GetActorDefinitionResourceId(Outer), Callback),
 	                 TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 }
 
@@ -64,33 +64,31 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		return;
 	}
 
-	const auto* UnknownDataTableRow = Result.GetItem<FAVVMSandboxDataTableRow>();
-	check(UnknownDataTableRow != nullptr);
+	const auto* DataTableRow = Result.GetItem<FAVVMDataTableRow>();
+	check(DataTableRow != nullptr);
 
 	FStreamableDelegate Callback;
 	Callback.BindUObject(this, &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
 
-	const TSharedPtr<FStreamableHandle> StreamableHandle = UAssetManager::Get().LoadAssetList(UnknownDataTableRow->GetResources(), Callback);
+	const TSharedPtr<FStreamableHandle> StreamableHandle = UAssetManager::Get().LoadAssetList(DataTableRow->GetResourcesPaths(), Callback);
 	ResourceHandles.Add(StreamableHandle);
 }
 
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
-	const auto ResourceImplementer = TScriptInterface<const IAVVMResourceImplementer>(OwningOuter.Get());
-	if (!UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(ResourceImplementer))
+	const auto ResourceImplementer = TScriptInterface<const IAVVMResourceProvider>(OwningOuter.Get());
+	if (!UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(ResourceImplementer) || ResourceHandles.IsEmpty())
 	{
 		return;
 	}
 
-	const auto TopHandle = !ResourceHandles.IsEmpty() ? ResourceHandles.Top() : TSharedPtr<FStreamableHandle>();
-
-	TArray<const UObject*> OutStreamedAssets;
-	TopHandle->GetLoadedAssets(OutStreamedAssets);
+	TArray<UObject*> OutStreamedAssets;
+	ResourceHandles.Top()->GetLoadedAssets(OutStreamedAssets);
 
 	FKeepProcessingResources Callback;
 	Callback.BindDynamic(this, &UAVVMResourceManagerComponent::OnRegistriesPending);
 
-	const bool bResult = ResourceImplementer->CheckIsDoneAcquiringResources(OutStreamedAssets, Callback);
+	const bool bResult = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(OwningOuter.Get(), OutStreamedAssets, Callback);
 	UE_LOG(LogUI,
 	       Log,
 	       TEXT("Resource Loader Update Status: Still Acquiring Resources ? %s"),
