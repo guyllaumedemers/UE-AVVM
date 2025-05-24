@@ -23,25 +23,25 @@
 EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!PassiveAbilityGroupId.IsValid())
+	if (bDoesSupportPassiveAbilities && !PassiveAbilityGroupId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "PassiveAbilityGroupId invalid!"));
 	}
 
-	if (!ActiveAbilityGroupId.IsValid())
+	if (bDoesSupportActiveAbilities && !ActiveAbilityGroupId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActiveAbilityGroupId invalid!"));
 	}
 
-	if (!CosmeticDefinitionId.IsValid())
+	if (bDoesSupportCosmetic && !CosmeticDefinitionId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "CosmeticDefinitionId invalid!"));
 	}
 
-	if (!EquipmentDefinitionId.IsValid())
+	if (bDoesSupportEquipment && !EquipmentDefinitionId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "EquipmentDefinitionId invalid!"));
@@ -56,7 +56,7 @@ EDataValidationResult FAVVMActorDefinitionDataTableRow::IsDataValid(class FDataV
 	if (ActorDefinition.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMActorDefinitionDataTableRow", "", "No valid UDataAsset specified!"));
+		Context.AddError(NSLOCTEXT("FAVVMActorDefinitionDataTableRow", "", "UAVVMActorDefinitionDataAsset missing. No valid UDataAsset specified!"));
 	}
 
 	return Result;

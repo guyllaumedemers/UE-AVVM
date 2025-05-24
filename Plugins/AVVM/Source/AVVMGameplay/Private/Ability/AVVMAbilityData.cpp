@@ -25,10 +25,16 @@ EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationCo
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
 	const bool bIsInputActionValid = !bIsPassiveAbility ? !AbilityInputAction.IsNull() : true;
-	if (!bIsInputActionValid || GameplayAbility.IsNull())
+	if (!bIsInputActionValid)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "No valid TSoftClassPtr<T> specified!"));
+		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "Input Action missing. No valid TSoftObjectPtr<T> specified!"));
+	}
+
+	if (GameplayAbility.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "GameplayAbility missing. No valid TSoftClassPtr<T> specified!"));
 	}
 
 	return Result;
@@ -57,7 +63,7 @@ EDataValidationResult FAVVMAbilityDataTableRow::IsDataValid(class FDataValidatio
 	if (AbilityDataAsset.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMAbilityDataTableRow", "", "No valid UDataAsset specified!"));
+		Context.AddError(NSLOCTEXT("FAVVMAbilityDataTableRow", "", "UAVVMAbilityDataAsset missing. No valid UDataAsset specified!"));
 	}
 
 	return Result;
