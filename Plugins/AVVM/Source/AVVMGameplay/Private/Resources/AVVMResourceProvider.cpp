@@ -19,6 +19,42 @@
 //SOFTWARE.
 #include "Resources/AVVMResourceProvider.h"
 
+#include "AbilitySystemComponent.h"
+#include "Ability/AVVMAbilityData.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+
+TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckAbilities(UAbilitySystemComponent* AbilitySystemComponent,
+                                                                                      const TArray<UObject*>& Resources)
+{
+	TArray<FDataRegistryId> OutResources;
+	TArray<UObject*> OutAbilities;
+
+	for (UObject* Resource : Resources)
+	{
+		const auto* AbilityGroup = Cast<UAVVMAbilityGroupDataAsset>(Resource);
+		if (IsValid(AbilityGroup))
+		{
+			OutResources.Append(AbilityGroup->GetAbilities());
+		}
+		else
+		{
+			const auto* Ability = Cast<UAVVMAbilityDataAsset>(Resource);
+			if (IsValid(Ability))
+			{
+				OutAbilities.Add(Resource);
+			}
+		}
+	}
+
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(AbilitySystemComponent);
+	if (IsValid(ASC) && !OutAbilities.IsEmpty())
+	{
+		ASC->SetupAbilities(OutAbilities);
+	}
+
+	return OutResources;
+}
+
 bool UAVVMResourceHandlingBlueprintFunctionLibrary::ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,
                                                                                     const FKeepProcessingResources& Callback)
 {

@@ -25,6 +25,8 @@
 
 #include "AVVMResourceProvider.generated.h"
 
+class UAbilitySystemComponent;
+
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
 
 /**
@@ -68,6 +70,10 @@ class AVVMGAMEPLAY_API UAVVMResourceHandlingBlueprintFunctionLibrary : public UB
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> CheckAbilities(UAbilitySystemComponent* AbilitySystemComponent,
+	                                              const TArray<UObject*>& Resources);
+
 	UFUNCTION(BlueprintCallable)
 	static bool ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,
 	                                            const FKeepProcessingResources& Callback);
