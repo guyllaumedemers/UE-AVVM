@@ -21,7 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
 #if WITH_EDITOR
@@ -81,6 +83,26 @@ protected:
 /**
  *	Class description:
  *
+ *	FAVVMAbilityDataTableRow represent a single ability entry in a Data Table.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMAbilityDataTableRow : public FAVVMDataTableRow
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UAVVMAbilityDataAsset> AbilityDataAsset = nullptr;
+};
+
+/**
+ *	Class description:
+ *
  *	UAVVMAbilityGroupDataAsset represent a set of abilities to be granted to an Actor with an ASC.
  */
 UCLASS(BlueprintType, NotBlueprintable)
@@ -90,28 +112,26 @@ class AVVMGAMEPLAY_API UAVVMAbilityGroupDataAsset : public UDataAsset
 
 public:
 	UFUNCTION(BlueprintCallable)
-	const TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>>& GetAbilities() const;
+	const TArray<FDataRegistryId>& GetAbilities() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>> Abilities;
+	TArray<FDataRegistryId> Abilities;
 };
 
 /**
  *	Class description:
  *
- *	FAVVMAbilityGroupDataTableRow. Struct Class referenced in UDataTable and accessed via a UDataRegistry. It's expected
- *	to be retrieved through UMetaDataRegistrySources_DataTable at Runtime.
+ *	FAVVMAbilityGroupDataTableRow. Struct Class referenced in UDataTable and accessed via a Registry Id. It's expected
+ *	to be gathered through UMetaDataRegistrySources_DataTable across multiple GFP at editor time.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMAbilityGroupDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMAbilityGroupDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftObjectPtr<UAVVMAbilityGroupDataAsset> AbilityGroupDataAsset = nullptr;
+	TArray<TSoftObjectPtr<UAVVMAbilityGroupDataAsset>> AbilityGroupDataAssets;
 };

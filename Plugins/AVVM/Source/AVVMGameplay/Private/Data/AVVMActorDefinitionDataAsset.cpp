@@ -23,10 +23,28 @@
 EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!AbilityGroupId.IsValid())
+	if (!PassiveAbilityGroupId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "No valid RegistryId specified!"));
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "PassiveAbilityGroupId invalid!"));
+	}
+
+	if (!ActiveAbilityGroupId.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActiveAbilityGroupId invalid!"));
+	}
+
+	if (!CosmeticDefinitionId.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "CosmeticDefinitionId invalid!"));
+	}
+
+	if (!EquipmentDefinitionId.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "EquipmentDefinitionId invalid!"));
 	}
 
 	return Result;

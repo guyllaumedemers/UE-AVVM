@@ -50,21 +50,37 @@ const TSoftObjectPtr<UInputAction>& UAVVMAbilityDataAsset::GetInputAction() cons
 	return AbilityInputAction;
 }
 
-const TArray<TSoftObjectPtr<UAVVMAbilityDataAsset>>& UAVVMAbilityGroupDataAsset::GetAbilities() const
-{
-	return Abilities;
-}
-
 #if WITH_EDITOR
-EDataValidationResult FAVVMAbilityGroupDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FAVVMAbilityDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (AbilityGroupDataAsset.IsNull())
+	if (AbilityDataAsset.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMAbilityGroupDataTableRow", "", "No valid UDataAsset specified!"));
+		Context.AddError(NSLOCTEXT("FAVVMAbilityDataTableRow", "", "No valid UDataAsset specified!"));
 	}
 
 	return Result;
 }
 #endif
+
+TArray<FSoftObjectPath> FAVVMAbilityDataTableRow::GetResourcesPaths() const
+{
+	return {AbilityDataAsset.ToSoftObjectPath()};
+}
+
+const TArray<FDataRegistryId>& UAVVMAbilityGroupDataAsset::GetAbilities() const
+{
+	return Abilities;
+}
+
+TArray<FSoftObjectPath> FAVVMAbilityGroupDataTableRow::GetResourcesPaths() const
+{
+	TArray<FSoftObjectPath> OutPaths;
+	for (const TSoftObjectPtr<UAVVMAbilityGroupDataAsset>& AbilityGroup : AbilityGroupDataAssets)
+	{
+		OutPaths.AddUnique(AbilityGroup.ToSoftObjectPath());
+	}
+
+	return OutPaths;
+}

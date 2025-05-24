@@ -47,7 +47,16 @@ class AVVMGAMEPLAY_API UAVVMActorDefinitionDataAsset : public UDataAsset
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FDataRegistryId AbilityGroupId = FDataRegistryId();
+	FDataRegistryId PassiveAbilityGroupId = FDataRegistryId();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FDataRegistryId ActiveAbilityGroupId = FDataRegistryId();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FDataRegistryId CosmeticDefinitionId = FDataRegistryId();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FDataRegistryId EquipmentDefinitionId = FDataRegistryId();
 };
 
 /**
