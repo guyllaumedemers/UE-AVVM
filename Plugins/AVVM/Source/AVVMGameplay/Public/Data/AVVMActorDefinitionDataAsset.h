@@ -21,62 +21,43 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
+#include "AVVMSandboxDataTableRow.h"
+#include "DataRegistryId.h"
 #include "Engine/DataAsset.h"
-#include "StructUtils/InstancedStruct.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
 #endif
 
-#include "AVVMCheatData.generated.h"
+#include "AVVMActorDefinitionDataAsset.generated.h"
 
 /**
  *	Class description:
  *
- *	FAVVMCheatData. Base Class for "stub" data. Expected to be derived and extended based on project requirements.
- */
-USTRUCT(BlueprintType)
-struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-};
-
-/**
- *	Class description:
- *
- *	UAVVMCheatDataAsset is binary asset type which define "stub" information about a running cheat. To be loaded/accessed during
- *	Cheats execution.
- *
- *	Benefit: UDataAsset, allow Data inheritance implying that design could make Data-Only BP of this Class and
- *	provide Context specific inputs to parent properties.
+ *	UAVVMActorDefinitionDataAsset define a set of properties to be loaded and applied to an Actor.
  */
 UCLASS(BlueprintType, NotBlueprintable)
-class AVVM_API UAVVMCheatDataAsset : public UDataAsset
+class AVVMGAMEPLAY_API UAVVMActorDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
-public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
-
-	UFUNCTION(BlueprintCallable)
-	const TInstancedStruct<FAVVMCheatData>& GetData() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TInstancedStruct<FAVVMCheatData> CheatData;
+	FDataRegistryId AbilityGroupId = FDataRegistryId();
 };
 
 /**
  *	Class description:
  *
- *	FAVVMCheatDataTableRow. Struct Class referenced in UDataTable and accessed via a UDataRegistry. It's expected
- *	to be retrieved through UMetaDataRegistrySources_DataTable at Runtime.
+ *	FAVVMActorDefinitionDataTableRow override the base list of resources to be dynamically loaded by the Resource Manager component
+ *	for it's counter-part Actor type.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FAVVMCheatDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMActorDefinitionDataTableRow : public FAVVMSandboxDataTableRow
 {
 	GENERATED_BODY()
 
@@ -84,8 +65,8 @@ struct AVVM_API FAVVMCheatDataTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers softptr to the resource asset that contain data specific to the payload
-	// we expect the CheatExtension to be provided with.
+	virtual TArray<FSoftObjectPath> GetResources() const override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftObjectPtr<UAVVMCheatDataAsset> CheatDataAsset = nullptr;
+	TSoftObjectPtr<UAVVMActorDefinitionDataAsset> ActorDefinition = nullptr;
 };

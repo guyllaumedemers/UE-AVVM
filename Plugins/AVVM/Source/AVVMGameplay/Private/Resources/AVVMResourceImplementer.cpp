@@ -17,27 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMPlayerState.h"
-
-#include "AVVMUtilityFunctionLibrary.h"
-
-AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-	bReplicates = true;
-}
-
-void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
-}
-
-UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
-{
-	const auto InterfaceCheck = TScriptInterface<IAbilitySystemInterface>(GetPawn());
-	ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!"));
-	return InterfaceCheck->GetAbilitySystemComponent();
-}
+#include "Resources/AVVMResourceImplementer.h"

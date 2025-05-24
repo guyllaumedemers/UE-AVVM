@@ -81,7 +81,7 @@ struct INTERACTIONSAMPLE_API FInteractionAbilityActivationInfo
  *
  *	UInteractionAbilityDataAsset encapsulate an interaction properties that define how the interaction should be executed.
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, NotBlueprintable)
 class INTERACTIONSAMPLE_API UInteractionAbilityDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

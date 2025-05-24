@@ -17,27 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMPlayerState.h"
+#pragma once
 
-#include "AVVMUtilityFunctionLibrary.h"
+#include "CoreMinimal.h"
 
-AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+#include "Engine/DataAsset.h"
+
+#include "AVVMSandboxDataTableRow.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FAVVMSandboxDataTableRow define an empty type to be derived from and load resources via the UAVVMResourceManagerComponent.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMSandboxDataTableRow : public FTableRowBase
 {
-	bReplicates = true;
-}
+	GENERATED_BODY()
 
-void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
-}
-
-UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
-{
-	const auto InterfaceCheck = TScriptInterface<IAbilitySystemInterface>(GetPawn());
-	ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!"));
-	return InterfaceCheck->GetAbilitySystemComponent();
-}
+	virtual TArray<FSoftObjectPath> GetResources() const PURE_VIRTUAL(GetResources, return TArray<FSoftObjectPath>(););
+};

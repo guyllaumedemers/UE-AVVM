@@ -48,8 +48,6 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;
 	// @gdemers here im just defining example cases of replicated systems that would allow
 	// 1. updating a collection of data specific to the system.
 	// 2. react post-replication and update presenters owned by the player state.

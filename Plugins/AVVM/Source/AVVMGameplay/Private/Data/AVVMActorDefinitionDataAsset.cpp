@@ -17,27 +17,35 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMPlayerState.h"
+#include "Data/AVVMActorDefinitionDataAsset.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
-
-AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+#if WITH_EDITOR
+EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	bReplicates = true;
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (!AbilityGroupId.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "No valid RegistryId specified!"));
+	}
+
+	return Result;
 }
 
-void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+EDataValidationResult FAVVMActorDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (ActorDefinition.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FAVVMActorDefinitionDataTableRow", "", "No valid UDataAsset specified!"));
+	}
 
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
+	return Result;
 }
+#endif
 
-UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
+TArray<FSoftObjectPath> FAVVMActorDefinitionDataTableRow::GetResources() const
 {
-	const auto InterfaceCheck = TScriptInterface<IAbilitySystemInterface>(GetPawn());
-	ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!"));
-	return InterfaceCheck->GetAbilitySystemComponent();
+	return {ActorDefinition.ToSoftObjectPath()};
 }

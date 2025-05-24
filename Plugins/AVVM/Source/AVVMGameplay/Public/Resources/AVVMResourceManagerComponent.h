@@ -17,27 +17,39 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMPlayerState.h"
+#pragma once
 
-#include "AVVMUtilityFunctionLibrary.h"
+#include "CoreMinimal.h"
 
-AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+#include "DataRegistryId.h"
+#include "DataRegistryTypes.h"
+#include "Components/ActorComponent.h"
+
+#include "AVVMResourceManagerComponent.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMResourceManagerComponent dynamic component handling resource loading on any Actor that implement the required interface
+ *	IAVVMResourceImplementer.
+ */
+UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class AVVMGAMEPLAY_API UAVVMResourceManagerComponent : public UActorComponent
 {
-	bReplicates = true;
-}
+	GENERATED_BODY()
 
-void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+public:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	// @gdemers Replication of object references is automatically handled by Unreal Engine's replication system.
-	// no need to mark the AInfo with DOREPLIFETIME
-}
+protected:
+	void RequestExternalResourceAsync(const AActor* Outer);
+	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
+	void OnSoftObjectAcquired();
 
-UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
-{
-	const auto InterfaceCheck = TScriptInterface<IAbilitySystemInterface>(GetPawn());
-	ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!"));
-	return InterfaceCheck->GetAbilitySystemComponent();
-}
+	UFUNCTION()
+	void OnRegistriesPending(const TArray<FDataRegistryId>& PendingRegistriesId);
+
+	TArray<TSharedPtr<FStreamableHandle>> ResourceHandles;
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+};
