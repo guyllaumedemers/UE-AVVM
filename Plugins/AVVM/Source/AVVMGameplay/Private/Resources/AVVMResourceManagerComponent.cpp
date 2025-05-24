@@ -107,8 +107,8 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
-	const auto ResourceImplementer = TScriptInterface<const IAVVMResourceProvider>(OwningOuter.Get());
-	if (!UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(ResourceImplementer) || ResourceHandles.IsEmpty())
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(OwningOuter.Get());
+	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IAVVMResourceProvider interface!")) || ResourceHandles.IsEmpty())
 	{
 		return;
 	}

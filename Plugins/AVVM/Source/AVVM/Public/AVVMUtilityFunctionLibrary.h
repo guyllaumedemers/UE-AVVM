@@ -41,7 +41,13 @@ class AVVM_API UAVVMUtilityFunctionLibrary : public UBlueprintFunctionLibrary
 
 public:
 	template <typename T>
-	static bool IsScriptInterfaceValid(const TScriptInterface<T>& Target);
+	static bool IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target);
+
+	template <typename U>
+	static bool IsBlueprintScriptInterfaceValid(const UObject* Target);
+
+	template <typename T, typename U>
+	static bool DoesImplementNativeOrBlueprintInterface(const UObject* Target);
 
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
@@ -50,7 +56,25 @@ public:
 };
 
 template <typename T>
-bool UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(const TScriptInterface<T>& Target)
+bool UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target)
 {
 	return (Target.GetInterface() != nullptr && IsValid(Target.GetObject()));
+}
+
+template <typename U>
+bool UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid(const UObject* Target)
+{
+	if (IsValid(Target))
+	{
+		return Target->GetClass()->ImplementsInterface(U::StaticClass());
+	}
+
+	return false;
+}
+
+template <typename T, typename U>
+bool UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface(const UObject* Target)
+{
+	return UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(TScriptInterface<const T>(Target)) ||
+			UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<U>(Target);
 }

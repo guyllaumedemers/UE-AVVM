@@ -27,7 +27,7 @@
 void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
                                                 UCommonUserWidget* Target)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
 	if (!ensureAlwaysMsgf(bIsValid, TEXT("ViewModelBase doesn't impl: IAVVMViewModelFNameHelper")))
 	{
 		return;

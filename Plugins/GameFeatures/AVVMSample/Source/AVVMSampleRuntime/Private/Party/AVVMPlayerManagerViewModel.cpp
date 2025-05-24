@@ -25,7 +25,7 @@
 void UAVVMPlayerManagerViewModel::SetPlayerConnections(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
                                                        const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(JsonParser);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(JsonParser);
 	if (!ensureAlways(bIsValid))
 	{
 		return;

@@ -36,7 +36,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 	const auto Callback = [Caller = TScriptInterface<IAVVMPrimaryGameLayoutInterface>(Outer)](EAsyncWidgetLayerState State,
 	                                                                                          UCommonActivatableWidget* ActivatableWidget)
 	{
-		const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(Caller);
+		const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Caller);
 		if (bIsValid)
 		{
 			Caller->OnPushActivatableWidgetCompleted(State, ActivatableWidget);

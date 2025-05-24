@@ -38,6 +38,12 @@ void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
 {
 	const auto InterfaceCheck = TScriptInterface<IAbilitySystemInterface>(GetPawn());
-	ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!"));
-	return InterfaceCheck->GetAbilitySystemComponent();
+	if (!ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(InterfaceCheck), TEXT("Pawn doesn't implement IAbilitySystemInterface!")))
+	{
+		return nullptr;
+	}
+	else
+	{
+		return InterfaceCheck->GetAbilitySystemComponent();
+	}
 }

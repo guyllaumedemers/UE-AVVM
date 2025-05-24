@@ -26,7 +26,7 @@
 bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
                                           const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsScriptInterfaceValid(OnlineInterface);
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(OnlineInterface);
 	if (bIsValid)
 	{
 		return OnlineInterface->IsHosting(PlayerUniqueNetIdPtr);
