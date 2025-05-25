@@ -42,7 +42,6 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 			continue;
 		}
 
-		// TODO @gdemers need to brainstorm about how to handle input before going further!
 		UE_LOG(LogUI, Log, TEXT("New Ability Recorded for deferred Granting: %s"), *AbilityAsset->GetName());
 		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
 	}
@@ -73,6 +72,6 @@ void UAVVMAbilitySystemComponent::GrantAbilities(const TArray<UObject*>& Abiliti
 {
 }
 
-void UAVVMAbilitySystemComponent::GrantAbility(const UGameplayAbility* Ability)
+void UAVVMAbilitySystemComponent::GrantAbility(UGameplayAbility* Ability)
 {
 }

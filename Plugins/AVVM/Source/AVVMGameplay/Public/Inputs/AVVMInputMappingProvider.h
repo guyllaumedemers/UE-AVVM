@@ -21,54 +21,29 @@
 
 #include "CoreMinimal.h"
 
-#include "AbilitySystemComponent.h"
-#include "Engine/StreamableManager.h"
+#include "UObject/Interface.h"
 
-#include "AVVMAbilitySystemComponent.generated.h"
+#include "AVVMInputMappingProvider.generated.h"
+
+class UInputMappingContext;
 
 /**
  *	Class description:
  *
- *	FAbilityToken describe a unique identifier that increment only when default construct. Can be safely
- *	passed by copy around.
+ *	UAVVMInputMappingProvider return access to an Input Mapping Context specific to an Actor type.
  */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAbilityToken
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMGAMEPLAY_API UAVVMInputMappingProvider : public UInterface
 {
 	GENERATED_BODY()
-
-	explicit FAbilityToken() : UniqueId(++GlobalUniqueId)
-	{
-	}
-
-	UPROPERTY(Transient)
-	uint32 UniqueId = 0;
-
-private:
-	inline static uint32 GlobalUniqueId = 0;
 };
 
-/**
- *	Class description:
- *
- *	UAVVMAbilitySystemComponent extend base behaviour from Unreal Ability system component and support
- *	default initialization of Actor Abilities based on data received.
- */
-UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class AVVMGAMEPLAY_API UAVVMAbilitySystemComponent : public UAbilitySystemComponent
+class AVVMGAMEPLAY_API IAVVMInputMappingProvider
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void SetupAbilities(const TArray<UObject*>& Resources);
-
-protected:
-	UFUNCTION()
-	void OnAbilityGrantedDeferred(FAbilityToken AbilityToken);
-
-	void GrantAbilities(const TArray<UObject*>& Abilities);
-	void GrantAbility(UGameplayAbility* Ability);
-
-	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
+	UFUNCTION(BlueprintNativeEvent)
+	UInputMappingContext* GetInputMappingContext() const;
+	virtual UInputMappingContext* GetInputMappingContext_Implementation() const PURE_VIRTUAL(GetInputMappingContext_Implementation, return nullptr;);
 };

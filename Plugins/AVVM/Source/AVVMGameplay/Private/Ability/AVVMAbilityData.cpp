@@ -23,14 +23,7 @@
 EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-
-	const bool bIsInputActionValid = !bIsPassiveAbility ? !AbilityInputAction.IsNull() : true;
-	if (!bIsInputActionValid)
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "Input Action missing. No valid TSoftObjectPtr<T> specified!"));
-	}
-
+	
 	if (GameplayAbility.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
@@ -49,11 +42,6 @@ bool UAVVMAbilityDataAsset::CanGrantAbility(const FGameplayTagContainer& Context
 const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDataAsset::GetGameplayAbilityClass() const
 {
 	return GameplayAbility;
-}
-
-const TSoftObjectPtr<UInputAction>& UAVVMAbilityDataAsset::GetInputAction() const
-{
-	return AbilityInputAction;
 }
 
 #if WITH_EDITOR

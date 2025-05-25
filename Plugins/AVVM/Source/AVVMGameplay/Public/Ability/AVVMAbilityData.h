@@ -56,18 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;
 
-	UFUNCTION(BlueprintCallable)
-	const TSoftObjectPtr<UInputAction>& GetInputAction() const;
-
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<UGameplayAbility> GameplayAbility = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bIsPassiveAbility = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="!bIsPassiveAbility"))
-	TSoftObjectPtr<UInputAction> AbilityInputAction = nullptr;
 
 	// @gdemers tags that define if this ability can be granted to the actor type.
 	// Example : Tag.IsPlayer, Tag.IsFlyingType
