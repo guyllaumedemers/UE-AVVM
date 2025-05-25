@@ -60,18 +60,21 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken AbilityToken)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = AbilityHandleSystem.Find(AbilityToken.UniqueId);
-	if (ensure(OutResult != nullptr && OutResult->IsValid()))
+	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
 	{
-		TArray<UObject*> OutStreamedAssets;
-		(*OutResult)->GetLoadedAssets(OutStreamedAssets);
-		GrantAbilities(OutStreamedAssets);
+		return;
 	}
-}
 
-void UAVVMAbilitySystemComponent::GrantAbilities(const TArray<UObject*>& Abilities)
-{
-}
+	TArray<UObject*> OutStreamedAssets;
+	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
 
-void UAVVMAbilitySystemComponent::GrantAbility(UGameplayAbility* Ability)
-{
+	for (UObject* Ability : OutStreamedAssets)
+	{
+		auto* GameplayAbility = Cast<UGameplayAbility>(Ability);
+		if (IsValid(GameplayAbility))
+		{
+			UE_LOG(LogUI, Log, TEXT("Granting New Ability: %s"), *GameplayAbility->GetName());
+			GiveAbility(FGameplayAbilitySpec{GameplayAbility});
+		}
+	}
 }

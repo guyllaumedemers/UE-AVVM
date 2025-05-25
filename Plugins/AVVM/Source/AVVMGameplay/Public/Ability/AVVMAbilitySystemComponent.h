@@ -67,8 +67,5 @@ protected:
 	UFUNCTION()
 	void OnAbilityGrantedDeferred(FAbilityToken AbilityToken);
 
-	void GrantAbilities(const TArray<UObject*>& Abilities);
-	void GrantAbility(UGameplayAbility* Ability);
-
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 };
