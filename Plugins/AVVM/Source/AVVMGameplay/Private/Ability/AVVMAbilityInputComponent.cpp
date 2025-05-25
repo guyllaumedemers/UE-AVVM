@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Ability/AVVMAbilityInputComponent.h"
 
-#include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
+#include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -36,7 +36,7 @@ void UAVVMAbilityInputComponent::BeginPlay()
 	Super::BeginPlay();
 
 	auto* PlayerState = GetTypedOuter<APlayerState>();
-	if (IsValid(PlayerState))
+	if (IsValid(PlayerState) && IsValid(PlayerState->GetPlayerController()) /*imply local player*/)
 	{
 		PlayerState->OnPawnSet.AddUniqueDynamic(this, &UAVVMAbilityInputComponent::OnPawnChanged);
 		OnPawnChanged(PlayerState, PlayerState->GetPawn(), nullptr);
@@ -50,7 +50,7 @@ void UAVVMAbilityInputComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	Super::EndPlay(EndPlayReason);
 
 	auto* PlayerState = Outer.Get();
-	if (IsValid(PlayerState))
+	if (IsValid(PlayerState) && IsValid(PlayerState->GetPlayerController()) /*imply local player*/)
 	{
 		PlayerState->OnPawnSet.RemoveAll(this);
 	}
@@ -93,12 +93,14 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
 	const UInputMappingContext* OldInputMappingContext = IAVVMInputMappingProvider::Execute_GetInputMappingContext(OldPawn);
 	if (IsValid(OldInputMappingContext))
 	{
+		UE_LOG(LogUI, Log, TEXT("Removing Input Mapping Context: %s."), *OldInputMappingContext->GetName());
 		EnhancedInputSubsystem->RemoveMappingContext(OldInputMappingContext);
 	}
 
 	const UInputMappingContext* NewInputMappingContext = IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn);
 	if (IsValid(NewInputMappingContext))
 	{
+		UE_LOG(LogUI, Log, TEXT("Adding Input Mapping Context: %s."), *NewInputMappingContext->GetName());
 		EnhancedInputSubsystem->AddMappingContext(NewInputMappingContext, 0);
 	}
 }
@@ -110,6 +112,7 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 		return;
 	}
 
+	UE_LOG(LogUI, Log, TEXT("Clearing Input Action Bindings."));
 	EnhancedInputComponent->ClearActionBindings();
 	AbilityTriggerTags.Reset();
 
@@ -123,6 +126,11 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 
 		FGameplayTag& OutTag = AbilityTriggerTags.FindOrAdd(InputAction);
 		OutTag = InputAction->AbilityTriggerTag;
+		UE_LOG(LogUI,
+		       Log,
+		       TEXT("Registering New Input Action: %s, Tag: %s."),
+		       *InputAction->GetName(),
+		       *OutTag.ToString());
 
 		EnhancedInputComponent->BindAction(InputAction,
 		                                   ETriggerEvent::Started,

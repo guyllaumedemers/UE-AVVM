@@ -47,12 +47,17 @@ TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckAbil
 	}
 
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(AbilitySystemComponent);
-	if (IsValid(ASC) && !OutAbilities.IsEmpty())
+	if (IsValid(ASC) && UAVVMResourceHandlingBlueprintFunctionLibrary::HasAuthority(ASC->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
 	{
 		ASC->SetupAbilities(OutAbilities);
 	}
 
 	return OutResources;
+}
+
+bool UAVVMResourceHandlingBlueprintFunctionLibrary::HasAuthority(const AActor* Outer)
+{
+	return IsValid(Outer) ? Outer->HasAuthority() : false;
 }
 
 bool UAVVMResourceHandlingBlueprintFunctionLibrary::ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,

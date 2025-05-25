@@ -38,11 +38,11 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 
 		if (!AbilityAsset->CanGrantAbility(ASCTags))
 		{
-			UE_LOG(LogUI, Log, TEXT("Failed to Grant Ability due to Blocking Tags: %s"), *AbilityAsset->GetName());
+			UE_LOG(LogUI, Log, TEXT("Failed to Grant Ability due to Blocking Tags: %s."), *AbilityAsset->GetName());
 			continue;
 		}
 
-		UE_LOG(LogUI, Log, TEXT("New Ability Recorded for deferred Granting: %s"), *AbilityAsset->GetName());
+		UE_LOG(LogUI, Log, TEXT("New Ability Recorded for deferred Granting: %s."), *AbilityAsset->GetName());
 		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
 	}
 
