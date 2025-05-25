@@ -37,6 +37,7 @@ void UInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
                                           const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	UE_LOG(LogTemp, Log, TEXT("Activate Ability %s."), *GetName());
 }
 
 void UInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

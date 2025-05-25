@@ -67,5 +67,7 @@ protected:
 	UFUNCTION()
 	void OnAbilityGrantedDeferred(FAbilityToken AbilityToken);
 
+	virtual void OnTagUpdated(const FGameplayTag& Tag, bool TagExists) override;
+
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 };

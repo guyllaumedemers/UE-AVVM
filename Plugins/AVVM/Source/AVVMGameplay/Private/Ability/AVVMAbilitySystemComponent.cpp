@@ -70,11 +70,17 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 
 	for (UObject* Ability : OutStreamedAssets)
 	{
-		auto* GameplayAbility = Cast<UGameplayAbility>(Ability);
-		if (IsValid(GameplayAbility))
+		auto* GameplayAbilityClass = Cast<UClass>(Ability);
+		if (IsValid(GameplayAbilityClass))
 		{
-			UE_LOG(LogUI, Log, TEXT("Granting New Ability: %s"), *GameplayAbility->GetName());
-			GiveAbility(FGameplayAbilitySpec{GameplayAbility});
+			UE_LOG(LogUI, Log, TEXT("Granting New Ability: %s"), *GameplayAbilityClass->GetName());
+			GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass});
 		}
 	}
+}
+
+void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool TagExists)
+{
+	Super::OnTagUpdated(Tag, TagExists);
+	UE_LOG(LogUI, Log, TEXT("Modifying Tag: %s"), *Tag.ToString());
 }
