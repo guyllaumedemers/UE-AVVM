@@ -44,6 +44,6 @@ class AVVMGAMEPLAY_API IAVVMInputMappingProvider
 
 public:
 	UFUNCTION(BlueprintNativeEvent)
-	UInputMappingContext* GetInputMappingContext() const;
-	virtual UInputMappingContext* GetInputMappingContext_Implementation() const PURE_VIRTUAL(GetInputMappingContext_Implementation, return nullptr;);
+	const UInputMappingContext* GetInputMappingContext() const;
+	virtual const UInputMappingContext* GetInputMappingContext_Implementation() const PURE_VIRTUAL(GetInputMappingContext_Implementation, return nullptr;);
 };

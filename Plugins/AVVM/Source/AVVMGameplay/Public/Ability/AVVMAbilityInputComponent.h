@@ -36,7 +36,8 @@ class ULocalPlayer;
 /**
  *	Class description:
  *
- *	UAVVMAbilityInputComponent 
+ *	UAVVMAbilityInputComponent setup Input Mapping Context and Input action bindings during Pawn change events. It triggers Abilities
+ *	via AbilityTriggerEvents when adding/removing tags specific to the Input Action recorded.
  */
 UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent

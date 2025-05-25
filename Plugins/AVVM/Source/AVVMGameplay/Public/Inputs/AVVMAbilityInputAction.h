@@ -29,8 +29,8 @@
 /**
  *	Class description:
  *
- *	UAVVMAbilityInputAction extend the base UInputAction and expose an additional Tag to be referenced from
- *	UAVVMAbilityInputComponent when triggering Abilities (see FAbilityTriggerData for overview of Ability System event).
+ *	UAVVMAbilityInputAction extend the base UInputAction and expose an additional Tag to be referenced from UAVVMAbilityInputComponent
+ *	when triggering Abilities (see FAbilityTriggerData for overview of Ability System event).
  */
 UCLASS()
 class AVVMGAMEPLAY_API UAVVMAbilityInputAction : public UInputAction
