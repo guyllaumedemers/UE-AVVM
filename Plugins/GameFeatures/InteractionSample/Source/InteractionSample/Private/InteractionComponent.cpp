@@ -21,7 +21,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "InteractionManagerComponent.h"
-#include "Components/PrimitiveComponent.h"
+#include "Components/ShapeComponent.h"
 
 void UInteractionComponent::BeginPlay()
 {
@@ -33,7 +33,7 @@ void UInteractionComponent::BeginPlay()
 		return;
 	}
 
-	auto* CollisionComponent = Actor->GetComponentByClass<UPrimitiveComponent>();
+	auto* CollisionComponent = Actor->GetComponentByClass<UShapeComponent>();
 	if (IsValid(CollisionComponent))
 	{
 		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UInteractionComponent::OnPrimitiveComponentBeginOverlap);
@@ -53,7 +53,7 @@ void UInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	auto* CollisionComponent = Actor->GetComponentByClass<UPrimitiveComponent>();
+	auto* CollisionComponent = Actor->GetComponentByClass<UShapeComponent>();
 	if (IsValid(CollisionComponent))
 	{
 		CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);

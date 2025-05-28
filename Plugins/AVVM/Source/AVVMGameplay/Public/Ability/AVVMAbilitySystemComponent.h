@@ -37,15 +37,14 @@ struct AVVMGAMEPLAY_API FAbilityToken
 {
 	GENERATED_BODY()
 
-	explicit FAbilityToken() : UniqueId(++GlobalUniqueId)
+	explicit FAbilityToken()
 	{
+		static uint32 GlobalUniqueId = 0;
+		UniqueId = ++GlobalUniqueId;
 	}
 
-	UPROPERTY(Transient)
+	UPROPERTY()
 	uint32 UniqueId = 0;
-
-private:
-	inline static uint32 GlobalUniqueId = 0;
 };
 
 /**

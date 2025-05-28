@@ -47,7 +47,8 @@ public class AVVMGameplay : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"EnhancedInput"
+				"EnhancedInput",
+				"ModularGameplay"
 			}
 		);
 	}

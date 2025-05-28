@@ -18,3 +18,26 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMModularActor.h"
+
+#include "Components/GameFrameworkComponentManager.h"
+
+void AAVVMModularActor::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+}
+
+void AAVVMModularActor::BeginPlay()
+{
+	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, UGameFrameworkComponentManager::NAME_GameActorReady);
+
+	Super::BeginPlay();
+}
+
+void AAVVMModularActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
+
+	Super::EndPlay(EndPlayReason);
+}

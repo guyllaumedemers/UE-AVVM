@@ -28,13 +28,17 @@
 /**
  *	Class Description :
  *
- *	AAVVMModularActor is a replicated Actor without a visual representation to with we can dynamically
- *	assign an Actor via GFP. It acts as a receiver socket for the GFP actor.
+ *	AAVVMModularActor handle component reception through GameFeature plugin.
  */
 UCLASS(BlueprintType, Blueprintable)
-class AVVMGAMEPLAY_API AAVVMModularActor : public AInfo
+class AVVMGAMEPLAY_API AAVVMModularActor : public AActor
 {
 	GENERATED_BODY()
 
-	// TODO @gdemers
+public:
+	//~ Begin AActor interface
+	virtual void PreInitializeComponents() override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~ End AActor interface
 };
