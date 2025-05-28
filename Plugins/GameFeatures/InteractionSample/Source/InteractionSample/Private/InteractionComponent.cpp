@@ -73,7 +73,7 @@ void UInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent
 		return;
 	}
 
-	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() == ROLE_AutonomousProxy); /*Controlled by Client*/
+	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() >= ROLE_AutonomousProxy);
 	if (!bIsActorLocallyControlled)
 	{
 		return;
@@ -106,7 +106,7 @@ void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* 
 		return;
 	}
 
-	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() == ROLE_AutonomousProxy); /*Controlled by Client*/
+	const bool bIsActorLocallyControlled = (OtherActor->GetLocalRole() >= ROLE_AutonomousProxy);
 	if (!bIsActorLocallyControlled)
 	{
 		return;

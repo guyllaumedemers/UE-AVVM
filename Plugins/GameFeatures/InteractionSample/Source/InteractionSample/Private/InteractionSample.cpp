@@ -20,3 +20,5 @@
 #include "InteractionSample.h"
 
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, InteractionSample)
+
+DEFINE_LOG_CATEGORY(LogGameplay);
