@@ -52,7 +52,7 @@ void UAVVMComponent::BeginPlay()
 		}
 	}
 
-	for (auto& Presenter : TransientPresenters)
+	for (TObjectPtr<UAVVMPresenter>& Presenter : TransientPresenters)
 	{
 		Presenter->SafeBeginPlay();
 	}
@@ -74,7 +74,7 @@ void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	TRACE_BOOKMARK(TEXT("Presenter.Destroy, TypedOuter: %s"), *ActorName);
 	LLM_SCOPE_BYTAG(AVVMTag);
 
-	for (auto& Presenter : TransientPresenters)
+	for (TObjectPtr<UAVVMPresenter>& Presenter : TransientPresenters)
 	{
 		Presenter->SafeEndPlay();
 	}

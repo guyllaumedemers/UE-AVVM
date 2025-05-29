@@ -60,7 +60,7 @@ bool UAVVMSubsystem::Static_UnregisterPresenter(const FAVVMPresenterContextArgs&
 	if (IsValid(AVVMSubsystem))
 	{
 		const UAVVMPresenter* Presenter = Context.Presenter;
-		const TSubclassOf<UMVVMViewModelBase>& ViewModelClass = Presenter->GetViewModelClass();
+		const TSubclassOf<UMVVMViewModelBase> ViewModelClass = Presenter->GetViewModelClass();
 		AActor* OuterKey = Presenter->GetOuterKey();
 		return IsValid(ViewModelClass) ? AVVMSubsystem->RemoveOrDestroy(ViewModelClass, OuterKey) : false;
 	}
@@ -74,7 +74,7 @@ UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FAVVMPresente
 	if (IsValid(AVVMSubsystem))
 	{
 		const UAVVMPresenter* Presenter = Context.Presenter;
-		const TSubclassOf<UMVVMViewModelBase>& ViewModelClass = Presenter->GetViewModelClass();
+		const TSubclassOf<UMVVMViewModelBase> ViewModelClass = Presenter->GetViewModelClass();
 		AActor* OuterKey = Presenter->GetOuterKey();
 		return IsValid(ViewModelClass) ? AVVMSubsystem->GetOrCreate(ViewModelClass, OuterKey) : nullptr;
 	}
