@@ -36,12 +36,21 @@ class AVVMGAMEPLAY_API UAVVMGameplayUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static FStringView PrintIsLocallyControlled(const AActor* Actor);
-	static FStringView PrintIsServerOrClient(const AActor* Actor);
-
 	UFUNCTION(BlueprintCallable)
-	static bool IsExecutingFromServerOrClient(const AActor* Actor);
+	static bool IsAuthoritativeActor(const AActor* Actor);
 
 	UFUNCTION(BlueprintCallable)
 	static bool IsLocallyControlled(const AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	static FString BP_PrintIsLocallyControlled(const AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	static FString BP_PrintNetMode(const AActor* Actor);
+
+	// @gdemers use these function in Native code and the prefixed BP_ in Blueprint
+	// as FStringView isn't exposed to blueprint.
+	static FStringView PrintIsLocallyControlled(const AActor* Actor);
+	static FStringView PrintNetMode(const AActor* Actor);
+	static FString PrintConnectionInfo(const UNetConnection* Connection);
 };

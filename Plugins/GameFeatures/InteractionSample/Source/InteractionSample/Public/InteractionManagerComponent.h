@@ -31,7 +31,7 @@ class UInteraction;
 *	Class Description :
  *
  *	UInteractionManagerComponent handle replication over network of interactions locally scheduled by clients. GFP _AddComponent is
- *	expected to Target the AGameState actor for creation.
+ *	expected to Target the APlayerController actor for creation (APlayerController is targeted due to RPC requirements for Connection Ownership).
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UInteractionManagerComponent : public UActorComponent
@@ -45,7 +45,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintPure)
-	static UInteractionManagerComponent* GetManager(const UObject* WorldContextObject);
+	static UInteractionManagerComponent* GetManager(const AActor* Actor);
 
 	UFUNCTION(BlueprintCallable)
 	void AttemptRecordBeginOverlap(const AActor* NewTarget,
@@ -77,5 +77,5 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewEndInteractionRecorded")
 	TArray<TObjectPtr<const UInteraction>> EndInteractions;
 
-	TWeakObjectPtr<AActor> OwningOuter = nullptr;
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

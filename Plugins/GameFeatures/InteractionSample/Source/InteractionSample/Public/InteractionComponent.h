@@ -73,5 +73,5 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag GrantAbilityTag = FGameplayTag::EmptyTag;
 
-	TWeakObjectPtr<const AActor> WorldActor = nullptr;
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

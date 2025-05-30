@@ -25,6 +25,9 @@
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "ProfilingDebugging/CountersTrace.h"
+
+TRACE_DECLARE_INT_COUNTER(UInteractionManagerComponent_InstanceCounter, TEXT("Interaction Manager Component Instance Counter"));
 
 UInteractionManagerComponent::UInteractionManagerComponent(const FObjectInitializer& ObjectInitializer)
 {
@@ -44,7 +47,21 @@ void UInteractionManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwningOuter = GetTypedOuter<AActor>();
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	TRACE_COUNTER_INCREMENT(UInteractionManagerComponent_InstanceCounter);
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Adding UInteractionManagerComponent to Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName())
+
+	OwningOuter = Outer;
 }
 
 void UInteractionManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -66,14 +83,26 @@ void UInteractionManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRea
 		Iterator.RemoveCurrentSwap();
 	}
 #endif
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Removing UInteractionManagerComponent to Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName())
 }
 
-UInteractionManagerComponent* UInteractionManagerComponent::GetManager(const UObject* WorldContextObject)
+UInteractionManagerComponent* UInteractionManagerComponent::GetManager(const AActor* Actor)
 {
-	AGameStateBase* GameStateBase = UGameplayStatics::GetGameState(WorldContextObject);
-	if (IsValid(GameStateBase))
+	if (IsValid(Actor))
 	{
-		return GameStateBase->GetComponentByClass<UInteractionManagerComponent>();
+		const auto* PC = Actor->GetOwner<APlayerController>();
+		return IsValid(PC) ? PC->GetComponentByClass<UInteractionManagerComponent>() : nullptr;
 	}
 	else
 	{
@@ -93,8 +122,9 @@ void UInteractionManagerComponent::AttemptRecordBeginOverlap(const AActor* NewTa
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Begin Overlap detected between Actors \"%s\" and \"%s\"!"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       TEXT("Executed from \"%s\". Owning Connection \"%s\". Begin Overlap detected between Actors \"%s\" and \"%s\"!"),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *UAVVMGameplayUtils::PrintConnectionInfo(Outer->GetNetConnection()),
 	       *NewTarget->GetName(),
 	       *NewInstigator->GetName());
 
@@ -112,7 +142,7 @@ void UInteractionManagerComponent::AttemptRecordBeginOverlap(const AActor* NewTa
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RecordBeginInteraction..."),
-		       UAVVMGameplayUtils::PrintIsServerOrClient(OwningOuter.Get()).GetData());
+		       UAVVMGameplayUtils::PrintNetMode(OwningOuter.Get()).GetData());
 
 		ServerRPC_RecordBeginInteraction(NewTarget, NewInstigator);
 	}
@@ -129,8 +159,9 @@ void UInteractionManagerComponent::AttemptRecordEndOverlap(const AActor* NewTarg
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". End Overlap detected between Actors \"%s\" and \"%s\"!"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       TEXT("Executed from \"%s\". Owning Connection \"%s\". End Overlap detected between Actors \"%s\" and \"%s\"!"),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *UAVVMGameplayUtils::PrintConnectionInfo(Outer->GetNetConnection()),
 	       *NewTarget->GetName(),
 	       *NewInstigator->GetName());
 
@@ -144,7 +175,7 @@ void UInteractionManagerComponent::AttemptRecordEndOverlap(const AActor* NewTarg
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Executing ServerRPC_RecordEndInteraction..."),
-		       UAVVMGameplayUtils::PrintIsServerOrClient(OwningOuter.Get()).GetData());
+		       UAVVMGameplayUtils::PrintNetMode(OwningOuter.Get()).GetData());
 
 		ServerRPC_RecordEndInteraction(NewTarget, NewInstigator);
 	}
@@ -162,7 +193,7 @@ void UInteractionManagerComponent::ServerRPC_RecordBeginInteraction_Implementati
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". ServerRPC_RecordBeginInteraction executed on Actor \"%s\"!"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
 	UInteraction* Transaction = NewObject<UInteraction>(this);
@@ -183,7 +214,7 @@ void UInteractionManagerComponent::ServerRPC_RecordEndInteraction_Implementation
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". ServerRPC_RecordEndInteraction executed on Actor \"%s\"!"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
 	UInteraction* Transaction = NewObject<UInteraction>(this);
@@ -203,7 +234,7 @@ void UInteractionManagerComponent::OnRep_NewBeginInteractionRecorded()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Begin Interaction Collection modified on Actor \"%s\"!"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 }
 
@@ -218,6 +249,6 @@ void UInteractionManagerComponent::OnRep_NewEndInteractionRecorded()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". End Interaction Collection modified on Actor \"%s\"!"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 }

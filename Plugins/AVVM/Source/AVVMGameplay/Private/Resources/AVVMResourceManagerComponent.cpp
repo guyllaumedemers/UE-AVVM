@@ -33,8 +33,8 @@
 AVVM_API extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
 
 // @gdemers for tracing nested resources loading request
-TRACE_DECLARE_INT_COUNTER(RequestCounter, TEXT("Resource Component Loading Request Counter"));
-TRACE_DECLARE_INT_COUNTER(InstanceCounter, TEXT("Resource Component Instance Counter"));
+TRACE_DECLARE_INT_COUNTER(UAVVMResourceManagerComponent_RequestCounter, TEXT("Resource Component Loading Request Counter"));
+TRACE_DECLARE_INT_COUNTER(UAVVMResourceManagerComponent_InstanceCounter, TEXT("Resource Component Instance Counter"));
 
 void UAVVMResourceManagerComponent::BeginPlay()
 {
@@ -46,12 +46,12 @@ void UAVVMResourceManagerComponent::BeginPlay()
 		return;
 	}
 
-	TRACE_COUNTER_INCREMENT(InstanceCounter);
+	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_InstanceCounter);
 
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent to Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName(),
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData())
 
@@ -75,7 +75,7 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent to Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName(),
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData())
 
@@ -92,7 +92,7 @@ void UAVVMResourceManagerComponent::RequestExternalResourceAsync(const AActor* O
 		return;
 	}
 
-	TRACE_COUNTER_INCREMENT(RequestCounter);
+	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
 
 	const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
 	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(IAVVMResourceProvider::Execute_GetActorDefinitionResourceId(Outer), Callback),
@@ -113,7 +113,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Resource Acquisition for \"%s\" Failed on Actor \"%s\"!"),
-		       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 		       *Result.ItemId.ToString(),
 		       *Outer->GetName());
 
@@ -154,7 +154,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Actor \"%s\"? %s"),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName(),
 	       bHasPendingRegistries ? TEXT("False") : TEXT("True"));
 }
@@ -167,7 +167,7 @@ bool UAVVMResourceManagerComponent::ProcessAdditionalResources(const TArray<FDat
 		return false;
 	}
 
-	TRACE_COUNTER_INCREMENT(RequestCounter);
+	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
 
 	for (const FDataRegistryId& RegistryId : PendingRegistriesId)
 	{

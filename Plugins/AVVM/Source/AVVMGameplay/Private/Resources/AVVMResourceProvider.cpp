@@ -48,7 +48,7 @@ TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckAbil
 	}
 
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(AbilitySystemComponent);
-	if (IsValid(ASC) && UAVVMGameplayUtils::IsExecutingFromServerOrClient(ASC->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
+	if (IsValid(ASC) && UAVVMGameplayUtils::IsAuthoritativeActor(ASC->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
 	{
 		ASC->SetupAbilities(OutAbilities);
 	}

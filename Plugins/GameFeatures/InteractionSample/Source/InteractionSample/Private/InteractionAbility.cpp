@@ -36,7 +36,7 @@ void UInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorIn
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
@@ -64,7 +64,7 @@ void UInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());

@@ -36,7 +36,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	const FGameplayTagContainer& ASCTags = GetOwnedGameplayTags();
 
 	const AActor* Outer = OwningOuter.Get();
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredGrantedAbilities;
 	for (const UObject* Resource : Resources)
@@ -92,7 +92,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 		return;
 	}
 
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
 
 	TArray<UObject*> OutStreamedAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
@@ -124,6 +124,6 @@ void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool Tag
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Modifying Tag \"%s\"."),
-	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Tag.ToString());
 }
