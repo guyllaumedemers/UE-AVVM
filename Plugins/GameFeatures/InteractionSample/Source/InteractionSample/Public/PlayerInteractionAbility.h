@@ -23,16 +23,16 @@
 
 #include "Abilities/GameplayAbility.h"
 
-#include "InteractionAbility.generated.h"
+#include "PlayerInteractionAbility.generated.h"
 
 /**
  *	Class Description :
  *
- *	UInteractionAbility define an instance ability the local client can interact with. Granted from a replicated
- *	world object.
+ *	UPlayerInteractionAbility define an instance ability the local client can interact with. Activation Requirement Tags are
+ *	Granted from a replicated world object.
  */
 UCLASS()
-class INTERACTIONSAMPLE_API UInteractionAbility : public UGameplayAbility
+class INTERACTIONSAMPLE_API UPlayerInteractionAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 

@@ -17,13 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InteractionAbility.h"
+#include "PlayerInteractionAbility.h"
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 
-void UInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                        const FGameplayAbilitySpec& Spec)
+void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                              const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
@@ -42,16 +42,16 @@ void UInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorIn
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
 }
 
-void UInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                          const FGameplayAbilitySpec& Spec)
+void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                                const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
-void UInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                          const FGameplayAbilityActorInfo* ActorInfo,
-                                          const FGameplayAbilityActivationInfo ActivationInfo,
-                                          const FGameplayEventData* TriggerEventData)
+void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                                const FGameplayAbilityActorInfo* ActorInfo,
+                                                const FGameplayAbilityActivationInfo ActivationInfo,
+                                                const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
@@ -70,11 +70,11 @@ void UInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
 }
 
-void UInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                     const FGameplayAbilityActorInfo* ActorInfo,
-                                     const FGameplayAbilityActivationInfo ActivationInfo,
-                                     bool bReplicateEndAbility,
-                                     bool bWasCancelled)
+void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+                                           const FGameplayAbilityActorInfo* ActorInfo,
+                                           const FGameplayAbilityActivationInfo ActivationInfo,
+                                           bool bReplicateEndAbility,
+                                           bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
