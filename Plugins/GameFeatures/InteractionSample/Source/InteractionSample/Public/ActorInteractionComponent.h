@@ -26,25 +26,20 @@
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 
-#include "InteractionComponent.generated.h"
+#include "ActorInteractionComponent.generated.h"
 
 /**
  *	Class description:
  *
- *	UInteractionComponent handle user interaction with world objects. We expect the GFP to _AddComponent to Actors defined in the Project
- *	and to be available ONLY the client side.
+ *	UActorInteractionComponent handle local collision check between world actors and PlayerControlled Pawn.
  *
  *	OnBeginOverlap/OnEndOverlap locally add loose tag for the ability system to execute behaviour based on locally controlled pawn via
  *	Input Pressed/Released.
  *
- *	Note : Im sceptical about converting this system to use an ability system component and custom AbilityTask_WaitforBeginOverlap/AbilityTask_WaitforEndOverlap,
- *	the task overlap would end whenever capturing an overlap and push a blocking tag. it counter part task would wait for the end overlap
- *	and remove the tag. Doing so would prevent second interaction from happening, if desired! A second player exiting the overlap would however trigger the EndOverlap.
- *
- *	The sequence would also have to be repeated... How would dormancy work with those ? Can Ability Task become dormant and be woken up after ?
+ *	Note : Pushed via GFP_AddComponents
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class INTERACTIONSAMPLE_API UInteractionComponent : public UActorComponent
+class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 

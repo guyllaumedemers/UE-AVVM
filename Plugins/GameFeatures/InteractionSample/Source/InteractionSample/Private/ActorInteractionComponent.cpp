@@ -17,18 +17,18 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InteractionComponent.h"
+#include "ActorInteractionComponent.h"
 
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "InteractionManagerComponent.h"
+#include "PlayerInteractionComponent.h"
 #include "Components/ShapeComponent.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
-TRACE_DECLARE_INT_COUNTER(UInteractionComponent_InstanceCounter, TEXT("Interaction Component Instance Counter"));
+TRACE_DECLARE_INT_COUNTER(UActorInteractionComponent_InstanceCounter, TEXT("Actor Interaction Component Instance Counter"));
 
-void UInteractionComponent::BeginPlay()
+void UActorInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -38,25 +38,25 @@ void UInteractionComponent::BeginPlay()
 		return;
 	}
 
-	TRACE_COUNTER_INCREMENT(UInteractionComponent_InstanceCounter);
+	TRACE_COUNTER_INCREMENT(UActorInteractionComponent_InstanceCounter);
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UInteractionComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding UActorInteractionComponent to Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
 
 	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
 	if (IsValid(CollisionComponent))
 	{
-		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UInteractionComponent::OnPrimitiveComponentBeginOverlap);
-		CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UInteractionComponent::OnPrimitiveComponentEndOverlap);
+		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
+		CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
 	}
 
 	OwningOuter = Outer;
 }
 
-void UInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -75,17 +75,17 @@ void UInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UInteractionComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing UActorInteractionComponent to Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
 }
 
-void UInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-                                                             AActor* OtherActor,
-                                                             UPrimitiveComponent* OtherComp,
-                                                             int32 OtherBodyIndex,
-                                                             bool bFromSweep,
-                                                             const FHitResult& SweepResult)
+void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+                                                                  AActor* OtherActor,
+                                                                  UPrimitiveComponent* OtherComp,
+                                                                  int32 OtherBodyIndex,
+                                                                  bool bFromSweep,
+                                                                  const FHitResult& SweepResult)
 {
 	if (!IsValid(OtherActor))
 	{
@@ -106,19 +106,19 @@ void UInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent
 		AbilityComponent->AddReplicatedLooseGameplayTag(GrantAbilityTag);
 	}
 
-	auto* InteractionManager = UInteractionManagerComponent::GetManager(OtherActor);
-	if (IsValid(InteractionManager))
+	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
+	if (IsValid(PlayerInteractionComponent))
 	{
 		// @gdemers we try adding this local overlap event and first validate the replicated state
 		// of our manager to prevent existing overlaps.
-		InteractionManager->AttemptRecordBeginOverlap(OwningOuter.Get(), OtherActor, bShouldPreventContingency);
+		PlayerInteractionComponent->AttemptRecordBeginOverlap(OwningOuter.Get(), OtherActor, bShouldPreventContingency);
 	}
 }
 
-void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* OverlappedComponent,
-                                                           AActor* OtherActor,
-                                                           UPrimitiveComponent* OtherComp,
-                                                           int32 OtherBodyIndex)
+void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* OverlappedComponent,
+                                                                AActor* OtherActor,
+                                                                UPrimitiveComponent* OtherComp,
+                                                                int32 OtherBodyIndex)
 {
 	if (!IsValid(OtherActor))
 	{
@@ -137,9 +137,9 @@ void UInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* 
 		AbilityComponent->RemoveReplicatedLooseGameplayTag(GrantAbilityTag);
 	}
 
-	auto* InteractionManager = UInteractionManagerComponent::GetManager(OtherActor);
-	if (IsValid(InteractionManager))
+	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
+	if (IsValid(PlayerInteractionComponent))
 	{
-		InteractionManager->AttemptRecordEndOverlap(OwningOuter.Get(), OtherActor);
+		PlayerInteractionComponent->AttemptRecordEndOverlap(OwningOuter.Get(), OtherActor);
 	}
 }

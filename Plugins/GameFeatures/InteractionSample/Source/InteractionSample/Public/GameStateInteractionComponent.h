@@ -23,48 +23,40 @@
 
 #include "GameFramework/Info.h"
 
-#include "InteractionManagerComponent.generated.h"
+#include "GameStateInteractionComponent.generated.h"
 
 class UInteraction;
 
 /**
-*	Class Description :
+ *	Class Description :
  *
- *	UInteractionManagerComponent handle replication over network of interactions locally scheduled by clients. GFP _AddComponent is
- *	expected to Target the APlayerController actor for creation (APlayerController is targeted due to RPC requirements for Connection Ownership).
+*	UGameStateInteractionComponent store/update replicated user interactions based on client RPC requests.
+ *
+ *	Note : Pushed via GFP_AddComponents
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class INTERACTIONSAMPLE_API UInteractionManagerComponent : public UActorComponent
+class INTERACTIONSAMPLE_API UGameStateInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	UInteractionManagerComponent(const FObjectInitializer& ObjectInitializer);
+	UGameStateInteractionComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintPure)
-	static UInteractionManagerComponent* GetManager(const AActor* Actor);
+	UFUNCTION(BlueprintCallable)
+	static UGameStateInteractionComponent* GetActorComponent(const UObject* WorldContextObject);
+
+	TArray<TObjectPtr<const UInteraction>> GetMatchingInteractions(const AActor* NewTarget) const;
 
 	UFUNCTION(BlueprintCallable)
-	void AttemptRecordBeginOverlap(const AActor* NewTarget,
-	                               const AActor* NewInstigator,
-	                               const bool bPreventContingency);
+	void Server_AddBeginOverlaped(UInteraction* NewInteraction);
 
 	UFUNCTION(BlueprintCallable)
-	void AttemptRecordEndOverlap(const AActor* NewTarget,
-	                             const AActor* NewInstigator);
+	void Server_AddEndOverlaped(UInteraction* NewInteraction);
 
 protected:
-	UFUNCTION(Server, Unreliable)
-	void ServerRPC_RecordBeginInteraction(const AActor* NewTarget,
-	                                      const AActor* NewInstigator);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerRPC_RecordEndInteraction(const AActor* NewTarget,
-	                                    const AActor* NewInstigator);
-
 	UFUNCTION()
 	void OnRep_NewBeginInteractionRecorded();
 
