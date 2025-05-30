@@ -25,6 +25,8 @@ void UInteraction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(UInteraction, InteractionTarget);
+	DOREPLIFETIME(UInteraction, InteractionInstigator);
 	DOREPLIFETIME(UInteraction, bInUse);
 }
 
