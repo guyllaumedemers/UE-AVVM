@@ -17,33 +17,31 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class InteractionSample : ModuleRules
+#include "Kismet/BlueprintFunctionLibrary.h"
+
+#include "AVVMGameplayUtils.generated.h"
+
+/**
+ *	Class Description :
+ *
+ *	UAVVMGameplayUtils expose a set of utility function relevant for gameplay.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMGameplayUtils : public UBlueprintFunctionLibrary
 {
-	public InteractionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"IrisCore"
-			}
-		);
+public:
+	static FStringView PrintIsLocallyControlled(const AActor* Actor);
+	static FStringView PrintIsServerOrClient(const AActor* Actor);
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay"
-			}
-		);
-	}
-}
+	UFUNCTION(BlueprintCallable)
+	static bool IsExecutingFromServerOrClient(const AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	static bool IsLocallyControlled(const AActor* Actor);
+};

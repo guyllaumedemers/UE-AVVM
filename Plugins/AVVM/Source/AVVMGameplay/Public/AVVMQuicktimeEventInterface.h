@@ -23,7 +23,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
+#include "AVVMGameplay.h"
 #include "AVVMNotificationSubsystem.h"
 
 #include "AVVMQuicktimeEventInterface.generated.h"
@@ -117,46 +117,46 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventGameStateInterface
 public:
 	virtual void Disconnect()
 	{
-		UE_LOG(LogUI, Log, TEXT("Disconnecting."));
+		UE_LOG(LogGameplay, Log, TEXT("Disconnecting."));
 	};
 
 	virtual void Connect()
 	{
-		UE_LOG(LogUI, Log, TEXT("Connecting."));
+		UE_LOG(LogGameplay, Log, TEXT("Connecting."));
 	};
 
 	virtual void Win()
 	{
-		UE_LOG(LogUI, Log, TEXT("Game Won."));
+		UE_LOG(LogGameplay, Log, TEXT("Game Won."));
 	};
 
 	virtual void Lose()
 	{
-		UE_LOG(LogUI, Log, TEXT("Game Lost."));
+		UE_LOG(LogGameplay, Log, TEXT("Game Lost."));
 	};
 
 	virtual void Kill()
 	{
 		// @gdemers Post-Death replication. the owned AInfo update its replicated properties. OnRep_, 'this' call, TScriptInterface<ThisClass>(SomeGameState)->Kill is invoked.
 		// Through our GameState, we can notify the relevant presenters of a player death events on all remote players.
-		UE_LOG(LogUI, Log, TEXT("Kill."));
+		UE_LOG(LogGameplay, Log, TEXT("Kill."));
 	};
 
 	virtual void Killstreak()
 	{
-		UE_LOG(LogUI, Log, TEXT("Killstreak."));
+		UE_LOG(LogGameplay, Log, TEXT("Killstreak."));
 	};
 
 	virtual void CaptureObjective()
 	{
-		UE_LOG(LogUI, Log, TEXT("Capturing new Objective."));
+		UE_LOG(LogGameplay, Log, TEXT("Capturing new Objective."));
 	};
 
 	virtual void DiscoverArea()
 	{
 		// @gdemers same principles can be applied here. a player could enter an area, consume a token which would no longer make the area "non-discovered", and push the information
 		// of the area to the AInfo of the game state so whenever a player actually discover the area, all players gets notified OnRep_.
-		UE_LOG(LogUI, Log, TEXT("Discovering new Area."));
+		UE_LOG(LogGameplay, Log, TEXT("Discovering new Area."));
 	};
 };
 
@@ -207,12 +207,12 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventPlayerStateInterface
 public:
 	virtual void Damage(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Damaged."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Damaged."));
 	}
 
 	virtual void Heal(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Healed."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Healed."));
 	}
 
 	virtual void Die(const UActorComponent* Component)
@@ -225,66 +225,66 @@ public:
 		//	etc...
 		// All of this is obviously depended on your project!
 		// Additionally, note that we heavily rely on interface dispatch here. It creates separation of concern in modules as they only need to know about "Engine", and "AVVMGameplay".
-		UE_LOG(LogUI, Log, TEXT("Player Died."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Died."));
 	}
 
 	virtual void Raise(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Raised."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Raised."));
 	}
 
 	virtual void Stun(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Stunned."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Stunned."));
 	}
 
 	virtual void Exhaust(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Exhausted."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Exhausted."));
 	}
 
 	virtual void StartCasting(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Started Casting."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Started Casting."));
 	}
 
 	virtual void StopCasting(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Stopped Casting."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Stopped Casting."));
 	}
 
 	virtual void EarnMoney(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Earned Money."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Earned Money."));
 	}
 
 	virtual void SpendMoney(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Spent Money."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Spent Money."));
 	}
 
 	virtual void StartInteractingWithWorld(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Started Interacting with World."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Started Interacting with World."));
 	}
 
 	virtual void StopInteractingWithWorld(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Stopped Interacting with World."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Stopped Interacting with World."));
 	}
 
 	virtual void ConsumeItem(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Consumed Item."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Consumed Item."));
 	}
 
 	virtual void StartTalkingToNpc(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Started Talking to NPC."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Started Talking to NPC."));
 	}
 
 	virtual void StopTalkingToNpc(const UActorComponent* Component)
 	{
-		UE_LOG(LogUI, Log, TEXT("Player Stopped Talking to NPC."));
+		UE_LOG(LogGameplay, Log, TEXT("Player Stopped Talking to NPC."));
 	}
 };

@@ -20,6 +20,7 @@
 #include "Resources/AVVMResourceProvider.h"
 
 #include "AbilitySystemComponent.h"
+#include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityData.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 
@@ -47,17 +48,12 @@ TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckAbil
 	}
 
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(AbilitySystemComponent);
-	if (IsValid(ASC) && UAVVMResourceHandlingBlueprintFunctionLibrary::HasAuthority(ASC->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
+	if (IsValid(ASC) && UAVVMGameplayUtils::IsExecutingFromServerOrClient(ASC->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
 	{
 		ASC->SetupAbilities(OutAbilities);
 	}
 
 	return OutResources;
-}
-
-bool UAVVMResourceHandlingBlueprintFunctionLibrary::HasAuthority(const AActor* Outer)
-{
-	return IsValid(Outer) ? Outer->HasAuthority() : false;
 }
 
 bool UAVVMResourceHandlingBlueprintFunctionLibrary::ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,

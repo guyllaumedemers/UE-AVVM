@@ -19,13 +19,24 @@
 //SOFTWARE.
 #include "Ability/AVVMAbilitySystemComponent.h"
 
-#include "AVVM.h"
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityData.h"
 #include "Engine/AssetManager.h"
+
+void UAVVMAbilitySystemComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	OwningOuter = GetTypedOuter<AActor>();
+}
 
 void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resources)
 {
 	const FGameplayTagContainer& ASCTags = GetOwnedGameplayTags();
+
+	const AActor* Outer = OwningOuter.Get();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredGrantedAbilities;
 	for (const UObject* Resource : Resources)
@@ -38,11 +49,21 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 
 		if (!AbilityAsset->CanGrantAbility(ASCTags))
 		{
-			UE_LOG(LogUI, Log, TEXT("Failed to Grant Ability due to Blocking Tags: %s."), *AbilityAsset->GetName());
+			UE_LOG(LogGameplay,
+			       Log,
+			       TEXT("Executed from \"%s\". Failed to Grant Ability \"%s\" due to Blocking Tags."),
+			       IsServerOrClientString,
+			       *AbilityAsset->GetName());
+
 			continue;
 		}
 
-		UE_LOG(LogUI, Log, TEXT("New Ability Recorded for deferred Granting: %s."), *AbilityAsset->GetName());
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". New Ability Recorded \"%s\" for deferred Granting."),
+		       IsServerOrClientString,
+		       *AbilityAsset->GetName());
+
 		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
 	}
 
@@ -65,22 +86,44 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 		return;
 	}
 
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData();
+
 	TArray<UObject*> OutStreamedAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
 
 	for (UObject* Ability : OutStreamedAssets)
 	{
 		auto* GameplayAbilityClass = Cast<UClass>(Ability);
-		if (IsValid(GameplayAbilityClass))
+		if (!IsValid(GameplayAbilityClass))
 		{
-			UE_LOG(LogUI, Log, TEXT("Granting New Ability: %s"), *GameplayAbilityClass->GetName());
-			GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass});
+			continue;
 		}
+
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Granting New Ability \"%s\" to Actor \"%s\"."),
+		       IsServerOrClientString,
+		       *GameplayAbilityClass->GetName(),
+		       *Outer->GetName());
+
+		GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass});
 	}
 }
 
 void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool TagExists)
 {
 	Super::OnTagUpdated(Tag, TagExists);
-	UE_LOG(LogUI, Log, TEXT("Modifying Tag: %s"), *Tag.ToString());
+
+	const AActor* Outer = OwningOuter.Get();
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Modifying Tag \"%s\"."),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Tag.ToString());
 }

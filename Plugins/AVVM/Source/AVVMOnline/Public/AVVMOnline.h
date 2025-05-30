@@ -26,6 +26,8 @@
 #include "AVVMNotificationSubsystem.h"
 #include "StructUtils/InstancedStruct.h"
 
+AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogOnline, Log, All);
+
 /**
  *	Plugin Description :
  *

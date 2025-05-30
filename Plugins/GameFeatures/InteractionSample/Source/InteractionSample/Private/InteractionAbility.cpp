@@ -19,10 +19,27 @@
 //SOFTWARE.
 #include "InteractionAbility.h"
 
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
+
 void UInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                         const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
+
+	const AActor* Outer = ActorInfo->OwnerActor.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *GetName(),
+	       *Outer->GetName(),
+	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
 }
 
 void UInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -37,7 +54,20 @@ void UInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
                                           const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	UE_LOG(LogTemp, Log, TEXT("Activate Ability %s."), *GetName());
+
+	const AActor* Outer = ActorInfo->OwnerActor.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *GetName(),
+	       *Outer->GetName(),
+	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
 }
 
 void UInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

@@ -26,6 +26,10 @@
   ],
   "Plugins": [
     {
+      "Name": "AVVM",
+      "Enabled": true
+    },
+    {
       "Name": "CommonUI",
       "Enabled": true
     },

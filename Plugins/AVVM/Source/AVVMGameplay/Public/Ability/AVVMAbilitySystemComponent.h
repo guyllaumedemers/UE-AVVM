@@ -59,6 +59,8 @@ class AVVMGAMEPLAY_API UAVVMAbilitySystemComponent : public UAbilitySystemCompon
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintCallable)
 	void SetupAbilities(const TArray<UObject*>& Resources);
 
@@ -69,4 +71,5 @@ protected:
 	virtual void OnTagUpdated(const FGameplayTag& Tag, bool TagExists) override;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
+	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 };

@@ -20,7 +20,8 @@
 #include "Ability/AVVMAbilityInputComponent.h"
 
 #include "AbilitySystemInterface.h"
-#include "AVVM.h"
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -36,26 +37,26 @@ void UAVVMAbilityInputComponent::BeginPlay()
 	Super::BeginPlay();
 
 	auto* PlayerState = GetTypedOuter<APlayerState>();
-	if (IsValid(PlayerState) && IsValid(PlayerState->GetPlayerController()) /*imply local player*/)
+	if (IsValid(PlayerState) && UAVVMGameplayUtils::IsLocallyControlled(PlayerState))
 	{
 		PlayerState->OnPawnSet.AddUniqueDynamic(this, &UAVVMAbilityInputComponent::OnPawnChanged);
 		OnPawnChanged(PlayerState, PlayerState->GetPawn(), nullptr);
 	}
 
-	Outer = PlayerState;
+	OwningOuter = PlayerState;
 }
 
 void UAVVMAbilityInputComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	auto* PlayerState = Outer.Get();
-	if (IsValid(PlayerState) && IsValid(PlayerState->GetPlayerController()) /*imply local player*/)
+	auto* PlayerState = OwningOuter.Get();
+	if (IsValid(PlayerState) && UAVVMGameplayUtils::IsLocallyControlled(PlayerState))
 	{
 		PlayerState->OnPawnSet.RemoveAll(this);
 	}
 
-	Outer.Reset();
+	OwningOuter.Reset();
 	AbilityTriggerTags.Reset();
 }
 
@@ -90,29 +91,55 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
 		return;
 	}
 
+	const APlayerState* PlayerState = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(PlayerState), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
 	const UInputMappingContext* OldInputMappingContext = IAVVMInputMappingProvider::Execute_GetInputMappingContext(OldPawn);
 	if (IsValid(OldInputMappingContext))
 	{
-		UE_LOG(LogUI, Log, TEXT("Removing Input Mapping Context: %s."), *OldInputMappingContext->GetName());
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Removing Input Mapping Context \"%s\" on Actor \"%s\"."),
+		       *OldInputMappingContext->GetName(),
+		       *PlayerState->GetName());
+
 		EnhancedInputSubsystem->RemoveMappingContext(OldInputMappingContext);
 	}
 
 	const UInputMappingContext* NewInputMappingContext = IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn);
 	if (IsValid(NewInputMappingContext))
 	{
-		UE_LOG(LogUI, Log, TEXT("Adding Input Mapping Context: %s."), *NewInputMappingContext->GetName());
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Adding Input Mapping Context \"%s\" on Actor \"%s\"."),
+		       *NewInputMappingContext->GetName(),
+		       *PlayerState->GetName());
+
 		EnhancedInputSubsystem->AddMappingContext(NewInputMappingContext, 0);
 	}
 }
 
 void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* EnhancedInputComponent, const UInputMappingContext* InputMappingContext)
 {
-	if (!IsValid(EnhancedInputComponent) || !IsValid(InputMappingContext) || !Outer.IsValid())
+	if (!IsValid(EnhancedInputComponent) || !IsValid(InputMappingContext))
 	{
 		return;
 	}
 
-	UE_LOG(LogUI, Log, TEXT("Clearing Input Action Bindings."));
+	const APlayerState* PlayerState = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(PlayerState), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Clearing Input Action Bindings on Actor \"%s\"."),
+	       *PlayerState->GetName());
+
 	EnhancedInputComponent->ClearActionBindings();
 	AbilityTriggerTags.Reset();
 
@@ -126,11 +153,13 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 
 		FGameplayTag& OutTag = AbilityTriggerTags.FindOrAdd(InputAction);
 		OutTag = InputAction->AbilityTriggerTag;
-		UE_LOG(LogUI,
+
+		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Registering New Input Action: %s, Tag: %s."),
+		       TEXT("Registering New Input Action \"%s\" and Tag \"%s\" on Actor \"%s\"."),
 		       *InputAction->GetName(),
-		       *OutTag.ToString());
+		       *OutTag.ToString(),
+		       *PlayerState->GetName());
 
 		EnhancedInputComponent->BindAction(InputAction,
 		                                   ETriggerEvent::Started,
@@ -154,7 +183,7 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 
 void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext)
 {
-	const auto AbilityInterface = TScriptInterface<IAbilitySystemInterface>(Outer.Get());
+	const auto AbilityInterface = TScriptInterface<IAbilitySystemInterface>(OwningOuter.Get());
 	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(AbilityInterface))
 	{
 		return;

@@ -20,3 +20,5 @@
 #include "AVVMGameplay.h"
     
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMGameplay)
+
+DEFINE_LOG_CATEGORY(LogGameplay);

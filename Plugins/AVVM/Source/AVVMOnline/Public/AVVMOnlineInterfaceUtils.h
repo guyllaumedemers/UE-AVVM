@@ -37,7 +37,7 @@ class ULocalPlayer;
 /**
  *	Class description:
  *
- *	UAVVMOnlineInterfaceUtils expose a set of utility function defined by the online service.
+ *	UAVVMOnlineInterfaceUtils expose a set of utility function relevant for the online service.
  */
 UCLASS()
 class AVVMONLINE_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrary
@@ -151,11 +151,12 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 	auto* Outer = Cast<UObject>(DerivedChild->GetImplementingOuterObject(UInterfaceClass::StaticClass()));
 	if (!ensureAlways(IsValid(Outer)))
 	{
-		UE_LOG(LogUI,
+		UE_LOG(LogOnline,
 		       Log,
 		       TEXT("%s doesn't Implement %s"),
 		       *DerivedChild->GetName(),
 		       *UInterfaceClass::StaticClass()->GetName());
+
 		return false;
 	}
 
@@ -164,7 +165,7 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 	const bool bImplement = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(OutInterface);
 	if (!ensureAlways(bImplement))
 	{
-		UE_LOG(LogUI,
+		UE_LOG(LogOnline,
 		       Log,
 		       TEXT("%s is Null. Does %s implement the interface in Blueprint? If so, Update to support the interface Natively!"),
 		       *UInterfaceClass::StaticClass()->GetName(),
@@ -180,14 +181,20 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 	const auto& StringParser = TScriptInterface<IAVVMOnlineStringParser>(FAVVMOnlineModule::GetJsonParser());
 	if (!ensureAlways(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(StringParser)))
 	{
-		UE_LOG(LogUI, Log, TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
+		UE_LOG(LogOnline,
+		       Log,
+		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
+
 		return FString();
 	}
 
 	const auto* Data = Payload.GetPtr<TPayload>();
 	if (!ensureAlways(Data != nullptr))
 	{
-		UE_LOG(LogUI, Log, TEXT("TPayload isn't of received type."))
+		UE_LOG(LogOnline,
+		       Log,
+		       TEXT("TPayload isn't of received type."))
+
 		return FString();
 	}
 
@@ -202,7 +209,10 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::Deserializ
 	const auto& StringParser = TScriptInterface<IAVVMOnlineStringParser>(FAVVMOnlineModule::GetJsonParser());
 	if (!ensureAlways(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(StringParser)))
 	{
-		UE_LOG(LogUI, Log, TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
+		UE_LOG(LogOnline,
+		       Log,
+		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
+
 		return TInstancedStruct<FAVVMNotificationPayload>();
 	}
 

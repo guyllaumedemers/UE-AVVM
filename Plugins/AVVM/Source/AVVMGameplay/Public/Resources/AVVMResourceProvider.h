@@ -73,9 +73,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<FDataRegistryId> CheckAbilities(UAbilitySystemComponent* AbilitySystemComponent,
 	                                              const TArray<UObject*>& Resources);
-	
-	UFUNCTION(BlueprintCallable)
-	static bool HasAuthority(const AActor* Outer);
 
 	UFUNCTION(BlueprintCallable)
 	static bool ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,

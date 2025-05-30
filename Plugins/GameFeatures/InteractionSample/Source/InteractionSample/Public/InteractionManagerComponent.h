@@ -41,6 +41,7 @@ class INTERACTIONSAMPLE_API UInteractionManagerComponent : public UActorComponen
 public:
 	UInteractionManagerComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintPure)
@@ -75,4 +76,6 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewEndInteractionRecorded")
 	TArray<TObjectPtr<const UInteraction>> EndInteractions;
+
+	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 };

@@ -21,8 +21,6 @@
 
 #include "Modules/ModuleManager.h"
 
-INTERACTIONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogGameplay, Log, All);
-
 /**
  *	Plugin Description :
  *

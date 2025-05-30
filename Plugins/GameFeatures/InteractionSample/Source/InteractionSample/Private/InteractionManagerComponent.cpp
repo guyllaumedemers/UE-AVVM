@@ -19,8 +19,9 @@
 //SOFTWARE.
 #include "InteractionManagerComponent.h"
 
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "Interaction.h"
-#include "InteractionSample.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -37,6 +38,13 @@ void UInteractionManagerComponent::GetLifetimeReplicatedProps(TArray<class FLife
 
 	DOREPLIFETIME(UInteractionManagerComponent, BeginInteractions);
 	DOREPLIFETIME(UInteractionManagerComponent, EndInteractions);
+}
+
+void UInteractionManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	OwningOuter = GetTypedOuter<AActor>();
 }
 
 void UInteractionManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -77,7 +85,18 @@ void UInteractionManagerComponent::AttemptRecordBeginOverlap(const AActor* NewTa
                                                              const AActor* NewInstigator,
                                                              const bool bPreventContingency)
 {
-	UE_LOG(LogGameplay, Log, TEXT("Client: Begin Overlap detected! Can we proceed ?"));
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Begin Overlap detected between Actors \"%s\" and \"%s\"!"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *NewTarget->GetName(),
+	       *NewInstigator->GetName());
 
 	auto MatchingInteractions = TArray<TObjectPtr<const UInteraction>>();
 	if (bPreventContingency)
@@ -90,7 +109,11 @@ void UInteractionManagerComponent::AttemptRecordBeginOverlap(const AActor* NewTa
 
 	if (!bPreventContingency || MatchingInteractions.IsEmpty())
 	{
-		UE_LOG(LogGameplay, Log, TEXT("No match found! Or we dont care about Contingency! Attempt Executing ServerRPC_RecordBeginInteraction..."));
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RecordBeginInteraction..."),
+		       UAVVMGameplayUtils::PrintIsServerOrClient(OwningOuter.Get()).GetData());
+
 		ServerRPC_RecordBeginInteraction(NewTarget, NewInstigator);
 	}
 }
@@ -98,7 +121,19 @@ void UInteractionManagerComponent::AttemptRecordBeginOverlap(const AActor* NewTa
 void UInteractionManagerComponent::AttemptRecordEndOverlap(const AActor* NewTarget,
                                                            const AActor* NewInstigator)
 {
-	UE_LOG(LogGameplay, Log, TEXT("Client: End Overlap detected! Can we proceed ?"));
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". End Overlap detected between Actors \"%s\" and \"%s\"!"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *NewTarget->GetName(),
+	       *NewInstigator->GetName());
+
 	const auto MatchingInteractions = BeginInteractions.FilterByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
 	{
 		return IsValid(Interaction) && Interaction->DoesMatch(NewTarget, NewInstigator);
@@ -106,7 +141,11 @@ void UInteractionManagerComponent::AttemptRecordEndOverlap(const AActor* NewTarg
 
 	if (!MatchingInteractions.IsEmpty())
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Match found! Attempt Executing ServerRPC_RecordEndInteraction..."));
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Executing ServerRPC_RecordEndInteraction..."),
+		       UAVVMGameplayUtils::PrintIsServerOrClient(OwningOuter.Get()).GetData());
+
 		ServerRPC_RecordEndInteraction(NewTarget, NewInstigator);
 	}
 }
@@ -114,7 +153,17 @@ void UInteractionManagerComponent::AttemptRecordEndOverlap(const AActor* NewTarg
 void UInteractionManagerComponent::ServerRPC_RecordBeginInteraction_Implementation(const AActor* NewTarget,
                                                                                    const AActor* NewInstigator)
 {
-	UE_LOG(LogGameplay, Log, TEXT("ServerRPC executed! New Begin Interaction Recorded!"));
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". ServerRPC_RecordBeginInteraction executed on Actor \"%s\"!"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName());
 
 	UInteraction* Transaction = NewObject<UInteraction>(this);
 	Transaction->operator()(NewTarget, NewInstigator);
@@ -125,7 +174,17 @@ void UInteractionManagerComponent::ServerRPC_RecordBeginInteraction_Implementati
 void UInteractionManagerComponent::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewTarget,
                                                                                  const AActor* NewInstigator)
 {
-	UE_LOG(LogGameplay, Log, TEXT("ServerRPC executed! New End Interaction Recorded!"));
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". ServerRPC_RecordEndInteraction executed on Actor \"%s\"!"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName());
 
 	UInteraction* Transaction = NewObject<UInteraction>(this);
 	Transaction->operator()(NewTarget, NewInstigator);
@@ -135,10 +194,30 @@ void UInteractionManagerComponent::ServerRPC_RecordEndInteraction_Implementation
 
 void UInteractionManagerComponent::OnRep_NewBeginInteractionRecorded()
 {
-	UE_LOG(LogGameplay, Log, TEXT("Begin Interaction Collection modified!"));
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Begin Interaction Collection modified on Actor \"%s\"!"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName());
 }
 
 void UInteractionManagerComponent::OnRep_NewEndInteractionRecorded()
 {
-	UE_LOG(LogGameplay, Log, TEXT("End Interaction Collection modified!"));
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". End Interaction Collection modified on Actor \"%s\"!"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName());
 }

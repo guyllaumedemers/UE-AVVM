@@ -19,7 +19,8 @@
 //SOFTWARE.
 #include "Resources/AVVMResourceManagerComponent.h"
 
-#include "AVVM.h"
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "DataRegistrySubsystem.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
@@ -47,7 +48,13 @@ void UAVVMResourceManagerComponent::BeginPlay()
 
 	TRACE_COUNTER_INCREMENT(InstanceCounter);
 
-	UE_LOG(LogUI, Log, TEXT("Adding UAVVMResourceManagerComponent to Actor: %s"), *Outer->GetName())
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent to Actor \"%s\". IsLocallyControlled: %s."),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName(),
+	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData())
+
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 	RequestExternalResourceAsync(Outer);
@@ -65,7 +72,13 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 		return;
 	}
 
-	UE_LOG(LogUI, Log, TEXT("Removing UAVVMResourceManagerComponent to Actor: %s"), *Outer->GetName())
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent to Actor \"%s\". IsLocallyControlled: %s."),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName(),
+	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData())
+
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 	ResourceHandles.Empty();
@@ -88,10 +101,22 @@ void UAVVMResourceManagerComponent::RequestExternalResourceAsync(const AActor* O
 
 void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result)
 {
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
 	const bool bIsFullyLoaded = Result.Status == EDataRegistryAcquireStatus::AcquireFinished;
 	if (!bIsFullyLoaded)
 	{
-		UE_LOG(LogUI, Log, TEXT("Resource.Acquisition.%s. Failed!"), *Result.ItemId.ToString());
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Resource Acquisition for \"%s\" Failed on Actor \"%s\"!"),
+		       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+		       *Result.ItemId.ToString(),
+		       *Outer->GetName());
+
 		return;
 	}
 
@@ -107,7 +132,13 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(OwningOuter.Get());
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(Outer);
 	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IAVVMResourceProvider interface!")) || ResourceHandles.IsEmpty())
 	{
 		return;
@@ -119,10 +150,12 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	FKeepProcessingResources Callback;
 	Callback.BindDynamic(this, &UAVVMResourceManagerComponent::ProcessAdditionalResources);
 
-	const bool bHasPendingRegistries = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(OwningOuter.Get(), OutStreamedAssets, Callback);
-	UE_LOG(LogUI,
+	const bool bHasPendingRegistries = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(Outer, OutStreamedAssets, Callback);
+	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Resource Loader Update Status: Is Done Acquiring Resources ? %s"),
+	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Actor \"%s\"? %s"),
+	       UAVVMGameplayUtils::PrintIsServerOrClient(Outer).GetData(),
+	       *Outer->GetName(),
 	       bHasPendingRegistries ? TEXT("False") : TEXT("True"));
 }
 

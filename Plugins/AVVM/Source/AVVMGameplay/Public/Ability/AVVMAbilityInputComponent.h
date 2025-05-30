@@ -74,5 +74,5 @@ protected:
 	void OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext);
 
 	TMap<TWeakObjectPtr<const UInputAction>, FGameplayTag> AbilityTriggerTags;
-	TWeakObjectPtr<APlayerState> Outer = nullptr;
+	TWeakObjectPtr<APlayerState> OwningOuter = nullptr;
 };
