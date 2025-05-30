@@ -200,6 +200,8 @@ void UInteractionManagerComponent::ServerRPC_RecordBeginInteraction_Implementati
 	Transaction->operator()(NewTarget, NewInstigator);
 	AddReplicatedSubObject(Transaction);
 	BeginInteractions.Add(Transaction);
+
+	OnRep_NewBeginInteractionRecorded();
 }
 
 void UInteractionManagerComponent::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewTarget,
@@ -221,6 +223,8 @@ void UInteractionManagerComponent::ServerRPC_RecordEndInteraction_Implementation
 	Transaction->operator()(NewTarget, NewInstigator);
 	AddReplicatedSubObject(Transaction);
 	EndInteractions.Add(Transaction);
+
+	OnRep_NewEndInteractionRecorded();
 }
 
 void UInteractionManagerComponent::OnRep_NewBeginInteractionRecorded()
