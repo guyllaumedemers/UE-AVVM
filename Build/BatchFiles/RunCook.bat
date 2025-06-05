@@ -25,13 +25,13 @@ if not exist "%~dp0..\..\Source" goto Error_BatchFileInWrongLocation
 
 rem ## batch file parameters
 echo %ProjectName% %CookPlatforms% %CookMaps%
+goto UnrealEdFound
 
-rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%Platform%\ directory, if thats how the engine setup is done. 
+rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done. 
 pushd "%~dp0..\..\Source"
 if not exist "%~dp0Engine\Binaries\$(Platform)\UnrealEditor.exe" goto Error_CheckAlternativePath
 
-popd
-exit /b 0
+goto UnrealEdFound
 
 :Error_BadArgumentPassing
 rem ## Output a blank line
@@ -65,12 +65,11 @@ echo.
 pause
 goto Exit
 
-:Success_ExecuteCMD
+:UnrealEdFound
 pushd %UnrealEdDir%
 rem ## Run the CMD for cooking.
-UnrealEditor.exe %ProjectName% -run=cook -targetplatform=%CookPlatforms% -map=%CookMaps% -NODEV
-popd
-exit /b 0
+call UnrealEditor %ProjectName% -run=cook -targetplatform=%CookPlatforms% -map=%CookMaps% -NODEV
+goto Exit
 
 :Exit
 rem ## Restore the command prompt directory to its previous state.
