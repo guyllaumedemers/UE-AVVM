@@ -1,7 +1,7 @@
 @echo off
 
 rem ## Attempt to scripting a bat file that will run Unreal cooking process.
-setlocal
+setlocal enableextensions
 echo Running Cook process...
 
 rem ## Define a set of global variables to be injected by the run command.
@@ -25,7 +25,6 @@ if not exist "%~dp0..\..\Source" goto Error_BatchFileInWrongLocation
 
 rem ## batch file parameters
 echo %ProjectName% %CookPlatforms% %CookMaps%
-goto UnrealEdFound
 
 rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done. 
 pushd "%~dp0..\..\Source"
@@ -54,7 +53,10 @@ goto Exit
 echo.
 echo RunCook ERROR: UnrealEditor.exe not found. Searching in alternative locations.
 echo.
-rem ## TODO search in alternative location.
+rem ## fsutils fsinfo drives return a single line -> Drives: C:\ ... which is why we are using token to create an additional variable who's input the drive list.
+for /f "tokens=1,*" %%g in ('fsutil fsinfo drives') do (
+	for %%c in (%%h) do (echo %%~dc)
+	)
 pause
 goto Exit
 
