@@ -90,6 +90,7 @@ pushd %~1
 echo UnrealEditor found in: %~dp0
 rem ## Run the CMD for cooking.
 call UnrealEditor %ProjectName% -run=cook -targetplatform=%CookPlatforms% -map=%CookMaps% -NODEV
+popd
 goto Exit
 
 :Exit
