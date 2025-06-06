@@ -10,6 +10,8 @@ set ProjectName=
 set CookPlatforms=
 set CookMaps=
 
+echo Parsing CommandLine Arguments...
+
 rem ## Parse batch file argument list.
 :GetParameterArguments
 set Delim=%~2
@@ -23,6 +25,10 @@ if not "%~1" == "" goto GetParameterArguments
 rem ## Verify the BatchFile location.
 if not exist "%~dp0..\..\Source" (goto Error_BatchFileInWrongLocation)
 pushd "%~dp0..\.."
+
+set ProjectDirSingleSlash=%~dp0
+set ProjectDirDoubleSlash=%ProjectDirSingleSlash:\=\\%
+
 echo Searching UnrealEditor.exe in "%~dp0Engine\Binaries"...
 
 rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done.
@@ -61,13 +67,11 @@ echo RunCook ERROR: UnrealEditor.exe cannot be executed from "*:\Documents\Unrea
 echo.
 echo Searching for Shortcut define in "%~dp0"...
 echo.
-set SingleBackslash=%~dp0
-set DoubleBackslash=%SingleBackslash:\=\\%
 rem ## Move directory to project ROOT.
 for %%g in (*.lnk) do (
-	echo "%DoubleBackslash%%%~g"
+	echo "%ProjectDirDoubleSlash%%%~g"
 	rem ## Disable default Delim options so we don't split fetch shortcuts.
-	for /f "delims=" %%h in ('wmic path win32_shortcutfile where 'name^="%DoubleBackslash%%%~g"' get target /value') do (
+	for /f "delims=" %%h in ('wmic path win32_shortcutfile where 'name^="%ProjectDirDoubleSlash%%%~g"' get target /value') do (
 		for /f "tokens=2,* delims=^=" %%i in ("%%~h") do (
 			rem ## TODO Our ROOT project could have multiple .lnk which imply that validating the directory path is required before calling pushd and goto
 			rem ## add missing checks.
@@ -97,7 +101,7 @@ goto Exit
 :UnrealEdFound
 echo Found UnrealEditor.exe in: "%~dp0"
 rem ## Run the CMD for cooking.
-call UnrealEditor %ProjectName% -run=cook -targetplatform=%CookPlatforms% -NODEV
+call UnrealEditor %ProjectDirDoubleSlash%%ProjectName% -run=cook
 popd
 goto Exit
 
