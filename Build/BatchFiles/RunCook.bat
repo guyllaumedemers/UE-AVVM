@@ -1,7 +1,7 @@
 @echo off
 
 rem ## Attempt to scripting a bat file that will run Unreal cooking process.
-setlocal enableextensions
+setlocal
 echo Running Cook process...
 
 rem ## Define a set of global variables to be injected by the run command.
@@ -25,11 +25,13 @@ if not exist "%~dp0..\..\Source" goto Error_BatchFileInWrongLocation
 rem ## batch file parameters
 echo %ProjectName% %CookPlatforms% %CookMaps%
 
-rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done. 
-pushd "%~dp0..\..\Source"
-if not exist "%~dp0Engine\Binaries\$(Platform)\UnrealEditor.exe" goto Error_CheckAlternativePath
+rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done.
+for %%g in (%CookPlatforms%) do (
+	echo Searching Platform: %%g
+	if exist "%~dp0Engine\Binaries\%%g\UnrealEditor.exe" (call :UnrealEdFound "%~dp0..\..\Engine\Binaries\%%g\")
+)
 
-goto UnrealEdFound
+goto Error_CheckAlternativePath
 
 :Error_BadArgumentPassing
 rem ## Output a blank line
@@ -56,20 +58,33 @@ rem ## fsutils fsinfo drives return a single line -> Drives: C:\ ... which is wh
 for /f "tokens=1,*" %%g in ('fsutil fsinfo drives') do (
 	for %%c in (%%h) do (
 		if exist "%%~dc\Documents\UnrealEngine" (call :UnrealEdFound "%%~dc\Documents\UnrealEngine") else (echo "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
-		)
 	)
-pause
-goto Exit
+)
+	
+:Error_CheckIfShortcutExist
+echo.
+echo RunCook ERROR: UnrealEditor.exe not under Drive Path. Searching for possible Shortcut define at location.
+echo.
+rem ## Move directory to project ROOT.
+pushd "%~dp0..\..\"
+for %%g in (*.lnk) do (
+	rem ## TODO jmp to .lnk target if possible.
+	echo "%~dp0%%g"
+	for %%h in (%CookPlatforms%) do (
+		rem ## TODO check for UnrealEditor
+	)
+)
 
 :Error_CannotExecuteRunCook
 echo.
-echo RunCook ERROR: Command cannot be executed properly. Exiting process...
+echo RunCook ERROR: Command cannot be executed properly. No shortcut available. Exiting process...
 echo.
 pause
 goto Exit
 
 :UnrealEdFound
-pushd %UnrealEdDir%
+pushd %~1
+echo UnrealEditor found in: %~dp0
 rem ## Run the CMD for cooking.
 call UnrealEditor %ProjectName% -run=cook -targetplatform=%CookPlatforms% -map=%CookMaps% -NODEV
 goto Exit
