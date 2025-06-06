@@ -33,7 +33,7 @@ echo Searching UnrealEditor.exe in "%~dp0Engine\Binaries"...
 
 rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done.
 for %%g in (%CookPlatforms%) do (
-	if exist "%~dp0Engine\Binaries\%%~g\UnrealEditor.exe" (call :UnrealEdFound "%~dp0Engine\Binaries\%%~g\")
+	if exist "%~dp0Engine\Binaries\%%~g\UnrealEditor.exe" (pushd "%~dp0Engine\Binaries\%%~g" & goto UnrealEdFound)
 )
 
 goto Error_CheckAlternativePath
@@ -55,7 +55,7 @@ echo.
 rem ## fsutils fsinfo drives return a single line -> Drives: C:\ ... which is why we are using token to create an additional variable who's input the drive list.
 for /f "tokens=1,*" %%g in ('fsutil fsinfo drives') do (
 	for %%c in (%%~h) do (
-		if exist "%%~dc\Documents\UnrealEngine" (call :UnrealEdFound "%%~dc\Documents\UnrealEngine") else (echo RunCook ERROR: "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
+		if exist "%%~dc\Documents\UnrealEngine" (pushd "%%~dc\Documents\UnrealEngine" & goto UnrealEdFound) else (echo RunCook ERROR: "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
 	)
 )
 
@@ -69,7 +69,6 @@ echo Searching for Shortcut define in "%~dp0"...
 echo.
 rem ## Move directory to project ROOT.
 for %%g in (*.lnk) do (
-	echo "%ProjectDirDoubleSlash%%%~g"
 	rem ## Disable default Delim options so we don't split fetch shortcuts.
 	for /f "delims=" %%h in ('wmic path win32_shortcutfile where 'name^="%ProjectDirDoubleSlash%%%~g"' get target /value') do (
 		for /f "tokens=2,* delims=^=" %%i in ("%%~h") do (
