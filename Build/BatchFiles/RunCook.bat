@@ -27,7 +27,7 @@ echo Searching UnrealEditor.exe in "%~dp0Engine\Binaries"...
 
 rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done.
 for %%g in (%CookPlatforms%) do (
-	if exist "%~dp0Engine\Binaries\%%g\UnrealEditor.exe" (call :UnrealEdFound "%~dp0Engine\Binaries\%%g\")
+	if exist "%~dp0Engine\Binaries\%%~g\UnrealEditor.exe" (call :UnrealEdFound "%~dp0Engine\Binaries\%%~g\")
 )
 
 goto Error_CheckAlternativePath
@@ -48,10 +48,12 @@ echo Searching matching directories based on available Drives...
 echo.
 rem ## fsutils fsinfo drives return a single line -> Drives: C:\ ... which is why we are using token to create an additional variable who's input the drive list.
 for /f "tokens=1,*" %%g in ('fsutil fsinfo drives') do (
-	for %%c in (%%h) do (
+	for %%c in (%%~h) do (
 		if exist "%%~dc\Documents\UnrealEngine" (call :UnrealEdFound "%%~dc\Documents\UnrealEngine") else (echo RunCook ERROR: "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
 	)
 )
+
+goto Error_CheckIfShortcutExist
 	
 :Error_CheckIfShortcutExist
 echo.
@@ -61,13 +63,19 @@ echo Searching for Shortcut define in "%~dp0"...
 echo.
 rem ## Move directory to project ROOT.
 for %%g in (*.lnk) do (
-	rem ## TODO jmp to .lnk target if possible.
-	echo "%~dp0%%g"
-	for %%h in (%CookPlatforms%) do (
-		rem ## TODO check for UnrealEditor
-		echo "%%h"
+	echo "%~dp0%%~g"
+	rem ## TODO Directory backslash prevent proper match with wimc. require usage of double backslash. Fix double backslash requirements. hard-coded for now
+	rem ## Disable default Delim options so we don't split fetch shortcuts.
+	for /f "delims=" %%h in ('wmic path win32_shortcutfile where 'name^="C:\\Users\\guyllaume\\Documents\\Unreal Projects\\UISample\\UnrealEngine - Shortcut.lnk"' get target /value') do (
+		for /f "tokens=2,* delims=^=" %%i in ("%%~h") do (
+			rem ## TODO Our ROOT project could have multiple .lnk which imply that validating the directory path is required before calling pushd and goto
+			rem ## add missing checks.
+			if not "%%~i" == "" (pushd "%%~i\Engine\Binaries\%CookPlatforms%" & goto UnrealEdFound)
+		)
 	)
 )
+
+goto Error_CannotExecuteRunCook
 
 :Error_BatchFileInWrongLocation
 rem ## Output a blank line
@@ -86,10 +94,9 @@ pause
 goto Exit
 
 :UnrealEdFound
-pushd %~1
-echo UnrealEditor found in: %~dp0
+echo Found UnrealEditor.exe in: "%~dp0"
 rem ## Run the CMD for cooking.
-call UnrealEditor %ProjectName% -run=cook -targetplatform=%CookPlatforms% -map=%CookMaps% -NODEV
+call UnrealEditor %ProjectName% -run=cook -targetplatform=%CookPlatforms% -NODEV
 popd
 goto Exit
 
