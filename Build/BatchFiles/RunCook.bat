@@ -8,7 +8,6 @@ rem ## Define a set of global variables to be injected by the run command.
 set ProjectName=
 set CookPlatforms=
 set CookMaps=
-set UnrealEdDir=
 
 rem ## Parse batch file argument list.
 :GetParameterArguments
@@ -55,7 +54,9 @@ echo RunCook ERROR: UnrealEditor.exe not found. Searching in alternative locatio
 echo.
 rem ## fsutils fsinfo drives return a single line -> Drives: C:\ ... which is why we are using token to create an additional variable who's input the drive list.
 for /f "tokens=1,*" %%g in ('fsutil fsinfo drives') do (
-	for %%c in (%%h) do (echo %%~dc)
+	for %%c in (%%h) do (
+		if exist "%%~dc\Documents\UnrealEngine" (call :UnrealEdFound "%%~dc\Documents\UnrealEngine") else (echo "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
+		)
 	)
 pause
 goto Exit
