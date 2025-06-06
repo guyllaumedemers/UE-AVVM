@@ -61,12 +61,13 @@ echo RunCook ERROR: UnrealEditor.exe cannot be executed from "*:\Documents\Unrea
 echo.
 echo Searching for Shortcut define in "%~dp0"...
 echo.
+set SingleBackslash=%~dp0
+set DoubleBackslash=%SingleBackslash:\=\\%
 rem ## Move directory to project ROOT.
 for %%g in (*.lnk) do (
-	echo "%~dp0%%~g"
-	rem ## TODO Directory backslash prevent proper match with wimc. require usage of double backslash. Fix double backslash requirements. hard-coded for now
+	echo "%DoubleBackslash%%%~g"
 	rem ## Disable default Delim options so we don't split fetch shortcuts.
-	for /f "delims=" %%h in ('wmic path win32_shortcutfile where 'name^="C:\\Users\\guyllaume\\Documents\\Unreal Projects\\UISample\\UnrealEngine - Shortcut.lnk"' get target /value') do (
+	for /f "delims=" %%h in ('wmic path win32_shortcutfile where 'name^="%DoubleBackslash%%%~g"' get target /value') do (
 		for /f "tokens=2,* delims=^=" %%i in ("%%~h") do (
 			rem ## TODO Our ROOT project could have multiple .lnk which imply that validating the directory path is required before calling pushd and goto
 			rem ## add missing checks.
