@@ -3,6 +3,7 @@
 rem ## Attempt to scripting a bat file that will run Unreal cooking process.
 setlocal
 echo Running Cook process...
+echo.
 
 rem ## Define a set of global variables to be injected by the run command.
 set ProjectName=
@@ -19,13 +20,14 @@ REM rem ## Shift the position of the Parameters list so
 shift
 if not "%~1" == "" goto GetParameterArguments
 
-rem ## batch file parameters
-echo %ProjectName% %CookPlatforms% %CookMaps%
+rem ## Verify the BatchFile location.
+if not exist "%~dp0..\..\Source" (goto Error_BatchFileInWrongLocation)
+pushd "%~dp0..\.."
+echo Searching UnrealEditor.exe in "%~dp0Engine\Binaries"...
 
 rem ## Check if UnrealEditor.exe can be accessed from your %ProjectName%\Engine\Binaries\%CookPlatforms%\ directory, if thats how the engine setup is done.
 for %%g in (%CookPlatforms%) do (
-	echo Searching Platform: %%g
-	if exist "%~dp0Engine\Binaries\%%g\UnrealEditor.exe" (call :UnrealEdFound "%~dp0..\..\Engine\Binaries\%%g\")
+	if exist "%~dp0Engine\Binaries\%%g\UnrealEditor.exe" (call :UnrealEdFound "%~dp0Engine\Binaries\%%g\")
 )
 
 goto Error_CheckAlternativePath
@@ -40,23 +42,24 @@ goto Exit
 
 :Error_CheckAlternativePath
 echo.
-echo RunCook ERROR: UnrealEditor.exe cannot be executed from "%ProjectName%\Engine" due to a invalid directory. Searching alternate locations.
+echo RunCook ERROR: UnrealEditor.exe cannot be executed from "%~dp0Engine\Binaries" due to missing directory.
+echo.
+echo Searching matching directories based on available Drives...
 echo.
 rem ## fsutils fsinfo drives return a single line -> Drives: C:\ ... which is why we are using token to create an additional variable who's input the drive list.
 for /f "tokens=1,*" %%g in ('fsutil fsinfo drives') do (
 	for %%c in (%%h) do (
-		if exist "%%~dc\Documents\UnrealEngine" (call :UnrealEdFound "%%~dc\Documents\UnrealEngine") else (echo "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
+		if exist "%%~dc\Documents\UnrealEngine" (call :UnrealEdFound "%%~dc\Documents\UnrealEngine") else (echo RunCook ERROR: "%%~dc\Documents\UnrealEngine" is not a valid directory on your local machine.)
 	)
 )
 	
 :Error_CheckIfShortcutExist
 echo.
-echo RunCook ERROR: UnrealEditor.exe cannot be executed from "Driver\Documents\UnrealEngine". Searching for Shortcut define in "%ProjectName%".
+echo RunCook ERROR: UnrealEditor.exe cannot be executed from "*:\Documents\UnrealEngine".
 echo.
-rem ## Verify the BatchFile location.
-if not exist "%~dp0..\..\Source" (goto Error_BatchFileInWrongLocation)
+echo Searching for Shortcut define in "%~dp0"...
+echo.
 rem ## Move directory to project ROOT.
-pushd "%~dp0..\..\"
 for %%g in (*.lnk) do (
 	rem ## TODO jmp to .lnk target if possible.
 	echo "%~dp0%%g"
@@ -69,7 +72,7 @@ for %%g in (*.lnk) do (
 :Error_BatchFileInWrongLocation
 rem ## Output a blank line
 echo.
-echo RunCook ERROR: The batch file does not appear to be located in the "%ProjectName%\Build\BatchFiles" directory. Process must be run from within this location.
+echo RunCook ERROR: The batch file does not appear to be located in the relative directory path "%ProjectName%\Build\BatchFiles". Process must be run from within this location.
 echo.
 rem ## Suspend the process of the batch program and request user input for program closure.
 pause
