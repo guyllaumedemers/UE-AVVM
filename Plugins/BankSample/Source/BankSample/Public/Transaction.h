@@ -104,7 +104,7 @@ protected:
 	FString OwnerId = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
-	ETransactionType TransactionType = ETransactionType::None;
+	TEnumAsByte<ETransactionType> TransactionType = ETransactionType::None;
 
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
 	FString Payload = FString();

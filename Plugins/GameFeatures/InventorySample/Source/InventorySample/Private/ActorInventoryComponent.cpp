@@ -17,14 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "Modules/ModuleManager.h"
-
-/**
- *	Plugin Description :
- *
- *	InventorySample handle collections of items owned by a given Actor. This plugin doesn't restrict itself to the standard inventory
- *	system we usually think about. Any actor could own the component supporting the inventory system and define a set of items to be act upon.
- *	A visual representation of the available set specific to the context at hand would be provided to the local client once interacted with.
- */
+#include "ActorInventoryComponent.h"

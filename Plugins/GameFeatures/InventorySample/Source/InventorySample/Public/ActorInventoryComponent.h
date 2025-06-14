@@ -19,12 +19,30 @@
 //SOFTWARE.
 #pragma once
 
-#include "Modules/ModuleManager.h"
+#include "CoreMinimal.h"
+
+#include "Components/ActorComponent.h"
+
+#include "ActorInventoryComponent.generated.h"
 
 /**
- *	Plugin Description :
- *
- *	InventorySample handle collections of items owned by a given Actor. This plugin doesn't restrict itself to the standard inventory
- *	system we usually think about. Any actor could own the component supporting the inventory system and define a set of items to be act upon.
- *	A visual representation of the available set specific to the context at hand would be provided to the local client once interacted with.
+ *	UActorInventoryComponent handle the core functionalities of the inventory system.
  */
+UCLASS(ClassGroup=("Inventory"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+	// what should this thing be able to do ?
+
+	// A) Retrieve a collection of items from a backend.
+
+	// B) Retrieve a collection of items from a data asset
+
+	// C) Display a collection of items for the local client. (and optionally for a remote client that request a trade)
+
+	// D) Broadcast event when item state is marked as equip, unequip, sell, buy, refund
+
+	// the inventory system can act both as a caching mechanism for persistent data that require display, but also temporary for
+	// items that can be bought, sold, traded etc...
+};
