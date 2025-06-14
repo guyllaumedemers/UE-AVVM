@@ -1,0 +1,94 @@
+﻿//Copyright(c) 2025 gdemers
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files(the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions :
+//
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+// ReSharper disable CppIncompleteSwitchStatement
+// ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "UObject/Interface.h"
+
+#include "HasItemCollection.generated.h"
+
+class UItemObject;
+class UItemCollectionDefinitionDataAsset;
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRetrieveInventoryItems, const TArray<UItemObject*>&, Items);
+
+/**
+ *	Class description:
+ *	
+ *	EItemSrcType represent the Item source Type. I.e How was the data retrieved. Dynamically (as a collection list provided by the Backend) ? or
+ *	Statically (from a collection list provided by a Data Asset reference) ?
+ */
+UENUM(BlueprintType)
+enum class EItemSrcType : uint8
+{
+	None,
+	Static,
+	Dynamic,
+};
+
+inline const TCHAR* EnumToString(EItemSrcType State)
+{
+	switch (State)
+	{
+		case EItemSrcType::Static:
+			return TEXT("Static");
+		case EItemSrcType::Dynamic:
+			return TEXT("Dynamic");
+	}
+	ensure(false);
+	return TEXT("Unknown");
+}
+
+/**
+ *	Class description:
+ *
+ *	UHasItemCollection provide a set of api to determine if the Owning Actor support a pre-defined list of Items to hold.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class INVENTORYSAMPLE_API UHasItemCollection : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class INVENTORYSAMPLE_API IHasItemCollection
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void RequestItems(const FOnRetrieveInventoryItems& Callback) const;
+	virtual void RequestItems_Implementation(const FOnRetrieveInventoryItems& Callback) const;
+
+protected:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ProcessStaticItems(const FOnRetrieveInventoryItems& Callback) const;
+	virtual void ProcessStaticItems_Implementation(const FOnRetrieveInventoryItems& Callback) const PURE_VIRTUAL(ProcessStaticItems_Implementation, return;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ProcessDynamicItems(const FOnRetrieveInventoryItems& Callback) const;
+	virtual void ProcessDynamicItems_Implementation(const FOnRetrieveInventoryItems& Callback) const PURE_VIRTUAL(ProcessDynamicItems_Implementation, return;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	EItemSrcType GetItemSrcType() const;
+	virtual EItemSrcType GetItemSrcType_Implementation() const PURE_VIRTUAL(GetItemSrcType_Implementation, return EItemSrcType::None;);
+};

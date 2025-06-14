@@ -18,3 +18,33 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
+
+#include "AVVMUtilityFunctionLibrary.h"
+#include "HasItemCollection.h"
+
+void UActorInventoryComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UObject* Outer = GetOuter();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IHasItemCollection, UHasItemCollection>(GetOuter());
+	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IHasItemCollection interface!")))
+	{
+		FOnRetrieveInventoryItems Callback;
+		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
+		IHasItemCollection::Execute_RequestItems(Outer, Callback);
+	}
+}
+
+void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds)
+{
+	if (!ensureAlwaysMsgf(!ItemObjectIds.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
+	{
+		return;
+	}
+}

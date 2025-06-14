@@ -25,6 +25,8 @@
 
 #include "ActorInventoryComponent.generated.h"
 
+class UItemObject;
+
 /**
  *	UActorInventoryComponent handle the core functionalities of the inventory system.
  */
@@ -33,6 +35,12 @@ class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+public:
+	virtual void BeginPlay() override;
+
+protected:
+	UFUNCTION()
+	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds);
 	// what should this thing be able to do ?
 
 	// A) Retrieve a collection of items from a backend.

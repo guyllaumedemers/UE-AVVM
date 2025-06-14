@@ -28,6 +28,8 @@
 #include "ItemObject.generated.h"
 
 /**
+ *	Class description:
+ *	
  *	EItemState represent the state of an item.
  */
 UENUM(BlueprintType)
@@ -67,6 +69,8 @@ inline const TCHAR* EnumToString(EItemState State)
 }
 
 /**
+ *	Class description:
+ *	
  *	EItemStorageState represent the location state of an item. Where is the item
  *	being kept.
  */
@@ -95,6 +99,8 @@ inline const TCHAR* EnumToString(EItemStorageState State)
 }
 
 /**
+ *	Class description:
+ *	
  *	UItemObject represent any object that exist in your project LORE. Note: When a UItemObject state
  *	becomes InWorld, an AActor is instanced on the server for player pick up.
  */
@@ -103,22 +109,22 @@ class INVENTORYSAMPLE_API UItemObject : public UObject
 {
 	GENERATED_BODY()
 
+public:
+	virtual void SpawnItemActor(const TFunctionRef<AActor*(void)> Callback);
+
 protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TEnumAsByte<EItemState> ItemState = EItemState::None;
+	// ItemActorClass represent any world object that is open for pick up. Note : We expect the actor to be receiving a UActorInteractionComponent to support both Interaction Actions,
+	// and UAVVMResourceManagerComponent for Resource loading, via a GameFeaturePlugin Data Asset.
+	// Note : Native Actor Class isn't required here as any BP Class can act as the receiver to the components being dynamically added.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AActor> ItemActorClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TEnumAsByte<EItemStorageState> ItemStorageState = EItemStorageState::None;
-};
+	TObjectPtr<AActor> ItemActor = nullptr;
 
-/**
- *	AItemActor represent any world object that is open for pick up.
- */
-UCLASS(BlueprintType, Blueprintable)
-class INVENTORYSAMPLE_API AItemActor : public AActor
-{
-	GENERATED_BODY()
+	UPROPERTY(Transient, BlueprintReadOnly)
+	EItemStorageState ItemStorageState = EItemStorageState::None;
 
-	// We expect the actor to be receiving an UActorInteractionComponent dynamically
-	// from the GFP : InteractionSample.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	EItemState ItemState = EItemState::None;
 };

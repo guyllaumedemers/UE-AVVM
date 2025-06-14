@@ -29,20 +29,21 @@ public class InventorySample : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMGameplay",
 				"CommonUI",
 				"Core",
 				"CoreUObject",
+				"DataRegistry",
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",
-				"IrisCore"
+				"IrisCore",
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMGameplay"
 			}
 		);
 	}
