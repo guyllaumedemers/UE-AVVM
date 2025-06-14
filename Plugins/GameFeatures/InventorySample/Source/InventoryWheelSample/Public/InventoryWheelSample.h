@@ -22,3 +22,9 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+
+/**
+ *	Plugin Description :
+ *
+ *	InventoryWheelSample handle the behaviour for selecting items based on a selection wheel.
+ */

@@ -17,34 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "ActorInventoryComponent.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
-#include "InventoryProvider.h"
+using UnrealBuildTool;
 
-void UActorInventoryComponent::BeginPlay()
+public class InventoryCraftingSample : ModuleRules
 {
-	Super::BeginPlay();
-
-	UObject* Outer = GetOuter();
-	if (!IsValid(Outer))
+	public InventoryCraftingSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		return;
-	}
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(GetOuter());
-	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
-	{
-		FOnRetrieveInventoryItems Callback;
-		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-		IInventoryProvider::Execute_RequestItems(Outer, Callback);
-	}
-}
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"AVVMGameplay",
+				"CommonUI",
+				"Core",
+				"CoreUObject",
+				"DataRegistry",
+				"Engine",
+				"GameplayAbilities",
+				"GameplayTags",
+				"IrisCore",
+			}
+		);
 
-void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds)
-{
-	if (!ensureAlwaysMsgf(!ItemObjectIds.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
-	{
-		return;
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+			}
+		);
 	}
 }

@@ -17,34 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "ActorInventoryComponent.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
-#include "InventoryProvider.h"
+#pragma once
 
-void UActorInventoryComponent::BeginPlay()
-{
-	Super::BeginPlay();
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
 
-	UObject* Outer = GetOuter();
-	if (!IsValid(Outer))
-	{
-		return;
-	}
-
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(GetOuter());
-	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
-	{
-		FOnRetrieveInventoryItems Callback;
-		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-		IInventoryProvider::Execute_RequestItems(Outer, Callback);
-	}
-}
-
-void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds)
-{
-	if (!ensureAlwaysMsgf(!ItemObjectIds.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
-	{
-		return;
-	}
-}
+/**
+ *	Plugin Description :
+ *
+ *	InventoryCraftingSample handle the behaviour for combining between two or more items.
+ */
