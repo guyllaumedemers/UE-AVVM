@@ -20,7 +20,7 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMUtilityFunctionLibrary.h"
-#include "HasItemCollection.h"
+#include "InventoryProvider.h"
 
 void UActorInventoryComponent::BeginPlay()
 {
@@ -32,12 +32,12 @@ void UActorInventoryComponent::BeginPlay()
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IHasItemCollection, UHasItemCollection>(GetOuter());
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(GetOuter());
 	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IHasItemCollection interface!")))
 	{
 		FOnRetrieveInventoryItems Callback;
 		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-		IHasItemCollection::Execute_RequestItems(Outer, Callback);
+		IInventoryProvider::Execute_RequestItems(Outer, Callback);
 	}
 }
 

@@ -25,7 +25,7 @@
 
 #include "UObject/Interface.h"
 
-#include "HasItemCollection.generated.h"
+#include "InventoryProvider.generated.h"
 
 class UItemObject;
 class UItemCollectionDefinitionDataAsset;
@@ -62,15 +62,15 @@ inline const TCHAR* EnumToString(EItemSrcType State)
 /**
  *	Class description:
  *
- *	UHasItemCollection provide a set of api to determine if the Owning Actor support a pre-defined list of Items to hold.
+ *	UInventoryProvider provide a set of api to determine if the Owning Actor support a pre-defined list of Items to hold.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class INVENTORYSAMPLE_API UHasItemCollection : public UInterface
+class INVENTORYSAMPLE_API UInventoryProvider : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class INVENTORYSAMPLE_API IHasItemCollection
+class INVENTORYSAMPLE_API IInventoryProvider
 {
 	GENERATED_BODY()
 
