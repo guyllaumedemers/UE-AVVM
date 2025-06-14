@@ -36,6 +36,8 @@ void IHasItemCollection::RequestItems_Implementation(const FOnRetrieveInventoryI
 		// should be invoked and handle resource loading at the Actor level in the override.
 		// Note : IResourceProvider return a RegistryId defined by the owning Actor. This can be used for static data that require loading
 		// during the ResourceComponent OnBeginPlay.
+		// TODO @gdemers Resource loading on an Actor with Static data may be already running on the Resource Component due to IResourceProvider defining the RegistryId.
+		// the Component should be able to store callback delegates, wait until completion of all resources loading and broadcast all registered callbacks.
 		ProcessStaticItems(Callback);
 	}
 	else
