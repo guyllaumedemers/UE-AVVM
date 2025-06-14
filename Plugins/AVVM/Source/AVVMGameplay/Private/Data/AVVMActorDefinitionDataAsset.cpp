@@ -35,18 +35,6 @@ EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataVali
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActiveAbilityGroupId invalid!"));
 	}
 
-	if (bDoesSupportCosmetic && !CosmeticDefinitionId.IsValid())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "CosmeticDefinitionId invalid!"));
-	}
-
-	if (bDoesSupportEquipment && !EquipmentDefinitionId.IsValid())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "EquipmentDefinitionId invalid!"));
-	}
-
 	return Result;
 }
 

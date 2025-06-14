@@ -95,7 +95,7 @@ void UAVVMResourceManagerComponent::RequestExternalResourceAsync(const AActor* O
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
 
 	const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
-	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(IAVVMResourceProvider::Execute_GetActorDefinitionResourceId(Outer), Callback),
+	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(IAVVMResourceProvider::Execute_GetResourceDefinitionResourceId(Outer), Callback),
 	                 TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 }
 

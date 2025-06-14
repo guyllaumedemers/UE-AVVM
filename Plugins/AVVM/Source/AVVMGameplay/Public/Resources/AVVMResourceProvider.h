@@ -32,8 +32,7 @@ DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FKeepProcessingResources, const T
 /**
  *	Class description:
  *
- *	UAVVMResourceProvider provide Actor resource definition via Registry id and support runtime checking of async loaded resources.
- *	It interface with the UAVVMResourceManagerComponent during the loading phase of the Resource Manager Component and forward loaded content to external systems.
+ *	UAVVMResourceProvider provide a resource definition via Registry id and support recursive request for loading nested resources.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMGAMEPLAY_API UAVVMResourceProvider : public UInterface
@@ -47,8 +46,8 @@ class AVVMGAMEPLAY_API IAVVMResourceProvider
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	FDataRegistryId GetActorDefinitionResourceId() const;
-	virtual FDataRegistryId GetActorDefinitionResourceId_Implementation() const PURE_VIRTUAL(GetActorDefinitionResourceId_Implementation, return FDataRegistryId(););
+	FDataRegistryId GetResourceDefinitionResourceId() const;
+	virtual FDataRegistryId GetResourceDefinitionResourceId_Implementation() const PURE_VIRTUAL(GetResourceDefinitionResourceId_Implementation, return FDataRegistryId(););
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources,

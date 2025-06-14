@@ -34,7 +34,8 @@
 /**
  *	Class description:
  *
- *	UAVVMActorDefinitionDataAsset define a set of properties to be loaded and applied to an Actor.
+ *	UAVVMActorDefinitionDataAsset define a set of properties to be loaded and applied to an Actor. Note : Items with visual representation
+ *	should be handled at the Inventory System level. See - GFP/InventorySample - ItemDefinitionDataAsset.
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class AVVMGAMEPLAY_API UAVVMActorDefinitionDataAsset : public UDataAsset
@@ -57,18 +58,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportActiveAbilities"))
 	FDataRegistryId ActiveAbilityGroupId = FDataRegistryId();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bDoesSupportCosmetic = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportCosmetic"))
-	FDataRegistryId CosmeticDefinitionId = FDataRegistryId();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bDoesSupportEquipment = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportEquipment"))
-	FDataRegistryId EquipmentDefinitionId = FDataRegistryId();
 };
 
 /**
