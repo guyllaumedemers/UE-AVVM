@@ -21,17 +21,22 @@
 
 #include "CoreMinimal.h"
 
-#include "Archetypes/AVVMPresenter.h"
+#include "AVVM.h"
+#include "MVVMViewModelBase.h"
 
-#include "ActorInventoryPresenter.generated.h"
+#include "ActorInventoryViewModel.generated.h"
 
 /**
- *	Class Description :
+*	Class description:
  *
- *	UActorInventoryPresenter handle the start/stop presenting action for displaying the Inventory context to the local player.
+ *	UActorInventoryViewModel. View Model class that display actor representation of the inventory items held.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UActorInventoryPresenter : public UAVVMPresenter
+class INVENTORYSAMPLE_API UActorInventoryViewModel : public UMVVMViewModelBase,
+                                                     public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
+
+public:
+	virtual FName GetViewModelFName() const override { return TEXT("UActorInventoryViewModel"); };
 };

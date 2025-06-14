@@ -21,17 +21,20 @@
 
 #include "CoreMinimal.h"
 
-#include "Archetypes/AVVMPresenter.h"
+#include "UObject/Object.h"
 
-#include "ActorInventoryPresenter.generated.h"
+#include "GameStateInventoryHandshakeComponent.generated.h"
 
 /**
- *	Class Description :
+ *	Class description:
  *
- *	UActorInventoryPresenter handle the start/stop presenting action for displaying the Inventory context to the local player.
+ *	UGameStateInventoryHandshakeComponent handle system behaviour for updating two Inventory Component states
+ *	during a handshake action like :
+ *		trade,
+ *		sell or buy
  */
 UCLASS()
-class INVENTORYSAMPLE_API UActorInventoryPresenter : public UAVVMPresenter
+class INVENTORYSAMPLE_API UGameStateInventoryHandshakeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 };

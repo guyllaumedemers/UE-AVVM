@@ -20,18 +20,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "Archetypes/AVVMPresenter.h"
-
-#include "ActorInventoryPresenter.generated.h"
+#include "Modules/ModuleManager.h"
 
 /**
- *	Class Description :
+ *	Plugin Description :
  *
- *	UActorInventoryPresenter handle the start/stop presenting action for displaying the Inventory context to the local player.
+ *	InventoryStorageSample handle collections of items owned by a user account.
  */
-UCLASS()
-class INVENTORYSAMPLE_API UActorInventoryPresenter : public UAVVMPresenter
-{
-	GENERATED_BODY()
-};

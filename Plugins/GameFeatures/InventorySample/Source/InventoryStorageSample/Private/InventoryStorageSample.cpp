@@ -17,21 +17,6 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "InventoryStorageSample.h"
 
-#include "CoreMinimal.h"
-
-#include "Archetypes/AVVMPresenter.h"
-
-#include "ActorInventoryPresenter.generated.h"
-
-/**
- *	Class Description :
- *
- *	UActorInventoryPresenter handle the start/stop presenting action for displaying the Inventory context to the local player.
- */
-UCLASS()
-class INVENTORYSAMPLE_API UActorInventoryPresenter : public UAVVMPresenter
-{
-	GENERATED_BODY()
-};
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, InventoryStorageSample)

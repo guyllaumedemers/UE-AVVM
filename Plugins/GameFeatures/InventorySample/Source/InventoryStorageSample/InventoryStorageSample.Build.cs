@@ -17,21 +17,35 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
 
-#include "CoreMinimal.h"
+using UnrealBuildTool;
 
-#include "Archetypes/AVVMPresenter.h"
-
-#include "ActorInventoryPresenter.generated.h"
-
-/**
- *	Class Description :
- *
- *	UActorInventoryPresenter handle the start/stop presenting action for displaying the Inventory context to the local player.
- */
-UCLASS()
-class INVENTORYSAMPLE_API UActorInventoryPresenter : public UAVVMPresenter
+public class InventoryStorageSample : ModuleRules
 {
-	GENERATED_BODY()
-};
+	public InventoryStorageSample(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"AVVM",
+				"AVVMGameplay",
+				"CommonUI",
+				"Core",
+				"CoreUObject",
+				"DataRegistry",
+				"Engine",
+				"GameplayAbilities",
+				"GameplayTags",
+				"IrisCore",
+			}
+		);
+
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+			}
+		);
+	}
+}
