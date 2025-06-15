@@ -21,6 +21,7 @@
 
 #include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
+#include "ItemObject.h"
 
 void UActorInventoryComponent::BeginPlay()
 {
@@ -32,13 +33,22 @@ void UActorInventoryComponent::BeginPlay()
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(GetOuter());
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
 	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
 	{
 		FOnRetrieveInventoryItems Callback;
 		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
 		IInventoryProvider::Execute_RequestItems(Outer, Callback);
 	}
+
+	OwningActor = Outer;
+}
+
+void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	InventoryItems.Reset();
+	OwningActor.Reset();
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds)
@@ -46,5 +56,22 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 	if (!ensureAlwaysMsgf(!ItemObjectIds.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
 	{
 		return;
+	}
+
+	const AActor* Owner = OwningActor.Get();
+	if (!ensureAlwaysMsgf(IsValid(Owner), TEXT("Owning Actor invalid!")))
+	{
+		return;
+	}
+
+	InventoryItems.Reset(ItemObjectIds.Num());
+	InventoryItems = ItemObjectIds;
+
+	// @gdemers Player Inventory should only spawn actor for equipped items that are in the primary slot (visible), other actor types
+	// should only be able to spawn a visual representation of the item bases on system requirements, example : hovering over item in grid
+	// trigger event that require spawning a mesh of the object in the world.
+	for (UItemObject* Item : InventoryItems)
+	{
+		Item->TrySpawnEquippedItem(Owner);
 	}
 }

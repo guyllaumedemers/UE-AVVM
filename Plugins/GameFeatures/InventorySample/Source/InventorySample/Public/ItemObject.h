@@ -36,7 +36,8 @@ UENUM(BlueprintType)
 enum class EItemState : uint8
 {
 	None,
-	Equipped,
+	PrimaryEquipped,
+	SecondaryEquipped,
 	PendingForTrade,
 	Traded,
 	PendingForSell,
@@ -53,8 +54,10 @@ inline const TCHAR* EnumToString(EItemState State)
 {
 	switch (State)
 	{
-		case EItemState::Equipped:
-			return TEXT("Equipped");
+		case EItemState::PrimaryEquipped:
+			return TEXT("PrimaryEquipped");
+		case EItemState::SecondaryEquipped:
+			return TEXT("SecondaryEquipped");
 		case EItemState::PendingForTrade:
 			return TEXT("PendingForTrade");
 		case EItemState::Traded:
@@ -163,7 +166,7 @@ inline const TCHAR* EnumToString(EItemStorageType Type)
  *	for given scenario but idk yet.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FInventoryItemStatusHandler
+struct INVENTORYSAMPLE_API FItemStatus
 {
 	GENERATED_BODY()
 
@@ -178,6 +181,9 @@ struct INVENTORYSAMPLE_API FInventoryItemStatusHandler
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	EItemState ItemState = EItemState::None;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
+	int32 Counter = 1;
 };
 
 /**
@@ -192,7 +198,7 @@ class INVENTORYSAMPLE_API UItemObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void SpawnItemActor(const TFunctionRef<AActor*(void)> Callback);
+	virtual void TrySpawnEquippedItem(const AActor* Target);
 
 protected:
 	// ItemActorClass represent any world object that is open for pick up. Note : We expect the actor to be receiving a UActorInteractionComponent to support both Interaction Actions,
@@ -201,9 +207,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AActor> ItemActorClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bCanAttachToSocket = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bCanAttachToSocket"))
+	FName SocketName = NAME_None;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<AActor> ItemActor = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FInventoryItemStatusHandler ItemStatusHandler;
+	FItemStatus ItemStatus = FItemStatus();
 };

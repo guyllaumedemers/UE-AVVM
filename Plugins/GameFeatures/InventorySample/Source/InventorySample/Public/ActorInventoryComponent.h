@@ -37,20 +37,14 @@ class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent
 
 public:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 protected:
 	UFUNCTION()
 	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds);
-	// what should this thing be able to do ?
 
-	// A) Retrieve a collection of items from a backend.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TObjectPtr<UItemObject>> InventoryItems;
 
-	// B) Retrieve a collection of items from a data asset
-
-	// C) Display a collection of items for the local client. (and optionally for a remote client that request a trade)
-
-	// D) Broadcast event when item state is marked as equip, unequip, sell, buy, refund
-
-	// the inventory system can act both as a caching mechanism for persistent data that require display, but also temporary for
-	// items that can be bought, sold, traded etc...
+	TWeakObjectPtr<AActor> OwningActor = nullptr;
 };

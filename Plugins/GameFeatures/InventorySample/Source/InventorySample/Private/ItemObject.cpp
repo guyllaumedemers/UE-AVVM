@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "ItemObject.h"
 
-void UItemObject::SpawnItemActor(const TFunctionRef<AActor*()> Callback)
+void UItemObject::TrySpawnEquippedItem(const AActor* Target)
 {
+	// TODO @gdemers Find target socket on skeletal mesh, scene component or whatever else that
+	// should receive 'this' object as child
 }
