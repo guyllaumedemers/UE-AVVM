@@ -18,3 +18,22 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "GameStateInventoryHandshakeComponent.h"
+
+void UGameStateInventoryHandshakeComponent::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void UGameStateInventoryHandshakeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
+
+void UGameStateInventoryHandshakeComponent::ShakeHands(const FInventoryHandshake& Context,
+                                                       const FOnHandshakeComplete& Callback)
+{
+	// TODO @gdemers handle actual handshake.
+	// A) Handshake Validation should be verified and confirmed.
+	// B) Data Exchange should be added here, may involve server-client interaction.
+	// C) both end should have to confirm exchange for trading, selling, buying, etc...
+}

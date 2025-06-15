@@ -160,7 +160,7 @@ inline const TCHAR* EnumToString(EItemStorageType Type)
 /**
  *	Class description:
  *
- *	FInventoryItemStatusHandler describe the status of an Item.
+ *	FItemStatus describe the status of an Item.
  *
  *	TODO @gdemers I may update this to be working with tags so to support blocking certain tags
  *	for given scenario but idk yet.

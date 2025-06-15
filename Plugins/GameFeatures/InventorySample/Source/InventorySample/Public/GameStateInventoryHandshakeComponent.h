@@ -25,6 +25,35 @@
 
 #include "GameStateInventoryHandshakeComponent.generated.h"
 
+class UItemObject;
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHandshakeComplete, const bool, bWasSuccess);
+
+/**
+ *	Class description:
+ *
+ *	FInventoryHandshake define the endpoint of a transaction between two entities and
+ *	the data exchanged.
+ *
+ *	TODO @gdemers we do not account for the fact that a trade may involve currencies. TBD! 
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FInventoryHandshake
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	UActorInventoryComponent* Src = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	UActorInventoryComponent* Dest = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<UItemObject*> SrcItems;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<UItemObject*> DestItems;
+};
+
 /**
  *	Class description:
  *
@@ -33,8 +62,16 @@
  *		trade,
  *		sell or buy
  */
-UCLASS()
+UCLASS(ClassGroup=("Inventory"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INVENTORYSAMPLE_API UGameStateInventoryHandshakeComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
+public:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION(BlueprintCallable)
+	void ShakeHands(const FInventoryHandshake& Context,
+	                const FOnHandshakeComplete& Callback);
 };
