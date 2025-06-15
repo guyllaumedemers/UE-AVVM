@@ -36,11 +36,15 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	UItemDefinitionDataAsset represent a singular item. It's retrieved based on a collection of items
- *	hosted from a backend services.
+ *	UItemDefinitionDataAsset represent a singular item. It may be retrieved based on a collection of items
+ *	hosted from a backend services or as the result of loading a statically define collection of item owned by an act, in which case, each instance run of the
+ *	game will generate the same output.
  *
- *	Example : Your microservice for the player account hold a collection of items tied to the player.
+ *	Example A : Your microservice for the player account hold a collection of items tied to the player.
  *	We want to load them using a collection of FDataRegistryId and populate the relevant system Post-GameState::MatchStartup.
+ *	
+ *	Example B : You load in a level which has a mystery box from which a randomize item can be pick up. The pool of object from which
+ *	to pick from is always the same.
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class INVENTORYSAMPLE_API UItemDefinitionDataAsset : public UDataAsset
