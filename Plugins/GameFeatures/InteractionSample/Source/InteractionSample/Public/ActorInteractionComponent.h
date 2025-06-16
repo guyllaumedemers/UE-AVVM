@@ -33,10 +33,10 @@
  *
  *	UActorInteractionComponent handle local collision check between world actors and PlayerControlled Pawn.
  *
- *	OnBeginOverlap/OnEndOverlap locally add loose tag for the ability system to execute behaviour based on locally controlled pawn via
- *	Input Pressed/Released.
+ *	OnBeginOverlap/OnEndOverlap handle Activation tag updates so to allow clients to execute behaviour based on Input Release/Press when
+ *	inside the radius of the owned collider.
  *
- *	Note : Pushed via GFP_AddComponents
+ *	Note : Pushed via GFP_AddComponents on Client ONLY.
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent

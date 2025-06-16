@@ -78,6 +78,8 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	       TEXT("Executed from \"%s\". Removing UActorInteractionComponent to Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
+
+	OwningOuter.Reset();
 }
 
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,

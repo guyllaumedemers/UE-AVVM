@@ -66,5 +66,6 @@ protected:
 	void ServerRPC_RecordEndInteraction(const AActor* NewTarget,
 	                                    const AActor* NewInstigator);
 
+	TWeakObjectPtr<UGameStateInteractionComponent> GameStateInteractionComponent = nullptr;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };
