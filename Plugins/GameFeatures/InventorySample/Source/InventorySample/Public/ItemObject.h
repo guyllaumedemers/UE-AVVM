@@ -23,6 +23,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "UObject/Object.h"
 
 #include "ItemObject.generated.h"
@@ -188,6 +189,23 @@ struct INVENTORYSAMPLE_API FItemStatus
 
 /**
  *	Class description:
+ *
+ *	FItemLayout define the layout occupied by the referenced item.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItemLayout
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
+	int32 RowHeight = 1;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
+	int32 ColWidth = 1;
+};
+
+/**
+ *	Class description:
  *	
  *	UItemObject represent any object that exist in your project LORE. Note: When a UItemObject state
  *	becomes InWorld, an AActor is instanced on the server for player pick up.
@@ -206,6 +224,16 @@ protected:
 	// Note : Native Actor Class isn't required here as any BP Class can act as the receiver to the components being dynamically added.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AActor> ItemActorClass = nullptr;
+
+	// @gdemers for filtering purpose
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag ItemTypeTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bSupportGridLayout = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bSupportGridLayout"))
+	FItemLayout ItemLayout = FItemLayout();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bCanAttachToSocket = false;

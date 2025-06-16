@@ -27,7 +27,7 @@ void UActorInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UObject* Outer = GetOuter();
+	const auto* Outer = GetTypedOuter<AActor>();
 	if (!IsValid(Outer))
 	{
 		return;
@@ -41,14 +41,15 @@ void UActorInventoryComponent::BeginPlay()
 		IInventoryProvider::Execute_RequestItems(Outer, Callback);
 	}
 
-	OwningActor = Outer;
+	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
+	OwningOuter = Outer;
 }
 
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	InventoryItems.Reset();
-	OwningActor.Reset();
+	OwningOuter.Reset();
+	Items.Reset();
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds)
@@ -58,19 +59,19 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 		return;
 	}
 
-	const AActor* Owner = OwningActor.Get();
+	const AActor* Owner = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Owner), TEXT("Owning Actor invalid!")))
 	{
 		return;
 	}
 
-	InventoryItems.Reset(ItemObjectIds.Num());
-	InventoryItems = ItemObjectIds;
+	Items.Reset(ItemObjectIds.Num());
+	Items = ItemObjectIds;
 
 	// @gdemers Player Inventory should only spawn actor for equipped items that are in the primary slot (visible), other actor types
 	// should only be able to spawn a visual representation of the item bases on system requirements, example : hovering over item in grid
 	// trigger event that require spawning a mesh of the object in the world.
-	for (UItemObject* Item : InventoryItems)
+	for (UItemObject* Item : Items)
 	{
 		Item->TrySpawnEquippedItem(Owner);
 	}

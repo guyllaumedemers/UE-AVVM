@@ -28,6 +28,19 @@
 class UItemObject;
 
 /**
+ *	Class description:
+ *
+ *	UInventoryLayoutHandler define behaviour details for placing items in a grid structure on screen.
+ */
+UCLASS(BlueprintType, NotBlueprintable)
+class INVENTORYSAMPLE_API UInventoryLayoutHandler : public UObject
+{
+	GENERATED_BODY()
+};
+
+/**
+ *	Class description:
+ *	
  *	UActorInventoryComponent handle the core functionalities of the inventory system.
  */
 UCLASS(ClassGroup=("Inventory"), Blueprintable, meta=(BlueprintSpawnableComponent))
@@ -44,7 +57,10 @@ protected:
 	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UItemObject>> InventoryItems;
+	TObjectPtr<UInventoryLayoutHandler> LayoutHandler = nullptr;
 
-	TWeakObjectPtr<AActor> OwningActor = nullptr;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TObjectPtr<UItemObject>> Items;
+
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };
