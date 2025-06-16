@@ -49,17 +49,22 @@ class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UActorInventoryComponent(const FObjectInitializer& ObjectInitializer);
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 protected:
 	UFUNCTION()
-	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds);
+	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
+	
+	UFUNCTION()
+	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UInventoryLayoutHandler> LayoutHandler = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
 	TArray<TObjectPtr<UItemObject>> Items;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

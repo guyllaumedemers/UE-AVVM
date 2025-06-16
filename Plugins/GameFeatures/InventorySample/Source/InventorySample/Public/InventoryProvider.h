@@ -63,7 +63,7 @@ inline const TCHAR* EnumToString(EItemSrcType State)
  *	Class description:
  *
  *	UInventoryProvider provide a set of api to determine if the Owning Actor support a pre-defined list of Items to hold. Note : Since the interface is defined in a GFP,
- *	we expect the plugin to be pre-loaded and never unloaded at runtime, otherwise expect linkage issues with undefined symbol for classes overriding the api.
+ *	we expect the plugin to be pre-loaded and never unloaded at runtime, otherwise expect linkage issues with undefined symbol for external classes overriding the api.
  *
  *	Additionally, we suggest handling the override details in BP and avoid direct reference of this DLL in your system to reduce compile/linkage time.
  */

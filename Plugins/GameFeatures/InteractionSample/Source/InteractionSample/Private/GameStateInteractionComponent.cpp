@@ -87,9 +87,11 @@ void UGameStateInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayR
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UGameStateInteractionComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing UGameStateInteractionComponent from Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
+
+	OwningOuter.Reset();
 }
 
 UGameStateInteractionComponent* UGameStateInteractionComponent::GetActorComponent(const UObject* WorldContextObject)

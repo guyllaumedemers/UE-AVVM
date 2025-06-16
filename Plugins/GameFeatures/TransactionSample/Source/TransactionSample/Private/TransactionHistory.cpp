@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "TransactionHistory.h"
 
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "Transaction.h"
 #include "Net/UnrealNetwork.h"
 
@@ -36,6 +38,17 @@ void ATransactionHistory::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	DOREPLIFETIME(ATransactionHistory, Transactions);
 }
 
+void ATransactionHistory::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Adding \"%s\" to World."),
+	       UAVVMGameplayUtils::PrintNetMode(this).GetData(),
+	       *GetName())
+}
+
 void ATransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
@@ -48,6 +61,12 @@ void ATransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Iterator.RemoveCurrentSwap();
 	}
 #endif
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Removing \"%s\" from World."),
+	       UAVVMGameplayUtils::PrintNetMode(this).GetData(),
+	       *GetName())
 }
 
 void ATransactionHistory::CreateAndRecordTransaction(const FString& NewOwnerId,

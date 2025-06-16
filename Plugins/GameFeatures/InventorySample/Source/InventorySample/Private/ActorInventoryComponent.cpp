@@ -19,20 +19,37 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
 #include "ItemObject.h"
+#include "Net/UnrealNetwork.h"
+
+UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)
+{
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+}
+
+void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UActorInventoryComponent, Items);
+}
 
 void UActorInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	const auto* Outer = GetTypedOuter<AActor>();
-	if (!IsValid(Outer))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
 	{
 		return;
 	}
 
+#if WITH_SERVER_CODE
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
 	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
 	{
@@ -40,6 +57,13 @@ void UActorInventoryComponent::BeginPlay()
 		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
 		IInventoryProvider::Execute_RequestItems(Outer, Callback);
 	}
+#endif
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Adding UActorInventoryComponent to Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName())
 
 	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
 	OwningOuter = Outer;
@@ -48,13 +72,66 @@ void UActorInventoryComponent::BeginPlay()
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+#if WITH_SERVER_CODE
+	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
+	{
+		RemoveReplicatedSubObject(Iterator->Get());
+		Iterator.RemoveCurrentSwap();
+	}
+#endif
+
+	const auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Removing UActorInventoryComponent from Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName())
+
 	OwningOuter.Reset();
-	Items.Reset();
 }
 
-void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjectIds)
+void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
 {
-	if (!ensureAlwaysMsgf(!ItemObjectIds.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	const int32 OldSize = OldItemObjects.Num();
+	const int32 NewSize = Items.Num();
+
+	FStringView SV;
+	if (NewSize == OldSize)
+	{
+		SV = TEXT("has identical Size. We may have Swapped Items!");
+	}
+	else if (NewSize > OldSize)
+	{
+		SV = TEXT("has increased!");
+	}
+	else
+	{
+		SV = TEXT("has decreased!");
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Item Collection modified on Actor \"%s\"! Collection %s"),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName(),
+	       SV.GetData());
+}
+
+void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects)
+{
+	if (!ensureAlwaysMsgf(!ItemObjects.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
 	{
 		return;
 	}
@@ -65,8 +142,8 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 		return;
 	}
 
-	Items.Reset(ItemObjectIds.Num());
-	Items = ItemObjectIds;
+	Items.Reset(ItemObjects.Num());
+	Items = ItemObjects;
 
 	// @gdemers Player Inventory should only spawn actor for equipped items that are in the primary slot (visible), other actor types
 	// should only be able to spawn a visual representation of the item bases on system requirements, example : hovering over item in grid

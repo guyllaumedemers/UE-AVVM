@@ -44,6 +44,7 @@ class TRANSACTIONSAMPLE_API ATransactionHistory : public AInfo
 public:
 	ATransactionHistory(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)

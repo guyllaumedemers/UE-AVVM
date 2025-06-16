@@ -19,8 +19,35 @@
 //SOFTWARE.
 #include "ItemObject.h"
 
+#include "Net/UnrealNetwork.h"
+
+void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UItemObject, ItemActor);
+	DOREPLIFETIME(UItemObject, ItemStatus);
+}
+
+bool UItemObject::IsSupportedForNetworking() const
+{
+	return true;
+}
+
+#if UE_WITH_IRIS
+void UItemObject::RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags)
+{
+	// Build descriptors and allocate PropertyReplicaitonFragments for this object
+	UE::Net::FReplicationFragmentUtil::CreateAndRegisterFragmentsForObject(this, Context, RegistrationFlags);
+}
+#endif // UE_WITH_IRIS
+
 void UItemObject::TrySpawnEquippedItem(const AActor* Target)
 {
 	// TODO @gdemers Find target socket on skeletal mesh, scene component or whatever else that
 	// should receive 'this' object as child
+}
+
+void UItemObject::TrySpawnDroppedItem(const AActor* Target)
+{
 }

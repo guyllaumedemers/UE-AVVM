@@ -24,6 +24,10 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+
+#if UE_WITH_IRIS
+#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
+#endif // UE_WITH_IRIS
 #include "UObject/Object.h"
 
 #include "ItemObject.generated.h"
@@ -216,7 +220,15 @@ class INVENTORYSAMPLE_API UItemObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void TrySpawnEquippedItem(const AActor* Target);
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool IsSupportedForNetworking() const override;
+
+#if UE_WITH_IRIS
+	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
+#endif // UE_WITH_IRIS
+
+	void TrySpawnEquippedItem(const AActor* Target);
+	void TrySpawnDroppedItem(const AActor* Target);
 
 protected:
 	// ItemActorClass represent any world object that is open for pick up. Note : We expect the actor to be receiving a UActorInteractionComponent to support both Interaction Actions,
@@ -241,9 +253,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bCanAttachToSocket"))
 	FName SocketName = NAME_None;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> ItemActor = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FItemStatus ItemStatus = FItemStatus();
 };
