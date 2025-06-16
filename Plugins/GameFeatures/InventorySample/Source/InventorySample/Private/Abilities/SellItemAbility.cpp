@@ -17,13 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "PlayerToggleInventoryAbility.h"
+#include "Abilities/SellItemAbility.h"
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 
-void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                                  const FGameplayAbilitySpec& Spec)
+void USellItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                     const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
@@ -42,16 +42,25 @@ void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInf
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
 }
 
-void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                                    const FGameplayAbilitySpec& Spec)
+void USellItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                       const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
-void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                    const FGameplayAbilityActorInfo* ActorInfo,
-                                                    const FGameplayAbilityActivationInfo ActivationInfo,
-                                                    const FGameplayEventData* TriggerEventData)
+bool USellItemAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                          const FGameplayAbilityActorInfo* ActorInfo,
+                                          const FGameplayTagContainer* SourceTags,
+                                          const FGameplayTagContainer* TargetTags,
+                                          FGameplayTagContainer* OptionalRelevantTags) const
+{
+	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+}
+
+void USellItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                       const FGameplayAbilityActorInfo* ActorInfo,
+                                       const FGameplayAbilityActivationInfo ActivationInfo,
+                                       const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
@@ -70,11 +79,11 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
 }
 
-void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                               const FGameplayAbilityActorInfo* ActorInfo,
-                                               const FGameplayAbilityActivationInfo ActivationInfo,
-                                               bool bReplicateEndAbility,
-                                               bool bWasCancelled)
+void USellItemAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+                                  const FGameplayAbilityActorInfo* ActorInfo,
+                                  const FGameplayAbilityActivationInfo ActivationInfo,
+                                  bool bReplicateEndAbility,
+                                  bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

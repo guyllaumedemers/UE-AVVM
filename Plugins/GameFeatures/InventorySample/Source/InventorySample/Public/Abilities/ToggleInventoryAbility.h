@@ -23,18 +23,18 @@
 
 #include "Abilities/GameplayAbility.h"
 
-#include "PlayerToggleInventoryAbility.generated.h"
+#include "ToggleInventoryAbility.generated.h"
 
 /**
  *	Class Description :
  *
- *	UPlayerToggleInventoryAbility define an instance ability the local client can interact with. Blocking Requirement Tags may
+ *	UToggleInventoryAbility define an instance ability the local client can interact with. Blocking Requirement Tags may
  *	prevent the execution of this Ability.
  *
  *	Example : Stasis, Stun, etc...
  */
 UCLASS()
-class INVENTORYSAMPLE_API UPlayerToggleInventoryAbility : public UGameplayAbility
+class INVENTORYSAMPLE_API UToggleInventoryAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -44,6 +44,12 @@ public:
 
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilitySpec& Spec) override;
+
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	                                const FGameplayAbilityActorInfo* ActorInfo,
+	                                const FGameplayTagContainer* SourceTags = nullptr,
+	                                const FGameplayTagContainer* TargetTags = nullptr,
+	                                FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	                             const FGameplayAbilityActorInfo* ActorInfo,
