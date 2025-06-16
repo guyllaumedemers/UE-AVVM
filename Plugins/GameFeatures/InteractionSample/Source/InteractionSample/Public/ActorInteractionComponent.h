@@ -66,7 +66,7 @@ protected:
 	bool bShouldPreventContingency = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag GrantAbilityTag = FGameplayTag::EmptyTag;
+	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

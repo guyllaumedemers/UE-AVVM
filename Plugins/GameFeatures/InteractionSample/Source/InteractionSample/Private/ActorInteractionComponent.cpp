@@ -105,7 +105,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	{
 		// @gdemers allow a gameplay ability to be executable due to tag condition
 		// being met!
-		AbilityComponent->AddReplicatedLooseGameplayTag(GrantAbilityTag);
+		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
 	}
 
 	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
@@ -136,7 +136,7 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->RemoveReplicatedLooseGameplayTag(GrantAbilityTag);
+		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
 	}
 
 	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
