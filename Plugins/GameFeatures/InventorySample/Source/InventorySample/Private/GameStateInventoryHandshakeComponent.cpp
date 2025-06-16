@@ -32,6 +32,19 @@ void UGameStateInventoryHandshakeComponent::EndPlay(const EEndPlayReason::Type E
 	Super::EndPlay(EndPlayReason);
 }
 
+UGameStateInventoryHandshakeComponent* UGameStateInventoryHandshakeComponent::GetActorComponent(const UObject* WorldContextObject)
+{
+	AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
+	if (IsValid(GameState))
+	{
+		return GameState->GetComponentByClass<UGameStateInventoryHandshakeComponent>();
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
 void UGameStateInventoryHandshakeComponent::ShakeHands(const FInventoryHandshake& Context,
                                                        const FOnHandshakeComplete& Callback) const
 {
@@ -39,32 +52,4 @@ void UGameStateInventoryHandshakeComponent::ShakeHands(const FInventoryHandshake
 	// A) Handshake Validation should be verified and confirmed.
 	// B) Data Exchange should be added here, may involve server-client interaction.
 	// C) both end should have to confirm exchange for trading, selling, buying, etc...
-}
-
-void UGameStateInventoryHandshakeBlueprintFunctionLibrary::RequestHandshake(const UObject* WorldContextObject,
-                                                                            const FInventoryHandshake& Context,
-                                                                            const FOnHandshakeComplete& Callback)
-{
-	if (!ensureAlwaysMsgf(IsValid(WorldContextObject), TEXT("Invalid World Context Object!")))
-	{
-		Callback.ExecuteIfBound(false);
-		return;
-	}
-
-	const auto* GameState = UGameplayStatics::GetGameState(WorldContextObject);
-	if (!IsValid(GameState))
-	{
-		Callback.ExecuteIfBound(false);
-		return;
-	}
-
-	const auto* HandshakeComponent = GameState->GetComponentByClass<UGameStateInventoryHandshakeComponent>();
-	if (ensureAlwaysMsgf(IsValid(HandshakeComponent), TEXT("UGameStateInventoryHandshakeComponent missing on GameState!")))
-	{
-		HandshakeComponent->ShakeHands(Context, Callback);
-	}
-	else
-	{
-		Callback.ExecuteIfBound(false);
-	}
 }
