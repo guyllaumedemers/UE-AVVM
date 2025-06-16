@@ -167,7 +167,6 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-#if WITH_SERVER_CODE
 	if (BeginInteractions.IsEmpty())
 	{
 		return;
@@ -182,9 +181,8 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 	auto* AbilityComponent = Instigator->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
+		AbilityComponent->AddLooseGameplayTags(GrantAbilityTags);
 	}
-#endif
 }
 
 void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
@@ -201,7 +199,6 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-#if WITH_SERVER_CODE
 	if (EndInteractions.IsEmpty())
 	{
 		return;
@@ -216,7 +213,6 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	auto* AbilityComponent = Instigator->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
+		AbilityComponent->RemoveLooseGameplayTags(GrantAbilityTags);
 	}
-#endif
 }
