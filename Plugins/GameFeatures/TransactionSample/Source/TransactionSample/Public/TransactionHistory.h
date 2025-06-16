@@ -23,7 +23,7 @@
 
 #include "GameFramework/Info.h"
 
-#include "BankTeller.generated.h"
+#include "TransactionHistory.generated.h"
 
 enum class ETransactionType : uint8;
 class UTransaction;
@@ -33,16 +33,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTrans
 /**
  *	Class description:
  *
- *	ABankTeller handle transaction that can be captured during gameplay and replicate across clients. this can aggregate damage dealt by this user,
+ *	ATransactionHistory handle transaction that can be captured during gameplay and replicate across clients. this can aggregate damage dealt by this user,
  *	number of death/raise, money spent, earned etc...
  */
 UCLASS(BlueprintType)
-class BANKSAMPLE_API ABankTeller : public AInfo
+class TRANSACTIONSAMPLE_API ATransactionHistory : public AInfo
 {
 	GENERATED_BODY()
 
 public:
-	ABankTeller(const FObjectInitializer& ObjectInitializer);
+	ATransactionHistory(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -52,8 +52,8 @@ public:
 	                                const FString& NewPayload);
 
 	// @gdemers no type conversion supported to return const TArray<const UTransaction*>, so we cant support UFUNCTION(BlueprintCallable)
-	const TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& OwnerId,
-	                                                             const ETransactionType TransactionType) const;
+	TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& OwnerId,
+	                                                       const ETransactionType TransactionType) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FOnTransactionRecorded TransactionRecordedDelegate;

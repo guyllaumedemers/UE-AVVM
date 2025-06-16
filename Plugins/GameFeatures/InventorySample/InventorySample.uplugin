@@ -32,11 +32,6 @@
 			"Name": "InventoryStorageSample",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "InventoryWheelSample",
-			"Type": "ClientOnly",
-			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [

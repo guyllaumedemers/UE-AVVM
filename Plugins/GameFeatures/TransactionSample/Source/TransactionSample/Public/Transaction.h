@@ -84,7 +84,7 @@ inline const TCHAR* EnumToString(ETransactionType State)
  *	UTransaction are replicated UObject that store replicated data.
  */
 UCLASS(BlueprintType)
-class BANKSAMPLE_API UTransaction : public UObject
+class TRANSACTIONSAMPLE_API UTransaction : public UObject
 {
 	GENERATED_BODY()
 
@@ -114,5 +114,5 @@ private:
 	                const ETransactionType NewTransactionType,
 	                const FString& NewPayload);
 
-	friend class ABankTeller;
+	friend class ATransactionHistory;
 };

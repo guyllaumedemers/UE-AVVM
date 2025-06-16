@@ -17,26 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "BankTeller.h"
+#include "TransactionHistory.h"
 
 #include "Transaction.h"
 #include "Net/UnrealNetwork.h"
 
-ABankTeller::ABankTeller(const FObjectInitializer& ObjectInitializer)
+ATransactionHistory::ATransactionHistory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	bReplicates = true;
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-void ABankTeller::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void ATransactionHistory::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ABankTeller, Transactions);
+	DOREPLIFETIME(ATransactionHistory, Transactions);
 }
 
-void ABankTeller::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ATransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -50,9 +50,9 @@ void ABankTeller::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #endif
 }
 
-void ABankTeller::CreateAndRecordTransaction(const FString& NewOwnerId,
-                                             const ETransactionType NewTransactionType,
-                                             const FString& NewPayload)
+void ATransactionHistory::CreateAndRecordTransaction(const FString& NewOwnerId,
+                                                     const ETransactionType NewTransactionType,
+                                                     const FString& NewPayload)
 {
 #if WITH_SERVER_CODE
 	UTransaction* Transaction = NewObject<UTransaction>(this);
@@ -62,8 +62,8 @@ void ABankTeller::CreateAndRecordTransaction(const FString& NewOwnerId,
 #endif
 }
 
-const TArray<TObjectPtr<const UTransaction>> ABankTeller::GetTransactions(const FString& OwnerId,
-                                                                          const ETransactionType TransactionType) const
+TArray<TObjectPtr<const UTransaction>> ATransactionHistory::GetTransactions(const FString& OwnerId,
+                                                                            const ETransactionType TransactionType) const
 {
 	return Transactions.FilterByPredicate([OwnerId, TransactionType](const TObjectPtr<const UTransaction>& Transaction)
 	{
@@ -71,7 +71,7 @@ const TArray<TObjectPtr<const UTransaction>> ABankTeller::GetTransactions(const 
 	});
 }
 
-void ABankTeller::OnRep_NewTransactionRecorded()
+void ATransactionHistory::OnRep_NewTransactionRecorded()
 {
 	UE_LOG(LogTemp, Log, TEXT("OnRep_NewTransactionRecorded called on client!"));
 	const UTransaction* NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Last().Get();

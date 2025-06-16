@@ -17,12 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
 
-#include "Modules/ModuleManager.h"
+using UnrealBuildTool;
 
-/**
- *	Plugin Description :
- *
- *	BankSample is a transaction system that record gameplay events and store data about players.
- */
+public class TransactionSample : ModuleRules
+{
+	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"Core",
+				"CoreUObject",
+				"Engine",
+				"IrisCore"
+			}
+		);
+
+
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+			}
+		);
+	}
+}
