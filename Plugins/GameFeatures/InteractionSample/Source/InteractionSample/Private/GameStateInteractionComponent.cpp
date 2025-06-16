@@ -173,7 +173,7 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 	}
 
 	const AActor* Instigator = BeginInteractions.Top()->GetInstigator();
-	if (!IsValid(Instigator))
+	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
 	}
@@ -205,7 +205,7 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	}
 
 	const AActor* Instigator = EndInteractions.Top()->GetInstigator();
-	if (!IsValid(Instigator))
+	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
 	}
