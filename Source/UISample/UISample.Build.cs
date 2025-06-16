@@ -28,6 +28,9 @@ public class UISample : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
+			"AVVM",
+			"AVVMGameplay",
+			"AVVMOnline",
 			"CommonGame",
 			"Core",
 			"CoreUObject",
@@ -37,6 +40,10 @@ public class UISample : ModuleRules
 			"GameFeatures",
 			"ModularGameplay",
 			"ModularGameplayActors"
+		});
+
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
 		});
 	}
 }

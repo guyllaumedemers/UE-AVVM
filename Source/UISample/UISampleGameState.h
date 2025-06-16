@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,15 +21,12 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMGameMode.h"
+#include "AVVMGameState.h"
 
-#include "UISampleGameMode.generated.h"
+#include "UISampleGameState.generated.h"
 
 UCLASS()
-class UISAMPLE_API AUISampleGameMode : public AAVVMGameMode
+class UISAMPLE_API AUISampleGameState : public AAVVMGameState
 {
 	GENERATED_BODY()
-
-public:
-	AUISampleGameMode();
 };

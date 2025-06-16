@@ -59,8 +59,8 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 		return;
 	}
 
-	const AActor* Owner = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Owner), TEXT("Owning Actor invalid!")))
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
 	{
 		return;
 	}
@@ -73,6 +73,6 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 	// trigger event that require spawning a mesh of the object in the world.
 	for (UItemObject* Item : Items)
 	{
-		Item->TrySpawnEquippedItem(Owner);
+		Item->TrySpawnEquippedItem(Outer);
 	}
 }
