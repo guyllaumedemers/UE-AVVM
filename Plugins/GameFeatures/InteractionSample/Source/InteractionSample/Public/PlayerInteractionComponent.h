@@ -25,6 +25,7 @@
 
 #include "PlayerInteractionComponent.generated.h"
 
+class UGameStateInteractionComponent;
 class UInteraction;
 
 /**
