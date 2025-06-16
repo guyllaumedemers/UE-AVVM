@@ -48,8 +48,8 @@ bool UInteraction::DoesPartialMatch(const AActor* NewTarget) const
 	return IsValid(NewTarget) && (InteractionTarget == NewTarget);
 }
 
-bool UInteraction::DoesMatch(const AActor* NewTarget,
-                             const AActor* NewInstigator) const
+bool UInteraction::DoesExactMatch(const AActor* NewTarget,
+                                  const AActor* NewInstigator) const
 {
 	return IsValid(NewTarget) && IsValid(NewInstigator) && (InteractionTarget == NewTarget) && (InteractionInstigator == NewInstigator);
 }

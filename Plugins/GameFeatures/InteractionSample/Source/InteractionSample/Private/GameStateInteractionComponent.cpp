@@ -121,7 +121,7 @@ TArray<TObjectPtr<const UInteraction>> UGameStateInteractionComponent::GetExactM
 {
 	return BeginInteractions.FilterByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
 	{
-		return IsValid(Interaction) && Interaction->DoesMatch(NewTarget, NewInstigator);
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewTarget, NewInstigator);
 	});
 }
 

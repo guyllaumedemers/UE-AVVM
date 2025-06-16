@@ -50,7 +50,7 @@ public:
 	bool DoesPartialMatch(const AActor* NewTarget) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesMatch(const AActor* NewTarget, const AActor* NewInstigator) const;
+	bool DoesExactMatch(const AActor* NewTarget, const AActor* NewInstigator) const;
 
 	UFUNCTION(BlueprintCallable)
 	const AActor* GetInstigator() const;
