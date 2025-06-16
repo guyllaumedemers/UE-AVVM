@@ -17,27 +17,18 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "GameStateInventoryHandshakeComponent.h"
+#include "GameStateHandshakeComponent.h"
 
+#include "HandshakeValidatorImpl.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 
-void UGameStateInventoryHandshakeComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UGameStateInventoryHandshakeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-}
-
-UGameStateInventoryHandshakeComponent* UGameStateInventoryHandshakeComponent::GetActorComponent(const UObject* WorldContextObject)
+UGameStateHandshakeComponent* UGameStateHandshakeComponent::GetActorComponent(const UObject* WorldContextObject)
 {
 	AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
 	if (IsValid(GameState))
 	{
-		return GameState->GetComponentByClass<UGameStateInventoryHandshakeComponent>();
+		return GameState->GetComponentByClass<UGameStateHandshakeComponent>();
 	}
 	else
 	{
@@ -45,11 +36,11 @@ UGameStateInventoryHandshakeComponent* UGameStateInventoryHandshakeComponent::Ge
 	}
 }
 
-void UGameStateInventoryHandshakeComponent::ShakeHands(const FInventoryHandshake& Context,
-                                                       const FOnHandshakeComplete& Callback) const
+void UGameStateHandshakeComponent::TryExecuteHandshake(const UHandshakeValidatorImpl* HandshakeImpl,
+                                                       const FHandshakeContext& Context) const
 {
-	// TODO @gdemers handle actual handshake.
-	// A) Handshake Validation should be verified and confirmed.
-	// B) Data Exchange should be added here, may involve server-client interaction.
-	// C) both end should have to confirm exchange for trading, selling, buying, etc...
+	if (ensureAlwaysMsgf(IsValid(HandshakeImpl), TEXT("UHandshakeValidatorImpl is invalid!")))
+	{
+		HandshakeImpl->TryExecute(Context);
+	}
 }

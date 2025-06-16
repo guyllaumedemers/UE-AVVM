@@ -17,26 +17,32 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+
 #pragma once
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
-#include "MVVMViewModelBase.h"
+#include "UObject/Object.h"
 
-#include "ActorInventoryViewModel.generated.h"
+#include "HandshakeValidatorImpl.generated.h"
+
+struct FHandshakeContext;
 
 /**
-*	Class description:
+ *	Class description:
  *
- *	UActorInventoryViewModel. View Model class that display actor representation of the inventory items held.
+ *	UHandshakeValidatorImpl define the behaviour that should be executed during the handshake process.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UActorInventoryViewModel : public UMVVMViewModelBase,
-                                                     public IAVVMViewModelFNameHelper
+class HANDSHAKESAMPLE_API UHandshakeValidatorImpl : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	virtual FName GetViewModelFName() const override { return TEXT("UActorInventoryViewModel"); };
+	UFUNCTION(BlueprintCallable)
+	void TryExecute(const FHandshakeContext& Context) const;
+
+protected:
+	virtual bool DoesMeetRequirementForHandshake(const FHandshakeContext& Context) const;
+	virtual void TryExecute_Internal(const FHandshakeContext& Context) const;
 };

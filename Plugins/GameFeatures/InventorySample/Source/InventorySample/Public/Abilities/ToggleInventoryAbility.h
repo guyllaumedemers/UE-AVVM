@@ -31,7 +31,7 @@
  *	UToggleInventoryAbility define an instance ability the local client can interact with. Blocking Requirement Tags may
  *	prevent the execution of this Ability.
  *
- *	Example : Stasis, Stun, etc...
+ *	Note : May display visual feedback for remote players.
  */
 UCLASS()
 class INVENTORYSAMPLE_API UToggleInventoryAbility : public UGameplayAbility

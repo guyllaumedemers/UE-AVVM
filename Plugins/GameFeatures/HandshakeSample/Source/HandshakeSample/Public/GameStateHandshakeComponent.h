@@ -23,60 +23,50 @@
 
 #include "UObject/Object.h"
 
-#include "GameStateInventoryHandshakeComponent.generated.h"
+#include "GameStateHandshakeComponent.generated.h"
 
-class UActorInventoryComponent;
-class UItemObject;
+class UActorComponent;
+class UHandshakeValidatorImpl;
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHandshakeComplete, const bool, bWasSuccess);
 
 /**
  *	Class description:
  *
- *	FInventoryHandshake define the endpoint of a transaction between two entities and
- *	the data exchanged.
- *
- *	TODO @gdemers we do not account for the fact that a trade may involve currencies. TBD! 
+ *	FHandshakeContext define the endpoint of a transaction between two entities.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FInventoryHandshake
+struct HANDSHAKESAMPLE_API FHandshakeContext
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	UActorInventoryComponent* Src = nullptr;
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UActorComponent* Src = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	UActorInventoryComponent* Dest = nullptr;
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UActorComponent* Dest = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<UItemObject*> SrcItems;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<UItemObject*> DestItems;
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FOnHandshakeComplete CompletionDelegate;
 };
 
 /**
  *	Class description:
  *
- *	UGameStateInventoryHandshakeComponent handle system behaviour for updating two Inventory Component states
- *	during a handshake action like :
- *		trade,
- *		sell or buy
+ *	UGameStateHandshakeComponent handle execution of a handshake based on ability invocation. Both end of an Ability, Instigator and Target often require
+ *	a set of requirements to be met, validation can be run through the Impl object provided, which make this system flexible for extension, and handle hiding the details
+ *	of an exchange between both entity.
  */
-UCLASS(ClassGroup=("Inventory"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class INVENTORYSAMPLE_API UGameStateInventoryHandshakeComponent : public UActorComponent
+UCLASS(ClassGroup=("Handshake"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class HANDSHAKESAMPLE_API UGameStateHandshakeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	UFUNCTION(BlueprintCallable)
+	static UGameStateHandshakeComponent* GetActorComponent(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
-	static UGameStateInventoryHandshakeComponent* GetActorComponent(const UObject* WorldContextObject);
-
-	UFUNCTION(BlueprintCallable)
-	void ShakeHands(const FInventoryHandshake& Context,
-	                const FOnHandshakeComplete& Callback) const;
+	void TryExecuteHandshake(const UHandshakeValidatorImpl* HandshakeImpl,
+	                         const FHandshakeContext& Context) const;
 };
