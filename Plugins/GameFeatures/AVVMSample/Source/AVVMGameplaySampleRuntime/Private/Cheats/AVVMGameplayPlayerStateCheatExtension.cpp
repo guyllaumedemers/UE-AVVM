@@ -420,7 +420,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Connect")) { Raise(PlayerIndex); }
+		if (ImGui::Button("Raise")) { Raise(PlayerIndex); }
 
 		ImGui::SameLine();
 
@@ -486,7 +486,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Stop Interaction Money")) { StopInteractingWithWorld(PlayerIndex); }
+		if (ImGui::Button("Stop Interaction")) { StopInteractingWithWorld(PlayerIndex); }
 
 		ImGui::SameLine();
 
