@@ -55,7 +55,7 @@ bool UInteraction::DoesExactMatch(const AActor* NewTarget,
 
 bool UInteraction::IsEqual(const UInteraction* Other) const
 {
-	return this == Other;
+	return (Instigator == Other->Instigator) && (Target == Other->Target);
 }
 
 const AActor* UInteraction::GetInstigator() const
