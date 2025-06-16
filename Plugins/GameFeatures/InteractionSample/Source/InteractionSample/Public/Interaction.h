@@ -57,13 +57,10 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
-	TObjectPtr<const AActor> InteractionTarget = nullptr;
+	TObjectPtr<const AActor> Target = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
-	TObjectPtr<const AActor> InteractionInstigator = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
-	bool bInUse = false;
+	TObjectPtr<const AActor> Instigator = nullptr;
 
 private:
 	void operator()(const AActor* NewTarget,

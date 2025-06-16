@@ -25,9 +25,8 @@ void UInteraction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UInteraction, InteractionTarget);
-	DOREPLIFETIME(UInteraction, InteractionInstigator);
-	DOREPLIFETIME(UInteraction, bInUse);
+	DOREPLIFETIME(UInteraction, Target);
+	DOREPLIFETIME(UInteraction, Instigator);
 }
 
 bool UInteraction::IsSupportedForNetworking() const
@@ -45,23 +44,23 @@ void UInteraction::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCo
 
 bool UInteraction::DoesPartialMatch(const AActor* NewTarget) const
 {
-	return IsValid(NewTarget) && (InteractionTarget == NewTarget);
+	return IsValid(NewTarget) && (Target == NewTarget);
 }
 
 bool UInteraction::DoesExactMatch(const AActor* NewTarget,
                                   const AActor* NewInstigator) const
 {
-	return IsValid(NewTarget) && IsValid(NewInstigator) && (InteractionTarget == NewTarget) && (InteractionInstigator == NewInstigator);
+	return IsValid(NewTarget) && IsValid(NewInstigator) && (Target == NewTarget) && (Instigator == NewInstigator);
 }
 
 const AActor* UInteraction::GetInstigator() const
 {
-	return InteractionInstigator.Get();
+	return Instigator.Get();
 }
 
 void UInteraction::operator()(const AActor* NewTarget,
                               const AActor* NewInstigator)
 {
-	InteractionInstigator = NewInstigator;
-	InteractionTarget = NewTarget;
+	Instigator = NewInstigator;
+	Target = NewTarget;
 }
