@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "GameFramework/Info.h"
 
 #include "GameStateInteractionComponent.generated.h"
@@ -62,6 +63,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_NewEndInteractionRecorded();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewBeginInteractionRecorded")
 	TArray<TObjectPtr<const UInteraction>> BeginInteractions;

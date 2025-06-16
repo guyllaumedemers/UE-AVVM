@@ -23,7 +23,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 
 #include "ActorInteractionComponent.generated.h"
@@ -31,10 +30,8 @@
 /**
  *	Class description:
  *
- *	UActorInteractionComponent handle local collision check between world actors and PlayerControlled Pawn.
- *
- *	OnBeginOverlap/OnEndOverlap handle Activation tag updates so to allow clients to execute behaviour based on Input Release/Press when
- *	inside the radius of the owned collider.
+ *	UActorInteractionComponent handle local collision check between world actors and PlayerControlled Pawn. UPlayerInteractionComponent run
+ *	further validation and determine if the local client is allowed to invoke the UPlayerInteractionAbility. 
  *
  *	Note : Pushed via GFP_AddComponents on Client ONLY.
  */
@@ -64,9 +61,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldPreventContingency = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

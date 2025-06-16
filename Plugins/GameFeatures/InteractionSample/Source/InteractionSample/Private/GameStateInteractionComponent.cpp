@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "GameStateInteractionComponent.h"
 
+#include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Interaction.h"
@@ -144,6 +145,20 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 	       TEXT("Executed from \"%s\". Begin Interaction Collection modified on Actor \"%s\"!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
+
+#if WITH_SERVER_CODE
+	const TObjectPtr<const UInteraction>& Top = BeginInteractions.Top();
+	if (!IsValid(Top) || !IsValid(Top->GetInstigator()))
+	{
+		return;
+	}
+
+	auto* AbilityComponent = Top->GetInstigator()->GetComponentByClass<UAbilitySystemComponent>();
+	if (IsValid(AbilityComponent))
+	{
+		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
+	}
+#endif
 }
 
 void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
@@ -159,4 +174,18 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	       TEXT("Executed from \"%s\". End Interaction Collection modified on Actor \"%s\"!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
+
+#if WITH_SERVER_CODE
+	const TObjectPtr<const UInteraction>& Top = EndInteractions.Top();
+	if (!IsValid(Top) || !IsValid(Top->GetInstigator()))
+	{
+		return;
+	}
+
+	auto* AbilityComponent = Top->GetInstigator()->GetComponentByClass<UAbilitySystemComponent>();
+	if (IsValid(AbilityComponent))
+	{
+		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
+	}
+#endif
 }

@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "ActorInteractionComponent.h"
 
-#include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "PlayerInteractionComponent.h"
@@ -100,19 +99,9 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 		return;
 	}
 
-	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
-	if (IsValid(AbilityComponent))
-	{
-		// @gdemers allow a gameplay ability to be executable due to tag condition
-		// being met!
-		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
-	}
-
 	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
 	if (IsValid(PlayerInteractionComponent))
 	{
-		// @gdemers we try adding this local overlap event and first validate the replicated state
-		// of our manager to prevent existing overlaps.
 		PlayerInteractionComponent->AttemptRecordBeginOverlap(OwningOuter.Get(), OtherActor, bShouldPreventContingency);
 	}
 }
@@ -131,12 +120,6 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	if (!bIsActorLocallyControlled)
 	{
 		return;
-	}
-
-	auto* AbilityComponent = OtherActor->GetComponentByClass<UAbilitySystemComponent>();
-	if (IsValid(AbilityComponent))
-	{
-		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
 	}
 
 	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);

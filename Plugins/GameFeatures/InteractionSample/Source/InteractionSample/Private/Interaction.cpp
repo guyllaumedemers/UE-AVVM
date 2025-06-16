@@ -54,6 +54,11 @@ bool UInteraction::DoesMatch(const AActor* NewTarget,
 	return IsValid(NewTarget) && IsValid(NewInstigator) && (InteractionTarget == NewTarget) && (InteractionInstigator == NewInstigator);
 }
 
+const AActor* UInteraction::GetInstigator() const
+{
+	return InteractionInstigator.Get();
+}
+
 void UInteraction::operator()(const AActor* NewTarget,
                               const AActor* NewInstigator)
 {

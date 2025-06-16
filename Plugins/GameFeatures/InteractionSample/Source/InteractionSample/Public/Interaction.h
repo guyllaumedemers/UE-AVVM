@@ -51,6 +51,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool DoesMatch(const AActor* NewTarget, const AActor* NewInstigator) const;
+	
+	UFUNCTION(BlueprintCallable)
+	const AActor* GetInstigator() const;
 
 protected:
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
