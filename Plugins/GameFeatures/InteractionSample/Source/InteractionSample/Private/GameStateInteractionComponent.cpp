@@ -108,11 +108,20 @@ UGameStateInteractionComponent* UGameStateInteractionComponent::GetActorComponen
 	}
 }
 
-TArray<TObjectPtr<const UInteraction>> UGameStateInteractionComponent::GetMatchingInteractions(const AActor* NewTarget) const
+TArray<TObjectPtr<const UInteraction>> UGameStateInteractionComponent::GetPartialMatchingInteractions(const AActor* NewTarget) const
 {
 	return BeginInteractions.FilterByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
 	{
 		return IsValid(Interaction) && Interaction->DoesPartialMatch(NewTarget);
+	});
+}
+
+TArray<TObjectPtr<const UInteraction>> UGameStateInteractionComponent::GetExactMatchingInteractions(const AActor* NewTarget,
+                                                                                                    const AActor* NewInstigator) const
+{
+	return BeginInteractions.FilterByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
+	{
+		return IsValid(Interaction) && Interaction->DoesMatch(NewTarget, NewInstigator);
 	});
 }
 

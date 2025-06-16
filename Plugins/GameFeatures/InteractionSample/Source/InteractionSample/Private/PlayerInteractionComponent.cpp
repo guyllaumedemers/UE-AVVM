@@ -112,7 +112,7 @@ void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTar
 	auto MatchingInteractions = TArray<TObjectPtr<const UInteraction>>();
 	if (bPreventContingency)
 	{
-		MatchingInteractions = AuthoritativeInteractionComponent->GetMatchingInteractions(NewTarget);
+		MatchingInteractions = AuthoritativeInteractionComponent->GetPartialMatchingInteractions(NewTarget);
 	}
 
 	if (!bPreventContingency || MatchingInteractions.IsEmpty())
@@ -144,7 +144,7 @@ void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewTarge
 	       *NewTarget->GetName(),
 	       *NewInstigator->GetName());
 
-	const auto MatchingInteractions = AuthoritativeInteractionComponent->GetMatchingInteractions(NewTarget);
+	const auto MatchingInteractions = AuthoritativeInteractionComponent->GetExactMatchingInteractions(NewTarget, NewInstigator);
 	if (!MatchingInteractions.IsEmpty())
 	{
 		UE_LOG(LogGameplay,

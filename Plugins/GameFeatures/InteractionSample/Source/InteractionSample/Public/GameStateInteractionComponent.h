@@ -49,7 +49,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UGameStateInteractionComponent* GetActorComponent(const UObject* WorldContextObject);
 
-	TArray<TObjectPtr<const UInteraction>> GetMatchingInteractions(const AActor* NewTarget) const;
+	TArray<TObjectPtr<const UInteraction>> GetPartialMatchingInteractions(const AActor* NewTarget) const;
+	TArray<TObjectPtr<const UInteraction>> GetExactMatchingInteractions(const AActor* NewTarget, const AActor* NewInstigator) const;
 
 	UFUNCTION(BlueprintCallable)
 	void Server_AddBeginOverlaped(UInteraction* NewInteraction);
