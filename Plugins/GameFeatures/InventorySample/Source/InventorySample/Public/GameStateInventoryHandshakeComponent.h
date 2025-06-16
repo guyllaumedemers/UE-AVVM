@@ -25,7 +25,9 @@
 
 #include "GameStateInventoryHandshakeComponent.generated.h"
 
+class UActorInventoryComponent;
 class UItemObject;
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHandshakeComplete, const bool, bWasSuccess);
 
 /**
@@ -72,6 +74,5 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ShakeHands(const FInventoryHandshake& Context,
-	                const FOnHandshakeComplete& Callback);
+	void ShakeHands(const FInventoryHandshake& Context, const FOnHandshakeComplete& Callback);
 };

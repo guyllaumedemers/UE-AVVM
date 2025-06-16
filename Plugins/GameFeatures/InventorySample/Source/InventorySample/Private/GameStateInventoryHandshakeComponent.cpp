@@ -29,8 +29,7 @@ void UGameStateInventoryHandshakeComponent::EndPlay(const EEndPlayReason::Type E
 	Super::EndPlay(EndPlayReason);
 }
 
-void UGameStateInventoryHandshakeComponent::ShakeHands(const FInventoryHandshake& Context,
-                                                       const FOnHandshakeComplete& Callback)
+void UGameStateInventoryHandshakeComponent::ShakeHands(const FInventoryHandshake& Context, const FOnHandshakeComplete& Callback)
 {
 	// TODO @gdemers handle actual handshake.
 	// A) Handshake Validation should be verified and confirmed.

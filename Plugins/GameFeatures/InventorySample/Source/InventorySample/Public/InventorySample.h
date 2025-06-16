@@ -25,6 +25,16 @@
  *	Plugin Description :
  *
  *	InventorySample handle collections of items owned by a given Actor. This plugin doesn't restrict itself to the standard inventory
- *	system we usually think about. Any actor could own the component supporting the inventory system and define a set of items to be act upon.
- *	A visual representation of the available set specific to the context at hand would be provided to the local client once interacted with.
+ *	system we usually think about. Any actor could own the component supporting the inventory system and define a set of items to be act upon. A visual
+ *	representation of the available set specific to the context at hand would be provided to the local client once interacted with.
+ *
+ *	Example : A Backpack, Shop or Mystery Chess could all be provided from various sources a collection set of items to store.
+ *
+ *	A) For the backpack, this would be specific to the local player (Backend account or local save file) and would represent what is currently held
+ *	by the player.
+ *
+ *	B) For the shop, this would be a statically define collection set of items from which the user can buy, sell, trade from. I.e defined by design. In this
+ *	case, interaction between the player and the shop would involve two components talking to each other and exchanging data.
+ *
+ *	C) Same for the Mystery chess.
  */
