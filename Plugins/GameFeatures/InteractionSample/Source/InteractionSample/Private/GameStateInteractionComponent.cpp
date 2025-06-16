@@ -148,6 +148,7 @@ void UGameStateInteractionComponent::Server_AddEndOverlaped(UInteraction* NewInt
 	if (SearchResult != nullptr)
 	{
 		RemoveReplicatedSubObject(const_cast<UInteraction*>(SearchResult->Get()));
+		BeginInteractions.Remove(*SearchResult);
 	}
 }
 
