@@ -74,5 +74,23 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ShakeHands(const FInventoryHandshake& Context, const FOnHandshakeComplete& Callback);
+	void ShakeHands(const FInventoryHandshake& Context, const FOnHandshakeComplete& Callback) const;
+};
+
+/**
+ *	Class description:
+ *
+ *	UGameStateInventoryHandshakeBlueprintFunctionLibrary define a set of api to simplify requesting exchange between two inventory
+ *	components interacting.
+ */
+UCLASS(BlueprintType)
+class INVENTORYSAMPLE_API UGameStateInventoryHandshakeBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static void RequestHandshake(const UObject* WorldContextObject,
+	                             const FInventoryHandshake& Context,
+	                             const FOnHandshakeComplete& Callback);
 };
