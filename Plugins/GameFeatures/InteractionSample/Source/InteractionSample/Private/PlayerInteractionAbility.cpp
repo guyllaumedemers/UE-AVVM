@@ -48,6 +48,15 @@ void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo*
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
+bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                                   const FGameplayAbilityActorInfo* ActorInfo,
+                                                   const FGameplayTagContainer* SourceTags,
+                                                   const FGameplayTagContainer* TargetTags,
+                                                   FGameplayTagContainer* OptionalRelevantTags) const
+{
+	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+}
+
 void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                 const FGameplayAbilityActorInfo* ActorInfo,
                                                 const FGameplayAbilityActivationInfo ActivationInfo,

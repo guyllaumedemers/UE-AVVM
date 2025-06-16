@@ -35,6 +35,8 @@ class UInteraction;
  *	PlayerController due to Unreal Owning Connection requirements to resolve RPC calls.
  *
  *	Note : Pushed via GFP_AddComponents
+ *
+ *	TODO @gdemers interaction between two players hasnt been put in place. events for begin/end overlap arent considered just yet here!
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UPlayerInteractionComponent : public UActorComponent
