@@ -69,7 +69,7 @@ void UAVVMDebuggerInputHandler::SafeBegin(const FSimpleDelegate& PreprocessorCal
 
 void UAVVMDebuggerInputHandler::SafeEnd()
 {
-	if (DebuggerPreprocessor.IsValid())
+	if (DebuggerPreprocessor.IsValid() && FModuleManager::Get().IsModuleLoaded(TEXT("Slate")))
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(DebuggerPreprocessor);
 		DebuggerPreprocessor.Reset();

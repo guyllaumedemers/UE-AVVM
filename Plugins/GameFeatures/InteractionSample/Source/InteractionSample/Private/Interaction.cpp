@@ -53,6 +53,11 @@ bool UInteraction::DoesExactMatch(const AActor* NewTarget,
 	return IsValid(NewTarget) && IsValid(NewInstigator) && (Target == NewTarget) && (Instigator == NewInstigator);
 }
 
+bool UInteraction::IsEqual(const UInteraction* Other) const
+{
+	return this == Other;
+}
+
 const AActor* UInteraction::GetInstigator() const
 {
 	return Instigator.Get();

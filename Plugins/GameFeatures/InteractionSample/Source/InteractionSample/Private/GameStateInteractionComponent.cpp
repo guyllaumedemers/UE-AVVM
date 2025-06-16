@@ -139,6 +139,16 @@ void UGameStateInteractionComponent::Server_AddEndOverlaped(UInteraction* NewInt
 	EndInteractions.Add(NewInteraction);
 
 	OnRep_NewEndInteractionRecorded();
+
+	const TObjectPtr<const UInteraction>* SearchResult = BeginInteractions.FindByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
+	{
+		return IsValid(Interaction) && Interaction->IsEqual(NewInteraction);
+	});
+
+	if (SearchResult != nullptr)
+	{
+		RemoveReplicatedSubObject(const_cast<UInteraction*>(SearchResult->Get()));
+	}
 }
 
 void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
@@ -156,13 +166,18 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 	       *Outer->GetName());
 
 #if WITH_SERVER_CODE
-	const TObjectPtr<const UInteraction>& Top = BeginInteractions.Top();
-	if (!IsValid(Top) || !IsValid(Top->GetInstigator()))
+	if (BeginInteractions.IsEmpty())
 	{
 		return;
 	}
 
-	auto* AbilityComponent = Top->GetInstigator()->GetComponentByClass<UAbilitySystemComponent>();
+	const AActor* Instigator = BeginInteractions.Top()->GetInstigator();
+	if (!IsValid(Instigator))
+	{
+		return;
+	}
+
+	auto* AbilityComponent = Instigator->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
 		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
@@ -185,13 +200,18 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	       *Outer->GetName());
 
 #if WITH_SERVER_CODE
-	const TObjectPtr<const UInteraction>& Top = EndInteractions.Top();
-	if (!IsValid(Top) || !IsValid(Top->GetInstigator()))
+	if (EndInteractions.IsEmpty())
 	{
 		return;
 	}
 
-	auto* AbilityComponent = Top->GetInstigator()->GetComponentByClass<UAbilitySystemComponent>();
+	const AActor* Instigator = EndInteractions.Top()->GetInstigator();
+	if (!IsValid(Instigator))
+	{
+		return;
+	}
+
+	auto* AbilityComponent = Instigator->GetComponentByClass<UAbilitySystemComponent>();
 	if (IsValid(AbilityComponent))
 	{
 		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);

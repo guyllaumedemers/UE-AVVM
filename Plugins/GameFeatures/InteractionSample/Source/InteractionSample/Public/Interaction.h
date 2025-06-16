@@ -53,6 +53,9 @@ public:
 	bool DoesExactMatch(const AActor* NewTarget, const AActor* NewInstigator) const;
 
 	UFUNCTION(BlueprintCallable)
+	bool IsEqual(const UInteraction* Other) const;
+
+	UFUNCTION(BlueprintCallable)
 	const AActor* GetInstigator() const;
 
 protected:
