@@ -27,8 +27,8 @@
 /**
  *	Plugin Description :
  *
- *	Runtime Gameplay Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
- *	that provide boiler plate code support gameplay behaviour.
+ *	AVVMGameplaySampleRuntime is a Sandbox for testing AVVMGameplay (IAVVMQuicktimeEventGameStateInterface & IAVVMQuicktimeEventPlayerStateInterface) UINTERFACE().
+ *	It offers a set of cheats from which recurrent gameplay features can be tested from.
 */
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnExecuteDebugEvent, const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>&, const UActorComponent*)
@@ -42,7 +42,7 @@ struct FAVVMGameplayScopedDebugger
 {
 	FAVVMGameplayScopedDebugger() = default;
 
-	// TODO @gdemers we should scopped tdebug the impletation called by the cheat, not the cheat itself
+	// TODO @gdemers Define how Gameplay testing should be debugged while being able to strip out symbols in SHIPPING_BUILD.
 };
 #else
 #define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 0

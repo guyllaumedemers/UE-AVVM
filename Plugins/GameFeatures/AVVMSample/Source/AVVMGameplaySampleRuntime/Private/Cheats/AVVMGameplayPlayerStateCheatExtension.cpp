@@ -387,7 +387,6 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 		return;
 	}
 
-	// @gdemers user selected index
 	static int PlayerIndex = 0;
 
 	{
@@ -402,7 +401,6 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 	}
 
 	{
-		// @gdemers Gameplay Events - Health
 		ImGui::Text("Health");
 		ImGui::Separator();
 
@@ -428,7 +426,6 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 	}
 
 	{
-		// @gdemers Gameplay Events - Status Effect
 		ImGui::Text("Status Effect");
 		ImGui::Separator();
 
@@ -440,7 +437,6 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 	}
 
 	{
-		// @gdemers Gameplay Events - Stamina
 		ImGui::Text("Stamina");
 		ImGui::Separator();
 
@@ -467,8 +463,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 	}
 
 	{
-		// TODO @gdemers this section is a bit underspecified! What are we interacting with exactly ? can we inject from cmd line ?
-		// @gdemers Gameplay Events - World Interactions
+		// TODO @gdemers Require to be better defined! Workout details about these calls. What do they involve ?
 		ImGui::Text("World Interactions");
 		ImGui::Separator();
 

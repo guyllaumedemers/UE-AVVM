@@ -30,8 +30,8 @@
 /**
 *	Class description:
  *
- *	UAVVMGameplaySampleSettings. project settings that define global variable for targeting Actor Components
- *	held by an Actor when doing debugging or running cheats.
+ *	UAVVMGameplaySampleSettings is a UDeveloperSettings that define a set of Component Class, specific to your project,
+ *	and from which we run cheat against.
  */
 UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMGameplaySampleSettings"))
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplaySampleSettings : public UDeveloperSettings

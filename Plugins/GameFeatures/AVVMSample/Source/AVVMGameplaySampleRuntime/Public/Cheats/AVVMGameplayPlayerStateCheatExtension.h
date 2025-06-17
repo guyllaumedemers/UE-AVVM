@@ -32,10 +32,8 @@
 /**
  *	Class description:
  *
- *	UAVVMGameplayPlayerStateCheatExtension is added through UGameFeatureAction_AddCheats and extend the UCheatManager without requiring deriving from
- *	the base class.
- *
- *	It exposed new console commands for testing the QuicktimeEvents specific to the Player State.
+ *	UAVVMGameplayPlayerStateCheatExtension is a CheatExtension, added via GFP, that expose a set of new console commands to test recurrent gameplay features.
+ *	See IAVVMQuicktimeEventPlayerStateInterface for project implementation details!
  */
 UCLASS()
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayPlayerStateCheatExtension : public UCheatManagerExtension

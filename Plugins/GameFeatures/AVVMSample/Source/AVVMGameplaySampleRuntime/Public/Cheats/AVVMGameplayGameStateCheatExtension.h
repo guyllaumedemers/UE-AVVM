@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMGameplaySampleRuntime.h"
 #include "GameFramework/CheatManager.h"
 
 #ifdef UE_ENABLE_AVVM_DEBUGGER
@@ -32,11 +31,9 @@
 
 /**
  *	Class description:
- *
- *	UAVVMGameplayGameStateCheatExtension is added through UGameFeatureAction_AddCheats and extend the UCheatManager without requiring deriving from
- *	the base class.
- *
- *	It exposed new console commands for testing the QuicktimeEvents specific to the Game State.
+ *	
+ *	UAVVMGameplayGameStateCheatExtension is a CheatExtension, added via GFP, that expose a set of new console commands to test recurrent gameplay features.
+ *	See IAVVMQuicktimeEventGameStateInterface for project implementation details!
  */
 UCLASS()
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : public UCheatManagerExtension
@@ -51,31 +48,27 @@ public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
 
-	// @gdemers fake disconnecting yourself. we use the local player as we only want to remove from HUD the
-	// local player representation from a possible group of people.
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Disconnect")
 	void Disconnect();
 
-	// @gdemers fake connecting yourself. we use the local player as we only want to add to the HUD the
-	// local player representation to a possible group of people.
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Connect")
 	void Connect();
-	
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Win")
 	void Win();
-	
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Lose")
 	void Lose();
-	
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Kill")
 	void Kill();
-	
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Killstreak")
 	void Killstreak();
-	
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.CaptureObjective")
 	void CaptureObjective();
-	
+
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.DiscoverArea")
 	void DiscoverArea();
 

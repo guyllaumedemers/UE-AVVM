@@ -129,7 +129,6 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 	}
 
 	{
-		// @gdemers Backend
 		ImGui::Text("Online");
 		ImGui::Separator();
 
@@ -145,7 +144,6 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 	}
 
 	{
-		// @gdemers AAR
 		ImGui::Text("After Action Report");
 		ImGui::Separator();
 
@@ -162,7 +160,6 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 
 
 	{
-		// @gdemers Leaderboard
 		ImGui::Text("Leaderboard");
 		ImGui::Separator();
 
@@ -182,7 +179,6 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 	}
 
 	{
-		// @gdemers Open notification
 		ImGui::Text("GameplayEvent");
 		ImGui::Separator();
 
