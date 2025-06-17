@@ -31,7 +31,8 @@
 /**
  *	Class Description :
  *
- *	UInteraction Object encapsulate data about a remote/local client trying to interact with a replicated actor.
+ *	UInteraction object is the data representation of a UPlayer collision with a replicated world actor. It captures the Target and Instigator
+ *	of the collision event, and allow Server code to resolve contingency between players so only one player can produce an interaction request.
  */
 UCLASS(BlueprintType)
 class INTERACTIONSAMPLE_API UInteraction : public UObject

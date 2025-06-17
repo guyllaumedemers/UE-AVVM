@@ -28,6 +28,7 @@
 #include "Net/UnrealNetwork.h"
 
 UGameStateInteractionComponent::UGameStateInteractionComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	SetIsReplicatedByDefault(true);
 	bReplicateUsingRegisteredSubObjectList = true;
@@ -55,7 +56,7 @@ void UGameStateInteractionComponent::BeginPlay()
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UGameStateInteractionComponent to Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
-	       *Outer->GetName())
+	       *Outer->GetName());
 
 	OwningOuter = Outer;
 }
@@ -90,7 +91,7 @@ void UGameStateInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayR
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UGameStateInteractionComponent from Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
-	       *Outer->GetName())
+	       *Outer->GetName());
 
 	OwningOuter.Reset();
 }

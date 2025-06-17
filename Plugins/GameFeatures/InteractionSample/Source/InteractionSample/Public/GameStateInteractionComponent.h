@@ -32,8 +32,6 @@ class UInteraction;
  *	Class Description :
  *
 *	UGameStateInteractionComponent store/update replicated user interactions based on client RPC requests.
- *
- *	Note : Pushed via GFP_AddComponents
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UGameStateInteractionComponent : public UActorComponent

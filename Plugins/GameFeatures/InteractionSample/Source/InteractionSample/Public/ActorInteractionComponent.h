@@ -30,10 +30,8 @@
 /**
  *	Class description:
  *
- *	UActorInteractionComponent handle local collision check between world actors and PlayerControlled Pawn. UPlayerInteractionComponent run
- *	further validation and determine if the local client is allowed to invoke the UPlayerInteractionAbility. 
- *
- *	Note : Pushed via GFP_AddComponents on Client ONLY.
+ *	UActorInteractionComponent is a Client-Only component pushed via GFP that handle local collision check between world actors and locally controlled APlayerController.
+ *	Using the received Instigator, it interface with the owned UPlayerInteractionComponent and call RPCs.
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent

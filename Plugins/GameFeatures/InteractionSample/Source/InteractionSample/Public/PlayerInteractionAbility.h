@@ -28,8 +28,11 @@
 /**
  *	Class Description :
  *
- *	UPlayerInteractionAbility define an instance ability the local client can interact with. Activation Requirement Tags are
- *	Granted from a replicated world object.
+ *	UPlayerInteractionAbility is an instance ability that can be invoked through user input when in-range of a world actor
+ *	with an UActorInteractionComponent.
+ *
+ *	TODO @gdemers Add missing implementation detail for the ability. Also, for cases like doors, the Ability, when activated should
+ *	trigger a Multicast RPC so we can react on ALL clients.
  */
 UCLASS()
 class INTERACTIONSAMPLE_API UPlayerInteractionAbility : public UGameplayAbility

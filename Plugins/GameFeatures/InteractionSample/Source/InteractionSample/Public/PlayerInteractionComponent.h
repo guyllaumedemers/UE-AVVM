@@ -31,12 +31,11 @@ class UInteraction;
 /**
 *	Class Description :
  *
- *	UPlayerInteractionComponent interface with handle UGameStateInteractionComponent and trigger RPC so the Server can store/update user interactions. It exists on the
- *	PlayerController due to Unreal Owning Connection requirements to resolve RPC calls.
+ *	UPlayerInteractionComponent is the src component from which RPC are called from. It interface with the UGameStateInteractionComponent to record Collision Overlap events
+ *	and resolve contingency between players trying to interact with replicated world actors. It exists on the APlayerController due to Unreal Owning Connection requirements to resolve RPC calls
+ *	and is pushed via GFP.
  *
- *	Note : Pushed via GFP_AddComponents
- *
- *	TODO @gdemers interaction between two players hasnt been put in place. events for begin/end overlap arent considered just yet here!
+ *	TODO @gdemers Add support for interaction between players for cases like trying to Raise a player.
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UPlayerInteractionComponent : public UActorComponent
@@ -44,7 +43,6 @@ class INTERACTIONSAMPLE_API UPlayerInteractionComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	UPlayerInteractionComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

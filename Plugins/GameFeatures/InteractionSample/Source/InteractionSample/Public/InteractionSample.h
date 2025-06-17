@@ -24,7 +24,17 @@
 /**
  *	Plugin Description :
  *
- *	InteractionSample record interaction from local client with world content. This system expect clients
- *	to be able to track remote actions from Autonomous & Simulated Proxy and display/update visual feedback
- *	base on the state of the system.
+ *	InteractionSample is a contingency system that handle UPlayer interaction between one (or more) locally controlled APlayerController
+ *	and a replicated world actor. During gameplay, the GFP will push a component on the AGameStateBase and react to RPC calls when
+ *	attempting a local interaction.
+ *
+ *	Example :
+ *	
+ *		* Door
+ *		* Chess
+ *		* etc...
+ *
+ *	This system allow granting of the required 'Activation' tag, so the locally controlled APlayerController can execute
+ *	the UPlayerInteractionAbility, and for them only! (unless contingency is not an issue on the target object, in which case, the flag
+ *	can be turned off on the world actor UActorInteractionComponent)
  */
