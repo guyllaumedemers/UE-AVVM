@@ -29,18 +29,26 @@ AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
 /**
  *	Plugin Description :
  *
- *	UE-AVVM. Actor, View, ViewModel. Based on the RAII principle, this architecture benefit from Ref-counting "Manual"
- *	ViewModel instance, using it's TypedOuter, and is managed via a World Subsystem.
+ *	AVVM is a CORE system that setup strong foundation for UI development. It offers a set of tools for handling View Model CRUD principles
+ *	in an elegant fashion and expose a flexible 'Notification' system for broadcasting events data to your UI.
  *
- *	It follows the core architecture of Unreal Engine and ensure consistent data
- *	between Travels (as it's being rebuilt with the owning Actor).
+ *		Snippet :
  *
- *	This system is a work in-progress and has for end goal to remove some of the drawback affecting data persistency which comes
- *	with "Global" ViewModel usage.
- *	It's core benefit being that active ViewModel "presenting" can easily be swapped at Runtime based on the Actor it's owned by and
- *	"present" new data without running complex control flow for project specific use-case.
+ *			UE-AVVM. Actor, View, ViewModel. Based on the RAII principle, define an Actor on which we add runtime components using Unreal GameFeaturePlugin.
+ *			Our runtime component, AVVMComponent, expose a collection of Presenter UObject that define the architecture of a single/multiplayer game.
+ *			It's lifecycle depends on it's owning typed Outer! Each Presenter UObject, AVVMPresenter is responsible for it's own Manual ViewModel instance
+ *			and is ref-count.
+ *			
+ *			See Full description here! (https://github.com/guyllaumedemers/UE-AVVM)
  *
- *	See Github link for more! : https://github.com/guyllaumedemers/UE-AVVM.
+ *		Class Recap :
+ *
+ *			* UAVVMModelComponent is a UActorComponent type, pushed via GFP, on a Target Actor Class. It holds a set of TSubClassOf<UAVVMPresenter> UObject and handle CRUD principle for these objects.
+ *			* UAVVMPresenter is a UObject type that's owned by a UAVVMModelComponent. It's define the View Model Class to be instanced and store a Pair<AActor, UMVVMViewModelBase>,
+ *			mapping it's Outer Actor Type to the View Model instance, with the UAVVMSubsystem, until destroyed. The View Model instanced is 'Manually' bound using the IAVVMViewModelFNameHelper UINTERFACE().
+ *			* UAVVMSubsystem is a World Subsystem that manage caching ViewModel instance and allow retrieval of said instance using the AActor type provided. This imply that View Model are owned by a unique
+ *			AActor which is great for situation where OnPossesChanges require displaying a new set of data to the HUD but may revert back to an existing Pawn later.
+ */
 
 // ---------------------------------------------------------------------------------------------------------------------//
 //													Other Utilities														//
