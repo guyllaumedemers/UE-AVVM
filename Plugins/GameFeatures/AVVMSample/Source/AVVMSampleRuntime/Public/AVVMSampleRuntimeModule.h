@@ -25,8 +25,39 @@
 /**
  *	Plugin Description :
  *
- *	Runtime Sample plugin. Based on Miro board (See : https://github.com/guyllaumedemers/UE-AVVM), define a set of class
- *	that would provide boiler plate code support for generic multiplayer-game project architecture.
+ *	AVVMSampleRuntime is a Sandbox that offer boiler plate implementation of the AVVM suite plugin. It setups the basic requirements
+ *	for a multiplayer/coop game.
+ *
+ *	Example (Game - Overwatch 2) :
+ *
+ *		* See Miro link : https://github.com/guyllaumedemers/UE-AVVM
+ *
+ *	This suite provide a starting point to users when building their Menu-ing system. Instead of doing again and again the same architecture,
+ *	use this and jump start your project!
+ *
+ *		Unreal Recap :
+ *
+ *			* Unreal's Actor Model architecture can be reduced to three points of interest. Those Actors are what are driving most systems and allow proper RAII principle for our View Model data.
+ *			There is no data persistency, so no global ViewModel being used. Check project README.md and understand why!
+ *
+ *				A) AGameMode
+ *				B) AGameStateBase
+ *				C) APlayerState
+ *
+ *		Quick Recap : AVVM Plugin
+ *
+ *			* UAVVMModelComponent is a UActorComponent type, pushed via GFP, on a Target Actor Class. It holds a set of TSubClassOf<UAVVMPresenter> UObject and handle CRUD principle for these objects.
+ *			* UAVVMPresenter is a UObject type that's owned by a UAVVMModelComponent. It's define the View Model Class to be instanced and store a Pair<AActor, UMVVMViewModelBase>,
+ *			mapping it's Outer Actor Type to the View Model instance, with the UAVVMSubsystem, until destroyed. The View Model instanced is 'Manually' bound using the IAVVMViewModelFNameHelper UINTERFACE().
+ *			* UAVVMSubsystem is a World Subsystem that manage caching ViewModel instance and allow retrieval of said instance using the AActor type provided. This imply that View Model are owned by a unique
+ *			AActor which is great for situation where OnPossesChanges require displaying a new set of data to the HUD but may revert back to an existing Pawn later.
+ *
+ *		Recap : AVVMSampleRuntime Plugin
+ *
+ *		The following UINTERFACE() expose api for recurrent function call that interface with the CommonGame & UIExtension plugin for pushing Widget on screen. UAVVMPresenter should implement one of these
+ *		based on system requirements.
+ *			* IAVVMUIExtensionInterface
+ *			* IAVVMPrimaryGameLayoutInterface
  */
 
 // @gdemers expect preprocessor to be defined in build.cs, or not!
