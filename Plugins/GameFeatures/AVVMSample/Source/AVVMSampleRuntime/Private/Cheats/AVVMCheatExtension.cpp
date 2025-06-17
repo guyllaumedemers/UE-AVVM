@@ -298,7 +298,7 @@ TInstancedStruct<FAVVMCheatData> UAVVMCheatExtension::GetPayload(const TSharedPt
 }
 
 #if WITH_AVVM_DEBUGGER
-inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGathering) const
+const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
@@ -343,7 +343,7 @@ inline const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGather
 	return *StringBuilder/*last entry will be \0\0 as expected by ImGui::Combo*/;
 }
 
-inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGathering) const
+const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGathering) const
 {
 	static TAnsiStringBuilder<512> StringBuilder;
 	static bool bWasInitialized = false;
@@ -388,7 +388,7 @@ inline const char* UAVVMCheatExtension::LazyGatherRegistryIds(bool& bForceGather
 	return *StringBuilder;
 }
 
-inline FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
+FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const int32 Index) const
 {
 	int32 ReverseCount = Index;
 

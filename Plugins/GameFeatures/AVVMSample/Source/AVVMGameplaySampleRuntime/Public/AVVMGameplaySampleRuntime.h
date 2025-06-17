@@ -53,10 +53,3 @@ struct FAVVMGameplayScopedDebugger
 #else
 #define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback)
 #endif
-
-// @gdemers this handle imgui conditional existence
-#if defined UE_ENABLE_AVVM_DEBUGGER
-#define WITH_AVVM_DEBUGGER 1
-#else
-#define WITH_AVVM_DEBUGGER 0
-#endif

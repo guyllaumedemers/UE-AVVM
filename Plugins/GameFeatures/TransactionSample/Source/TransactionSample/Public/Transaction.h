@@ -48,7 +48,8 @@ enum class ETransactionType : uint8
 	Killstreak,
 	Assist,
 	EarnedCurrency,
-	SpentCurrency
+	SpentCurrency,
+	Max
 };
 
 inline const TCHAR* EnumToString(ETransactionType State)
@@ -98,6 +99,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool DoesMatch(const FString& NewOwnerId, const ETransactionType NewTransactionType) const;
+	
+	UFUNCTION(BlueprintCallable)
+	FString ToString() const;
 
 protected:
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)

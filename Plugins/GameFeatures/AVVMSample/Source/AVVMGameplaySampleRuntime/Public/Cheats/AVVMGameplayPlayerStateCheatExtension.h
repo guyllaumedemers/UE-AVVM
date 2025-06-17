@@ -21,10 +21,9 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMGameplaySampleRuntime.h"
 #include "GameFramework/CheatManager.h"
 
-#if WITH_AVVM_DEBUGGER
+#ifdef UE_ENABLE_AVVM_DEBUGGER
 #include "AVVMDebugger.h"
 #endif
 
@@ -38,7 +37,7 @@
  *
  *	It exposed new console commands for testing the QuicktimeEvents specific to the Player State.
  */
-UCLASS(BlueprintType)
+UCLASS()
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayPlayerStateCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
                                                                              ,

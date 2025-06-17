@@ -21,13 +21,12 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMSampleRuntimeModule.h"
 #include "DataRegistryTypes.h"
 #include "Cheats/AVVMCheatData.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
 
-#if WITH_AVVM_DEBUGGER
+#ifdef UE_ENABLE_AVVM_DEBUGGER
 #include "AVVMDebugger.h"
 #endif
 
@@ -42,7 +41,7 @@
  *	It exposed new console commands for testing the UAVVMNotificationSubsystem, allowing to broadcast specific tag channels and/or
  *	interface with the UAVVMPresenter Model to "inject" stub data to derive types.
  */
-UCLASS(BlueprintType)
+UCLASS()
 class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
                                                   ,
@@ -84,15 +83,15 @@ protected:
 	TInstancedStruct<FAVVMCheatData> GetPayload(const TSharedPtr<FStreamableHandle> StreamableHandle);
 
 #if WITH_AVVM_DEBUGGER
-	inline const char* LazyGatherTagChannels(bool& bForceGathering) const;
-	inline const char* LazyGatherRegistryIds(bool& bForceGathering) const;
+	const char* LazyGatherTagChannels(bool& bForceGathering) const;
+	const char* LazyGatherRegistryIds(bool& bForceGathering) const;
 
-	inline FString GetIndexedString(const char* ConcatString,
-	                                const int32 Index) const;
+	FString GetIndexedString(const char* ConcatString,
+	                         const int32 Index) const;
 
-	inline void HandleComboBoxLinkage(const bool bIsComboBoxLinked,
-	                                  const int32& TagChannelIndex,
-	                                  int32& OutRegistryIndex);
+	void HandleComboBoxLinkage(const bool bIsComboBoxLinked,
+	                           const int32& TagChannelIndex,
+	                           int32& OutRegistryIndex);
 #endif
 
 	// @gdemers handle data registry/gameplay tag changes at runtime. (most-likely triggered from GFP)

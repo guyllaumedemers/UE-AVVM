@@ -48,9 +48,8 @@ void UAVVMGameplayGameStateCheatExtension::RemovedFromCheatManager_Implementatio
 #endif
 }
 
-void UAVVMGameplayGameStateCheatExtension::Disconnect(const bool bCanExecuteOnlineDisconnect)
+void UAVVMGameplayGameStateCheatExtension::Disconnect()
 {
-	// TODO @gdemers execute backend call based on 'bCanExecuteOnlineDisconnect' value.
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
 	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
@@ -136,13 +135,7 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		static const char* const ExecuteOnlineDisconnectTitle = "ExecuteOnlineDisconnect";
-		static bool bCanExecuteOnlineDisconnect = false;
-		ImGui::Checkbox(ExecuteOnlineDisconnectTitle, &bCanExecuteOnlineDisconnect);
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("Disconnect")) { Disconnect(bCanExecuteOnlineDisconnect); }
+		if (ImGui::Button("Disconnect")) { Disconnect(); }
 
 		ImGui::SameLine();
 

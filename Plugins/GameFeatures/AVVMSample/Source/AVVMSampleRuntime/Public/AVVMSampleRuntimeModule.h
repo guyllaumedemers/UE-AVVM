@@ -30,15 +30,8 @@
  */
 
 // @gdemers expect preprocessor to be defined in build.cs, or not!
-#if defined UE_AVVM_ENABLE_ONLINE_REQUEST_BRANCHING
+#ifdef UE_AVVM_ENABLE_ONLINE_REQUEST_BRANCHING
 #define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 1
 #else
 #define UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION 0
-#endif
-
-// @gdemers this handle imgui conditional existence
-#if defined UE_ENABLE_AVVM_DEBUGGER
-#define WITH_AVVM_DEBUGGER 1
-#else
-#define WITH_AVVM_DEBUGGER 0
 #endif

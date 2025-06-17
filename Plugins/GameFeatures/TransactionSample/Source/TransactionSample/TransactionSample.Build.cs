@@ -29,6 +29,7 @@ public class TransactionSample : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
 				"AVVMGameplay",
 				"Core",
 				"CoreUObject",
@@ -43,5 +44,24 @@ public class TransactionSample : ModuleRules
 			{
 			}
 		);
+
+		if (Target.bBuildDeveloperTools)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMDebugger",
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"ImGui"
+				});
+
+			PrivateDefinitions.Add(
+				string.Format("IMPLOT_API=DLLIMPORT")
+			);
+		}
 	}
 }

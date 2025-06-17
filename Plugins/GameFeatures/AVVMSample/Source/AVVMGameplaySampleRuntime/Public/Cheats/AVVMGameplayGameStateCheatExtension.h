@@ -24,7 +24,7 @@
 #include "AVVMGameplaySampleRuntime.h"
 #include "GameFramework/CheatManager.h"
 
-#if WITH_AVVM_DEBUGGER
+#ifdef UE_ENABLE_AVVM_DEBUGGER
 #include "AVVMDebugger.h"
 #endif
 
@@ -38,7 +38,7 @@
  *
  *	It exposed new console commands for testing the QuicktimeEvents specific to the Game State.
  */
-UCLASS(BlueprintType)
+UCLASS()
 class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : public UCheatManagerExtension
 #if WITH_AVVM_DEBUGGER
                                                                            ,
@@ -54,7 +54,7 @@ public:
 	// @gdemers fake disconnecting yourself. we use the local player as we only want to remove from HUD the
 	// local player representation from a possible group of people.
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.Disconnect")
-	void Disconnect(const bool bCanExecuteOnlineDisconnect = false);
+	void Disconnect();
 
 	// @gdemers fake connecting yourself. we use the local player as we only want to add to the HUD the
 	// local player representation to a possible group of people.

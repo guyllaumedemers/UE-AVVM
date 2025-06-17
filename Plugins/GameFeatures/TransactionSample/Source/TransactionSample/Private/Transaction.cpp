@@ -48,6 +48,11 @@ bool UTransaction::DoesMatch(const FString& NewOwnerId, const ETransactionType N
 	return (OwnerId.Equals(NewOwnerId) && (TransactionType == NewTransactionType));
 }
 
+FString UTransaction::ToString() const
+{
+	return FString();
+}
+
 void UTransaction::operator()(const FString& NewOwnerId,
                               const ETransactionType NewTransactionType,
                               const FString& NewPayload)

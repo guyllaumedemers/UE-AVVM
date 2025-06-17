@@ -30,10 +30,18 @@
 class UAVVMDebuggerInputHandler;
 class UGameInstance;
 
+// @gdemers this handle IAVVMImGuiDescriptor conditional existence as the AVVMDebugger Module wont be
+// delivered in SHIPPING_BUILD.
+#ifdef UE_ENABLE_AVVM_DEBUGGER
+#define WITH_AVVM_DEBUGGER 1
+#else
+#define WITH_AVVM_DEBUGGER 0
+#endif
+
 /**
 *	Class description:
 *
-*	UAVVMImGuiDescriptor. draw behaviour specific to the implementer class.
+*	UAVVMImGuiDescriptor. draw content specific to the implementer class.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMDEBUGGER_API UAVVMImGuiDescriptor : public UInterface
