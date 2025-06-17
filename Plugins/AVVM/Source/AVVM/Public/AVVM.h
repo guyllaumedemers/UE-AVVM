@@ -50,10 +50,6 @@ AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
  *			AActor which is great for situation where OnPossesChanges require displaying a new set of data to the HUD but may revert back to an existing Pawn later.
  */
 
-// ---------------------------------------------------------------------------------------------------------------------//
-//													Other Utilities														//
-// ---------------------------------------------------------------------------------------------------------------------//
-
 /**
  *	Class description:
  *

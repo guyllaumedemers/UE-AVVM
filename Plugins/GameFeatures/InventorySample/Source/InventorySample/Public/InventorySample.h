@@ -24,17 +24,25 @@
 /**
  *	Plugin Description :
  *
- *	InventorySample handle collections of items owned by a given Actor. This plugin doesn't restrict itself to the standard inventory
- *	system we usually think about. Any actor could own the component supporting the inventory system and define a set of items to be act upon. A visual
- *	representation of the available set specific to the context at hand would be provided to the local client once interacted with.
+ *	InventorySample is a system that define specific details about what an Inventory would look like in a game. Traditional inventory system
+ *	seems to be generally answering a single need, define what the UPlayer holds on them. But, as I'm thinking about it, the general use of this
+ *	system can be broader.
  *
- *	Example : A Backpack, Shop or Mystery Chess could all be provided from various sources a collection set of items to store.
+ *		Here's how...
  *
- *	A) For the backpack, this would be specific to the local player (Backend account or local save file) and would represent what is currently held
- *	by the player.
+ *		This plugin doesn't restrict itself to the standard inventory system we usually think about, any AActor could own the UActorComponent supporting
+ *		the inventory system, which means any Actor could hold a collection of Items i.e AShop, AMysteryChess, AForge, etc...
+ *		and they could all have data driven statically define set of items (or dynamic if provided from backend services).
  *
- *	B) For the shop, this would be a statically define collection set of items from which the user can buy, sell, trade from. I.e defined by design. In this
- *	case, interaction between the player and the shop would involve two components talking to each other and exchanging data.
+ *	This system has the benefit of allowing two components of similar type to exchange content, allow actions like trading, buying, etc... It unify
+ *	the api under a single roof, removing the need for systems like Shop/Forge/etc... and simplify how the UI system would request the relevant data for multi-context display.
  *
- *	C) Same for the Mystery chess.
+ *		Example :
+ *
+ *			* Displaying side-by-side AShop items and UPlayer 1 inventory.
+ *			* Displaying side-by-side UPlayer 1 inventory and UPlayer 1 Backup Storage.
+ *			* Displaying side-by-side UPlayer 1 inventory and UPlayer 2 inventory.
+ *			* or just displaying UPlayer 1 inventory in a singular window context.
+ *
+ *	Note : This system expect to make direct calls to the HandshakeSample GFP for running validations!
  */
