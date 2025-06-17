@@ -25,7 +25,9 @@
  *	Plugin Description :
  *
  *	TransactionSample is a recording system that capture statistics from gameplay events. During gameplay, the GFP will push
- *	a component on the GameState and record various transaction types :
+ *	a component on the AGameStateBase and record various transaction types :
+ *
+ *	Example :
  *
  *		* DamageDealt
  *		* Assist

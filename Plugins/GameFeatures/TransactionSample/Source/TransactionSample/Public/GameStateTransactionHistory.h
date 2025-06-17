@@ -34,7 +34,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTrans
 /**
  *	Class description:
  *
- *	UGameStateTransactionHistory capture transactions UObjects. It exists on the GameState and is pushed via GFP.
+ *	UGameStateTransactionHistory capture UTransaction object. It exists on the AGameStateBase and is pushed via GFP.
  *	During gameplay, it aggregate statistics for later access and display with UI or third party service.
  */
 UCLASS(ClassGroup=("Transaction"), Blueprintable, meta=(BlueprintSpawnableComponent))

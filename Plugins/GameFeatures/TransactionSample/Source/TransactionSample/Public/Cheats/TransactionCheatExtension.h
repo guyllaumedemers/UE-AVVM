@@ -35,7 +35,7 @@ class UGameStateTransactionHistory;
 /**
  *	Class description:
  *
- *	UTransactionCheatExtension expose basic functionnalities for recording transactions with the UGameStateTransactionHistory component
+ *	UTransactionCheatExtension expose basic functionalities for recording UTransaction with the UGameStateTransactionHistoryComponent
  *	during gameplay testing.
  */
 UCLASS()
