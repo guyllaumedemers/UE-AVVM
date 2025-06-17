@@ -30,16 +30,13 @@
 
 #include "TransactionCheatExtension.generated.h"
 
-class ATransactionHistory;
+class UGameStateTransactionHistory;
 
 /**
  *	Class description:
  *
- *	UTransactionCheatExtension is added through UGameFeatureAction_AddCheats and extend the UCheatManager without requiring deriving from
- *	the base class.
- *
- *	It exposed new console commands for testing the Transaction system and modify the replicated transaction history for
- *	use-case like the After Action Report and the leaderboard.
+ *	UTransactionCheatExtension expose basic functionnalities for recording transactions with the UGameStateTransactionHistory component
+ *	during gameplay testing.
  */
 UCLASS()
 class TRANSACTIONSAMPLE_API UTransactionCheatExtension : public UCheatManagerExtension
@@ -75,8 +72,6 @@ protected:
 	void OnStartGameInstance(UGameInstance* Game);
 	void ClearTransactionHistory();
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TObjectPtr<ATransactionHistory> TransactionHistory = nullptr;
-
+	TWeakObjectPtr<UGameStateTransactionHistory> TransactionHistory = nullptr;
 	FDelegateHandle GameInstanceDelegateHandle;
 };

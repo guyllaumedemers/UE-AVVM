@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Cheats/TransactionCheatExtension.h"
 
-#include "AVVM.h"
-#include "TransactionHistory.h"
+#include "AVVMGameplay.h"
+#include "GameStateTransactionHistory.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -32,7 +32,7 @@
 
 void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+	UE_LOG(LogGameplay, Log, TEXT("Registering %s"), *GetName());
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
@@ -45,7 +45,7 @@ void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 
 void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
+	UE_LOG(LogGameplay, Log, TEXT("Unregistering %s"), *GetName());
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
@@ -58,15 +58,15 @@ void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 
 void UTransactionCheatExtension::RemoveTransaction(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogUI, Log, TEXT("Remove Transaction \"%s\" from Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
+	UE_LOG(LogGameplay, Log, TEXT("Remove Transaction \"%s\" from Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
 
-	// TODO @gdemers define removal api if required. its not really a requirement to the system of transaction as transaction would be instanced
-	// and destroyed between worlds!
+	// TODO @gdemers Define Removal Action. System doesnt require due to it being instance per-gameplay GameState instantiation
+	// but will be closer to feature complete if available.
 }
 
 void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogUI, Log, TEXT("Add Transaction \"%s\" to Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
+	UE_LOG(LogGameplay, Log, TEXT("Add Transaction \"%s\" to Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
 
 	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 	if (!IsValid(PlayerState))
@@ -80,17 +80,19 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 		return;
 	}
 
-	if (ensureAlwaysMsgf(IsValid(TransactionHistory), TEXT("Invalid Transaction History Actor!")))
+	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Actor!")))
 	{
-		TransactionHistory->CreateAndRecordTransaction(UniqueNetId->ToString(), NewType, FString());
+		TransactionComponent->CreateAndRecordTransaction(UniqueNetId->ToString(), NewType, FString());
 	}
 }
 
 void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogUI, Log, TEXT("Print All Transactions \"%s\" from Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
+	UE_LOG(LogGameplay, Log, TEXT("Print All Transactions \"%s\" from Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
 
-	if (!ensureAlwaysMsgf(IsValid(TransactionHistory), TEXT("Invalid Transaction History Actor!")))
+	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	if (!ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Actor!")))
 	{
 		return;
 	}
@@ -110,7 +112,7 @@ void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const 
 	int32 Count = 0;
 	for (const UTransaction* Transaction : TransactionHistory->GetTransactions(UniqueNetId->ToString(), NewType))
 	{
-		UE_LOG(LogUI, Log, TEXT("Transaction \"%s\": \"%s\"."), *FString::FromInt(++Count), *Transaction->ToString());
+		UE_LOG(LogGameplay, Log, TEXT("Transaction \"%s\": \"%s\"."), *FString::FromInt(++Count), *Transaction->ToString());
 	}
 }
 
@@ -210,18 +212,14 @@ void UTransactionCheatExtension::OnStartGameInstance(UGameInstance* Game)
 		return;
 	}
 
-	UWorld* World = Game->GetWorld();
-	if (IsValid(World))
+	AGameStateBase* GameState = UGameplayStatics::GetGameState(this);
+	if (IsValid(GameState))
 	{
-		TransactionHistory = World->SpawnActor<ATransactionHistory>();
+		TransactionHistory = GameState->GetComponentByClass<UGameStateTransactionHistory>();
 	}
 }
 
 void UTransactionCheatExtension::ClearTransactionHistory()
 {
-	if (IsValid(TransactionHistory))
-	{
-		TransactionHistory->Destroy();
-		TransactionHistory = nullptr;
-	}
+	TransactionHistory.Reset();
 }

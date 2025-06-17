@@ -23,8 +23,9 @@
 
 #include "GameFramework/Info.h"
 
-#include "TransactionHistory.generated.h"
+#include "GameStateTransactionHistory.generated.h"
 
+class AGameStateBase;
 enum class ETransactionType : uint8;
 class UTransaction;
 
@@ -33,16 +34,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTrans
 /**
  *	Class description:
  *
- *	ATransactionHistory handle transaction that can be captured during gameplay and replicate across clients. this can aggregate damage dealt by this user,
- *	number of death/raise, money spent, earned etc...
+ *	UGameStateTransactionHistory capture transactions UObjects. It exists on the GameState and is pushed via GFP.
+ *	During gameplay, it aggregate statistics for later access and display with UI or third party service.
  */
-UCLASS(BlueprintType)
-class TRANSACTIONSAMPLE_API ATransactionHistory : public AInfo
+UCLASS(ClassGroup=("Transaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class TRANSACTIONSAMPLE_API UGameStateTransactionHistory : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	ATransactionHistory(const FObjectInitializer& ObjectInitializer);
+	UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -60,12 +61,11 @@ public:
 	FOnTransactionRecorded TransactionRecordedDelegate;
 
 protected:
-	// @gdemers a new transaction was recorded. broadcast external system
-	// that require an update!
 	UFUNCTION()
 	void OnRep_NewTransactionRecorded();
 
-	// @gdemers a set of transaction recorded.
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewTransactionRecorded")
 	TArray<TObjectPtr<const UTransaction>> Transactions;
+
+	TWeakObjectPtr<const AGameStateBase> OwningOuter = nullptr;
 };

@@ -29,7 +29,6 @@ public class TransactionSample : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVM",
 				"AVVMGameplay",
 				"Core",
 				"CoreUObject",

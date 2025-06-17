@@ -50,6 +50,7 @@ bool UTransaction::DoesMatch(const FString& NewOwnerId, const ETransactionType N
 
 FString UTransaction::ToString() const
 {
+	// TODO @gdemers parse data into a readable format
 	return FString();
 }
 

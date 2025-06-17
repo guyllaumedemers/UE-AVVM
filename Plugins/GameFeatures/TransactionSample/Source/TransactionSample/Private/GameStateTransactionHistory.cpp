@@ -17,39 +17,48 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "TransactionHistory.h"
+#include "GameStateTransactionHistory.h"
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Transaction.h"
+#include "GameFramework/GameStateBase.h"
 #include "Net/UnrealNetwork.h"
 
-ATransactionHistory::ATransactionHistory(const FObjectInitializer& ObjectInitializer)
+UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	bReplicates = true;
+	SetIsReplicatedByDefault(true);
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-void ATransactionHistory::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UGameStateTransactionHistory::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ATransactionHistory, Transactions);
+	DOREPLIFETIME(UGameStateTransactionHistory, Transactions);
 }
 
-void ATransactionHistory::BeginPlay()
+void UGameStateTransactionHistory::BeginPlay()
 {
 	Super::BeginPlay();
 
+	const auto* Outer = GetTypedOuter<AGameStateBase>();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" to World."),
-	       UAVVMGameplayUtils::PrintNetMode(this).GetData(),
-	       *GetName())
+	       TEXT("Executed from \"%s\". Adding UGameStateTransactionHistory to Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName());
+
+	OwningOuter = Outer;
 }
 
-void ATransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -62,16 +71,22 @@ void ATransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 #endif
 
+	const auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" from World."),
-	       UAVVMGameplayUtils::PrintNetMode(this).GetData(),
-	       *GetName())
+	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName());
 }
 
-void ATransactionHistory::CreateAndRecordTransaction(const FString& NewOwnerId,
-                                                     const ETransactionType NewTransactionType,
-                                                     const FString& NewPayload)
+void UGameStateTransactionHistory::CreateAndRecordTransaction(const FString& NewOwnerId,
+                                                              const ETransactionType NewTransactionType,
+                                                              const FString& NewPayload)
 {
 #if WITH_SERVER_CODE
 	UTransaction* Transaction = NewObject<UTransaction>(this);
@@ -81,8 +96,8 @@ void ATransactionHistory::CreateAndRecordTransaction(const FString& NewOwnerId,
 #endif
 }
 
-TArray<TObjectPtr<const UTransaction>> ATransactionHistory::GetTransactions(const FString& OwnerId,
-                                                                            const ETransactionType TransactionType) const
+TArray<TObjectPtr<const UTransaction>> UGameStateTransactionHistory::GetTransactions(const FString& OwnerId,
+                                                                                     const ETransactionType TransactionType) const
 {
 	return Transactions.FilterByPredicate([OwnerId, TransactionType](const TObjectPtr<const UTransaction>& Transaction)
 	{
@@ -90,9 +105,13 @@ TArray<TObjectPtr<const UTransaction>> ATransactionHistory::GetTransactions(cons
 	});
 }
 
-void ATransactionHistory::OnRep_NewTransactionRecorded()
+void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 {
-	UE_LOG(LogTemp, Log, TEXT("OnRep_NewTransactionRecorded called on client!"));
-	const UTransaction* NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Last().Get();
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". OnRep_NewTransactionRecorded."),
+	       UAVVMGameplayUtils::PrintNetMode(OwningOuter.Get()).GetData());
+
+	const TObjectPtr<const UTransaction> NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Top();
 	TransactionRecordedDelegate.Broadcast(NewTransaction);
 }

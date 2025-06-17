@@ -82,7 +82,7 @@ inline const TCHAR* EnumToString(ETransactionType State)
 /**
  *	Class description:
  *
- *	UTransaction are replicated UObject that store replicated data.
+ *	UTransaction are replicated UObject that store gameplay statistics.
  */
 UCLASS(BlueprintType)
 class TRANSACTIONSAMPLE_API UTransaction : public UObject
@@ -118,5 +118,5 @@ private:
 	                const ETransactionType NewTransactionType,
 	                const FString& NewPayload);
 
-	friend class ATransactionHistory;
+	friend class UGameStateTransactionHistory;
 };
