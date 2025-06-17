@@ -34,6 +34,9 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHandshakeComplete, const bool, bWasSuccess)
  *	Class description:
  *
  *	FHandshakeContext define the endpoint of a transaction between two entities.
+ *
+ *	TODO @gdemers May be valuable to convert this into a UObject so we can ad the UObject to the ReplicatedSubObjectList and
+ *	replicate status update of the validation process on client.
  */
 USTRUCT(BlueprintType)
 struct HANDSHAKESAMPLE_API FHandshakeContext
@@ -53,9 +56,7 @@ struct HANDSHAKESAMPLE_API FHandshakeContext
 /**
  *	Class description:
  *
- *	UGameStateHandshakeComponent handle execution of a handshake based on ability invocation. Both end of an Ability, Instigator and Target often require
- *	a set of requirements to be met, validation can be run through the Impl object provided, which make this system flexible for extension, and handle hiding the details
- *	of an exchange between both entity.
+ *	UGameStateHandshakeComponent process 'Handshake' request and notify caller of the returned results.
  */
 UCLASS(ClassGroup=("Handshake"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class HANDSHAKESAMPLE_API UGameStateHandshakeComponent : public UActorComponent

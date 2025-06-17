@@ -43,4 +43,5 @@ bool UHandshakeValidatorImpl::DoesMeetRequirementForHandshake(const FHandshakeCo
 
 void UHandshakeValidatorImpl::TryExecute_Internal(const FHandshakeContext& Context) const
 {
+	// TODO @gdemers Add implementation details for gameplay testing.
 }

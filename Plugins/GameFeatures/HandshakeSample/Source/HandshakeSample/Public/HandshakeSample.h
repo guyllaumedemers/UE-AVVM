@@ -24,5 +24,16 @@
 /**
  *	Plugin Description :
  *
- *	
+ *	HandshakeSample is a validation system that take advantage of the 'strategy pattern' to compare, validate and execute behaviour,
+ *	based on the provided 'Handshake' context. A handshake can represent any interaction between two components that are trying to communicate
+ *	with each other and execute an action. During gameplay, the GFP will push a component on the AGameStateBase and await a user request.
+ *
+ *	Example :
+ *
+ *		* Trading Items between players
+ *		* Attempting to raise a player
+ *		* Buying an Item from a Store
+ *
+ *	This system should be extended specific to your project needs and validation extended through the UHandshakeValidatorImpl so microservice in place
+ *	can execute proper security check. 
  */

@@ -31,7 +31,8 @@ struct FHandshakeContext;
 /**
  *	Class description:
  *
- *	UHandshakeValidatorImpl define the behaviour that should be executed during the handshake process.
+ *	UHandshakeValidatorImpl is an object that implement the 'strategy pattern' and allow behaviour changes by
+ *	referencing a different class context at runtime. It validates the 'Handshake' between two components of similar types.
  */
 UCLASS()
 class HANDSHAKESAMPLE_API UHandshakeValidatorImpl : public UObject
