@@ -35,152 +35,17 @@
 
 /**
  *	Class description:
- *	
- *	EItemState is the general state of the Item when held by the owning UActorComponent.
- */
-UENUM(BlueprintType)
-enum class EItemState : uint8
-{
-	None,
-	PrimaryEquipped,
-	SecondaryEquipped,
-	PendingForTrade,
-	Traded,
-	PendingForSell,
-	Sold,
-	PendingForPurchase,
-	Purchased,
-	PendingForDiscard,
-	Discarded,
-	PendingForConsumption,
-	Consumed
-};
-
-inline const TCHAR* EnumToString(EItemState State)
-{
-	switch (State)
-	{
-		case EItemState::PrimaryEquipped:
-			return TEXT("PrimaryEquipped");
-		case EItemState::SecondaryEquipped:
-			return TEXT("SecondaryEquipped");
-		case EItemState::PendingForTrade:
-			return TEXT("PendingForTrade");
-		case EItemState::Traded:
-			return TEXT("Traded");
-		case EItemState::PendingForSell:
-			return TEXT("PendingForSell");
-		case EItemState::Sold:
-			return TEXT("Sold");
-		case EItemState::PendingForPurchase:
-			return TEXT("PendingForPurchase");
-		case EItemState::Purchased:
-			return TEXT("Purchased");
-		case EItemState::PendingForDiscard:
-			return TEXT("PendingForDiscard");
-		case EItemState::Discarded:
-			return TEXT("Discarded");
-	}
-	ensure(false);
-	return TEXT("Unknown");
-}
-
-/**
- *	Class description:
- *	
- *	EItemDropBehaviourType is the Item behaviour attached to a Drop action.
- */
-UENUM(BlueprintType)
-enum class EItemDropBehaviourType : uint8
-{
-	None,
-	DropAndPersist,
-	DropAndDestroy
-};
-
-inline const TCHAR* EnumToString(EItemDropBehaviourType Type)
-{
-	switch (Type)
-	{
-		case EItemDropBehaviourType::DropAndPersist:
-			return TEXT("DropAndPersist");
-		case EItemDropBehaviourType::DropAndDestroy:
-			return TEXT("DropAndDestroy");
-	}
-	ensure(false);
-	return TEXT("Unknown");
-}
-
-/**
- *	Class description:
- *	
- *	EItemConsumptionState is the liquidity of the Item.
- */
-UENUM(BlueprintType)
-enum class EItemConsumptionState : uint8
-{
-	None,
-	CanBeConsumed
-};
-
-inline const TCHAR* EnumToString(EItemConsumptionState State)
-{
-	switch (State)
-	{
-		case EItemConsumptionState::CanBeConsumed:
-			return TEXT("CanBeConsumed");
-	}
-	ensure(false);
-	return TEXT("Unknown");
-}
-
-/**
- *	Class description:
- *	
- *	EItemStorageType is where the Item currently exist.
- */
-UENUM(BlueprintType)
-enum class EItemStorageType : uint8
-{
-	None,
-	InGameWorld,
-	InUserBackpackStorage,
-	InUserBackupStorage
-};
-
-inline const TCHAR* EnumToString(EItemStorageType Type)
-{
-	switch (Type)
-	{
-		case EItemStorageType::InGameWorld:
-			return TEXT("InGameWorld");
-		case EItemStorageType::InUserBackpackStorage:
-			return TEXT("InUserBackpackStorage");
-		case EItemStorageType::InUserBackupStorage:
-			return TEXT("InUserBackupStorage");
-	}
-	ensure(false);
-	return TEXT("Unknown");
-}
-
-/**
- *	Class description:
  *
- *	FItemStatus is the status of the Item.
- *
- *	TODO @gdemers I may update this to be working with tags so to support blocking certain tags
- *	for given scenario but idk yet.
+ *	FItemStatus is the status of the Item using Tags.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemStatus
 {
 	GENERATED_BODY()
 
+	// @gdemers Complex state of the item. Example : CanBeConsumed & InBackupStorage & PendingForTrade
 	UPROPERTY(Transient, BlueprintReadOnly)
-	EItemStorageType ItemStorageType = EItemStorageType::None;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	EItemState ItemState = EItemState::None;
+	FGameplayTagContainer RuntimeItemDefinitionTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 Counter = 1;
@@ -229,17 +94,12 @@ public:
 	void TrySpawnDroppedItem(const AActor* Target);
 
 protected:
+	// @gdemers define a set of tags that default initialize the status of the item when created.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag ItemTypeTag = FGameplayTag::EmptyTag;
+	FGameplayTagContainer ItemDefinitionTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FDataRegistryId ItemProgressionId = FDataRegistryId();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	EItemDropBehaviourType ItemDropBehaviourType = EItemDropBehaviourType::None;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	EItemConsumptionState ItemConsumptionState = EItemConsumptionState::None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bCanAttachToSocket = false;

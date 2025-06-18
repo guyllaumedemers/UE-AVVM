@@ -25,7 +25,6 @@
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 #include "Engine/StreamableManager.h"
-#include "Templates/SubclassOf.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
