@@ -101,6 +101,22 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 	return Items;
 }
 
+const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByPartialMatch(const FGameplayTagContainer& FilteringTags) const
+{
+	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Item)
+	{
+		return IsValid(Item) && Item->HasPartialMatch(Compare);
+	});
+}
+
+const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const
+{
+	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Item)
+	{
+		return IsValid(Item) && Item->HasExactMatch(Compare);
+	});
+}
+
 void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
 {
 	auto* Outer = OwningOuter.Get();

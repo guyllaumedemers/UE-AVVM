@@ -49,6 +49,16 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 	RuntimeItemState.StateTags.AppendTags(AddedTags);
 }
 
+bool UItemObject::HasPartialMatch(const FGameplayTagContainer& Compare) const
+{
+	return ItemTypeTags.HasAnyExact(Compare);
+}
+
+bool UItemObject::HasExactMatch(const FGameplayTagContainer& Compare) const
+{
+	return ItemTypeTags.HasAllExact(Compare);
+}
+
 void UItemObject::TrySpawnEquippedItem(const AActor* Target)
 {
 	auto* ResourceManagerComponent = IsValid(Target) ? Target->GetComponentByClass<UAVVMResourceManagerComponent>() : nullptr;

@@ -94,6 +94,9 @@ public:
 #endif // UE_WITH_IRIS
 
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
+	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
+
 	void TrySpawnEquippedItem(const AActor* Target);
 	void TrySpawnDroppedItem(const AActor* Target);
 
