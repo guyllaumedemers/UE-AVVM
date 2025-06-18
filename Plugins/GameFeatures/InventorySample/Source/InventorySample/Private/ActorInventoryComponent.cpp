@@ -120,39 +120,6 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const
 	});
 }
 
-void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
-{
-	auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
-	{
-		return;
-	}
-
-	const int32 OldSize = OldItemObjects.Num();
-	const int32 NewSize = Items.Num();
-
-	FStringView SV;
-	if (NewSize == OldSize)
-	{
-		SV = TEXT("has identical Size. We may have Swapped Items!");
-	}
-	else if (NewSize > OldSize)
-	{
-		SV = TEXT("has increased!");
-	}
-	else
-	{
-		SV = TEXT("has decreased!");
-	}
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Item Collection modified on Actor \"%s\"! Collection %s"),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
-	       *Outer->GetName(),
-	       SV.GetData());
-}
-
 void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects)
 {
 	if (!ensureAlwaysMsgf(!ItemObjects.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
@@ -192,4 +159,37 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 			Item->TrySpawnEquippedItem(Outer);
 		}
 	}
+}
+
+void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
+{
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	const int32 OldSize = OldItemObjects.Num();
+	const int32 NewSize = Items.Num();
+
+	FStringView SV;
+	if (NewSize == OldSize)
+	{
+		SV = TEXT("has identical Size. We may have Swapped Items!");
+	}
+	else if (NewSize > OldSize)
+	{
+		SV = TEXT("has increased!");
+	}
+	else
+	{
+		SV = TEXT("has decreased!");
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Item Collection modified on Actor \"%s\"! Collection %s"),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName(),
+	       SV.GetData());
 }

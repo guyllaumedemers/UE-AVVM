@@ -23,16 +23,16 @@
 EDataValidationResult UItemDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemObject.IsNull())
+	if (ItemObjectClass.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UItemDefinitionDataAsset", "", "UItemObject missing. No valid TSoftObjectPtr specified!"));
+		Context.AddError(NSLOCTEXT("UItemDefinitionDataAsset", "", "UItemObject missing. No valid TSoftClassPtr specified!"));
 	}
 
 	return Result;
 }
 
-EDataValidationResult FAVVMItemDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FItemDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 	if (ItemDefinition.IsNull())
@@ -45,7 +45,7 @@ EDataValidationResult FAVVMItemDefinitionDataTableRow::IsDataValid(class FDataVa
 }
 #endif
 
-TArray<FSoftObjectPath> FAVVMItemDefinitionDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FItemDefinitionDataTableRow::GetResourcesPaths() const
 {
 	return {ItemDefinition.ToSoftObjectPath()};
 }
@@ -63,7 +63,7 @@ EDataValidationResult UItemCollectionDefinitionDataAsset::IsDataValid(class FDat
 	return Result;
 }
 
-EDataValidationResult FAVVMItemCollectionDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FItemCollectionDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 	if (ItemCollectionDefinition.IsNull())
@@ -76,7 +76,7 @@ EDataValidationResult FAVVMItemCollectionDefinitionDataTableRow::IsDataValid(cla
 }
 #endif
 
-TArray<FSoftObjectPath> FAVVMItemCollectionDefinitionDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FItemCollectionDefinitionDataTableRow::GetResourcesPaths() const
 {
 	return {ItemCollectionDefinition.ToSoftObjectPath()};
 }

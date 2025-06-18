@@ -86,7 +86,7 @@ void UItemProgressionDefinitionDataAsset::OnSoftObjectAcquired(FOnRequestItemAct
 }
 
 #if WITH_EDITOR
-EDataValidationResult FAVVMItemProgressionDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FItemProgressionDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 	if (ItemProgressionDefinition.IsNull())
@@ -99,7 +99,7 @@ EDataValidationResult FAVVMItemProgressionDefinitionDataTableRow::IsDataValid(cl
 }
 #endif
 
-TArray<FSoftObjectPath> FAVVMItemProgressionDefinitionDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FItemProgressionDefinitionDataTableRow::GetResourcesPaths() const
 {
 	return {ItemProgressionDefinition.ToSoftObjectPath()};
 }

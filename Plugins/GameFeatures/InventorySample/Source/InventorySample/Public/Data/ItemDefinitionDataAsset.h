@@ -56,16 +56,16 @@ class INVENTORYSAMPLE_API UItemDefinitionDataAsset : public UDataAsset
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftObjectPtr<UItemObject> ItemObject = nullptr;
+	TSoftClassPtr<UItemObject> ItemObjectClass = nullptr;
 };
 
 /**
  *	Class description:
  *
- *	FAVVMItemDefinitionDataTableRow is an entry in a DataTableRow for a unique item.
+ *	FItemDefinitionDataTableRow is an entry in a DataTableRow for a unique item.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FAVVMItemDefinitionDataTableRow : public FAVVMDataTableRow
+struct INVENTORYSAMPLE_API FItemDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
@@ -106,10 +106,10 @@ protected:
 /**
  *	Class description:
  *
- *	FAVVMItemCollectionDefinitionDataTableRow is an entry in a DataTableRow for a unique set of items.
+ *	FItemCollectionDefinitionDataTableRow is an entry in a DataTableRow for a unique set of items.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FAVVMItemCollectionDefinitionDataTableRow : public FAVVMDataTableRow
+struct INVENTORYSAMPLE_API FItemCollectionDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

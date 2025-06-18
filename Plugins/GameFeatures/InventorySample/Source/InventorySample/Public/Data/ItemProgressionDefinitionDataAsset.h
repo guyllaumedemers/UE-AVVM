@@ -37,7 +37,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, const TSoftC
 /**
  *	Class description:
  *
- *	UItemStage is a POD that reference information about an item representation at a given stage/level.
+ *	UItemProgressionStageDefinitionDataAsset is a POD that reference information about an item representation at a given stage/level.
  *	This data asset can reference any information specific to your items and the overrides per-stages.
  *
  *	Example :
@@ -100,10 +100,10 @@ protected:
 /**
  *	Class description:
  *
- *	FAVVMItemProgressionDefinitionDataTableRow is an entry in a DataTableRow for a unique item progression.
+ *	FItemProgressionDefinitionDataTableRow is an entry in a DataTableRow for a unique item progression.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FAVVMItemProgressionDefinitionDataTableRow : public FAVVMDataTableRow
+struct INVENTORYSAMPLE_API FItemProgressionDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

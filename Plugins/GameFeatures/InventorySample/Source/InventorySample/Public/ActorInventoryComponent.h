@@ -74,10 +74,10 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
+	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects);
 
 	UFUNCTION()
-	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects);
+	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldAsyncLoadOnBeginPlay = true;
