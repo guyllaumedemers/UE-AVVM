@@ -33,7 +33,7 @@
 
 #include "ItemProgressionDefinitionDataAsset.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, TSubclassOf<AActor>, NewActorClass);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, const TSoftClassPtr<AActor>&, NewActorClass);
 
 /**
  *	Class description:
@@ -54,7 +54,7 @@ class INVENTORYSAMPLE_API UItemProgressionStageDefinitionDataAsset : public UDat
 
 public:
 	UFUNCTION(BlueprintCallable)
-	TSubclassOf<AActor> GetOverrideItemActorClass() const;
+	const TSoftClassPtr<AActor>& GetOverrideItemActorClass() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool CanOverrideItemActorClass() const;
@@ -64,7 +64,7 @@ protected:
 	bool bDoesOverrideItemActorClass = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesOverrideItemActorClass"))
-	TSubclassOf<AActor> OverrideItemActorClass = nullptr;
+	TSoftClassPtr<AActor> OverrideItemActorClass = nullptr;
 };
 
 /**
@@ -83,7 +83,7 @@ public:
 	                            const FOnRequestItemActorClassComplete& Callback);
 
 	UFUNCTION(BlueprintCallable)
-	TSubclassOf<AActor> GetDefaultItemActorClass() const;
+	const TSoftClassPtr<AActor>& GetDefaultItemActorClass() const;
 
 protected:
 	UFUNCTION()
@@ -93,7 +93,7 @@ protected:
 	TArray<TSoftObjectPtr<const UItemProgressionStageDefinitionDataAsset>> ItemProgressionStageDataAssets;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<AActor> DefaultItemActorClass = nullptr;
+	TSoftClassPtr<AActor> DefaultItemActorClass = nullptr;
 
 	TSharedPtr<FStreamableHandle> ItemProgressionStageHandle;
 };

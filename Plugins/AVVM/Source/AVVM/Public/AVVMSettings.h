@@ -44,5 +44,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	FDataRegistryType CheatRegistryType;
+	FDataRegistryType CheatRegistryType = FDataRegistryType();
 };

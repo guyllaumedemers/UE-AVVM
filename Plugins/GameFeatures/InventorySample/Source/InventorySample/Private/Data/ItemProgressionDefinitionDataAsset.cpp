@@ -21,7 +21,7 @@
 
 #include "Engine/AssetManager.h"
 
-TSubclassOf<AActor> UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
+const TSoftClassPtr<AActor>& UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
 {
 	return OverrideItemActorClass;
 }
@@ -48,7 +48,7 @@ void UItemProgressionDefinitionDataAsset::GetItemActorClassAsync(const int32 Pro
 	}
 }
 
-TSubclassOf<AActor> UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
+const TSoftClassPtr<AActor>& UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
 {
 	return DefaultItemActorClass;
 }
