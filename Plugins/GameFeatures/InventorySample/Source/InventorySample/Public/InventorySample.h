@@ -32,7 +32,7 @@
  *
  *		This plugin doesn't restrict itself to the standard inventory system we usually think about, any AActor could own the UActorComponent supporting
  *		the inventory system, which means any Actor could hold a collection of Items i.e AShop, AMysteryChess, AForge, etc...
- *		and they could all have data driven statically define set of items (or dynamic if provided from backend services).
+ *		and they could all have data driven collection of items (or dynamic if provided from backend services).
  *
  *	This system has the benefit of allowing two components of similar type to exchange content, allow actions like trading, buying, etc... It unify
  *	the api under a single roof, removing the need for systems like Shop/Forge/etc... and simplify how the UI system would request the relevant data for multi-context display.

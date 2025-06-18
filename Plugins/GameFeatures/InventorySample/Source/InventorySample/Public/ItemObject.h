@@ -35,7 +35,7 @@
 /**
  *	Class description:
  *	
- *	EItemState represent the state of an item.
+ *	EItemState is the general state of the Item when held by the owning UActorComponent.
  */
 UENUM(BlueprintType)
 enum class EItemState : uint8
@@ -87,7 +87,7 @@ inline const TCHAR* EnumToString(EItemState State)
 /**
  *	Class description:
  *	
- *	EItemDropBehaviourType represent the behaviour state of an item. What does the item execute when dropped.
+ *	EItemDropBehaviourType is the Item behaviour attached to a Drop action.
  */
 UENUM(BlueprintType)
 enum class EItemDropBehaviourType : uint8
@@ -113,7 +113,7 @@ inline const TCHAR* EnumToString(EItemDropBehaviourType Type)
 /**
  *	Class description:
  *	
- *	EItemConsumptionState represent the state of an item. Can we consume the object.
+ *	EItemConsumptionState is the liquidity of the Item.
  */
 UENUM(BlueprintType)
 enum class EItemConsumptionState : uint8
@@ -136,7 +136,7 @@ inline const TCHAR* EnumToString(EItemConsumptionState State)
 /**
  *	Class description:
  *	
- *	EItemStorageType represent the location type of an item. Where is the item being kept.
+ *	EItemStorageType is where the Item currently exist.
  */
 UENUM(BlueprintType)
 enum class EItemStorageType : uint8
@@ -165,7 +165,7 @@ inline const TCHAR* EnumToString(EItemStorageType Type)
 /**
  *	Class description:
  *
- *	FItemStatus describe the status of an Item.
+ *	FItemStatus is the status of the Item.
  *
  *	TODO @gdemers I may update this to be working with tags so to support blocking certain tags
  *	for given scenario but idk yet.
@@ -194,7 +194,7 @@ struct INVENTORYSAMPLE_API FItemStatus
 /**
  *	Class description:
  *
- *	FItemLayout define the layout occupied by the referenced item.
+ *	FItemLayout is the Item UI layout space.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemLayout
@@ -211,8 +211,11 @@ struct INVENTORYSAMPLE_API FItemLayout
 /**
  *	Class description:
  *	
- *	UItemObject represent any object that exist in your project LORE. Note: When a UItemObject state
- *	becomes InWorld, an AActor is instanced on the server for player pick up.
+ *	UItemObject is any object that exist in your project LORE. Note: When a UItemObject state becomes InWorld, an AActor is instanced on the server
+ *	for player pick up.
+ *
+ *	This object type can be created based on data assets referenced on an AActor Class (holding UAVVMResourceManagerComponent)
+ *	or based on a FDataRegistryId collection returned from backend services.
  */
 UCLASS(BlueprintType, Blueprintable)
 class INVENTORYSAMPLE_API UItemObject : public UObject
@@ -231,13 +234,9 @@ public:
 	void TrySpawnDroppedItem(const AActor* Target);
 
 protected:
-	// ItemActorClass represent any world object that is open for pick up. Note : We expect the actor to be receiving a UActorInteractionComponent to support both Interaction Actions,
-	// and UAVVMResourceManagerComponent for Resource loading, via a GameFeaturePlugin Data Asset.
-	// Note : Native Actor Class isn't required here as any BP Class can act as the receiver to the components being dynamically added.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AActor> ItemActorClass = nullptr;
 
-	// @gdemers for filtering purpose
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag ItemTypeTag = FGameplayTag::EmptyTag;
 
