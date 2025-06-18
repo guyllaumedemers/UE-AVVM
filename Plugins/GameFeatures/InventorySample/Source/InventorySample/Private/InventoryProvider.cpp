@@ -19,8 +19,17 @@
 //SOFTWARE.
 #include "InventoryProvider.h"
 
-void IInventoryProvider::RequestItems_Implementation(const UObject* Outer, const FOnRetrieveInventoryItems& Callback) const
+#include "AVVMUtilityFunctionLibrary.h"
+
+void UInventoryBlueprintFunctionLibrary::RequestItems(const UObject* Outer,
+                                                      const FOnRetrieveInventoryItems& Callback)
 {
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
+	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
+	{
+		return;
+	}
+
 	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
 	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
 	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
@@ -40,4 +49,10 @@ void IInventoryProvider::RequestItems_Implementation(const UObject* Outer, const
 		// @gdemers manage items retrieved from backend services
 		IInventoryProvider::Execute_ProcessDynamicItems(Outer, Callback);
 	}
+}
+
+void UInventoryBlueprintFunctionLibrary::ExecuteInventoryProviderDelegate(const TArray<UItemObject*>& NewItems,
+                                                                          const FOnRetrieveInventoryItems& Callback)
+{
+	Callback.ExecuteIfBound(NewItems);
 }

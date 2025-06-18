@@ -21,7 +21,6 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
 #include "ItemObject.h"
 #include "Net/UnrealNetwork.h"
@@ -49,14 +48,13 @@ void UActorInventoryComponent::BeginPlay()
 		return;
 	}
 
+	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
+	OwningOuter = Outer;
+
 #if WITH_SERVER_CODE
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
-	if (ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
-	{
-		FOnRetrieveInventoryItems Callback;
-		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-		IInventoryProvider::Execute_RequestItems(Outer, Outer, Callback);
-	}
+	FOnRetrieveInventoryItems Callback;
+	Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
+	UInventoryBlueprintFunctionLibrary::RequestItems(Outer, Callback);
 #endif
 
 	UE_LOG(LogGameplay,
@@ -64,9 +62,6 @@ void UActorInventoryComponent::BeginPlay()
 	       TEXT("Executed from \"%s\". Adding UActorInventoryComponent to Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
-
-	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
-	OwningOuter = Outer;
 }
 
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -147,14 +142,32 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 		return;
 	}
 
+	// @gdemers remove first
+	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
+	{
+		RemoveReplicatedSubObject(Iterator->Get());
+		Iterator.RemoveCurrentSwap();
+	}
+
 	Items.Reset(ItemObjects.Num());
-	Items = ItemObjects;
+	// @gdemers append after
+	for (UItemObject* Item : ItemObjects)
+	{
+		if (IsValid(Item) /*Make Array in BP return size=1 array with [0]=nullptr*/)
+		{
+			AddReplicatedSubObject(Item);
+			Items.Add(Item);
+		}
+	}
 
 	// @gdemers Player Inventory should only spawn actor for equipped items that are in the primary slot (visible), other actor types
 	// should only be able to spawn a visual representation of the item bases on system requirements, example : hovering over item in grid
 	// trigger event that require spawning a mesh of the object in the world.
 	for (UItemObject* Item : Items)
 	{
-		Item->TrySpawnEquippedItem(Outer);
+		if (IsValid(Item))
+		{
+			Item->TrySpawnEquippedItem(Outer);
+		}
 	}
 }

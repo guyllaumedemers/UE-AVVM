@@ -171,8 +171,11 @@ bool UAVVMResourceManagerComponent::ProcessAdditionalResources(const TArray<FDat
 
 	for (const FDataRegistryId& RegistryId : PendingRegistriesId)
 	{
-		const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
-		ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(RegistryId, Callback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
+		if (RegistryId.IsValid())
+		{
+			const auto Callback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired);
+			ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(RegistryId, Callback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
+		}
 	}
 
 	return true;

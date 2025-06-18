@@ -77,11 +77,6 @@ class INVENTORYSAMPLE_API IInventoryProvider
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RequestItems(const UObject* Outer, const FOnRetrieveInventoryItems& Callback) const;
-	virtual void RequestItems_Implementation(const UObject* Outer, const FOnRetrieveInventoryItems& Callback) const;
-
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ProcessStaticItems(const FOnRetrieveInventoryItems& Callback) const;
@@ -94,4 +89,25 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	EItemSrcType GetItemSrcType() const;
 	virtual EItemSrcType GetItemSrcType_Implementation() const PURE_VIRTUAL(GetItemSrcType_Implementation, return EItemSrcType::None;);
+};
+
+/**
+ *	Class description:
+ *
+ *	UInventoryBlueprintFunctionLibrary is a function library that expose basic api for executing Provider Request in Blueprint. It works around the issue
+ *	where Blueprint Classes, who implement an interface in BP Only, not in Native C++, cannot bind to the 'Add Parent Call' Node.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UInventoryBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static void RequestItems(const UObject* Outer,
+	                         const FOnRetrieveInventoryItems& Callback);
+
+	UFUNCTION(BlueprintCallable)
+	static void ExecuteInventoryProviderDelegate(const TArray<UItemObject*>& NewItems,
+	                                             const FOnRetrieveInventoryItems& Callback);
 };
