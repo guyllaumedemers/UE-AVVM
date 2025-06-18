@@ -25,8 +25,8 @@ void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UItemObject, ItemActor);
-	DOREPLIFETIME(UItemObject, ItemStatus);
+	DOREPLIFETIME(UItemObject, RuntimeItemActor);
+	DOREPLIFETIME(UItemObject, RuntimeItemState);
 }
 
 bool UItemObject::IsSupportedForNetworking() const

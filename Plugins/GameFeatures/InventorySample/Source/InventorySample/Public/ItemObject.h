@@ -36,16 +36,16 @@
 /**
  *	Class description:
  *
- *	FItemStatus is the status of the Item using Tags.
+ *	FItemState is the state of the Item portrait using Tags.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemStatus
+struct INVENTORYSAMPLE_API FItemState
 {
 	GENERATED_BODY()
 
-	// @gdemers Complex state of the item. Example : CanBeConsumed & InBackupStorage & PendingForTrade
+	// @gdemers Complex state. Example : CanBeConsumed & InBackupStorage & PendingForTrade
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTagContainer RuntimeItemDefinitionTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 Counter = 1;
@@ -94,9 +94,11 @@ public:
 	void TrySpawnDroppedItem(const AActor* Target);
 
 protected:
-	// @gdemers define a set of tags that default initialize the status of the item when created.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer ItemDefinitionTags = FGameplayTagContainer::EmptyContainer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item State and how it should behave. Example : CanBeConsumed, Destroy on Drop, etc..."))
+	FGameplayTagContainer DefaultItemStateTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item Category. Example : Weapon, Armor, etc... and the Slot where it can be equipped!"))
+	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FDataRegistryId ItemProgressionId = FDataRegistryId();
@@ -114,8 +116,8 @@ protected:
 	FItemLayout ItemLayout = FItemLayout();
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AActor> ItemActor = nullptr;
+	TObjectPtr<AActor> RuntimeItemActor = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FItemStatus ItemStatus = FItemStatus();
+	FItemState RuntimeItemState = FItemState();
 };
