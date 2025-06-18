@@ -19,9 +19,9 @@
 //SOFTWARE.
 #include "InventoryProvider.h"
 
-void IInventoryProvider::RequestItems_Implementation(const FOnRetrieveInventoryItems& Callback) const
+void IInventoryProvider::RequestItems_Implementation(const UObject* Outer, const FOnRetrieveInventoryItems& Callback) const
 {
-	const EItemSrcType ItemSrcType = GetItemSrcType();
+	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
 	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
 	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
 	{
@@ -32,18 +32,12 @@ void IInventoryProvider::RequestItems_Implementation(const FOnRetrieveInventoryI
 	const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
 	if (bIsItemSrcStatic)
 	{
-		// @gdemers expect loading of local resource based on FDataRegistryIds fetch from static data. Note : UAVVMResourceManagerComponent
-		// should be invoked and handle resource loading at the Actor level in the override.
-		// Note : IResourceProvider return a RegistryId defined by the owning Actor. This can be used for static data that require loading
-		// during the ResourceComponent OnBeginPlay.
-		// TODO @gdemers Resource loading on an Actor with Static data may be already running on the Resource Component due to IResourceProvider defining the RegistryId.
-		// the Component should be able to store callback delegates, wait until completion of all resources loading and broadcast all registered callbacks.
-		ProcessStaticItems(Callback);
+		// @gdemers manage items retrieved from data asset
+		IInventoryProvider::Execute_ProcessStaticItems(Outer, Callback);
 	}
 	else
 	{
-		// @gdemers expect handling of any backend request and loading of resources based on FDataRegistryIds received post-request completion. Note : UAVVMResourceManagerComponent
-		// should be invoked and handle resource loading at the Actor level in the override.
-		ProcessDynamicItems(Callback);
+		// @gdemers manage items retrieved from backend services
+		IInventoryProvider::Execute_ProcessDynamicItems(Outer, Callback);
 	}
 }

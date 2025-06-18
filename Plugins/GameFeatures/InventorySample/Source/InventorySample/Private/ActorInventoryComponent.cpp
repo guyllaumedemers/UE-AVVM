@@ -55,7 +55,7 @@ void UActorInventoryComponent::BeginPlay()
 	{
 		FOnRetrieveInventoryItems Callback;
 		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-		IInventoryProvider::Execute_RequestItems(Outer, Callback);
+		IInventoryProvider::Execute_RequestItems(Outer, Outer, Callback);
 	}
 #endif
 
@@ -94,6 +94,11 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	       *Outer->GetName())
 
 	OwningOuter.Reset();
+}
+
+const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
+{
+	return Items;
 }
 
 void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)

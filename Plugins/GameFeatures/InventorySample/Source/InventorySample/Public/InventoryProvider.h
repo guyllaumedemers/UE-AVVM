@@ -79,8 +79,8 @@ class INVENTORYSAMPLE_API IInventoryProvider
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RequestItems(const FOnRetrieveInventoryItems& Callback) const;
-	virtual void RequestItems_Implementation(const FOnRetrieveInventoryItems& Callback) const;
+	void RequestItems(const UObject* Outer, const FOnRetrieveInventoryItems& Callback) const;
+	virtual void RequestItems_Implementation(const UObject* Outer, const FOnRetrieveInventoryItems& Callback) const;
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

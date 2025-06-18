@@ -30,7 +30,8 @@ class UItemObject;
 /**
  *	Class description:
  *
- *	UInventoryLayoutHandler define behaviour details for placing items in a grid structure on screen.
+ *	UInventoryLayoutHandler is the implementation behaviour that define how the UActorInventoryComponent
+ *	content should be displayed.
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class INVENTORYSAMPLE_API UInventoryLayoutHandler : public UObject
@@ -41,7 +42,14 @@ class INVENTORYSAMPLE_API UInventoryLayoutHandler : public UObject
 /**
  *	Class description:
  *	
- *	UActorInventoryComponent handle the core functionalities of the inventory system.
+ *	UActorInventoryComponent is the CORE component of the inventory system and allow ANY AActor to reference a set
+ *	of items.
+ *
+ *	This system handle the loading request of all referenced items through the owning A UINTERFACE() IInventoryProvider api
+ *	and provide layout information specific to the instance type at hand.
+ *
+ *	Note : This system participate in the 'Handshake' process following user interaction with UI and Ability execution for buying,
+ *	selling or trading content.
  */
 UCLASS(ClassGroup=("Inventory"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent
@@ -54,10 +62,13 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION(BlueprintCallable)
+	const TArray<UItemObject*>& GetItems() const;
+
 protected:
 	UFUNCTION()
 	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
-	
+
 	UFUNCTION()
 	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects);
 

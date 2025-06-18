@@ -36,9 +36,8 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	UItemDefinitionDataAsset represent a singular item. It may be retrieved based on a collection of items
- *	hosted from a backend services or as the result of loading a statically define collection of item owned by an act, in which case, each instance run of the
- *	game will generate the same output.
+ *	UItemDefinitionDataAsset is a singular item. It may be retrieved based on a collection of items
+ *	hosted from a backend services or as the result of loading a data asset referenced on an AActor.
  *
  *	Example A : Your microservice for the player account hold a collection of items tied to the player.
  *	We want to load them using a collection of FDataRegistryId and populate the relevant system Post-GameState::MatchStartup.
@@ -63,7 +62,7 @@ protected:
 /**
  *	Class description:
  *
- *	FAVVMItemDefinitionDataTableRow represent an entry in a DataTableRow for a unique item.
+ *	FAVVMItemDefinitionDataTableRow is an entry in a DataTableRow for a unique item.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FAVVMItemDefinitionDataTableRow : public FAVVMDataTableRow
@@ -83,7 +82,7 @@ struct INVENTORYSAMPLE_API FAVVMItemDefinitionDataTableRow : public FAVVMDataTab
 /**
  *	Class description:
  *	
- *	UItemCollectionDefinitionDataAsset represent a STATIC collection of items to be referenced DIRECTLY by an Actor. This
+ *	UItemCollectionDefinitionDataAsset is a STATIC collection of items to be referenced DIRECTLY by an Actor. This
  *	is for cases where an Actor should be interacted with and display non-dynamic content.
  *
  *	Example : A shop actor with a pre-defined set of items to buy from. 
@@ -107,7 +106,7 @@ protected:
 /**
  *	Class description:
  *
- *	FAVVMItemCollectionDefinitionDataTableRow represent an entry in a DataTableRow for a unique set of items.
+ *	FAVVMItemCollectionDefinitionDataTableRow is an entry in a DataTableRow for a unique set of items.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FAVVMItemCollectionDefinitionDataTableRow : public FAVVMDataTableRow
