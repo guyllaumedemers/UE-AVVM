@@ -39,7 +39,7 @@ TRACE_DECLARE_INT_COUNTER(UAVVMResourceManagerComponent_InstanceCounter, TEXT("R
 UAVVMResourceManagerComponent::FResourceQueueingMechanism::~FResourceQueueingMechanism()
 {
 	StreamableHandles.Reset();
-	PendingRequests.Reset();
+	PendingRequests.Empty();
 	CompletionDelegate.Clear();
 }
 
@@ -49,8 +49,8 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRe
 
 	if (ensureAlwaysMsgf(HasPendingRequest(), TEXT("Queue should never be empty!")) && !HasUnfinishedStreamableHandle())
 	{
-		FOnAsyncLoadingRequestDeferred PendingRequest;
-		PendingRequests.HeapPop(PendingRequest);
+		UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred PendingRequest;
+		PendingRequests.Dequeue(PendingRequest);
 		return PendingRequest.ExecuteIfBound();
 	}
 	else
@@ -92,9 +92,9 @@ const FOnResourceAsyncLoadingComplete& UAVVMResourceManagerComponent::FResourceQ
 	return CompletionDelegate;
 }
 
-void UAVVMResourceManagerComponent::FResourceQueueingMechanism::QueueRequest(const FOnAsyncLoadingRequestDeferred& NewRequest)
+void UAVVMResourceManagerComponent::FResourceQueueingMechanism::QueueRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest)
 {
-	PendingRequests.Push(NewRequest);
+	PendingRequests.Enqueue(NewRequest);
 }
 
 void UAVVMResourceManagerComponent::BeginPlay()
