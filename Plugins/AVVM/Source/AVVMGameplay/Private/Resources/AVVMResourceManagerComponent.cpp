@@ -244,10 +244,17 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
 {
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(DataRegistrySubsystem) || PendingRegistriesId.IsEmpty())
+	if (!IsValid(DataRegistrySubsystem))
 	{
 		QueueingMechanism.GetCompletionDelegate().ExecuteIfBound();
 		return false;
+	}
+
+	const bool bIsEmpty = PendingRegistriesId.IsEmpty();
+	if (bIsEmpty)
+	{
+		QueueingMechanism.GetCompletionDelegate().ExecuteIfBound();
+		return true;
 	}
 
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
@@ -261,5 +268,5 @@ bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FD
 		}
 	}
 
-	return true;
+	return false;
 }
