@@ -165,9 +165,7 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 		}
 	}
 
-	// @gdemers Player Inventory should only spawn actor for equipped items that are in the primary slot (visible), other actor types
-	// should only be able to spawn a visual representation of the item bases on system requirements, example : hovering over item in grid
-	// trigger event that require spawning a mesh of the object in the world.
+	// @gdemers handle spawning default object that are currently equipped
 	for (UItemObject* Item : Items)
 	{
 		if (IsValid(Item))

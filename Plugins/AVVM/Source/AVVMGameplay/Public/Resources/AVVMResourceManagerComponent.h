@@ -28,6 +28,8 @@
 
 #include "AVVMResourceManagerComponent.generated.h"
 
+DECLARE_DYNAMIC_DELEGATE(FOnResourceAsyncLoadingComplete);
+
 /**
  *	Class description:
  *
@@ -39,18 +41,47 @@ class AVVMGAMEPLAY_API UAVVMResourceManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_DELEGATE(FOnAsyncLoadingRequestDeferred);
+
 public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION(BlueprintCallable)
+	void RequestAsyncLoading(const FDataRegistryId& NewRegistryId,
+	                         const FOnResourceAsyncLoadingComplete& OnRequestCompleteCallback);
+
 protected:
-	void RequestExternalResourceAsync(const AActor* Outer);
-	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result);
+	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result,
+	                          FOnResourceAsyncLoadingComplete OnRequestCompleteCallback);
+
 	void OnSoftObjectAcquired();
 
 	UFUNCTION()
 	bool OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId);
 
-	TArray<TSharedPtr<FStreamableHandle>> ResourceHandles;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldAsyncLoadOnBeginPlay = true;
+
+	struct FResourceQueueingMechanism
+	{
+		virtual ~FResourceQueueingMechanism();
+		bool TryExecuteNextRequest(const FOnAsyncLoadingRequestDeferred& NewRequest);
+		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback);
+		void PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle);
+		void GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const;
+		const FOnResourceAsyncLoadingComplete& GetCompletionDelegate() const;
+
+	protected:
+		bool HasUnfinishedStreamableHandle() const;
+		bool HasPendingRequest() const;
+		void QueueRequest(const FOnAsyncLoadingRequestDeferred& NewRequest);
+
+		TArray<TSharedPtr<FStreamableHandle>> StreamableHandles;
+		TArray<FOnAsyncLoadingRequestDeferred> PendingRequests;
+		FOnResourceAsyncLoadingComplete CompletionDelegate;
+	};
+
+	FResourceQueueingMechanism QueueingMechanism;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

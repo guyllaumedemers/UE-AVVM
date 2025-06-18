@@ -20,6 +20,7 @@
 #include "ItemObject.h"
 
 #include "Net/UnrealNetwork.h"
+#include "Resources/AVVMResourceManagerComponent.h"
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -42,12 +43,90 @@ void UItemObject::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCon
 }
 #endif // UE_WITH_IRIS
 
+void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
+{
+	RuntimeItemState.StateTags.RemoveTags(RemovedTags);
+	RuntimeItemState.StateTags.AppendTags(AddedTags);
+}
+
 void UItemObject::TrySpawnEquippedItem(const AActor* Target)
 {
-	// TODO @gdemers Find target socket on skeletal mesh, scene component or whatever else that
-	// should receive 'this' object as child
+	auto* ResourceManagerComponent = IsValid(Target) ? Target->GetComponentByClass<UAVVMResourceManagerComponent>() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer Actor doesn't reference a UAVVMResourceManagerComponent!")))
+	{
+		return;
+	}
+
+	OwningOuter = Target;
+
+	FOnResourceAsyncLoadingComplete Callback;
+	Callback.BindDynamic(this, &UItemObject::OnResourcesLoaded);
+	// TODO @gdemers define tag configs to tell user we are in the equipping phase
+	ModifyRuntimeState({}, {});
+	ResourceManagerComponent->RequestAsyncLoading(ItemProgressionId, Callback);
 }
 
 void UItemObject::TrySpawnDroppedItem(const AActor* Target)
 {
+	auto* ResourceManagerComponent = IsValid(Target) ? Target->GetComponentByClass<UAVVMResourceManagerComponent>() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer Actor doesn't reference a UAVVMResourceManagerComponent!")))
+	{
+		return;
+	}
+
+	OwningOuter = Target;
+
+	FOnResourceAsyncLoadingComplete Callback;
+	Callback.BindDynamic(this, &UItemObject::OnResourcesLoaded);
+	// TODO @gdemers define tag configs to tell user we are in the dropping phase
+	ModifyRuntimeState({}, {});
+	ResourceManagerComponent->RequestAsyncLoading(ItemProgressionId, Callback);
+}
+
+void UItemObject::OnResourcesLoaded()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		const FTransform ItemAnchorTransform = GetSpawningAnchorTransform(*Outer);
+		RuntimeItemActor = World->SpawnActor(nullptr, &ItemAnchorTransform, FActorSpawnParameters());
+	}
+
+	if (ensureAlwaysMsgf(IsValid(RuntimeItemActor),
+	                     TEXT("Item Actor Class Failed to create an instance in World!")))
+	{
+		// @gdemers bad practice but avoid code refactoring!
+		RuntimeItemActor->AttachToActor(const_cast<AActor*>(Outer), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+	}
+}
+
+FTransform UItemObject::GetSpawningAnchorTransform(const AActor& Target) const
+{
+	// check RuntimeItemState.StateTags to determine the state of the object
+	const bool bShouldSpawnAndAttach = true;
+	const bool bShouldSpawnAndDrop = false;
+
+	FTransform ItemAnchorTransform = Target.GetActorTransform();
+	if (bShouldSpawnAndAttach)
+	{
+		const auto* MeshComponent = Target.GetComponentByClass<UMeshComponent>();
+		if (IsValid(MeshComponent))
+		{
+			ItemAnchorTransform = MeshComponent->GetSocketTransform(SocketName);
+		}
+	}
+	else if (bShouldSpawnAndDrop)
+	{
+		// TODO @gdemers retrieve the item size and move by this increment
+		const FVector3d NewLocation = ItemAnchorTransform.GetLocation() + (FVector3d::ForwardVector * 10.f);
+		ItemAnchorTransform.SetLocation(NewLocation);
+	}
+
+	return ItemAnchorTransform;
 }

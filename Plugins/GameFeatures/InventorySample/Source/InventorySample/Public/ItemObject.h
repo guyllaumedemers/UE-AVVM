@@ -49,6 +49,9 @@ struct INVENTORYSAMPLE_API FItemState
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 Counter = 1;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
+	int32 ProgressionIndex = 0;
 };
 
 /**
@@ -90,10 +93,16 @@ public:
 	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
 #endif // UE_WITH_IRIS
 
+	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 	void TrySpawnEquippedItem(const AActor* Target);
 	void TrySpawnDroppedItem(const AActor* Target);
 
 protected:
+	UFUNCTION()
+	void OnResourcesLoaded();
+
+	FTransform GetSpawningAnchorTransform(const AActor& Target) const;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item State and how it should behave. Example : CanBeConsumed, Destroy on Drop, etc..."))
 	FGameplayTagContainer DefaultItemStateTags = FGameplayTagContainer::EmptyContainer;
 
@@ -120,4 +129,6 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FItemState RuntimeItemState = FItemState();
+
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };
