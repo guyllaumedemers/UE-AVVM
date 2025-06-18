@@ -148,7 +148,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	ResourceHandles.Top()->GetLoadedAssets(OutStreamedAssets);
 
 	FKeepProcessingResources Callback;
-	Callback.BindDynamic(this, &UAVVMResourceManagerComponent::ProcessAdditionalResources);
+	Callback.BindDynamic(this, &UAVVMResourceManagerComponent::OnProcessAdditionalResources);
 
 	const bool bHasPendingRegistries = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(Outer, OutStreamedAssets, Callback);
 	UE_LOG(LogGameplay,
@@ -159,7 +159,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	       bHasPendingRegistries ? TEXT("False") : TEXT("True"));
 }
 
-bool UAVVMResourceManagerComponent::ProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
+bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
 {
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem) || PendingRegistriesId.IsEmpty())

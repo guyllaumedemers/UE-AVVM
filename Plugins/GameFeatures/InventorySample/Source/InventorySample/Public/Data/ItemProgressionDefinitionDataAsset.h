@@ -1,0 +1,111 @@
+﻿//Copyright(c) 2025 gdemers
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files(the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions :
+//
+//The above copyright notice and this permission notice shall be included in all
+//copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Data/AVVMDataTableRow.h"
+#include "Engine/DataAsset.h"
+#include "Engine/StreamableManager.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
+#include "ItemProgressionDefinitionDataAsset.generated.h"
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, const TSubclassOf<AActor>&, NewActorClass);
+
+/**
+ *	Class description:
+ *
+ *	UItemStage is a POD that reference information about an item representation at a given stage/level.
+ *	This data asset can reference any information specific to your items and the overrides per-stages.
+ *
+ *	Example :
+ *
+ *		* Level 1: Skill Item A has Material A
+ *		* Level 2: Skill Item A has Material B
+ *		* etc...
+ */
+UCLASS(BlueprintType, Blueprintable)
+class INVENTORYSAMPLE_API UItemProgressionStageDefinitionDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const TSubclassOf<AActor>& GetOverrideItemActorClass() const;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bDoesOverrideItemActorClass = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesOverrideItemActorClass"))
+	TSubclassOf<AActor> OverrideItemActorClass = nullptr;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UItemProgressionDefinitionDataAsset is a singular item and it's progression information.
+ */
+UCLASS(BlueprintType, NotBlueprintable)
+class INVENTORYSAMPLE_API UItemProgressionDefinitionDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void GetItemActorClassAsync(const int32 ProgressionStageIndex,
+	                            const FOnRequestItemActorClassComplete& Callback);
+
+protected:
+	UFUNCTION()
+	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSoftObjectPtr<const UItemProgressionStageDefinitionDataAsset>> ItemProgressionStageDataAssets;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AActor> DefaultItemActorClass = nullptr;
+
+	TSharedPtr<FStreamableHandle> ItemProgressionStageHandle;
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMItemProgressionDefinitionDataTableRow is an entry in a DataTableRow for a unique item progression.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FAVVMItemProgressionDefinitionDataTableRow : public FAVVMDataTableRow
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UItemProgressionDefinitionDataAsset> ItemProgressionDefinition = nullptr;
+};

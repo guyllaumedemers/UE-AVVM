@@ -49,7 +49,7 @@ class INVENTORYSAMPLE_API UInventoryLayoutHandler : public UObject
  *	and provide layout information specific to the instance type at hand.
  *
  *	Note : This system participate in the 'Handshake' process following user interaction with UI and Ability execution for buying,
- *	selling or trading content.
+ *	selling, trading or consuming content.
  */
 UCLASS(ClassGroup=("Inventory"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent

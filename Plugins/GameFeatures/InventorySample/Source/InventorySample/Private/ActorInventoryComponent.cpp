@@ -24,6 +24,9 @@
 #include "InventoryProvider.h"
 #include "ItemObject.h"
 #include "Net/UnrealNetwork.h"
+#include "ProfilingDebugging/CountersTrace.h"
+
+TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)
 {
@@ -47,6 +50,8 @@ void UActorInventoryComponent::BeginPlay()
 	{
 		return;
 	}
+
+	TRACE_COUNTER_INCREMENT(UActorInventoryComponent_InstanceCounter);
 
 	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
 	OwningOuter = Outer;

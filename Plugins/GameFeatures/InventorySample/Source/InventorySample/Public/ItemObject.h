@@ -23,12 +23,13 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "UObject/Object.h"
 
 #if UE_WITH_IRIS
 #include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
 #endif // UE_WITH_IRIS
-#include "UObject/Object.h"
 
 #include "ItemObject.generated.h"
 
@@ -176,12 +177,6 @@ struct INVENTORYSAMPLE_API FItemStatus
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	EItemDropBehaviourType ItemDropBehaviourType = EItemDropBehaviourType::None;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	EItemConsumptionState ItemConsumptionState = EItemConsumptionState::None;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
 	EItemStorageType ItemStorageType = EItemStorageType::None;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -235,22 +230,28 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<AActor> ItemActorClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag ItemTypeTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bSupportGridLayout = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FDataRegistryId ItemProgressionId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bSupportGridLayout"))
-	FItemLayout ItemLayout = FItemLayout();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	EItemDropBehaviourType ItemDropBehaviourType = EItemDropBehaviourType::None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	EItemConsumptionState ItemConsumptionState = EItemConsumptionState::None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bCanAttachToSocket = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bCanAttachToSocket"))
 	FName SocketName = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bSupportGridLayout = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bSupportGridLayout"))
+	FItemLayout ItemLayout = FItemLayout();
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> ItemActor = nullptr;
