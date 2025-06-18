@@ -21,9 +21,14 @@
 
 #include "Engine/AssetManager.h"
 
-const TSubclassOf<AActor>& UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
+TSubclassOf<AActor> UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
 {
 	return OverrideItemActorClass;
+}
+
+bool UItemProgressionStageDefinitionDataAsset::CanOverrideItemActorClass() const
+{
+	return bDoesOverrideItemActorClass;
 }
 
 void UItemProgressionDefinitionDataAsset::GetItemActorClassAsync(const int32 ProgressionStageIndex,
@@ -43,6 +48,11 @@ void UItemProgressionDefinitionDataAsset::GetItemActorClassAsync(const int32 Pro
 	}
 }
 
+TSubclassOf<AActor> UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
+{
+	return DefaultItemActorClass;
+}
+
 void UItemProgressionDefinitionDataAsset::OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete)
 {
 	if (!ensureAlwaysMsgf(ItemProgressionStageHandle.IsValid(),
@@ -59,7 +69,8 @@ void UItemProgressionDefinitionDataAsset::OnSoftObjectAcquired(FOnRequestItemAct
 	{
 		const auto* ProgressionStageItemDefinitionDataAsset = Cast<UItemProgressionStageDefinitionDataAsset>(OutStreamedAssets[0]);
 		if (ensureAlwaysMsgf(IsValid(ProgressionStageItemDefinitionDataAsset),
-		                     TEXT("UItemProgressionDefinitionDataAsset trying to Cast object to UItemProgressionStageDefinitionDataAsset failed!")))
+		                     TEXT("UItemProgressionDefinitionDataAsset trying to Cast object to UItemProgressionStageDefinitionDataAsset failed!")) &&
+			ProgressionStageItemDefinitionDataAsset->CanOverrideItemActorClass())
 		{
 			OnRequestItemActorClassComplete.ExecuteIfBound(ProgressionStageItemDefinitionDataAsset->GetOverrideItemActorClass());
 		}

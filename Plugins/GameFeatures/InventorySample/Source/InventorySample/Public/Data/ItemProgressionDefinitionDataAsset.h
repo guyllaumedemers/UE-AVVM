@@ -21,9 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "GameFramework/Actor.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 #include "Engine/StreamableManager.h"
+#include "Templates/SubclassOf.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -31,7 +33,7 @@
 
 #include "ItemProgressionDefinitionDataAsset.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, const TSubclassOf<AActor>&, NewActorClass);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, TSubclassOf<AActor>, NewActorClass);
 
 /**
  *	Class description:
@@ -51,8 +53,11 @@ class INVENTORYSAMPLE_API UItemProgressionStageDefinitionDataAsset : public UDat
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	const TSubclassOf<AActor>& GetOverrideItemActorClass() const;
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<AActor> GetOverrideItemActorClass() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool CanOverrideItemActorClass() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
@@ -73,9 +78,12 @@ class INVENTORYSAMPLE_API UItemProgressionDefinitionDataAsset : public UDataAsse
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable)
 	void GetItemActorClassAsync(const int32 ProgressionStageIndex,
 	                            const FOnRequestItemActorClassComplete& Callback);
+
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<AActor> GetDefaultItemActorClass() const;
 
 protected:
 	UFUNCTION()
