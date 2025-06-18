@@ -60,9 +60,6 @@ protected:
 	UFUNCTION()
 	bool OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bShouldAsyncLoadOnBeginPlay = true;
-
 	struct FResourceQueueingMechanism
 	{
 		virtual ~FResourceQueueingMechanism();
@@ -82,6 +79,9 @@ protected:
 		FOnResourceAsyncLoadingComplete CompletionDelegate;
 	};
 
-	FResourceQueueingMechanism QueueingMechanism;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldAsyncLoadOnBeginPlay = true;
+
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	FResourceQueueingMechanism QueueingMechanism;
 };

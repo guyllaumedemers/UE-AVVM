@@ -57,9 +57,12 @@ void UActorInventoryComponent::BeginPlay()
 	OwningOuter = Outer;
 
 #if WITH_SERVER_CODE
-	FOnRetrieveInventoryItems Callback;
-	Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-	UInventoryBlueprintFunctionLibrary::RequestItems(Outer, Callback);
+	if (bShouldAsyncLoadOnBeginPlay)
+	{
+		FOnRetrieveInventoryItems Callback;
+		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
+		UInventoryBlueprintFunctionLibrary::RequestItems(Outer, Callback);
+	}
 #endif
 
 	UE_LOG(LogGameplay,

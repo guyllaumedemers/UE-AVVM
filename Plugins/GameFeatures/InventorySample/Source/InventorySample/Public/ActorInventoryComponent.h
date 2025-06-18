@@ -79,6 +79,9 @@ protected:
 	UFUNCTION()
 	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldAsyncLoadOnBeginPlay = true;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UInventoryLayoutHandler> LayoutHandler = nullptr;
 
