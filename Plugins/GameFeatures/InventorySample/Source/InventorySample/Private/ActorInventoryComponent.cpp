@@ -193,7 +193,7 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const
 
 bool UActorInventoryComponent::DoesMeetItemRequirements(const TSoftClassPtr<UItemObject>& ItemObjectClass)
 {
-	if (!ItemObjectClass.IsValid())
+	if (ItemObjectClass.IsNull())
 	{
 		return false;
 	}
