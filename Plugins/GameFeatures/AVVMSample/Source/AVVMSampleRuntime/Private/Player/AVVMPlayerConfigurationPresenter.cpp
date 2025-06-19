@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "Player/AVVMPlayerConfigurationPresenter.h"
 
-#include "AVVM.h"
 #include "AVVMOnlineInterface.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/AVVMPlayerConfigurationViewModel.h"
@@ -49,7 +48,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerLe
 		// @gdemers here our notification channel are type specific and not instance specific
 		// we expect some validation to be run before executing any code here as ALL players configuration will try
 		// executing the following code.
-		UE_LOG(LogUI, Log, TEXT("[Remote] Has Level Up!"));
+		UE_LOG(LogOnline, Log, TEXT("[Remote] Has Level Up!"));
 		// @gdemers trigger emote event for separate system which handle showing above head animation like league of legend does.
 		BP_EmotePlayer(Payload);
 		SetPlayerConnection(Payload);
@@ -61,7 +60,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerPr
 	const auto* RemoteConnection = Payload.GetPtr<FAVVMPlayerConnection>();
 	if (ensure(RemoteConnection != nullptr) && DoesMatchPlayerConnection(*RemoteConnection))
 	{
-		UE_LOG(LogUI, Log, TEXT("[Remote] Player Profile Changed!"));
+		UE_LOG(LogOnline, Log, TEXT("[Remote] Player Profile Changed!"));
 		// @gdemers trigger equipping event for any external system which should receive the modified entry/equipped item that changed.
 		BP_StripNakedPlayer(Payload);
 		SetPlayerConnection(Payload);
@@ -70,7 +69,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerPr
 
 void UAVVMPlayerConfigurationPresenter::SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
 {
-	UE_LOG(LogUI, Log, TEXT("[Remote] Refreshing Player Profile!"));
+	UE_LOG(LogOnline, Log, TEXT("[Remote] Refreshing Player Profile!"));
 
 	auto* PlayerConfigurationViewModel = Cast<UAVVMPlayerConfigurationViewModel>(ViewModel.Get());
 	if (IsValid(PlayerConfigurationViewModel))

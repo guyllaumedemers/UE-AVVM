@@ -57,12 +57,12 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 	const auto* LoginContext = Payload.GetPtr<FAVVMLoginContext>();
 	if (LoginContext != nullptr)
 	{
-		UE_LOG(LogUI, Log, TEXT("Sending Login Request. In-Progress..."));
+		UE_LOG(LogOnline, Log, TEXT("Sending Login Request. In-Progress..."));
 		OnlineInterface->RequestLogin(*LoginContext, Callback);
 	}
 	else
 	{
-		UE_LOG(LogUI, Log, TEXT("Sending Empty Login Request. In-Progress..."));
+		UE_LOG(LogOnline, Log, TEXT("Sending Empty Login Request. In-Progress..."));
 		OnlineInterface->RequestLogin(FAVVMLoginContext{}, Callback);
 	}
 }
@@ -89,7 +89,7 @@ void UAVVMAccountLoginPresenter::BindViewModel() const
 void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,
                                                          const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Login Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Login Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers Post-login, we expect to broadcast to the following systems :

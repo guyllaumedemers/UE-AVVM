@@ -63,12 +63,12 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 	const auto* ModifiedPlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
 	if (ModifiedPlayerProfile != nullptr)
 	{
-		UE_LOG(LogUI, Log, TEXT("Committing Player Profile Request. In-Progress..."));
+		UE_LOG(LogOnline, Log, TEXT("Committing Player Profile Request. In-Progress..."));
 		OnlineInterface->CommitModifiedPlayerProfile(*ModifiedPlayerProfile, Callback);
 	}
 	else
 	{
-		UE_LOG(LogUI, Log, TEXT("Committing Empty Player Profile Request. In-Progress..."));
+		UE_LOG(LogOnline, Log, TEXT("Committing Empty Player Profile Request. In-Progress..."));
 		OnlineInterface->CommitModifiedPlayerProfile(FAVVMPlayerProfile{}, Callback);
 	}
 }
@@ -85,7 +85,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfi
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted);
 
-	UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Force Pull Player Profile Request. In-Progress..."));
 	OnlineInterface->ForcePullPlayerProfile(Callback);
 }
 
@@ -98,7 +98,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ProcessPlayerRequest
 	}
 
 	const FString EventTypeString(EnumToString(PlayerRequest->RequestType));
-	UE_LOG(LogUI,
+	UE_LOG(LogOnline,
 	       Log,
 	       TEXT("Processing Player Request. Type: %s, In-Progress..."),
 	       *EventTypeString);
@@ -135,7 +135,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ProcessPlayerRequest
 void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers additional data could be defined to properly log output here!
-	UE_LOG(LogUI, Log, TEXT("Updating local Player Profile!"));
+	UE_LOG(LogOnline, Log, TEXT("Updating local Player Profile!"));
 
 	auto* PlayerProfileViewModel = Cast<UAVVMPlayerProfileViewModel>(ViewModel.Get());
 	if (IsValid(PlayerProfileViewModel))
@@ -166,7 +166,7 @@ void UAVVMPlayerProfilePresenter::BindViewModel() const
 void UAVVMPlayerProfilePresenter::OnCommitPlayerProfileCompleted(const bool bWasSuccess,
                                                                  const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Committing Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Committing Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update profile onSuccess
@@ -183,7 +183,7 @@ void UAVVMPlayerProfilePresenter::OnCommitPlayerProfileCompleted(const bool bWas
 
 void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool bWasSuccess, const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Force Pull Player Profile Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Force Pull Player Profile Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update profile onSuccess
@@ -209,7 +209,7 @@ void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& Play
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted);
-	UE_LOG(LogUI, Log, TEXT("Invite Player Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Invite Player Request. In-Progress..."));
 
 	OnlineInterface->InvitePlayer(PlayerRequest, Callback);
 }
@@ -217,7 +217,7 @@ void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& Play
 void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess,
                                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Invite Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Invite Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
@@ -249,7 +249,7 @@ void UAVVMPlayerProfilePresenter::TryBlockPlayer(const FAVVMPlayerRequest& Playe
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnBlockPlayerCompleted);
-	UE_LOG(LogUI, Log, TEXT("Block Player Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Block Player Request. In-Progress..."));
 
 	OnlineInterface->BlockPlayer(PlayerRequest, Callback);
 }
@@ -257,7 +257,7 @@ void UAVVMPlayerProfilePresenter::TryBlockPlayer(const FAVVMPlayerRequest& Playe
 void UAVVMPlayerProfilePresenter::OnBlockPlayerCompleted(const bool bWasSuccess,
                                                          const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Block Request Add Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Block Request Add Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
@@ -281,7 +281,7 @@ void UAVVMPlayerProfilePresenter::TryAddFriend(const FAVVMPlayerRequest& PlayerR
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnAddFriendCompleted);
-	UE_LOG(LogUI, Log, TEXT("Adding new Friend Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Adding new Friend Request. In-Progress..."));
 
 	OnlineInterface->AddFriend(PlayerRequest, Callback);
 }
@@ -290,7 +290,7 @@ void UAVVMPlayerProfilePresenter::OnAddFriendCompleted(const bool bWasSuccess,
                                                        const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers note that friend request are pending until accepted by the receiving end of the request.
-	UE_LOG(LogUI, Log, TEXT("Friend Request Add Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Friend Request Add Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
@@ -314,7 +314,7 @@ void UAVVMPlayerProfilePresenter::TryRemoveFriend(const FAVVMPlayerRequest& Play
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnRemoveFriendCompleted);
-	UE_LOG(LogUI, Log, TEXT("Removing Friend Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Removing Friend Request. In-Progress..."));
 
 	OnlineInterface->RemoveFriend(PlayerRequest, Callback);
 }
@@ -322,7 +322,7 @@ void UAVVMPlayerProfilePresenter::TryRemoveFriend(const FAVVMPlayerRequest& Play
 void UAVVMPlayerProfilePresenter::OnRemoveFriendCompleted(const bool bWasSuccess,
                                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Friend Request Remove Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Friend Request Remove Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers handle notification to the friend presenter system to update any visual representation of the friend list
@@ -346,7 +346,7 @@ void UAVVMPlayerProfilePresenter::TryTrade(const FAVVMPlayerRequest& PlayerReque
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPlayerProfilePresenter::OnTradeCompleted);
-	UE_LOG(LogUI, Log, TEXT("Trade Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Trade Request. In-Progress..."));
 
 	OnlineInterface->Trade(PlayerRequest, Callback);
 }
@@ -354,7 +354,7 @@ void UAVVMPlayerProfilePresenter::TryTrade(const FAVVMPlayerRequest& PlayerReque
 void UAVVMPlayerProfilePresenter::OnTradeCompleted(const bool bWasSuccess,
                                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Trade Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Trade Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers run any additional behaviour here!

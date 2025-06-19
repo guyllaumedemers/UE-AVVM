@@ -55,7 +55,7 @@ void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ForcePullChalleng
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMChallengeManagerPresenter::OnForcePullChallengesCompleted);
 
-	UE_LOG(LogUI, Log, TEXT("Force Pull Challenges Request. In-Progress..."));
+	UE_LOG(LogOnline, Log, TEXT("Force Pull Challenges Request. In-Progress..."));
 	OnlineInterface->ForcePullChallenges(Callback);
 }
 
@@ -74,19 +74,19 @@ void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ClaimChallengeRew
 	const auto* Challenge = Payload.GetPtr<FAVVMRuntimeChallenge>();
 	if (Challenge != nullptr)
 	{
-		UE_LOG(LogUI, Log, TEXT("Claim Challenge Rewards Request. In-Progress..."));
+		UE_LOG(LogOnline, Log, TEXT("Claim Challenge Rewards Request. In-Progress..."));
 		OnlineInterface->ClaimChallenge(*Challenge, Callback);
 	}
 	else
 	{
-		UE_LOG(LogUI, Log, TEXT("Claim Empty Challenge Rewards Request. In-Progress..."));
+		UE_LOG(LogOnline, Log, TEXT("Claim Empty Challenge Rewards Request. In-Progress..."));
 		OnlineInterface->ClaimChallenge(FAVVMRuntimeChallenge{}, Callback);
 	}
 }
 
 void UAVVMChallengeManagerPresenter::SetChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Updating local Challenges!"));
+	UE_LOG(LogOnline, Log, TEXT("Updating local Challenges!"));
 
 	auto* ChallengeManagerViewModel = Cast<UAVVMChallengeManagerViewModel>(ViewModel.Get());
 	if (IsValid(ChallengeManagerViewModel))
@@ -117,7 +117,7 @@ void UAVVMChallengeManagerPresenter::BindViewModel() const
 void UAVVMChallengeManagerPresenter::OnForcePullChallengesCompleted(const bool bWasSuccess,
                                                                     const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Force Pull Challenges Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Force Pull Challenges Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update challenges onSuccess
@@ -134,7 +134,7 @@ void UAVVMChallengeManagerPresenter::OnForcePullChallengesCompleted(const bool b
 
 void UAVVMChallengeManagerPresenter::OnClaimChallengeRewardsCompleted(const bool bWasSuccess, const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogUI, Log, TEXT("Claim Challenge Rewards Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogOnline, Log, TEXT("Claim Challenge Rewards Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update challenges onSuccess
