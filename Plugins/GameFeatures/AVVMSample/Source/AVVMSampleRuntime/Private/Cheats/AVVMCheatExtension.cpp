@@ -322,7 +322,8 @@ const char* UAVVMCheatExtension::LazyGatherTagChannels(bool& bForceGathering) co
 	StringBuilder.Reset();
 	for (int32 i = 0; i < OutTagSources.Num(); ++i)
 	{
-		if (OutTagSources[i] == nullptr)
+		const FGameplayTagSource* TagSource = OutTagSources[i];
+		if (TagSource == nullptr || !TagSource->GetConfigFileName().Contains(TEXT("AVVM")))
 		{
 			continue;
 		}
