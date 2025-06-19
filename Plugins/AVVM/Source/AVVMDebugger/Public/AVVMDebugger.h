@@ -30,8 +30,8 @@
 class UAVVMDebuggerInputHandler;
 class UGameInstance;
 
-// @gdemers this handle IAVVMImGuiDescriptor conditional existence as the AVVMDebugger Module wont be
-// delivered in SHIPPING_BUILD.
+// @gdemers this handle IAVVMImGuiDescriptor conditional existence, as the AVVMDebugger Module wont be delivered in UE_SHIPPING_BUILD,
+// and doesn't exist when Target doesn't compile with DeveloperTool included.
 #ifdef UE_ENABLE_AVVM_DEBUGGER
 #define WITH_AVVM_DEBUGGER 1
 #else
@@ -41,8 +41,12 @@ class UGameInstance;
 /**
 *	Class description:
 *
-*	UAVVMImGuiDescriptor. draw content specific to the implementer class.
- */
+*	UAVVMImGuiDescriptor is an interface to be implemented by CheatExtensions and allow drawing ImGui content on screen.
+*	Important : Make sure to conditionally include #include "AVVMDebugger.h" wrapped with #ifdef UE_ENABLE_AVVM_DEBUGGER in your header file,
+*	and wrap the interface with #if WITH_AVVM_DEBUGGER so symbols can be properly stripped out when required.
+*
+*	See AVVMSampleRuntime/Cheats for examples!
+*/
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMDEBUGGER_API UAVVMImGuiDescriptor : public UInterface
 {
@@ -60,7 +64,7 @@ public:
 /**
  *	Class Description :
  *
- *	FAVVMImGuiDebugContext represent the Context Object which draw our debugger.
+ *	FAVVMImGuiDebugContext is the context object that draw our debugger.
  */
 struct AVVMDEBUGGER_API FAVVMImGuiDebugContext
 {
@@ -99,8 +103,8 @@ private:
 /**
  *	Plugin Description :
  *
- *	FAVVMDebuggerModule setup the base requirement to hook onto the ImGui plugin. Additional features will be added so Cheats register, and get exposed
- *	here!
+ *	AVVMDebuggerModule is a Module that configure the requirements for hooking into the ImGui plugin. It fixes some of the issues
+ *	that the UE ImGui plugin has with input support by hijacking Platform inputs using a custom InputPreprocessor.
  */
 class FAVVMDebuggerModule : public IModuleInterface
 {

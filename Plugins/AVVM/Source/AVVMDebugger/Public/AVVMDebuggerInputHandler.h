@@ -49,7 +49,12 @@ protected:
 /**
  *	Class Description :
  *
- *	UAVVMDebuggerInputHandler represent the Context Object which handle invoking our debugger.
+ *	UAVVMDebuggerInputHandler is the context object that handle opening/closing our debugger. It creates and
+ *	destroy the Input Preprocessor based on the application state.
+ *
+ *	TODO @gdemers Theres a problem OnApplicationShutdown were often the Slate Module is either unloaded and we try
+ *	to unregister the Input Preprocessor OR we have resources pending for load on an AsyncThread. Either way, this need
+ *	to be investigated and fixed!
  */
 UCLASS(BlueprintType, Blueprintable)
 class AVVMDEBUGGER_API UAVVMDebuggerInputHandler : public UObject

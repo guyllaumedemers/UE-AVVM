@@ -30,7 +30,7 @@ class UAVVMDebuggerInputHandler;
 /**
 *	Class description:
 *
-*	UAVVMDebuggerSettings define a set of properties to be access in code. 
+*	UAVVMDebuggerSettings is a DeveloperSetting for global variable that require access in this plugin.
  */
 UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMDebuggerSettings"))
 class AVVMDEBUGGER_API UAVVMDebuggerSettings : public UDeveloperSettings
