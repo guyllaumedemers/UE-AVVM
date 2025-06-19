@@ -33,7 +33,7 @@ void FAVVMOnlineModule::StartupModule()
 	IConsoleVariable* NewCVar = IConsoleManager::Get()
 			.RegisterConsoleVariable(TEXT("OnlineRequestReturnedStatus"),
 			                         false,
-			                         TEXT("Inject the Completion Status of a request being 'faked' when interfacing with incomplete backend."));
+			                         TEXT("Stub Data for Testing Online request callback result. bWasSuccess=True/False."));
 
 	CVarOnlineRequestReturnedStatus = MakeShareable<IConsoleVariable>(NewCVar);
 

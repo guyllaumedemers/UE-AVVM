@@ -334,8 +334,8 @@ struct AVVMONLINE_API FAVVMLoginContext : public FAVVMNotificationPayload
 /**
 *	Class description:
  *
- *	UAVVMOnlineIdentityInterface. Abstract the subsystem interfacing with the microservice
- *	for tracking the player identity, login/logout actions and account modification.
+ *	UAVVMOnlineIdentityInterface is the subsystem interfacing with the microservice for tracking the player identity,
+ *	login/logout action and profile updates.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineIdentityInterface : public UInterface
@@ -390,8 +390,7 @@ public:
 /**
 *	Class description:
  *
- *	UAVVMOnlinePartyInterface. Abstract the subsystem interfacing with the microservice
- *	for tracking available groups/party/sessions, etc...
+ *	UAVVMOnlinePartyInterface is the subsystem interfacing with the microservice for tracking available groups/party/sessions, etc...
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlinePartyInterface : public UInterface
@@ -428,8 +427,7 @@ public:
 /**
 *	Class description:
  *
- *	UAVVMOnlineFriendInterface. Abstract the subsystem interfacing with the microservice
- *	for a user Friends.
+ *	UAVVMOnlineFriendInterface is the subsystem interfacing with the microservice for a user Friends.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineFriendInterface : public UInterface
@@ -466,8 +464,8 @@ public:
 /**
 *	Class description:
  *
- *	UAVVMOnlineMessagingInterface. Abstract the subsystem interfacing with the microservice
- *	for messaging channels between players. (mic, chat, email, etc...)
+ *	UAVVMOnlineMessagingInterface is the subsystem interfacing with the microservice for messaging channels between players.
+ *	(mic, chat, email, etc...)
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineMessagingInterface : public UInterface
@@ -494,8 +492,7 @@ public:
 /**
 *	Class description:
  *
- *	UAVVMOnlineChallengesInterface. Abstract the subsystem interfacing with the microservice
- *	for (Player) Challenges progression.
+ *	UAVVMOnlineChallengesInterface is the subsystem interfacing with the microservice for (Player) Challenges progression.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineChallengesInterface : public UInterface
@@ -522,8 +519,7 @@ public:
 /**
  *	Class description:
  *
- *	UAVVMOnlineBattlePassInterface. Abstract the subsystem interfacing with the microservice
- *	for Battle Pass progression.
+ *	UAVVMOnlineBattlePassInterface is the subsystem interfacing with the microservice for Battle Pass progression.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineBattlePassInterface : public UInterface
@@ -556,8 +552,7 @@ public:
 /**
  *	Class description:
  *
- *	UAVVMOnlineStoreInterface. Abstract the subsystem interfacing with the microservice
- *	for the game store and the content that can be purchased outside gameplay.
+ *	UAVVMOnlineStoreInterface is the subsystem interfacing with the microservice for the game store and the content that can be purchased outside gameplay.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineStoreInterface : public UInterface
@@ -570,13 +565,11 @@ class AVVMONLINE_API IAVVMOnlineStoreInterface
 	GENERATED_BODY()
 
 public:
-	// @gdemers local request only.
 	virtual void SellItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	// @gdemers local request only.
 	virtual void BuyItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);

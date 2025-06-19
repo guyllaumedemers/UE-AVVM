@@ -29,7 +29,7 @@
 /**
 *	Class description:
  *
- *	UAVVMOnlineSettings. project settings that define global variable to be accessed by plugin system.
+ *	UAVVMOnlineSettings is a DeveloperSetting for global variable that require access in this plugin.
  */
 UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMOnlineSettings"))
 class AVVMONLINE_API UAVVMOnlineSettings : public UDeveloperSettings

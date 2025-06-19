@@ -29,7 +29,8 @@
 /**
  *	Class description:
  *
- *	UAVVMOnlineInterface abstract project parser from the plugin.
+ *	UAVVMOnlineInterface is the interface to be implemented by your parser system. It defines the api for general use case
+ *	with Struct Types defined here.
  */
 UINTERFACE(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineStringParser : public UInterface

@@ -31,7 +31,38 @@ AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogOnline, Log, All);
 /**
  *	Plugin Description :
  *
- *	FAVVMOnlineModule define a set of utilities to be used in the GameFeature plugin Module FAVVMSampleRuntime.
+ *	AVVMOnline is a Module that offer a broad interface for general interaction with backend services. It takes advantages of the AVVM Notification
+ *	system and Receive/Send type-erase context data to any endpoint using FInstancedStruct/TInstancedStruct<T>.
+ *
+ *	Important : Plugin requirements were created out based on Overwatch 2, and are expected to be extended to interface with your project services.
+ *	ImGui has been added to support quick iterative debugging. Through the use of CVAR and the ImGui window, users can invoke registered 'Descriptors'.
+ *	See AVVMDebugger for information about how to invoke the context window and AVVMSampleRuntime for project implementation examples. (Bonus)
+ *	-> I've made it so symbols are stripped out in UE_SHIPPING_BUILD!
+ *
+ *	Additionally,
+ *
+ *	Here's an exhaustive list of relevant types available in the plugin for your everyday use. Note that we expect
+ *	the usage of a Parser object to properly convert from FString->YourType and to YourType->FString.
+ *
+ *		Types :
+ *
+ *			* FAVVMPlayerWallet
+ *			* FAVVMPlayerProfile
+ *			* FAVVMHostConfiguration
+ *			* FAVVMRuntimeResource
+ *			* FAVVMRuntimeChallenge
+ *			* FAVVMPlayerConnection
+ *			* FAVVMParty
+ *			* FAVVMPlayerRequest
+ *			* FAVVMLoginContext
+ *
+ *		* See AVVMOnlineInterface.h for a rundown of the available system interfaces.
+ *
+ *	Finally,
+ *
+ *	The exposed api has been crafted with the intent of speeding up the initial 'setup' process by which we configure the architecture of
+ *	a new project but may obviously be incomplete. Feel free to extend the existing api! Using this should however still provide you with a good jump start
+ *	for crafting your UI system and fleshing out the game loop!
  */
 class FAVVMOnlineModule : public IModuleInterface
 {
@@ -43,12 +74,7 @@ public:
 	static AVVMONLINE_API UObject* GetJsonParser();
 
 private:
-	/**
-	 *	Variable Description :
-	 *
-	 *	CVar to allow user testing of 'fake' online request being made without an actual backend hooked. (Cuz thats way too much work and UCommonUser plugin
-	 *	isn't so friendly)
-	 */
+	// cvar that allow user testing. returns the status of a stub request (true/false) without an actual backend hooked.
 	static AVVMONLINE_API TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
 	static AVVMONLINE_API TStrongObjectPtr<UObject> JsonParser;
 };
