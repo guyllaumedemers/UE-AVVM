@@ -74,10 +74,14 @@ struct INVENTORYSAMPLE_API FItemLayout
 /**
  *	Class description:
  *	
- *	UItemObject is any object that exist in your project LORE. It may be loaded via a FDataRegistryId (targeting: UItemDefinitionDataAsset), and
- *	should
+ *	UItemObject is any object that exist in your project LORE. It may be loaded via a FDataRegistryId (targeting: UItemDefinitionDataAsset),
+ *	instanced, and tracks the state of the object based on user actions.
  *
- *	Note: When a UItemObject state becomes InGameWorld, an AActor is instanced on the server for player pick up.
+ *		Example :
+ *
+ *			* ItemState::InPlayerInventory->InGameWorld will spawn an Actor defined based on this object configuration for pickup.
+ *			* ItemState::InGameWorld may also imply we are previewing an item for purchased from a Shop.
+ *			* etc...
  */
 UCLASS(BlueprintType, Blueprintable)
 class INVENTORYSAMPLE_API UItemObject : public UObject
