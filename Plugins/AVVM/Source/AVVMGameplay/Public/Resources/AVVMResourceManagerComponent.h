@@ -33,8 +33,16 @@ DECLARE_DYNAMIC_DELEGATE(FOnResourceAsyncLoadingComplete);
 /**
  *	Class description:
  *
- *	UAVVMResourceManagerComponent dynamic component handling resource loading on any Actor that implement the required interface
- *	IAVVMResourceImplementer.
+ *	UAVVMResourceManagerComponent is a system handling resource loading, through the implementation of IAVVMResourceImplementer::GetResourceDefinitionResourceId(), invoked during OnBeginPlay
+ *	or via direct call made to UAVVMResourceManagerComponent::RequestAsyncLoading.
+ *
+ *	Any user request made must provide a valid FDataRegistryId and a Completion Delegate. The Component Outer Actor is expected to implement the required interface, i.e IAVVMResourceImplementer
+ *	and override the following call IAVVMResourceProvider::CheckIsDoneAcquiringResources.
+ *
+ *	Important : CheckIsDoneAcquiringResources will be the central point in which your system will parse the status of all resources currently loading and update based on your system requirements.
+ *	To allow flexibility, components added at Runtime via GFP_AddComponent<T> should retrieve a Delegate from their Outer Actor, bind to it, and be notified so they are able to gather nested FDataRegistryIds.
+ *
+ *	See UAVVMAbilitySystemComponent::SetupAbilities as example! (Impl. details done in BP on the BP_AVVM_PlayerState)
  */
 UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class AVVMGAMEPLAY_API UAVVMResourceManagerComponent : public UActorComponent
