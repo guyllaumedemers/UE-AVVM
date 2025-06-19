@@ -103,7 +103,7 @@ private:
 /**
  *	Plugin Description :
  *
- *	AVVMDebuggerModule is a Module that configure the requirements for hooking into the ImGui plugin. It fixes some of the issues
+ *	AVVMDebugger is a system that configures the requirements for hooking into the ImGui plugin. It fixes some of the issues
  *	that the UE ImGui plugin has with input support by hijacking Platform inputs using a custom InputPreprocessor.
  */
 class FAVVMDebuggerModule : public IModuleInterface

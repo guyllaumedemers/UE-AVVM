@@ -31,7 +31,7 @@ AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogOnline, Log, All);
 /**
  *	Plugin Description :
  *
- *	AVVMOnline is a Module that offer a broad interface for general interaction with backend services. It takes advantages of the AVVM Notification
+ *	AVVMOnline is a system that offer a broad interface for general interaction with backend services. It takes advantages of the AVVM Notification
  *	system and Receive/Send type-erase context data to any endpoint using FInstancedStruct/TInstancedStruct<T>.
  *
  *	Important : Plugin requirements were created out based on Overwatch 2, and are expected to be extended to interface with your project services.

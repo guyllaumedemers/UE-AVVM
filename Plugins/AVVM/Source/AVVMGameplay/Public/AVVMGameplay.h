@@ -27,8 +27,25 @@ AVVMGAMEPLAY_API DECLARE_LOG_CATEGORY_EXTERN(LogGameplay, Log, All);
 /**
  *	Plugin Description :
  *
- *	FAVVMGameplayModule define a set of utilities to be used in the GameFeature plugin Module FAVVMSampleRuntime. In this module, we define
- *	the base Actor Class that implement the AVVMOnline interfaces and gameplay specific interfaces.
+ *	AVVMGameplay is a CORE system that setup requirements so to properly use the AVVM plugin and it's features.
+ *	It expects GameFeatures to target relevant Actors defined here, and dynamically add content :
+ *
+ *		Example :
+ *
+ *			* GFP_AddComponent<UAVVMModelComponent> -> AVVMPlayerState
+ *			* GFP_AddDataMetaSources
+ *			* etc...
+ *
+ *		Most important here for our UI system is pushing the UAVVMModelComponent Class, defined in BP, and allow the creation of
+ *		our UAVVMPresenter Object who respond to the AVVM Notification system.
+ *
+ *	Additionally,
+ *
+ *	This system offers a base for any Data definition types, favoring Data driven systems, and a Resource Manager system that will
+ *	handle Async loading of your resources (for any AModularActor type).
+ *
+ *	It defines it's own AbilitySystemComponent and InputMapping Component for handling OnPawnPosses situation where Abilities and InputMappingContext
+ *	require a full refresh in respond to gameplay.
  *
  *	IMPORTANT :
  *
