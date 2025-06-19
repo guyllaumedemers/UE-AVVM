@@ -17,14 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Ability/AVVMAbilityData.h"
+#include "Ability/AVVMAbilityDefinitionDataAsset.h"
 
 #if WITH_EDITOR
-EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UAVVMAbilityDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	
-	if (GameplayAbility.IsNull())
+
+	if (GameplayAbilityClass.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "GameplayAbility missing. No valid TSoftClassPtr<T> specified!"));
@@ -34,21 +34,21 @@ EDataValidationResult UAVVMAbilityDataAsset::IsDataValid(class FDataValidationCo
 }
 #endif
 
-bool UAVVMAbilityDataAsset::CanGrantAbility(const FGameplayTagContainer& ContextualTags) const
+bool UAVVMAbilityDefinitionDataAsset::CanGrantAbility(const FGameplayTagContainer& ContextualTags) const
 {
 	return true;
 }
 
-const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDataAsset::GetGameplayAbilityClass() const
+const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDefinitionDataAsset::GetGameplayAbilityClass() const
 {
-	return GameplayAbility;
+	return GameplayAbilityClass;
 }
 
 #if WITH_EDITOR
-EDataValidationResult FAVVMAbilityDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FAVVMAbilityDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (AbilityDataAsset.IsNull())
+	if (AbilityDefinitionDataAsset.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("FAVVMAbilityDataTableRow", "", "UAVVMAbilityDataAsset missing. No valid UDataAsset specified!"));
@@ -58,23 +58,17 @@ EDataValidationResult FAVVMAbilityDataTableRow::IsDataValid(class FDataValidatio
 }
 #endif
 
-TArray<FSoftObjectPath> FAVVMAbilityDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FAVVMAbilityDefinitionDataTableRow::GetResourcesPaths() const
 {
-	return {AbilityDataAsset.ToSoftObjectPath()};
+	return {AbilityDefinitionDataAsset.ToSoftObjectPath()};
 }
 
-const TArray<FDataRegistryId>& UAVVMAbilityGroupDataAsset::GetAbilities() const
+const TArray<FDataRegistryId>& UAVVMAbilityGroupDefinitionDataAsset::GetAbilityIds() const
 {
-	return Abilities;
+	return AbilityIds;
 }
 
-TArray<FSoftObjectPath> FAVVMAbilityGroupDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FAVVMAbilityGroupDefinitionDataTableRow::GetResourcesPaths() const
 {
-	TArray<FSoftObjectPath> OutPaths;
-	for (const TSoftObjectPtr<UAVVMAbilityGroupDataAsset>& AbilityGroup : AbilityGroupDataAssets)
-	{
-		OutPaths.AddUnique(AbilityGroup.ToSoftObjectPath());
-	}
-
-	return OutPaths;
+	return {AbilityGroupDefinitionDataAsset.ToSoftObjectPath()};
 }

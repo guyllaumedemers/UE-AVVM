@@ -36,23 +36,28 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	UItemDefinitionDataAsset is a singular item. It may be retrieved based on a collection of items
- *	hosted from a backend services or as the result of loading a data asset referenced on an AActor.
+ *	UItemDefinitionDataAsset is a singular item POD. It may be request for loading from various sources.
  *
- *	Example A : Your microservice for the player account hold a collection of items tied to the player.
- *	We want to load them using a collection of FDataRegistryId and populate the relevant system Post-GameState::MatchStartup.
- *	
- *	Example B : You load in a level which has a mystery box from which a randomize item can be pick up. The pool of object from which
- *	to pick from is always the same.
+ *		Example :
+ *
+ *		* based on a microservice request to load player account inventory.
+ *		* based on a data asset referenced on a world actor.
+ *
+ *	This POD references the BP Class that will be instanced during gameplay.
+ *	See UItemObject for details!
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class INVENTORYSAMPLE_API UItemDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
+public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+
+	UFUNCTION(BlueprintCallable)
+	const TSoftClassPtr<UItemObject>& GetItemObjectClass() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -62,7 +67,7 @@ protected:
 /**
  *	Class description:
  *
- *	FItemDefinitionDataTableRow is an entry in a DataTableRow for a unique item.
+ *	FItemDefinitionDataTableRow is an entry in a DataTableRow for a unique UItemDefinitionDataAsset.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemDefinitionDataTableRow : public FAVVMDataTableRow
@@ -82,34 +87,32 @@ struct INVENTORYSAMPLE_API FItemDefinitionDataTableRow : public FAVVMDataTableRo
 /**
  *	Class description:
  *	
- *	UItemCollectionDefinitionDataAsset is a STATIC collection of items to be referenced DIRECTLY by an Actor. This
- *	is for cases where an Actor should be interacted with and display non-dynamic content.
- *
- *	Example : A shop actor with a pre-defined set of items to buy from. 
+ *	UItemGroupDefinitionDataAsset is a grouping of items to be referenced by an gameplay Actor class via the override of IResourceProvider.
  */
 UCLASS(BlueprintType, NotBlueprintable)
-class INVENTORYSAMPLE_API UItemCollectionDefinitionDataAsset : public UDataAsset
+class INVENTORYSAMPLE_API UItemGroupDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
+public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	const TArray<FDataRegistryId>& GetResourcesIds() const { return ItemRegistryIds; }
+	const TArray<FDataRegistryId>& GetItemIds() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<FDataRegistryId> ItemRegistryIds;
+	TArray<FDataRegistryId> ItemIds;
 };
 
 /**
  *	Class description:
  *
- *	FItemCollectionDefinitionDataTableRow is an entry in a DataTableRow for a unique set of items.
+ *	FItemGroupDefinitionDataTableRow is an entry in a DataTableRow for a unique UItemGroupDefinitionDataAsset.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemCollectionDefinitionDataTableRow : public FAVVMDataTableRow
+struct INVENTORYSAMPLE_API FItemGroupDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
@@ -120,5 +123,5 @@ struct INVENTORYSAMPLE_API FItemCollectionDefinitionDataTableRow : public FAVVMD
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftObjectPtr<UItemCollectionDefinitionDataAsset> ItemCollectionDefinition = nullptr;
+	TSoftObjectPtr<UItemGroupDefinitionDataAsset> ItemGroupDefinition = nullptr;
 };

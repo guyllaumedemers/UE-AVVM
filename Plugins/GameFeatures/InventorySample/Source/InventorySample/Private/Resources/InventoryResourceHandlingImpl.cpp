@@ -17,4 +17,39 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InventoryProvider.h"
+#include "Resources/InventoryResourceHandlingImpl.h"
+
+#include "ActorInventoryComponent.h"
+#include "AVVMGameplayUtils.h"
+#include "Data/ItemDefinitionDataAsset.h"
+
+TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
+{
+	TArray<FDataRegistryId> OutResources;
+	TArray<UObject*> OutItems;
+
+	for (UObject* Resource : Resources)
+	{
+		const auto* ItemGroup = Cast<UItemGroupDefinitionDataAsset>(Resource);
+		if (IsValid(ItemGroup))
+		{
+			OutResources.Append(ItemGroup->GetItemIds());
+		}
+		else
+		{
+			const auto* Item = Cast<UItemDefinitionDataAsset>(Resource);
+			if (IsValid(Item))
+			{
+				OutItems.Add(Resource);
+			}
+		}
+	}
+
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
+	if (IsValid(InventoryComponent) && UAVVMGameplayUtils::IsAuthoritativeActor(InventoryComponent->GetTypedOuter<AActor>()) && !OutItems.IsEmpty())
+	{
+		InventoryComponent->SetupItems(OutItems);
+	}
+
+	return OutResources;
+}

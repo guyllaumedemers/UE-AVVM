@@ -28,9 +28,7 @@
 #include "InventoryProvider.generated.h"
 
 class UItemObject;
-class UItemCollectionDefinitionDataAsset;
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRetrieveInventoryItems, const TArray<UItemObject*>&, Items);
+class UItemGroupDefinitionDataAsset;
 
 /**
  *	Class description:
@@ -79,35 +77,14 @@ class INVENTORYSAMPLE_API IInventoryProvider
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void ProcessStaticItems(const FOnRetrieveInventoryItems& Callback) const;
-	virtual void ProcessStaticItems_Implementation(const FOnRetrieveInventoryItems& Callback) const PURE_VIRTUAL(ProcessStaticItems_Implementation, return;);
+	void RequestItemsFromDataAsset() const;
+	virtual void RequestItemsFromDataAsset_Implementation() const PURE_VIRTUAL(RequestItemsFromDataAsset_Implementation, return;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void ProcessDynamicItems(const FOnRetrieveInventoryItems& Callback) const;
-	virtual void ProcessDynamicItems_Implementation(const FOnRetrieveInventoryItems& Callback) const PURE_VIRTUAL(ProcessDynamicItems_Implementation, return;);
+	void RequestItemsFromMicroService() const;
+	virtual void RequestItemsFromMicroService_Implementation() const PURE_VIRTUAL(RequestItemsFromMicroService_Implementation, return;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	EItemSrcType GetItemSrcType() const;
 	virtual EItemSrcType GetItemSrcType_Implementation() const PURE_VIRTUAL(GetItemSrcType_Implementation, return EItemSrcType::None;);
-};
-
-/**
- *	Class description:
- *
- *	UInventoryBlueprintFunctionLibrary is a function library that expose basic api for executing Provider Request in Blueprint. It works around the issue
- *	where Blueprint Classes, who implement an interface in BP Only, not in Native C++, cannot bind to the 'Add Parent Call' Node.
- */
-UCLASS()
-class INVENTORYSAMPLE_API UInventoryBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable)
-	static void RequestItems(const UObject* Outer,
-	                         const FOnRetrieveInventoryItems& Callback);
-
-	UFUNCTION(BlueprintCallable)
-	static void ExecuteInventoryProviderDelegate(const TArray<UItemObject*>& NewItems,
-	                                             const FOnRetrieveInventoryItems& Callback);
 };

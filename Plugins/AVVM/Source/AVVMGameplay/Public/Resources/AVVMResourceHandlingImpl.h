@@ -17,4 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InventoryProvider.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "DataRegistryId.h"
+#include "UObject/Object.h"
+
+#include "AVVMResourceHandlingImpl.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMResourceHandlingImpl is an abstraction around the implementation details that load nested resources.
+ */
+UCLASS(Abstract, BlueprintType, NotBlueprintable)
+class AVVMGAMEPLAY_API UAVVMResourceHandlingImpl : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual TArray<FDataRegistryId> ProcessResources(UActorComponent* ActorComponent,
+	                                                 const TArray<UObject*>& Resources) const PURE_VIRTUAL(ProcessResources, return TArray<FDataRegistryId>(););
+};

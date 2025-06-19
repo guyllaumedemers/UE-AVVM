@@ -17,4 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InventoryProvider.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Resources/AVVMResourceHandlingImpl.h"
+
+#include "InventoryResourceHandlingImpl.generated.h"
+
+/**
+ *	Class description:
+ *
+*	UInventoryResourceHandlingImpl implement resource loading for nested 'Item' resources.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UInventoryResourceHandlingImpl : public UAVVMResourceHandlingImpl
+{
+	GENERATED_BODY()
+
+public:
+	virtual TArray<FDataRegistryId> ProcessResources(UActorComponent* ActorComponent,
+	                                                 const TArray<UObject*>& Resources) const override;
+};

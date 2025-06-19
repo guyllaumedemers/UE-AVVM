@@ -34,14 +34,14 @@
 /**
  *	Class description:
  *
- *	UAVVMActorDefinitionDataAsset define a set of properties to be loaded and applied to an Actor. Note : Items with visual representation
- *	should be handled at the Inventory System level. See - GFP/InventorySample - ItemDefinitionDataAsset.
+ *	UAVVMActorDefinitionDataAsset is the unique definition of an Actor and the content that's expected to be in accessed at Runtime.
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class AVVMGAMEPLAY_API UAVVMActorDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
+public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
@@ -63,8 +63,7 @@ protected:
 /**
  *	Class description:
  *
- *	FAVVMActorDefinitionDataTableRow override the base list of resources to be dynamically loaded by the Resource Manager component
- *	for it's counter-part Actor type.
+ *	FAVVMActorDefinitionDataTableRow is an entry in a DataTableRow for a unique Actor type.
  */
 USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMActorDefinitionDataTableRow : public FAVVMDataTableRow

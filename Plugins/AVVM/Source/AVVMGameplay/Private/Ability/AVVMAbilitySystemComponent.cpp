@@ -21,7 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "Ability/AVVMAbilityData.h"
+#include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 
 void UAVVMAbilitySystemComponent::BeginPlay()
@@ -41,7 +41,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	TArray<FSoftObjectPath> DeferredGrantedAbilities;
 	for (const UObject* Resource : Resources)
 	{
-		const auto* AbilityAsset = Cast<UAVVMAbilityDataAsset>(Resource);
+		const auto* AbilityAsset = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
 		if (!IsValid(AbilityAsset))
 		{
 			continue;

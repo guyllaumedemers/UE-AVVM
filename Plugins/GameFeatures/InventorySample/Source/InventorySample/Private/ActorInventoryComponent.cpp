@@ -21,8 +21,12 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
 #include "ItemObject.h"
+#include "Data/ItemDefinitionDataAsset.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
@@ -59,9 +63,7 @@ void UActorInventoryComponent::BeginPlay()
 #if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay)
 	{
-		FOnRetrieveInventoryItems Callback;
-		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemsRetrieved);
-		UInventoryBlueprintFunctionLibrary::RequestItems(Outer, Callback);
+		RequestItems(Outer);
 	}
 #endif
 
@@ -99,6 +101,75 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
+void UActorInventoryComponent::RequestItems(const UObject* Outer)
+{
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
+	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
+	{
+		return;
+	}
+
+	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
+	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
+	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	{
+		return;
+	}
+
+	const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
+	if (bIsItemSrcStatic)
+	{
+		IInventoryProvider::Execute_RequestItemsFromDataAsset(Outer);
+	}
+	else
+	{
+		IInventoryProvider::Execute_RequestItemsFromMicroService(Outer);
+	}
+}
+
+void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
+{
+	const AActor* Outer = OwningOuter.Get();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
+
+	TArray<FSoftObjectPath> DeferredItems;
+	for (const UObject* Resource : Resources)
+	{
+		const auto* ItemAsset = Cast<UItemDefinitionDataAsset>(Resource);
+		if (!IsValid(ItemAsset))
+		{
+			continue;
+		}
+
+		if (!DoesMeetItemRequirements(ItemAsset->GetItemObjectClass()))
+		{
+			UE_LOG(LogGameplay,
+			       Log,
+			       TEXT("Executed from \"%s\". Failed to Meet Item_\"%s\" Requirements."),
+			       IsServerOrClientString,
+			       *ItemAsset->GetName());
+
+			continue;
+		}
+
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". New Item_\"%s\" Recorded."),
+		       IsServerOrClientString,
+		       *ItemAsset->GetName());
+
+		DeferredItems.Add(ItemAsset->GetItemObjectClass().ToSoftObjectPath());
+	}
+
+	if (!DeferredItems.IsEmpty())
+	{
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved);
+		// TODO @gdemers there may be nested items which imply that this handle will be overwrite on next call. Fix it!
+		StreamableHandle = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+	}
+}
+
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 {
 	return Items;
@@ -120,9 +191,29 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const
 	});
 }
 
-void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects)
+bool UActorInventoryComponent::DoesMeetItemRequirements(const TSoftClassPtr<UItemObject>& ItemObjectClass)
 {
-	if (!ensureAlwaysMsgf(!ItemObjects.IsEmpty(), TEXT("UActorInventoryComponent::OnItemsRetrieved has received an Empty Collection!")))
+	if (!ItemObjectClass.IsValid())
+	{
+		return false;
+	}
+
+	const auto* ItemObjectCDO = ItemObjectClass->GetDefaultObject<UItemObject>();
+	if (!IsValid(ItemObjectCDO))
+	{
+		return false;
+	}
+	else
+	{
+		// TODO @gdemers handle requirements using the CDO. May have to inject the current state of the object if fetching dynamic data with progression
+		// from backend.
+		return true;
+	}
+}
+
+void UActorInventoryComponent::OnItemsRetrieved()
+{
+	if (!ensureAlwaysMsgf(!StreamableHandle.IsValid(), TEXT("UActorInventoryComponent::OnItemsRetrieved Streamable handle is invalid!")))
 	{
 		return;
 	}
@@ -140,11 +231,15 @@ void UActorInventoryComponent::OnItemsRetrieved(const TArray<UItemObject*>& Item
 		Iterator.RemoveCurrentSwap();
 	}
 
-	Items.Reset(ItemObjects.Num());
+	TArray<UObject*> OutStreamableAssets;
+	StreamableHandle->GetLoadedAssets(OutStreamableAssets);
+
+	Items.Reset(OutStreamableAssets.Num());
 	// @gdemers append after
-	for (UItemObject* Item : ItemObjects)
+	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
-		if (IsValid(Item) /*Make Array in BP return size=1 array with [0]=nullptr*/)
+		auto* Item = Cast<UItemObject>(StreamableAsset);
+		if (IsValid(Item))
 		{
 			AddReplicatedSubObject(Item);
 			Items.Add(Item);

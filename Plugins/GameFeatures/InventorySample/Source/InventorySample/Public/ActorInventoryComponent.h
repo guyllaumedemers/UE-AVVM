@@ -23,6 +23,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "Engine/StreamableManager.h"
 
 #include "ActorInventoryComponent.generated.h"
 
@@ -64,6 +65,12 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
+	void RequestItems(const UObject* Outer);
+
+	UFUNCTION(BlueprintCallable)
+	void SetupItems(const TArray<UObject*>& Resources);
+
+	UFUNCTION(BlueprintCallable)
 	const TArray<UItemObject*>& GetItems() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -73,8 +80,11 @@ public:
 	const TArray<UItemObject*>& GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const;
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	bool DoesMeetItemRequirements(const TSoftClassPtr<UItemObject>& ItemObjectClass);
+
 	UFUNCTION()
-	void OnItemsRetrieved(const TArray<UItemObject*>& ItemObjects);
+	void OnItemsRetrieved();
 
 	UFUNCTION()
 	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
@@ -88,5 +98,6 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
 	TArray<TObjectPtr<UItemObject>> Items;
 
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

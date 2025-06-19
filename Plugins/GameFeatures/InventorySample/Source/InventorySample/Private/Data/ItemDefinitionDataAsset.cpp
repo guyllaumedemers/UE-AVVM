@@ -31,7 +31,14 @@ EDataValidationResult UItemDefinitionDataAsset::IsDataValid(class FDataValidatio
 
 	return Result;
 }
+#endif
 
+const TSoftClassPtr<UItemObject>& UItemDefinitionDataAsset::GetItemObjectClass() const
+{
+	return ItemObjectClass;
+}
+
+#if WITH_EDITOR
 EDataValidationResult FItemDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
@@ -51,10 +58,10 @@ TArray<FSoftObjectPath> FItemDefinitionDataTableRow::GetResourcesPaths() const
 }
 
 #if WITH_EDITOR
-EDataValidationResult UItemCollectionDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UItemGroupDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemRegistryIds.IsEmpty())
+	if (ItemIds.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UItemCollectionDefinitionDataAsset", "", "FDataRegistry Collection is Empty. No valid entries detected!"));
@@ -63,10 +70,15 @@ EDataValidationResult UItemCollectionDefinitionDataAsset::IsDataValid(class FDat
 	return Result;
 }
 
-EDataValidationResult FItemCollectionDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+const TArray<FDataRegistryId>& UItemGroupDefinitionDataAsset::GetItemIds() const
+{
+	return ItemIds;
+}
+
+EDataValidationResult FItemGroupDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemCollectionDefinition.IsNull())
+	if (ItemGroupDefinition.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("FAVVMItemCollectionDefinitionDataTableRow", "", "UItemCollectionDefinitionDataAsset missing. No valid UDataAsset specified!"));
@@ -76,7 +88,7 @@ EDataValidationResult FItemCollectionDefinitionDataTableRow::IsDataValid(class F
 }
 #endif
 
-TArray<FSoftObjectPath> FItemCollectionDefinitionDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FItemGroupDefinitionDataTableRow::GetResourcesPaths() const
 {
-	return {ItemCollectionDefinition.ToSoftObjectPath()};
+	return {ItemGroupDefinition.ToSoftObjectPath()};
 }

@@ -22,10 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMResourceProvider.generated.h"
 
-class UAbilitySystemComponent;
+class UAVVMResourceHandlingImpl;
 
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
 
@@ -70,7 +71,8 @@ class AVVMGAMEPLAY_API UAVVMResourceHandlingBlueprintFunctionLibrary : public UB
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> CheckAbilities(UAbilitySystemComponent* AbilitySystemComponent,
+	static TArray<FDataRegistryId> CheckResources(TSubclassOf<UAVVMResourceHandlingImpl> ResourceHandlingImplClass,
+	                                              UActorComponent* ActorComponent,
 	                                              const TArray<UObject*>& Resources);
 
 	UFUNCTION(BlueprintCallable)

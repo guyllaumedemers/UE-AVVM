@@ -19,41 +19,29 @@
 //SOFTWARE.
 #include "Resources/AVVMResourceProvider.h"
 
-#include "AbilitySystemComponent.h"
-#include "AVVMGameplayUtils.h"
-#include "Ability/AVVMAbilityData.h"
-#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityDefinitionDataAsset.h"
+#include "Resources/AVVMResourceHandlingImpl.h"
 
-TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckAbilities(UAbilitySystemComponent* AbilitySystemComponent,
+TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(TSubclassOf<UAVVMResourceHandlingImpl> ResourceHandlingImplClass,
+                                                                                      UActorComponent* ActorComponent,
                                                                                       const TArray<UObject*>& Resources)
 {
-	TArray<FDataRegistryId> OutResources;
-	TArray<UObject*> OutAbilities;
-
-	for (UObject* Resource : Resources)
+	if (!ensureAlwaysMsgf(IsValid(ResourceHandlingImplClass),
+	                      TEXT("UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources missing valid TSubclassOf<UAVVMResourceHandlingImpl> !")))
 	{
-		const auto* AbilityGroup = Cast<UAVVMAbilityGroupDataAsset>(Resource);
-		if (IsValid(AbilityGroup))
-		{
-			OutResources.Append(AbilityGroup->GetAbilities());
-		}
-		else
-		{
-			const auto* Ability = Cast<UAVVMAbilityDataAsset>(Resource);
-			if (IsValid(Ability))
-			{
-				OutAbilities.Add(Resource);
-			}
-		}
+		return TArray<FDataRegistryId>();
 	}
 
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(AbilitySystemComponent);
-	if (IsValid(ASC) && UAVVMGameplayUtils::IsAuthoritativeActor(ASC->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
+	const auto* ResourceHandlingImpl = ResourceHandlingImplClass->GetDefaultObject<UAVVMResourceHandlingImpl>();
+	if (!ensureAlwaysMsgf(IsValid(ResourceHandlingImpl),
+	                      TEXT("UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources CDO cannot be reached!")))
 	{
-		ASC->SetupAbilities(OutAbilities);
+		return TArray<FDataRegistryId>();
 	}
-
-	return OutResources;
+	else
+	{
+		return ResourceHandlingImpl->ProcessResources(ActorComponent, Resources);
+	}
 }
 
 bool UAVVMResourceHandlingBlueprintFunctionLibrary::ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,

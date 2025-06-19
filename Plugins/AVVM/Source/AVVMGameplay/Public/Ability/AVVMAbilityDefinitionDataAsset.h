@@ -30,18 +30,17 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "AVVMAbilityData.generated.h"
+#include "AVVMAbilityDefinitionDataAsset.generated.h"
 
-class UInputAction;
 class UGameplayAbility;
 
 /**
  *	Class description:
  *
- *	UAVVMAbilityDataAsset represent a single ability and it's requirements for being granted.
+ *	UAVVMAbilityDefinitionDataAsset represent a single ability and it's requirements for being granted.
  */
 UCLASS(BlueprintType, NotBlueprintable)
-class AVVMGAMEPLAY_API UAVVMAbilityDataAsset : public UDataAsset
+class AVVMGAMEPLAY_API UAVVMAbilityDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -58,7 +57,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<UGameplayAbility> GameplayAbility = nullptr;
+	TSoftClassPtr<UGameplayAbility> GameplayAbilityClass = nullptr;
 
 	// @gdemers tags that define if this ability can be granted to the actor type.
 	// Example : Tag.IsPlayer, Tag.IsFlyingType
@@ -74,10 +73,10 @@ protected:
 /**
  *	Class description:
  *
- *	FAVVMAbilityDataTableRow represent a single ability entry in a Data Table.
+ *	FAVVMAbilityDefinitionDataTableRow is an entry in a DataTableRow for a unique UAVVMAbilityDefinitionDataAsset.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMAbilityDataTableRow : public FAVVMDataTableRow
+struct AVVMGAMEPLAY_API FAVVMAbilityDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
@@ -88,41 +87,40 @@ struct AVVMGAMEPLAY_API FAVVMAbilityDataTableRow : public FAVVMDataTableRow
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftObjectPtr<UAVVMAbilityDataAsset> AbilityDataAsset = nullptr;
+	TSoftObjectPtr<UAVVMAbilityDefinitionDataAsset> AbilityDefinitionDataAsset = nullptr;
 };
 
 /**
  *	Class description:
  *
- *	UAVVMAbilityGroupDataAsset represent a set of abilities to be granted to an Actor with an ASC.
+ *	UAVVMAbilityGroupDefinitionDataAsset represent a set of abilities to be granted to an Actor with an ASC.
  */
 UCLASS(BlueprintType, NotBlueprintable)
-class AVVMGAMEPLAY_API UAVVMAbilityGroupDataAsset : public UDataAsset
+class AVVMGAMEPLAY_API UAVVMAbilityGroupDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable)
-	const TArray<FDataRegistryId>& GetAbilities() const;
+	const TArray<FDataRegistryId>& GetAbilityIds() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<FDataRegistryId> Abilities;
+	TArray<FDataRegistryId> AbilityIds;
 };
 
 /**
  *	Class description:
  *
- *	FAVVMAbilityGroupDataTableRow. Struct Class referenced in UDataTable and accessed via a Registry Id. It's expected
- *	to be gathered through UMetaDataRegistrySources_DataTable across multiple GFP at editor time.
+ *	FAVVMAbilityGroupDefinitionDataTableRow is an entry in a DataTableRow for a unique UAVVMAbilityGroupDefinitionDataAsset.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMAbilityGroupDataTableRow : public FAVVMDataTableRow
+struct AVVMGAMEPLAY_API FAVVMAbilityGroupDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<TSoftObjectPtr<UAVVMAbilityGroupDataAsset>> AbilityGroupDataAssets;
+	TSoftObjectPtr<UAVVMAbilityGroupDefinitionDataAsset> AbilityGroupDefinitionDataAsset;
 };
