@@ -43,6 +43,7 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UActorInventoryComponent, Items);
+	DOREPLIFETIME(UActorInventoryComponent, OwnedGameplayTags);
 }
 
 void UActorInventoryComponent::BeginPlay()
