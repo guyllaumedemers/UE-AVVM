@@ -192,16 +192,10 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 		AbilityComponent->AddLooseGameplayTags(GrantAbilityTags);
 	}
 
-	const AActor* Target = TopInteraction->GetTarget();
-	if (IsValid(Target))
-	{
-		FAVVMNotificationContextArgs CtxArgs;
-		CtxArgs.WorldContextObject = this;
-		CtxArgs.ChannelTag = StartPromptInteractionChannel;
-		CtxArgs.Target = Target;
-		CtxArgs.Payload = FAVVMNotificationPayload::Empty;
-		UAVVMNotificationSubsystem::Static_BroadcastChannel(CtxArgs);
-	}
+	UE_AVVM_NOTIFY(this,
+	               StartPromptInteractionChannel,
+	               TopInteraction->GetTarget(),
+	               FAVVMNotificationPayload::Empty);
 }
 
 void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
@@ -241,14 +235,8 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 		AbilityComponent->RemoveLooseGameplayTags(GrantAbilityTags);
 	}
 
-	const AActor* Target = TopInteraction->GetTarget();
-	if (IsValid(Target))
-	{
-		FAVVMNotificationContextArgs CtxArgs;
-		CtxArgs.WorldContextObject = this;
-		CtxArgs.ChannelTag = StopPromptInteractionChannel;
-		CtxArgs.Target = Target;
-		CtxArgs.Payload = FAVVMNotificationPayload::Empty;
-		UAVVMNotificationSubsystem::Static_BroadcastChannel(CtxArgs);
-	}
+	UE_AVVM_NOTIFY(this,
+	               StopPromptInteractionChannel,
+	               TopInteraction->GetTarget(),
+	               FAVVMNotificationPayload::Empty);
 }

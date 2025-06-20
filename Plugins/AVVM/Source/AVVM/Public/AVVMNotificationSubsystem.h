@@ -30,8 +30,14 @@
 struct FAVVMNotificationPayload;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAVVMOnChannelNotifiedMulticastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
+
+// @gdemers allow stripping symbols when running dedicated server
+#ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
+#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
+#else
+#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload) UAVVMNotificationSubsystem::Static_BroadcastChannel(FAVVMNotificationContextArgs{WorldContextObject, ChannelTag, Target, Payload});
+#endif
 
 /**
  *	Class description:
@@ -127,33 +133,23 @@ public:
 	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
 
 protected:
+	struct FAVVMObservers
+	{
+		~FAVVMObservers();
+		void Unregister(const AActor* Target);
+		void Register(const AActor* Target, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
+		void BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
+		void Broadcast(const AActor* Target, const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
+
+		TMap<TWeakObjectPtr<const AActor>, FAVVMOnChannelNotifiedSingleCastDelegate> Observers;
+	};
+
 	struct FAVVObserversFilteringMechanism
 	{
 		~FAVVObserversFilteringMechanism();
-		void Unregister(const AActor* Target,
-		                const FGameplayTag& ChannelTag);
-
-		void Register(const AActor* Target,
-		              const FGameplayTag& ChannelTag,
-		              const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
-
+		void Unregister(const AActor* Target, const FGameplayTag& ChannelTag);
+		void Register(const AActor* Target, const FGameplayTag& ChannelTag, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
 		void Broadcast(const FAVVMNotificationContextArgs& NotificationContext) const;
-
-		struct FAVVMObservers
-		{
-			~FAVVMObservers();
-			void Unregister(const AActor* Target);
-
-			void Register(const AActor* Target,
-			              const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
-
-			void BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
-
-			void Broadcast(const AActor* Target,
-			               const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
-
-			TMap<TWeakObjectPtr<const AActor>, FAVVMOnChannelNotifiedSingleCastDelegate> Observers;
-		};
 
 		TMap<const FGameplayTag, FAVVMObservers> TagToObservers;
 	};

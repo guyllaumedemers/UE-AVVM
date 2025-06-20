@@ -96,24 +96,24 @@ void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotification
 	}
 }
 
-UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::~FAVVMObservers()
+UAVVMNotificationSubsystem::FAVVMObservers::~FAVVMObservers()
 {
 	Observers.Reset();
 }
 
-void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::Unregister(const AActor* Target)
+void UAVVMNotificationSubsystem::FAVVMObservers::Unregister(const AActor* Target)
 {
 	Observers.Remove(Target);
 }
 
-void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::Register(const AActor* Target,
-                                                                                           const FAVVMOnChannelNotifiedSingleCastDelegate& Callback)
+void UAVVMNotificationSubsystem::FAVVMObservers::Register(const AActor* Target,
+                                                          const FAVVMOnChannelNotifiedSingleCastDelegate& Callback)
 {
 	FAVVMOnChannelNotifiedSingleCastDelegate& OutResult = Observers.FindOrAdd(Target);
 	OutResult = Callback;
 }
 
-void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
+void UAVVMNotificationSubsystem::FAVVMObservers::BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
 {
 	for (const auto& [Actor, Callback] : Observers)
 	{
@@ -121,8 +121,8 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers
 	}
 }
 
-void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::Broadcast(const AActor* Target,
-                                                                                            const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
+void UAVVMNotificationSubsystem::FAVVMObservers::Broadcast(const AActor* Target,
+                                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
 {
 	const FAVVMOnChannelNotifiedSingleCastDelegate* SearchResult = Observers.Find(Target);
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("FAVVMObservers::Broadcast provided with invalid Target Actor")))
