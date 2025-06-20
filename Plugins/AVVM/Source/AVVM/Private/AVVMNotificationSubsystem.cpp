@@ -29,10 +29,15 @@ TInstancedStruct<FAVVMNotificationPayload> FAVVMNotificationPayload::Empty = TIn
 
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
+	if (IsRunningDedicatedServer())
+	{
+		return false;
+	}
+
 	const UWorld* PieOrGameWorld = Cast<UWorld>(Outer);
 	if (IsValid(PieOrGameWorld))
 	{
-		const bool bIsGameClient = PieOrGameWorld->IsGameWorld() && !PieOrGameWorld->IsNetMode(NM_DedicatedServer);
+		const bool bIsGameClient = PieOrGameWorld->IsGameWorld();
 		return bIsGameClient;
 	}
 	else
@@ -50,7 +55,15 @@ void UAVVMNotificationSubsystem::Initialize(FSubsystemCollectionBase& Collection
 UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UObject* WorldContextObject)
 {
 	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
-	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(World);
+	if (IsValid(World))
+	{
+		auto* Subsystem = UWorld::GetSubsystem<UAVVMNotificationSubsystem>(World);
+		return Subsystem;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
