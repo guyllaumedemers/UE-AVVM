@@ -69,7 +69,7 @@ void UAVVMWorldActorPresenter::StartPresenting()
 		CtxArgs.World = GetWorld();
 		CtxArgs.ContextObject = this;
 		CtxArgs.ViewModel = ViewModel.Get();
-		CtxArgs.ExtensionPointTag = ExtensionPointTag;
+		CtxArgs.ExtensionPointTag = TargetTag;
 
 		ExtensionRequestHandle = IAVVMUIExtensionInterface::PushContentToExtensionPoint(CtxArgs);
 		return;
@@ -113,12 +113,12 @@ void UAVVMWorldActorPresenter::SetupWorldWidget()
 		       Log,
 		       TEXT("Actor \"%s\" doesn't hold a WidgetComponent. Failed to set \"%s\" Widget Class."),
 		       *Outer->GetName(),
-		       IsValid(PreviewInteractionWidgetClass) ? *PreviewInteractionWidgetClass->GetName() : TEXT("Unknown"));
+		       IsValid(WorldWidgetClass) ? *WorldWidgetClass->GetName() : TEXT("Unknown"));
 
 		return;
 	}
 
-	WidgetComponent->SetWidgetClass(PreviewInteractionWidgetClass);
+	WidgetComponent->SetWidgetClass(WorldWidgetClass);
 
 	auto* Target = Cast<UCommonUserWidget>(WidgetComponent->GetWidget());
 	if (IsValid(Target))

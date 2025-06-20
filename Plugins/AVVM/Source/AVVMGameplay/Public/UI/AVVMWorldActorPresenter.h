@@ -47,7 +47,7 @@ enum class EAVVMWidgetPreviewType : uint8
  *	Class description:
  *
  *	UAVVMWorldActorPresenter is a presenter class that allow opening/closing context specific Widgets following world interaction between local client and world actor.
- *	When available, it can display the Widgets in World or on the HUD.
+ *	When available, it can display the Widgets in World or on the HUD, then based on user Input, can open the Widget context specific to the owning system.
  */
 UCLASS()
 class AVVMGAMEPLAY_API UAVVMWorldActorPresenter : public UAVVMPresenter,
@@ -76,11 +76,7 @@ protected:
 	EAVVMWidgetPreviewType PreviewType = EAVVMWidgetPreviewType::InWorld;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EAVVMWidgetPreviewType::InWorld"))
-	TSubclassOf<UCommonUserWidget> PreviewInteractionWidgetClass = nullptr;
-
-	// @gdemers UUIExtensionPointWidget reference the Widget to be instanced
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EAVVMWidgetPreviewType::OnHUD"))
-	FGameplayTag ExtensionPointTag = FGameplayTag::EmptyTag;
+	TSubclassOf<UCommonUserWidget> WorldWidgetClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	ESlateVisibility DefaultVisibilityOnStart = ESlateVisibility::SelfHitTestInvisible;
