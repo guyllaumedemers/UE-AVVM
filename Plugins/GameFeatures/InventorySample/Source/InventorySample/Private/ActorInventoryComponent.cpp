@@ -141,6 +141,8 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 			continue;
 		}
 
+		// TODO @gdemers This wont work. TSoftClassPtr->UClass isnt loaded yet. GetDefaultObject will
+		// hit interrupt. Fix it! Or remove requirement check.
 		if (!DoesMeetItemRequirements(ItemAsset->GetItemObjectClass()))
 		{
 			UE_LOG(LogGameplay,
