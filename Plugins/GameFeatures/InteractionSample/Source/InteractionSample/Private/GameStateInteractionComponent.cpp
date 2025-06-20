@@ -22,6 +22,7 @@
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -156,7 +157,7 @@ void UGameStateInteractionComponent::Server_AddEndOverlaped(UInteraction* NewInt
 
 void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 {
-	auto* Outer = OwningOuter.Get();
+	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
 	{
 		return;
@@ -173,7 +174,13 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 		return;
 	}
 
-	const AActor* Instigator = BeginInteractions.Top()->GetInstigator();
+	const UInteraction* TopInteraction = BeginInteractions.Top();
+	if (!IsValid(TopInteraction))
+	{
+		return;
+	}
+
+	const AActor* Instigator = TopInteraction->GetInstigator();
 	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
@@ -184,11 +191,22 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 	{
 		AbilityComponent->AddLooseGameplayTags(GrantAbilityTags);
 	}
+
+	const AActor* Target = TopInteraction->GetTarget();
+	if (IsValid(Target))
+	{
+		FAVVMNotificationContextArgs CtxArgs;
+		CtxArgs.WorldContextObject = this;
+		CtxArgs.ChannelTag = StartPromptInteractionChannel;
+		CtxArgs.Target = Target;
+		CtxArgs.Payload = FAVVMNotificationPayload::Empty;
+		UAVVMNotificationSubsystem::Static_BroadcastChannel(CtxArgs);
+	}
 }
 
 void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 {
-	auto* Outer = OwningOuter.Get();
+	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
 	{
 		return;
@@ -205,7 +223,13 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 		return;
 	}
 
-	const AActor* Instigator = EndInteractions.Top()->GetInstigator();
+	const UInteraction* TopInteraction = BeginInteractions.Top();
+	if (!IsValid(TopInteraction))
+	{
+		return;
+	}
+
+	const AActor* Instigator = TopInteraction->GetInstigator();
 	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
@@ -215,5 +239,16 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	if (IsValid(AbilityComponent))
 	{
 		AbilityComponent->RemoveLooseGameplayTags(GrantAbilityTags);
+	}
+
+	const AActor* Target = TopInteraction->GetTarget();
+	if (IsValid(Target))
+	{
+		FAVVMNotificationContextArgs CtxArgs;
+		CtxArgs.WorldContextObject = this;
+		CtxArgs.ChannelTag = StopPromptInteractionChannel;
+		CtxArgs.Target = Target;
+		CtxArgs.Payload = FAVVMNotificationPayload::Empty;
+		UAVVMNotificationSubsystem::Static_BroadcastChannel(CtxArgs);
 	}
 }

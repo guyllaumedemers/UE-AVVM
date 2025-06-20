@@ -66,6 +66,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag StartPromptInteractionChannel = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
+
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewBeginInteractionRecorded")
 	TArray<TObjectPtr<const UInteraction>> BeginInteractions;
 

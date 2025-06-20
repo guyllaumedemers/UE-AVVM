@@ -112,8 +112,8 @@ void UAVVMCheatExtension::NotifyChannelWithPayload(const FString& TagChannel,
 	{
 		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *TagChannel);
 		FAVVMNotificationContextArgs ContextArgs;
-		ContextArgs.ChannelTag = ChannelTag;
 		ContextArgs.WorldContextObject = this;
+		ContextArgs.ChannelTag = ChannelTag;
 		ContextArgs.Payload = GetPayload(*SearchResult);
 		UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
 	}
@@ -138,9 +138,9 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 
 	UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *TagChannel);
 	FAVVMNotificationContextArgs ContextArgs;
-	ContextArgs.ChannelTag = FGameplayTag::RequestGameplayTag(FName(TagChannel));
 	ContextArgs.WorldContextObject = this;
-	ContextArgs.Payload = TInstancedStruct<FAVVMNotificationPayload>{};
+	ContextArgs.ChannelTag = FGameplayTag::RequestGameplayTag(FName(TagChannel));
+	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
 }
 
@@ -243,8 +243,8 @@ void UAVVMCheatExtension::OnSoftObjectAcquired()
 		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *LookAtChannelTag.ToString());
 
 		FAVVMNotificationContextArgs ContextArgs;
-		ContextArgs.ChannelTag = LookAtChannelTag;
 		ContextArgs.WorldContextObject = this;
+		ContextArgs.ChannelTag = LookAtChannelTag;
 		ContextArgs.Payload = GetPayload(*StreamableHandle);
 		UAVVMNotificationSubsystem::Static_BroadcastChannel(ContextArgs);
 

@@ -70,7 +70,7 @@ protected:
 
 	struct FResourceQueueingMechanism
 	{
-		virtual ~FResourceQueueingMechanism();
+		~FResourceQueueingMechanism();
 		bool TryExecuteNextRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest);
 		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback);
 		void PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle);

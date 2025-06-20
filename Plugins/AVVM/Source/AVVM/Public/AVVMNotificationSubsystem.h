@@ -50,6 +50,9 @@ struct AVVM_API FAVVMObserverContextArgs
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
+	AActor* Target = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
 };
 
@@ -66,8 +69,12 @@ struct AVVM_API FAVVMNotificationContextArgs
 	UPROPERTY(Transient, BlueprintReadWrite)
 	UObject* WorldContextObject = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite, meta=(ToolTip="Target Channel. May have multiple Presenters listening."))
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
+
+	// @gdemers if no target is provided, we broadcast to all observers of the channel tag.
+	UPROPERTY(Transient, BlueprintReadWrite, meta=(ToolTip="Unique Owner of the Presenter we are targeting."))
+	const AActor* Target = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TInstancedStruct<FAVVMNotificationPayload> Payload;
@@ -82,6 +89,8 @@ USTRUCT(BlueprintType)
 struct AVVM_API FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	static TInstancedStruct<FAVVMNotificationPayload> Empty;
 };
 
 /**
@@ -105,9 +114,8 @@ class AVVM_API UAVVMNotificationSubsystem : public UWorldSubsystem
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
 
-	static UAVVMNotificationSubsystem* Get(const UWorld* WorldContext);
+	static UAVVMNotificationSubsystem* Get(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);
@@ -119,10 +127,36 @@ public:
 	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
 
 protected:
-	void BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext) const;
-	void RemoveOrDestroy(const FGameplayTag& ChannelTag, const UObject* DelegateOwner);
-	void CreateOrAdd(const FGameplayTag& ChannelTag, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
+	struct FAVVObserversFilteringMechanism
+	{
+		~FAVVObserversFilteringMechanism();
+		void Unregister(const AActor* Target,
+		                const FGameplayTag& ChannelTag);
 
-	// @gdemers a collection of all channels we can broadcast and notify observers with based on provided "Gameplay event".
-	TMap<const FGameplayTag, FAVVMOnChannelNotifiedMulticastDelegate> TagChannels;
+		void Register(const AActor* Target,
+		              const FGameplayTag& ChannelTag,
+		              const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
+
+		void Broadcast(const FAVVMNotificationContextArgs& NotificationContext) const;
+
+		struct FAVVMObservers
+		{
+			~FAVVMObservers();
+			void Unregister(const AActor* Target);
+
+			void Register(const AActor* Target,
+			              const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
+
+			void BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
+
+			void Broadcast(const AActor* Target,
+			               const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
+
+			TMap<TWeakObjectPtr<const AActor>, FAVVMOnChannelNotifiedSingleCastDelegate> Observers;
+		};
+
+		TMap<const FGameplayTag, FAVVMObservers> TagToObservers;
+	};
+
+	FAVVObserversFilteringMechanism ObserversFilteringMechanism;
 };

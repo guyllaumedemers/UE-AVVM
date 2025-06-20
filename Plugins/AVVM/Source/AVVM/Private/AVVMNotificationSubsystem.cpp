@@ -25,6 +25,8 @@
 // @gdemers extern symbol for global access to custom LLM_tag
 extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
 
+TInstancedStruct<FAVVMNotificationPayload> FAVVMNotificationPayload::Empty = TInstancedStruct<FAVVMNotificationPayload>();
+
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const UWorld* PieOrGameWorld = Cast<UWorld>(Outer);
@@ -45,72 +47,116 @@ void UAVVMNotificationSubsystem::Initialize(FSubsystemCollectionBase& Collection
 	UE_LOG(LogUI, Log, TEXT("UAVVMNotificationSubsystem::Initialize. Running On Client."));
 }
 
-void UAVVMNotificationSubsystem::Deinitialize()
+UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UObject* WorldContextObject)
 {
-	Super::Deinitialize();
-	TagChannels.Empty();
-}
-
-UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UWorld* WorldContext)
-{
-	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(WorldContext);
+	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
+	return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(World);
 }
 
 void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
-	const UObject* WorldContextObject = ObserverContext.WorldContextObject;
-	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(World);
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		AVVMNotificationSubsystem->RemoveOrDestroy(ObserverContext.ChannelTag, WorldContextObject);
+		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
+		FilteringMechanism.Unregister(ObserverContext.Target, ObserverContext.ChannelTag);
 	}
 }
 
 void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext)
 {
-	const UObject* WorldContextObject = ObserverContext.WorldContextObject;
-	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(World);
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		AVVMNotificationSubsystem->CreateOrAdd(ObserverContext.ChannelTag, ObserverContext.Callback);
+		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
+		FilteringMechanism.Register(ObserverContext.Target, ObserverContext.ChannelTag, ObserverContext.Callback);
 	}
 }
 
 void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext)
 {
-	const UObject* WorldContextObject = NotificationContext.WorldContextObject;
-	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(World);
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
-		AVVMNotificationSubsystem->BroadcastChannel(NotificationContext);
+		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
+		FilteringMechanism.Broadcast(NotificationContext);
 	}
 }
 
-void UAVVMNotificationSubsystem::BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext) const
+UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::~FAVVMObservers()
 {
-	const FAVVMOnChannelNotifiedMulticastDelegate* SearchResult = TagChannels.Find(NotificationContext.ChannelTag);
-	if (ensure(SearchResult != nullptr))
+	Observers.Reset();
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::Unregister(const AActor* Target)
+{
+	Observers.Remove(Target);
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::Register(const AActor* Target,
+                                                                                           const FAVVMOnChannelNotifiedSingleCastDelegate& Callback)
+{
+	FAVVMOnChannelNotifiedSingleCastDelegate& OutResult = Observers.FindOrAdd(Target);
+	OutResult = Callback;
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
+{
+	for (const auto& [Actor, Callback] : Observers)
 	{
-		SearchResult->Broadcast(NotificationContext.Payload);
+		Callback.ExecuteIfBound(Payload);
 	}
 }
 
-void UAVVMNotificationSubsystem::RemoveOrDestroy(const FGameplayTag& ChannelTag,
-                                                 const UObject* DelegateOwner)
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::FAVVMObservers::Broadcast(const AActor* Target,
+                                                                                            const TInstancedStruct<FAVVMNotificationPayload>& Payload) const
 {
-	FAVVMOnChannelNotifiedMulticastDelegate* MulticastDelegate = TagChannels.Find(ChannelTag);
-	if (ensure(MulticastDelegate != nullptr))
+	const FAVVMOnChannelNotifiedSingleCastDelegate* SearchResult = Observers.Find(Target);
+	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("FAVVMObservers::Broadcast provided with invalid Target Actor")))
 	{
-		MulticastDelegate->RemoveAll(DelegateOwner);
+		SearchResult->ExecuteIfBound(Payload);
 	}
 }
 
-void UAVVMNotificationSubsystem::CreateOrAdd(const FGameplayTag& ChannelTag,
-                                             const FAVVMOnChannelNotifiedSingleCastDelegate& Callback)
+UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::~FAVVObserversFilteringMechanism()
 {
-	FAVVMOnChannelNotifiedMulticastDelegate& MulticastDelegate = TagChannels.FindOrAdd(ChannelTag);
-	MulticastDelegate.AddUnique(Callback);
+	TagToObservers.Reset();
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Unregister(const AActor* Target,
+                                                                             const FGameplayTag& ChannelTag)
+{
+	FAVVMObservers* SearchResult = TagToObservers.Find(ChannelTag);
+	if (SearchResult != nullptr)
+	{
+		SearchResult->Unregister(Target);
+	}
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Register(const AActor* Target,
+                                                                           const FGameplayTag& ChannelTag,
+                                                                           const FAVVMOnChannelNotifiedSingleCastDelegate& Callback)
+{
+	FAVVMObservers& SearchResult = TagToObservers.FindOrAdd(ChannelTag);
+	SearchResult.Register(Target, Callback);
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(const FAVVMNotificationContextArgs& NotificationContext) const
+{
+	const FAVVMObservers* SearchResult = TagToObservers.Find(NotificationContext.ChannelTag);
+	if (!ensureAlwaysMsgf(SearchResult != nullptr, TEXT("FAVVMNotificationContextArgs provided with invalid Channel Tag")))
+	{
+		return;
+	}
+
+	const TInstancedStruct<FAVVMNotificationPayload>& Payload = NotificationContext.Payload;
+	const AActor* Target = NotificationContext.Target;
+	if (!IsValid(Target))
+	{
+		SearchResult->BroadcastAll(Payload);
+	}
+	else
+	{
+		SearchResult->Broadcast(Target, Payload);
+	}
 }

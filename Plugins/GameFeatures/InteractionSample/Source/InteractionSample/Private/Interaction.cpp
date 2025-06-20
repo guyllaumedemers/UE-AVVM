@@ -58,6 +58,11 @@ bool UInteraction::IsEqual(const UInteraction* Other) const
 	return (Instigator == Other->Instigator) && (Target == Other->Target);
 }
 
+const AActor* UInteraction::GetTarget() const
+{
+	return Target.Get();
+}
+
 const AActor* UInteraction::GetInstigator() const
 {
 	return Instigator.Get();

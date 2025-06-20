@@ -56,7 +56,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsEqual(const UInteraction* Other) const;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, meta=(ToolTip="Actor on which the collision event executed from."))
+	const AActor* GetTarget() const;
+
+	UFUNCTION(BlueprintCallable, meta=(ToolTip="Actor that entered/exited the collision range."))
 	const AActor* GetInstigator() const;
 
 protected:
