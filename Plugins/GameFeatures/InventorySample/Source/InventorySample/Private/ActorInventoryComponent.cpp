@@ -213,7 +213,7 @@ bool UActorInventoryComponent::DoesMeetItemRequirements(const TSoftClassPtr<UIte
 
 void UActorInventoryComponent::OnItemsRetrieved()
 {
-	if (!ensureAlwaysMsgf(!StreamableHandle.IsValid(), TEXT("UActorInventoryComponent::OnItemsRetrieved Streamable handle is invalid!")))
+	if (!ensureAlwaysMsgf(StreamableHandle.IsValid(), TEXT("UActorInventoryComponent::OnItemsRetrieved Streamable handle is invalid!")))
 	{
 		return;
 	}
