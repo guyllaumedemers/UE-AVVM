@@ -39,7 +39,6 @@ public class AVVMGameplay : ModuleRules
 				"GameplayTags",
 				"GameplayTasks",
 				"ModularGameplayActors",
-				"NetCore",
 				"Slate",
 			}
 		);
@@ -47,8 +46,11 @@ public class AVVMGameplay : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"CommonUI",
 				"EnhancedInput",
-				"ModularGameplay"
+				"ModelViewViewModel",
+				"ModularGameplay",
+				"UMG"
 			}
 		);
 	}

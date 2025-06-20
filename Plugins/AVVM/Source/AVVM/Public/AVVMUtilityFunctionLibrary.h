@@ -53,6 +53,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
 	                          UCommonUserWidget* Target);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
+	static ULocalPlayer* GetFirstLocalPlayer(const UObject* WorldContextObject);
 };
 
 template <typename T>

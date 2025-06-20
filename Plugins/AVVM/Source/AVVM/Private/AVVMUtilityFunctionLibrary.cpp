@@ -41,3 +41,27 @@ void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMView
 		MVVMView->SetViewModel(ViewModelFName, ViewModel);
 	}
 }
+
+ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstLocalPlayer(const UObject* WorldContextObject)
+{
+	if (!IsValid(WorldContextObject))
+	{
+		return nullptr;
+	}
+
+	const UWorld* World = WorldContextObject->GetWorld();
+	if (!IsValid(World))
+	{
+		return nullptr;
+	}
+
+	const UGameInstance* GameInstance = World->GetGameInstance();
+	if (IsValid(GameInstance))
+	{
+		return GameInstance->GetFirstGamePlayer();
+	}
+	else
+	{
+		return nullptr;
+	}
+}

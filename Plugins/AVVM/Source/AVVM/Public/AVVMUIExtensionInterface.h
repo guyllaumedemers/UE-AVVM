@@ -33,7 +33,7 @@
  *	FAVVMUIExtensionContextArgs encapsulate arguments to pass to the UI Extension Point.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMUIExtensionContextArgs
+struct AVVM_API FAVVMUIExtensionContextArgs
 {
 	GENERATED_BODY()
 
@@ -60,12 +60,12 @@ struct AVVMSAMPLERUNTIME_API FAVVMUIExtensionContextArgs
  *	IAVVMUIExtensionInterface or IAVVMPrimaryGameLayoutInterface.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class AVVMSAMPLERUNTIME_API UAVVMUIExtensionInterface : public UInterface
+class AVVM_API UAVVMUIExtensionInterface : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMSAMPLERUNTIME_API IAVVMUIExtensionInterface
+class AVVM_API IAVVMUIExtensionInterface
 {
 	GENERATED_BODY()
 

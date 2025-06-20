@@ -103,30 +103,6 @@ FUniqueNetIdPtr UAVVMOnlineInterfaceUtils::GetUniqueNetIdPtr(const ULocalPlayer*
 	return UniqueNetIdPtr;
 }
 
-ULocalPlayer* UAVVMOnlineInterfaceUtils::GetFirstLocalPlayer(const UObject* WorldContextObject)
-{
-	if (!IsValid(WorldContextObject))
-	{
-		return nullptr;
-	}
-
-	const UWorld* World = WorldContextObject->GetWorld();
-	if (!IsValid(World))
-	{
-		return nullptr;
-	}
-
-	const UGameInstance* GameInstance = World->GetGameInstance();
-	if (IsValid(GameInstance))
-	{
-		return GameInstance->GetFirstGamePlayer();
-	}
-	else
-	{
-		return nullptr;
-	}
-}
-
 FString UAVVMOnlineInterfaceUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPlayerWallet>(Payload);

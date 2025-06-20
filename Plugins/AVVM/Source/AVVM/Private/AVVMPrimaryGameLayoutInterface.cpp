@@ -20,14 +20,13 @@
 #include "AVVMPrimaryGameLayoutInterface.h"
 
 #include "AVVM.h"
-#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "PrimaryGameLayout.h"
 
 void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
 {
-	ULocalPlayer* FirstLocalPlayer = UAVVMOnlineInterfaceUtils::GetFirstLocalPlayer(Outer);
+	ULocalPlayer* FirstLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstLocalPlayer(Outer);
 	if (!IsValid(FirstLocalPlayer))
 	{
 		return;
@@ -64,7 +63,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObject* Outer,
                                                                       UCommonActivatableWidget* Target)
 {
-	ULocalPlayer* FirstLocalPlayer = UAVVMOnlineInterfaceUtils::GetFirstLocalPlayer(Outer);
+	ULocalPlayer* FirstLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstLocalPlayer(Outer);
 	if (!IsValid(FirstLocalPlayer))
 	{
 		return;

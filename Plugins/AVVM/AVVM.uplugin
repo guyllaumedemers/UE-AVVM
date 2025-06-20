@@ -41,6 +41,10 @@
       "Enabled": true
     },
     {
+      "Name": "CommonGame",
+      "Enabled": true
+    },
+    {
       "Name": "DataRegistry",
       "Enabled": true
     },
@@ -62,6 +66,10 @@
     },
     {
       "Name": "ModularGameplayActors",
+      "Enabled": true
+    },
+    {
+      "Name": "UIExtension",
       "Enabled": true
     }
   ]

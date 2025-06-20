@@ -29,7 +29,6 @@ public class AVVM : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CommonUI",
 				"Core",
 				"CoreUObject",
 				"DataRegistry",
@@ -38,13 +37,16 @@ public class AVVM : ModuleRules
 				"FieldNotification",
 				"GameplayTags",
 				"ModelViewViewModel",
-				"UMG",
+				"UIExtension"
 			});
 
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"CommonGame",
+				"CommonUI",
+				"UMG",
 			});
 	}
 }

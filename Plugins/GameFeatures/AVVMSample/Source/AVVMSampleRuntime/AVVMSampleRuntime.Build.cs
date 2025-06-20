@@ -38,17 +38,16 @@ public class AVVMSampleRuntime : ModuleRules
 				"GameplayTags",
 				"ModularGameplayActors",
 				"ModelViewViewModel",
-				"OnlineSubsystem"
+				"OnlineSubsystem",
+				"UIExtension",
 			});
 
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CommonGame",
 				"CommonUI",
 				"DataRegistry",
-				"UIExtension",
 			});
 
 		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools

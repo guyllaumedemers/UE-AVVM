@@ -36,7 +36,7 @@ class UCommonActivatableWidget;
  *	Game layout.
  */
 USTRUCT(BlueprintType)
-struct AVVMSAMPLERUNTIME_API FAVVMPrimaryGameLayoutContextArgs
+struct AVVM_API FAVVMPrimaryGameLayoutContextArgs
 {
 	GENERATED_BODY()
 
@@ -57,12 +57,12 @@ struct AVVMSAMPLERUNTIME_API FAVVMPrimaryGameLayoutContextArgs
  *	IAVVMPrimaryGameLayoutInterface or IAVVMUIExtensionInterface.
  */
 UINTERFACE(BlueprintType, Blueprintable)
-class AVVMSAMPLERUNTIME_API UAVVMPrimaryGameLayoutInterface : public UInterface
+class AVVM_API UAVVMPrimaryGameLayoutInterface : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMSAMPLERUNTIME_API IAVVMPrimaryGameLayoutInterface
+class AVVM_API IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
