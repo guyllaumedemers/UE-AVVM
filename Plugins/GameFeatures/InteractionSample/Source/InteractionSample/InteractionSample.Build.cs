@@ -42,6 +42,7 @@ public class InteractionSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
 				"AVVMGameplay"
 			}
 		);
