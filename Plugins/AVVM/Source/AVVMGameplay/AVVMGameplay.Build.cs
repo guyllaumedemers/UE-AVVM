@@ -40,6 +40,7 @@ public class AVVMGameplay : ModuleRules
 				"GameplayTasks",
 				"ModularGameplayActors",
 				"Slate",
+				"UIExtension"
 			}
 		);
 

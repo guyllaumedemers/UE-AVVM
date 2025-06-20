@@ -27,18 +27,31 @@
 #include "Components/SlateWrapperTypes.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "WorldActorPresenter.generated.h"
+#include "AVVMWorldActorPresenter.generated.h"
 
 class UCommonUserWidget;
 
 /**
  *	Class description:
  *
- *	UWorldActorPresenter is a presenter class that display world content and possibly has world interaction enabled.
+ *	EAVVMWidgetPreviewType define if the widget should be displayed in world or on HUD.
+ */
+UENUM(BlueprintType)
+enum class EAVVMWidgetPreviewType : uint8
+{
+	InWorld = 0,
+	OnHUD
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMWorldActorPresenter is a presenter class that allow opening/closing context specific Widgets following world interaction between local client and world actor.
+ *	When available, it can display the Widgets in World or on the HUD.
  */
 UCLASS()
-class AVVMGAMEPLAY_API UWorldActorPresenter : public UAVVMPresenter,
-                                              public IAVVMUIExtensionInterface
+class AVVMGAMEPLAY_API UAVVMWorldActorPresenter : public UAVVMPresenter,
+                                                  public IAVVMUIExtensionInterface
 {
 	GENERATED_BODY()
 
@@ -59,11 +72,15 @@ protected:
 
 	void SetupWorldWidget();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bShouldPreviewInteractionInWorldOrHUD = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	EAVVMWidgetPreviewType PreviewType = EAVVMWidgetPreviewType::InWorld;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldPreviewInteractionInWorldOrHUD"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EAVVMWidgetPreviewType::InWorld"))
 	TSubclassOf<UCommonUserWidget> PreviewInteractionWidgetClass = nullptr;
+
+	// @gdemers UUIExtensionPointWidget reference the Widget to be instanced
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EAVVMWidgetPreviewType::OnHUD"))
+	FGameplayTag ExtensionPointTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	ESlateVisibility DefaultVisibilityOnStart = ESlateVisibility::SelfHitTestInvisible;

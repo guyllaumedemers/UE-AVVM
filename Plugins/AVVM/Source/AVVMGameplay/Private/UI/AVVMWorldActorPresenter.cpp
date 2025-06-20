@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/WorldActorPresenter.h"
+#include "UI/AVVMWorldActorPresenter.h"
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
@@ -26,22 +26,23 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
 
-AActor* UWorldActorPresenter::GetOuterKey() const
+AActor* UAVVMWorldActorPresenter::GetOuterKey() const
 {
 	return GetTypedOuter<AActor>();
 }
 
-void UWorldActorPresenter::SafeBeginPlay()
+void UAVVMWorldActorPresenter::SafeBeginPlay()
 {
 	Super::SafeBeginPlay();
 
-	if (bShouldPreviewInteractionInWorldOrHUD)
+	const bool bDoesDisplayInWorld = (PreviewType == EAVVMWidgetPreviewType::InWorld);
+	if (bDoesDisplayInWorld)
 	{
 		SetupWorldWidget();
 	}
 }
 
-void UWorldActorPresenter::SafeEndPlay()
+void UAVVMWorldActorPresenter::SafeEndPlay()
 {
 	Super::SafeEndPlay();
 
@@ -49,18 +50,31 @@ void UWorldActorPresenter::SafeEndPlay()
 	WorldWidget.Reset();
 }
 
-void UWorldActorPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	StartPresenting();
 }
 
-void UWorldActorPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	StopPresenting();
 }
 
-void UWorldActorPresenter::StartPresenting()
+void UAVVMWorldActorPresenter::StartPresenting()
 {
+	const bool bDoesDisplayOnHUD = (PreviewType == EAVVMWidgetPreviewType::OnHUD);
+	if (bDoesDisplayOnHUD)
+	{
+		FAVVMUIExtensionContextArgs CtxArgs;
+		CtxArgs.World = GetWorld();
+		CtxArgs.ContextObject = this;
+		CtxArgs.ViewModel = ViewModel.Get();
+		CtxArgs.ExtensionPointTag = ExtensionPointTag;
+
+		ExtensionRequestHandle = IAVVMUIExtensionInterface::PushContentToExtensionPoint(CtxArgs);
+		return;
+	}
+
 	UCommonUserWidget* TargetWidget = WorldWidget.Get();
 	if (IsValid(TargetWidget))
 	{
@@ -68,8 +82,15 @@ void UWorldActorPresenter::StartPresenting()
 	}
 }
 
-void UWorldActorPresenter::StopPresenting()
+void UAVVMWorldActorPresenter::StopPresenting()
 {
+	const bool bDoesDisplayOnHUD = (PreviewType == EAVVMWidgetPreviewType::OnHUD);
+	if (bDoesDisplayOnHUD)
+	{
+		IAVVMUIExtensionInterface::PopContentToExtensionPoint(ExtensionRequestHandle);
+		return;
+	}
+
 	UCommonUserWidget* TargetWidget = WorldWidget.Get();
 	if (IsValid(TargetWidget))
 	{
@@ -77,7 +98,7 @@ void UWorldActorPresenter::StopPresenting()
 	}
 }
 
-void UWorldActorPresenter::SetupWorldWidget()
+void UAVVMWorldActorPresenter::SetupWorldWidget()
 {
 	const AActor* Outer = GetTypedOuter<AActor>();
 	if (!IsValid(Outer))
