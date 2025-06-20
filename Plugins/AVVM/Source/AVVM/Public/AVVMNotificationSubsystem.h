@@ -81,7 +81,7 @@ struct AVVM_API FAVVMNotificationContextArgs
 /**
  *	Class description:
  *
- *	FAVVMNotificationPayload. Base Class of a notification Payload.
+ *	FAVVMNotificationPayload is base class for a notification Payload.
  */
 USTRUCT(BlueprintType)
 struct AVVM_API FAVVMNotificationPayload
@@ -94,15 +94,12 @@ struct AVVM_API FAVVMNotificationPayload
 /**
 *	Class description:
  *
- *	UAVVMNotificationSubsystem notify Presenters of a "Gameplay event" through Tag Channels. This system is expected to reduce
- *	the amount of boiler plate required for Presenter to listen to "Gameplay event".
+ *	UAVVMNotificationSubsystem is a system that register/unregister Observers (i.e Presenter Objects) and notify them of a "Gameplay event" through Tag Channels. This system allow filtering
+ *	of Actors so we can notify for a unique target or to all targets listening to the channel.
  *
- *	Use UAVVMNotificationSubsystem::Static_BroadcastChannel in Game Code to broadcast to the expected Presenter UObject instead of
- *	having the Presenter fetch from it's Outer Actor and listen for state change events.
+ *	Here's an example of the expected tag format :
  *
- *	It's expected that the Channel Tags are being composed as follow when registering new Presenters.
- *
- *	example : ModuleName.ChannelName.PresenterClass.GameplayEventType
+ *		* ModuleName.ChannelName.PresenterClass.GameplayEventType
  */
 UCLASS()
 class AVVM_API UAVVMNotificationSubsystem : public UWorldSubsystem
