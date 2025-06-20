@@ -17,40 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplay.h"
+#pragma once
 
-#include "GameplayTagsModule.h"
+#include "CoreMinimal.h"
 
-DEFINE_LOG_CATEGORY(LogGameplay);
+#include "AVVM.h"
+#include "MVVMViewModelBase.h"
 
-static const FString TagPath = (FPaths::ProjectPluginsDir() / TEXT("AVVM/Config/Tags"));
+#include "AVVMWorldActorViewModel.generated.h"
 
-void FAVVMGameplayModule::StartupModule()
+/**
+ *	Class description:
+ *
+ *	UAVVMWorldActorViewModel encapsulate information about the world Actor it's owned by.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMWorldActorViewModel : public UMVVMViewModelBase,
+                                                  public IAVVMViewModelFNameHelper
 {
-	IModuleInterface::StartupModule();
+	GENERATED_BODY()
 
-	const IGameplayTagsModule& GameplayTagModule = IGameplayTagsModule::Get();
-	if (GameplayTagModule.IsAvailable())
-	{
-		UGameplayTagsManager::Get().AddTagIniSearchPath(TagPath);
-	}
-}
-
-void FAVVMGameplayModule::ShutdownModule()
-{
-	IModuleInterface::ShutdownModule();
-
-	const bool bIsAvailable = IGameplayTagsModule::IsAvailable();
-	if (!bIsAvailable)
-	{
-		return;
-	}
-
-	UGameplayTagsManager* GameplayTagManager = UGameplayTagsManager::GetIfAllocated();
-	if (IsValid(GameplayTagManager))
-	{
-		GameplayTagManager->RemoveTagIniSearchPath(TagPath);
-	}
-}
-
-IMPLEMENT_MODULE(FAVVMGameplayModule, AVVMGameplay)
+public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMWorldActorViewModel"); };
+};

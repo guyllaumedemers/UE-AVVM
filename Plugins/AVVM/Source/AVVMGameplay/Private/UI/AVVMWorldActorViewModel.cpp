@@ -17,40 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplay.h"
-
-#include "GameplayTagsModule.h"
-
-DEFINE_LOG_CATEGORY(LogGameplay);
-
-static const FString TagPath = (FPaths::ProjectPluginsDir() / TEXT("AVVM/Config/Tags"));
-
-void FAVVMGameplayModule::StartupModule()
-{
-	IModuleInterface::StartupModule();
-
-	const IGameplayTagsModule& GameplayTagModule = IGameplayTagsModule::Get();
-	if (GameplayTagModule.IsAvailable())
-	{
-		UGameplayTagsManager::Get().AddTagIniSearchPath(TagPath);
-	}
-}
-
-void FAVVMGameplayModule::ShutdownModule()
-{
-	IModuleInterface::ShutdownModule();
-
-	const bool bIsAvailable = IGameplayTagsModule::IsAvailable();
-	if (!bIsAvailable)
-	{
-		return;
-	}
-
-	UGameplayTagsManager* GameplayTagManager = UGameplayTagsManager::GetIfAllocated();
-	if (IsValid(GameplayTagManager))
-	{
-		GameplayTagManager->RemoveTagIniSearchPath(TagPath);
-	}
-}
-
-IMPLEMENT_MODULE(FAVVMGameplayModule, AVVMGameplay)
+#include "UI/AVVMWorldActorViewModel.h"

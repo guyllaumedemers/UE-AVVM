@@ -52,3 +52,10 @@ AVVMGAMEPLAY_API DECLARE_LOG_CATEGORY_EXTERN(LogGameplay, Log, All);
  *	Be aware that these actors will be available on both : Server and Client! Presenters dynamically added via the GPF_AddComponent will however
  *	not be present on the Server! (if configured properly)
  */
+
+class FAVVMGameplayModule : public IModuleInterface
+{
+public:
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+};
