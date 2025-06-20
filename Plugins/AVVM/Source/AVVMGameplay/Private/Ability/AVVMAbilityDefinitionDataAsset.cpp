@@ -36,7 +36,7 @@ EDataValidationResult UAVVMAbilityDefinitionDataAsset::IsDataValid(class FDataVa
 
 bool UAVVMAbilityDefinitionDataAsset::CanGrantAbility(const FGameplayTagContainer& ContextualTags) const
 {
-	return true;
+	return BlockingTagsPreventingGrantingAbility.IsEmpty() || !ContextualTags.HasAnyExact(BlockingTagsPreventingGrantingAbility);
 }
 
 const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDefinitionDataAsset::GetGameplayAbilityClass() const
