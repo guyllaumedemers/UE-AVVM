@@ -80,9 +80,6 @@ public:
 	const TArray<UItemObject*>& GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const;
 
 protected:
-	UFUNCTION(BlueprintCallable)
-	bool DoesMeetItemRequirements(const TSoftClassPtr<UItemObject>& ItemObjectClass);
-
 	UFUNCTION()
 	void OnItemsRetrieved();
 

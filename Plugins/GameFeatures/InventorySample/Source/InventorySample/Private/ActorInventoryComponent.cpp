@@ -141,9 +141,8 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 			continue;
 		}
 
-		// TODO @gdemers This wont work. TSoftClassPtr->UClass isnt loaded yet. GetDefaultObject will
-		// hit interrupt. Fix it! Or remove requirement check.
-		if (!DoesMeetItemRequirements(ItemAsset->GetItemObjectClass()))
+		// TODO @gdemers Define the Requirements for loading an Item and Accessing it! Where does this Tags set comes from.
+		if (!ItemAsset->CanAccessItem({}, {}))
 		{
 			UE_LOG(LogGameplay,
 			       Log,
@@ -191,26 +190,6 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const
 	{
 		return IsValid(Item) && Item->HasExactMatch(Compare);
 	});
-}
-
-bool UActorInventoryComponent::DoesMeetItemRequirements(const TSoftClassPtr<UItemObject>& ItemObjectClass)
-{
-	if (ItemObjectClass.IsNull())
-	{
-		return false;
-	}
-
-	const auto* ItemObjectCDO = ItemObjectClass->GetDefaultObject<UItemObject>();
-	if (!IsValid(ItemObjectCDO))
-	{
-		return false;
-	}
-	else
-	{
-		// TODO @gdemers handle requirements using the CDO. May have to inject the current state of the object if fetching dynamic data with progression
-		// from backend.
-		return true;
-	}
 }
 
 void UActorInventoryComponent::OnItemsRetrieved()

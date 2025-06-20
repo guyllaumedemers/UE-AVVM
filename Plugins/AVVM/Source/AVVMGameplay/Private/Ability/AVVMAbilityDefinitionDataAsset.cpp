@@ -34,9 +34,12 @@ EDataValidationResult UAVVMAbilityDefinitionDataAsset::IsDataValid(class FDataVa
 }
 #endif
 
-bool UAVVMAbilityDefinitionDataAsset::CanGrantAbility(const FGameplayTagContainer& ContextualTags) const
+bool UAVVMAbilityDefinitionDataAsset::CanGrantAbility(const FGameplayTagContainer& RequirementTags,
+                                                      const FGameplayTagContainer& BlockingTags) const
 {
-	return BlockingTagsPreventingGrantingAbility.IsEmpty() || !ContextualTags.HasAnyExact(BlockingTagsPreventingGrantingAbility);
+	const bool bMeetRequirements = RequiredTagsForGrantingAbility.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsForGrantingAbility);
+	const bool bIsntBlocked = BlockingTagsPreventingGrantingAbility.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsPreventingGrantingAbility);
+	return bIsntBlocked && bMeetRequirements;
 }
 
 const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDefinitionDataAsset::GetGameplayAbilityClass() const

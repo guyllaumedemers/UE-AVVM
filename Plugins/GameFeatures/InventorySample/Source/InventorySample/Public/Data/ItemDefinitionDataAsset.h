@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "GameplayTagContainer.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
@@ -59,9 +60,23 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UItemObject>& GetItemObjectClass() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
+	                   const FGameplayTagContainer& BlockingTags) const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<UItemObject> ItemObjectClass = nullptr;
+
+	// @gdemers tags that define if this item can be accessed by the actor type.
+	// Example : PlayerClass.Mage -> Cannot hold axe, but can hold staff
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer RequiredTagsAllowingItemAccess = FGameplayTagContainer::EmptyContainer;
+
+	// @gdemers tags that define if this item should not be accessed.
+	// Example : Tag.InTutorial
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer BlockingTagsPreventingItemAccess = FGameplayTagContainer::EmptyContainer;
 };
 
 /**

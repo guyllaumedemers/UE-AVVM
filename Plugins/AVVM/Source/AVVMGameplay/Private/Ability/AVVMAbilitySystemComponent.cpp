@@ -47,7 +47,9 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 			continue;
 		}
 
-		if (!AbilityAsset->CanGrantAbility(ASCTags))
+		// TODO @gdemers Define the Requirements for loading an Ability and granting it! Where does this Tags set comes from.
+		// Blocked is based on current ASC status, but requirements should be defined by either the Actor or the Game. Example : InTutorial, WithClassType-XY, etc...
+		if (!AbilityAsset->CanGrantAbility({}, ASCTags))
 		{
 			UE_LOG(LogGameplay,
 			       Log,

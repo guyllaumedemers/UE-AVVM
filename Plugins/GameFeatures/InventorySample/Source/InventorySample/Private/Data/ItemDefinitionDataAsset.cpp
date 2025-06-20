@@ -38,6 +38,14 @@ const TSoftClassPtr<UItemObject>& UItemDefinitionDataAsset::GetItemObjectClass()
 	return ItemObjectClass;
 }
 
+bool UItemDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,
+                                             const FGameplayTagContainer& BlockingTags) const
+{
+	const bool bMeetRequirements = RequiredTagsAllowingItemAccess.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsAllowingItemAccess);
+	const bool bIsntBlocked = BlockingTagsPreventingItemAccess.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsPreventingItemAccess);
+	return bIsntBlocked && bMeetRequirements;
+}
+
 #if WITH_EDITOR
 EDataValidationResult FItemDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {

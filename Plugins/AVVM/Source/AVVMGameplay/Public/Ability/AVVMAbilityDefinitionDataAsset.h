@@ -50,7 +50,8 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	bool CanGrantAbility(const FGameplayTagContainer& ContextualTags/*world specific*/) const;
+	bool CanGrantAbility(const FGameplayTagContainer& RequirementTags,
+	                     const FGameplayTagContainer& BlockingTags) const;
 
 	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;
@@ -64,7 +65,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer RequiredTagsForGrantingAbility = FGameplayTagContainer::EmptyContainer;
 
-	// @gdemers tags that define if this ability can block granting.
+	// @gdemers tags that define if this ability should not be granted.
 	// Example : Tag.IsWorldWaterLevel -> Blocks Tag.IsFlyingType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer BlockingTagsPreventingGrantingAbility = FGameplayTagContainer::EmptyContainer;
