@@ -33,7 +33,7 @@ void UAVVMAbilitySystemComponent::BeginPlay()
 
 void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resources)
 {
-	const FGameplayTagContainer& ASCTags = GetOwnedGameplayTags();
+	const FGameplayTagContainer& OwnedTags = GetOwnedGameplayTags();
 
 	const AActor* Outer = OwningOuter.Get();
 	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
@@ -47,9 +47,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 			continue;
 		}
 
-		// TODO @gdemers Define the Requirements for loading an Ability and granting it! Where does this Tags set comes from.
-		// Blocked is based on current ASC status, but requirements should be defined by either the Actor or the Game. Example : InTutorial, WithClassType-XY, etc...
-		if (!AbilityAsset->CanGrantAbility({}, ASCTags))
+		if (!AbilityAsset->CanGrantAbility(OwnedTags, OwnedTags))
 		{
 			UE_LOG(LogGameplay,
 			       Log,

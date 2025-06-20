@@ -68,7 +68,7 @@ protected:
 	// @gdemers tags that define if this ability should not be granted.
 	// Example : Tag.IsWorldWaterLevel -> Blocks Tag.IsFlyingType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer BlockingTagsPreventingGrantingAbility = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsForGrantingAbility = FGameplayTagContainer::EmptyContainer;
 };
 
 /**

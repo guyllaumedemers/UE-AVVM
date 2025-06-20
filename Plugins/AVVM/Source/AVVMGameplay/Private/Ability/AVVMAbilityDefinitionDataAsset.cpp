@@ -38,7 +38,7 @@ bool UAVVMAbilityDefinitionDataAsset::CanGrantAbility(const FGameplayTagContaine
                                                       const FGameplayTagContainer& BlockingTags) const
 {
 	const bool bMeetRequirements = RequiredTagsForGrantingAbility.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsForGrantingAbility);
-	const bool bIsntBlocked = BlockingTagsPreventingGrantingAbility.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsPreventingGrantingAbility);
+	const bool bIsntBlocked = BlockingTagsForGrantingAbility.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsForGrantingAbility);
 	return bIsntBlocked && bMeetRequirements;
 }
 

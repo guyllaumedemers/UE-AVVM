@@ -79,6 +79,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const TArray<UItemObject*>& GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const;
 
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+
+	UFUNCTION(BlueprintCallable)
+	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
+
 protected:
 	UFUNCTION()
 	void OnItemsRetrieved();
@@ -94,6 +103,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
 	TArray<TObjectPtr<UItemObject>> Items;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
+	FGameplayTagContainer OwnedGameplayTags = FGameplayTagContainer::EmptyContainer;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

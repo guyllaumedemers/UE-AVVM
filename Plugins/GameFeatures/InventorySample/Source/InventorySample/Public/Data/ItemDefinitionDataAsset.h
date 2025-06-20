@@ -71,12 +71,12 @@ protected:
 	// @gdemers tags that define if this item can be accessed by the actor type.
 	// Example : PlayerClass.Mage -> Cannot hold axe, but can hold staff
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer RequiredTagsAllowingItemAccess = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 
 	// @gdemers tags that define if this item should not be accessed.
 	// Example : Tag.InTutorial
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer BlockingTagsPreventingItemAccess = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 };
 
 /**

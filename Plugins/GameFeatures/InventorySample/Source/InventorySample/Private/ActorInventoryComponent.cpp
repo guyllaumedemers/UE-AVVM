@@ -141,8 +141,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 			continue;
 		}
 
-		// TODO @gdemers Define the Requirements for loading an Item and Accessing it! Where does this Tags set comes from.
-		if (!ItemAsset->CanAccessItem({}, {}))
+		if (!ItemAsset->CanAccessItem(OwnedGameplayTags, OwnedGameplayTags))
 		{
 			UE_LOG(LogGameplay,
 			       Log,
@@ -190,6 +189,22 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const
 	{
 		return IsValid(Item) && Item->HasExactMatch(Compare);
 	});
+}
+
+void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
+{
+	OwnedGameplayTags.RemoveTags(RemovedTags);
+	OwnedGameplayTags.AppendTags(AddedTags);
+}
+
+bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Compare) const
+{
+	return OwnedGameplayTags.HasAnyExact(Compare);
+}
+
+bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compare) const
+{
+	return OwnedGameplayTags.HasAllExact(Compare);
 }
 
 void UActorInventoryComponent::OnItemsRetrieved()

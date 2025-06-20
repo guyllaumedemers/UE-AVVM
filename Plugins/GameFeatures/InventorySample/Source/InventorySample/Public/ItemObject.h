@@ -96,11 +96,19 @@ public:
 	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
 #endif // UE_WITH_IRIS
 
+	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+
+	UFUNCTION(BlueprintCallable)
 	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
 
+	UFUNCTION(BlueprintCallable)
 	void TrySpawnEquippedItem(const AActor* Target);
+
+	UFUNCTION(BlueprintCallable)
 	void TrySpawnDroppedItem(const AActor* Target);
 
 protected:
