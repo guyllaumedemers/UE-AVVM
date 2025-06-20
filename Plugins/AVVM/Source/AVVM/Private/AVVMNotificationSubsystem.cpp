@@ -66,29 +66,42 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UObject* World
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext)
+void UAVVMNotificationSubsystem::Static_UnregisterObserver(const UObject* WorldContextObject,
+                                                           const FAVVMObserverContextArgs& ObserverContext)
 {
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContextObject);
+	if (!IsValid(WorldContextObject))
+	{
+		return;
+	}
+
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
-		FilteringMechanism.Unregister(ObserverContext.Target, ObserverContext.ChannelTag);
+		FilteringMechanism.Unregister(WorldContextObject->GetTypedOuter<const AActor>(), ObserverContext.ChannelTag);
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext)
+void UAVVMNotificationSubsystem::Static_RegisterObserver(const UObject* WorldContextObject,
+                                                         const FAVVMObserverContextArgs& ObserverContext)
 {
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(ObserverContext.WorldContextObject);
+	if (!IsValid(WorldContextObject))
+	{
+		return;
+	}
+
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
-		FilteringMechanism.Register(ObserverContext.Target, ObserverContext.ChannelTag, ObserverContext.Callback);
+		FilteringMechanism.Register(WorldContextObject->GetTypedOuter<const AActor>(), ObserverContext.ChannelTag, ObserverContext.Callback);
 	}
 }
 
-void UAVVMNotificationSubsystem::Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext)
+void UAVVMNotificationSubsystem::Static_BroadcastChannel(const UObject* WorldContextObject,
+                                                         const FAVVMNotificationContextArgs& NotificationContext)
 {
-	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(NotificationContext.WorldContextObject);
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;

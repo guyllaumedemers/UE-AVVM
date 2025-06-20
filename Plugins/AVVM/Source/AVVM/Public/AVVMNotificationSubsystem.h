@@ -30,13 +30,14 @@
 struct FAVVMNotificationPayload;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAVVMOnChannelNotifiedMulticastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
 
 // @gdemers allow stripping symbols when building server target for dedicated server
 #ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
 #else
-#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload) UAVVMNotificationSubsystem::Static_BroadcastChannel(FAVVMNotificationContextArgs{WorldContextObject, ChannelTag, Target, Payload});
+#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload) UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, Target, Payload});
 #endif
 
 /**
@@ -50,13 +51,7 @@ struct AVVM_API FAVVMObserverContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UObject* WorldContextObject = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	AActor* Target = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
@@ -71,9 +66,6 @@ USTRUCT(BlueprintType)
 struct AVVM_API FAVVMNotificationContextArgs
 {
 	GENERATED_BODY()
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	UObject* WorldContextObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite, meta=(ToolTip="Target Channel. May have multiple Presenters listening."))
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
@@ -123,14 +115,17 @@ public:
 
 	static UAVVMNotificationSubsystem* Get(const UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
-	static void Static_UnregisterObserver(const FAVVMObserverContextArgs& ObserverContext);
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	static void Static_UnregisterObserver(const UObject* WorldContextObject,
+	                                      const FAVVMObserverContextArgs& ObserverContext);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
-	static void Static_RegisterObserver(const FAVVMObserverContextArgs& ObserverContext);
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	static void Static_RegisterObserver(const UObject* WorldContextObject,
+	                                    const FAVVMObserverContextArgs& ObserverContext);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
-	static void Static_BroadcastChannel(const FAVVMNotificationContextArgs& NotificationContext);
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	static void Static_BroadcastChannel(const UObject* WorldContextObject,
+	                                    const FAVVMNotificationContextArgs& NotificationContext);
 
 protected:
 	struct FAVVMObservers
