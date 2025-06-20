@@ -34,9 +34,9 @@ class UMVVMViewModelBase;
 /**
  *	Class description:
  *
- *	UAVVMPresenter is a UObject type that bridge the "Gameplay code" and "UI code". It binds and responds to the AVVMNotification system
- *	channel tags to perform actions based on the request received. It defines a Key-Value pair required for mapping an Actor type (i.e it's Outer)
- *	to a "Manual" type ViewModel and register/unregister it with the AVVMSubsystem.
+ *	UAVVMPresenter is a UObject type that bridge the "Gameplay code" and "UI code". It binds and responds to the AVVMNotification system channel tags
+ *	to perform actions based on the request received. It defines a Key-Value pair required for mapping an Actor type (i.e it's Outer) to a "Manual" type ViewModel
+ *	registered with the AVVMSubsystem.
  */
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class AVVM_API UAVVMPresenter : public UObject
