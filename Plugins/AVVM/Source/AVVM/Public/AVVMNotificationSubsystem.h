@@ -32,7 +32,7 @@ struct FAVVMNotificationPayload;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAVVMOnChannelNotifiedMulticastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
 
-// @gdemers allow stripping symbols build target is dedicated server
+// @gdemers allow stripping symbols when building server target for dedicated server
 #ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
 #else

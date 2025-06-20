@@ -25,10 +25,15 @@
 
 bool UAVVMSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
+	if (IsRunningDedicatedServer())
+	{
+		return false;
+	}
+
 	const UWorld* PieOrGameWorld = Cast<UWorld>(Outer);
 	if (IsValid(PieOrGameWorld))
 	{
-		const bool bIsGameClient = PieOrGameWorld->IsGameWorld() && !PieOrGameWorld->IsNetMode(NM_DedicatedServer);
+		const bool bIsGameClient = PieOrGameWorld->IsGameWorld();
 		return bIsGameClient;
 	}
 	else
