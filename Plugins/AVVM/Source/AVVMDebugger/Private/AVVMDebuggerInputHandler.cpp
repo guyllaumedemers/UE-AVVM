@@ -69,11 +69,18 @@ void UAVVMDebuggerInputHandler::SafeBegin(const FSimpleDelegate& PreprocessorCal
 
 void UAVVMDebuggerInputHandler::SafeEnd()
 {
-	if (DebuggerPreprocessor.IsValid() && FModuleManager::Get().IsModuleLoaded(TEXT("Slate")))
+	if (!DebuggerPreprocessor.IsValid())
+	{
+		return;
+	}
+
+	const bool bIsModuleAvailable = FModuleManager::Get().IsModuleLoaded(TEXT("Slate"));
+	if (bIsModuleAvailable && FSlateApplication::IsInitialized())
 	{
 		FSlateApplication::Get().UnregisterInputPreProcessor(DebuggerPreprocessor);
-		DebuggerPreprocessor.Reset();
 	}
+
+	DebuggerPreprocessor.Reset();
 }
 
 TSharedPtr<FAVVMDebuggerInputPreprocessor> UAVVMDebuggerInputHandler::GetPreprocessor() const
