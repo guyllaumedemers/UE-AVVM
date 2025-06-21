@@ -21,7 +21,10 @@
 
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "CommonActivatableWidget.h"
 #include "CommonUserWidget.h"
+#include "MVVMViewModelBase.h"
 #include "GameFramework/PlayerState.h"
 
 AActor* UMultiContextInventoryPresenter::GetOuterKey() const
@@ -85,4 +88,10 @@ void UMultiContextInventoryPresenter::StopPresenting()
 	{
 		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
 	}
+}
+
+void UMultiContextInventoryPresenter::BindViewModel() const
+{
+	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
+	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }

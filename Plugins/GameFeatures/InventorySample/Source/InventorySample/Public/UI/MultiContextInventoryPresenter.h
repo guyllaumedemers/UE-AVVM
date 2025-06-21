@@ -57,6 +57,7 @@ protected:
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
+	virtual void BindViewModel() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
