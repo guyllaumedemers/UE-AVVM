@@ -21,6 +21,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplayUtils.h"
+#include "CommonUserWidget.h"
 #include "GameFramework/PlayerState.h"
 
 AActor* UMultiContextInventoryPresenter::GetOuterKey() const
@@ -63,6 +64,11 @@ void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UMultiContextInventoryPresenter::StartPresenting()
 {
+	FAVVMPrimaryGameLayoutContextArgs CtxArgs;
+	CtxArgs.LayerTag = TargetTag;
+	CtxArgs.WidgetClass = WidgetClass;
+	IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(this, CtxArgs);
+
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
@@ -72,6 +78,8 @@ void UMultiContextInventoryPresenter::StartPresenting()
 
 void UMultiContextInventoryPresenter::StopPresenting()
 {
+	IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
