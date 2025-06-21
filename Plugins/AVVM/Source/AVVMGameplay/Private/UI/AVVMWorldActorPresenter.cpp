@@ -107,14 +107,10 @@ void UAVVMWorldActorPresenter::SetupWorldWidget()
 	}
 
 	auto* WidgetComponent = Outer->GetComponentByClass<UWidgetComponent>();
-	if (!IsValid(WidgetComponent))
+	if (!ensureAlwaysMsgf(IsValid(WidgetComponent),
+	                      TEXT("Missing UWidgetComponent on Actor \"%s\"."),
+	                      *Outer->GetName()))
 	{
-		UE_LOG(LogUI,
-		       Log,
-		       TEXT("Actor \"%s\" doesn't hold a WidgetComponent. Failed to set \"%s\" Widget Class."),
-		       *Outer->GetName(),
-		       IsValid(WorldWidgetClass) ? *WorldWidgetClass->GetName() : TEXT("Unknown"));
-
 		return;
 	}
 
