@@ -70,7 +70,7 @@ void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObj
 	}
 
 	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(FirstLocalPlayer);
-	if (ensure(IsValid(GameLayout)))
+	if (IsValid(GameLayout))
 	{
 		GameLayout->FindAndRemoveWidgetFromLayer(Target);
 	}
