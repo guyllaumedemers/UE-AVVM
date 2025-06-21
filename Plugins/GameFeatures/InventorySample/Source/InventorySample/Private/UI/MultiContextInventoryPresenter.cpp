@@ -20,6 +20,7 @@
 #include "UI/MultiContextInventoryPresenter.h"
 
 #include "AbilitySystemComponent.h"
+#include "AVVM.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
