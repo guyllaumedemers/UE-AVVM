@@ -25,6 +25,11 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "AVVMEditorToolkit",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "AVVMGameplay",
       "Type": "Runtime",
       "LoadingPhase": "Default"
@@ -32,6 +37,11 @@
     {
       "Name": "AVVMOnline",
       "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "AVVMToolkit",
+      "Type": "ClientOnly",
       "LoadingPhase": "Default"
     }
   ],
