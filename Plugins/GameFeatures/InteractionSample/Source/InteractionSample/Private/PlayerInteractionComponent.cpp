@@ -27,6 +27,12 @@
 
 TRACE_DECLARE_INT_COUNTER(UPlayerInteractionComponent_InstanceCounter, TEXT("Player Interaction Component Instance Counter"));
 
+UPlayerInteractionComponent::UPlayerInteractionComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SetIsReplicatedByDefault(true);
+}
+
 void UPlayerInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();

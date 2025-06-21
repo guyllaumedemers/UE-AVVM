@@ -43,6 +43,7 @@ class INTERACTIONSAMPLE_API UPlayerInteractionComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UPlayerInteractionComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

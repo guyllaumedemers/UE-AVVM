@@ -142,6 +142,8 @@ void UGameStateInteractionComponent::Server_AddEndOverlaped(UInteraction* NewInt
 
 	OnRep_NewEndInteractionRecorded();
 
+	// TODO @gdemers Current issue. Removal is done before the local client can access the begin interaction and broadcast stop presenting
+	// Fix it!
 	const TObjectPtr<const UInteraction>* SearchResult = BeginInteractions.FindByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
 	{
 		return IsValid(Interaction) && Interaction->IsEqual(NewInteraction);
@@ -212,7 +214,7 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	if (EndInteractions.IsEmpty())
+	if (BeginInteractions.IsEmpty())
 	{
 		return;
 	}
