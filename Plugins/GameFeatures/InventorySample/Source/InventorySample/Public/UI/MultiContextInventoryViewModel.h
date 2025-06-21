@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
 #include "MVVMViewModelBase.h"
 
 #include "MultiContextInventoryViewModel.generated.h"
@@ -28,10 +29,14 @@
 /**
  *	Class description:
  *
- *	UMultiContextInventoryViewModel bridge data provided by gameplay to the view.
+ *	UMultiContextInventoryViewModel encapsulate information about the PlayerState it's owned by.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewModelBase
+class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewModelBase,
+                                                            public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
+
+public:
+	virtual FName GetViewModelFName() const override { return TEXT("UMultiContextInventoryViewModel"); };
 };

@@ -51,10 +51,18 @@ void UMultiContextInventoryPresenter::SafeEndPlay()
 	OwnerASC.Reset();
 }
 
+void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StartPresenting();
+}
+
+void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	StopPresenting();
+}
+
 void UMultiContextInventoryPresenter::StartPresenting()
 {
-	Super::StartPresenting();
-
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
@@ -64,8 +72,6 @@ void UMultiContextInventoryPresenter::StartPresenting()
 
 void UMultiContextInventoryPresenter::StopPresenting()
 {
-	Super::StopPresenting();
-
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{

@@ -21,8 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
+#include "AVVMPrimaryGameLayoutInterface.h"
 #include "GameplayTagContainer.h"
 #include "Archetypes/AVVMPresenter.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "MultiContextInventoryPresenter.generated.h"
 
@@ -31,21 +34,27 @@ class UAbilitySystemComponent;
 /**
  *	Class description:
  *
- *	UMultiContextInventoryPresenter is owned by the local player ONLY and it configure details about
- *	the inventory displayed on screen. As a MultiContext Presenter, it's able to display content from multiples end-user.
+ *	UMultiContextInventoryPresenter is owned by the local player ONLY, and configures details about the inventory system.
+ *	As a MultiContext Presenter, it's able to display content from multiple end-users.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UMultiContextInventoryPresenter : public UAVVMPresenter
+class INVENTORYSAMPLE_API UMultiContextInventoryPresenter : public UAVVMPresenter,
+                                                            public IAVVMPrimaryGameLayoutInterface
 {
 	GENERATED_BODY()
 
 public:
 	virtual AActor* GetOuterKey() const override;
-	
 	virtual void SafeBeginPlay() override;
 	virtual void SafeEndPlay() override;
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 

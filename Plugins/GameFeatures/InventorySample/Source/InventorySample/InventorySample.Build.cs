@@ -39,7 +39,8 @@ public class InventorySample : ModuleRules
 				"GameplayAbilities",
 				"GameplayTags",
 				"IrisCore",
-				"ModelViewViewModel"
+				"ModelViewViewModel",
+				"StructUtils"
 			}
 		);
 

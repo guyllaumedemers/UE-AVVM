@@ -27,7 +27,6 @@
 
 #include "AVVMPresenter.generated.h"
 
-struct FAVVMNotificationPayload;
 class UCommonUserWidget;
 class UMVVMViewModelBase;
 
