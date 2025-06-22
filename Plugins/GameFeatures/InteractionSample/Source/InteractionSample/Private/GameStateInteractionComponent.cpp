@@ -129,13 +129,15 @@ TArray<UInteraction*> UGameStateInteractionComponent::GetExactMatchingInteractio
 void UGameStateInteractionComponent::Server_AddRecord(const AActor* NewTarget,
                                                       const AActor* NewInstigator)
 {
+	TArray<UInteraction*> OldRecords = Records;
+
 	auto* Transaction = NewObject<UInteraction>(this);
 	Transaction->operator()(NewTarget, NewInstigator);
 
 	AddReplicatedSubObject(Transaction);
 	Records.Add(Transaction);
 
-	OnRep_RecordModified(Records);
+	OnRep_RecordModified(OldRecords);
 }
 
 void UGameStateInteractionComponent::Server_RemoveRecord(const AActor* NewTarget,
@@ -148,11 +150,13 @@ void UGameStateInteractionComponent::Server_RemoveRecord(const AActor* NewTarget
 
 	if (SearchResult != nullptr)
 	{
+		TArray<UInteraction*> OldRecords = Records;
+
 		UInteraction* Transaction = SearchResult->Get();
 		RemoveReplicatedSubObject(Transaction);
 		Records.Remove(Transaction);
 
-		OnRep_RecordModified(Records);
+		OnRep_RecordModified(OldRecords);
 	}
 }
 
