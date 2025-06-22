@@ -77,6 +77,8 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	       *GetName(),
 	       *Outer->GetName(),
 	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+
+	// TODO @gdemers Status change to set the owning interaction to non-interactable has to happen here
 }
 
 void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

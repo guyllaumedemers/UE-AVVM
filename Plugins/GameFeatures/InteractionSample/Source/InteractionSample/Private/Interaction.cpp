@@ -27,6 +27,7 @@ void UInteraction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 
 	DOREPLIFETIME(UInteraction, Target);
 	DOREPLIFETIME(UInteraction, Instigator);
+	DOREPLIFETIME(UInteraction, bIsInteractable);
 }
 
 bool UInteraction::IsSupportedForNetworking() const
@@ -56,6 +57,11 @@ bool UInteraction::DoesExactMatch(const AActor* NewTarget,
 bool UInteraction::IsEqual(const UInteraction* Other) const
 {
 	return (Instigator == Other->Instigator) && (Target == Other->Target);
+}
+
+bool UInteraction::CanInteract() const
+{
+	return bIsInteractable;
 }
 
 const AActor* UInteraction::GetTarget() const

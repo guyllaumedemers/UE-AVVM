@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsEqual(const UInteraction* Other) const;
 
+	UFUNCTION(BlueprintCallable)
+	bool CanInteract() const;
+
 	UFUNCTION(BlueprintCallable, meta=(ToolTip="Actor on which the collision event executed from."))
 	const AActor* GetTarget() const;
 
@@ -68,6 +71,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
 	TObjectPtr<const AActor> Instigator = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
+	bool bIsInteractable = true;
 
 private:
 	void operator()(const AActor* NewTarget,
