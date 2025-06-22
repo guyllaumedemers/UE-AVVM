@@ -39,8 +39,7 @@ void UGameStateInteractionComponent::GetLifetimeReplicatedProps(TArray<class FLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UGameStateInteractionComponent, BeginInteractions);
-	DOREPLIFETIME(UGameStateInteractionComponent, EndInteractions);
+	DOREPLIFETIME(UGameStateInteractionComponent, Records);
 }
 
 void UGameStateInteractionComponent::BeginPlay()
@@ -67,14 +66,14 @@ void UGameStateInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayR
 	Super::EndPlay(EndPlayReason);
 
 #if WITH_SERVER_CODE
-	for (auto Iterator = BeginInteractions.CreateIterator(); Iterator; ++Iterator)
+	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
 	{
 		auto* MutableInteraction = const_cast<UInteraction*>(Iterator->Get());
 		RemoveReplicatedSubObject(MutableInteraction);
 		Iterator.RemoveCurrentSwap();
 	}
 
-	for (auto Iterator = EndInteractions.CreateIterator(); Iterator; ++Iterator)
+	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
 	{
 		auto* MutableInteraction = const_cast<UInteraction*>(Iterator->Get());
 		RemoveReplicatedSubObject(MutableInteraction);
@@ -110,54 +109,69 @@ UGameStateInteractionComponent* UGameStateInteractionComponent::GetActorComponen
 	}
 }
 
-TArray<TObjectPtr<const UInteraction>> UGameStateInteractionComponent::GetPartialMatchingInteractions(const AActor* NewTarget) const
+TArray<UInteraction*> UGameStateInteractionComponent::GetPartialMatchingInteractions(const AActor* NewTarget) const
 {
-	return BeginInteractions.FilterByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
+	return Records.FilterByPredicate([&](const UInteraction* Interaction)
 	{
 		return IsValid(Interaction) && Interaction->DoesPartialMatch(NewTarget);
 	});
 }
 
-TArray<TObjectPtr<const UInteraction>> UGameStateInteractionComponent::GetExactMatchingInteractions(const AActor* NewTarget,
-                                                                                                    const AActor* NewInstigator) const
+TArray<UInteraction*> UGameStateInteractionComponent::GetExactMatchingInteractions(const AActor* NewTarget,
+                                                                                   const AActor* NewInstigator) const
 {
-	return BeginInteractions.FilterByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
+	return Records.FilterByPredicate([&](const UInteraction* Interaction)
 	{
 		return IsValid(Interaction) && Interaction->DoesExactMatch(NewTarget, NewInstigator);
 	});
 }
 
-void UGameStateInteractionComponent::Server_AddBeginOverlaped(UInteraction* NewInteraction)
+void UGameStateInteractionComponent::Server_AddRecord(const AActor* NewTarget,
+                                                      const AActor* NewInstigator)
 {
-	AddReplicatedSubObject(NewInteraction);
-	BeginInteractions.Add(NewInteraction);
+	auto* Transaction = NewObject<UInteraction>(this);
+	Transaction->operator()(NewTarget, NewInstigator);
 
-	OnRep_NewBeginInteractionRecorded();
+	AddReplicatedSubObject(Transaction);
+	Records.Add(Transaction);
+
+	OnRep_RecordModified(Records);
 }
 
-void UGameStateInteractionComponent::Server_AddEndOverlaped(UInteraction* NewInteraction)
+void UGameStateInteractionComponent::Server_RemoveRecord(const AActor* NewTarget,
+                                                         const AActor* NewInstigator)
 {
-	AddReplicatedSubObject(NewInteraction);
-	EndInteractions.Add(NewInteraction);
-
-	OnRep_NewEndInteractionRecorded();
-
-	// TODO @gdemers Current issue. Removal is done before the local client can access the begin interaction and broadcast stop presenting
-	// Fix it!
-	const TObjectPtr<const UInteraction>* SearchResult = BeginInteractions.FindByPredicate([&](const TObjectPtr<const UInteraction>& Interaction)
+	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Interaction)
 	{
-		return IsValid(Interaction) && Interaction->IsEqual(NewInteraction);
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewTarget, NewInstigator);
 	});
 
 	if (SearchResult != nullptr)
 	{
-		auto* Target = const_cast<UInteraction*>(SearchResult->Get());
-		RemoveReplicatedSubObject(Target);
-		BeginInteractions.Remove(Target);
+		UInteraction* Transaction = SearchResult->Get();
+		RemoveReplicatedSubObject(Transaction);
+		Records.Remove(Transaction);
+
+		OnRep_RecordModified(Records);
 	}
 }
 
-void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
+void UGameStateInteractionComponent::OnRep_RecordModified(const TArray<UInteraction*>& OldRecords)
+{
+	const int32 OldNum = OldRecords.Num();
+	const int32 NewNum = Records.Num();
+
+	if (OldNum < NewNum)
+	{
+		HandleNewRecord(Records);
+	}
+	else if (OldNum > NewNum)
+	{
+		HandleOldRecord(OldRecords);
+	}
+}
+
+void UGameStateInteractionComponent::HandleNewRecord(const TArray<UInteraction*>& NewRecords)
 {
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
@@ -167,22 +181,22 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Begin Interaction Collection modified on Actor \"%s\"!"),
+	       TEXT("Executed from \"%s\". Record Collection modified on Actor \"%s\". Adding!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	if (BeginInteractions.IsEmpty())
+	if (NewRecords.IsEmpty())
 	{
 		return;
 	}
 
-	const UInteraction* TopInteraction = BeginInteractions.Top();
-	if (!IsValid(TopInteraction))
+	const UInteraction* TopRecord = NewRecords.Top();
+	if (!IsValid(TopRecord))
 	{
 		return;
 	}
 
-	const AActor* Instigator = TopInteraction->GetInstigator();
+	const AActor* Instigator = TopRecord->GetInstigator();
 	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
@@ -196,11 +210,11 @@ void UGameStateInteractionComponent::OnRep_NewBeginInteractionRecorded()
 
 	UE_AVVM_NOTIFY(this,
 	               StartPromptInteractionChannel,
-	               TopInteraction->GetTarget(),
+	               TopRecord->GetTarget(),
 	               FAVVMNotificationPayload::Empty);
 }
 
-void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
+void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>& OldRecords)
 {
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
@@ -210,22 +224,43 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". End Interaction Collection modified on Actor \"%s\"!"),
+	       TEXT("Executed from \"%s\". Record Collection modified on Actor \"%s\". Removing!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	if (BeginInteractions.IsEmpty())
+	if (OldRecords.IsEmpty())
 	{
 		return;
 	}
 
-	const UInteraction* TopInteraction = BeginInteractions.Top();
-	if (!IsValid(TopInteraction))
+	const UInteraction* FoundMatch = nullptr;
+	for (const TObjectPtr<UInteraction>& OldRecord : OldRecords)
+	{
+		if (!IsValid(OldRecord))
+		{
+			continue;
+		}
+
+		const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const TObjectPtr<UInteraction>& Param)
+		{
+			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetTarget(), OldRecord->GetInstigator());
+		});
+
+		if (SearchResult == nullptr)
+		{
+			// @gdemers rip. no longer with us!
+			FoundMatch = OldRecord;
+			break;
+		}
+	}
+
+	if (!ensureAlwaysMsgf(IsValid(FoundMatch),
+	                      TEXT("UGameStateInteractionComponent::HandleOldRecord didnt find a match for removal!")))
 	{
 		return;
 	}
 
-	const AActor* Instigator = TopInteraction->GetInstigator();
+	const AActor* Instigator = FoundMatch->GetInstigator();
 	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
@@ -239,6 +274,6 @@ void UGameStateInteractionComponent::OnRep_NewEndInteractionRecorded()
 
 	UE_AVVM_NOTIFY(this,
 	               StopPromptInteractionChannel,
-	               TopInteraction->GetTarget(),
+	               FoundMatch->GetTarget(),
 	               FAVVMNotificationPayload::Empty);
 }

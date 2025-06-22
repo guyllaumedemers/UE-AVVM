@@ -47,21 +47,23 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UGameStateInteractionComponent* GetActorComponent(const UObject* WorldContextObject);
 
-	TArray<TObjectPtr<const UInteraction>> GetPartialMatchingInteractions(const AActor* NewTarget) const;
-	TArray<TObjectPtr<const UInteraction>> GetExactMatchingInteractions(const AActor* NewTarget, const AActor* NewInstigator) const;
+	TArray<UInteraction*> GetPartialMatchingInteractions(const AActor* NewTarget) const;
+	TArray<UInteraction*> GetExactMatchingInteractions(const AActor* NewTarget, const AActor* NewInstigator) const;
 
 	UFUNCTION(BlueprintCallable)
-	void Server_AddBeginOverlaped(UInteraction* NewInteraction);
+	void Server_AddRecord(const AActor* NewTarget,
+	                      const AActor* NewInstigator);
 
 	UFUNCTION(BlueprintCallable)
-	void Server_AddEndOverlaped(UInteraction* NewInteraction);
+	void Server_RemoveRecord(const AActor* NewTarget,
+	                         const AActor* NewInstigator);
 
 protected:
 	UFUNCTION()
-	void OnRep_NewBeginInteractionRecorded();
+	void OnRep_RecordModified(const TArray<UInteraction*>& OldRecords);
 
-	UFUNCTION()
-	void OnRep_NewEndInteractionRecorded();
+	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
+	void HandleOldRecord(const TArray<UInteraction*>& OldRecords);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
@@ -72,11 +74,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
 
-	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewBeginInteractionRecorded")
-	TArray<TObjectPtr<const UInteraction>> BeginInteractions;
-
-	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewEndInteractionRecorded")
-	TArray<TObjectPtr<const UInteraction>> EndInteractions;
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_RecordModified")
+	TArray<TObjectPtr<UInteraction>> Records;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

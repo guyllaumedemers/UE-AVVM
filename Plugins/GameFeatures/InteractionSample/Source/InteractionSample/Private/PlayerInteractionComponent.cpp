@@ -94,9 +94,14 @@ void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTar
                                                             const AActor* NewInstigator,
                                                             const bool bPreventContingency)
 {
-	const auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer) && IsValid(AuthoritativeInteractionComponent), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	const auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
+	if (!ensureAlwaysMsgf(IsValid(AuthoritativeInteractionComponent), TEXT("Invalid GameStateInteractionComponent!")))
 	{
 		return;
 	}
@@ -109,7 +114,7 @@ void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTar
 	       *NewTarget->GetName(),
 	       *NewInstigator->GetName());
 
-	auto MatchingInteractions = TArray<TObjectPtr<const UInteraction>>();
+	auto MatchingInteractions = TArray<UInteraction*>();
 	if (bPreventContingency)
 	{
 		MatchingInteractions = AuthoritativeInteractionComponent->GetPartialMatchingInteractions(NewTarget);
@@ -129,9 +134,14 @@ void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTar
 void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewTarget,
                                                           const AActor* NewInstigator)
 {
-	const auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer) && IsValid(AuthoritativeInteractionComponent), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	const auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
+	if (!ensureAlwaysMsgf(IsValid(AuthoritativeInteractionComponent), TEXT("Invalid GameStateInteractionComponent!")))
 	{
 		return;
 	}
@@ -159,9 +169,14 @@ void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewTarge
 void UPlayerInteractionComponent::ServerRPC_RecordBeginInteraction_Implementation(const AActor* NewTarget,
                                                                                   const AActor* NewInstigator)
 {
-	auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer) && IsValid(AuthoritativeInteractionComponent), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
+	if (!ensureAlwaysMsgf(IsValid(AuthoritativeInteractionComponent), TEXT("Invalid GameStateInteractionComponent!")))
 	{
 		return;
 	}
@@ -172,17 +187,20 @@ void UPlayerInteractionComponent::ServerRPC_RecordBeginInteraction_Implementatio
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	UInteraction* Transaction = NewObject<UInteraction>(this);
-	Transaction->operator()(NewTarget, NewInstigator);
-	AuthoritativeInteractionComponent->Server_AddBeginOverlaped(Transaction);
+	AuthoritativeInteractionComponent->Server_AddRecord(NewTarget, NewInstigator);
 }
 
 void UPlayerInteractionComponent::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewTarget,
                                                                                 const AActor* NewInstigator)
 {
-	auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer) && IsValid(AuthoritativeInteractionComponent), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	auto* AuthoritativeInteractionComponent = GameStateInteractionComponent.Get();
+	if (!ensureAlwaysMsgf(IsValid(AuthoritativeInteractionComponent), TEXT("Invalid GameStateInteractionComponent!")))
 	{
 		return;
 	}
@@ -193,7 +211,5 @@ void UPlayerInteractionComponent::ServerRPC_RecordEndInteraction_Implementation(
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	UInteraction* Transaction = NewObject<UInteraction>(this);
-	Transaction->operator()(NewTarget, NewInstigator);
-	AuthoritativeInteractionComponent->Server_AddEndOverlaped(Transaction);
+	AuthoritativeInteractionComponent->Server_RemoveRecord(NewTarget, NewInstigator);
 }

@@ -73,5 +73,5 @@ private:
 	void operator()(const AActor* NewTarget,
 	                const AActor* NewInstigator);
 
-	friend class UPlayerInteractionComponent;
+	friend class UGameStateInteractionComponent;
 };
