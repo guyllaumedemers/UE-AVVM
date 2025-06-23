@@ -70,14 +70,7 @@ void UGameStateInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayR
 #if WITH_SERVER_CODE
 	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
 	{
-		auto* MutableInteraction = const_cast<UInteraction*>(Iterator->Get());
-		RemoveReplicatedSubObject(MutableInteraction);
-		Iterator.RemoveCurrentSwap();
-	}
-
-	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
-	{
-		auto* MutableInteraction = const_cast<UInteraction*>(Iterator->Get());
+		UInteraction* MutableInteraction = Iterator->Get();
 		RemoveReplicatedSubObject(MutableInteraction);
 		Iterator.RemoveCurrentSwap();
 	}
@@ -223,19 +216,22 @@ void UGameStateInteractionComponent::HandleNewRecord(const TArray<UInteraction*>
 	const AActor* Instigator = TopRecord->GetInstigator();
 	const AActor* Target = TopRecord->GetTarget();
 
-	if (!IsValid(Instigator) || !IsValid(Target) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
+	if (IsValid(Instigator))
 	{
-		return;
+		// @gdemers ApplyGFE on Server creates a racing condition between the server/client and trigger the ability BEFORE we updated the TMap caching GFEHandle on the Client (which we care about due
+		// to the access to EffectCauser Actor in UPlayerInteractionAbility).
+		// UPlayerInteractionAbility is currently set to Activation based on Tag added/removed for testing purposes but we actually care more about user input to trigger the ability so the racing condition
+		// isnt a real issue here. However, this approach bothers me a little...
+		// Note : Client Side GFEActivationHandle will be default initialized without data due to not being Actor ROLE_Authority. (This should be fine!)
+		auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, const_cast<AActor*>(Instigator), const_cast<AActor*>(Target));
+		AddGameplayEffectHandle(ASC, GESpecHandle);
 	}
 
-	auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
-	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, const_cast<AActor*>(Instigator), const_cast<AActor*>(Target));
-	AddGameplayEffectHandle(ASC, GESpecHandle);
-
-	UE_AVVM_NOTIFY(this,
-	               StartPromptInteractionChannel,
-	               Target,
-	               FAVVMNotificationPayload::Empty);
+	UE_AVVM_NOTIFY_LOCALPLAYER_ONLY(this,
+	                                StartPromptInteractionChannel,
+	                                Target,
+	                                FAVVMNotificationPayload::Empty);
 }
 
 void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>& OldRecords)
@@ -287,18 +283,16 @@ void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>
 	const AActor* Instigator = FoundMatch->GetInstigator();
 	const AActor* Target = FoundMatch->GetTarget();
 
-	if (!IsValid(Instigator) || !IsValid(Target) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
+	if (IsValid(Instigator))
 	{
-		return;
+		auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
+		RemoveGameplayEffectHandle(ASC);
 	}
 
-	auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
-	RemoveGameplayEffectHandle(ASC);
-
-	UE_AVVM_NOTIFY(this,
-	               StopPromptInteractionChannel,
-	               Target,
-	               FAVVMNotificationPayload::Empty);
+	UE_AVVM_NOTIFY_LOCALPLAYER_ONLY(this,
+	                                StopPromptInteractionChannel,
+	                                Target,
+	                                FAVVMNotificationPayload::Empty);
 }
 
 void UGameStateInteractionComponent::AddGameplayEffectHandle(UAbilitySystemComponent* ASC,

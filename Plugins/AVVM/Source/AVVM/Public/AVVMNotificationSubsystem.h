@@ -35,9 +35,18 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, cons
 
 // @gdemers allow stripping symbols when building server target for dedicated server
 #ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
+
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
+#define UE_AVVM_NOTIFY_LOCALPLAYER_ONLY(WorldContextObject, ChannelTag, Target, Payload)
+
 #else
+
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload) UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, Target, Payload});
+#define UE_AVVM_NOTIFY_LOCALPLAYER_ONLY(WorldContextObject, ChannelTag, Target, Payload)\
+	if(UAVVMGameplayUtils::IsLocallyControlled(Instigator))\
+	{\
+		UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, Target, Payload});\
+	}
 #endif
 
 /**
