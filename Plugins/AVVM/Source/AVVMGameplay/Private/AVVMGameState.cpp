@@ -30,17 +30,4 @@ AAVVMGameState::AAVVMGameState(const FObjectInitializer& ObjectInitializer)
 void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// @gdemers https://dev.epicgames.com/documentation/en-us/unreal-engine/replicate-actor-properties-in-unreal-engine
-	// Replicate Object References
-	// Replication of object references is automatically handled by Unreal Engine's replication system.
-	// If you have a UObject property that is replicated, references to that object are sent over network connections
-	// as a FNetworkGUID that is assigned by the authoritative server. The server then notifies all connected clients of this assignment.
-
-	// @gdemers object reference should be automatically handled by Unreal system according to the above but our console logs complains about the object not
-	// being added for replication in this function.
-	DOREPLIFETIME(AAVVMGameState, PlayerDeaths);
-	DOREPLIFETIME(AAVVMGameState, PlayerKillstreaks);
-	DOREPLIFETIME(AAVVMGameState, CapturedObjectives);
-	DOREPLIFETIME(AAVVMGameState, DiscoveredArea);
 }
