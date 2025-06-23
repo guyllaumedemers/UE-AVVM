@@ -29,7 +29,13 @@
 /**
  *	Class description:
  *
- *	AAVVMGameMode. Actor type that handle interaction with online service general use case, among other things.
+*	AAVVMGameMode is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
+ *	
+ *	IMPORTANT : Replicated systems SHOULD BE managed through a component added via GFP. Unreal's USubsystem derived classes CANNOT be replicated! Doing this approach makes for a more modular system
+ *	due to component addition and removal no longer requiring hard references in the Actor derived class.
+ *
+ *	Note : for your UI systems. We expect to push an AVVMComponent with a pre-defined list of UAVVMPresenter class on it! Additionally, by implementing the api defined in the interface below,
+ *	you will be able to forward gameplay information without creating dependencies between modules. However, it comes with a price due to interface dispatch!
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMGameMode : public AModularGameMode,

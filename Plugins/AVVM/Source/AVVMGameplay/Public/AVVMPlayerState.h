@@ -31,8 +31,13 @@
 /**
  *	Class description:
  *
- *	AAVVMPlayerState. Modular Actor that receive a collection of Presenters (Client-Only) dynamically
- *	and define a set of unique events to communicate with them. (See IAVVMQuicktimeEventPlayerStateInterface)
+ *	AAVVMPlayerState is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
+ *	
+ *	IMPORTANT : Replicated systems SHOULD BE managed through a component added via GFP. Unreal's USubsystem derived classes CANNOT be replicated! Doing this approach makes for a more modular system
+ *	due to component addition and removal no longer requiring hard references in the Actor derived class.
+ *
+ *	Note : for your UI systems. We expect to push an AVVMComponent with a pre-defined list of UAVVMPresenter class on it! Additionally, by implementing IAVVMQuicktimeEventPlayerStateInterface base
+ *	api, you will be able to forward gameplay information without creating dependencies between modules. However, it comes with a price due to interface dispatch!
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
@@ -45,23 +50,7 @@ public:
 	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// @gdemers PlayerState is the preferred place to host the ASC as OnPawnPosses can be used to modify the internal state of the
+	// ASC (good for state persistency between Pawn possession!).
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-protected:
-	// @gdemers here im just defining example cases of replicated systems that would allow
-	// 1. updating a collection of data specific to the system.
-	// 2. react post-replication and update presenters owned by the player state.
-	// Note : replicated system would be accessed from inside the api defined in : IAVVMQuicktimeEventPlayerStateInterface
-
-	// @gdemers example property of a bank system. each player has it's own bank which
-	// handle content that ARE NOT tied to the user account (so not inventory, or profile currencies. so only in-game resources that can be gathered!)
-	// note : this could aggregate damage dealt by this user, number of death/raise, etc... ALL types or simply in-game resources gathered.
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> Bank = nullptr;
-
-	// @gdemers example property for any short-time lived, or not, placeable actor. lets say we want to show a visual representation of the level on screen
-	// with our visual actors representation. Our local system would fetch all player states from the game state and read from the collection type held by this replicated actors
-	// to generate position information about the in-world actors on screen.
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> Pings = nullptr;
 };

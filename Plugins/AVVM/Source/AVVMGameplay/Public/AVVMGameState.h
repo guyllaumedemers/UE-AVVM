@@ -30,8 +30,13 @@
 /**
  *	Class description:
  *
- *	AAVVMGameState. Modular Actor that receive a collection of Presenters (Client-Only) dynamically
- *	and define a set of unique events to communicate with them. (See IAVVMQuicktimeEventGameStateInterface)
+*	AAVVMGameState is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
+ *	
+ *	IMPORTANT : Replicated systems SHOULD BE managed through a component added via GFP. Unreal's USubsystem derived classes CANNOT be replicated! Doing this approach makes for a more modular system
+ *	due to component addition and removal no longer requiring hard references in the Actor derived class.
+ *
+ *	Note : for your UI systems. We expect to push an AVVMComponent with a pre-defined list of UAVVMPresenter class on it! Additionally, by implementing IAVVMQuicktimeEventGameStateInterface base
+ *	api, you will be able to forward gameplay information without creating dependencies between modules. However, it comes with a price due to interface dispatch!
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
@@ -43,25 +48,4 @@ class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
 public:
 	AAVVMGameState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-protected:
-	// @gdemers here im just defining example cases of replicated systems that would allow
-	// 1. updating a collection of data specific to the system.
-	// 2. react post-replication and update presenters owned by the game state.
-	// Note : replicated system would be accessed from inside the api defined in : IAVVMQuicktimeEventGameStateInterface
-
-	// @gdemers these systems are queues of data to tracking which entry was recorded last.
-	// they are simple 'Recording' systems for pushing sequentially content on the HUD, maybe for a PvP game
-	// or COOP game, etc...
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> PlayerDeaths = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> PlayerKillstreaks = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> CapturedObjectives = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	TObjectPtr<AInfo> DiscoveredArea = nullptr;
 };
