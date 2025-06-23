@@ -21,11 +21,15 @@
 
 #include "CoreMinimal.h"
 
+#include "ActiveGameplayEffectHandle.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Info.h"
 
 #include "GameStateInteractionComponent.generated.h"
 
+struct FGameplayEffectSpecHandle;
+class UAbilitySystemComponent;
+class UGameplayEffect;
 class UInteraction;
 
 /**
@@ -58,6 +62,9 @@ public:
 	void Server_RemoveRecord(const AActor* NewTarget,
 	                         const AActor* NewInstigator);
 
+	UFUNCTION(BlueprintCallable)
+	const AActor* GetGameplayEffectCauser(const AActor* Instigator) const;
+
 protected:
 	UFUNCTION()
 	void OnRep_RecordModified(const TArray<UInteraction*>& OldRecords);
@@ -65,8 +72,13 @@ protected:
 	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
 	void HandleOldRecord(const TArray<UInteraction*>& OldRecords);
 
+	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC,
+	                             const FGameplayEffectSpecHandle& GEHandle);
+
+	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
+	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag StartPromptInteractionChannel = FGameplayTag::EmptyTag;
@@ -77,5 +89,6 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_RecordModified")
 	TArray<TObjectPtr<UInteraction>> Records;
 
+	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

@@ -19,13 +19,22 @@
 //SOFTWARE.
 #include "PlayerInteractionAbility.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "GameStateInteractionComponent.h"
 
 void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                               const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
 
 	const AActor* Outer = ActorInfo->OwnerActor.Get();
 	if (!ensure(IsValid(Outer)))
@@ -35,17 +44,17 @@ void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* A
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
+	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *GetName(),
-	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       *Outer->GetName());
 }
 
 void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                 const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
+	GameStateInteractionComponent.Reset();
 }
 
 bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -64,21 +73,44 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
 	const AActor* Outer = ActorInfo->OwnerActor.Get();
-	if (!ensure(IsValid(Outer)))
+	if (!ensureAlwaysMsgf(IsValid(Outer),
+	                      TEXT("UPlayerInteractionAbility Owning Actor invalid!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
+	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *GetName(),
-	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       *Outer->GetName());
 
-	// TODO @gdemers Status change to set the owning interaction to non-interactable has to happen here
+	const UGameStateInteractionComponent* InteractionComponent = GetLazyComponent();
+	if (!IsValid(InteractionComponent))
+	{
+		return;
+	}
+
+	const AActor* EffectCauser = InteractionComponent->GetGameplayEffectCauser(Outer);
+	if (!IsValid(EffectCauser))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Gameplay Effect Causer \"%s\" from Ability \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(EffectCauser).GetData(),
+	       *EffectCauser->GetName(),
+	       *GetName());
 }
 
 void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
@@ -88,4 +120,16 @@ void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Hand
                                            bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+const UGameStateInteractionComponent* UPlayerInteractionAbility::GetLazyComponent()
+{
+	const UGameStateInteractionComponent* Component = GameStateInteractionComponent.Get();
+	if (!IsValid(Component))
+	{
+		Component = UGameStateInteractionComponent::GetActorComponent(this);
+		GameStateInteractionComponent = Component;
+	}
+
+	return Component;
 }

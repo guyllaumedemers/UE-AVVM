@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "GameStateInteractionComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
@@ -160,6 +162,24 @@ void UGameStateInteractionComponent::Server_RemoveRecord(const AActor* NewTarget
 	}
 }
 
+const AActor* UGameStateInteractionComponent::GetGameplayEffectCauser(const AActor* Instigator) const
+{
+	const FActiveGameplayEffectHandle* SearchResult = ActorToGEActiveHandle.Find(Instigator);
+	if (SearchResult == nullptr)
+	{
+		return nullptr;
+	}
+
+	auto* ASC = SearchResult->GetOwningAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		const FGameplayEffectContextHandle GEContextHandle = ASC->GetEffectContextFromActiveGEHandle(*SearchResult);
+		return GEContextHandle.GetEffectCauser();
+	}
+
+	return nullptr;
+}
+
 void UGameStateInteractionComponent::OnRep_RecordModified(const TArray<UInteraction*>& OldRecords)
 {
 	const int32 OldNum = OldRecords.Num();
@@ -201,20 +221,20 @@ void UGameStateInteractionComponent::HandleNewRecord(const TArray<UInteraction*>
 	}
 
 	const AActor* Instigator = TopRecord->GetInstigator();
-	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
+	const AActor* Target = TopRecord->GetTarget();
+
+	if (!IsValid(Instigator) || !IsValid(Target) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
 	}
 
-	auto* AbilityComponent = Instigator->GetComponentByClass<UAbilitySystemComponent>();
-	if (IsValid(AbilityComponent))
-	{
-		AbilityComponent->AddLooseGameplayTags(GrantAbilityTags);
-	}
+	auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
+	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, const_cast<AActor*>(Instigator), const_cast<AActor*>(Target));
+	AddGameplayEffectHandle(ASC, GESpecHandle);
 
 	UE_AVVM_NOTIFY(this,
 	               StartPromptInteractionChannel,
-	               TopRecord->GetTarget(),
+	               Target,
 	               FAVVMNotificationPayload::Empty);
 }
 
@@ -265,19 +285,52 @@ void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>
 	}
 
 	const AActor* Instigator = FoundMatch->GetInstigator();
-	if (!IsValid(Instigator) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
+	const AActor* Target = FoundMatch->GetTarget();
+
+	if (!IsValid(Instigator) || !IsValid(Target) || !UAVVMGameplayUtils::IsLocallyControlled(Instigator))
 	{
 		return;
 	}
 
-	auto* AbilityComponent = Instigator->GetComponentByClass<UAbilitySystemComponent>();
-	if (IsValid(AbilityComponent))
-	{
-		AbilityComponent->RemoveLooseGameplayTags(GrantAbilityTags);
-	}
+	auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
+	RemoveGameplayEffectHandle(ASC);
 
 	UE_AVVM_NOTIFY(this,
 	               StopPromptInteractionChannel,
-	               FoundMatch->GetTarget(),
+	               Target,
 	               FAVVMNotificationPayload::Empty);
+}
+
+void UGameStateInteractionComponent::AddGameplayEffectHandle(UAbilitySystemComponent* ASC,
+                                                             const FGameplayEffectSpecHandle& GEHandle)
+{
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	FActiveGameplayEffectHandle& SearchResult = ActorToGEActiveHandle.FindOrAdd(ASC->GetOwnerActor());
+	if (SearchResult.IsValid())
+	{
+		ASC->RemoveActiveGameplayEffect(SearchResult);
+	}
+
+	SearchResult = ASC->BP_ApplyGameplayEffectSpecToSelf(GEHandle);
+}
+
+void UGameStateInteractionComponent::RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC)
+{
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	const AActor* Instigator = ASC->GetOwnerActor();
+
+	FActiveGameplayEffectHandle* SearchResult = ActorToGEActiveHandle.Find(Instigator);
+	if (SearchResult != nullptr)
+	{
+		ASC->RemoveActiveGameplayEffect(*SearchResult);
+		ActorToGEActiveHandle.Remove(Instigator);
+	}
 }
