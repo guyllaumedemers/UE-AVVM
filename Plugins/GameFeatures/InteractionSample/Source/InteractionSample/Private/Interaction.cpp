@@ -43,13 +43,13 @@ void UInteraction::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCo
 }
 #endif // UE_WITH_IRIS
 
-bool UInteraction::DoesPartialMatch(const AActor* NewTarget) const
+bool UInteraction::DoesPartialMatch(const AActor* NewInstigator) const
 {
-	return IsValid(NewTarget) && (Target == NewTarget);
+	return IsValid(NewInstigator) && (Instigator == NewInstigator);
 }
 
-bool UInteraction::DoesExactMatch(const AActor* NewTarget,
-                                  const AActor* NewInstigator) const
+bool UInteraction::DoesExactMatch(const AActor* NewInstigator,
+                                  const AActor* NewTarget) const
 {
 	return IsValid(NewTarget) && IsValid(NewInstigator) && (Target == NewTarget) && (Instigator == NewInstigator);
 }
@@ -74,8 +74,8 @@ const AActor* UInteraction::GetInstigator() const
 	return Instigator.Get();
 }
 
-void UInteraction::operator()(const AActor* NewTarget,
-                              const AActor* NewInstigator)
+void UInteraction::operator()(const AActor* NewInstigator,
+                              const AActor* NewTarget)
 {
 	Instigator = NewInstigator;
 	Target = NewTarget;

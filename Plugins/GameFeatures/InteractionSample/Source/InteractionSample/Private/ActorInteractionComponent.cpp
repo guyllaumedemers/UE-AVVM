@@ -32,7 +32,7 @@ void UActorInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	const auto* Outer = GetTypedOuter<AActor>();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -60,7 +60,7 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	Super::EndPlay(EndPlayReason);
 
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -102,7 +102,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
 	if (IsValid(PlayerInteractionComponent))
 	{
-		PlayerInteractionComponent->AttemptRecordBeginOverlap(OwningOuter.Get(), OtherActor, bShouldPreventContingency);
+		PlayerInteractionComponent->AttemptRecordBeginOverlap(OwningOuter.Get()/*World Actor*/, OtherActor/*APlayerCharacter*/, bShouldPreventContingency);
 	}
 }
 
@@ -125,6 +125,6 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
 	if (IsValid(PlayerInteractionComponent))
 	{
-		PlayerInteractionComponent->AttemptRecordEndOverlap(OwningOuter.Get(), OtherActor);
+		PlayerInteractionComponent->AttemptRecordEndOverlap(OwningOuter.Get()/*World Actor*/, OtherActor /*APlayerCharacter*/);
 	}
 }

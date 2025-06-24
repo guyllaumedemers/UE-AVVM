@@ -51,16 +51,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UGameStateInteractionComponent* GetActorComponent(const UObject* WorldContextObject);
 
-	TArray<UInteraction*> GetPartialMatchingInteractions(const AActor* NewTarget) const;
-	TArray<UInteraction*> GetExactMatchingInteractions(const AActor* NewTarget, const AActor* NewInstigator) const;
+	TArray<UInteraction*> GetPartialMatchingInteractions(const AActor* NewInstigator) const;
+
+	TArray<UInteraction*> GetExactMatchingInteractions(const AActor* NewInstigator,
+	                                                   const AActor* NewTarget) const;
 
 	UFUNCTION(BlueprintCallable)
-	void Server_AddRecord(const AActor* NewTarget,
-	                      const AActor* NewInstigator);
+	void Server_AddRecord(const AActor* NewInstigator,
+	                      const AActor* NewTarget);
 
 	UFUNCTION(BlueprintCallable)
-	void Server_RemoveRecord(const AActor* NewTarget,
-	                         const AActor* NewInstigator);
+	void Server_RemoveRecord(const AActor* NewInstigator,
+	                         const AActor* NewTarget);
 
 	UFUNCTION(BlueprintCallable)
 	const AActor* GetGameplayEffectCauser(const AActor* Instigator) const;

@@ -19,8 +19,7 @@
 //SOFTWARE.
 #include "AVVMPlayerState.h"
 
-#include "AbilitySystemGlobals.h"
-#include "Net/UnrealNetwork.h"
+#include "AbilitySystemComponent.h"
 
 AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -33,7 +32,20 @@ void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
+void AAVVMPlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AbilitySystemComponent = GetComponentByClass<UAbilitySystemComponent>();
+}
+
+void AAVVMPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	AbilitySystemComponent.Reset();
+}
+
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
 {
-	return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetPawn());
+	return AbilitySystemComponent.Get();
 }

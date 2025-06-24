@@ -51,22 +51,22 @@ public:
 	static UPlayerInteractionComponent* GetActorComponent(const AActor* Actor);
 
 	UFUNCTION(BlueprintCallable)
-	void AttemptRecordBeginOverlap(const AActor* NewTarget,
-	                               const AActor* NewInstigator,
+	void AttemptRecordBeginOverlap(const AActor* NewInstigator,
+	                               const AActor* NewTarget,
 	                               const bool bPreventContingency);
 
 	UFUNCTION(BlueprintCallable)
-	void AttemptRecordEndOverlap(const AActor* NewTarget,
-	                             const AActor* NewInstigator);
+	void AttemptRecordEndOverlap(const AActor* NewInstigator,
+	                             const AActor* NewTarget);
 
 protected:
 	UFUNCTION(Server, Unreliable)
-	void ServerRPC_RecordBeginInteraction(const AActor* NewTarget,
-	                                      const AActor* NewInstigator);
+	void ServerRPC_RecordBeginInteraction(const AActor* NewInstigator,
+	                                      const AActor* NewTarget);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerRPC_RecordEndInteraction(const AActor* NewTarget,
-	                                    const AActor* NewInstigator);
+	void ServerRPC_RecordEndInteraction(const AActor* NewInstigator,
+	                                    const AActor* NewTarget);
 
 	TWeakObjectPtr<UGameStateInteractionComponent> GameStateInteractionComponent = nullptr;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

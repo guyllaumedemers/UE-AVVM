@@ -40,7 +40,7 @@ void UPlayerInteractionComponent::BeginPlay()
 	GameStateInteractionComponent = UGameStateInteractionComponent::GetActorComponent(this);
 
 	const auto* Outer = GetTypedOuter<AActor>();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -49,7 +49,7 @@ void UPlayerInteractionComponent::BeginPlay()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UPlayerInteractionComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding UPlayerInteractionComponent to PlayerState \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
 
@@ -63,14 +63,14 @@ void UPlayerInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	GameStateInteractionComponent.Reset();
 
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UPlayerInteractionComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing UPlayerInteractionComponent to PlayerState \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName())
 
@@ -90,12 +90,12 @@ UPlayerInteractionComponent* UPlayerInteractionComponent::GetActorComponent(cons
 	}
 }
 
-void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTarget,
-                                                            const AActor* NewInstigator,
+void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewInstigator,
+                                                            const AActor* NewTarget,
                                                             const bool bPreventContingency)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -108,18 +108,18 @@ void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTar
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Owning Connection \"%s\". Begin Overlap detected between Actors \"%s\" and \"%s\"!"),
+	       TEXT("Executed from \"%s\". Owning Connection \"%s\". Begin Overlap detected between Instigator \"%s\" and Target \"%s\"!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *UAVVMGameplayUtils::PrintConnectionInfo(Outer->GetNetConnection()),
-	       *NewTarget->GetName(),
-	       *NewInstigator->GetName());
+	       *NewInstigator->GetName(),
+	       *NewTarget->GetName());
 
 	auto MatchingInteractions = TArray<UInteraction*>();
 	bool bCanInteract = true;
 
 	if (bPreventContingency)
 	{
-		MatchingInteractions = AuthoritativeInteractionComponent->GetPartialMatchingInteractions(NewTarget);
+		MatchingInteractions = AuthoritativeInteractionComponent->GetPartialMatchingInteractions(NewInstigator);
 
 		for (const UInteraction* Interaction : MatchingInteractions)
 		{
@@ -138,15 +138,15 @@ void UPlayerInteractionComponent::AttemptRecordBeginOverlap(const AActor* NewTar
 		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RecordBeginInteraction..."),
 		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData());
 
-		ServerRPC_RecordBeginInteraction(NewTarget, NewInstigator);
+		ServerRPC_RecordBeginInteraction(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 	}
 }
 
-void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewTarget,
-                                                          const AActor* NewInstigator)
+void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewInstigator,
+                                                          const AActor* NewTarget)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -159,13 +159,13 @@ void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewTarge
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Owning Connection \"%s\". End Overlap detected between Actors \"%s\" and \"%s\"!"),
+	       TEXT("Executed from \"%s\". Owning Connection \"%s\". End Overlap detected between Instigator \"%s\" and Target \"%s\"!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *UAVVMGameplayUtils::PrintConnectionInfo(Outer->GetNetConnection()),
-	       *NewTarget->GetName(),
-	       *NewInstigator->GetName());
+	       *NewInstigator->GetName(),
+	       *NewTarget->GetName());
 
-	const auto MatchingInteractions = AuthoritativeInteractionComponent->GetExactMatchingInteractions(NewTarget, NewInstigator);
+	const auto MatchingInteractions = AuthoritativeInteractionComponent->GetExactMatchingInteractions(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 	if (!MatchingInteractions.IsEmpty())
 	{
 		UE_LOG(LogGameplay,
@@ -173,15 +173,15 @@ void UPlayerInteractionComponent::AttemptRecordEndOverlap(const AActor* NewTarge
 		       TEXT("Executed from \"%s\". Executing ServerRPC_RecordEndInteraction..."),
 		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData());
 
-		ServerRPC_RecordEndInteraction(NewTarget, NewInstigator);
+		ServerRPC_RecordEndInteraction(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 	}
 }
 
-void UPlayerInteractionComponent::ServerRPC_RecordBeginInteraction_Implementation(const AActor* NewTarget,
-                                                                                  const AActor* NewInstigator)
+void UPlayerInteractionComponent::ServerRPC_RecordBeginInteraction_Implementation(const AActor* NewInstigator,
+                                                                                  const AActor* NewTarget)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -198,14 +198,14 @@ void UPlayerInteractionComponent::ServerRPC_RecordBeginInteraction_Implementatio
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	AuthoritativeInteractionComponent->Server_AddRecord(NewTarget, NewInstigator);
+	AuthoritativeInteractionComponent->Server_AddRecord(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 }
 
-void UPlayerInteractionComponent::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewTarget,
-                                                                                const AActor* NewInstigator)
+void UPlayerInteractionComponent::ServerRPC_RecordEndInteraction_Implementation(const AActor* NewInstigator,
+                                                                                const AActor* NewTarget)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -222,5 +222,5 @@ void UPlayerInteractionComponent::ServerRPC_RecordEndInteraction_Implementation(
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
-	AuthoritativeInteractionComponent->Server_RemoveRecord(NewTarget, NewInstigator);
+	AuthoritativeInteractionComponent->Server_RemoveRecord(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 }

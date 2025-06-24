@@ -28,6 +28,8 @@
 
 #include "AVVMPlayerState.generated.h"
 
+class UAbilitySystemComponent;
+
 /**
  *	Class description:
  *
@@ -49,8 +51,13 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
 public:
 	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	// @gdemers PlayerState is the preferred place to host the ASC as OnPawnPosses can be used to modify the internal state of the
 	// ASC (good for state persistency between Pawn possession!).
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+protected:
+	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;
 };

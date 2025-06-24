@@ -87,7 +87,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 	}
 
 	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -107,7 +107,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Executed from \"%s\". Granting New Ability \"%s\" to Actor \"%s\"."),
+		       TEXT("Executed from \"%s\". Granting New Ability \"%s\" to Outer \"%s\"."),
 		       IsServerOrClientString,
 		       *GameplayAbilityClass->GetName(),
 		       *Outer->GetName());

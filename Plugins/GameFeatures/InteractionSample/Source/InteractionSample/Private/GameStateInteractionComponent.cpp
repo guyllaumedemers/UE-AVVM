@@ -27,6 +27,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -49,14 +50,14 @@ void UGameStateInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	const auto* Outer = GetTypedOuter<AActor>();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UGameStateInteractionComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding UGameStateInteractionComponent to Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
@@ -77,14 +78,14 @@ void UGameStateInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayR
 #endif
 
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UGameStateInteractionComponent from Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing UGameStateInteractionComponent from Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
@@ -104,30 +105,30 @@ UGameStateInteractionComponent* UGameStateInteractionComponent::GetActorComponen
 	}
 }
 
-TArray<UInteraction*> UGameStateInteractionComponent::GetPartialMatchingInteractions(const AActor* NewTarget) const
+TArray<UInteraction*> UGameStateInteractionComponent::GetPartialMatchingInteractions(const AActor* NewInstigator) const
 {
 	return Records.FilterByPredicate([&](const UInteraction* Interaction)
 	{
-		return IsValid(Interaction) && Interaction->DoesPartialMatch(NewTarget);
+		return IsValid(Interaction) && Interaction->DoesPartialMatch(NewInstigator);
 	});
 }
 
-TArray<UInteraction*> UGameStateInteractionComponent::GetExactMatchingInteractions(const AActor* NewTarget,
-                                                                                   const AActor* NewInstigator) const
+TArray<UInteraction*> UGameStateInteractionComponent::GetExactMatchingInteractions(const AActor* NewInstigator,
+                                                                                   const AActor* NewTarget) const
 {
 	return Records.FilterByPredicate([&](const UInteraction* Interaction)
 	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewTarget, NewInstigator);
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 	});
 }
 
-void UGameStateInteractionComponent::Server_AddRecord(const AActor* NewTarget,
-                                                      const AActor* NewInstigator)
+void UGameStateInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
+                                                      const AActor* NewTarget)
 {
 	TArray<UInteraction*> OldRecords = Records;
 
 	auto* Transaction = NewObject<UInteraction>(this);
-	Transaction->operator()(NewTarget, NewInstigator);
+	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 
 	AddReplicatedSubObject(Transaction);
 	Records.Add(Transaction);
@@ -135,12 +136,12 @@ void UGameStateInteractionComponent::Server_AddRecord(const AActor* NewTarget,
 	OnRep_RecordModified(OldRecords);
 }
 
-void UGameStateInteractionComponent::Server_RemoveRecord(const AActor* NewTarget,
-                                                         const AActor* NewInstigator)
+void UGameStateInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator,
+                                                         const AActor* NewTarget)
 {
 	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Interaction)
 	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewTarget, NewInstigator);
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 	});
 
 	if (SearchResult != nullptr)
@@ -191,14 +192,14 @@ void UGameStateInteractionComponent::OnRep_RecordModified(const TArray<UInteract
 void UGameStateInteractionComponent::HandleNewRecord(const TArray<UInteraction*>& NewRecords)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Record Collection modified on Actor \"%s\". Adding!"),
+	       TEXT("Executed from \"%s\". Record Collection modified on Outer \"%s\". Adding!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
@@ -216,35 +217,43 @@ void UGameStateInteractionComponent::HandleNewRecord(const TArray<UInteraction*>
 	const AActor* Instigator = TopRecord->GetInstigator();
 	const AActor* Target = TopRecord->GetTarget();
 
-	if (IsValid(Instigator))
+	auto* OwningPC = IsValid(Target) ? Target->GetOwner<APlayerController>() : nullptr;
+	if (!IsValid(OwningPC))
 	{
-		// @gdemers ApplyGFE on Server creates a racing condition between the server/client and trigger the ability BEFORE we updated the TMap caching GFEHandle on the Client (which we care about due
-		// to the access to EffectCauser Actor in UPlayerInteractionAbility).
-		// UPlayerInteractionAbility is currently set to Activation based on Tag added/removed for testing purposes but we actually care more about user input to trigger the ability so the racing condition
-		// isnt a real issue here. However, this approach bothers me a little...
-		// Note : Client Side GFEActivationHandle will be default initialized without data due to not being Actor ROLE_Authority. (This should be fine!)
-		auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, const_cast<AActor*>(Instigator), const_cast<AActor*>(Target));
-		AddGameplayEffectHandle(ASC, GESpecHandle);
+		return;
 	}
 
-	UE_AVVM_NOTIFY_LOCALPLAYER_ONLY(this,
-	                                StartPromptInteractionChannel,
-	                                Target,
-	                                FAVVMNotificationPayload::Empty);
+	// @gdemers ApplyGFE on Server creates a racing condition between the server/client and trigger the ability BEFORE we updated the TMap caching GFEHandle on the Client (which we care about due
+	// to the access to EffectCauser Actor in UPlayerInteractionAbility).
+	// UPlayerInteractionAbility is currently set to Activation based on Tag added/removed for testing purposes but we actually care more about user input to trigger the ability so the racing condition
+	// isnt a real issue here. However, this approach bothers me a little...
+	// Note : Client Side GFEActivationHandle will be default initialized without data due to not being Actor ROLE_Authority. (This should be fine!)
+	APlayerState* OwningPlayerState = OwningPC->PlayerState;
+	auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwningPlayerState);
+	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect,
+	                                                                                                     OwningPlayerState /*APlayerState*/,
+	                                                                                                     const_cast<AActor*>(Instigator)/*World Actor*/);
+
+	AddGameplayEffectHandle(ASC, GESpecHandle);
+
+	UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(this,
+	                                    StartPromptInteractionChannel,
+	                                    OwningPlayerState,
+	                                    Instigator,
+	                                    FAVVMNotificationPayload::Empty);
 }
 
 void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>& OldRecords)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Record Collection modified on Actor \"%s\". Removing!"),
+	       TEXT("Executed from \"%s\". Record Collection modified on Outer \"%s\". Removing!"),
 	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 	       *Outer->GetName());
 
@@ -263,7 +272,7 @@ void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>
 
 		const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const TObjectPtr<UInteraction>& Param)
 		{
-			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetTarget(), OldRecord->GetInstigator());
+			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetInstigator() /*World Actor*/, OldRecord->GetTarget() /*APlayerCharacter*/);
 		});
 
 		if (SearchResult == nullptr)
@@ -283,16 +292,21 @@ void UGameStateInteractionComponent::HandleOldRecord(const TArray<UInteraction*>
 	const AActor* Instigator = FoundMatch->GetInstigator();
 	const AActor* Target = FoundMatch->GetTarget();
 
-	if (IsValid(Instigator))
+	auto* OwningPC = IsValid(Target) ? Target->GetOwner<APlayerController>() : nullptr;
+	if (!IsValid(OwningPC))
 	{
-		auto* ASC = Instigator->GetComponentByClass<UAbilitySystemComponent>();
-		RemoveGameplayEffectHandle(ASC);
+		return;
 	}
 
-	UE_AVVM_NOTIFY_LOCALPLAYER_ONLY(this,
-	                                StopPromptInteractionChannel,
-	                                Target,
-	                                FAVVMNotificationPayload::Empty);
+	APlayerState* OwningPlayerState = OwningPC->PlayerState;
+	auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwningPlayerState);
+	RemoveGameplayEffectHandle(ASC);
+
+	UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(this,
+	                                    StopPromptInteractionChannel,
+	                                    OwningPlayerState,
+	                                    Instigator,
+	                                    FAVVMNotificationPayload::Empty);
 }
 
 void UGameStateInteractionComponent::AddGameplayEffectHandle(UAbilitySystemComponent* ASC,

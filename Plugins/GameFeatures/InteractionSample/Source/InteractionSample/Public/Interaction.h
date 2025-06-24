@@ -48,10 +48,11 @@ public:
 #endif // UE_WITH_IRIS
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesPartialMatch(const AActor* NewTarget) const;
+	bool DoesPartialMatch(const AActor* NewInstigator) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesExactMatch(const AActor* NewTarget, const AActor* NewInstigator) const;
+	bool DoesExactMatch(const AActor* NewInstigator,
+	                    const AActor* NewTarget) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsEqual(const UInteraction* Other) const;
@@ -76,8 +77,8 @@ protected:
 	bool bIsInteractable = true;
 
 private:
-	void operator()(const AActor* NewTarget,
-	                const AActor* NewInstigator);
+	void operator()(const AActor* NewInstigator,
+	                const AActor* NewTarget);
 
 	friend class UGameStateInteractionComponent;
 };
