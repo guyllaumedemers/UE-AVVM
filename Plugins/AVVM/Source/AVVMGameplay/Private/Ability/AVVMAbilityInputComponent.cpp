@@ -36,12 +36,12 @@ void UAVVMAbilityInputComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto* PlayerState = GetTypedOuter<APlayerState>();
-	if (IsValid(PlayerState) && UAVVMGameplayUtils::IsLocallyControlled(PlayerState))
+	auto* Outer = GetTypedOuter<APlayerState>();
+	if (IsValid(Outer) && UAVVMGameplayUtils::IsLocallyControlled(Outer))
 	{
-		OwningOuter = PlayerState;
-		PlayerState->OnPawnSet.AddUniqueDynamic(this, &UAVVMAbilityInputComponent::OnPawnChanged);
-		OnPawnChanged(PlayerState, PlayerState->GetPawn(), nullptr);
+		OwningOuter = Outer;
+		Outer->OnPawnSet.AddUniqueDynamic(this, &UAVVMAbilityInputComponent::OnPawnChanged);
+		OnPawnChanged(Outer, Outer->GetPawn(), nullptr);
 	}
 }
 
@@ -49,10 +49,10 @@ void UAVVMAbilityInputComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 {
 	Super::EndPlay(EndPlayReason);
 
-	auto* PlayerState = OwningOuter.Get();
-	if (IsValid(PlayerState) && UAVVMGameplayUtils::IsLocallyControlled(PlayerState))
+	auto* Outer = OwningOuter.Get();
+	if (IsValid(Outer) && UAVVMGameplayUtils::IsLocallyControlled(Outer))
 	{
-		PlayerState->OnPawnSet.RemoveAll(this);
+		Outer->OnPawnSet.RemoveAll(this);
 	}
 
 	OwningOuter.Reset();
@@ -77,8 +77,8 @@ void UAVVMAbilityInputComponent::OnPawnChanged(APlayerState* Player,
 	const auto* PlayerController = Cast<APlayerController>(NewPawn->GetController());
 	if (IsValid(PlayerController))
 	{
+		auto* InputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
 		const ULocalPlayer* LocalPLayer = PlayerController->GetLocalPlayer();
-		UEnhancedInputComponent* InputComponent = NewPawn->GetComponentByClass<UEnhancedInputComponent>();
 
 		SwapInputMappingContext(LocalPLayer, NewPawn, OldPawn);
 		BindInputActions(InputComponent, IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn));
@@ -95,8 +95,8 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
 		return;
 	}
 
-	const APlayerState* PlayerState = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(PlayerState), TEXT("Invalid Outer!")))
+	const APlayerState* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -106,9 +106,10 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Removing Input Mapping Context \"%s\" on Outer \"%s\"."),
+		       TEXT("Executed from \"%s\". Removing Input Mapping Context \"%s\" on Outer \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 		       *OldInputMappingContext->GetName(),
-		       *PlayerState->GetName());
+		       *Outer->GetName());
 
 		EnhancedInputSubsystem->RemoveMappingContext(OldInputMappingContext);
 	}
@@ -118,9 +119,10 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Adding Input Mapping Context \"%s\" on Outer \"%s\"."),
+		       TEXT("Executed from \"%s\". Adding Input Mapping Context \"%s\" on Outer \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 		       *NewInputMappingContext->GetName(),
-		       *PlayerState->GetName());
+		       *Outer->GetName());
 
 		EnhancedInputSubsystem->AddMappingContext(NewInputMappingContext, 0);
 	}
@@ -133,16 +135,17 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 		return;
 	}
 
-	const APlayerState* PlayerState = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(PlayerState), TEXT("Invalid Outer!")))
+	const APlayerState* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Clearing Input Action Bindings on Outer \"%s\"."),
-	       *PlayerState->GetName());
+	       TEXT("Executed from \"%s\". Clearing Input Action Bindings on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       *Outer->GetName());
 
 	EnhancedInputComponent->ClearBindingsForObject(this);
 	AbilityTriggerTags.Reset();
@@ -160,10 +163,11 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Registering New Input Action \"%s\" and Tag \"%s\" on Outer \"%s\"."),
+		       TEXT("Executed from \"%s\". Registering New Input Action \"%s\" and Tag \"%s\" on Outer \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
 		       *InputAction->GetName(),
 		       *OutTag.ToString(),
-		       *PlayerState->GetName());
+		       *Outer->GetName());
 
 		EnhancedInputComponent->BindAction(InputAction,
 		                                   ETriggerEvent::Started,
