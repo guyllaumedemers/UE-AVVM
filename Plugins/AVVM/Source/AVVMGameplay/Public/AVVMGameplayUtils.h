@@ -36,21 +36,17 @@ class AVVMGAMEPLAY_API UAVVMGameplayUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	// @gdemers check if the actor has authority on the local machine. i.e can it modify the state of the actor locally.
 	UFUNCTION(BlueprintCallable)
-	static bool IsAuthoritativeActor(const AActor* Actor);
+	static bool CheckActorAuthority(const AActor* Actor);
+
+	// @gdemers other than the APlayerController, all Actors are ROLE_Authority if non-replicated or if existing on the Server.
+	UFUNCTION(BlueprintCallable)
+	static bool HasNetworkAuthority(const AActor* Actor);
 
 	UFUNCTION(BlueprintCallable)
-	static bool IsLocallyControlled(const AActor* Actor);
+	static FString BP_PrintNetSource(const AActor* Actor);
 
-	UFUNCTION(BlueprintCallable)
-	static FString BP_PrintIsLocallyControlled(const AActor* Actor);
-
-	UFUNCTION(BlueprintCallable)
-	static FString BP_PrintNetMode(const AActor* Actor);
-
-	// @gdemers use these function in Native code and the prefixed BP_ in Blueprint
-	// as FStringView isn't exposed to blueprint.
-	static FStringView PrintIsLocallyControlled(const AActor* Actor);
-	static FStringView PrintNetMode(const AActor* Actor);
+	static FStringView PrintNetSource(const AActor* Actor);
 	static FString PrintConnectionInfo(const UNetConnection* Connection);
 };

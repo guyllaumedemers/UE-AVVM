@@ -28,7 +28,17 @@ void UAVVMAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwningOuter = GetTypedOuter<AActor>();
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		OwningOuter = Outer;
+	}
+}
+
+void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	OwningOuter.Reset();
 }
 
 void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resources)
@@ -36,7 +46,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	const FGameplayTagContainer& OwnedTags = GetOwnedGameplayTags();
 
 	const AActor* Outer = OwningOuter.Get();
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredGrantedAbilities;
 	for (const UObject* Resource : Resources)
@@ -92,7 +102,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 		return;
 	}
 
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<UObject*> OutStreamedAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
@@ -124,6 +134,6 @@ void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool Tag
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Modifying Tag \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Tag.ToString());
 }

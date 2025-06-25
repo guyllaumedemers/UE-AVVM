@@ -46,7 +46,7 @@ TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActo
 	}
 
 	auto* AbilitySystemComponent = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
-	if (IsValid(AbilitySystemComponent) && UAVVMGameplayUtils::IsAuthoritativeActor(AbilitySystemComponent->GetTypedOuter<AActor>()) && !OutAbilities.IsEmpty())
+	if (!OutAbilities.IsEmpty() && IsValid(AbilitySystemComponent) && UAVVMGameplayUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
 	{
 		AbilitySystemComponent->SetupAbilities(OutAbilities);
 	}

@@ -81,4 +81,5 @@ private:
 	                const AActor* NewTarget);
 
 	friend class UGameStateInteractionComponent;
+	friend class UActorInteractionImpl;
 };

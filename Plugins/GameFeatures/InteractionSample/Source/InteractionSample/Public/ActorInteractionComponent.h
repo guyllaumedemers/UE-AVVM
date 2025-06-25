@@ -24,14 +24,14 @@
 #include "CoreMinimal.h"
 
 #include "Components/ActorComponent.h"
+#include "Templates/SubclassOf.h"
 
 #include "ActorInteractionComponent.generated.h"
 
+class UActorInteractionImpl;
+
 /**
  *	Class description:
- *
- *	UActorInteractionComponent is a Client-Only component pushed via GFP that handle local collision check between world actors and locally controlled APlayerController.
- *	Using the received Instigator, it interface with the owned UPlayerInteractionComponent and call RPCs.
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent
@@ -39,6 +39,8 @@ class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UActorInteractionComponent(const FObjectInitializer& ObjectInitializer);
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -59,6 +61,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldPreventContingency = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	TObjectPtr<UActorInteractionImpl> InteractionImpl = nullptr;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

@@ -36,10 +36,10 @@ void UTradeItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
 }
 
 void UTradeItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -73,10 +73,10 @@ void UTradeItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
 }
 
 void UTradeItemAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

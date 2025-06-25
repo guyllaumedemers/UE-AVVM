@@ -41,7 +41,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, cons
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, ActorBoundToChannel, Payload)\
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload});
 #define UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(WorldContextObject, ChannelTag, LocallyControlledActor, ActorBoundToChannel, Payload)\
-	if(UAVVMGameplayUtils::IsLocallyControlled(LocallyControlledActor)) { UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload}); }
+	if(UAVVMGameplayUtils::CheckActorAuthority(LocallyControlledActor)) { UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload}); }
 #endif
 
 /**

@@ -23,7 +23,6 @@
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "GameStateInteractionComponent.h"
 
 void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                               const FGameplayAbilitySpec& Spec)
@@ -45,7 +44,7 @@ void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* A
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName());
 }
@@ -54,7 +53,6 @@ void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo*
                                                 const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
-	GameStateInteractionComponent.Reset();
 }
 
 bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -89,28 +87,28 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName());
 
-	const UGameStateInteractionComponent* InteractionComponent = GetLazyComponent();
-	if (!IsValid(InteractionComponent))
-	{
-		return;
-	}
-
-	const AActor* EffectCauser = InteractionComponent->GetGameplayEffectCauser(Outer);
-	if (!IsValid(EffectCauser))
-	{
-		return;
-	}
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Gameplay Effect Causer \"%s\" from Ability \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(EffectCauser).GetData(),
-	       *EffectCauser->GetName(),
-	       *GetName());
+	// const UGameStateInteractionComponent* InteractionComponent = GetLazyComponent();
+	// if (!IsValid(InteractionComponent))
+	// {
+	// 	return;
+	// }
+	//
+	// const AActor* EffectCauser = InteractionComponent->GetGameplayEffectCauser(Outer);
+	// if (!IsValid(EffectCauser))
+	// {
+	// 	return;
+	// }
+	//
+	// UE_LOG(LogGameplay,
+	//        Log,
+	//        TEXT("Executed from \"%s\". Gameplay Effect Causer \"%s\" from Ability \"%s\"."),
+	//        UAVVMGameplayUtils::PrintNetMode(EffectCauser).GetData(),
+	//        *EffectCauser->GetName(),
+	//        *GetName());
 }
 
 void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
@@ -120,16 +118,4 @@ void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Hand
                                            bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-const UGameStateInteractionComponent* UPlayerInteractionAbility::GetLazyComponent()
-{
-	const UGameStateInteractionComponent* Component = GameStateInteractionComponent.Get();
-	if (!IsValid(Component))
-	{
-		Component = UGameStateInteractionComponent::GetActorComponent(this);
-		GameStateInteractionComponent = Component;
-	}
-
-	return Component;
 }

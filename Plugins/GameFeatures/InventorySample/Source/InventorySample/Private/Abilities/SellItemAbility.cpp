@@ -36,10 +36,10 @@ void USellItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
 }
 
 void USellItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -73,10 +73,10 @@ void USellItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
 }
 
 void USellItemAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

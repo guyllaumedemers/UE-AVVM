@@ -25,8 +25,6 @@
 
 #include "PlayerInteractionAbility.generated.h"
 
-class UGameStateInteractionComponent;
-
 /**
  *	Class Description :
  *
@@ -64,10 +62,4 @@ public:
 	                        const FGameplayAbilityActivationInfo ActivationInfo,
 	                        bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
-
-protected:
-	UFUNCTION(BlueprintCallable)
-	const UGameStateInteractionComponent* GetLazyComponent();
-
-	TWeakObjectPtr<const UGameStateInteractionComponent> GameStateInteractionComponent = nullptr;
 };

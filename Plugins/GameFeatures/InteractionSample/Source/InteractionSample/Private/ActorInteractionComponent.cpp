@@ -19,13 +19,28 @@
 //SOFTWARE.
 #include "ActorInteractionComponent.h"
 
+#include "ActorInteractionImpl.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "PlayerInteractionComponent.h"
 #include "Components/ShapeComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInteractionComponent_InstanceCounter, TEXT("Actor Interaction Component Instance Counter"));
+
+UActorInteractionComponent::UActorInteractionComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+}
+
+void UActorInteractionComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UActorInteractionComponent, InteractionImpl);
+}
 
 void UActorInteractionComponent::BeginPlay()
 {
@@ -41,12 +56,23 @@ void UActorInteractionComponent::BeginPlay()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UActorInteractionComponent to Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       TEXT("Executed from \"%s\". Adding UActorInteractionComponent to Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
+	if (ensureAlwaysMsgf(IsValid(InteractionImplClass),
+	                     TEXT("Invalid InteractionImplClass!")))
+	{
+		InteractionImpl = NewObject<UActorInteractionImpl>(this, InteractionImplClass);
+	}
+
+	if (IsValid(InteractionImpl))
+	{
+		InteractionImpl->SafeBegin();
+	}
+
 	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-	if (IsValid(CollisionComponent))
+	if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
 	{
 		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
 		CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
@@ -58,6 +84,11 @@ void UActorInteractionComponent::BeginPlay()
 void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	if (IsValid(InteractionImpl))
+	{
+		InteractionImpl->SafeEnd();
+	}
 
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -74,8 +105,8 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UActorInteractionComponent to Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       TEXT("Executed from \"%s\". Removing UActorInteractionComponent to Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
 	OwningOuter.Reset();
@@ -93,16 +124,10 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 		return;
 	}
 
-	const bool bIsActorLocallyControlled = UAVVMGameplayUtils::IsLocallyControlled(OtherActor);
-	if (!bIsActorLocallyControlled)
+	UActorInteractionImpl* Impl = InteractionImpl.Get();
+	if (IsValid(Impl))
 	{
-		return;
-	}
-
-	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
-	if (IsValid(PlayerInteractionComponent))
-	{
-		PlayerInteractionComponent->AttemptRecordBeginOverlap(OwningOuter.Get()/*World Actor*/, OtherActor/*APlayerCharacter*/, bShouldPreventContingency);
+		Impl->HandleBeginOverlap(OwningOuter.Get()/*World Actor*/, OtherActor->GetInstigatorController()/*AController*/, bShouldPreventContingency);
 	}
 }
 
@@ -116,15 +141,9 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 		return;
 	}
 
-	const bool bIsActorLocallyControlled = UAVVMGameplayUtils::IsLocallyControlled(OtherActor);
-	if (!bIsActorLocallyControlled)
+	UActorInteractionImpl* Impl = InteractionImpl.Get();
+	if (IsValid(Impl))
 	{
-		return;
-	}
-
-	auto* PlayerInteractionComponent = UPlayerInteractionComponent::GetActorComponent(OtherActor);
-	if (IsValid(PlayerInteractionComponent))
-	{
-		PlayerInteractionComponent->AttemptRecordEndOverlap(OwningOuter.Get()/*World Actor*/, OtherActor /*APlayerCharacter*/);
+		Impl->HandleEndOverlap(OwningOuter.Get()/*World Actor*/, OtherActor->GetInstigatorController()/*AController*/);
 	}
 }

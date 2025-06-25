@@ -23,9 +23,13 @@
 
 #include "ActiveGameplayEffectHandle.h"
 #include "GameplayTagContainer.h"
-#include "GameFramework/Info.h"
+#include "UObject/Object.h"
 
-#include "GameStateInteractionComponent.generated.h"
+#if UE_WITH_IRIS
+#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
+#endif // UE_WITH_IRIS
+
+#include "ActorInteractionImpl.generated.h"
 
 struct FGameplayEffectSpecHandle;
 class UAbilitySystemComponent;
@@ -33,50 +37,55 @@ class UGameplayEffect;
 class UInteraction;
 
 /**
- *	Class Description :
- *
-*	UGameStateInteractionComponent store/update replicated user interactions based on client RPC requests.
+ * 
  */
-UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class INTERACTIONSAMPLE_API UGameStateInteractionComponent : public UActorComponent
+UCLASS(BlueprintType, Blueprintable)
+class INTERACTIONSAMPLE_API UActorInteractionImpl : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UGameStateInteractionComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual bool IsSupportedForNetworking() const override;
 
-	UFUNCTION(BlueprintCallable)
-	static UGameStateInteractionComponent* GetActorComponent(const UObject* WorldContextObject);
+#if UE_WITH_IRIS
+	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
+#endif // UE_WITH_IRIS
 
-	TArray<UInteraction*> GetPartialMatchingInteractions(const AActor* NewInstigator) const;
+	virtual void SafeBegin();
+	virtual void SafeEnd();
 
-	TArray<UInteraction*> GetExactMatchingInteractions(const AActor* NewInstigator,
-	                                                   const AActor* NewTarget) const;
+	void HandleBeginOverlap(const AActor* NewInstigator /*World Actor*/,
+	                        const AActor* NewTarget /*APlayerCharacter*/,
+	                        const bool bShouldPreventContingency);
 
-	UFUNCTION(BlueprintCallable)
-	void Server_AddRecord(const AActor* NewInstigator,
-	                      const AActor* NewTarget);
-
-	UFUNCTION(BlueprintCallable)
-	void Server_RemoveRecord(const AActor* NewInstigator,
-	                         const AActor* NewTarget);
-
-	UFUNCTION(BlueprintCallable)
-	const AActor* GetGameplayEffectCauser(const AActor* Instigator) const;
+	void HandleEndOverlap(const AActor* NewInstigator /*World Actor*/,
+	                      const AActor* NewTarget /*APlayerCharacter*/);
 
 protected:
+	TArray<UInteraction*> GetExactMatchingInteractions(const AActor* NewInstigator, const AActor* NewTarget) const;
+	TArray<UInteraction*> GetPartialMatchingInteractions(const AActor* NewInstigator) const;
+
+	virtual bool AttemptBeginOverlap(const AActor* NewInstigator, const bool bShouldPreventContingency);
+
+	virtual bool AttemptEndOverlap(const AActor* NewInstigator,
+	                               const AActor* NewTarget);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPC_AddRecord(const AActor* NewInstigator,
+	                         const AActor* NewTarget);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPC_RemoveRecord(const AActor* NewInstigator,
+	                            const AActor* NewTarget);
+
 	UFUNCTION()
-	void OnRep_RecordModified(const TArray<UInteraction*>& OldRecords);
+	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
 
 	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
 	void HandleOldRecord(const TArray<UInteraction*>& OldRecords);
 
-	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC,
-	                             const FGameplayEffectSpecHandle& GEHandle);
-
+	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
 	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

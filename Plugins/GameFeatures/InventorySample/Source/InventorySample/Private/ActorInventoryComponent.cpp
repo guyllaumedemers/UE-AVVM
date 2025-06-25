@@ -71,7 +71,7 @@ void UActorInventoryComponent::BeginPlay()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UActorInventoryComponent to Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 }
 
@@ -96,7 +96,7 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UActorInventoryComponent from Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
 	OwningOuter.Reset();
@@ -131,7 +131,7 @@ void UActorInventoryComponent::RequestItems(const UObject* Outer)
 void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 {
 	const AActor* Outer = OwningOuter.Get();
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetMode(Outer).GetData();
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredItems;
 	for (const UObject* Resource : Resources)
@@ -281,7 +281,7 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Item Collection modified on Actor \"%s\"! Collection %s"),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       SV.GetData());
 }

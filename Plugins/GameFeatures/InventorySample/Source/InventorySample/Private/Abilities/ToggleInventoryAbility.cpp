@@ -36,10 +36,10 @@ void UToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Act
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
 }
 
 void UToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -73,10 +73,10 @@ void UToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
 }
 
 void UToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

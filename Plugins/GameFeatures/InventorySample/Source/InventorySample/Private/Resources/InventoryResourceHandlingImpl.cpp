@@ -46,7 +46,7 @@ TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorC
 	}
 
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (IsValid(InventoryComponent) && UAVVMGameplayUtils::IsAuthoritativeActor(InventoryComponent->GetTypedOuter<AActor>()) && !OutItems.IsEmpty())
+	if (!OutItems.IsEmpty() && IsValid(InventoryComponent) && UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
 	{
 		InventoryComponent->SetupItems(OutItems);
 	}

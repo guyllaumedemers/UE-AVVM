@@ -52,7 +52,7 @@ void UGameStateTransactionHistory::BeginPlay()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UGameStateTransactionHistory to Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
 	OwningOuter = Outer;
@@ -80,7 +80,7 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 }
 
@@ -110,7 +110,7 @@ void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". OnRep_NewTransactionRecorded."),
-	       UAVVMGameplayUtils::PrintNetMode(OwningOuter.Get()).GetData());
+	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 	const TObjectPtr<const UTransaction> NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Top();
 	TransactionRecordedDelegate.Broadcast(NewTransaction);

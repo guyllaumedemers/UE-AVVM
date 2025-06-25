@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameplayUtils.h"
 
-bool UAVVMGameplayUtils::IsAuthoritativeActor(const AActor* Actor)
+bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
 {
 	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
 	{
@@ -27,64 +27,84 @@ bool UAVVMGameplayUtils::IsAuthoritativeActor(const AActor* Actor)
 	}
 
 	const ENetMode NetMode = Actor->GetNetMode();
-	if (NetMode == NM_DedicatedServer || NetMode == NM_ListenServer || NetMode == NM_Standalone)
+	if (NetMode == NM_Standalone)
 	{
-		// @gdemers if HasAuthority return true in PIE, this means the Actor exist on the Server
-		// or the authoritative instance of the game.
-		return Actor->HasAuthority();
+		return true;
+	}
+	else if ((NetMode == NM_ListenServer) || (NetMode == NM_Client))
+	{
+		const ENetRole RemoteRole = Actor->GetRemoteRole();
+		const ENetRole LocalRole = Actor->GetLocalRole();
+
+		const bool bIsRunningActorOnClientWithoutControl = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
+		if (bIsRunningActorOnClientWithoutControl)
+		{
+			return false;
+		}
+
+		const bool bIsRuningActorOnClientDuringStartup = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
+		const bool bIsRuningActorOnClientPostStartup = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
+		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
+		return bIsRuningActorOnClientDuringStartup || bIsRuningActorOnClientPostStartup || bIsRunningActorOnServer;
 	}
 
+	// @gdemers NM_DedicatedServer
 	return false;
 }
 
-bool UAVVMGameplayUtils::IsLocallyControlled(const AActor* Actor)
-{
-	if (ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
-	{
-		const auto* PC = Actor->GetOwner<APlayerController>();
-		return IsValid(PC) && PC->IsLocalPlayerController();
-	}
-
-	return false;
-}
-
-FString UAVVMGameplayUtils::BP_PrintIsLocallyControlled(const AActor* Actor)
-{
-	return FString{UAVVMGameplayUtils::PrintIsLocallyControlled(Actor)};
-}
-
-FString UAVVMGameplayUtils::BP_PrintNetMode(const AActor* Actor)
-{
-	return FString{UAVVMGameplayUtils::PrintIsLocallyControlled(Actor)};
-}
-
-FStringView UAVVMGameplayUtils::PrintIsLocallyControlled(const AActor* Actor)
-{
-	return UAVVMGameplayUtils::IsLocallyControlled(Actor) ? TEXT("True") : TEXT("False");
-}
-
-FStringView UAVVMGameplayUtils::PrintNetMode(const AActor* Actor)
+bool UAVVMGameplayUtils::HasNetworkAuthority(const AActor* Actor)
 {
 	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
 	{
-		return TEXT("Unknown");
+		return false;
+	}
+
+	return Actor->HasAuthority();
+}
+
+FString UAVVMGameplayUtils::BP_PrintNetSource(const AActor* Actor)
+{
+	return FString{UAVVMGameplayUtils::PrintNetSource(Actor)};
+}
+
+FStringView UAVVMGameplayUtils::PrintNetSource(const AActor* Actor)
+{
+	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
+	{
+		return TEXT("[Unknown]");
 	}
 
 	const ENetMode NetMode = Actor->GetNetMode();
-	const bool bIsServerOrClient = UAVVMGameplayUtils::IsAuthoritativeActor(Actor);
+	if (NetMode & NM_Standalone)
+	{
+		return TEXT("[Standalone]");
+	}
+	else if ((NetMode & NM_ListenServer) || (NetMode & NM_Client))
+	{
+		const ENetRole RemoteRole = Actor->GetRemoteRole();
+		const ENetRole LocalRole = Actor->GetLocalRole();
 
-	if (NetMode == NM_Standalone)
-	{
-		return TEXT("NM_Standalone");
+		const bool bIsServerAndClient = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
+		if (bIsServerAndClient)
+		{
+			return TEXT("[Server/Client]");
+		}
+
+		const bool bIsClientOnServer = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
+		if (bIsClientOnServer)
+		{
+			return TEXT("[Client On Server]");
+		}
+
+		const bool bDoesMatchClientDuringStartup = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
+		const bool bDoesMatchClientPostStartup = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
+		if (bDoesMatchClientDuringStartup || bDoesMatchClientPostStartup)
+		{
+			return TEXT("[Client]");
+		}
 	}
-	else if (NetMode == NM_ListenServer)
-	{
-		return bIsServerOrClient ? TEXT("NM_ListenServer") : TEXT("NM_Clients");
-	}
-	else
-	{
-		return bIsServerOrClient ? TEXT("NM_DedicatedServer") : TEXT("NM_Clients");
-	}
+
+	return TEXT("[Server]");
 }
 
 FString UAVVMGameplayUtils::PrintConnectionInfo(const UNetConnection* Connection)

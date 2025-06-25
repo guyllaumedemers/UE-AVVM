@@ -27,7 +27,7 @@
 
 #include "AVVMAbilityInputComponent.generated.h"
 
-class APlayerState;
+class APlayerController;
 class UEnhancedInputComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -62,8 +62,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnPawnChanged(APlayerState* Player,
-	                   APawn* NewPawn,
+	void OnPawnChanged(APawn* NewPawn,
 	                   APawn* OldPawn);
 
 	void SwapInputMappingContext(const ULocalPlayer* LocalPlayer,
@@ -74,5 +73,5 @@ protected:
 	void OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext);
 
 	TMap<TWeakObjectPtr<const UInputAction>, FGameplayTag> AbilityTriggerTags;
-	TWeakObjectPtr<APlayerState> OwningOuter = nullptr;
+	TWeakObjectPtr<APlayerController> OwningOuter = nullptr;
 };

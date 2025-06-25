@@ -113,10 +113,9 @@ void UAVVMResourceManagerComponent::BeginPlay()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent to Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
-	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData())
+	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent to Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName())
 
 	LLM_SCOPE_BYTAG(AVVMTag);
 
@@ -140,10 +139,9 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent to Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
-	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintIsLocallyControlled(Outer).GetData())
+	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent to Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName())
 
 	LLM_SCOPE_BYTAG(AVVMTag);
 }
@@ -181,7 +179,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Resource Acquisition for \"%s\" Failed on Actor \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 		       *Result.ItemId.ToString(),
 		       *Outer->GetName());
 
@@ -207,7 +205,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Resource Acquisition Request for \"%s\" was \"%s\"!"),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Result.ItemId.ToString(),
 	       bWasRequestExecutedOrDeferred ? TEXT("Executed") : TEXT("Deferred"));
 }
@@ -238,7 +236,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Actor \"%s\"? %s"),
-	       UAVVMGameplayUtils::PrintNetMode(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       bIsDoneAcquiringResources ? TEXT("True") : TEXT("False"));
 }
