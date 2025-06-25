@@ -47,8 +47,11 @@ bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
 		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
 		return bIsRuningActorOnClientDuringStartup || bIsRuningActorOnClientPostStartup || bIsRunningActorOnServer;
 	}
+	else if (NetMode == NM_DedicatedServer)
+	{
+		return Actor->HasAuthority();
+	}
 
-	// @gdemers NM_DedicatedServer
 	return false;
 }
 
