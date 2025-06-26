@@ -88,7 +88,6 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 {
 	Super::EndPlay(EndPlayReason);
 
-#if WITH_SERVER_CODE
 	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
 	{
 		if (IsValid(*Iterator))
@@ -97,7 +96,6 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 			Iterator.RemoveCurrentSwap();
 		}
 	}
-#endif
 
 	if (IsValid(InteractionImpl))
 	{

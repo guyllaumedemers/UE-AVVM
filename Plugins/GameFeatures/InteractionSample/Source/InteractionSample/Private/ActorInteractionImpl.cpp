@@ -233,11 +233,12 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	APlayerState* PlayerState = PC->PlayerState;
 
 #if WITH_SERVER_CODE
-	const AActor* Owner = Outer->GetOwner();
-	if (IsValid(Owner) && Owner->GetLocalRole() == ROLE_Authority)
+	if (Outer->GetLocalRole() == ROLE_Authority)
 	{
 		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, PlayerState /*APlayerState*/, const_cast<AActor*>(Instigator)/*World Actor*/);
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect,
+		                                                                                                     PlayerState /*APlayerState*/,
+		                                                                                                     const_cast<AActor*>(Instigator)/*World Actor*/);
 		AddGameplayEffectHandle(ASC, GESpecHandle);
 	}
 #endif
@@ -308,8 +309,7 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	APlayerState* PlayerState = PC->PlayerState;
 
 #if WITH_SERVER_CODE
-	const AActor* Owner = Outer->GetOwner();
-	if (IsValid(Owner) && Owner->GetLocalRole() == ROLE_Authority)
+	if (Outer->GetLocalRole() == ROLE_Authority)
 	{
 		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
 		RemoveGameplayEffectHandle(ASC);

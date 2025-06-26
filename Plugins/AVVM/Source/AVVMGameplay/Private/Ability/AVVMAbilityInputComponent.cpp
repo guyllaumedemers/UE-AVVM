@@ -29,6 +29,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "Inputs/AVVMAbilityInputAction.h"
 #include "Inputs/AVVMInputMappingProvider.h"
 
@@ -190,7 +191,13 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 
 void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext)
 {
-	UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwningOuter.Get());
+	APlayerController* PC = OwningOuter.Get();
+	if (!IsValid(PC))
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PC->PlayerState);
 	if (!IsValid(AbilitySystemComponent))
 	{
 		return;
