@@ -23,6 +23,7 @@
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "Ability/AVVMGameplayAbilityActorInfo.h"
 
 void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                               const FGameplayAbilitySpec& Spec)
@@ -61,7 +62,14 @@ bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHan
                                                    const FGameplayTagContainer* TargetTags,
                                                    FGameplayTagContainer* OptionalRelevantTags) const
 {
-	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return false;
+	}
+
+	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
+	return Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -74,41 +82,26 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
 	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
 	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
 
-	const AActor* Outer = ActorInfo->OwnerActor.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer),
+	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
+
+	const AActor* PC = ModifiedActorInfo.OwnerActor.Get();
+	if (!ensureAlwaysMsgf(IsValid(PC),
 	                      TEXT("UPlayerInteractionAbility Owning Actor invalid!")))
 	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Actor \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
 	       *GetName(),
-	       *Outer->GetName());
-
-	// const UGameStateInteractionComponent* InteractionComponent = GetLazyComponent();
-	// if (!IsValid(InteractionComponent))
-	// {
-	// 	return;
-	// }
-	//
-	// const AActor* EffectCauser = InteractionComponent->GetGameplayEffectCauser(Outer);
-	// if (!IsValid(EffectCauser))
-	// {
-	// 	return;
-	// }
-	//
-	// UE_LOG(LogGameplay,
-	//        Log,
-	//        TEXT("Executed from \"%s\". Gameplay Effect Causer \"%s\" from Ability \"%s\"."),
-	//        UAVVMGameplayUtils::PrintNetMode(EffectCauser).GetData(),
-	//        *EffectCauser->GetName(),
-	//        *GetName());
+	       *PC->GetName());
 }
 
 void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

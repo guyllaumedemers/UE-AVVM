@@ -224,7 +224,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	const AActor* Instigator = TopRecord->GetInstigator();
 	const AActor* Target = TopRecord->GetTarget();
 
-	auto* PC = Cast<AController>(Target);
+	const auto* PC = Cast<AController>(Target);
 	if (!IsValid(PC))
 	{
 		return;
@@ -233,7 +233,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	APlayerState* PlayerState = PC->PlayerState;
 
 #if WITH_SERVER_CODE
-	if (Outer->GetLocalRole() == ROLE_Authority)
+	if (PC->HasAuthority())
 	{
 		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
 		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect,
@@ -300,7 +300,7 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	const AActor* Instigator = FoundMatch->GetInstigator();
 	const AActor* Target = FoundMatch->GetTarget();
 
-	auto* PC = Cast<AController>(Target);
+	const auto* PC = Cast<AController>(Target);
 	if (!IsValid(PC))
 	{
 		return;
@@ -309,7 +309,7 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	APlayerState* PlayerState = PC->PlayerState;
 
 #if WITH_SERVER_CODE
-	if (Outer->GetLocalRole() == ROLE_Authority)
+	if (PC->HasAuthority())
 	{
 		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
 		RemoveGameplayEffectHandle(ASC);

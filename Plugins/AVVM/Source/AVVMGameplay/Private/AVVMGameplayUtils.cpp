@@ -26,6 +26,9 @@ bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
 		return false;
 	}
 
+	const ENetRole RemoteRole = Actor->GetRemoteRole();
+	const ENetRole LocalRole = Actor->GetLocalRole();
+
 	const ENetMode NetMode = Actor->GetNetMode();
 	if (NetMode == NM_Standalone)
 	{
@@ -33,9 +36,6 @@ bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
 	}
 	else if ((NetMode == NM_ListenServer) || (NetMode == NM_Client))
 	{
-		const ENetRole RemoteRole = Actor->GetRemoteRole();
-		const ENetRole LocalRole = Actor->GetLocalRole();
-
 		const bool bIsRunningActorOnClientWithoutControl = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
 		if (bIsRunningActorOnClientWithoutControl)
 		{
@@ -78,36 +78,45 @@ FStringView UAVVMGameplayUtils::PrintNetSource(const AActor* Actor)
 	}
 
 	const ENetMode NetMode = Actor->GetNetMode();
-	if (NetMode & NM_Standalone)
+	if (NetMode == NM_Standalone)
 	{
 		return TEXT("[Standalone]");
 	}
-	else if ((NetMode & NM_ListenServer) || (NetMode & NM_Client))
+	else if ((NetMode == NM_ListenServer) || (NetMode == NM_Client))
 	{
 		const ENetRole RemoteRole = Actor->GetRemoteRole();
 		const ENetRole LocalRole = Actor->GetLocalRole();
 
-		const bool bIsServerAndClient = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
-		if (bIsServerAndClient)
+		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
+		if (bIsRunningActorOnServer)
 		{
-			return TEXT("[Server/Client]");
+			return TEXT("[Server|Authority]");
 		}
 
-		const bool bIsClientOnServer = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
-		if (bIsClientOnServer)
+		const bool bIsRunningActorOnClientWithoutControl = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
+		if (bIsRunningActorOnClientWithoutControl)
 		{
-			return TEXT("[Client On Server]");
+			return TEXT("[ClientOnServer|NoAuthority]");
 		}
 
-		const bool bDoesMatchClientDuringStartup = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
-		const bool bDoesMatchClientPostStartup = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
-		if (bDoesMatchClientDuringStartup || bDoesMatchClientPostStartup)
+		const bool bIsRunningActorClientOnServer = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
+		if (bIsRunningActorClientOnServer)
 		{
-			return TEXT("[Client]");
+			return TEXT("[ClientOnServer|Authority]");
+		}
+
+		const bool bIsRunningActorOnClient = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
+		if (bIsRunningActorOnClient)
+		{
+			return TEXT("[Client|Authority]");
 		}
 	}
+	else if (NetMode == NM_DedicatedServer)
+	{
+		return TEXT("[DedicatedServer]");
+	}
 
-	return TEXT("[Server]");
+	return TEXT("[Unknown]");
 }
 
 FString UAVVMGameplayUtils::PrintConnectionInfo(const UNetConnection* Connection)
