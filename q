@@ -1,0 +1,2621 @@
+[33mcommit f340bce7a9194a470ab69cb6f3804946a83bf6f6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mInteractionSampleDevTest[m[33m)[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 25 20:40:44 2025 -0400
+
+    Adding support for SubObjectList Replicated. Was missing AddReplicated/RemovedReplicatedSubobjectList. Also fixed the Utils function for checking actor authority which was tested with in inproper scenario which provided errounouis output. Now correctly check the state of an Actor on both client server and return the right Role. Still have a replication issue where the OwningOuter of the Replicated SubobjectList isnt initialized. TBD
+
+[33mcommit ca69ede4812618966760871c1f3a0551bec1f006[m[33m ([m[1;31morigin/InteractionSampleDevTest[m[33m)[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 25 19:19:45 2025 -0400
+
+    fixing util api impl for checking actor authority
+
+[33mcommit f61678c7a582345518019caf866cfce6c2405830[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 24 20:49:48 2025 -0400
+
+    Refactored whole InteractionSample system. Merged 3 components into one and defiend an Impl object from which we run impl details. Updates Gameplay Utils function to proeprly retrieve information using NetMode and
+    and NetRole. Doing so allow to define behaviour and initialize data according to the Authority state (which is pretty spaghetti). Updated the affected scripts. Have one remaining issue with Prompt not working correctly
+    which I will tackle next!
+
+[33mcommit d2ea8d9414ce0dc6f22eb0b89a4b5639f1a65afb[m[33m ([m[1;32mmaster[m[33m)[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 24 11:43:21 2025 -0400
+
+    adding latest changes before branching
+
+[33mcommit 3901548d2395bf28fe911851f304afe6b3ddc695[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 23:15:56 2025 -0400
+
+    fixing missing pieces for invoking inputs on both client and client/server aka listen server so I can add the tag for executing the Ability for interaction
+
+[33mcommit fb3b611a8002f9fb74cd9de38ff0e2bcf57231f1[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 22:41:09 2025 -0400
+
+    updating instigator/target signature args so the world actor becomes instigator and target become the player character. reverted some changes to BP and macros. Added support for Input triggering/with bug fixes
+
+[33mcommit 07c472835656163d1779c69baa78dab3107991de[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 18:07:21 2025 -0400
+
+    Èadding new macro to remove symbols with AVVM Notification subsystem. Also moved around some impl details to execute GFE addition removal on both server and client even if only Server can execute this behaviour correctly
+
+[33mcommit 4d67e348505bf37aa49db62b63fdc9bd9b3a2c5b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 15:54:56 2025 -0400
+
+    removing DOREP of deprecated properties
+
+[33mcommit bdde6fc59881183c22faf311907463996dacd789[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 15:50:14 2025 -0400
+
+    removing direct tag add/remove from interaction system and did base impl to execute the same process via GameplayEffect instead which allow to retrieve an EffectCauser during the GameplayAbility execution process
+
+[33mcommit dc23e278cee7471c6bf343edf793a9870efa5c57[m
+Merge: c70d0c7 a3e6324
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 15:48:28 2025 -0400
+
+    Merge branch 'master' of https://github.com/guyllaumedemers/UE-AVVM
+
+[33mcommit c70d0c76ef3607f3d26c878ae93b176caee498cc[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 23 15:48:14 2025 -0400
+
+    ÈÈremoving properties in the three main actor classes and update class description as i solely rely on Component being pushed from GFP. AInfo property are no longer relevant"
+
+[33mcommit a3e63249657afba79aad83c961383351ab74ab01[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Mon Jun 23 12:00:18 2025 -0400
+
+    Update README.md
+
+[33mcommit d28b4dd627761ad2a7699ee9e5111706ee10db6a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Jun 22 12:07:42 2025 -0400
+
+    adding TODO for status update of an interaction so that first player entering a collider doesnt prevent secondary from acting on the object if the interaction never locked
+
+[33mcommit 11d360d41d54849bf894e3473cf8b49e9c6a7fe4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Jun 22 11:41:50 2025 -0400
+
+    fixing listen server situation where server wasnt doing comparison on the proper data set
+
+[33mcommit 8b68010ccda537fe34c17d1093b7ecf6292f02f5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Jun 22 11:24:25 2025 -0400
+
+    fixing interaction prompt feedback in multi-user session. further changes incoming
+
+[33mcommit 8b144dee6a2b1daf3a8bc4f5f85620321ea0f976[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 12:51:51 2025 -0400
+
+    testing in multiplayer session shop interaction. added TODO to track process as there is a racing condition issue to be fixed
+
+[33mcommit fdb31ee3be8f18aa74ee49ecf24e7adff66ddcd4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:52:35 2025 -0400
+
+    removing ensure check on primary game layout
+
+[33mcommit 1889cc932eb815034de443eaa30c9ef0c6aad9c2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:49:03 2025 -0400
+
+    adding missing plugin dependencies in uplugin
+
+[33mcommit e38ff557728246e2f17a8c6e5b5b7a58365852c1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:42:28 2025 -0400
+
+    removing BP_interactable Actor. no longer needed, can simply use the BP_ShopActor for interaction testing
+
+[33mcommit 7a09818395f323b66e0c0ed5ff950be10f96ac6f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:36:32 2025 -0400
+
+    Èstting up shop actor to display available interaction when entering collision field
+
+[33mcommit 7d2d0827d93d3d202e19fd76fd87474b0c18daa5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:28:10 2025 -0400
+
+    assing missing include to execute casting to interface type
+
+[33mcommit a78cae37916063c78dc22cd3a3c49c1ea3468fb8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:26:53 2025 -0400
+
+    adding missing override impl for binding VM in MultiContextPresenter
+
+[33mcommit 6af26811378324bd7179e6fd522bf4c90d93037b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:22:55 2025 -0400
+
+    adding missing call to push onto primary game layout
+
+[33mcommit 5e27effe5ab582eb59fe39234b3cf5dbf30c694d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:17:05 2025 -0400
+
+    adding tags for retrieving events specific to player inventory open/close request
+
+[33mcommit 251bd30641c869fc3c2d7ccee07c913cf2361e96[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 11:04:30 2025 -0400
+
+    updating BP naming convention and adding proper setup for GFP pushing Presenters onto the PlayerState for inventory support
+    
+    :q
+    
+    :q
+    
+    :q
+
+[33mcommit 8c7aaebe70aad4ad630d528a8772fa8864025dbf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 10:12:41 2025 -0400
+
+    adding placeholder modules for future development ideas
+
+[33mcommit bd5a887508230a19386b3857b901c77d2c222cb9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 21 10:00:40 2025 -0400
+
+    adding missing widget component on shop actor under /Game and moved Shop specific BP to /Plugins/InventorySample so I can push them on Client opnly via GFP
+
+[33mcommit 8d0e3685e0dd7dfab3cad373934439c6ada74622[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 21:40:41 2025 -0400
+
+    Èsetting up shop actor and presenter. tested calling setupworldwidget. also may have fixed the AVVMDebugger module Shutdown issue. TBD.
+
+[33mcommit 5092f86a4953fa69424d61e794e08cabb7fbeb44[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 16:56:06 2025 -0400
+
+    adding tags to the AVVMGameplay and AVVM module so i can push widget at extension point
+
+[33mcommit 5ed341c823cf63e32fe4c48f396677add8df8316[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 15:23:16 2025 -0400
+
+    removing property duplication betweeen base class presenter and derived world presenter class i just added
+
+[33mcommit 934cabf2ce7c7d246e2e873cbc28c3060025d0e0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 15:13:19 2025 -0400
+
+    updating dependencies to support WorldActorPresenter under AVVMGameplay
+
+[33mcommit d59867da074b9b2190565976e1b3f11208932c77[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 14:42:50 2025 -0400
+
+    moving interfaces for primary and ui extension from AVVMSample into AVVM. Added WorldActorPresenter class under AVVM so interaction sample can use it to preview being able to interact with world object
+
+[33mcommit 4643af22fac4ba114f7e5ce3ff3ab90cb913c22e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 13:32:22 2025 -0400
+
+    updating PResenter class description and fixing BP compiler error with BP nodes that needed refreshing
+
+[33mcommit 922ed7c901d2b4e0fb2b530e42c90861c4b9b24f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 13:11:38 2025 -0400
+
+    ÈÈadding clarification in class description for AVVMPresenters and AVVMComponent
+
+[33mcommit a9c00aaa986be70e50a6997ed558ffbfa97a77bf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 12:55:27 2025 -0400
+
+    fixing AVVMNotification system static api. Updated BlueprintCallable signature to reference Self and updated ContextArgs custom Struct to reduce the setup requirements overhead and have the BP setup DefaultSelf
+
+[33mcommit 6eca0853608a5f77e5a5e49820151ed18ec46559[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 12:03:37 2025 -0400
+
+    fixing check for should create subsystem in AVVMSubsystem
+
+[33mcommit db8c57b0c923608d024818a39f7be2ac4e976776[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 11:55:04 2025 -0400
+
+    minor change to macro description
+
+[33mcommit 0cd6b4797c991bf1b69bd95395be89c451888310[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 11:53:56 2025 -0400
+
+    adding macro definition to strip out symbols and prevent unecessary broadcast with the AVVM notification system when running dedicated server
+
+[33mcommit 6d76e1282eb036a21e8d8a1a2c8a9eed6296c0d5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 11:40:45 2025 -0400
+
+    fixing AVVM NOtification Subsystem ShouldCreate call to prevent instance on Dedicated Server
+
+[33mcommit 7365277d06dc02f4dc3dfc2cab2ba0e6f3443a62[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 11:28:26 2025 -0400
+
+    adding missing dependency and fixing linker issue
+
+[33mcommit 84d8c082cd4c43237ed9f3f6733d2b2dbf7a890a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 11:25:28 2025 -0400
+
+    updating AVVM Notification system to allow targeting actor specific registered callback so we dont suffer the overhead of broadcasting large payload to all observers
+
+[33mcommit 1ebfb9b8a2050ce1b48093fdc798883aa4c621c0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 10:04:05 2025 -0400
+
+    adding replication of property with DOREP
+
+[33mcommit 52cd8e7e5f68f9b89e003638fb41187e6a340b02[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 20 10:03:52 2025 -0400
+
+    adding tag management on Inventory Component so we can filter UItemObject loading process. user should set the tag at runtime based on game progression
+
+[33mcommit a0238d32eda80d3ac750c09d2bcad4ae7c228d44[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 20:58:50 2025 -0400
+
+    removing DoesMeetRequirements functions in favor of CanAccessItem which is handled on the DA. Params retrieval is still undefined. TBD. Also updated the ability granting since both are very similar
+
+[33mcommit 44b3bbccfb546e920b22bb00f981e70b605f4c2e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 20:40:43 2025 -0400
+
+    adding missing TODO for inventory loading and adding some changes to Data Assets and Data Table
+
+[33mcommit 80ecf2665c2efc4d1e57d672345f758512707c7c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 20:38:41 2025 -0400
+
+    adding missing impl in CanGrantAbility DA so we can block loading ability for granting
+
+[33mcommit 1d470e997fef8d57e7c79f4bd60b11256d42d275[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 20:31:34 2025 -0400
+
+    fixing wrong validity check on StreamableHandle in INventory Component. Still have to fix the issue with the access to the CDO on the ClassPtr that isnt loaded
+
+[33mcommit 2da1b5229247bd7dd4a411efe357c4b1ac093e1f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 19:47:11 2025 -0400
+
+    fixed bad validity check on TSoftClassPtr for an item being requested for load
+
+[33mcommit e92ebe9690954f581d13143a5a736628e60cb1de[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 19:45:51 2025 -0400
+
+    fixing BP impl to support loading inventory content on BP_Shop. Removed ResourceManagerComponent addition through GFP and child the component on the actor directly to prevent request from external system creating a racing condition
+
+[33mcommit b62be7ccfec0a713974e4e756bcf952484b3263f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 19:02:07 2025 -0400
+
+    fixing tag filtering in CheatExtension so ImGui combo only display AVVM relevant Tag Channel for testing the notification system and not the inventory or ability ones. GameplayTag api isnt so good btw for filtering
+
+[33mcommit c24ffc055005adedefd97f03d181eec4b876703a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 17:49:12 2025 -0400
+
+    adding incomplete description for UItemObject
+
+[33mcommit 48c0a6eba53732c0ca34b0b910e487f3f3b5cf4f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 17:28:00 2025 -0400
+
+    ÈÈadding explicit description on the Resource manager system to orient other progs on whats going on with this system
+
+[33mcommit 182c35dbb716f023721d00bf1d52c6a4a445aa29[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 17:08:26 2025 -0400
+
+    ÈÈadding last plugin description missing for AVVMGameplay. General explanation for all facilities should have been covered now!
+
+[33mcommit ddbbac19820ca1295421f478758c2d4fc16192d0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 16:50:29 2025 -0400
+
+    updating plugin description and providing further details to the use cases for this module and its intent
+
+[33mcommit 0e8df22605932d95229728e80d9d3bc14e71c981[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 16:35:01 2025 -0400
+
+    updating LogCategory in AVVMSampleRuntime from LogUI to LogOnline since this module impl the AVVMOnline interfaces
+
+[33mcommit 9aaa6b7a23a160245c837750ae8c2e53dba604d7[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 19 16:27:18 2025 -0400
+
+    updating plugin module description AVVMOnline with api explanation
+
+[33mcommit 19ce112d32e593ceced42b52dcd4bf2ec33a1f28[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 23:13:48 2025 -0400
+
+    renaming Data Asset classes with standardized names. Removing corrupted BP with missing ItemStruct. Reconnected Binaries for Abilities and Items to proper CORE Redirects
+
+[33mcommit ed206f58864c47e2edc96e152d5fe2819078f713[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 19:34:39 2025 -0400
+
+    updating data registry ItemStruct and Id with prefix R_. Fixed affected assets and reserialized binaries
+
+[33mcommit 09adafc79e85938a902594cb443fb5414b695884[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 19:20:43 2025 -0400
+
+    fixing ItemDefinitionDataAsset so i reference a TSoftClassPtr to the BP Class and not a TSoftObjectPtr to nothing
+
+[33mcommit 97f29c1d211fdae4b290d98ec20c3f077296f091[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 18:42:32 2025 -0400
+
+    adding property to toggle off loading inventory resources OnBeginPlay if desired
+
+[33mcommit c5a61d06978fbb87bd591f96d505a1f5a0b62ddb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 18:40:32 2025 -0400
+
+    appending config/tags for items content
+
+[33mcommit a50c7df64539afa217234a86e3dc4ff39d003aef[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 17:53:56 2025 -0400
+
+    fixing OnProcessAdditionalResources return value for proper logging support
+
+[33mcommit 2ab18d1556e9c7d54c41131f584b068c6666a75e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 16:11:09 2025 -0400
+
+    fixing compilation issue due to operator< not being overloaded in the template instantiation for TArray.Top
+
+[33mcommit 6954adfc403b8d2a7adc151a456429f2df16584c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 15:57:02 2025 -0400
+
+    pushing a bunch of changes to the resource component and added impl for how the UItemObject instance their Actor Class. No testing atm. TBD
+
+[33mcommit b39d60f28f6fd665fb0c72bb904a0ab17d5417ce[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 12:32:21 2025 -0400
+
+    ÈÈpolishing properties in UItemObject and adding meta data
+
+[33mcommit 66a23c0906234d2916db258896d62ed5cb9b588b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 12:19:47 2025 -0400
+
+    cleaning up UItemObject and moving away from Enum to protrait item states. using Tags instead. Added config file for available states.
+
+[33mcommit a7b221837cb453255b6cfb21a4b60c02a195715b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 11:15:48 2025 -0400
+
+    removing project usage of TSubClassOf and prevent implicit loading of Class content when referenced on asset that is explicitly loaded. Using FSoftClassPtr instead
+
+[33mcommit 0658718ee6cec7245c838ee7a12b3a2f8f4abb25[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 11:00:39 2025 -0400
+
+    fixing api signature for progression items. TSubClassOf is a very odd template class. returning by const ref prevent compilation due to not being able to find a valid operator= overrides
+
+[33mcommit 33b58e35abdef44a64542bc559af2f127565eda9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Jun 18 10:32:53 2025 -0400
+
+    defining asset type for item progression information and updating UItemObject properties
+
+[33mcommit 77dfa45d0763042283dbfcbcfd03848cf13bda65[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 23:13:11 2025 -0400
+
+    fixing inventory component gfp add and post-retrieval process of items (callback is invoked in BP through the blueprint function api)
+
+[33mcommit 7873c231da8d795c96a865172fde326719aee115[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 22:04:27 2025 -0400
+
+    one step closer to setting up the PlayerState BP correctly and implement the IInventory Interface, however call to parent function dont work atm due to the impl of the interface being done BP side only
+
+[33mcommit cea192f2fa02e9bbe3c02866d63f75b583efb82a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 20:38:37 2025 -0400
+
+    fixing typos and descriptions
+
+[33mcommit 57a1f21d98291b5c22c9396d38e575d9e3d78272[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 19:45:39 2025 -0400
+
+    Èadding plugin description for inventory sample
+
+[33mcommit 027ad30ff577e4b2a4a6febd7d0a7cb39a1dca3d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 19:30:17 2025 -0400
+
+    updating plugin description in AVVM
+
+[33mcommit bdec08d9fc80fd0998d8b72f1830bc9568cdec75[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 19:15:04 2025 -0400
+
+    ÈÈÈÈupdated plugin descriptions and classes description in AVVMGameplaySample
+
+[33mcommit 888b6bf107cc5139957a6dce3d8f7172e717f91d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 19:02:18 2025 -0400
+
+    updating plugin description in AVVMSampleRuntime
+
+[33mcommit e69fa714faff608b9b91004e29d0ede1db10a79d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 17:46:54 2025 -0400
+
+    updating plugin descriptions/classes descriptions and TODO in Handshake Sample. Atm theres more boiler plate code than Feature complete plugins which isnt good!
+
+[33mcommit 42defc41de3a0d2d6b44b46f24188c4323b2119a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 17:21:45 2025 -0400
+
+    fixing plugin descriptions and classes descriptions in interaction sample. updated TODO
+
+[33mcommit c1baf0960ab1a1073a2619d53077225c3e9b3335[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 17:21:22 2025 -0400
+
+    ÈÈÈÈfixing class descriptions in transaction system
+
+[33mcommit b5b559e9c0d2ac393c397576ff0c0454e1df762b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Jun 17 16:46:06 2025 -0400
+
+    updating plugin description. refactoring Actor Transaction History into a Component so GPF can push onto GameState. Adding missing BP to run gameplay testing on feature.
+
+[33mcommit f13ab1f2c75cf2d4cd3327638f2fefdcecc26707[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 23:41:55 2025 -0400
+
+    adding transaction cheat (wip) and fixing other cheats and meta properties of cheats
+
+[33mcommit 9093c5058c97ba81e77fb1fea216c61f009ab947[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 18:54:10 2025 -0400
+
+    adding check to instigator locally controlled for only granting tags to the local player in OnRep function
+
+[33mcommit a8322c4ebfb0c5dfaaf9d3516509fa99f129bfc5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 18:03:01 2025 -0400
+
+    setup ability asset to only executed from client or server with local authority
+
+[33mcommit 65f8b069740988866ebbfacd297b1945b4aef383[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 17:30:37 2025 -0400
+
+    fixing interaction removal
+
+[33mcommit fb517ef72501353a9787865f5d8a72ed2f1cf674[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 16:48:04 2025 -0400
+
+    adding missing GFP data asset and adding missing statement in OnEndOverlap
+
+[33mcommit 14dad69c69640a53ab059ced7f37bd4fc92c2ee5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 16:42:33 2025 -0400
+
+    adding removal of begin interaction overlap after exiting collision sphere and fixed issue with debugger being removed post-slate module unloading
+
+[33mcommit 820b838f03c1d179ee86f6e53b8072baf0b61deb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 16:09:26 2025 -0400
+
+    removing garbage properties and fixing names
+
+[33mcommit 5b5e08b29ad57020127ed44ee3341f550e175364[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 16:08:09 2025 -0400
+
+    renaming function for clarity
+
+[33mcommit 98fcb32d10f08a529daf8b5450fdd51a2f7ac9e5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 16:07:10 2025 -0400
+
+    adding missing comparison in OnEndOverlap to add End Interaction for the right target actor
+
+[33mcommit 52949565418d6225de2de51c2f02df5761cc93a4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 16:01:55 2025 -0400
+
+    updating interaction sample behaviour when granting tags to enable local client to invoke ASC interaction Ability AFTER server has confirmed their is no contengency with world object interaction
+
+[33mcommit 0c50a96ec3cfdeaeb0128df31e3fa9771b0aa7ef[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 15:38:39 2025 -0400
+
+    setting up handshake module and removing previous impl from inventory as this is a more generic system behaviour that can be reused
+
+[33mcommit d2bf23f54b4a18fc916c8909ad7e115bf8f3f65f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 15:19:32 2025 -0400
+
+    Èupdating player interaction ability to make aware that between player interaction isnt yet supported
+
+[33mcommit ba0e9504f6bad487d669709c845b75f2cda04074[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 14:45:31 2025 -0400
+
+    defining the abilities to be invoked to start a  handshake
+
+[33mcommit 80195bd7758947893411e7ce1c37d16442053e9d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 14:16:51 2025 -0400
+
+    Èupdating interaction tag to be granted in interaction system for a tag container
+
+[33mcommit 69812d0da13fb18529025e9b0392b1cf6db42e1e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 13:01:48 2025 -0400
+
+    setting up placeholder scripts for functional testing. to be impl later
+
+[33mcommit 358020a4141fb4796ac2e3f3ef5dc95311409ab0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 12:40:47 2025 -0400
+
+    adding missing forward declaration
+
+[33mcommit ff74f58be38d272efa862a3dfce42b1d5285b9eb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 12:38:31 2025 -0400
+
+    adding proper caching of GameStateInteraction Component to avoid multiple request
+
+[33mcommit 4d4b7ccc63bee62a8442e81912ecea372f1b9bef[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 11:50:21 2025 -0400
+
+    adding BP function lib to request Handshake component on gamestate
+
+[33mcommit ce7200f928ee360b158c2757a53ea0eb9f6e62d6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 11:38:44 2025 -0400
+
+    adding replication to ItemObject and fixing minor typo issues in previous system impl the same behaviour where UObject are replicated as SubObjectList to COmponent
+
+[33mcommit d0b5805ec8df9d17e0f05f4250deedff3f2f0d5b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 11:03:25 2025 -0400
+
+    ÈÈadding proper inheritance in main module for the three top level classes in unreal so UISample extend GameMode/GameState/PlayerState and added interface description in InventoryProvider to details how the interface override is expected to be managed
+
+[33mcommit b1a7402dc3c688730b0a94a4d6b33421b8f128d8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 10:21:27 2025 -0400
+
+    adding more comments in module sample file to explain the purpose of the system
+
+[33mcommit 8781e93fd374c344b94ede7fca76fb41c13a3903[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 10:14:20 2025 -0400
+
+    fixing cheat button displayed named for player centric cheats in the Runtime sample plugin
+
+[33mcommit bd3ecde044c9799c98cbba5eed60bdc544eef5be[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 10:08:20 2025 -0400
+
+    cleaning up workspace with latest changes to inventory system
+
+[33mcommit be7fcdfa164a12c1ef3291a00b12349b36a47c8c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Jun 16 10:07:53 2025 -0400
+
+    renaming BankSample module to Transaction module for clarity. Removing InventoryWheel placeholder module and recenter development focus on gameplay/ui features for future
+
+[33mcommit 7ec493e62fb82832b54a28c156568cb3eeaee2d6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 23:23:32 2025 -0400
+
+    added comments to clarify ItemData definition
+
+[33mcommit 1e4fa32abed3e4d6d250645552deccba6022cc4f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 23:19:42 2025 -0400
+
+    adding signature for handshake function
+
+[33mcommit 1b84fa003adfb45b896445ad555cbc61203335e8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 22:56:28 2025 -0400
+
+    adding initialization flow for item objects on the component handling the process execution
+
+[33mcommit 18e2e80c273fbe22d7a5707c983284a8f7fd52c3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 14:27:35 2025 -0400
+
+    adding more classes to solidify system architecture. added placeholder handshake component to handle trade/buy/sell action between an exchange with two components
+
+[33mcommit 879f4a905519ea655e26f1d8c7fd7fd1bbd70492[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 13:41:30 2025 -0400
+
+    adding Toggle inventory ability boiler plate code
+
+[33mcommit aa0339526456b21326d24269cd67cdc98e1c7ac3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 13:24:34 2025 -0400
+
+    adding boiler plate code module for crafting system which will be using the inventory system
+
+[33mcommit 1b66ae22264763ff2dbb8c59ed90dc761a061902[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 13:13:00 2025 -0400
+
+    renaming interface from IHasItemCollection to IInventoryProvider
+
+[33mcommit 86dd0a955a650b80e1670699211be2cffbeb3311[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 12:59:27 2025 -0400
+
+    adding TODO comment on the inventory sample. (Im still investigating gauntlet btw to run test on the sample plugins but understanding the execution flow of the framework is time consuming...)
+
+[33mcommit 6826ebdce1a440deab0466cd7f5b372b60a3c511[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 12:50:30 2025 -0400
+
+    adding minor change to actor definition data as the visual elements should now be loaded from the inventory system
+
+[33mcommit 91a3b6114d270f9d11ffaaec69c13fd9848badb3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 12:49:42 2025 -0400
+
+    setting up inventory system basic data requirements. resources loading should work in parallel with the existing resource component system in AVVMGameplay
+
+[33mcommit efe271727e803b5e26fc2cd424a6e9e702e6c765[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 12:23:38 2025 -0400
+
+    adding missing DT for Actor Definition Data setup and fixing Enum property usage of TEnumAsByte
+
+[33mcommit d209f20d0f298fd1e57af6105b0737c530045acb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 10:21:33 2025 -0400
+
+    Setting up data information about an Item representation
+
+[33mcommit 87dc251e2cd558c4f56f889447020b0467b01949[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Jun 14 09:40:34 2025 -0400
+
+    Èadding gfa plugin for inventory sample. first commit while I continue investigating gauntlet and how to run functional testing on server-client model
+
+[33mcommit e372db715336c60c8b6b2aa463ed1d5cd93fec0f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 12:43:21 2025 -0400
+
+    removing usage of call to function and instead use pushd & goto chain call. this way i can correctly manage my current possition from within the bat file
+
+[33mcommit 9be984c44a5c8e88c92f89fda86975b5b580da3e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 12:34:50 2025 -0400
+
+    removing some arguments to the end result command to run so I can run test running UnrealEditor from a workable batch file
+
+[33mcommit 9162ba20d64e3531521b8b881ea6a4e3a9442160[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 12:22:17 2025 -0400
+
+    adding substitution for single backslash to double backslash and usage of hard coded path
+
+[33mcommit 80df3a8904f183995db5522c59030d9b42d829b8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 11:22:09 2025 -0400
+
+    adding core setup to invoke the executable from hardcoded shortcut.lnk path. added TODO to rework the hardcoded portion. Executable invocation generate descriptor error message but does launch the exe. To be investigated
+
+[33mcommit fb0586d0a2e6855c0b86de500089de16e0dc0de4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 08:28:59 2025 -0400
+
+    adding missing popd pop directory statement
+
+[33mcommit 4c64f279b57fe70affc5e7c6a69c177237d709c1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 08:27:56 2025 -0400
+
+    minor cleanup of debug logs and directory positionning handling using %~dp0 instead of %ProjectName% as output
+
+[33mcommit ffc5b62f82aaa1a04d4920e59e663e0f5aee020c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri Jun 6 08:11:05 2025 -0400
+
+    fixing issue with whitespace in RunCook batfile so the project name doesnt have a trailing whitespace
+
+[33mcommit 9a99fddff3838cc264fe514d40de9c7a5209a88e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 5 22:09:46 2025 -0400
+
+    adding changes to bat file and testing shortcut .lnk access which isnt as simple as expected. still searching around for proper solution
+
+[33mcommit 8013492fa5c77cf74b09d80d2ba678c1c807ddb4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 5 20:54:13 2025 -0400
+
+    adding lookup for UnrealEngine dir under Drive/Documents (without delayed expansion in forloop)
+
+[33mcommit b93e98d454e08c5a5eb77dac60f3ffc61d8b90d5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 5 20:34:56 2025 -0400
+
+    adding drive listing so I can manually look for %Drive%/Documents/UnrealEngine
+
+[33mcommit 5beab8d6fde9abeb2a76e9e1c9a4ced97154e29f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 5 18:38:11 2025 -0400
+
+    fixing UnrealEditor invocation call from bat file. still have to retrieve the path to the executable in Engine. This is just an excercise heading toward learning BuildGraph and eventually Gauntlet framework to run Automation Testing from BuildGraph and setup Task/Nodes, etc... in xml, not in batch file.
+
+[33mcommit 6ede9e464c6516421c2fcfa4f89c1745329e6670[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu Jun 5 18:20:12 2025 -0400
+
+    Pushing work on bat file to trigger cook build. WIP
+
+[33mcommit 0d71a41cba1fcc13f2795101e7dca56ad2a90716[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 30 12:11:39 2025 -0400
+
+    adding empty Test.cpp for Functional test. will built that today if im able to achieve it!
+
+[33mcommit 3aabbf140c2e1fccdc4d1dd6db3d8aa07f2b5809[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 30 12:09:40 2025 -0400
+
+    renaming ability to context specific use case
+
+[33mcommit bb1e87e89b835cb76082293600b8d30920038e65[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 30 10:57:16 2025 -0400
+
+    adding missing properties in GetLifeTime so interaction can replicate correctly their instigator and calling owner
+
+[33mcommit 461129d0369316adb0feeb900e31c13db4b47841[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 30 10:43:17 2025 -0400
+
+    reworking system so we handle interaction via 3 components. 1) Actor specific which handle collision check and use instigator to trigger RPC calls. 2) Player controller specific component which handle rpc owning connection. 3) game state component for caching the replicated data in a central place as we only care about a unique set of interactions, not one set per player
+
+[33mcommit 7e1e9e51aa730a5787b1fea3cbc19ffd36eeb1b4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 30 09:34:55 2025 -0400
+
+    adding missing OnRep call in Server RPC so we can properly invoked this behaviour and see proper output logs. moving into creating an AInfo to actually handle the replicated data in a central point
+
+[33mcommit a21d96b460a5ba8027eccaf12d13883f133241e4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 30 09:22:23 2025 -0400
+
+    fixing owning connection setup requirements to properly run RPC on server and fixed server overlaps event being trigerred when non-locally controlled actor would move in range
+
+[33mcommit cfeee17c9ea444d89ed4aba4fb47ef82b991c0a3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 29 21:15:31 2025 -0400
+
+    refactoring logging in project to better track initialization flow of abilities and have cleaner log with explicit information
+
+[33mcommit 5cb5993c9991a301991c131ec45196a6c955e306[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 29 18:00:13 2025 -0400
+
+    Èmaking change/code clean up to be more explicit. removing usage of auto keyword when type isnt obvious
+
+[33mcommit 58750f1b2b0c78f32fe2c83343cea2e479a4340c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 27 20:52:58 2025 -0400
+
+    adding actor declared in GameState/PlayerState in GetRep and remove console warnings. added comments about it cause Unreal mentioned Object Reference being automatically replicated but yet again... log warning
+
+[33mcommit 3167e572bf46999dca6c2068cadb08e302d54f2d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 27 20:30:45 2025 -0400
+
+    adding reference to CommonGameViewport so CommonUI input routing system no longer triggers warning and use correctly its Input Routing system
+
+[33mcommit b5711f874c1b3b5ac34630168076fbfd74272a01[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 27 20:20:55 2025 -0400
+
+    starting testing interaction and replication
+
+[33mcommit b0f6afeaef89669fe08b6429d04f1dabc8de8ad5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 27 20:01:56 2025 -0400
+
+    moving back to /game the interactable actor BP. updated its base class to Modular Actor so we can push component via GFP. updated interaction component cast to PrimitiveComponent which most component derive from to ShapeComponent. This way I can retrieve collision handling component type and run the correct behaviour when entering the radius
+
+[33mcommit e05405edb231a167cc76f72f6781cc39c69651eb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 25 19:57:43 2025 -0400
+
+    moving interactable actor under the GFP. tested ability granting which seems to execute full flow. need to create a socket system to dynamically add GFP actor into the level which isnt currently possible with my interactable actor (as it exist only in the GFP plugin and cannot be referenced in the level)
+
+[33mcommit cf6854869656ee679e9a7b27d9c14e252d58127a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 25 19:01:40 2025 -0400
+
+    simplifying ability granting
+
+[33mcommit 0aa7bff107125d4c83925f4a94bb16ebf9f4f74c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 25 17:22:17 2025 -0400
+
+    setting up abilities in resource provider to be authoritative ONLY
+
+[33mcommit ca75247352fcf926bd592d7d1c0e61f148dfd44b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 25 16:17:16 2025 -0400
+
+    fixing comments/description of newly added classes for input support before moving to granting abilities logic
+
+[33mcommit 07ca42c0f85ce181cd15a6fbcc83e96477638ebd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 25 16:11:06 2025 -0400
+
+    removing input action from ability data asset. deriving new input action to expose tag in custom class. built system to register and bind IMC and input actions (derived type). input bindings will trigger and add/remove tags so to trigger abilities via FAbilityTriggerData
+
+[33mcommit cea943c8055acfb6b8e6c47bf68982bf83270eed[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 17:53:13 2025 -0400
+
+    adding work for ability loading. i do have to brainstorm a bit to make a decision about how inputs should be loaded/handled from the abilit asset
+
+[33mcommit bb9dabe43409a7f39c04c631fca7153dd983956a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 17:07:38 2025 -0400
+
+    started testing the loading process and updated the script interface is valid check to support both native impl and blueprint only impl. sadly the asc interface prevents blueprint only impl
+
+[33mcommit 03caa155203b8ff48e368cfc47ef6af3934393de[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 16:07:02 2025 -0400
+
+    setting up check for resource loading ability
+
+[33mcommit 01f20c9246bcaa110304cc118b23f270efa6856e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 15:16:32 2025 -0400
+
+    updating ability data scheme and removing interaction ability data asset class. no longer required
+
+[33mcommit 4c8efffc21525e8c49c8db7ac26ce24d27bca2f7[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 14:47:41 2025 -0400
+
+    setting up some testing data
+
+[33mcommit 48f78d2e55493c3ec7cfd1e6b3ce007d4e91aaf5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 14:29:36 2025 -0400
+
+    reworking ability data scheme to allow groups of groups and have the resource manager properly load abilities
+
+[33mcommit 3cb173c12f6286dab78b82ef2217d0f7c44edf58[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 12:56:06 2025 -0400
+
+    adding missing dependencies and declspec(dllexport/import) for LLM_DEFINE_TAG in AVVM so I can trace bookmark using the same tag. not sure if thats correct but... renamed trace counter to more explicit names
+
+[33mcommit aaeee52abc9647b8be4136b960468b7d0d9bcc1d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 12:24:13 2025 -0400
+
+    adding custom asc empty class and dependencies required to compile/link
+
+[33mcommit 94cabf9810a70341aad75ad575368505f32b3163[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 12:06:12 2025 -0400
+
+    adding api to allow broadcasting dynamic delegate in BP for the resource provider actor
+
+[33mcommit 85515a031201a643758d19a95c31507396ec5948[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 24 10:21:06 2025 -0400
+
+    renaming resource loading api to more suitable names
+
+[33mcommit 7a9b24a4e477a9a8e16dbcacaddf40aaa162111b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 22:41:46 2025 -0400
+
+    one step toward loading abilities for initial granting of abilities. Added a boiler plate resource manager component for actors so i can load from DT a group of abiltiies
+
+[33mcommit cae9d24ed0cc752bad961400ab362b319b4054b5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 15:14:18 2025 -0400
+
+    fixing missing validator in INteractionAbilityData
+
+[33mcommit 19a116f68930f40052e7eecabd2f59bdc8219154[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 15:05:52 2025 -0400
+
+    fixing validator for cheat data & ability data. fixed content browser not allowing plugin content path to be used in gfp. refreshing the content browser property settings allowed to load content and reference properly data asset defined in gfp
+
+[33mcommit 2e30a6eaf0bcd1b46e085dcb1672c75b473151d1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 10:36:16 2025 -0400
+
+    Èfixing core redirectors. updating data scheme. GPF Data Asset arent able to reference content thats self contained to the plugin. Asset manager is not allowing to find them. INvestigating atm!
+
+[33mcommit d5dd8620513defdd2e6dedac404a6805e7d8320b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 08:14:00 2025 -0400
+
+    modifying comments for clarity
+
+[33mcommit e185157e4790c2584c3b7bc5fbce91b269533d9c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 08:12:50 2025 -0400
+
+    adding enhanced input to plugin and input actions to ability DA
+
+[33mcommit 25de9ff843351b130c4d51c45aeac93edee3bde8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 23 08:09:02 2025 -0400
+
+    renamed Interaction Manager with postfix component. added boiler plate for defining data asset for abilities which will be dynamically extended by the GPF for interaction
+
+[33mcommit 430225c3d083ab89744d7c26aceac3e629286b19[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 17:05:13 2025 -0400
+
+    Èrenaming properly ability related classes before starting impl
+
+[33mcommit 0a02085dfa54da1e9ee19ab6218d19ea5448b38d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 16:52:56 2025 -0400
+
+    idk why but i wasnt using the right api for loose tag
+
+[33mcommit ff346a5a8e0b1cea467d9e5c9f8e9e628a5e0aa8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 16:52:01 2025 -0400
+
+    moving adding loose tag after GetLocalRole call
+
+[33mcommit aa4182f04e1243775a8af91c7aa005e7c4971701[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 16:12:23 2025 -0400
+
+    fixing issue with manager actor creation. moved to a Uactor component so I can dynamically add to the game state without referencing the plugin
+
+[33mcommit 9c18e059e50bb6a2c6dcad505887e0ac257f48b1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 15:45:30 2025 -0400
+
+    adding start of an interaction system for starting/stoping presenters based on gameplay interactions. this is mostly with the end goal of testing yesterday Bank system
+
+[33mcommit 097f93e354dcd9ccf8b4cd29fec573c80cdf4770[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 10:57:26 2025 -0400
+
+    deleting Bank from GFP and moving over regular plugin Bank. this is to fix the problem where game code cannot reference GFP classes (which is required for the Player state to retrieve transaction information)
+
+[33mcommit c6da948ebfe0b0f6079c7747765493b7388da8d1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 22 10:21:34 2025 -0400
+
+    Ècleaning up comments in gameplay interfaces and reworking explanation of Die event in PlayerState interface to clarify the implementation details
+
+[33mcommit 2848ff675bb39b5d5f2aeffaf33b8ff26cb6cfe6[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Thu May 22 09:56:49 2025 -0400
+
+    Update README.md
+    
+    adding link to Actor replication miro so I can refer to it later
+
+[33mcommit 58ab42b579377780cab7c2628543d3d82ec7b829[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Wed May 21 16:21:40 2025 -0400
+
+    Update README.md
+    
+    adding information to orient users in the project
+
+[33mcommit 4842bee3fc78eaef03f67c8466977d799bee932f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 15:33:31 2025 -0400
+
+    adding comments and enable replication in AVVMGameState and AVVNPlayerState
+
+[33mcommit bde5b2c6efbe7000acc34048f241c68161d7103d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 14:44:13 2025 -0400
+
+    adding simple replicated banking system -  TBD - need testing
+
+[33mcommit 1855699268cd0371042aee1551ddf69b3ecb3305[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 11:31:19 2025 -0400
+
+    adding more comments about how things should be configured to support correctly server authority
+
+[33mcommit f27c4f827cefe9395bc5389d7b13056564296a42[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 11:07:17 2025 -0400
+
+    more comments to explain my train of thoughts
+
+[33mcommit b8b2951456399e42ac94b8ea31056473382113dd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 11:04:26 2025 -0400
+
+    Èadding bank property example idea on the player state
+
+[33mcommit 08b1a33e2bf552391c7e836b9e48d30ac93ae232[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 10:53:16 2025 -0400
+
+    adding imgui entries for heal/damage
+
+[33mcommit 8e3062d75ce3f83900d07514cb62eb0c5874a5bf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 10:52:05 2025 -0400
+
+    adding Heal/Damage with explanation of more 'basic' actions vs 'complex' action expectation
+
+[33mcommit 9f52286d52b76441e35310d18f38ce987e39ed8b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 10:42:07 2025 -0400
+
+    adding missing replicated properties
+
+[33mcommit b7579382f54a13a0244b053dccdafd4e3f5638c5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 10:31:12 2025 -0400
+
+    removing GameplayScoped Debugger since Cheats arent packages in shipping build which makes this useless. Instead, I will scoped debug the implementation defined in the interface specific to gameplay
+
+[33mcommit 69acfa02dbcfdb1e6133a2ee87fdd75f1f5488ca[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 10:22:13 2025 -0400
+
+    removing callback entirely
+
+[33mcommit b6052d683a833924339de93e30873a2753c0890a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 10:21:01 2025 -0400
+
+    fixing macro disable state due to interface mismatch
+
+[33mcommit 177bff2e5c6111fcefdd3acc9822f7c462153e3d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 21 09:50:22 2025 -0400
+
+    clarifying through code comments how the interface for AVVMGameplay are means to be used
+
+[33mcommit 649d01629e922b2e7fa5e311c63fefab64251610[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 17:14:29 2025 -0400
+
+    adding player index selection
+
+[33mcommit afcbc0f0fbf901374c1e585f7631adffcf0c410b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 16:51:02 2025 -0400
+
+    removing comments about the string that couldnt be cached. idk wtf I was talking about. its local static  storage and its never modified unless we force reprocessing the whole thing
+
+[33mcommit 082ce90840099dad8136ce69d8cbc8581af149ff[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 16:47:05 2025 -0400
+
+    fixing imgui layout for Cheat extension specific to this plugin
+
+[33mcommit 697016493f7269d97e53408d80d07426ca40bda8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 15:01:47 2025 -0400
+
+    removing operator overload in scoped debugger. no longer necessary with my current approach
+
+[33mcommit e1c4563558a8a4efcb11aa7a0cd6da5e4667166a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 14:59:55 2025 -0400
+
+    Èmissing missing call to executeifbound in disable preprocessor definition
+
+[33mcommit 0a38eb65176cb87f2163bf012da4b96bbccb60a1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 12:39:13 2025 -0400
+
+    fixing macro declaration in disable state
+
+[33mcommit 10652d9b1b5e3b62cdfeb42038140a1dc76b22cd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 12:38:13 2025 -0400
+
+    fixing return type in dev settings and adding missing dependencies
+
+[33mcommit 60fa5b35824fcd87ef4dc3c4222ee63ffec35f08[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 12:20:38 2025 -0400
+
+    ÈÈadding player state cheats implementation to fix nullptr argument for missing component. We now use transient components and discard after action is complete
+
+[33mcommit f154b764c8f7630c2c0502169242b119a10ba087[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 10:38:39 2025 -0400
+
+    adding PLayer State interface cheats impl
+
+[33mcommit ac0f693ebc85d44719781b45d438ef0b0ec0dd21[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 10:21:24 2025 -0400
+
+    adding more functions to the Player State interface
+
+[33mcommit 4dc2ea2ec24672010dc92515de7ac98d782d0577[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 08:39:22 2025 -0400
+
+    updating comments in QuickTimeGameState to explain thought process
+
+[33mcommit 83b90a1a16cdffa8ca98e4e148e41682ffe79010[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 08:06:01 2025 -0400
+
+    adding logs in Quicktime interface to be tested with imgui debugger
+
+[33mcommit fd8c3635b7b69e5183fb3c3bd01df24eff5c0c00[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 07:40:37 2025 -0400
+
+    pushing comments to explain thought process for the quicktime interface
+
+[33mcommit 6a2a90155e6635ec3b052a2afd4618f829e6ec34[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 07:37:51 2025 -0400
+
+    adding boiler plate in game state cheat for exposed api which require impl based on the Quicktime interface in AVVMGameplay. responsability falls under the actor to impl the behaviour
+
+[33mcommit ea206b3db159df478d5fbed340af74aed884b8b9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 07:22:03 2025 -0400
+
+    adding example case for GameState cheat in gameplay. will extend the api today
+
+[33mcommit 5161cb3d8fd703e72a6514f71cacd4445b3f8db1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 07:09:03 2025 -0400
+
+    splitting files for cheats in AVVMGameplaySample
+
+[33mcommit ffec5be502d6945ae77b4e192344a78170282ecb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 07:00:07 2025 -0400
+
+    adding conditional includes for preprocessor symbols in build.cs of AVVMGameplaySamepleRuntime
+
+[33mcommit 7c6ae438765a6d6c51feb241002d94434e86ad49[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 06:55:19 2025 -0400
+
+    adding new GFP module under AVVMSample for gameplay specific content. added base cheats class which will run test for actor specific presenters
+
+[33mcommit 74e59bce30df21996815082ebcc94bee7da318d2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 06:30:45 2025 -0400
+
+    reserializing binaries post-move of class from AVVMOnline to AVVMGameplay
+
+[33mcommit bc4d8763cb00b3b69b42bb1096875c5aaf2cbb60[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 15 06:05:07 2025 -0400
+
+    Èadding placeholder work for AVVMGameplay modules. Moved Actor class from AVVMOnline to AVVMGameplay which makes more sense to extend from when impl in project. Gameplay interface are wip
+
+[33mcommit e351772e46dc83a202686c8dc064b6b697c070fa[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 14 14:34:01 2025 -0400
+
+    Èremoving StructUtils plugin reference. Has been moved to CoreUObject since Unreal 5.5 update
+
+[33mcommit 3ea2c022b3a885aa2f0efcde82d53072e7c58452[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 14 11:50:10 2025 -0400
+
+    adding missing includes
+
+[33mcommit b7d66fa2b3e502f94b96f26dc6c7488ab9e2362a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 14 11:48:51 2025 -0400
+
+    fixing preprocessor setup in build.cs and module files and target.cs so to properly handle DeveloperTool MOdule Type
+
+[33mcommit 30ebddb90b99a1a0d64af9aa5d7cfb56e13117e3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 14 10:34:27 2025 -0400
+
+    adding proper support to module type (DeveloperTool) for ImGui and AVVMDebugger. Applied required preprocessor to support specified target behaviour
+
+[33mcommit fe365dbf24931a6c02951bb73b80c7b2ce610c50[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon May 12 08:40:41 2025 -0400
+
+    Èadding interface onto game mode class
+
+[33mcommit 0e9fd150022d00d6b6533e88dc0e167cb43f1754[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 10:43:23 2025 -0400
+
+    adding placehodler BP impl in Party Manager to notify other system of mute event and censor event
+
+[33mcommit fa7b48e49dbf5d0ddeb5d502933edcdd5c083958[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 10:40:11 2025 -0400
+
+    adding messaging interface for muting players
+
+[33mcommit 5bc5e52551c7048531af120e4c89f7586002698b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 10:17:49 2025 -0400
+
+    Èrenaming invite request to a more generic naming so its not restricted to friend. added blocking request to the player profile
+
+[33mcommit 43f97dfab12466180a6fe0325d20e1a938ee333d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 10:02:06 2025 -0400
+
+    pushing BP impl for the Player Profile presenter that would react to add/remove/invite friend
+
+[33mcommit 4b46d871e3bd82e6f5cc2275413cd2bb04e0d930[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 09:44:26 2025 -0400
+
+    updating online interface so the invite api comes from the friend interface
+
+[33mcommit d6ad8d62e0992888506b7be81b7e4505aa7113a9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 09:42:50 2025 -0400
+
+    moving party manager logic for inviting player to the Player profile since its all tied to the friend system
+
+[33mcommit a789df6b85371be70d843ac77cb0001ada64ce76[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 11 09:33:26 2025 -0400
+
+    ÈÈadding new enum entries for adding/removing friends and updated the Profile presenter api to react to Adding/Removing friends. imply that a Friend Presenter class need to be created to handle in-game visual representation of the service
+
+[33mcommit 5210947276d232fd60af4e699138639c596c0bc8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 17:49:55 2025 -0400
+
+    updating behaviour for Player Manager so we react correctly to Post-Join/Exist and Player refresh events. Added placeholder widgets reference to the BP presenters targeted
+
+[33mcommit f5c4fe781dfdae1629b0683af4307dd49e015c78[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 17:31:32 2025 -0400
+
+    ÈÈÈÈadding missing comment in party manager
+
+[33mcommit 3d9943d51f684f9b96d9c62a961e23c10e4e46cf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 17:28:31 2025 -0400
+
+    polishing Party Manager behaviour as some calls were not properly defined
+
+[33mcommit 46d7651c75d9ce4df379a2ba3f0b1d3a30292742[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 17:05:56 2025 -0400
+
+    adding support for Post-Join/Post-Exit in PartyManager Presenter BP
+
+[33mcommit c6040ea56dccc2832649b0e3923ed35de1bf1e7a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 16:53:21 2025 -0400
+
+    adding new api to deserialize from string our online struct types
+
+[33mcommit 3ac5cc05153df6c2294ac90c01848bf038c5a476[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 16:38:27 2025 -0400
+
+    polishing party manager api to cache a local representation of the player active party
+
+[33mcommit 793934b24aa0c2648733cb6edc5d5543ed7cc5e7[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 16:27:28 2025 -0400
+
+    ÈÈsetting up correctly post-login events. moving onto post-join party
+
+[33mcommit 00737a590d6dec030e0c804ec59018ae731ed1cc[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 15:49:46 2025 -0400
+
+    Èfixing plugin dependencies missing
+
+[33mcommit befd055ee2f6ce9d3f1921e13e8089c26379f689[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 13:03:47 2025 -0400
+
+    adding new api to convert struct type to string in BP and started defining post login action in BP
+
+[33mcommit 76f4b4f997d1e96d0115ce89eb5924ec01582388[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 12:07:17 2025 -0400
+
+    pushing new comments in PlayerManager BP to explain the BlueprintImplementable events
+
+[33mcommit ffa9b2ba9b9ac297e3b2bad7657cb903dfbf3d65[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 11:59:13 2025 -0400
+
+    Èadding comments in BP for player configuration to better define the BlueprintImplementable events like Emotes and StripNaked
+
+[33mcommit 593868d3a7d5f187e88fa2aa1e5bf316b8c8ab86[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 11:50:05 2025 -0400
+
+    adding player specific event bindings that were missing
+
+[33mcommit a0c2f7914394092a87bac66f8e98b19568e87212[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 11:40:42 2025 -0400
+
+    moving trade request to Player profile so its not specific to the store like previous impl
+
+[33mcommit 687aa59a365bb51db88ed3589116493cdcb762be[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 10 11:03:13 2025 -0400
+
+    setting up BP asset Notification registration/Unregistration so to test the architecture in AVVMSample plugin
+
+[33mcommit a57402b3a54e321465e4ad34209920a8a024b0bd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 9 20:42:40 2025 -0400
+
+    pushing new checkbox in imgui so we can link tag channel change and registry item name selected based on tag last entry
+
+[33mcommit 2e4f537c4cd47d5c9210a3c419bcc27705aa9ac1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 9 13:21:35 2025 -0400
+
+    adding missing reference symbol where it applied to prevent unecessary copies
+
+[33mcommit 3e154020201f339556b5313b564546863d9950da[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 9 13:20:38 2025 -0400
+
+    modifying comment
+
+[33mcommit 38957315257952d7886b66edb0e1c2e4eff60dbd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 9 13:19:37 2025 -0400
+
+    updating Registry Id ItemName retrieval to using a call that isnt editor only
+
+[33mcommit 7e74b0632de5d46dac11a296adb9354eb1721fc9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 9 13:05:15 2025 -0400
+
+    pushing changes to how the gameplaytaglist is fetched. removed usage of editor only api. theres still constraint with how i manage tag retrieval but it allow splitting all tags in presenter specific .ini file and keep things clean for now. further filtering coould be added after
+
+[33mcommit 14d8fcefad242c74a9b99746dbc0502389d8e3b2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 9 11:59:43 2025 -0400
+
+    splitting .ini files so each tags collection is specific to its presenter system. updated cheat dynamic population, so the combo entries only append with the tag sequence that define a notification channel
+
+[33mcommit e45d75a0276c1566f88b448e4bfd2e712851f460[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 19:24:18 2025 -0400
+
+    adding custom .ini file that define a set of trace channels to expose my custom counters
+
+[33mcommit 94f7a1863851c7f9d3573ed532d6bf2bd442d83c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 14:02:51 2025 -0400
+
+    adding profiling trace counter to track how many times we rebuild our combo list
+
+[33mcommit 14023726e4c415981567331d33bc44b5b5428ad6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 13:54:15 2025 -0400
+
+    adding support to respond to data registry at runtime so our cheat imgui updated its combo box entries
+
+[33mcommit 59fa6cbde09062c228243149782c9b47a9cd469a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 13:25:49 2025 -0400
+
+    adding asset validation to output error message if failing to comply to requirements/default initializing its content
+
+[33mcommit 1700d09478e5c3f4a48f15476489760ee8e976bc[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 13:02:25 2025 -0400
+
+    adding support to refresh tag tree combo entries both at editor time and runtime
+
+[33mcommit 045ac07c9e855cc28cd43a753ad0fdb3c6a36372[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 10:58:20 2025 -0400
+
+    updating registry with empty payload
+
+[33mcommit cc98e13c83a54cdb9c9cb2d3b5b7fdd05e1a734b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 10:56:59 2025 -0400
+
+    fixing tag parsing by clearing stringbuilder based on number of childs
+
+[33mcommit 83ae24828011cb9d0d01fc3aa24fc3c9e1ccd082[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 8 10:35:41 2025 -0400
+
+    fixing string parsing issue with ImGui Combo. concersion from String to Ansi via the ptr to the front of the character array was problematic. Null termination was also not correctly handlded for ImGui::Combo to parse the collection of entries. Still have to parse the tags to only have the outer most childs and not parent sequence. (coming up next)
+
+[33mcommit c7beaa458ef8a3b9bcee6673538e7c338613b501[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 18:37:33 2025 -0400
+
+    pushing work on trying to dynamically populate ImGui::Combo. The conversion to AnsiChar is giving me trouble. The Combo box is expected to split entries using null terminated symbols which but fail to do so. Tried \0, \0 & 0
+
+[33mcommit 65e0af6e4eebc1b7796a44031d9ec43d138717cd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 15:41:56 2025 -0400
+
+    pushing GetIndexedString impl. Parsing of the Tag Channel test to return incomplete array value. to be investigated
+    
+    :q
+
+[33mcommit aa866aab6c5b9d092589535e478981e5be70c223[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 15:18:18 2025 -0400
+
+    moved CheatExtension to Sample GFP. Included AVVMDebugger to the Sample plugin. Removed AVVMDebugger from AVVM module. Added based impl for drawing the imgui context with what I expect to display to execute the notification cheat.
+
+[33mcommit 169752b4b9f377310029f8c1b2839d0c5642331e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 13:10:52 2025 -0400
+
+    updated the event to which we bind. OnWorldCOntextDebug will not broadcast frequently enough to render the the imgui window context due to it filtering by context id. this makes the event pointless. MultiContext is shared between PIE session which isnt great (I wanted to used by World Context id as I though the Context Id would be specific to the PIE session so each PIE would have its own context but thats not working so... im a little disapointed by the plugin tbh)
+
+[33mcommit f0bcdee22395b36d701ef2fe2cf76a6e3297d74b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 10:18:33 2025 -0400
+
+    adding developer settings to expose BP object of Input handler and updated meta tage in AVVMOnlineSettings
+
+[33mcommit 583516d3a2a0e29c21be5035b4b870c7956172ba[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 10:12:46 2025 -0400
+
+    adding comments in code explaning the purpose of the custom Input Handler and not fallbacking to ImGuiInputHandler
+
+[33mcommit a67f652c347d7251eb43029af5f60bd04cf74730[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 10:05:25 2025 -0400
+
+    Adding support to registering the Input Preprocessor during PIE Start/End and StartGame with failsafe support so theres only one preprocessor active at all time
+
+[33mcommit 899f42ae9699ec65e83704e51aea0c4f691a8383[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 09:46:04 2025 -0400
+
+    adding InputPreprocessor boiler plate to listen for user defined FKey which will be configurable from Project Settings. I find this approach simpler than having to fetch a PlayerController/InputComponent and register a custom IMC for the debugger. seem like a huge overhead for very simple operation
+
+[33mcommit d71578a080142bc7a72d34dbf25adc7b4d9985bd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed May 7 09:07:44 2025 -0400
+
+    modifying AVVMDebugger class hierarchy to interface handle drawing instead of doing item drawing through a scoped struct which use information provided by the interface. this was all unecessary anyway. the interface should handle the drawing portion of its content as the implementer will be aware of its content and event to invoked on button press or when checkbox are enabled
+
+[33mcommit c70029811a58af742d7a7d8ee787e94c196b7eaf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 21:10:27 2025 -0400
+
+    Èadding boiler plate code for scoped descriptor definition. will continue in the morning.  the impl details for unique items isnt  defined in the scoped descriptor. fun experiment really!
+
+[33mcommit 122ff334e6b3a33a8d8b12c32c018b9b54ffa833[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 19:15:44 2025 -0400
+
+    adding lonely scripts with minimal changes that havent been worked on today
+
+[33mcommit b75e814871ef0664852d6fbcea08a8dc6809fa38[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 19:14:37 2025 -0400
+
+    setting up basic debugger module that hook onto the imgui systems to display Hello World Debugger. Added comment about the setup process which im not happy about
+
+[33mcommit 530ea9dcf98febb7e3237e3efcc638c806f2a311[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 15:44:24 2025 -0400
+
+    fixing primary game layout deinit invocation call from custom interface. modified how the primary game layout is access during PIE shutdown. Using the local player instead which is the Outer most type thats allowed to fetch it. run early return if the local player isnt available as it imply the Primary Game Layout was prob already removed from the game viewport at that point.
+
+[33mcommit c5072e8b9a4995e1daf4e9b1fa708c53a0155413[m
+Merge: c347245 39a2882
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 15:19:01 2025 -0400
+
+    Merge branch 'master' of https://github.com/guyllaumedemers/UE-AVVM
+
+[33mcommit c3472458504d3d18947703726fda2d0b08c22254[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 15:18:49 2025 -0400
+
+    adding missing is valid check in primary game layout interface so we can properly deinitialize all resources without hitting an ensure during shutdown
+
+[33mcommit 39a2882ea759f5f0d028286ce9502a4a881f01b4[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Tue May 6 14:27:59 2025 -0400
+
+    Update README.md
+    
+    Adding link to new miro which I will populate to properly grasp the impl details of imgui in unreal
+
+[33mcommit ba52b52632658a9fb6f994ef86e9021ee71f2ca6[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Tue May 6 13:43:10 2025 -0400
+
+    Update README.md
+    
+    warnings about how imgui is included in the project
+
+[33mcommit 556fe1d3d00dcc7a955a261a4f6362bf1f722521[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 13:38:58 2025 -0400
+
+    adding UnrealImGui plugin to project. fixing deprecation issues. added it as submodules so im not 100% sure my changes are submitted here.
+
+[33mcommit 4088c468b3c86c458bdf7e4f8b807d372bf59766[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue May 6 13:09:48 2025 -0400
+
+    modifying comment about preprocessor definition
+
+[33mcommit 0328b6ddc375ed38f25b689b393a8d9c6b7d102a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon May 5 16:19:03 2025 -0400
+
+    reordering invocation call for the preprocessor use case in Party Manager and Host Configuration
+
+[33mcommit ec427394fa9e13e9c520c1273482663cb7b3db22[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon May 5 16:12:43 2025 -0400
+
+    adding missing use of preprocessor in HostConffiguration for conditional branching on host behaviour
+
+[33mcommit 63edc25ca754dd5db3d015243492fae09c9d8555[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon May 5 16:02:39 2025 -0400
+
+    removing inline getter. this should be there
+
+[33mcommit 0d817e8dee43a56d438397606dded6976699240a[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Mon May 5 15:59:57 2025 -0400
+
+    Update README.md
+    
+    fixing typo
+
+[33mcommit ea477fc0f8f4dc8fa256ce8e399b63836474f135[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Mon May 5 15:59:22 2025 -0400
+
+    Update README.md
+    
+    updating readme to better orient reviewers
+
+[33mcommit e12fec13f4b6a0301e446111c1b3fcdf6ed2dc4a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon May 5 15:57:54 2025 -0400
+
+    updating comments in FAVVMStringPayload so the intent is properly vehiculate
+
+[33mcommit f3b20c1ddc35052fceb92f54f1555f765f78c2c9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 20:15:57 2025 -0400
+
+    finishing store interaction impl
+
+[33mcommit c51d083310d6c701ed0bb7c7956d1fe765bba839[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 20:04:05 2025 -0400
+
+    fixing preprocessor definition and adding store basic impl details
+
+[33mcommit e92352e7559c6e39d514faf3befa62d4dacc8b59[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 19:47:52 2025 -0400
+
+    fixing preprocessor since they are compile time replaced by symbol
+
+[33mcommit 44ec8bc883945ba9a1a0ec7dfe4b9984290bac09[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 19:41:16 2025 -0400
+
+    adding missing constructor for player request
+
+[33mcommit 5cf8cc59fbe8093672727007b878843f9221470c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 19:38:30 2025 -0400
+
+    Èfixing preprocessor and adding new one for branching host/remote player logic in party manager
+
+[33mcommit a3b703f508deeceba3dc5c5b16a42d57c21ee85d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 19:08:19 2025 -0400
+
+    adding comments to explain trading and sending gift
+
+[33mcommit 8cb3a21d13887921c8c996c6529d01fe9b3af39b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 19:06:39 2025 -0400
+
+    Èadding store presenter. extending the online interface to have a store specific one. added new request type for supporting trade between players.
+
+[33mcommit 0edb475c563c8ce5d9c66c09cd14a3875b265f51[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 18:55:58 2025 -0400
+
+    fixing module name which had post fix module in AVVMOnline
+
+[33mcommit 33b751eb8937c42df044c7eee85796b0a71f2c7c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 18:51:17 2025 -0400
+
+    updating miro screenshot
+
+[33mcommit c954204390fefa0acfce8f7500b157f9fde5d9c5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 18:43:05 2025 -0400
+
+    splitting the online interface into microservice specific entity
+
+[33mcommit c1a33f76ade9a9e71bb1e6390e8d35978ab6d8a6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 16:44:05 2025 -0400
+
+    reorganizing content in AVVMSample
+
+[33mcommit e062c7717b4fe28778d7ad8e30987843a1d5db4f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 16:41:54 2025 -0400
+
+    creating/ adding reference to actor, components and presenters with the Game Mode referenced in the Third Mode Map
+
+[33mcommit 966e2d72aa52b94051e146008551bff10272db8e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun May 4 16:21:19 2025 -0400
+
+    refactoring project organization to properly handle the AVVMSample GFP. Create new MOdule under AVVM plugin for online specific details and have the AVVSample reference required resources instead. Since GFP cant be reference by project content, this setup allow the project from using derived actor types defined in AVVMOnline and have the GFP interface with the AVVMOnline.
+
+[33mcommit 06c3ce2f98408d16cb02343d5de90102a20498d1[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 18:29:56 2025 -0400
+
+    adding global parser instead of fetching from get outer
+
+[33mcommit b13a4b843eee64329c1fc7d1fd59b2e57d111109[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 17:54:17 2025 -0400
+
+    ÈÈfixing tchar conversion issue
+
+[33mcommit 33b962a20d5bc5b274cf1d42486c73e9a6a5c9c9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 17:49:00 2025 -0400
+
+    fixing errors
+
+[33mcommit 65d21aa4ec0f6a939d1400bf1620a72169c37953[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 17:47:51 2025 -0400
+
+    Èremoving party id from player request. expect backend to resolve src unique net id i.e host inviting friend party instead
+
+[33mcommit 3db936b33edf2f930a6a1b660120dedd77a63be2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 17:44:21 2025 -0400
+
+    fixing kick player definition. adding invite player
+
+[33mcommit 7e8fac2352ae27177b48f984acdb4a2879772206[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 17:20:25 2025 -0400
+
+    adding generic player request and kick action to remove player from party
+
+[33mcommit ca7017488ceb414eb879fab10b2f3ef70d921190[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 16:51:09 2025 -0400
+
+    adding missing meta properties and dllexport for the online parser interface
+
+[33mcommit 27b1859b1c5085626f51749d24e9d1d10e4db9da[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 16:49:56 2025 -0400
+
+    updating online parser function signature for api overload that handle a single type compare to those handling a collection type
+
+[33mcommit 24f4fffcdd68ada909bd7f013dcf78b99ce74eca[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 16:44:20 2025 -0400
+
+    adding missing properties in Wallet
+
+[33mcommit c5b0be9361dd5e84fa873aa75f58af69375cebe0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 16:38:13 2025 -0400
+
+    removing struct collection type. introducing generic string payload type so collection type can be parse from it on the client side. however, important to understand that in any other circumstance, the online service delegate system should always provided already resolved type from the payload. only exception being whenever it holds more than one items.
+
+[33mcommit d43d467392280072f7000b65af7177532eda71b5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 14:42:19 2025 -0400
+
+    adding missing properties declaration in online interface
+
+[33mcommit c51916de2b32dde1e9c84616c48dc6dab9a9bf3e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 14:39:51 2025 -0400
+
+    adding missing definition in qte to preven linking error
+
+[33mcommit 527b927469e21aa22d4378c7cb6b58aa28e270c7[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 14:39:10 2025 -0400
+
+    adding boiler plate for supporting challenges, both game time and offline
+
+[33mcommit e52e3c16378a0068954eeb4217206705df7c3f8e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 13:49:17 2025 -0400
+
+    adding imple for both primary game layout interface and ui extension interface on what I believe are fitting presenter for each action type
+
+[33mcommit 101d9563851b89fd89078ebdc581fa5995e66020[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 13:34:44 2025 -0400
+
+    adding missing stop present invocation call in SafeEndPlay to allow proper clean up of UI before destroying our presenters
+
+[33mcommit fd8d34d92c0cfb5266a02e7cf4df01276889da2a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 13:29:22 2025 -0400
+
+    removing foward declaration and fixing linker issues
+
+[33mcommit 5837039e702f287b57273e42f374db515467d4af[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 13:26:14 2025 -0400
+
+    adding impl for ui extension interface
+
+[33mcommit 8f8295ae7345eadc73f014784f36500c35c2cb0c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 13:03:39 2025 -0400
+
+    adding boiler plate interface for support ui extension with presenters
+
+[33mcommit 621a2e4d906a3b76367f5f7ba8699a56c9e9336f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 12:59:58 2025 -0400
+
+    adding UIExtension plugin to project
+
+[33mcommit 7e9d381445a3e283681e3f8d36f3b07f3a2346bb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 12:53:12 2025 -0400
+
+    fixing linker error with missing gameplaytags in build.cs public dependency
+
+[33mcommit 5f00b5af07afa951128a70d88cd341a2ecdb3141[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 12:51:29 2025 -0400
+
+    adding interface that can be impl in presenter class to reduce boiler plate code for primary game layout possible access
+
+[33mcommit 06f559bf28e8a68379ed3a4e21e44c4568606692[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sat May 3 12:50:23 2025 -0400
+
+    Update README.md
+    
+    updating readme to poiint user toward AVVMSample plugin under GFP
+
+[33mcommit 647026f97aea6dd1375c1bd9cfb4597523cdb4b3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 12:42:32 2025 -0400
+
+    adding new interface to hide general push request to primary game layout so presenters calling start/stop dont have to repeat themselves.
+
+[33mcommit b7bad79332f15c189aab2c40536ab9f18269a765[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 11:55:36 2025 -0400
+
+    adding player status to player connection so we can track what state they are in
+
+[33mcommit f132c3087baa7782be6a1d8be62f3a48e074a1e4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 11:45:31 2025 -0400
+
+    fixing missing name definition in PlayerConfiguration VM
+
+[33mcommit cfa65d392b6dd99b466f0ad2b314b73182a4fed8[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 11:44:20 2025 -0400
+
+    pushing missing derivation for AVVMViewModelFNameHelper
+
+[33mcommit 27c55e8e6f139b7f11733ab4bb7f9512fbe5e57d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 11:33:44 2025 -0400
+
+    renaming cheat to  shorten the input length required
+
+[33mcommit 6132e0cd23d171704520b3186e57495a0a6a5cdd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 11:28:41 2025 -0400
+
+    updating cheat to have one more function to not have to pass in a payload for notification testing that doesn require one : example :start stop
+
+[33mcommit e6fa4407d5d5e92123c4ca3c17e43be5d18ff00b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 11:14:45 2025 -0400
+
+    Èdoing code cleanup
+
+[33mcommit bf2402161b4845d7b0e77058f0d9c2b6750e955f[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sat May 3 10:39:31 2025 -0400
+
+    Update README.md
+    
+    Updating UE-AVVM screenshot
+
+[33mcommit ac96d85eec93cd099095dbed7d41ca15743df248[m
+Merge: cf049d9 a37987d
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 10:38:21 2025 -0400
+
+    Merge branch 'master' of https://github.com/guyllaumedemers/UE-AVVM
+
+[33mcommit cf049d954b3951b9de40f019c625f3b41ddf6144[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 10:38:06 2025 -0400
+
+    Èupdating screenshot for miro preview
+
+[33mcommit a37987dc9fae3af57363ab8727579b850ae42331[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sat May 3 10:26:31 2025 -0400
+
+    Update README.md
+    
+    updating link to mind map miro board. had to duplicate it to update/modify it. Will do change to the general architecture this morning.
+
+[33mcommit f587da6d983e56eb7bdfc48b3e85647f758ec327[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sat May 3 10:24:08 2025 -0400
+
+    Update README.md
+    
+    Removing CommonUser Miro link. not useful here
+
+[33mcommit 9f32971bbd90ab762836eaf4f8c61bf26df322e0[m
+Merge: 6f9547b dd833c9
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat May 3 10:22:58 2025 -0400
+
+    Merge branch 'master' of https://github.com/guyllaumedemers/UE-AVVM
+
+[33mcommit dd833c9b1a672fa1cc9d2a81b33e87692a8c35da[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sat May 3 10:22:36 2025 -0400
+
+    Update README.md
+    
+    Updating readme to  a proper explanation of the system intent
+
+[33mcommit 6f9547b3bb1e5b087f45f3ba336bb07c3004e942[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 18:13:42 2025 -0400
+
+    initializing correctly properties
+
+[33mcommit b4c26009a549af34d94bc4faaa11c8d01cd323c6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 18:12:40 2025 -0400
+
+    updating struct properties for online interface
+
+[33mcommit 9394868b6a38da19e1c4094429b5d82e229295bb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 18:06:23 2025 -0400
+
+    adding more struct declarations for the online interface
+
+[33mcommit 5031b64689b4d4415ecfc26e5d9e05d8f3ed8099[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 17:55:10 2025 -0400
+
+    adding missing function in player manager presenter
+
+[33mcommit e397a1c5edfd769bd79e4960950811700402b130[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 17:22:41 2025 -0400
+
+    ÈScopeDebugger change - changing copy constructor with explicit assignment - which still resolve into just invoking the copy ctor - with just calling directlly the copy ctor
+
+[33mcommit bb644833ba416416c4316235550b92cfa84ef5f9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 15:05:43 2025 -0400
+
+    removing emote presenter from design architecture. now handled on the player configuration presenter.
+
+[33mcommit 9d3b9c6aaac72ab58e7e834c85ac77a9ff231ab9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 15:00:22 2025 -0400
+
+    extending api to support player configuration update
+
+[33mcommit 2c4cdec6083d61e6d8e6cc46ba453f86b15658a4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 14:31:31 2025 -0400
+
+    fixing linking error due to missing operator overload definition
+
+[33mcommit de5f2c2a295b3ee12bbbcfa143510e14094c62f9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 14:30:27 2025 -0400
+
+    setting up boiler plate outer type classes for gameplay presenters
+
+[33mcommit cd34f0e1da224a5e849cd48c27cf556f18b36c40[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 14:07:40 2025 -0400
+
+    adding new Character class to use as OuterKey for the PlayerConfigurationPresenter class which represent a player information in both offline and online scenario
+
+[33mcommit 4a53e479bc7ddf89fea4ee7f355adf24eedebe24[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 14:03:19 2025 -0400
+
+    renaming api
+
+[33mcommit d22694422c8245cc92f67ad0e78c9065f3d4a6d4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 14:01:11 2025 -0400
+
+    adding player manager impl details for supporting new player connecting/disconnecting
+
+[33mcommit 2549febf61cd71ca1561afff606b92ba7eb9e802[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 13:35:51 2025 -0400
+
+    adding missing work on Host configuration handling
+
+[33mcommit b722fe9884023163754352bcdb755697e79ecfb0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 12:15:21 2025 -0400
+
+    fixing compition errors
+
+[33mcommit db9e1bb0ac512e5ea47b7b9cdbdaacaaf10ab435[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 11:59:00 2025 -0400
+
+    adding scoped debug log struct for running test. is disabled in shipping build
+
+[33mcommit 72b1e4e1a3837a8794d73306e120a5e342678094[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 11:37:37 2025 -0400
+
+    adding definition for FAVVMHostCOnfiguration
+
+[33mcommit 39f04f8d66ee033233af004a23f7e6a3228e1c38[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 11:34:36 2025 -0400
+
+    defining a PlayerCOnnection internal properties
+
+[33mcommit a64cdad0aba9c7d1efaa22d0be313e5ec4e8de46[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 11:33:00 2025 -0400
+
+    updating party presenter join/exit api
+
+[33mcommit 98ecf64900b14221d281053a1c77687d47cc294c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 11:03:13 2025 -0400
+
+    fixing UFUNCTION BlueprintCallable issue with ONline Utils api
+
+[33mcommit 599e293c6c9e2fbfecba6944e7fd53788a77eb10[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 11:01:57 2025 -0400
+
+    adding some more boiler plate code to better define the project architecture
+
+[33mcommit fe78f4cc7d2de98170386eab9772cebd1ca4c9f3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 10:04:18 2025 -0400
+
+    adding comments about host configuration presenter
+
+[33mcommit 7a269071e4d41f03af6da5575c838a83a785771a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 10:02:13 2025 -0400
+
+    adding force pull parties and updating/renaming some api callback functions to be more verbose
+
+[33mcommit 72ff3ea29443a1f040a4d45cd9973ba4f5c9bc71[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 09:41:59 2025 -0400
+
+    adding missing .generated.h include
+
+[33mcommit e71a301eccbf87c15e962e899208a3b5a2e9af43[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 09:41:11 2025 -0400
+
+    Èupdating avvm online interface signature so the api is a bit more explicit
+
+[33mcommit 87a47008fc3f1bddbfddff552682ad598073d9ab[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 09:22:21 2025 -0400
+
+    updating party class description
+
+[33mcommit 6c21849f9bb8f84241f6eac43aab5badfd8b979e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 09:08:50 2025 -0400
+
+    adding more functions to the Online interface for the AVVM sample plugin
+
+[33mcommit 2ac329710a1d70cb51369bae7faa537ad09cc5ea[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Fri May 2 09:07:20 2025 -0400
+
+    starting to flesh out the AVVM architecture based on Miro. Note however that the aggregation mentioned in the miro wont be 1-to-1. Our presenters do not own each other. They however talk/exchange information between Notification channel
+
+[33mcommit 44719689264298af20caf8d3b3fdc4bb0556a848[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 18:33:41 2025 -0400
+
+    Èadding changes to the CommonGame Messaging system which is fairly under-developt. Theres interesting ideas into how its setup and how CommonUser uses it but its not feature complete. I added the bare minimum for :q
+
+[33mcommit ff5de194e05b223a34c611ed9ee4b7783670655e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 16:40:02 2025 -0400
+
+    doing small cleanup on duplicated delegate callback in notification functino
+
+[33mcommit 3403e2641783d560413947cd61cc2b5089fe55d2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 16:39:04 2025 -0400
+
+    creating new GameMode Class in AVVMSample. Sample map will reference this. Force enabled AVVMSample plugin in GFP project settings to ensure we can reference the interface we impl natively on the Game Mode. Fixed Login Notification handling impl
+
+[33mcommit 3ff08bf72599898bb2af17fd758d17a9f0fa9032[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 16:03:17 2025 -0400
+
+    pushing current state so I can investigate BP interface not being recognized when testing the login notification
+
+[33mcommit 5b9c051ff827314524ef8bf19acab5d224a7a7c0[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 15:32:58 2025 -0400
+
+    adding boiler plate code to abstract online backend and inject data into 'fake' online system to test the account login logic
+
+[33mcommit 36979c6aba957729939ebd130f830ef007131880[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Thu May 1 12:43:28 2025 -0400
+
+    Update README.md
+    
+    adding bold to readme
+
+[33mcommit 63c66711587fef8c892b0e1ec3af6b764e0b4395[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Thu May 1 12:43:09 2025 -0400
+
+    Update README.md
+    
+    adding comments about cheat support
+
+[33mcommit 44436003545687e3986e9ca276b5b3292a2a6324[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 12:40:04 2025 -0400
+
+    adding missing registration in Account Login Presenter to Start/Stop presenting based on the cheat exec for the Start/Stop channel
+
+[33mcommit b87bc84037556355b763d44eae54c20ade1f305a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Thu May 1 11:51:05 2025 -0400
+
+    adding new cheat extension and its impl details
+
+[33mcommit da5a929bba20bbe6b9a3e6252506108fbe2e325d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 20:57:09 2025 -0400
+
+    removing PostINitialize & BeginDestroy impl in Presenter. UObject lifetime doesnt work correctly with calls made dureing gameplay. the UObject will be invalidated by the gc when BeginDestroy is invoked. any subsequent call made inside the function may fail. BP call will not work due to the object flag being marked as garbage|unreachable
+
+[33mcommit 4ae405fcf48df4354ad4ac97472b3bc3bf12a5b4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 18:51:39 2025 -0400
+
+    pushing current state. require investigation for how to workaround calling BP code in BeginDestroy of UObject which isnt allowed due to the GC running
+
+[33mcommit 18de07e9d65f8be6141de3ccee3d64bb1724e9bc[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 18:36:35 2025 -0400
+
+    removing deprecated interfaces
+
+[33mcommit 1627f9fee662621715c482cccda0a7adf8bedb9f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 17:48:37 2025 -0400
+
+    exposing BP function to Presenter class to bind to the notification system in BP
+
+[33mcommit 0a4df1b19423d29ddac034ca65ca77f27b11e6e6[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Wed Apr 30 17:43:48 2025 -0400
+
+    Update README.md
+    
+    remove README note justifying realization about the notification subsystem since it was just now reworked.
+
+[33mcommit 9db23b82072970824fe708627ea3caa08774ebb9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 17:43:02 2025 -0400
+
+    pushing modification to notification subsystem. removed resolver logic. changed how the notification subsystem cache information about observers and replaced with multicast delegate. we now expect users to define more advanced tags to filter out which presenter invocation call should be executed
+
+[33mcommit 68a8d4100a75a9f6d34fab4654a161a0858a4f0e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 16:17:34 2025 -0400
+
+    Èpushing current state of project to reflect on core system decision
+
+[33mcommit 9111162ac68a05da18631682f42f905ae97ec6e2[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Wed Apr 30 16:16:27 2025 -0400
+
+    Update README.md
+    
+    important notes about core system realisation
+
+[33mcommit 8c43383d3e829140bc7f31bd0546ab3bd208c6ff[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 15:28:59 2025 -0400
+
+    setting up StartPresenting & StopPresenting function in Login Presenter. expect user deriving from presenter to handle their own case as different GameUI system may be involve for presenting
+
+[33mcommit b001dc6e839e1d77b057da1b7718ad36bf580c54[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 14:52:47 2025 -0400
+
+    updating observer interface to allow returning the OuterKey so the Executioner Class can compare against the owning instance and filter
+
+[33mcommit 41bef61e29a1246c9c3dd64a8f4673b197c1ca9c[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 14:38:58 2025 -0400
+
+    fixing call to NewObject taking in TSubClassOf missed use.
+
+[33mcommit 327258177fc83cd415873bef58fc7bbf5f8e712d[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 14:13:47 2025 -0400
+
+    moving Factory Impl class from game feature plugin to core module as dev settings cannot reference GFP classes since loaded at runtime. maybe its possible but I havent found documentation about it yet
+
+[33mcommit 2c7db09c16c1179548cd4ce79f549ea3b1bf33ca[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 12:32:38 2025 -0400
+
+    adding missing impl for pure virtual function
+
+[33mcommit af91038e822ae6823a7fd9a877766dd9fbd9e1ec[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 12:23:05 2025 -0400
+
+    starting to slowly sketch out the architecture shown in the miro board and fixing system issues due to missing project setup
+
+[33mcommit a047137347628732ad14643f7ec2ceea72ba2fe3[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 12:19:10 2025 -0400
+
+    updating pResenter so we dont initialize in the constructor as 'this' will be to the outer base type and not most derive. move impl in PostInit which allow proper downcast
+
+[33mcommit 071b2c0ca327acc34cf734f21c40e734ff604015[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 10:13:52 2025 -0400
+
+    adding missing function specifier static in util function
+
+[33mcommit 34490869e124462cb0cdb486ef762d9ec9b30731[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 10:12:34 2025 -0400
+
+    adding new bind view model function in util library and interface so we dont have to define names
+
+[33mcommit 052880f8023b1d95fe171f99cbcb9ac9c5654b31[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 09:37:22 2025 -0400
+
+    adding function library and updating the TScriptinterface IsValid check with the new function for code cleanup
+
+[33mcommit d80b22c1074d97a635a0d2a8fa62428c983ea931[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Wed Apr 30 09:08:52 2025 -0400
+
+    deleting GFP Demo and replacing with AVVMSample. I'll extend this plugin and Runtime module with class definition for the AVVM architecture shown in miro board. Updated AVVM module description and moved interface into the module description for better visibility of requirements that come with the module impl.
+
+[33mcommit 9ffe2fcb7553fffe90b1fa7d4997e96c2c647d9e[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 17:42:21 2025 -0400
+
+    fixing linker errors
+
+[33mcommit 5c9e3ab13fa0a4bf4eced8d080efd5834342c2ba[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 17:35:40 2025 -0400
+
+    adding missing dependency for AVVM plugin
+
+[33mcommit 33726752bf92d351c5357c8aa2ad4016281bd831[m
+Merge: 39ca970 3212c26
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 17:34:51 2025 -0400
+
+    Merge branch 'master' of https://github.com/guyllaumedemers/UE-AVVM
+
+[33mcommit 39ca970fddda7fbd6faa1862537a00103d139632[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 17:34:40 2025 -0400
+
+    adding logic for resolving/filtering observers. a bit wip and require profiling
+
+[33mcommit 3212c267c72e8e10f4100690b33a0c6bd8dd5249[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Tue Apr 29 15:52:03 2025 -0400
+
+    Update README.md
+    
+    Adding comments to GameFeature on-going investigation.
+
+[33mcommit 52505632706435df8e0cf88f4eecfb4b32c521fd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 15:49:40 2025 -0400
+
+    adding other changes to test/confirm dynamic push of component onto the game mode actor following previous change
+
+[33mcommit 7e9b01ffd7c51073c8a4f6111b1877a234228dd4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 15:49:03 2025 -0400
+
+    Èrenaming GameFeatureData to plugin name as the implementation details of the State Machine makes it name dependend - odd choice...
+
+[33mcommit cd86cbfcb96d977c811f5739410b7de796183e21[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 14:19:27 2025 -0400
+
+    ÈAdding new tags to identify each layers in the primarygamelayout so calls to PrimaryGameLayout::Push*** can target registered layers
+
+[33mcommit 77e2b1e337073dbed30b9133d9a8d3e1d232c635[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 13:49:30 2025 -0400
+
+    ÈAdding project configuration changes required to push a PrimaryGameLayout on screen.
+
+[33mcommit ba7030fd972d9a1b61f6afe46ad02c19f1f77a24[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Tue Apr 29 11:17:25 2025 -0400
+
+    Update README.md
+    
+    updating links to miro board as im limited to 3 actives boards
+
+[33mcommit 1a496663d58e360eeff7c274d8a87b3d6a5e96bc[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 11:00:09 2025 -0400
+
+    added explicit comments for engine change clarity
+
+[33mcommit ca508dc91f3c240173f9d077640fe6e24a4048ce[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 10:58:38 2025 -0400
+
+    fixing crash on possible nullptr access. the ptr to the Streamable Handle might be null and prevent giving back the token to restore user input
+
+[33mcommit d0c90cabb004ea84cdb632e82c1b40d085b8b004[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Tue Apr 29 09:24:43 2025 -0400
+
+    Update README.md
+    
+    sneaky renaming url link
+
+[33mcommit 0101ca67953c65bcf65bd4e5d8e3601d3486f703[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 09:23:53 2025 -0400
+
+    Adding new plugins to support pushing content to the game viewport. Extra plugins were added due to CommonGame dependencies but i<ll still use ModularGameplayActors to support GFP correctly
+
+[33mcommit 59499d27f946a77bc65f417029e5a033bee426bb[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Tue Apr 29 09:15:47 2025 -0400
+
+    Update README.md
+    
+    Adding url to the blank miro for my next investigation as I will not add a custom layering system and prompt system just to run test case on the AVVM plugin
+
+[33mcommit 1fa52abd77852269c54b92f1b78821993d87e257[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 09:03:43 2025 -0400
+
+    adding unstaged files before adding new Common Game plugin and dependencies to the project
+
+[33mcommit d18fb43f3c9df9585198597a66dabe22065853cf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 08:44:00 2025 -0400
+
+    Èadding comments to clarify the initialization flow of the Actor system/and the affected presenters to ensure proper usage with the notification system
+
+[33mcommit 9019a5d833521e72dff4676dca7b19373781949b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Tue Apr 29 08:33:15 2025 -0400
+
+    Adding reference to the widget class managed by the PResenter
+
+[33mcommit 5e640103c4a5a8d5999177fda8fce8c5b3ba92f4[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 15:23:47 2025 -0400
+
+    modifying cheat signature as the tag channel will also equal the ItemName for the RegistryId from which we return the resources for the payload + Added new dummy payload
+
+[33mcommit 2c147bfb67cb3770a7611a3a90fe36bf85ec0113[m
+Merge: a202da2 e161bff
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 15:12:25 2025 -0400
+
+    Merge branch 'master' of https://github.com/guyllaumedemers/UE-AVVM
+
+[33mcommit a202da2e075db61063bdeed810bd465c2e57c6ac[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 15:12:15 2025 -0400
+
+    ÈUpdating Struct naming to follow plugin Prefix convention: i.e AVVM. Added new Cheat class + Data class to work with the Registry System. No custom DataRegistrySources required. Only using the DataTable for now.
+
+[33mcommit e161bff71755aee733258dbab10840d049ca4c9c[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Mon Apr 28 14:38:52 2025 -0400
+
+    Update README.md
+    
+    Adding Miro for on-going investigation on DataRegistry and DataRegistrySources
+
+[33mcommit 35f897750404b4b2fbdac2044ac6c069b3326ec7[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 11:09:41 2025 -0400
+
+    fixing dependency handling with UBT as plugin and project were not listing the correct dependencies and prevented the local GF plugin directory to appear
+
+[33mcommit d8710b89cea4cbc5ae88614373f6f4fc7d78256f[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 10:53:11 2025 -0400
+
+    adding CHeatExtension base class (empty) to later on test the Notification Subsystem and Presenter system
+
+[33mcommit 20206ad345f364c60dc1f2ba2c83b3e777209762[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 10:30:27 2025 -0400
+
+    fixing ShouldCreateSubsystem so we only target the GameWorld and ONly instanced when not dedicated server as other NetMode config will require local support for UI
+
+[33mcommit 8da72d797b833912d06e8ef531903fee765432c9[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 10:11:00 2025 -0400
+
+    updating ShouldCreateSubsystem so we retrieve the World from the Outer since the call to GetWorld is invalid during the initialization phase
+
+[33mcommit 29330e19a1d20d03cad2eb2c2f7903a54c1b940a[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 09:57:31 2025 -0400
+
+    removing ensure in ShouldCreateSubystem to prevent Editor World creation from hitting this as we only expect this to be valid when running the Game World
+
+[33mcommit 0f12290294e2acb5cb65231803068529b5f56acf[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 09:50:07 2025 -0400
+
+    updating payload type in notification subsystem to take in a TInstancedStruct<FNotificationPayload> instead of the FInstancedStruct. Makes type more obvious
+
+[33mcommit 1819a57b52cd99b38dde24249c9cb98a62ae142b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 09:46:05 2025 -0400
+
+    fixing dll linkage for the new log category and missing includes for MVVMViewModelBase in Presenter class + adding missing reference to GameplayTags in AVVM module .cs
+
+[33mcommit 81d56028b4e61b3d1cc0b679c9f37229d24625bb[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Mon Apr 28 09:36:49 2025 -0400
+
+    adding trace macro in observer resolve function for later previewing of performance impact due to pre-filtering operation. added new log category to confirm the state of subsystem with how their ShouldCreateSubystem function is implemented
+
+[33mcommit b65076c936e575aa4e659dd24795b24e15cce8df[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 21:31:48 2025 -0400
+
+    adding missing cleanup statement in deinitialize
+
+[33mcommit 2161eaa334abadc3bf99d103bd366d41e8d140bc[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 21:30:24 2025 -0400
+
+    updating impl of notification subsystem to allow adding/removing observers. currently missing filtering of observers before broadcasting to a set as requirements are undefined foir this action
+
+[33mcommit 88d1e9ba4d849b147432c5216d45caa2175fe65b[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 16:10:06 2025 -0400
+
+    adding missing dependecy reference in Build.cs and .uproject + fixed dllexport for interface defined for the observer pattern
+
+[33mcommit fde474339844ce057edab3a15b81191f68cae1af[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 16:08:28 2025 -0400
+
+    unreal still compiling while im doing local changes... added new plugin dependecy for FInstancedStruct and a new boiler class for a notification system that ties Game Code and Presenters
+
+[33mcommit f45227fc011b48f89fea8f52007c5feec78c9d28[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 15:16:19 2025 -0400
+
+    ÈÈadding memory trace in AVVM Component + defining custom tag for LLM so we can trace memory allocation for our tag
+
+[33mcommit 03930a8c4d9a1c7664e6e91b5322fc5f4a1035da[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 14:27:31 2025 -0400
+
+    adding missing handling of deinitialization phase for world subsystem, so resources are correctly freed. will add tracing next
+
+[33mcommit 859467e3b8761a92f3cac6d90cf3d2e16a9dd8a2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 13:44:49 2025 -0400
+
+    updating miro preview image for UAVVM project
+
+[33mcommit 3610e5b31c7d1c01508682ae5ae50b341cd02ed6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 13:40:21 2025 -0400
+
+    adding missing call/property to cache the VM on the Presenter UObject
+
+[33mcommit a54f3f1a9824f42a4b9e83c226db1a4a27c683af[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 13:38:46 2025 -0400
+
+    updating base class boiler code with implementation details to track usage of an actor by a set of presenters. app is currently compiling on my patoto computer!
+
+[33mcommit 7fd58f8e121adfb500c3fd2953b69ed850b6a696[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:55:04 2025 -0400
+
+    Update README.md
+    
+    fixing typo
+
+[33mcommit 56af4e1dc0f771677ba7898201a3dc526cabdeb6[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 10:46:21 2025 -0400
+
+    pushing base classes for AVVM plugin
+
+[33mcommit 1054f0956f618e269eceed136294e88e74be3642[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:44:43 2025 -0400
+
+    Update README.md
+    
+    Adding link to empty miro UE-MVVM (Will expand in the next few days)
+
+[33mcommit 3950960431718816a1eff257ee03f685c7bb9531[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:39:33 2025 -0400
+
+    Update README.md
+
+[33mcommit 92257b023ddd29e1cd6091ce948325cdfdc6440d[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:26:57 2025 -0400
+
+    Update README.md
+
+[33mcommit 225c30f66d1253b92111dc3b5785b7f3b8f379ab[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:25:59 2025 -0400
+
+    Update README.md (#1)
+
+[33mcommit b336d3ba57a878ccfc7d49db738ea4d841c825d1[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:19:35 2025 -0400
+
+    Update README.md
+    
+    updating README
+
+[33mcommit 40836485235856807baf1897017bafe38bdfcbad[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sun Apr 27 10:17:37 2025 -0400
+
+    Update README.md
+    
+    updating link to png res
+
+[33mcommit 694d92184f1a0a17e5eeb0eaa43170c0d95319f5[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sun Apr 27 10:16:15 2025 -0400
+
+    updating README with AVVM mindmap + gamefeature mindmap + resources png
+
+[33mcommit d2d38d0ec889365212a4f6fc2a7e3f7dfbbe44f2[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Apr 26 16:24:24 2025 -0400
+
+    disabling UnityBuild & PCH flag to ensure IWYU principle and not rely on PCH when running project
+
+[33mcommit 21f6d09588690762aa4b4146142cbb3b5fd39066[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Apr 26 15:25:19 2025 -0400
+
+    updating project settings configuration to reference requirements to the project roadmap
+
+[33mcommit c3be5d1dbb0713c592514cc522a168d108df4207[m
+Author: guyllaume demers <73708367+guyllaumedemers@users.noreply.github.com>
+Date:   Sat Apr 26 14:47:03 2025 -0400
+
+    Create README.md
+    
+    init readme
+
+[33mcommit 4696f632fa1966a60b765db14c922cc2acdc3b20[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Apr 26 14:20:01 2025 -0400
+
+    adding lfs tracking of *.uasset files
+
+[33mcommit df0b12745604445244793e74fb1f9dcfd44d3acd[m
+Author: guyllaumedemers <guyllaume_demers@hotmail.fr>
+Date:   Sat Apr 26 14:16:44 2025 -0400
+
+    initial commit with .gitignore setup

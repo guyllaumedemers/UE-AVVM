@@ -26,27 +26,6 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "GameFramework/PlayerState.h"
-#include "Net/UnrealNetwork.h"
-
-void UActorInteractionImpl::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UActorInteractionImpl, Records);
-}
-
-bool UActorInteractionImpl::IsSupportedForNetworking() const
-{
-	return true;
-}
-
-#if UE_WITH_IRIS
-void UActorInteractionImpl::RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags)
-{
-	// Build descriptors and allocate PropertyReplicaitonFragments for this object
-	UE::Net::FReplicationFragmentUtil::CreateAndRegisterFragmentsForObject(this, Context, RegistrationFlags);
-}
-#endif // UE_WITH_IRIS
 
 void UActorInteractionImpl::SafeBegin()
 {
@@ -84,25 +63,26 @@ void UActorInteractionImpl::SafeEnd()
 	OwningOuter.Reset();
 }
 
-void UActorInteractionImpl::HandleBeginOverlap(const AActor* NewInstigator,
+bool UActorInteractionImpl::HandleBeginOverlap(const TArray<UInteraction*>& NewRecords,
+                                               const AActor* NewInstigator,
                                                const AActor* NewTarget,
                                                const bool bShouldPreventContingency)
 {
 	if (!IsValid(NewTarget))
 	{
-		return;
+		return false;
 	}
 
 	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(NewTarget);
 	if (!bHasActorAuthority)
 	{
-		return;
+		return false;
 	}
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		return;
+		return false;
 	}
 
 	UE_LOG(LogGameplay,
@@ -112,36 +92,30 @@ void UActorInteractionImpl::HandleBeginOverlap(const AActor* NewInstigator,
 	       *NewInstigator->GetName(),
 	       *NewTarget->GetName());
 
-	const bool bResult = AttemptBeginOverlap(NewInstigator /*World Actor*/, bShouldPreventContingency);
-	if (bResult)
-	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Attempt Executing Server_AddRecord..."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
-
-		ServerRPC_AddRecord(NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	}
+	return AttemptBeginOverlap(NewRecords,
+	                           NewInstigator /*World Actor*/,
+	                           bShouldPreventContingency);
 }
 
-void UActorInteractionImpl::HandleEndOverlap(const AActor* NewInstigator,
+bool UActorInteractionImpl::HandleEndOverlap(const TArray<UInteraction*>& NewRecords,
+                                             const AActor* NewInstigator,
                                              const AActor* NewTarget)
 {
 	if (!IsValid(NewTarget))
 	{
-		return;
+		return false;
 	}
 
 	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(NewTarget);
 	if (!bHasActorAuthority)
 	{
-		return;
+		return false;
 	}
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		return;
+		return false;
 	}
 
 	UE_LOG(LogGameplay,
@@ -151,19 +125,29 @@ void UActorInteractionImpl::HandleEndOverlap(const AActor* NewInstigator,
 	       *NewInstigator->GetName(),
 	       *NewTarget->GetName());
 
-	const bool bResult = AttemptEndOverlap(NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	if (bResult)
-	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RemoveRecord..."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
+	return AttemptEndOverlap(NewRecords,
+	                         NewInstigator /*World Actor*/,
+	                         NewTarget /*AController*/);
+}
 
-		ServerRPC_RemoveRecord(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& OldRecords,
+                                                 const TArray<UInteraction*>& NewRecords)
+{
+	const int32 OldNum = OldRecords.Num();
+	const int32 NewNum = NewRecords.Num();
+
+	if (OldNum < NewNum)
+	{
+		HandleNewRecord(NewRecords);
+	}
+	else if (OldNum > NewNum)
+	{
+		HandleOldRecord(NewRecords, OldRecords);
 	}
 }
 
-TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const AActor* NewInstigator,
+TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
+                                                                          const AActor* NewInstigator,
                                                                           const AActor* NewTarget) const
 {
 	return Records.FilterByPredicate([&](const UInteraction* Interaction)
@@ -172,7 +156,8 @@ TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const 
 	});
 }
 
-TArray<UInteraction*> UActorInteractionImpl::GetPartialMatchingInteractions(const AActor* NewInstigator) const
+TArray<UInteraction*> UActorInteractionImpl::GetPartialMatchingInteractions(const TArray<UInteraction*>& Records,
+                                                                            const AActor* NewInstigator) const
 {
 	return Records.FilterByPredicate([&](const UInteraction* Interaction)
 	{
@@ -180,7 +165,9 @@ TArray<UInteraction*> UActorInteractionImpl::GetPartialMatchingInteractions(cons
 	});
 }
 
-bool UActorInteractionImpl::AttemptBeginOverlap(const AActor* NewInstigator, const bool bShouldPreventContingency)
+bool UActorInteractionImpl::AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
+                                                const AActor* NewInstigator,
+                                                const bool bShouldPreventContingency)
 {
 	if (!bShouldPreventContingency)
 	{
@@ -188,7 +175,7 @@ bool UActorInteractionImpl::AttemptBeginOverlap(const AActor* NewInstigator, con
 	}
 
 	bool bCanInteract = true;
-	for (const UInteraction* Interaction : GetPartialMatchingInteractions(NewInstigator))
+	for (const UInteraction* Interaction : GetPartialMatchingInteractions(NewRecords, NewInstigator))
 	{
 		if (IsValid(Interaction) && !Interaction->CanInteract())
 		{
@@ -201,58 +188,12 @@ bool UActorInteractionImpl::AttemptBeginOverlap(const AActor* NewInstigator, con
 	return bExecute;
 }
 
-bool UActorInteractionImpl::AttemptEndOverlap(const AActor* NewInstigator,
+bool UActorInteractionImpl::AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
+                                              const AActor* NewInstigator,
                                               const AActor* NewTarget)
 {
-	const auto MatchingInteractions = GetExactMatchingInteractions(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
+	const auto MatchingInteractions = GetExactMatchingInteractions(NewRecords, NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
 	return !MatchingInteractions.IsEmpty();
-}
-
-void UActorInteractionImpl::ServerRPC_AddRecord_Implementation(const AActor* NewInstigator,
-                                                               const AActor* NewTarget)
-{
-	TArray<UInteraction*> OldRecords = Records;
-
-	auto* Transaction = NewObject<UInteraction>(this);
-	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
-
-	Records.Add(Transaction);
-
-	OnRep_RecordModified(OldRecords);
-}
-
-void UActorInteractionImpl::ServerRPC_RemoveRecord_Implementation(const AActor* NewInstigator,
-                                                                  const AActor* NewTarget)
-{
-	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Interaction)
-	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
-	});
-
-	if (SearchResult != nullptr)
-	{
-		TArray<UInteraction*> OldRecords = Records;
-
-		UInteraction* Transaction = SearchResult->Get();
-		Records.Remove(Transaction);
-
-		OnRep_RecordModified(OldRecords);
-	}
-}
-
-void UActorInteractionImpl::OnRep_RecordModified(TArray<UInteraction*> OldRecords)
-{
-	const int32 OldNum = OldRecords.Num();
-	const int32 NewNum = Records.Num();
-
-	if (OldNum < NewNum)
-	{
-		HandleNewRecord(Records);
-	}
-	else if (OldNum > NewNum)
-	{
-		HandleOldRecord(OldRecords);
-	}
 }
 
 void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewRecords)
@@ -292,9 +233,13 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	APlayerState* PlayerState = PC->PlayerState;
 
 #if WITH_SERVER_CODE
-	auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
-	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, PlayerState /*APlayerState*/, const_cast<AActor*>(Instigator)/*World Actor*/);
-	AddGameplayEffectHandle(ASC, GESpecHandle);
+	const AActor* Owner = Outer->GetOwner();
+	if (IsValid(Owner) && Owner->GetLocalRole() == ROLE_Authority)
+	{
+		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, PlayerState /*APlayerState*/, const_cast<AActor*>(Instigator)/*World Actor*/);
+		AddGameplayEffectHandle(ASC, GESpecHandle);
+	}
 #endif
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
@@ -304,7 +249,8 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	                                        FAVVMNotificationPayload::Empty);
 }
 
-void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& OldRecords)
+void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewRecords,
+                                            const TArray<UInteraction*>& OldRecords)
 {
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -324,14 +270,14 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& OldReco
 	}
 
 	const UInteraction* FoundMatch = nullptr;
-	for (const TObjectPtr<UInteraction>& OldRecord : OldRecords)
+	for (const UInteraction* OldRecord : OldRecords)
 	{
 		if (!IsValid(OldRecord))
 		{
 			continue;
 		}
 
-		const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const TObjectPtr<UInteraction>& Param)
+		const UInteraction* const* SearchResult = NewRecords.FindByPredicate([&](const UInteraction* Param)
 		{
 			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetInstigator() /*World Actor*/, OldRecord->GetTarget() /*APlayerCharacter*/);
 		});
@@ -362,8 +308,12 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& OldReco
 	APlayerState* PlayerState = PC->PlayerState;
 
 #if WITH_SERVER_CODE
-	auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
-	RemoveGameplayEffectHandle(ASC);
+	const AActor* Owner = Outer->GetOwner();
+	if (IsValid(Owner) && Owner->GetLocalRole() == ROLE_Authority)
+	{
+		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
+		RemoveGameplayEffectHandle(ASC);
+	}
 #endif
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,

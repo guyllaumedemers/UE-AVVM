@@ -22,6 +22,7 @@
 #include "ActorInteractionImpl.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "Interaction.h"
 #include "Components/ShapeComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
@@ -39,7 +40,7 @@ void UActorInteractionComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UActorInteractionComponent, InteractionImpl);
+	DOREPLIFETIME(UActorInteractionComponent, Records);
 }
 
 void UActorInteractionComponent::BeginPlay()
@@ -66,15 +67,19 @@ void UActorInteractionComponent::BeginPlay()
 	{
 		InteractionImpl = NewObject<UActorInteractionImpl>(this, InteractionImplClass);
 		InteractionImpl->SafeBegin();
-		AddReplicatedSubObject(InteractionImpl);
 	}
 
-	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-	if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
+#if WITH_SERVER_CODE
+	if (GetOwnerRole() == ROLE_Authority)
 	{
-		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
-		CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
+		auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
+		if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
+		{
+			CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
+			CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
+		}
 	}
+#endif
 
 	OwningOuter = Outer;
 }
@@ -83,10 +88,20 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 {
 	Super::EndPlay(EndPlayReason);
 
+#if WITH_SERVER_CODE
+	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
+	{
+		if (IsValid(*Iterator))
+		{
+			RemoveReplicatedSubObject(Iterator->Get());
+			Iterator.RemoveCurrentSwap();
+		}
+	}
+#endif
+
 	if (IsValid(InteractionImpl))
 	{
 		InteractionImpl->SafeEnd();
-		RemoveReplicatedSubObject(InteractionImpl);
 	}
 
 	const auto* Outer = OwningOuter.Get();
@@ -95,12 +110,17 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 		return;
 	}
 
-	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-	if (IsValid(CollisionComponent))
+#if WITH_SERVER_CODE
+	if (GetOwnerRole() == ROLE_Authority)
 	{
-		CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
-		CollisionComponent->OnComponentEndOverlap.RemoveAll(this);
+		auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
+		if (IsValid(CollisionComponent))
+		{
+			CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
+			CollisionComponent->OnComponentEndOverlap.RemoveAll(this);
+		}
 	}
+#endif
 
 	UE_LOG(LogGameplay,
 	       Log,
@@ -125,9 +145,27 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	}
 
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
-	if (IsValid(Impl))
+	if (!IsValid(Impl))
 	{
-		Impl->HandleBeginOverlap(OwningOuter.Get()/*World Actor*/, OtherActor->GetInstigatorController()/*AController*/, bShouldPreventContingency);
+		return;
+	}
+
+	const AActor* Instigator = OwningOuter.Get();
+	const AActor* Target = OtherActor->GetInstigatorController();
+
+	const bool bResult = Impl->HandleBeginOverlap(Records,
+	                                              Instigator/*World Actor*/,
+	                                              Target/*AController*/,
+	                                              bShouldPreventContingency);
+
+	if (bResult)
+	{
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Attempt Executing Server_AddRecord..."),
+		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
+
+		Server_AddRecord(Instigator, Target);
 	}
 }
 
@@ -142,8 +180,67 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	}
 
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
+	if (!IsValid(Impl))
+	{
+		return;
+	}
+
+	const AActor* Instigator = OwningOuter.Get();
+	const AActor* Target = OtherActor->GetInstigatorController();
+
+	const bool bResult = Impl->HandleEndOverlap(Records,
+	                                            Instigator/*World Actor*/,
+	                                            Target/*AController*/);
+
+	if (bResult)
+	{
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RemoveRecord..."),
+		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
+
+		Server_RemoveRecord(Instigator, Target);
+	}
+}
+
+void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
+                                                  const AActor* NewTarget)
+{
+	TArray<UInteraction*> OldRecords = Records;
+
+	auto* Transaction = NewObject<UInteraction>(this);
+	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+	AddReplicatedSubObject(Transaction);
+	Records.Add(Transaction);
+
+	OnRep_RecordModified(OldRecords);
+}
+
+void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator,
+                                                     const AActor* NewTarget)
+{
+	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Interaction)
+	{
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
+	});
+
+	if (SearchResult != nullptr)
+	{
+		TArray<UInteraction*> OldRecords = Records;
+
+		UInteraction* Transaction = SearchResult->Get();
+		RemoveReplicatedSubObject(Transaction);
+		Records.Remove(Transaction);
+
+		OnRep_RecordModified(OldRecords);
+	}
+}
+
+void UActorInteractionComponent::OnRep_RecordModified(TArray<UInteraction*> OldRecords)
+{
+	UActorInteractionImpl* Impl = InteractionImpl.Get();
 	if (IsValid(Impl))
 	{
-		Impl->HandleEndOverlap(OwningOuter.Get()/*World Actor*/, OtherActor->GetInstigatorController()/*AController*/);
+		Impl->HandleRecordModified(OldRecords, Records);
 	}
 }

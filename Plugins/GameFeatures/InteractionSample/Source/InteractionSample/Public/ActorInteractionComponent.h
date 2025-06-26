@@ -59,14 +59,26 @@ protected:
 	                                    UPrimitiveComponent* OtherComp,
 	                                    int32 OtherBodyIndex);
 
+	void Server_AddRecord(const AActor* NewInstigator,
+	                      const AActor* NewTarget);
+
+	void Server_RemoveRecord(const AActor* NewInstigator,
+	                         const AActor* NewTarget);
+
+	UFUNCTION()
+	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldPreventContingency = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UActorInteractionImpl> InteractionImpl = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_RecordModified")
+	TArray<TObjectPtr<UInteraction>> Records;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

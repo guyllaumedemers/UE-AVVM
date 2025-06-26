@@ -80,6 +80,5 @@ private:
 	void operator()(const AActor* NewInstigator,
 	                const AActor* NewTarget);
 
-	friend class UGameStateInteractionComponent;
-	friend class UActorInteractionImpl;
+	friend class UActorInteractionComponent;
 };
