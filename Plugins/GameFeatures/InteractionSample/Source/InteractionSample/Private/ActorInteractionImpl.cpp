@@ -297,11 +297,11 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	AddGameplayEffectHandle(ASC, GESpecHandle);
 #endif
 
-	UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(this,
-	                                    StartPromptInteractionChannel,
-	                                    PC,
-	                                    Instigator,
-	                                    FAVVMNotificationPayload::Empty);
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+	                                        StartPromptInteractionChannel,
+	                                        PC,
+	                                        Instigator,
+	                                        FAVVMNotificationPayload::Empty);
 }
 
 void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& OldRecords)
@@ -366,11 +366,11 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& OldReco
 	RemoveGameplayEffectHandle(ASC);
 #endif
 
-	UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(this,
-	                                    StopPromptInteractionChannel,
-	                                    PC,
-	                                    Instigator,
-	                                    FAVVMNotificationPayload::Empty);
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+	                                        StopPromptInteractionChannel,
+	                                        PC,
+	                                        Instigator,
+	                                        FAVVMNotificationPayload::Empty);
 }
 
 void UActorInteractionImpl::AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle)

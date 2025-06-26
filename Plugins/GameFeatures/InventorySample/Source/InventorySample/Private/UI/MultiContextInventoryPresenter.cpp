@@ -43,7 +43,13 @@ void UMultiContextInventoryPresenter::SafeBeginPlay()
 		return;
 	}
 
-	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(PlayerState->GetOwningController());
+	APlayerController* PlayerController = PlayerState->GetPlayerController();
+	if (!IsValid(PlayerController))
+	{
+		return;
+	}
+
+	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(PlayerController);
 	if (bHasActorAuthority)
 	{
 		OwnerASC = PlayerState->GetComponentByClass<UAbilitySystemComponent>();

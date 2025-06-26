@@ -42,10 +42,10 @@ bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
 			return false;
 		}
 
-		const bool bIsRuningActorOnClientDuringStartup = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
-		const bool bIsRuningActorOnClientPostStartup = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
+		const bool bIsRunningActorClientOnServer = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
+		const bool bIsRunningActorOnClient = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
 		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
-		return bIsRuningActorOnClientDuringStartup || bIsRuningActorOnClientPostStartup || bIsRunningActorOnServer;
+		return bIsRunningActorOnClient || bIsRunningActorClientOnServer || bIsRunningActorOnServer;
 	}
 	else if (NetMode == NM_DedicatedServer)
 	{

@@ -70,8 +70,9 @@ void UActorInventoryComponent::BeginPlay()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UActorInventoryComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UActorInventoryComponent::StaticClass()->GetName(),
 	       *Outer->GetName())
 }
 
@@ -95,8 +96,9 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UActorInventoryComponent from Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UActorInventoryComponent::StaticClass()->GetName(),
 	       *Outer->GetName())
 
 	OwningOuter.Reset();
@@ -146,7 +148,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 		{
 			UE_LOG(LogGameplay,
 			       Log,
-			       TEXT("Executed from \"%s\". Failed to Meet Item_\"%s\" Requirements."),
+			       TEXT("Executed from \"%s\". Failed to Meet \"%s\" Requirements."),
 			       IsServerOrClientString,
 			       *ItemAsset->GetName());
 
@@ -155,7 +157,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Executed from \"%s\". New Item_\"%s\" Recorded."),
+		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
 		       IsServerOrClientString,
 		       *ItemAsset->GetName());
 
@@ -280,7 +282,7 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Item Collection modified on Actor \"%s\"! Collection %s"),
+	       TEXT("Executed from \"%s\". Item Collection modified on Outer \"%s\"! Collection %s"),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       SV.GetData());

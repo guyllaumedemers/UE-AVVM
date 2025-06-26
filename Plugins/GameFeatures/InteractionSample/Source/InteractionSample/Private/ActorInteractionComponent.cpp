@@ -56,7 +56,8 @@ void UActorInteractionComponent::BeginPlay()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UActorInteractionComponent to Outer \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding \"%s\" Class Instance to Outer \"%s\"."),
+	       *UActorInteractionComponent::StaticClass()->GetName(),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
@@ -64,11 +65,8 @@ void UActorInteractionComponent::BeginPlay()
 	                     TEXT("Invalid InteractionImplClass!")))
 	{
 		InteractionImpl = NewObject<UActorInteractionImpl>(this, InteractionImplClass);
-	}
-
-	if (IsValid(InteractionImpl))
-	{
 		InteractionImpl->SafeBegin();
+		AddReplicatedSubObject(InteractionImpl);
 	}
 
 	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
@@ -88,6 +86,7 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	if (IsValid(InteractionImpl))
 	{
 		InteractionImpl->SafeEnd();
+		RemoveReplicatedSubObject(InteractionImpl);
 	}
 
 	const auto* Outer = OwningOuter.Get();
@@ -105,7 +104,8 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UActorInteractionComponent to Outer \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing \"%s\" Class Instance to Outer \"%s\"."),
+	       *UActorInteractionComponent::StaticClass()->GetName(),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
