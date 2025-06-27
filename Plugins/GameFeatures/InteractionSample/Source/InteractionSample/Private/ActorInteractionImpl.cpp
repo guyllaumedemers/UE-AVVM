@@ -148,8 +148,19 @@ void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& Ol
 
 bool UActorInteractionImpl::HandleActorInteraction(const AActor* NewTarget)
 {
-	// TODO @gdemers Define a default behaviour. Like an Single-Click Open action to some system then add Hold-Down for x time interaction, etc...
-	// maybe start an Ability Task?
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return false;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Executing \"%s\" Class Interaction on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UActorInteractionImpl::StaticClass()->GetName(),
+	       *Outer->GetName());
+
 	return true;
 }
 

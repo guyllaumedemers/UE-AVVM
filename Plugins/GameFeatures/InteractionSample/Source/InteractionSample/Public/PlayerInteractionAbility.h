@@ -62,4 +62,8 @@ public:
 	                        const FGameplayAbilityActivationInfo ActivationInfo,
 	                        bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
 };

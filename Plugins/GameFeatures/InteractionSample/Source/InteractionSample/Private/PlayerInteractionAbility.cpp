@@ -111,8 +111,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	// TODO @gdemers Check how GE Query work!
-	FGameplayEffectQuery GEQuery;
+	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAllEffectTags(GEQueryTags);
 	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = ASC->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
 	if (GEActiveHandles.IsEmpty())
 	{
