@@ -111,7 +111,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAllEffectTags(GEQueryTags);
+	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(GEQueryTags);
 	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = ASC->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
 	if (GEActiveHandles.IsEmpty())
 	{
