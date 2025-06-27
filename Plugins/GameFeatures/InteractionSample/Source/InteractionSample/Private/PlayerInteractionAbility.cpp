@@ -21,6 +21,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "ActorInteractionComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
@@ -44,7 +45,7 @@ void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* A
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
 	       *Outer->GetName());
@@ -98,10 +99,60 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
 	       *GetName(),
 	       *PC->GetName());
+
+	const auto* ASC = ModifiedActorInfo.AbilitySystemComponent.Get();
+	if (!IsValid(ASC))
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	// TODO @gdemers Check how GE Query work!
+	FGameplayEffectQuery GEQuery;
+	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = ASC->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
+	if (GEActiveHandles.IsEmpty())
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	ensureAlwaysMsgf(GEActiveHandles.Num() == 1, TEXT("Multiple Matches Found! There should only ever be one match!"));
+
+	const FActiveGameplayEffect* GEActive = ASC->GetActiveGameplayEffect(GEActiveHandles[0]);
+	if (GEActive == nullptr)
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
+	const AActor* EffectCauser = GECtx.GetEffectCauser();
+	if (!IsValid(EffectCauser))
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	const auto* InteractionComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
+	if (!IsValid(InteractionComponent))
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	const bool bResult = InteractionComponent->ExecuteInteraction(PC);
+	if (bResult)
+	{
+		CommitAbility(Handle, ActorInfo, ActivationInfo);
+	}
+	else
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+	}
 }
 
 void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

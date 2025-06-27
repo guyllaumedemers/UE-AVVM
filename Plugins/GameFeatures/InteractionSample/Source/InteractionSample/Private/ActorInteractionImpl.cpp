@@ -146,6 +146,13 @@ void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& Ol
 	}
 }
 
+bool UActorInteractionImpl::HandleActorInteraction(const AActor* NewTarget)
+{
+	// TODO @gdemers Define a default behaviour. Like an Single-Click Open action to some system then add Hold-Down for x time interaction, etc...
+	// maybe start an Ability Task?
+	return true;
+}
+
 TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
                                                                           const AActor* NewInstigator,
                                                                           const AActor* NewTarget) const
@@ -224,28 +231,24 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	const AActor* Instigator = TopRecord->GetInstigator();
 	const AActor* Target = TopRecord->GetTarget();
 
-	const auto* PC = Cast<AController>(Target);
-	if (!IsValid(PC))
+	const auto* Controller = Cast<AController>(Target);
+	if (!IsValid(Controller))
 	{
 		return;
 	}
 
-	APlayerState* PlayerState = PC->PlayerState;
-
 #if WITH_SERVER_CODE
-	if (PC->HasAuthority())
+	if (Controller->HasAuthority())
 	{
-		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect,
-		                                                                                                     PlayerState /*APlayerState*/,
-		                                                                                                     const_cast<AActor*>(Instigator)/*World Actor*/);
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, const_cast<AController*>(Controller), const_cast<AActor*>(Instigator));
+		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
 		AddGameplayEffectHandle(ASC, GESpecHandle);
 	}
 #endif
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
 	                                        StartPromptInteractionChannel,
-	                                        PC,
+	                                        Controller,
 	                                        Instigator,
 	                                        FAVVMNotificationPayload::Empty);
 }
@@ -306,12 +309,10 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 		return;
 	}
 
-	APlayerState* PlayerState = PC->PlayerState;
-
 #if WITH_SERVER_CODE
 	if (PC->HasAuthority())
 	{
-		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PlayerState);
+		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PC->PlayerState);
 		RemoveGameplayEffectHandle(ASC);
 	}
 #endif

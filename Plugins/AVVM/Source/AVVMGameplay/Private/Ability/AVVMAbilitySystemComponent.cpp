@@ -117,7 +117,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Executed from \"%s\". Granting New Ability \"%s\" to Outer \"%s\"."),
+		       TEXT("Executed from \"%s\". Granting New Ability \"%s\" on Outer \"%s\"."),
 		       IsServerOrClientString,
 		       *GameplayAbilityClass->GetName(),
 		       *Outer->GetName());
@@ -131,9 +131,15 @@ void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool Tag
 	Super::OnTagUpdated(Tag, TagExists);
 
 	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Modifying Tag \"%s\"."),
+	       TEXT("Executed from \"%s\". Modifying Tag \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Tag.ToString());
+	       *Tag.ToString(),
+	       *Outer->GetName());
 }

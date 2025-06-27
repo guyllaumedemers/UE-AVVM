@@ -130,6 +130,11 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	OwningOuter.Reset();
 }
 
+bool UActorInteractionComponent::ExecuteInteraction(const AActor* NewTarget) const
+{
+	return IsValid(InteractionImpl) ? InteractionImpl->HandleActorInteraction(NewTarget) : false;
+}
+
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
                                                                   AActor* OtherActor,
                                                                   UPrimitiveComponent* OtherComp,

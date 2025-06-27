@@ -56,6 +56,8 @@ public:
 	void HandleRecordModified(const TArray<UInteraction*>& OldRecords,
 	                          const TArray<UInteraction*>& NewRecords);
 
+	virtual bool HandleActorInteraction(const AActor* NewTarget);
+
 protected:
 	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
 	                                                   const AActor* NewInstigator,

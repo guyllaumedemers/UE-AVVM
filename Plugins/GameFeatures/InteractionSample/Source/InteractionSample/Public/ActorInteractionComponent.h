@@ -28,6 +28,7 @@
 
 #include "ActorInteractionComponent.generated.h"
 
+class UAbilitySystemComponent;
 class UActorInteractionImpl;
 
 /**
@@ -43,6 +44,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	bool ExecuteInteraction(const AActor* NewTarget) const;
 
 protected:
 	UFUNCTION()
