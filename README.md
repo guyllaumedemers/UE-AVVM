@@ -55,3 +55,7 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime**, **InteractionSample** and **InventorySample**. Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
 
+### Interaction Sample
+
+This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. Implementation details are still under construction for Single-Click, Double-Click and Hold interactions. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
+
