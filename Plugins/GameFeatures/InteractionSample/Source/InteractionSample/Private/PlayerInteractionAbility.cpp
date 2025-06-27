@@ -143,6 +143,10 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
+	// TODO @gdemers ServerRPC call should be executed and update the state of the interaction on the Server
+	// as we may want to prevent executing an interaction on already locked interactable actor.
+	// example : Server (Grants CanActivate) -> Client (Receive GE with Tags) -> TryExecute (if Interaction not locked) -> Poke Server ->
+	// Server (check state of Interaction - Lock if required) -> Tell client to execute and notify all Clients to play Animation if required.
 	const bool bResult = InteractionComponent->ExecuteInteraction(PC);
 	if (bResult)
 	{
