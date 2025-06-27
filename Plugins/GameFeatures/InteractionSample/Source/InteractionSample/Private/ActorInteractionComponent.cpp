@@ -224,7 +224,7 @@ void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator
 {
 	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Interaction)
 	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	});
 
 	if (SearchResult != nullptr)

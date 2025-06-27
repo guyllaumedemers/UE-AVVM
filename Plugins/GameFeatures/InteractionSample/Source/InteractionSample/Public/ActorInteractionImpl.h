@@ -33,9 +33,20 @@ class UGameplayEffect;
 class UInteraction;
 
 /**
- * 
+ *	Class Description :
+ *
+ *	UActorInteractionImpl is the base class for executing a player interaction with a world actor. The implementation details are expected to be overriden to support behaviour specific to your
+ *	gameplay.
+ *
+ *		Example :
+ *
+ *			* Single Click
+ *			* Double Click
+ *			* Hold
+ *
+ *		All cases could be used to interact with world actors like : Doors, Chess, NPC, etc...
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(Abstract, BlueprintType, NotBlueprintable)
 class INTERACTIONSAMPLE_API UActorInteractionImpl : public UObject
 {
 	GENERATED_BODY()

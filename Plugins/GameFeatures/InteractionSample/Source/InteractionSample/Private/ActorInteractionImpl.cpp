@@ -170,7 +170,7 @@ TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const 
 {
 	return Records.FilterByPredicate([&](const UInteraction* Interaction)
 	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
+		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	});
 }
 
@@ -210,7 +210,7 @@ bool UActorInteractionImpl::AttemptEndOverlap(const TArray<UInteraction*>& NewRe
                                               const AActor* NewInstigator,
                                               const AActor* NewTarget)
 {
-	const auto MatchingInteractions = GetExactMatchingInteractions(NewRecords, NewInstigator /*World Actor*/, NewTarget /*APlayerCharacter*/);
+	const auto MatchingInteractions = GetExactMatchingInteractions(NewRecords, NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	return !MatchingInteractions.IsEmpty();
 }
 
@@ -294,7 +294,7 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 
 		const UInteraction* const* SearchResult = NewRecords.FindByPredicate([&](const UInteraction* Param)
 		{
-			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetInstigator() /*World Actor*/, OldRecord->GetTarget() /*APlayerCharacter*/);
+			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetInstigator() /*World Actor*/, OldRecord->GetTarget() /*AController*/);
 		});
 
 		if (SearchResult == nullptr)
