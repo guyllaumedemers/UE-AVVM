@@ -55,6 +55,25 @@ void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo*
                                                 const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
+	const AActor* Outer = ActorInfo->OwnerActor.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *GetName(),
+	       *Outer->GetName());
 }
 
 bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -87,10 +106,12 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
+	auto ModifiedActorInfo = FAVVMGameplayAbilityActorInfo(*ActorInfo);
+	OverrideActorInfo = MakeShared<FAVVMGameplayAbilityActorInfo>(ModifiedActorInfo);
+	SetCurrentActorInfo(Handle, &ModifiedActorInfo);
 
-	const AActor* PC = ModifiedActorInfo.OwnerActor.Get();
-	if (!ensureAlwaysMsgf(IsValid(PC),
+	const AActor* Controller = ModifiedActorInfo.OwnerActor.Get();
+	if (!ensureAlwaysMsgf(IsValid(Controller),
 	                      TEXT("UPlayerInteractionAbility Owning Actor invalid!")))
 	{
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
@@ -100,9 +121,9 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
 	       *GetName(),
-	       *PC->GetName());
+	       *Controller->GetName());
 
 	const auto* ASC = ModifiedActorInfo.AbilitySystemComponent.Get();
 	if (!IsValid(ASC))
@@ -147,7 +168,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	// as we may want to prevent executing an interaction on already locked interactable actor.
 	// example : Server (Grants CanActivate) -> Client (Receive GE with Tags) -> TryExecute (if Interaction not locked) -> Poke Server ->
 	// Server (check state of Interaction - Lock if required) -> Tell client to execute and notify all Clients to play Animation if required.
-	const bool bResult = InteractionComponent->ExecuteInteraction(PC);
+	const bool bResult = InteractionComponent->Execute(Controller, this);
 	if (bResult)
 	{
 		CommitAbility(Handle, ActorInfo, ActivationInfo);

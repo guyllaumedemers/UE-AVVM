@@ -37,8 +37,16 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputAction : public UInputAction
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(BlueprintCallable)
+	int32 GetInputId() const;
+
+protected:
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag AbilityTriggerTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 InputId = INDEX_NONE;
 
 	friend class UAVVMAbilityInputComponent;
 };

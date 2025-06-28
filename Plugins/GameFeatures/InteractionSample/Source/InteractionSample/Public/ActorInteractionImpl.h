@@ -29,6 +29,7 @@
 
 struct FGameplayEffectSpecHandle;
 class UAbilitySystemComponent;
+class UGameplayAbility;
 class UGameplayEffect;
 class UInteraction;
 
@@ -67,7 +68,7 @@ public:
 	void HandleRecordModified(const TArray<UInteraction*>& OldRecords,
 	                          const TArray<UInteraction*>& NewRecords);
 
-	virtual bool HandleActorInteraction(const AActor* NewTarget);
+	virtual bool Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility);
 
 protected:
 	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
@@ -91,6 +92,9 @@ protected:
 
 	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
 	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);
+
+	UFUNCTION()
+	void OnInputReleased(float DeltaTime);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;

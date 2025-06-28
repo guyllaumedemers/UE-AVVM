@@ -22,6 +22,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
+#include "Ability/AVVMGameplayAbility.h"
 #include "Engine/AssetManager.h"
 
 void UAVVMAbilitySystemComponent::BeginPlay()
@@ -109,8 +110,8 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 
 	for (UObject* Ability : OutStreamedAssets)
 	{
-		auto* GameplayAbilityClass = Cast<UClass>(Ability);
-		if (!IsValid(GameplayAbilityClass))
+		const auto GameplayAbilityClass = TSoftClassPtr<UAVVMGameplayAbility>(Ability);
+		if (!GameplayAbilityClass.IsValid())
 		{
 			continue;
 		}
@@ -122,7 +123,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 		       *GameplayAbilityClass->GetName(),
 		       *Outer->GetName());
 
-		GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass});
+		GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass.Get(), 1, GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()});
 	}
 }
 

@@ -17,35 +17,38 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class InteractionSample : ModuleRules
+#include "Abilities/GameplayAbility.h"
+
+#include "AVVMGameplayAbility.generated.h"
+
+struct FAVVMGameplayAbilityActorInfo;
+class UAVVMAbilityInputAction;
+
+/**
+ *	Class description:
+ *
+ *	UAVVMGameplayAbility is a derived class from UGameplayAbility that define in a dynamic fashion the Input Id value used by the
+ *	AbilitySpec for supporting WaitForInputPressed and WaitForInputReleased.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMGameplayAbility : public UGameplayAbility
 {
-	public InteractionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"IrisCore",
-			}
-		);
+public:
+	// @gdemers input remapping shouldnt affect the returned value here. Our input id is just a unique
+	// identifier to trigger events on the ASC so we can trigger AbilityTask::WaitForInput.
+	UFUNCTION(BlueprintCallable)
+	int32 GetInputId() const;
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"GameplayTasks"
-			}
-		);
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UAVVMAbilityInputAction> InputAction = nullptr;
+
+	// @gdemers optional override of the actor info provided by the ASC
+	TSharedPtr<FAVVMGameplayAbilityActorInfo> OverrideActorInfo = nullptr;
+};

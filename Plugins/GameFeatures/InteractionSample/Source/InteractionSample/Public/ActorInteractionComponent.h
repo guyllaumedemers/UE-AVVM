@@ -30,6 +30,7 @@
 
 class UAbilitySystemComponent;
 class UActorInteractionImpl;
+class UGameplayAbility;
 
 /**
  *	Class description:
@@ -45,7 +46,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	bool ExecuteInteraction(const AActor* NewTarget) const;
+	bool Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility) const;
 
 protected:
 	UFUNCTION()

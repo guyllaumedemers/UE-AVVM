@@ -203,7 +203,13 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 		return;
 	}
 
-	const FGameplayTag* SearchTag = AbilityTriggerTags.Find(InputActionCallbackContext.InputAction);
+	const auto* InputAction = Cast<UAVVMAbilityInputAction>(InputActionCallbackContext.InputAction.Get());
+	if (!ensureAlwaysMsgf(IsValid(InputAction), TEXT("Input Action doesn't derive from UAVVMAbilityInputAction.")))
+	{
+		return;
+	}
+
+	const FGameplayTag* SearchTag = AbilityTriggerTags.Find(InputAction);
 	if (!ensureAlwaysMsgf(SearchTag != nullptr, TEXT("Input Action doesn't match to any registered entries.")))
 	{
 		return;
@@ -212,6 +218,7 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 	const bool bCanRemoveTag = EnumHasAnyFlags(InputActionCallbackContext.TriggerEvent, ETriggerEvent::Canceled | ETriggerEvent::Completed);
 	if (bCanRemoveTag)
 	{
+		AbilitySystemComponent->ReleaseInputID(InputAction->GetInputId());
 		AbilitySystemComponent->RemoveLooseGameplayTag(*SearchTag);
 		return;
 	}
@@ -220,6 +227,7 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 	if (bCanAddTag)
 	{
 		AbilitySystemComponent->AddLooseGameplayTag(*SearchTag);
+		AbilitySystemComponent->PressInputID(InputAction->GetInputId());
 		return;
 	}
 }

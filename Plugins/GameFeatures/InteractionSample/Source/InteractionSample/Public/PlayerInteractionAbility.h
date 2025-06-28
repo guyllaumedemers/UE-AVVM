@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Abilities/GameplayAbility.h"
+#include "Ability/AVVMGameplayAbility.h"
 
 #include "PlayerInteractionAbility.generated.h"
 
@@ -32,7 +32,7 @@
  *	with an UActorInteractionComponent.
  */
 UCLASS()
-class INTERACTIONSAMPLE_API UPlayerInteractionAbility : public UGameplayAbility
+class INTERACTIONSAMPLE_API UPlayerInteractionAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

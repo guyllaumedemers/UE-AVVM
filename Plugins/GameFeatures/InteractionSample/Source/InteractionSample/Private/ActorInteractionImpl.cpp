@@ -26,6 +26,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "GameFramework/PlayerState.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 
 void UActorInteractionImpl::SafeBegin()
 {
@@ -146,7 +147,7 @@ void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& Ol
 	}
 }
 
-bool UActorInteractionImpl::HandleActorInteraction(const AActor* NewTarget)
+bool UActorInteractionImpl::Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -160,6 +161,13 @@ bool UActorInteractionImpl::HandleActorInteraction(const AActor* NewTarget)
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UActorInteractionImpl::StaticClass()->GetName(),
 	       *Outer->GetName());
+
+	UAbilityTask_WaitInputRelease* Task = UAbilityTask_WaitInputRelease::WaitInputRelease(OwningAbility);
+	if (IsValid(Task))
+	{
+		Task->OnRelease.AddUniqueDynamic(this, &UActorInteractionImpl::OnInputReleased);
+		Task->ReadyForActivation();
+	}
 
 	return true;
 }
@@ -314,23 +322,23 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	const AActor* Instigator = FoundMatch->GetInstigator();
 	const AActor* Target = FoundMatch->GetTarget();
 
-	const auto* PC = Cast<AController>(Target);
-	if (!IsValid(PC))
+	const auto* Controller = Cast<AController>(Target);
+	if (!IsValid(Controller))
 	{
 		return;
 	}
 
 #if WITH_SERVER_CODE
-	if (PC->HasAuthority())
+	if (Controller->HasAuthority())
 	{
-		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PC->PlayerState);
+		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
 		RemoveGameplayEffectHandle(ASC);
 	}
 #endif
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
 	                                        StopPromptInteractionChannel,
-	                                        PC,
+	                                        Controller,
 	                                        Instigator,
 	                                        FAVVMNotificationPayload::Empty);
 }
@@ -366,4 +374,20 @@ void UActorInteractionImpl::RemoveGameplayEffectHandle(UAbilitySystemComponent* 
 		ASC->RemoveActiveGameplayEffect(*SearchResult);
 		ActorToGEActiveHandle.Remove(Instigator);
 	}
+}
+
+void UActorInteractionImpl::OnInputReleased(float DeltaTime)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Input Released on Outer \"%s\". Total Held Time \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName(),
+	       *FString::SanitizeFloat(DeltaTime, 2));
 }
