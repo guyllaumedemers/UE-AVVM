@@ -106,9 +106,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	auto ModifiedActorInfo = FAVVMGameplayAbilityActorInfo(*ActorInfo);
-	OverrideActorInfo = MakeShared<FAVVMGameplayAbilityActorInfo>(ModifiedActorInfo);
-	SetCurrentActorInfo(Handle, &ModifiedActorInfo);
+	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
 
 	const AActor* Controller = ModifiedActorInfo.OwnerActor.Get();
 	if (!ensureAlwaysMsgf(IsValid(Controller),

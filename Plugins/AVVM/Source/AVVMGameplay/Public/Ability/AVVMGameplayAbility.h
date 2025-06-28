@@ -48,7 +48,4 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UAVVMAbilityInputAction> InputAction = nullptr;
-
-	// @gdemers optional override of the actor info provided by the ASC
-	TSharedPtr<FAVVMGameplayAbilityActorInfo> OverrideActorInfo = nullptr;
 };
