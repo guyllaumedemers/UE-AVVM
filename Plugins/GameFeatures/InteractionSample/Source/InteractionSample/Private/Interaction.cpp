@@ -64,6 +64,16 @@ bool UInteraction::CanInteract() const
 	return bIsInteractable;
 }
 
+void UInteraction::Lock()
+{
+	bIsInteractable = false;
+}
+
+void UInteraction::Unlock()
+{
+	bIsInteractable = true;
+}
+
 const AActor* UInteraction::GetTarget() const
 {
 	return Target.Get();

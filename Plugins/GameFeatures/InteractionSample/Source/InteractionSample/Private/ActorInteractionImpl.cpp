@@ -145,14 +145,24 @@ void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& Ol
 	{
 		HandleOldRecord(NewRecords, OldRecords);
 	}
+	else
+	{
+		HandleModifiedRecord(NewRecords, OldRecords);
+	}
 }
 
-bool UActorInteractionImpl::Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility)
+void UActorInteractionImpl::Execute(const AActor* NewInstigator,
+                                    const AActor* NewTarget,
+                                    const TArray<UInteraction*>& NewRecords,
+                                    const bool bShouldPreventContingency,
+                                    UGameplayAbility* OwningAbility,
+                                    const TFunctionRef<void(const bool)>& Callback)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		return false;
+		Callback(false);
+		return;
 	}
 
 	UE_LOG(LogGameplay,
@@ -162,14 +172,31 @@ bool UActorInteractionImpl::Execute(const AActor* NewTarget, UGameplayAbility* O
 	       *UActorInteractionImpl::StaticClass()->GetName(),
 	       *Outer->GetName());
 
-	UAbilityTask_WaitInputRelease* Task = UAbilityTask_WaitInputRelease::WaitInputRelease(OwningAbility);
+#if WITH_SERVER_CODE
+	if (bShouldPreventContingency && IsValid(NewTarget) && NewTarget->HasAuthority())
+	{
+		const bool bResult = Server_LockInteraction(NewRecords, NewInstigator, NewTarget);
+
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Interaction locking \"%s\"!"),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       bResult ? TEXT("Succeeded") : TEXT("Failed"));
+
+		if (!bResult)
+		{
+			Callback(false);
+		}
+	}
+#endif
+
+	// TODO @gdemers impl object wrapper who handles caching callback for committing ability OnInputRelease
+	auto* Task = UAbilityTask_WaitInputRelease::WaitInputRelease(OwningAbility);
 	if (IsValid(Task))
 	{
 		Task->OnRelease.AddUniqueDynamic(this, &UActorInteractionImpl::OnInputReleased);
 		Task->ReadyForActivation();
 	}
-
-	return true;
 }
 
 TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
@@ -201,9 +228,9 @@ bool UActorInteractionImpl::AttemptBeginOverlap(const TArray<UInteraction*>& New
 	}
 
 	bool bCanInteract = true;
-	for (const UInteraction* Interaction : GetPartialMatchingInteractions(NewRecords, NewInstigator))
+	for (const auto* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
 	{
-		if (IsValid(Interaction) && !Interaction->CanInteract())
+		if (IsValid(Record) && !Record->CanInteract())
 		{
 			bCanInteract = false;
 			break;
@@ -218,8 +245,8 @@ bool UActorInteractionImpl::AttemptEndOverlap(const TArray<UInteraction*>& NewRe
                                               const AActor* NewInstigator,
                                               const AActor* NewTarget)
 {
-	const auto MatchingInteractions = GetExactMatchingInteractions(NewRecords, NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	return !MatchingInteractions.IsEmpty();
+	const TArray<UInteraction*> SearchResult = GetExactMatchingInteractions(NewRecords, NewInstigator /*World Actor*/, NewTarget /*AController*/);
+	return !SearchResult.IsEmpty();
 }
 
 void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewRecords)
@@ -293,7 +320,7 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	}
 
 	const UInteraction* FoundMatch = nullptr;
-	for (const UInteraction* OldRecord : OldRecords)
+	for (const auto* OldRecord : OldRecords)
 	{
 		if (!IsValid(OldRecord))
 		{
@@ -343,6 +370,22 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	                                        FAVVMNotificationPayload::Empty);
 }
 
+void UActorInteractionImpl::HandleModifiedRecord(const TArray<UInteraction*>& NewRecords,
+                                                 const TArray<UInteraction*>& OldRecords)
+{
+	const auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Record Collection modified on Outer \"%s\". Updating locking State!"),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName());
+}
+
 void UActorInteractionImpl::AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle)
 {
 	if (!IsValid(ASC))
@@ -374,6 +417,61 @@ void UActorInteractionImpl::RemoveGameplayEffectHandle(UAbilitySystemComponent* 
 		ASC->RemoveActiveGameplayEffect(*SearchResult);
 		ActorToGEActiveHandle.Remove(Instigator);
 	}
+}
+
+bool UActorInteractionImpl::Server_LockInteraction(const TArray<UInteraction*>& NewRecords,
+                                                   const AActor* NewInstigator,
+                                                   const AActor* NewTarget)
+{
+	bool bCanInteract = true;
+	UInteraction* TargetInteraction = nullptr;
+
+	for (auto* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
+	{
+		if (!IsValid(Record))
+		{
+			continue;
+		}
+
+		if (!Record->CanInteract())
+		{
+			bCanInteract = false;
+			break;
+		}
+		else if (Record->DoesExactMatch(NewInstigator, NewTarget))
+		{
+			TargetInteraction = Record;
+		}
+	}
+
+	const bool bResult = bCanInteract && IsValid(TargetInteraction);
+	if (bResult)
+	{
+		TargetInteraction->Lock();
+	}
+
+	return bResult;
+}
+
+bool UActorInteractionImpl::Server_UnlockInteraction(const TArray<UInteraction*>& NewRecords,
+                                                     const AActor* NewInstigator,
+                                                     const AActor* NewTarget)
+{
+	TArray<UInteraction*> SearchResult = GetExactMatchingInteractions(NewRecords, NewInstigator, NewTarget);
+	if (SearchResult.IsEmpty() || !ensureAlwaysMsgf(SearchResult.Num() == 1, TEXT("Multiple match found for unique instigator and target pair!")))
+	{
+		return false;
+	}
+
+	UInteraction* Interaction = SearchResult[0];
+
+	const bool bResult = IsValid(Interaction) && ensureAlwaysMsgf(!Interaction->CanInteract(), TEXT("Target Interaction wasn't locked!"));
+	if (bResult)
+	{
+		Interaction->Unlock();
+	}
+
+	return bResult;
 }
 
 void UActorInteractionImpl::OnInputReleased(float DeltaTime)

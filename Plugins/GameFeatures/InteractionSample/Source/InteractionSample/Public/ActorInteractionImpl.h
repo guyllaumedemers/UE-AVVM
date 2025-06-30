@@ -68,7 +68,12 @@ public:
 	void HandleRecordModified(const TArray<UInteraction*>& OldRecords,
 	                          const TArray<UInteraction*>& NewRecords);
 
-	virtual bool Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility);
+	virtual void Execute(const AActor* NewInstigator,
+	                     const AActor* NewTarget,
+	                     const TArray<UInteraction*>& NewRecords,
+	                     const bool bShouldPreventContingency,
+	                     UGameplayAbility* OwningAbility,
+	                     const TFunctionRef<void(const bool)>& Callback);
 
 protected:
 	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
@@ -87,11 +92,23 @@ protected:
 	                               const AActor* NewTarget);
 
 	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
+
 	void HandleOldRecord(const TArray<UInteraction*>& NewRecords,
 	                     const TArray<UInteraction*>& OldRecords);
 
+	void HandleModifiedRecord(const TArray<UInteraction*>& NewRecords,
+	                          const TArray<UInteraction*>& OldRecords);
+
 	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
 	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);
+
+	bool Server_LockInteraction(const TArray<UInteraction*>& NewRecords,
+	                            const AActor* NewInstigator,
+	                            const AActor* NewTarget);
+
+	bool Server_UnlockInteraction(const TArray<UInteraction*>& NewRecords,
+	                              const AActor* NewInstigator,
+	                              const AActor* NewTarget);
 
 	UFUNCTION()
 	void OnInputReleased(float DeltaTime);

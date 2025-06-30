@@ -102,7 +102,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
 	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
@@ -112,7 +112,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	if (!ensureAlwaysMsgf(IsValid(Controller),
 	                      TEXT("UPlayerInteractionAbility Owning Actor invalid!")))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
@@ -123,10 +123,10 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	       *GetName(),
 	       *Controller->GetName());
 
-	const auto* ASC = ModifiedActorInfo.AbilitySystemComponent.Get();
+	const auto* ASC = ActorInfo->AbilitySystemComponent.Get();
 	if (!IsValid(ASC))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
@@ -134,7 +134,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = ASC->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
 	if (GEActiveHandles.IsEmpty())
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
@@ -143,7 +143,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	const FActiveGameplayEffect* GEActive = ASC->GetActiveGameplayEffect(GEActiveHandles[0]);
 	if (GEActive == nullptr)
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
@@ -151,30 +151,48 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	const AActor* EffectCauser = GECtx.GetEffectCauser();
 	if (!IsValid(EffectCauser))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
 	const auto* InteractionComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
 	if (!IsValid(InteractionComponent))
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
-	// TODO @gdemers ServerRPC call should be executed and update the state of the interaction on the Server
-	// as we may want to prevent executing an interaction on already locked interactable actor.
-	// example : Server (Grants CanActivate) -> Client (Receive GE with Tags) -> TryExecute (if Interaction not locked) -> Poke Server ->
-	// Server (check state of Interaction - Lock if required) -> Tell client to execute and notify all Clients to play Animation if required.
-	const bool bResult = InteractionComponent->Execute(Controller, this);
-	if (bResult)
+	const TFunctionRef<void(const bool)> Callback = [WeakAbility = TWeakObjectPtr<UGameplayAbility>(this)](const bool bWasSuccess)
 	{
-		CommitAbility(Handle, ActorInfo, ActivationInfo);
-	}
-	else
-	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
-	}
+		UGameplayAbility* Ability = WeakAbility.Get();
+		if (!IsValid(Ability))
+		{
+			return;
+		}
+
+		// @gdemers why doesnt unreal have a commit function that's parameter-less. the Ability itself already holds all the data internally... ?
+		const FGameplayAbilitySpecHandle SpecHandle = Ability->GetCurrentAbilitySpecHandle();
+		const FGameplayAbilityActorInfo ActorInfo = Ability->GetActorInfo();
+		const FGameplayAbilityActivationInfo ActivationInfo = Ability->GetCurrentActivationInfo();
+
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". \"%s\" Ability \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Ability->GetOwningActorFromActorInfo()).GetData(),
+		       bWasSuccess ? TEXT("Committing") : TEXT("Aborting"),
+		       *UPlayerInteractionAbility::StaticClass()->GetName());
+
+		if (bWasSuccess)
+		{
+			Ability->CommitAbility(SpecHandle, &ActorInfo, ActivationInfo);
+		}
+		else
+		{
+			Ability->CancelAbility(SpecHandle, &ActorInfo, ActivationInfo, true);
+		}
+	};
+
+	InteractionComponent->TryExecute(Controller, this, Callback);
 }
 
 void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

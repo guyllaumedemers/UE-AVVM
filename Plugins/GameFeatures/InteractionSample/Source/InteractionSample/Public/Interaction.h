@@ -59,6 +59,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool CanInteract() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void Lock();
+	
+	UFUNCTION(BlueprintCallable)
+	void Unlock();
 
 	UFUNCTION(BlueprintCallable, meta=(ToolTip="Actor on which the collision event executed from."))
 	const AActor* GetTarget() const;

@@ -46,7 +46,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	bool Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility) const;
+	void TryExecute(const AActor* NewTarget, UGameplayAbility* OwningAbility, const TFunctionRef<void(const bool)>& Callback) const;
 
 protected:
 	UFUNCTION()

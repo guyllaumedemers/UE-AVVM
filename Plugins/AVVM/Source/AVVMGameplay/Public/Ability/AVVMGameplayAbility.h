@@ -25,7 +25,6 @@
 
 #include "AVVMGameplayAbility.generated.h"
 
-struct FAVVMGameplayAbilityActorInfo;
 class UAVVMAbilityInputAction;
 
 /**

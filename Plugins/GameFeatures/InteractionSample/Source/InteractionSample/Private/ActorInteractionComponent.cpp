@@ -130,9 +130,16 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	OwningOuter.Reset();
 }
 
-bool UActorInteractionComponent::Execute(const AActor* NewTarget, UGameplayAbility* OwningAbility) const
+void UActorInteractionComponent::TryExecute(const AActor* NewTarget, UGameplayAbility* OwningAbility, const TFunctionRef<void(const bool)>& Callback) const
 {
-	return IsValid(InteractionImpl) ? InteractionImpl->Execute(NewTarget, OwningAbility) : false;
+	if (IsValid(InteractionImpl))
+	{
+		InteractionImpl->Execute(OwningOuter.Get(), NewTarget, Records, bShouldPreventContingency, OwningAbility, Callback);
+	}
+	else
+	{
+		Callback(false);
+	}
 }
 
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
