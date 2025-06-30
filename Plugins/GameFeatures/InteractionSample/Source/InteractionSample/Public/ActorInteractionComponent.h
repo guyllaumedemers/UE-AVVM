@@ -24,16 +24,22 @@
 #include "CoreMinimal.h"
 
 #include "Components/ActorComponent.h"
+#include "StructUtils/InstancedStruct.h"
 #include "Templates/SubclassOf.h"
 
 #include "ActorInteractionComponent.generated.h"
 
+struct FInteractionExecutionRequirements;
 class UAbilitySystemComponent;
 class UActorInteractionImpl;
 class UGameplayAbility;
 
 /**
  *	Class description:
+ *
+ *	UActorInteractionComponent is a system held by a world actor from which collision check are executed from. It caches a record
+ *	of interaction between its owning actor and the local players that enter it's range. During that time, players can interact with the
+ *	owning actor and execute actions based on requirements defined 
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent
@@ -46,7 +52,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	void TryExecute(const AActor* NewTarget, UGameplayAbility* OwningAbility, const TFunctionRef<void(const bool)>& Callback) const;
+	bool StartExecution(const AActor* NewTarget) const;
+	bool StopExecution(const AActor* NewTarget) const;
+	bool HasMetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const;
 
 protected:
 	UFUNCTION()

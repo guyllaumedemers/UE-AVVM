@@ -23,6 +23,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Interaction.h"
+#include "Ability/InteractionExecutionRequirements.h"
 #include "Components/ShapeComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
@@ -130,16 +131,24 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	OwningOuter.Reset();
 }
 
-void UActorInteractionComponent::TryExecute(const AActor* NewTarget, UGameplayAbility* OwningAbility, const TFunctionRef<void(const bool)>& Callback) const
+bool UActorInteractionComponent::StartExecution(const AActor* NewTarget) const
 {
-	if (IsValid(InteractionImpl))
-	{
-		InteractionImpl->Execute(OwningOuter.Get(), NewTarget, Records, bShouldPreventContingency, OwningAbility, Callback);
-	}
-	else
-	{
-		Callback(false);
-	}
+	return IsValid(InteractionImpl)
+		       ? InteractionImpl->StartExecute(OwningOuter.Get(), NewTarget, Records, bShouldPreventContingency)
+		       : false;
+}
+
+bool UActorInteractionComponent::StopExecution(const AActor* NewTarget) const
+{
+	return IsValid(InteractionImpl)
+		       ? InteractionImpl->StopExecute(OwningOuter.Get(), NewTarget, Records, bShouldPreventContingency)
+		       : false;
+}
+
+bool UActorInteractionComponent::HasMetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const
+{
+	const auto* Instanced = Requirements.GetPtr<FInteractionExecutionRequirements>();
+	return (Instanced != nullptr) ? Instanced->DoesMetRequirements(InteractionImpl) : false;
 }
 
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,

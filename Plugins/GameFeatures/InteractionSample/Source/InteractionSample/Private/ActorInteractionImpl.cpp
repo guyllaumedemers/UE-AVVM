@@ -26,7 +26,6 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "GameFramework/PlayerState.h"
-#include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 
 void UActorInteractionImpl::SafeBegin()
 {
@@ -151,23 +150,20 @@ void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& Ol
 	}
 }
 
-void UActorInteractionImpl::Execute(const AActor* NewInstigator,
-                                    const AActor* NewTarget,
-                                    const TArray<UInteraction*>& NewRecords,
-                                    const bool bShouldPreventContingency,
-                                    UGameplayAbility* OwningAbility,
-                                    const TFunctionRef<void(const bool)>& Callback)
+bool UActorInteractionImpl::StartExecute(const AActor* NewInstigator,
+                                         const AActor* NewTarget,
+                                         const TArray<UInteraction*>& NewRecords,
+                                         const bool bShouldPreventContingency)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		Callback(false);
-		return;
+		return false;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Executing \"%s\" Class Interaction on Outer \"%s\"."),
+	       TEXT("Executed from \"%s\". StartExecute \"%s\" Class Interaction on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UActorInteractionImpl::StaticClass()->GetName(),
 	       *Outer->GetName());
@@ -183,20 +179,47 @@ void UActorInteractionImpl::Execute(const AActor* NewInstigator,
 		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 		       bResult ? TEXT("Succeeded") : TEXT("Failed"));
 
-		if (!bResult)
-		{
-			Callback(false);
-		}
+		return bResult;
 	}
 #endif
 
-	// TODO @gdemers impl object wrapper who handles caching callback for committing ability OnInputRelease
-	auto* Task = UAbilityTask_WaitInputRelease::WaitInputRelease(OwningAbility);
-	if (IsValid(Task))
+	return true;
+}
+
+bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
+                                        const AActor* NewTarget,
+                                        const TArray<UInteraction*>& NewRecords,
+                                        const bool bShouldPreventContingency)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		Task->OnRelease.AddUniqueDynamic(this, &UActorInteractionImpl::OnInputReleased);
-		Task->ReadyForActivation();
+		return false;
 	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". StopExecute \"%s\" Class Interaction on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UActorInteractionImpl::StaticClass()->GetName(),
+	       *Outer->GetName());
+
+#if WITH_SERVER_CODE
+	if (bShouldPreventContingency && IsValid(NewTarget) && NewTarget->HasAuthority())
+	{
+		const bool bResult = Server_UnlockInteraction(NewRecords, NewInstigator, NewTarget);
+
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Interaction unlocking \"%s\"!"),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       bResult ? TEXT("Succeeded") : TEXT("Failed"));
+
+		return bResult;
+	}
+#endif
+
+	return true;
 }
 
 TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
@@ -228,7 +251,7 @@ bool UActorInteractionImpl::AttemptBeginOverlap(const TArray<UInteraction*>& New
 	}
 
 	bool bCanInteract = true;
-	for (const auto* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
+	for (const UInteraction* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
 	{
 		if (IsValid(Record) && !Record->CanInteract())
 		{
@@ -320,7 +343,7 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	}
 
 	const UInteraction* FoundMatch = nullptr;
-	for (const auto* OldRecord : OldRecords)
+	for (const UInteraction* OldRecord : OldRecords)
 	{
 		if (!IsValid(OldRecord))
 		{
@@ -426,7 +449,7 @@ bool UActorInteractionImpl::Server_LockInteraction(const TArray<UInteraction*>& 
 	bool bCanInteract = true;
 	UInteraction* TargetInteraction = nullptr;
 
-	for (auto* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
+	for (UInteraction* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
 	{
 		if (!IsValid(Record))
 		{
@@ -472,20 +495,4 @@ bool UActorInteractionImpl::Server_UnlockInteraction(const TArray<UInteraction*>
 	}
 
 	return bResult;
-}
-
-void UActorInteractionImpl::OnInputReleased(float DeltaTime)
-{
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Input Released on Outer \"%s\". Total Held Time \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       *FString::SanitizeFloat(DeltaTime, 2));
 }

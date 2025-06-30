@@ -23,11 +23,13 @@
 
 #include "ActiveGameplayEffectHandle.h"
 #include "GameplayTagContainer.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "ActorInteractionImpl.generated.h"
 
 struct FGameplayEffectSpecHandle;
+struct FInteractionExecutionRequirements;
 class UAbilitySystemComponent;
 class UGameplayAbility;
 class UGameplayEffect;
@@ -36,18 +38,9 @@ class UInteraction;
 /**
  *	Class Description :
  *
- *	UActorInteractionImpl is the base class for executing a player interaction with a world actor. The implementation details are expected to be overriden to support behaviour specific to your
- *	gameplay.
- *
- *		Example :
- *
- *			* Single Click
- *			* Double Click
- *			* Hold
- *
- *		All cases could be used to interact with world actors like : Doors, Chess, NPC, etc...
+ *	UActorInteractionImpl is a functional class from which we run validation during a player interaction with a world actor.
  */
-UCLASS(Abstract, BlueprintType, NotBlueprintable)
+UCLASS(BlueprintType, Blueprintable)
 class INTERACTIONSAMPLE_API UActorInteractionImpl : public UObject
 {
 	GENERATED_BODY()
@@ -68,12 +61,15 @@ public:
 	void HandleRecordModified(const TArray<UInteraction*>& OldRecords,
 	                          const TArray<UInteraction*>& NewRecords);
 
-	virtual void Execute(const AActor* NewInstigator,
-	                     const AActor* NewTarget,
-	                     const TArray<UInteraction*>& NewRecords,
-	                     const bool bShouldPreventContingency,
-	                     UGameplayAbility* OwningAbility,
-	                     const TFunctionRef<void(const bool)>& Callback);
+	bool StartExecute(const AActor* NewInstigator,
+	                  const AActor* NewTarget,
+	                  const TArray<UInteraction*>& NewRecords,
+	                  const bool bShouldPreventContingency);
+
+	bool StopExecute(const AActor* NewInstigator,
+	                 const AActor* NewTarget,
+	                 const TArray<UInteraction*>& NewRecords,
+	                 const bool bShouldPreventContingency);
 
 protected:
 	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
@@ -83,13 +79,13 @@ protected:
 	TArray<UInteraction*> GetPartialMatchingInteractions(const TArray<UInteraction*>& Records,
 	                                                     const AActor* NewInstigator) const;
 
-	virtual bool AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
-	                                 const AActor* NewInstigator,
-	                                 const bool bShouldPreventContingency);
+	bool AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
+	                         const AActor* NewInstigator,
+	                         const bool bShouldPreventContingency);
 
-	virtual bool AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
-	                               const AActor* NewInstigator,
-	                               const AActor* NewTarget);
+	bool AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
+	                       const AActor* NewInstigator,
+	                       const AActor* NewTarget);
 
 	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
 
@@ -110,9 +106,6 @@ protected:
 	                              const AActor* NewInstigator,
 	                              const AActor* NewTarget);
 
-	UFUNCTION()
-	void OnInputReleased(float DeltaTime);
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
 
@@ -122,6 +115,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TInstancedStruct<FInteractionExecutionRequirements> Requirements;
+
 	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+	friend struct FInteractionExecutionFloatRequirements;
 };

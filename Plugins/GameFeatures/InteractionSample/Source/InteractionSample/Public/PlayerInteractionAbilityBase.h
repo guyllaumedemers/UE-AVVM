@@ -23,16 +23,18 @@
 
 #include "Ability/AVVMGameplayAbility.h"
 
-#include "PlayerInteractionAbility.generated.h"
+#include "PlayerInteractionAbilityBase.generated.h"
+
+class UActorInteractionComponent;
 
 /**
  *	Class Description :
  *
- *	UPlayerInteractionAbility is an instance ability that can be invoked through user input when in-range of a world actor
+ *	UPlayerInteractionAbilityBase is an instance ability that can be invoked through user input when in-range of a world actor
  *	with an UActorInteractionComponent.
  */
-UCLASS()
-class INTERACTIONSAMPLE_API UPlayerInteractionAbility : public UAVVMGameplayAbility
+UCLASS(Abstract, BlueprintType, NotBlueprintable)
+class INTERACTIONSAMPLE_API UPlayerInteractionAbilityBase : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -61,6 +63,13 @@ public:
 	                        bool bWasCancelled) override;
 
 protected:
+	virtual void RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
+	                             const FGameplayAbilityActorInfo* ActorInfo,
+	                             const FGameplayAbilityActivationInfo ActivationInfo,
+	                             const FGameplayEventData* TriggerEventData);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
+
+	TWeakObjectPtr<UActorInteractionComponent> TargetComponent = nullptr;
 };

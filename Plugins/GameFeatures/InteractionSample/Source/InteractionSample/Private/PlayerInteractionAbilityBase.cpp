@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "PlayerInteractionAbility.h"
+#include "PlayerInteractionAbilityBase.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
@@ -26,8 +26,8 @@
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 
-void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                              const FGameplayAbilitySpec& Spec)
+void UPlayerInteractionAbilityBase::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                                  const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
@@ -51,8 +51,8 @@ void UPlayerInteractionAbility::OnGiveAbility(const FGameplayAbilityActorInfo* A
 	       *Outer->GetName());
 }
 
-void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                                const FGameplayAbilitySpec& Spec)
+void UPlayerInteractionAbilityBase::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                                    const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 
@@ -76,11 +76,11 @@ void UPlayerInteractionAbility::OnRemoveAbility(const FGameplayAbilityActorInfo*
 	       *Outer->GetName());
 }
 
-bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                   const FGameplayAbilityActorInfo* ActorInfo,
-                                                   const FGameplayTagContainer* SourceTags,
-                                                   const FGameplayTagContainer* TargetTags,
-                                                   FGameplayTagContainer* OptionalRelevantTags) const
+bool UPlayerInteractionAbilityBase::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                                       const FGameplayAbilityActorInfo* ActorInfo,
+                                                       const FGameplayTagContainer* SourceTags,
+                                                       const FGameplayTagContainer* TargetTags,
+                                                       FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
 	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
@@ -88,14 +88,16 @@ bool UPlayerInteractionAbility::CanActivateAbility(const FGameplayAbilitySpecHan
 		return false;
 	}
 
+	// @gdemers required to pass the internal call to ShouldActivateAbility(AvatarActor->GetLocalRole()) since our ASC is owned
+	// by the player state which is simulated_proxy on client.
 	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
 	return Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
-void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                const FGameplayAbilityActorInfo* ActorInfo,
-                                                const FGameplayAbilityActivationInfo ActivationInfo,
-                                                const FGameplayEventData* TriggerEventData)
+void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                                    const FGameplayAbilityActorInfo* ActorInfo,
+                                                    const FGameplayAbilityActivationInfo ActivationInfo,
+                                                    const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
@@ -106,9 +108,7 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		return;
 	}
 
-	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
-
-	const AActor* Controller = ModifiedActorInfo.OwnerActor.Get();
+	const AActor* Controller = ActorInfo->OwnerActor.Get();
 	if (!ensureAlwaysMsgf(IsValid(Controller),
 	                      TEXT("UPlayerInteractionAbility Owning Actor invalid!")))
 	{
@@ -148,58 +148,48 @@ void UPlayerInteractionAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	}
 
 	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
-	const AActor* EffectCauser = GECtx.GetEffectCauser();
-	if (!IsValid(EffectCauser))
+	const AActor* GEEffectCauser = GECtx.GetEffectCauser();
+	if (!IsValid(GEEffectCauser))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
-	const auto* InteractionComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
+	auto* InteractionComponent = GEEffectCauser->GetComponentByClass<UActorInteractionComponent>();
 	if (!IsValid(InteractionComponent))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
-	const TFunctionRef<void(const bool)> Callback = [WeakAbility = TWeakObjectPtr<UGameplayAbility>(this)](const bool bWasSuccess)
+	TargetComponent = InteractionComponent;
+
+	const bool bCanStartExecution = InteractionComponent->StartExecution(Controller);
+	if (bCanStartExecution)
 	{
-		UGameplayAbility* Ability = WeakAbility.Get();
-		if (!IsValid(Ability))
-		{
-			return;
-		}
-
-		// @gdemers why doesnt unreal have a commit function that's parameter-less. the Ability itself already holds all the data internally... ?
-		const FGameplayAbilitySpecHandle SpecHandle = Ability->GetCurrentAbilitySpecHandle();
-		const FGameplayAbilityActorInfo ActorInfo = Ability->GetActorInfo();
-		const FGameplayAbilityActivationInfo ActivationInfo = Ability->GetCurrentActivationInfo();
-
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". \"%s\" Ability \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Ability->GetOwningActorFromActorInfo()).GetData(),
-		       bWasSuccess ? TEXT("Committing") : TEXT("Aborting"),
-		       *UPlayerInteractionAbility::StaticClass()->GetName());
-
-		if (bWasSuccess)
-		{
-			Ability->CommitAbility(SpecHandle, &ActorInfo, ActivationInfo);
-		}
-		else
-		{
-			Ability->CancelAbility(SpecHandle, &ActorInfo, ActivationInfo, true);
-		}
-	};
-
-	InteractionComponent->TryExecute(Controller, this, Callback);
+		RunOptionalTask(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	}
+	else
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+	}
 }
 
-void UPlayerInteractionAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                           const FGameplayAbilityActorInfo* ActorInfo,
-                                           const FGameplayAbilityActivationInfo ActivationInfo,
-                                           bool bReplicateEndAbility,
-                                           bool bWasCancelled)
+void UPlayerInteractionAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle,
+                                               const FGameplayAbilityActorInfo* ActorInfo,
+                                               const FGameplayAbilityActivationInfo ActivationInfo,
+                                               bool bReplicateEndAbility,
+                                               bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+
+	TargetComponent.Reset();
+}
+
+void UPlayerInteractionAbilityBase::RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
+                                                    const FGameplayAbilityActorInfo* ActorInfo,
+                                                    const FGameplayAbilityActivationInfo ActivationInfo,
+                                                    const FGameplayEventData* TriggerEventData)
+{
+	CommitAbility(Handle, ActorInfo, ActivationInfo);
 }
