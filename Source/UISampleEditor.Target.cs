@@ -36,6 +36,6 @@ public class UISampleEditorTarget : TargetRules
 
 	private void RegisterModulesCreatedByRider()
 	{
-		ExtraModuleNames.AddRange(new string[] { "TestSample" });
+		ExtraModuleNames.AddRange(new string[] {  });
 	}
 }

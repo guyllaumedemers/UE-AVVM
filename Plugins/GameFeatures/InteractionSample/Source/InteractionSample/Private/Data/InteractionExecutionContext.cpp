@@ -17,31 +17,16 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Data/InteractionExecutionContext.h"
 
-using UnrealBuildTool;
+#include "AVVMNotificationSubsystem.h"
 
-public class TestSample : ModuleRules
+void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
 {
-	public TestSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"GameplayTags",
-				"InteractionSample",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM"
-			}
-		);
-	}
+	const auto* PC = Cast<APlayerController>(NewTarget);
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+	                                        TargetChannelTag,
+	                                        PC,
+	                                        NewInstigator,
+	                                        FAVVMNotificationPayload::Empty);
 }
