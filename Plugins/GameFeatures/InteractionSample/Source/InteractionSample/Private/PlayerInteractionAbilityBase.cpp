@@ -186,6 +186,21 @@ void UPlayerInteractionAbilityBase::EndAbility(const FGameplayAbilitySpecHandle 
 	TargetComponent.Reset();
 }
 
+bool UPlayerInteractionAbilityBase::CommitAbility(const FGameplayAbilitySpecHandle Handle,
+                                                  const FGameplayAbilityActorInfo* ActorInfo,
+                                                  const FGameplayAbilityActivationInfo ActivationInfo,
+                                                  FGameplayTagContainer* OptionalRelevantTags)
+{
+	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
+	if (ActorInfo == nullptr || !IsValid(InteractionComponent) || !Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	InteractionComponent->Execute(ActorInfo->PlayerController.Get());
+	return true;
+}
+
 void UPlayerInteractionAbilityBase::RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
                                                     const FGameplayAbilityActorInfo* ActorInfo,
                                                     const FGameplayAbilityActivationInfo ActivationInfo,

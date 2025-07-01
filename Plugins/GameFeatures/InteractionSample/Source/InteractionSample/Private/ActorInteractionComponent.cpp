@@ -23,6 +23,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Interaction.h"
+#include "Ability/InteractionExecutionContext.h"
 #include "Ability/InteractionExecutionRequirements.h"
 #include "Components/ShapeComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -145,10 +146,19 @@ bool UActorInteractionComponent::StopExecution(const AActor* NewTarget) const
 		       : false;
 }
 
-bool UActorInteractionComponent::HasMetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const
+bool UActorInteractionComponent::DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const
 {
 	const auto* Instanced = Requirements.GetPtr<FInteractionExecutionRequirements>();
-	return (Instanced != nullptr) ? Instanced->DoesMetRequirements(InteractionImpl) : false;
+	return (Instanced != nullptr) ? Instanced->DoesMeetRequirements(InteractionImpl) : false;
+}
+
+void UActorInteractionComponent::Execute(const AActor* NewTarget) const
+{
+	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	if (ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	{
+		Instanced->Execute(NewTarget);
+	}
 }
 
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
@@ -238,9 +248,9 @@ void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
 void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator,
                                                      const AActor* NewTarget)
 {
-	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Interaction)
+	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Param)
 	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+		return IsValid(Param) && Param->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	});
 
 	if (SearchResult != nullptr)

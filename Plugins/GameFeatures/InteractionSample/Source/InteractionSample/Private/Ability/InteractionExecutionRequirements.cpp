@@ -26,7 +26,7 @@ FInteractionExecutionFloatRequirements::FInteractionExecutionFloatRequirements(c
 {
 }
 
-bool FInteractionExecutionFloatRequirements::DoesMetRequirements(const UActorInteractionImpl* Impl) const
+bool FInteractionExecutionFloatRequirements::DoesMeetRequirements(const UActorInteractionImpl* Impl) const
 {
 	if (!IsValid(Impl))
 	{

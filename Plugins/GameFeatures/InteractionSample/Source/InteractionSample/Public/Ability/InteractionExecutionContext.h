@@ -21,38 +21,18 @@
 
 #include "CoreMinimal.h"
 
-#include "InteractionExecutionRequirements.generated.h"
-
-class UActorInteractionImpl;
+#include "InteractionExecutionContext.generated.h"
 
 /**
  *	Class description:
  *
- *	FInteractionExecutionRequirements is a POD that hold the data to validate prior to interaction execution.
+ *	FInteractionExecutionContext is a POD that hold the action to be executed during Ability Commit.
  */
 USTRUCT(BlueprintType)
-struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
+struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 {
 	GENERATED_BODY()
 
-	virtual ~FInteractionExecutionRequirements() = default;
-	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
-};
-
-/**
-*	Class description:
- *
- *	FInteractionExecutionFloatRequirements expose float value requirements for interaction execution.
- */
-USTRUCT()
-struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FInteractionExecutionRequirements
-{
-	GENERATED_BODY()
-
-	FInteractionExecutionFloatRequirements() = default;
-	FInteractionExecutionFloatRequirements(const float NewThreshold);
-	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Threshold = 0.f;
+	virtual ~FInteractionExecutionContext() = default;
+	virtual void Execute(const AActor* NewTarget/*AController*/) const PURE_VIRTUAL(Execute, return;);
 };
