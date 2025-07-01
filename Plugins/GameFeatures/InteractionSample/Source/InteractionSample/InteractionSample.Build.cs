@@ -36,6 +36,7 @@ public class InteractionSample : ModuleRules
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",
+				"GameplayTasks",
 				"IrisCore",
 			}
 		);
@@ -44,7 +45,6 @@ public class InteractionSample : ModuleRules
 			new string[]
 			{
 				"AVVM",
-				"GameplayTasks"
 			}
 		);
 	}

@@ -36,7 +36,7 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
 	GENERATED_BODY()
 
 	virtual ~FInteractionExecutionRequirements() = default;
-	virtual bool DoesMetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
+	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
 };
 
 /**
@@ -51,7 +51,7 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FIn
 
 	FInteractionExecutionFloatRequirements() = default;
 	FInteractionExecutionFloatRequirements(const float NewThreshold);
-	virtual bool DoesMetRequirements(const UActorInteractionImpl* Impl) const override;
+	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Threshold = 0.f;

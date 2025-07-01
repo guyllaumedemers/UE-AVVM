@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,25 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
-using System.Collections.Generic;
+#include "CoreMinimal.h"
 
-public class UISampleTarget : TargetRules
+#include "InteractionExecutionContext.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FInteractionExecutionContext is a POD that hold the action to be executed during Ability Commit.
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 {
-	public UISampleTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
-		ExtraModuleNames.Add("UISample");
+	GENERATED_BODY()
 
-		bBuildDeveloperTools = false;
-		RegisterModulesCreatedByRider();
-	}
+	virtual ~FInteractionExecutionContext() = default;
 
-	private void RegisterModulesCreatedByRider()
-	{
-		ExtraModuleNames.AddRange(new string[] { "TestSample" });
-	}
-}
+	virtual void Execute(const AActor* NewInstigator,
+	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;);
+};
