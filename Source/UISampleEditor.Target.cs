@@ -31,5 +31,11 @@ public class UISampleEditorTarget : TargetRules
 		ExtraModuleNames.Add("UISample");
 
 		bBuildDeveloperTools = true;
+		RegisterModulesCreatedByRider();
+	}
+
+	private void RegisterModulesCreatedByRider()
+	{
+		ExtraModuleNames.AddRange(new string[] { "TestSample" });
 	}
 }

@@ -157,7 +157,7 @@ void UActorInteractionComponent::Execute(const AActor* NewTarget) const
 	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
 	if (ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
 	{
-		Instanced->Execute(NewTarget);
+		Instanced->Execute(OwningOuter.Get(), NewTarget);
 	}
 }
 

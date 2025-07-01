@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -19,23 +19,29 @@
 //SOFTWARE.
 
 using UnrealBuildTool;
-using System.Collections.Generic;
 
-public class UISampleTarget : TargetRules
+public class TestSample : ModuleRules
 {
-	public UISampleTarget(TargetInfo Target) : base(Target)
+	public TestSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
-		ExtraModuleNames.Add("UISample");
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		bBuildDeveloperTools = false;
-		RegisterModulesCreatedByRider();
-	}
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"Core",
+				"CoreUObject",
+				"Engine",
+				"GameplayTags",
+				"InteractionSample",
+			}
+		);
 
-	private void RegisterModulesCreatedByRider()
-	{
-		ExtraModuleNames.AddRange(new string[] { "TestSample" });
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"AVVM"
+			}
+		);
 	}
 }

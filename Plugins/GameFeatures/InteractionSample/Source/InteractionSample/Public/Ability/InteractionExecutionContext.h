@@ -34,5 +34,7 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 	GENERATED_BODY()
 
 	virtual ~FInteractionExecutionContext() = default;
-	virtual void Execute(const AActor* NewTarget/*AController*/) const PURE_VIRTUAL(Execute, return;);
+
+	virtual void Execute(const AActor* NewInstigator,
+	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;);
 };
