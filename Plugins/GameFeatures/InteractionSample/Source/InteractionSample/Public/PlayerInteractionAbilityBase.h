@@ -62,6 +62,11 @@ public:
 	                        bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
 
+	virtual bool CommitAbility(const FGameplayAbilitySpecHandle Handle,
+	                           const FGameplayAbilityActorInfo* ActorInfo,
+	                           const FGameplayAbilityActivationInfo ActivationInfo,
+	                           FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
+
 protected:
 	virtual void RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
 	                             const FGameplayAbilityActorInfo* ActorInfo,

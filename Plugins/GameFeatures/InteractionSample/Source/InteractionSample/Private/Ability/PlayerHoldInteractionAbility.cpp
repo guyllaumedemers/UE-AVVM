@@ -73,8 +73,7 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	}
 
 	const FInteractionExecutionFloatRequirements Requirements(TimeHeld);
-	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->
-			HasMetExecutionRequirements(TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
+	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->DoesMeetExecutionRequirements(TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
 
 	UE_LOG(LogGameplay,
 	       Log,

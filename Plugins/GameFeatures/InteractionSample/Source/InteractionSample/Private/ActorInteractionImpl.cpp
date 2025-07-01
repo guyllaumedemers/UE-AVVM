@@ -226,18 +226,18 @@ TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const 
                                                                           const AActor* NewInstigator,
                                                                           const AActor* NewTarget) const
 {
-	return Records.FilterByPredicate([&](const UInteraction* Interaction)
+	return Records.FilterByPredicate([&](const UInteraction* Param)
 	{
-		return IsValid(Interaction) && Interaction->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+		return IsValid(Param) && Param->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	});
 }
 
 TArray<UInteraction*> UActorInteractionImpl::GetPartialMatchingInteractions(const TArray<UInteraction*>& Records,
                                                                             const AActor* NewInstigator) const
 {
-	return Records.FilterByPredicate([&](const UInteraction* Interaction)
+	return Records.FilterByPredicate([&](const UInteraction* Param)
 	{
-		return IsValid(Interaction) && Interaction->DoesPartialMatch(NewInstigator);
+		return IsValid(Param) && Param->DoesPartialMatch(NewInstigator);
 	});
 }
 
