@@ -51,8 +51,8 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 		return;
 	}
 
-	const APlayerController* PC = ActorInfo->PlayerController.Get();
-	if (!IsValid(PC))
+	const AActor* Controller = ActorInfo->PlayerController.Get();
+	if (!IsValid(Controller))
 	{
 		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
 		return;
@@ -61,8 +61,8 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Input Released on Outer \"%s\". Total Held Time \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
-	       *PC->GetName(),
+	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
+	       *Controller->GetName(),
 	       *FString::SanitizeFloat(TimeHeld, 2));
 
 	UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
@@ -73,7 +73,8 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	}
 
 	const FInteractionExecutionFloatRequirements Requirements(TimeHeld);
-	bool bCanCommit = InteractionComponent->StopExecution(PC) && InteractionComponent->HasMetExecutionRequirements(TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
+	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->
+			HasMetExecutionRequirements(TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
 
 	UE_LOG(LogGameplay,
 	       Log,

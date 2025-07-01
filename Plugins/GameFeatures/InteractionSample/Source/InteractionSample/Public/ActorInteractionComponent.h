@@ -39,7 +39,7 @@ class UGameplayAbility;
  *
  *	UActorInteractionComponent is a system held by a world actor from which collision check are executed from. It caches a record
  *	of interaction between its owning actor and the local players that enter it's range. During that time, players can interact with the
- *	owning actor and execute actions based on requirements defined 
+ *	owning actor and execute actions based on the implementation object referenced.
  */
 UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent

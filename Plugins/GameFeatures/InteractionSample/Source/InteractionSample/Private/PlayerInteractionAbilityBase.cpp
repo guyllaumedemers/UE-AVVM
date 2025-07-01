@@ -108,9 +108,9 @@ void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHa
 		return;
 	}
 
-	const AActor* Controller = ActorInfo->OwnerActor.Get();
+	const AActor* Controller = ActorInfo->PlayerController.Get();
 	if (!ensureAlwaysMsgf(IsValid(Controller),
-	                      TEXT("UPlayerInteractionAbility Owning Actor invalid!")))
+	                      TEXT("UPlayerInteractionAbility PlayerController invalid!")))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
