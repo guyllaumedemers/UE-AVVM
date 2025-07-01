@@ -44,14 +44,14 @@ void UGameStateTransactionHistory::BeginPlay()
 	Super::BeginPlay();
 
 	const auto* Outer = GetTypedOuter<AGameStateBase>();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UGameStateTransactionHistory to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding UGameStateTransactionHistory to Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
@@ -62,46 +62,50 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 {
 	Super::EndPlay(EndPlayReason);
 
-#if WITH_SERVER_CODE
 	for (auto Iterator = Transactions.CreateIterator(); Iterator; ++Iterator)
 	{
 		auto* MutableTransaction = const_cast<UTransaction*>(Iterator->Get());
 		RemoveReplicatedSubObject(MutableTransaction);
 		Iterator.RemoveCurrentSwap();
 	}
-#endif
 
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 }
 
-void UGameStateTransactionHistory::CreateAndRecordTransaction(const FString& NewOwnerId,
+void UGameStateTransactionHistory::CreateAndRecordTransaction(const AActor* NewInstigator,
+                                                              const AActor* NewTarget,
                                                               const ETransactionType NewTransactionType,
                                                               const FString& NewPayload)
 {
 #if WITH_SERVER_CODE
-	UTransaction* Transaction = NewObject<UTransaction>(this);
-	Transaction->operator()(NewOwnerId, NewTransactionType, NewPayload);
-	AddReplicatedSubObject(Transaction);
-	Transactions.Add(Transaction);
+	if (IsValid(NewTarget) && NewTarget->HasAuthority())
+	{
+		UTransaction* Transaction = NewObject<UTransaction>(this);
+		Transaction->operator()(NewInstigator, NewTarget, NewTransactionType, NewPayload);
+		AddReplicatedSubObject(Transaction);
+		Transactions.Add(Transaction);
+
+		OnRep_NewTransactionRecorded();
+	}
 #endif
 }
 
-TArray<TObjectPtr<const UTransaction>> UGameStateTransactionHistory::GetTransactions(const FString& OwnerId,
+TArray<TObjectPtr<const UTransaction>> UGameStateTransactionHistory::GetTransactions(const FString& NewTargetId,
                                                                                      const ETransactionType TransactionType) const
 {
-	return Transactions.FilterByPredicate([OwnerId, TransactionType](const TObjectPtr<const UTransaction>& Transaction)
+	return Transactions.FilterByPredicate([NewTargetId, TransactionType](const TObjectPtr<const UTransaction>& Param)
 	{
-		return IsValid(Transaction) && Transaction->DoesMatch(OwnerId, TransactionType);
+		return IsValid(Param) && Param->DoesMatch(NewTargetId, TransactionType);
 	});
 }
 
@@ -109,7 +113,7 @@ void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 {
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". OnRep_NewTransactionRecorded."),
+	       TEXT("Executed from \"%s\". New Transaction Detected!"),
 	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 	const TObjectPtr<const UTransaction> NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Top();

@@ -32,7 +32,10 @@
 
 void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogGameplay, Log, TEXT("Registering %s"), *GetName());
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Registering %s"),
+	       *GetName());
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
@@ -45,7 +48,10 @@ void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 
 void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogGameplay, Log, TEXT("Unregistering %s"), *GetName());
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Unregistering %s"),
+	       *GetName());
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
@@ -58,7 +64,11 @@ void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 
 void UTransactionCheatExtension::RemoveTransaction(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay, Log, TEXT("Remove Transaction \"%s\" from Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Remove Transaction \"%s\" from Player Index \"%s\"."),
+	       EnumToString(NewType),
+	       *FString::FromInt(PlayerIndex));
 
 	// TODO @gdemers Define Removal Action. System doesnt require due to it being instance per-gameplay GameState instantiation
 	// but will be closer to feature complete if available.
@@ -66,30 +76,29 @@ void UTransactionCheatExtension::RemoveTransaction(const ETransactionType NewTyp
 
 void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay, Log, TEXT("Add Transaction \"%s\" to Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
-
-	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
-	const FUniqueNetIdRepl& UniqueNetId = PlayerState->GetUniqueId();
-	if (!ensureAlwaysMsgf(UniqueNetId != nullptr, TEXT("Invalid FUniqueNetIdRepl from \"%s\"."), *PlayerState->GetName()))
-	{
-		return;
-	}
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Add Transaction \"%s\" to Player Index \"%s\"."),
+	       EnumToString(NewType),
+	       *FString::FromInt(PlayerIndex));
 
 	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Actor!")))
 	{
-		TransactionComponent->CreateAndRecordTransaction(UniqueNetId->ToString(), NewType, FString());
+		TransactionComponent->CreateAndRecordTransaction(nullptr,
+		                                                 UGameplayStatics::GetPlayerState(this, PlayerIndex),
+		                                                 NewType,
+		                                                 FString());
 	}
 }
 
 void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay, Log, TEXT("Print All Transactions \"%s\" from Player Index \"%s\"."), EnumToString(NewType), *FString::FromInt(PlayerIndex));
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Print All Transactions \"%s\" from Player Index \"%s\"."),
+	       EnumToString(NewType),
+	       *FString::FromInt(PlayerIndex));
 
 	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
 	if (!ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Actor!")))
@@ -112,7 +121,11 @@ void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const 
 	int32 Count = 0;
 	for (const UTransaction* Transaction : TransactionHistory->GetTransactions(UniqueNetId->ToString(), NewType))
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Transaction \"%s\": \"%s\"."), *FString::FromInt(++Count), *Transaction->ToString());
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Transaction \"%s\": \"%s\"."),
+		       *FString::FromInt(++Count),
+		       *Transaction->ToString());
 	}
 }
 

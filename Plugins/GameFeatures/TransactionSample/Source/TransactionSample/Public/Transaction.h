@@ -33,22 +33,21 @@
 /**
  *	Class description:
  *
- *	ETransactionType describe the transaction UObject category. Useful for filtering
- *	a collection.
+ *	ETransactionType describe the transaction UObject category. Useful for filtering a collection.
  */
 UENUM(BlueprintType)
 enum class ETransactionType : uint8
 {
 	None,
-	DamageDealt,
+	Damage,
 	Healing,
 	Death,
 	Raise,
 	Kill,
 	Killstreak,
 	Assist,
-	EarnedCurrency,
-	SpentCurrency,
+	Currency,
+	Combo,
 	Max
 };
 
@@ -56,8 +55,8 @@ inline const TCHAR* EnumToString(ETransactionType State)
 {
 	switch (State)
 	{
-		case ETransactionType::DamageDealt:
-			return TEXT("DamageDealt");
+		case ETransactionType::Damage:
+			return TEXT("Damage");
 		case ETransactionType::Healing:
 			return TEXT("Healing");
 		case ETransactionType::Death:
@@ -70,10 +69,10 @@ inline const TCHAR* EnumToString(ETransactionType State)
 			return TEXT("Killstreak");
 		case ETransactionType::Assist:
 			return TEXT("Assist");
-		case ETransactionType::EarnedCurrency:
-			return TEXT("EarnedCurrency");
-		case ETransactionType::SpentCurrency:
-			return TEXT("SpentCurrency");
+		case ETransactionType::Currency:
+			return TEXT("Currency");
+		case ETransactionType::Combo:
+			return TEXT("Combo");
 	}
 	ensure(false);
 	return TEXT("Unknown");
@@ -98,14 +97,19 @@ public:
 #endif // UE_WITH_IRIS
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesMatch(const FString& NewOwnerId, const ETransactionType NewTransactionType) const;
-	
+	bool DoesMatch(const FString& NewTargetId, const ETransactionType NewTransactionType) const;
+
 	UFUNCTION(BlueprintCallable)
 	FString ToString() const;
 
 protected:
+	// @gdemers he who triggered/caused this transaction event.
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
-	FString OwnerId = FString();
+	FString InstigatorId = FString();
+
+	// @gdemers he who owns this transaction.
+	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
+	FString TargetId = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
 	ETransactionType TransactionType = ETransactionType::None;
@@ -114,7 +118,8 @@ protected:
 	FString Payload = FString();
 
 private:
-	void operator()(const FString& NewOwnerId,
+	void operator()(const AActor* NewInstigator,
+	                const AActor* NewTarget,
 	                const ETransactionType NewTransactionType,
 	                const FString& NewPayload);
 

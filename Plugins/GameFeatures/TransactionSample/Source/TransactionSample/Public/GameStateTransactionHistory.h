@@ -49,12 +49,13 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void CreateAndRecordTransaction(const FString& NewOwnerId,
+	void CreateAndRecordTransaction(const AActor* NewInstigator /*Statistics Source - from which we generate*/,
+	                                const AActor* NewTarget /*Statistics Owner - whom we aggregate for*/,
 	                                const ETransactionType NewTransactionType,
 	                                const FString& NewPayload);
 
 	// @gdemers no type conversion supported to return const TArray<const UTransaction*>, so we cant support UFUNCTION(BlueprintCallable)
-	TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& OwnerId,
+	TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& NewTargetId,
 	                                                       const ETransactionType TransactionType) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

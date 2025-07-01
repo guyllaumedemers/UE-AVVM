@@ -19,13 +19,16 @@
 //SOFTWARE.
 #include "Transaction.h"
 
+#include "AVVMUtilityFunctionLibrary.h"
+#include "DoesTransactionProviderSupportIdentifier.h"
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 void UTransaction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UTransaction, OwnerId);
+	DOREPLIFETIME(UTransaction, TargetId);
 	DOREPLIFETIME(UTransaction, TransactionType);
 	DOREPLIFETIME(UTransaction, Payload);
 }
@@ -43,9 +46,9 @@ void UTransaction::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCo
 }
 #endif // UE_WITH_IRIS
 
-bool UTransaction::DoesMatch(const FString& NewOwnerId, const ETransactionType NewTransactionType) const
+bool UTransaction::DoesMatch(const FString& NewTargetId, const ETransactionType NewTransactionType) const
 {
-	return (OwnerId.Equals(NewOwnerId) && (TransactionType == NewTransactionType));
+	return (TargetId.Equals(NewTargetId) && (TransactionType == NewTransactionType));
 }
 
 FString UTransaction::ToString() const
@@ -54,19 +57,61 @@ FString UTransaction::ToString() const
 	return FString();
 }
 
-void UTransaction::operator()(const FString& NewOwnerId,
+void UTransaction::operator()(const AActor* NewInstigator,
+                              const AActor* NewTarget,
                               const ETransactionType NewTransactionType,
                               const FString& NewPayload)
 {
-	OwnerId = NewOwnerId;
 	TransactionType = NewTransactionType;
 	Payload = NewPayload;
 
-	const FString TransactionTypeString(EnumToString(NewTransactionType));
-	UE_LOG(LogTemp,
-	       Log,
-	       TEXT("OwnerId: %s, Transaction type: %s, Payload: %s"),
-	       *NewOwnerId,
-	       *TransactionTypeString,
-	       *NewPayload);
+	TFunction<void(const AActor* StatisticOwner, FString& OutUniqueId)> SetUniqueId;
+	SetUniqueId = [&SetUniqueId](const AActor* StatisticOwner, FString& OutUniqueId)
+	{
+		if (!IsValid(StatisticOwner))
+		{
+			return;
+		}
+
+		const auto* NewPlayerState = Cast<APlayerState>(StatisticOwner);
+		if (IsValid(NewPlayerState))
+		{
+			const FUniqueNetIdRepl& UniqueNetId = NewPlayerState->GetUniqueId();
+			if (ensureAlwaysMsgf(UniqueNetId.IsValid(), TEXT("FUniqueNetIdRepl invalid!")))
+			{
+				OutUniqueId = UniqueNetId->ToString();
+				return;
+			}
+		}
+
+		const auto* Controller = Cast<AController>(StatisticOwner);
+		if (IsValid(Controller))
+		{
+			const AActor* Target = IsValid(Controller->PlayerState) ? Cast<AActor>(Controller->PlayerState) : Cast<AActor>(Controller->GetPawn());
+			SetUniqueId(Target, OutUniqueId);
+			return;
+		}
+
+		const auto* Pawn = Cast<APawn>(StatisticOwner);
+		if (IsValid(Pawn))
+		{
+			const auto* PlayerState = Cast<APlayerState>(Pawn->GetPlayerState());
+			if (IsValid(PlayerState))
+			{
+				SetUniqueId(PlayerState, OutUniqueId);
+				return;
+			}
+		}
+
+		const bool bImplements = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IDoesTransactionProviderSupportIdentifier,
+		                                                                                              UDoesTransactionProviderSupportIdentifier>(StatisticOwner);
+		if (bImplements)
+		{
+			// @gdemers else, we care about statistics specific to inanimated world objects.
+			OutUniqueId = IDoesTransactionProviderSupportIdentifier::Execute_GetProviderIdentifier(StatisticOwner);
+		}
+	};
+
+	SetUniqueId(NewInstigator, InstigatorId);
+	SetUniqueId(NewTarget, TargetId);
 }
