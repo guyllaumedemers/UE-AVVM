@@ -17,7 +17,27 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Data/InteractionExecutionRequirements.h"
 
-#include "TestSample.h"
+#include "ActorInteractionImpl.h"
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, TestSample)
+FInteractionExecutionFloatRequirements::FInteractionExecutionFloatRequirements(const float NewThreshold)
+	: Threshold(NewThreshold)
+{
+}
+
+bool FInteractionExecutionFloatRequirements::DoesMeetRequirements(const UActorInteractionImpl* Impl) const
+{
+	if (!IsValid(Impl))
+	{
+		return false;
+	}
+
+	const auto* Requirements = Impl->Requirements.GetPtr<FInteractionExecutionFloatRequirements>();
+	if (!ensureAlwaysMsgf(Requirements != nullptr, TEXT("Comparing against UActorInteractionImpl with Requirement type mismatch!")))
+	{
+		return false;
+	}
+
+	return (Threshold >= Requirements->Threshold);
+}

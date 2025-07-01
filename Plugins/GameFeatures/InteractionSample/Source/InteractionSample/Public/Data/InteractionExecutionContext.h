@@ -17,4 +17,43 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Ability/InteractionExecutionContext.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "GameplayTagContainer.h"
+
+#include "InteractionExecutionContext.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FInteractionExecutionContext is a POD that hold the action to be executed during Ability Commit.
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FInteractionExecutionContext
+{
+	GENERATED_BODY()
+
+	virtual ~FInteractionExecutionContext() = default;
+
+	virtual void Execute(const AActor* NewInstigator,
+	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;);
+};
+
+/**
+ *	Class description:
+ *
+ *	FInteractionExecutionContextAVVMNotify is a POD that hold the action to be executed during Ability Commit for pushing a Ctx View on screen.
+ */
+USTRUCT()
+struct INTERACTIONSAMPLE_API FInteractionExecutionContextAVVMNotify : public FInteractionExecutionContext
+{
+	GENERATED_BODY()
+
+	virtual void Execute(const AActor* NewInstigator,
+	                     const AActor* NewTarget) const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag TargetChannelTag = FGameplayTag::EmptyTag;
+};

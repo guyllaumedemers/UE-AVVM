@@ -23,7 +23,7 @@
 #include "ActorInteractionImpl.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "Ability/InteractionExecutionRequirements.h"
+#include "Data/InteractionExecutionRequirements.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 
 void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
@@ -73,7 +73,8 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	}
 
 	const FInteractionExecutionFloatRequirements Requirements(TimeHeld);
-	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->DoesMeetExecutionRequirements(TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
+	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->DoesMeetExecutionRequirements(
+			TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
 
 	UE_LOG(LogGameplay,
 	       Log,

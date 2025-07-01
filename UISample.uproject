@@ -8,11 +8,6 @@
 			"Name": "UISample",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "TestSample",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -45,6 +40,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "HandshakeSample",
+			"Enabled": true
+		},
+		{
 			"Name": "InteractionSample",
 			"Enabled": true
 		},
@@ -74,10 +73,6 @@
 		},
 		{
 			"Name": "UIExtension",
-			"Enabled": true
-		},
-		{
-			"Name": "HandshakeSample",
 			"Enabled": true
 		}
 	]
