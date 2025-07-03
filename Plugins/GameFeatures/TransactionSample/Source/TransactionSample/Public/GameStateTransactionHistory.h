@@ -37,7 +37,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTrans
  *	Class description:
  *
  *	UGameStateTransactionHistory capture UTransaction object. It exists on the AGameStateBase and is pushed via GFP.
- *	During gameplay, it aggregate statistics for later access and display with UI or third party service.
+ *	During gameplay, it aggregates statistics for later access and display with UI or third party service.
  */
 UCLASS(ClassGroup=("Transaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class TRANSACTIONSAMPLE_API UGameStateTransactionHistory : public UActorComponent
@@ -56,9 +56,18 @@ public:
 	                                const ETransactionType NewTransactionType,
 	                                const FString& NewPayload);
 
+	UFUNCTION(BlueprintCallable)
+	void RemoveAllOfType(const AActor* NewTarget,
+	                     const ETransactionType NewTransactionType);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveAll(const AActor* NewTarget);
+
 	// @gdemers no type conversion supported to return const TArray<const UTransaction*>, so we cant support UFUNCTION(BlueprintCallable)
-	TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& NewTargetId,
-	                                                       const ETransactionType TransactionType) const;
+	TArray<TObjectPtr<const UTransaction>> GetAllTransactionsOfType(const FString& NewTargetId,
+	                                                                const ETransactionType TransactionType) const;
+
+	TArray<TObjectPtr<const UTransaction>> GetAllTransactions(const FString& NewTargetId) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FOnTransactionRecorded TransactionRecordedDelegate;

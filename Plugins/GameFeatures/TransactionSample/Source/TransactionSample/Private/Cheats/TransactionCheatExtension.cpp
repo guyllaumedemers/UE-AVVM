@@ -63,29 +63,49 @@ void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 	ClearTransactionHistory();
 }
 
-void UTransactionCheatExtension::RemoveTransaction(const ETransactionType NewType, const int32 PlayerIndex)
+void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionType NewType, const int32 PlayerIndex)
 {
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Remove Transaction \"%s\" from Player Index \"%s\"."),
-	       EnumToString(NewType),
-	       *FString::FromInt(PlayerIndex));
-
-	// TODO @gdemers Define Removal Action. System doesnt require due to it being instance per-gameplay GameState instantiation
-	// but will be closer to feature complete if available.
-}
-
-void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, const int32 PlayerIndex)
-{
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Add Transaction \"%s\" to Player Index \"%s\"."),
+	       TEXT("Remove All Transactions of type \"%s\" from Player Index \"%s\"."),
 	       EnumToString(NewType),
 	       *FString::FromInt(PlayerIndex));
 
 	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
+		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
+		TransactionComponent->RemoveAllOfType(PlayerState, NewType);
+	}
+}
+
+void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
+{
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Remove All Transactions from Player Index \"%s\"."),
+	       *FString::FromInt(PlayerIndex));
+
+	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
+	{
+		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
+		TransactionComponent->RemoveAll(PlayerState);
+	}
+}
+
+void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, const int32 PlayerIndex)
+{
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Add Transaction of type \"%s\" to Player Index \"%s\"."),
+	       EnumToString(NewType),
+	       *FString::FromInt(PlayerIndex));
+
+	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
+	{
+		// TODO @gdemers Make impl details that generate stub data for populating transactions using only the Enum Type
 		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 		const FString Payload = UTransactionFactoryUtils::CreateStringPayload(TInstancedStruct<FTransactionPayload/*Should be derived Type here!*/>::Make(/*VArgs*/));
 		TransactionComponent->CreateAndRecordTransaction(nullptr, PlayerState, NewType, Payload);
@@ -119,7 +139,7 @@ void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const 
 	}
 
 	int32 Count = 0;
-	for (const UTransaction* Transaction : TransactionHistory->GetTransactions(UniqueNetId->ToString(), NewType))
+	for (const UTransaction* Transaction : TransactionComponent->GetAllTransactionsOfType(UniqueNetId->ToString(), NewType))
 	{
 		UE_LOG(LogGameplay,
 		       Log,
@@ -175,7 +195,7 @@ void UTransactionCheatExtension::Draw()
 		if (ImGui::Button("Remove"))
 		{
 			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex);
-			RemoveTransaction(Value, PlayerIndex);
+			RemoveAllTransactionsOfType(Value, PlayerIndex);
 		}
 
 		ImGui::SameLine();

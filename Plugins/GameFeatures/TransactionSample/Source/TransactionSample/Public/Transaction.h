@@ -97,10 +97,16 @@ public:
 #endif // UE_WITH_IRIS
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesMatch(const FString& NewTargetId, const ETransactionType NewTransactionType) const;
+	bool DoesExactMatch(const FString& NewTargetId, const ETransactionType NewTransactionType) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool DoesPartialMatch(const FString& NewTargetId) const;
 
 	UFUNCTION(BlueprintCallable)
 	FString ToString() const;
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetUniqueId(const AActor* NewTarget);
 
 protected:
 	// @gdemers he who triggered/caused this transaction event.

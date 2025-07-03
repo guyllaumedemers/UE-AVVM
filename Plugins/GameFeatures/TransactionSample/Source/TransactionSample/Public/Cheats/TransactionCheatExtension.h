@@ -51,8 +51,11 @@ public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
 
-	UFUNCTION(Exec, BlueprintCallable, Category="Transaction|Cheats", DisplayName="Transaction.Remove")
-	void RemoveTransaction(const ETransactionType NewType, const int32 PlayerIndex = 0);
+	UFUNCTION(Exec, BlueprintCallable, Category="Transaction|Cheats", DisplayName="Transaction.RemoveAllOfType")
+	void RemoveAllTransactionsOfType(const ETransactionType NewType, const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="Transaction|Cheats", DisplayName="Transaction.RemoveAll")
+	void RemoveAllTransactions(const int32 PlayerIndex = 0);
 
 	UFUNCTION(Exec, BlueprintCallable, Category="Transaction|Cheats", DisplayName="Transaction.Add")
 	void AddTransaction(const ETransactionType NewType, const int32 PlayerIndex = 0);

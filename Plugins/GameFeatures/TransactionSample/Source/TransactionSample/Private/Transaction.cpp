@@ -46,9 +46,14 @@ void UTransaction::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCo
 }
 #endif // UE_WITH_IRIS
 
-bool UTransaction::DoesMatch(const FString& NewTargetId, const ETransactionType NewTransactionType) const
+bool UTransaction::DoesExactMatch(const FString& NewTargetId, const ETransactionType NewTransactionType) const
 {
 	return (TargetId.Equals(NewTargetId) && (TransactionType == NewTransactionType));
+}
+
+bool UTransaction::DoesPartialMatch(const FString& NewTargetId) const
+{
+	return TargetId.Equals(NewTargetId);
 }
 
 FString UTransaction::ToString() const
@@ -61,16 +66,10 @@ FString UTransaction::ToString() const
 	return FString::Format(TEXT("Instigator:{Instigator}\nTarget:{Target}\nTransactionType:{TransactionType}\nValue:\n\t{Payload}.\n"), Args);
 }
 
-void UTransaction::operator()(const AActor* NewInstigator,
-                              const AActor* NewTarget,
-                              const ETransactionType NewTransactionType,
-                              const FString& NewPayload)
+FString UTransaction::GetUniqueId(const AActor* NewTarget)
 {
-	TransactionType = NewTransactionType;
-	Payload = NewPayload;
-
-	TFunction<void(const AActor* StatisticOwner, FString& OutUniqueId)> SetUniqueId;
-	SetUniqueId = [&SetUniqueId](const AActor* StatisticOwner, FString& OutUniqueId)
+	TFunction<void(const AActor* StatisticOwner, FString& OutUniqueId)> FindActorId;
+	FindActorId = [&FindActorId](const AActor* StatisticOwner, FString& OutUniqueId)
 	{
 		if (!IsValid(StatisticOwner))
 		{
@@ -92,7 +91,7 @@ void UTransaction::operator()(const AActor* NewInstigator,
 		if (IsValid(Controller))
 		{
 			const AActor* Target = IsValid(Controller->PlayerState) ? Cast<AActor>(Controller->PlayerState) : Cast<AActor>(Controller->GetPawn());
-			SetUniqueId(Target, OutUniqueId);
+			FindActorId(Target, OutUniqueId);
 			return;
 		}
 
@@ -102,7 +101,7 @@ void UTransaction::operator()(const AActor* NewInstigator,
 			const auto* PlayerState = Cast<APlayerState>(Pawn->GetPlayerState());
 			if (IsValid(PlayerState))
 			{
-				SetUniqueId(PlayerState, OutUniqueId);
+				FindActorId(PlayerState, OutUniqueId);
 				return;
 			}
 		}
@@ -116,6 +115,18 @@ void UTransaction::operator()(const AActor* NewInstigator,
 		}
 	};
 
-	SetUniqueId(NewInstigator, InstigatorId);
-	SetUniqueId(NewTarget, TargetId);
+	FString OutActorId;
+	FindActorId(NewTarget, OutActorId);
+	return OutActorId;
+}
+
+void UTransaction::operator()(const AActor* NewInstigator,
+                              const AActor* NewTarget,
+                              const ETransactionType NewTransactionType,
+                              const FString& NewPayload)
+{
+	InstigatorId = UTransaction::GetUniqueId(NewInstigator);
+	TargetId = UTransaction::GetUniqueId(NewTarget);
+	TransactionType = NewTransactionType;
+	Payload = NewPayload;
 }
