@@ -54,7 +54,7 @@ public:
 	void CreateAndRecordTransaction(const AActor* NewInstigator /*Statistics Source - from which we generate*/,
 	                                const AActor* NewTarget /*Statistics Owner - whom we aggregate for*/,
 	                                const ETransactionType NewTransactionType,
-	                                const TInstancedStruct<FTransactionPayload>& NewPayload);
+	                                const FString& NewPayload);
 
 	// @gdemers no type conversion supported to return const TArray<const UTransaction*>, so we cant support UFUNCTION(BlueprintCallable)
 	TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& NewTargetId,

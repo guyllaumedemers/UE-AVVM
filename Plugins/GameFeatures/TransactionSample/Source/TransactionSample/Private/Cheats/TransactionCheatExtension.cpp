@@ -84,12 +84,11 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	       *FString::FromInt(PlayerIndex));
 
 	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
-	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Actor!")))
+	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
-		TransactionComponent->CreateAndRecordTransaction(nullptr,
-		                                                 UGameplayStatics::GetPlayerState(this, PlayerIndex),
-		                                                 NewType,
-		                                                 FTransactionPayload::Empty/*Placeholder*/);
+		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
+		const FString Payload = UTransactionFactoryUtils::CreateStringPayload(TInstancedStruct<FTransactionPayload/*Should be derived Type here!*/>::Make(/*VArgs*/));
+		TransactionComponent->CreateAndRecordTransaction(nullptr, PlayerState, NewType, Payload);
 	}
 }
 
@@ -102,7 +101,7 @@ void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const 
 	       *FString::FromInt(PlayerIndex));
 
 	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
-	if (!ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
 		return;
 	}

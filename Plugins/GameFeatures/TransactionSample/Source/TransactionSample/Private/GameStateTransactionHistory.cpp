@@ -86,13 +86,13 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 void UGameStateTransactionHistory::CreateAndRecordTransaction(const AActor* NewInstigator,
                                                               const AActor* NewTarget,
                                                               const ETransactionType NewTransactionType,
-                                                              const TInstancedStruct<FTransactionPayload>& NewPayload)
+                                                              const FString& NewPayload)
 {
 #if WITH_SERVER_CODE
 	if (IsValid(NewTarget) && NewTarget->HasAuthority())
 	{
 		UTransaction* Transaction = NewObject<UTransaction>(this);
-		Transaction->operator()(NewInstigator, NewTarget, NewTransactionType, UTransactionFactoryUtils::CreateStringPayload(NewPayload));
+		Transaction->operator()(NewInstigator, NewTarget, NewTransactionType, NewPayload);
 		AddReplicatedSubObject(Transaction);
 		Transactions.Add(Transaction);
 

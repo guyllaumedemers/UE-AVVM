@@ -35,6 +35,9 @@
  *
  *		* Derive type should define a Constructor with arguments specific to the listed properties.
  *		* Properties defined in the derived type will be listed in the ToString function and display values.
+ *
+ *	Note : When receiving gameplay events, the derived type can be constructed directly from the constructor, only post-replication does the factory function have to be invoked to convert
+ *	from a string and back to an instanced type. (If data has to be red)
  */
 USTRUCT(BlueprintType)
 struct TRANSACTIONSAMPLE_API FTransactionPayload
