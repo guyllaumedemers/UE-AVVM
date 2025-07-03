@@ -53,8 +53,10 @@ bool UTransaction::DoesMatch(const FString& NewTargetId, const ETransactionType 
 
 FString UTransaction::ToString() const
 {
-	// TODO @gdemers parse data into a readable format
-	return FString();
+	FStringFormatNamedArguments Args;
+	Args.Add(TEXT("TransactionType"), FStringFormatArg{EnumToString(TransactionType)});
+	Args.Add(TEXT("Payload"), FStringFormatArg{Payload});
+	return FString::Format(TEXT("{TransactionType}\n\t{Payload}.\n"), Args);
 }
 
 void UTransaction::operator()(const AActor* NewInstigator,

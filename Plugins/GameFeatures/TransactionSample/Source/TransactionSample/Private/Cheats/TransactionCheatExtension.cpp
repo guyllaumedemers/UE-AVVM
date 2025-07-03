@@ -123,7 +123,7 @@ void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const 
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Transaction \"%s\": \"%s\"."),
+		       TEXT("T%s\n\t%s."),
 		       *FString::FromInt(++Count),
 		       *Transaction->ToString());
 	}
