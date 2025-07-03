@@ -21,6 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "GameStateTransactionHistory.h"
+#include "TransactionFactoryUtils.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -88,7 +89,7 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 		TransactionComponent->CreateAndRecordTransaction(nullptr,
 		                                                 UGameplayStatics::GetPlayerState(this, PlayerIndex),
 		                                                 NewType,
-		                                                 FString());
+		                                                 FTransactionPayload::Empty/*Placeholder*/);
 	}
 }
 

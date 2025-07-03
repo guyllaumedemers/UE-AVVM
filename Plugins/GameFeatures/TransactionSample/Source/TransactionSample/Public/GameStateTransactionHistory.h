@@ -22,11 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "GameFramework/Info.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "GameStateTransactionHistory.generated.h"
 
 class AGameStateBase;
 enum class ETransactionType : uint8;
+struct FTransactionPayload;
 class UTransaction;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTransaction*, Transaction);
@@ -52,7 +54,7 @@ public:
 	void CreateAndRecordTransaction(const AActor* NewInstigator /*Statistics Source - from which we generate*/,
 	                                const AActor* NewTarget /*Statistics Owner - whom we aggregate for*/,
 	                                const ETransactionType NewTransactionType,
-	                                const FString& NewPayload);
+	                                const TInstancedStruct<FTransactionPayload>& NewPayload);
 
 	// @gdemers no type conversion supported to return const TArray<const UTransaction*>, so we cant support UFUNCTION(BlueprintCallable)
 	TArray<TObjectPtr<const UTransaction>> GetTransactions(const FString& NewTargetId,

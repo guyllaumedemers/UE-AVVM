@@ -28,8 +28,13 @@
 /**
  *	Class description:
  *
-*	FTransactionPayload is the Payload base class for caching data specific to gameplay. Each Transaction Type should
+ *	FTransactionPayload is the Payload base class for caching data specific to gameplay. Each Transaction Type should
  *	have their own derived type. Users can store information about gameplay statistics here.
+ *
+ *	How to use it ?
+ *
+ *		* Derive type should define a Constructor with arguments specific to the listed properties.
+ *		* Properties defined in the derived type will be listed in the ToString function and display values.
  */
 USTRUCT(BlueprintType)
 struct TRANSACTIONSAMPLE_API FTransactionPayload

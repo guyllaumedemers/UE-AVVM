@@ -22,6 +22,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Transaction.h"
+#include "TransactionFactoryUtils.h"
 #include "GameFramework/GameStateBase.h"
 #include "Net/UnrealNetwork.h"
 
@@ -85,13 +86,13 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 void UGameStateTransactionHistory::CreateAndRecordTransaction(const AActor* NewInstigator,
                                                               const AActor* NewTarget,
                                                               const ETransactionType NewTransactionType,
-                                                              const FString& NewPayload)
+                                                              const TInstancedStruct<FTransactionPayload>& NewPayload)
 {
 #if WITH_SERVER_CODE
 	if (IsValid(NewTarget) && NewTarget->HasAuthority())
 	{
 		UTransaction* Transaction = NewObject<UTransaction>(this);
-		Transaction->operator()(NewInstigator, NewTarget, NewTransactionType, NewPayload);
+		Transaction->operator()(NewInstigator, NewTarget, NewTransactionType, UTransactionFactoryUtils::CreateStringPayload(NewPayload));
 		AddReplicatedSubObject(Transaction);
 		Transactions.Add(Transaction);
 
