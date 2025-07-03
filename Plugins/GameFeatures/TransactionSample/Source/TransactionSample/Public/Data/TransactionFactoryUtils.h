@@ -23,7 +23,7 @@
 
 #include "StructUtils/InstancedStruct.h"
 
-#include "TransactionFactory.generated.h"
+#include "TransactionFactoryUtils.generated.h"
 
 /**
  *	Class description:
@@ -38,6 +38,7 @@ struct TRANSACTIONSAMPLE_API FTransactionPayload
 
 	virtual ~FTransactionPayload() = default;
 	virtual FString ToString() const PURE_VIRTUAL(ToString, return FString(););
+	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) const PURE_VIRTUAL(Init, return Empty;);
 
 	static TInstancedStruct<FTransactionPayload> Empty;
 };
@@ -54,23 +55,27 @@ struct TRANSACTIONSAMPLE_API FTransactionFactoryImpl
 	GENERATED_BODY()
 
 	virtual ~FTransactionFactoryImpl() = default;
-	virtual TInstancedStruct<FTransactionPayload> CreatePayload() const PURE_VIRTUAL(CreatePayload, return FTransactionPayload::Empty;);
+	virtual TInstancedStruct<FTransactionPayload> CreatePayload(const FString& NewPayload) const PURE_VIRTUAL(CreatePayload, return FTransactionPayload::Empty;);
 };
 
 /**
  *	Class description:
  *
- *	UTransactionFactory is a Factory class that expose to BP methods from which a Payload context can be created from or converted
+ *	UTransactionFactoryUtils is a Factory class that expose to BP methods from which a Payload context can be created from or converted
  *	into a String representation.
  */
-UCLASS(BlueprintType)
-class TRANSACTIONSAMPLE_API UTransactionFactory : public UBlueprintFunctionLibrary
+UCLASS()
+class TRANSACTIONSAMPLE_API UTransactionFactoryUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static TInstancedStruct<FTransactionPayload> CreateInstancedPayload(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl);
+	static TInstancedStruct<FTransactionPayload> CreateEmptyPayload(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl);
+
+	UFUNCTION(BlueprintCallable)
+	static TInstancedStruct<FTransactionPayload> CreatePayloadFromString(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl,
+	                                                                     const FString& NewPayload);
 
 	UFUNCTION(BlueprintCallable)
 	static FString CreateStringPayload(const TInstancedStruct<FTransactionPayload>& NewPayload);

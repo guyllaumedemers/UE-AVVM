@@ -17,17 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/TransactionFactory.h"
+#include "Data/TransactionFactoryUtils.h"
 
 TInstancedStruct<FTransactionPayload> FTransactionPayload::Empty;
 
-TInstancedStruct<FTransactionPayload> UTransactionFactory::CreateInstancedPayload(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl)
+TInstancedStruct<FTransactionPayload> UTransactionFactoryUtils::CreateEmptyPayload(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl)
 {
-	const auto* FactoryImpl = NewFactoryImpl.GetPtr<FTransactionFactoryImpl>();
-	return (FactoryImpl != nullptr) ? FactoryImpl->CreatePayload() : FTransactionPayload::Empty;
+	return UTransactionFactoryUtils::CreatePayloadFromString(NewFactoryImpl, TEXT(""));
 }
 
-FString UTransactionFactory::CreateStringPayload(const TInstancedStruct<FTransactionPayload>& NewPayload)
+TInstancedStruct<FTransactionPayload> UTransactionFactoryUtils::CreatePayloadFromString(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl,
+                                                                                        const FString& NewPayload)
+{
+	const auto* FactoryImpl = NewFactoryImpl.GetPtr<FTransactionFactoryImpl>();
+	return (FactoryImpl != nullptr) ? FactoryImpl->CreatePayload(NewPayload) : FTransactionPayload::Empty;
+}
+
+FString UTransactionFactoryUtils::CreateStringPayload(const TInstancedStruct<FTransactionPayload>& NewPayload)
 {
 	const auto* Payload = NewPayload.GetPtr<FTransactionPayload>();
 	return (Payload != nullptr) ? Payload->ToString() : FString();
