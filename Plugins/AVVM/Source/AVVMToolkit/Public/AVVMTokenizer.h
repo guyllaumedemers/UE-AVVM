@@ -17,51 +17,35 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class TransactionSample : ModuleRules
+#include "UObject/Object.h"
+
+#include "AVVMTokenizer.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMTokenizer is a utility tool that allows string parsing. Using the provided input, it searches a specific token
+ *	and return it's value.
+ */
+UCLASS()
+class AVVMTOOLKIT_API UAVVMTokenizer : public UObject
 {
-	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"IrisCore"
-			}
-		);
+public:
+	template <typename T>
+	static T GetTokenValue(const FString& Token,
+	                       const FString& Input);
+};
 
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit"
-			}
-		);
-
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMDebugger",
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
-
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
-		}
-	}
+template <typename T>
+T UAVVMTokenizer::GetTokenValue(const FString& Token,
+                                const FString& Input)
+{
+	// TODO @gdemers impl token handler
+	return T();
 }

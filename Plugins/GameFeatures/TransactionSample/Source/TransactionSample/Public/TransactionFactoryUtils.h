@@ -46,7 +46,7 @@ struct TRANSACTIONSAMPLE_API FTransactionPayload
 
 	virtual ~FTransactionPayload() = default;
 	virtual FString ToString() const PURE_VIRTUAL(ToString, return FString(););
-	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) const PURE_VIRTUAL(Init, return Empty;);
+	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) PURE_VIRTUAL(Init, return Empty;);
 
 	static TInstancedStruct<FTransactionPayload> Empty;
 };
