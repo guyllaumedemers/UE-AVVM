@@ -17,20 +17,20 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "TransactionDeveloperSettings.h"
+#include "TransactionSettings.h"
 
 #include "TransactionFactoryUtils.h"
 
-UTransactionDeveloperSettings::UTransactionDeveloperSettings()
+UTransactionSettings::UTransactionSettings()
 {
 	CategoryName = TEXT("Game");
 }
 
-TInstancedStruct<FTransactionFactoryImpl> UTransactionDeveloperSettings::GetFactoryImpl(const ETransactionType NewType)
+TInstancedStruct<FTransactionFactoryImpl> UTransactionSettings::GetFactoryImpl(const ETransactionType NewType)
 {
 	TInstancedStruct<FTransactionFactoryImpl> Value;
 
-	const auto* Settings = GetDefault<UTransactionDeveloperSettings>();
+	const auto* Settings = GetDefault<UTransactionSettings>();
 	if (!ensureAlwaysMsgf(IsValid(Settings), TEXT("UTransactionDeveloperSettings CDO invalid!")))
 	{
 		return Value;

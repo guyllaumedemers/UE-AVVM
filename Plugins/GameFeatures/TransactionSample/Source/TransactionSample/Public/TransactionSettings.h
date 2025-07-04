@@ -24,23 +24,23 @@
 #include "Engine/DeveloperSettings.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "TransactionDeveloperSettings.generated.h"
+#include "TransactionSettings.generated.h"
 
 struct FTransactionFactoryImpl;
 
 /**
  *	Class description:
  *
- *	UTransactionDeveloperSettings is a developer settings class that expose a mapping of Transaction type to Factory Class
+ *	UTransactionSettings is a developer settings class that expose a mapping of Transaction type to Factory Class
  *	for creating instanced struct from a string payload.
  */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UTransactionDeveloperSettings"))
-class TRANSACTIONSAMPLE_API UTransactionDeveloperSettings : public UDeveloperSettings
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UTransactionSettings"))
+class TRANSACTIONSAMPLE_API UTransactionSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
-	UTransactionDeveloperSettings();
+	UTransactionSettings();
 
 	UFUNCTION(BlueprintCallable)
 	static TInstancedStruct<FTransactionFactoryImpl> GetFactoryImpl(const ETransactionType NewType);

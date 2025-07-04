@@ -21,7 +21,7 @@
 
 #include "AVVMUtilityFunctionLibrary.h"
 #include "DoesTransactionProviderSupportIdentifier.h"
-#include "TransactionDeveloperSettings.h"
+#include "TransactionSettings.h"
 #include "TransactionFactoryUtils.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
@@ -70,7 +70,7 @@ FString UTransaction::ToString() const
 
 TInstancedStruct<FTransactionPayload> UTransaction::GetValue() const
 {
-	const TInstancedStruct<FTransactionFactoryImpl> FactoryImpl = UTransactionDeveloperSettings::GetFactoryImpl(TransactionType);
+	const TInstancedStruct<FTransactionFactoryImpl> FactoryImpl = UTransactionSettings::GetFactoryImpl(TransactionType);
 	return UTransactionFactoryUtils::CreatePayloadFromString(FactoryImpl, Payload);
 }
 
