@@ -21,6 +21,8 @@
 
 #include "AVVMUtilityFunctionLibrary.h"
 #include "DoesTransactionProviderSupportIdentifier.h"
+#include "TransactionDeveloperSettings.h"
+#include "TransactionFactoryUtils.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
@@ -64,6 +66,12 @@ FString UTransaction::ToString() const
 	Args.Add(TEXT("TransactionType"), FStringFormatArg{EnumToString(TransactionType)});
 	Args.Add(TEXT("Payload"), FStringFormatArg{Payload});
 	return FString::Format(TEXT("Instigator:{Instigator}\nTarget:{Target}\nTransactionType:{TransactionType}\nValue:\n\t{Payload}.\n"), Args);
+}
+
+TInstancedStruct<FTransactionPayload> UTransaction::GetValue() const
+{
+	const TInstancedStruct<FTransactionFactoryImpl> FactoryImpl = UTransactionDeveloperSettings::GetFactoryImpl(TransactionType);
+	return UTransactionFactoryUtils::CreatePayloadFromString(FactoryImpl, Payload);
 }
 
 FString UTransaction::GetUniqueId(const AActor* NewTarget)

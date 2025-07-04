@@ -26,9 +26,13 @@
 #if UE_WITH_IRIS
 #include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
 #endif // UE_WITH_IRIS
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "Transaction.generated.h"
+
+struct FTransactionFactoryImpl;
+struct FTransactionPayload;
 
 /**
  *	Class description:
@@ -104,6 +108,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString ToString() const;
+
+	UFUNCTION(BlueprintCallable)
+	TInstancedStruct<FTransactionPayload> GetValue() const;
 
 	UFUNCTION(BlueprintCallable)
 	static FString GetUniqueId(const AActor* NewTarget);

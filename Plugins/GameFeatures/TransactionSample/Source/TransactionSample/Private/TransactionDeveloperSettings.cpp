@@ -17,52 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "TransactionDeveloperSettings.h"
 
-using UnrealBuildTool;
+#include "TransactionFactoryUtils.h"
 
-public class TransactionSample : ModuleRules
+UTransactionDeveloperSettings::UTransactionDeveloperSettings()
 {
-	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
+	CategoryName = TEXT("Game");
+}
+
+TInstancedStruct<FTransactionFactoryImpl> UTransactionDeveloperSettings::GetFactoryImpl(const ETransactionType NewType)
+{
+	TInstancedStruct<FTransactionFactoryImpl> Value;
+
+	const auto* Settings = GetDefault<UTransactionDeveloperSettings>();
+	if (!ensureAlwaysMsgf(IsValid(Settings), TEXT("UTransactionDeveloperSettings CDO invalid!")))
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore"
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit"
-			}
-		);
-
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMDebugger",
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
-
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
-		}
+		return Value;
 	}
+
+	const TInstancedStruct<FTransactionFactoryImpl>* SearchResult = Settings->Factories.Find(NewType);
+	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("UTransactionDeveloperSettings missing TransactionType!")))
+	{
+		Value = *SearchResult;
+	}
+
+	return Value;
 }

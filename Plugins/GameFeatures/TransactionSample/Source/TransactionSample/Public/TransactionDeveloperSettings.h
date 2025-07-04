@@ -17,52 +17,35 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class TransactionSample : ModuleRules
+#include "Engine/DeveloperSettings.h"
+#include "StructUtils/InstancedStruct.h"
+
+#include "TransactionDeveloperSettings.generated.h"
+
+struct FTransactionFactoryImpl;
+
+/**
+ *	Class description:
+ *
+ *	UTransactionDeveloperSettings is a developer settings class that expose a mapping of Transaction type to Factory Class
+ *	for creating instanced struct from a string payload.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UTransactionDeveloperSettings"))
+class TRANSACTIONSAMPLE_API UTransactionDeveloperSettings : public UDeveloperSettings
 {
-	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore"
-			}
-		);
+public:
+	UTransactionDeveloperSettings();
 
+	UFUNCTION(BlueprintCallable)
+	static TInstancedStruct<FTransactionFactoryImpl> GetFactoryImpl(const ETransactionType NewType);
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit"
-			}
-		);
-
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMDebugger",
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
-
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
-		}
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	TMap<ETransactionType, TInstancedStruct<FTransactionFactoryImpl>> Factories;
+};
