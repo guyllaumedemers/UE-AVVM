@@ -180,17 +180,17 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 
 const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByPartialMatch(const FGameplayTagContainer& FilteringTags) const
 {
-	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Item)
+	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Param)
 	{
-		return IsValid(Item) && Item->HasPartialMatch(Compare);
+		return IsValid(Param) && Param->HasPartialMatch(Compare);
 	});
 }
 
 const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const
 {
-	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Item)
+	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Param)
 	{
-		return IsValid(Item) && Item->HasExactMatch(Compare);
+		return IsValid(Param) && Param->HasExactMatch(Compare);
 	});
 }
 

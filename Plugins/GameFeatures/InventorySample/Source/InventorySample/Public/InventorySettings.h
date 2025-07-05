@@ -31,7 +31,7 @@
  *
  *	UInventorySettings is a DeveloperSettings that expose global tags use to track/update the state of an Item.
  */
-UCLASS()
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UInventorySettings"))
 class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -49,15 +49,15 @@ public:
 	static const FGameplayTagContainer& GetInstancedDroppedTags();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTagContainer PendingSpawnEquipTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTagContainer PendingSpawnDropTags = FGameplayTagContainer::EmptyContainer;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTagContainer InstancedEquippedTags = FGameplayTagContainer::EmptyContainer;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTagContainer InstancedDroppedTags = FGameplayTagContainer::EmptyContainer;
 };
