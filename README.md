@@ -57,7 +57,7 @@ To properly vehicule the train of thought into laying down good grounds for gene
 
 ### Interaction Sample
 
-This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. Implementation details are still under construction for Single-Click, Double-Click and Hold interactions. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
+This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
 
 ### Transaction Sample
 
