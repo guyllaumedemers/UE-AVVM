@@ -51,6 +51,18 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 ![UE-AVVM](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM.jpg)
 
+# AVVM
+
+### A quick walkthrough to help the reader be made aware of the existing utilities that can be found under the AVVM plugin.
+
+ * AVVMDebugger : Is a developer tool module that register descriptor context (i.e cheat extension) and execute draw calls using imgui immediate mode.
+ * AVVM : Is a core system for UI development. It exposes the base class required to create View Model instance (with the Actor-View-ViewModel paradigm) and register Presenter object with the notification system from which we can forward generic payload information.
+ * AVVMOnline : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected based use by the AVVM notification system.
+ * AVVMGameplay : Is a core system for gameplay development. It exposes the base class for supporting **Resource loading** and **Input/Ability triggering** via tag activation.
+ * ...
+
+**Other modules are placeholder work for ideas that are currently floating around.**
+
 ## GameFeature Plugin Sample Modules
 
 To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime**, **InteractionSample** and **InventorySample**. Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
