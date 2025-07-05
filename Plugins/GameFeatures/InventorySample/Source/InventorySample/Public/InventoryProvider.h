@@ -87,4 +87,12 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	EItemSrcType GetItemSrcType() const;
 	virtual EItemSrcType GetItemSrcType_Implementation() const PURE_VIRTUAL(GetItemSrcType_Implementation, return EItemSrcType::None;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool DoesSupportSpawnOnLoad() const;
+	virtual bool DoesSupportSpawnOnLoad_Implementation() const PURE_VIRTUAL(DoesSupportSpawnOnLoad_Implementation, return false;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool IsItemEquipped(const UItemObject* NewItem) const;
+	virtual bool IsItemEquipped_Implementation(const UItemObject* NewItem) const PURE_VIRTUAL(IsItemEquipped_Implementation, return false;);
 };

@@ -242,10 +242,23 @@ void UActorInventoryComponent::OnItemsRetrieved()
 		}
 	}
 
+	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
+	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
+	{
+		return;
+	}
+
+	const bool bDoesSupportSpawnOnLoad = IInventoryProvider::Execute_DoesSupportSpawnOnLoad(Outer);
+	if (!bDoesSupportSpawnOnLoad)
+	{
+		return;
+	}
+
 	// @gdemers handle spawning default object that are currently equipped
 	for (UItemObject* Item : Items)
 	{
-		if (IsValid(Item))
+		const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, Item);
+		if (bIsItemEquipped)
 		{
 			Item->TrySpawnEquippedItem(Outer);
 		}
