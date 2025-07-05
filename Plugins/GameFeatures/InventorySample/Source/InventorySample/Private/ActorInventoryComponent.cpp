@@ -80,13 +80,11 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-#if WITH_SERVER_CODE
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
 		RemoveReplicatedSubObject(Iterator->Get());
 		Iterator.RemoveCurrentSwap();
 	}
-#endif
 
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
