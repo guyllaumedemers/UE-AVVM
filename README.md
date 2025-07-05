@@ -62,3 +62,9 @@ This GameFeature plugin is a sample plugin for supporting general interaction be
 ### Transaction Sample
 
 This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Implementation details are still under construction for the Tokenizer class that manage the parsing of the payload string storing statistic properties. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
+
+### Inventory Sample
+
+This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished to support world instantiation of item Actors. Abilities for consuming, equipping and/or dropping items are yet to be put in place. TBD!
+
+**Notes : All plugins defined above are example cases that utilize the api from AVVM plugin.**
