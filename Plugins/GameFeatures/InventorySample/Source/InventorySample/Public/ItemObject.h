@@ -100,6 +100,9 @@ public:
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 
 	UFUNCTION(BlueprintCallable)
+	bool HasRuntimeState(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
 	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)

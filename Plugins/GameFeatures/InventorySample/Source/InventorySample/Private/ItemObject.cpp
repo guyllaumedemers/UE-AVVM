@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "ItemObject.h"
 
+#include "InventorySettings.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
@@ -49,6 +50,11 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 	RuntimeItemState.StateTags.AppendTags(AddedTags);
 }
 
+bool UItemObject::HasRuntimeState(const FGameplayTagContainer& Compare) const
+{
+	return RuntimeItemState.StateTags.HasAllExact(Compare);
+}
+
 bool UItemObject::HasPartialMatch(const FGameplayTagContainer& Compare) const
 {
 	return ItemTypeTags.HasAnyExact(Compare);
@@ -71,8 +77,7 @@ void UItemObject::TrySpawnEquippedItem(const AActor* Target)
 
 	FOnResourceAsyncLoadingComplete Callback;
 	Callback.BindDynamic(this, &UItemObject::OnResourcesLoaded);
-	// TODO @gdemers define tag configs to tell user we are in the equipping phase
-	ModifyRuntimeState({}, {});
+	ModifyRuntimeState(UInventorySettings::GetPendingSpawnEquipTags(), {});
 	ResourceManagerComponent->RequestAsyncLoading(ItemProgressionId, Callback);
 }
 
@@ -88,39 +93,65 @@ void UItemObject::TrySpawnDroppedItem(const AActor* Target)
 
 	FOnResourceAsyncLoadingComplete Callback;
 	Callback.BindDynamic(this, &UItemObject::OnResourcesLoaded);
-	// TODO @gdemers define tag configs to tell user we are in the dropping phase
-	ModifyRuntimeState({}, {});
+	ModifyRuntimeState(UInventorySettings::GetPendingSpawnDropTags(), {});
 	ResourceManagerComponent->RequestAsyncLoading(ItemProgressionId, Callback);
 }
 
 void UItemObject::OnResourcesLoaded()
 {
-	const AActor* Outer = OwningOuter.Get();
-	if (!IsValid(Outer))
+	// TODO @gdemers The Resource Provider interface implementer Actor should handle the Spawining of the Actor in the Check function to be overriden.
+	// The Data Asset at this point is already loaded and resources are forwarded to the check function. The only thing to do here would be to update the state
+	// of the ItemObject!
+
+	auto RemovedTags = FGameplayTagContainer::EmptyContainer;
+	auto AddedTags = FGameplayTagContainer::EmptyContainer;
+
+	const bool bHasPendingEquippedTags = HasRuntimeState(UInventorySettings::GetPendingSpawnEquipTags());
+	if (bHasPendingEquippedTags)
 	{
+		RemovedTags = UInventorySettings::GetPendingSpawnEquipTags();
+		AddedTags = UInventorySettings::GetInstancedEquippedTags();
+
+		ModifyRuntimeState(AddedTags, RemovedTags);
 		return;
 	}
 
-	UWorld* World = GetWorld();
-	if (IsValid(World))
+	const bool bHasPendingDroppedTags = HasRuntimeState(UInventorySettings::GetPendingSpawnDropTags());
+	if (bHasPendingDroppedTags)
 	{
-		const FTransform ItemAnchorTransform = GetSpawningAnchorTransform(*Outer);
-		RuntimeItemActor = World->SpawnActor(nullptr, &ItemAnchorTransform, FActorSpawnParameters());
+		RemovedTags = UInventorySettings::GetPendingSpawnDropTags();
+		AddedTags = UInventorySettings::GetInstancedDroppedTags();
+
+		ModifyRuntimeState(AddedTags, RemovedTags);
+		return;
 	}
 
-	if (ensureAlwaysMsgf(IsValid(RuntimeItemActor),
-	                     TEXT("Item Actor Class Failed to create an instance in World!")))
-	{
-		// @gdemers bad practice but avoid code refactoring!
-		RuntimeItemActor->AttachToActor(const_cast<AActor*>(Outer), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
-	}
+	// TODO @gdemers Impl in the Actor IResourceProvider::Check function 
+	// const AActor* Outer = OwningOuter.Get();
+	// if (!IsValid(Outer))
+	// {
+	// 	return;
+	// }
+	//
+	// UWorld* World = GetWorld();
+	// if (IsValid(World))
+	// {
+	// 	const FTransform ItemAnchorTransform = GetSpawningAnchorTransform(*Outer);
+	// 	RuntimeItemActor = World->SpawnActor(nullptr, &ItemAnchorTransform, FActorSpawnParameters());
+	// }
+	//
+	// if (ensureAlwaysMsgf(IsValid(RuntimeItemActor),
+	//                      TEXT("Item Actor Class Failed to create an instance in World!")))
+	// {
+	// 	// @gdemers bad practice but avoid code refactoring!
+	// 	RuntimeItemActor->AttachToActor(const_cast<AActor*>(Outer), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+	// }
 }
 
 FTransform UItemObject::GetSpawningAnchorTransform(const AActor& Target) const
 {
-	// check RuntimeItemState.StateTags to determine the state of the object
-	const bool bShouldSpawnAndAttach = true;
-	const bool bShouldSpawnAndDrop = false;
+	const bool bShouldSpawnAndAttach = HasRuntimeState(UInventorySettings::GetPendingSpawnEquipTags());
+	const bool bShouldSpawnAndDrop = HasRuntimeState(UInventorySettings::GetPendingSpawnDropTags());
 
 	FTransform ItemAnchorTransform = Target.GetActorTransform();
 	if (bShouldSpawnAndAttach)

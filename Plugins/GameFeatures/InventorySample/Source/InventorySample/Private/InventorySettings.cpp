@@ -17,38 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "InventorySettings.h"
 
-using UnrealBuildTool;
-
-public class InventorySample : ModuleRules
+const FGameplayTagContainer& UInventorySettings::GetPendingSpawnEquipTags()
 {
-	public InventorySample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	return GetDefault<UInventorySettings>()->PendingSpawnEquipTags;
+}
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"IrisCore",
-				"ModelViewViewModel",
-				"StructUtils"
-			}
-		);
+const FGameplayTagContainer& UInventorySettings::GetPendingSpawnDropTags()
+{
+	return GetDefault<UInventorySettings>()->PendingSpawnDropTags;
+}
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
+const FGameplayTagContainer& UInventorySettings::GetInstancedEquippedTags()
+{
+	return GetDefault<UInventorySettings>()->InstancedEquippedTags;
+}
+
+const FGameplayTagContainer& UInventorySettings::GetInstancedDroppedTags()
+{
+	return GetDefault<UInventorySettings>()->InstancedDroppedTags;
 }
