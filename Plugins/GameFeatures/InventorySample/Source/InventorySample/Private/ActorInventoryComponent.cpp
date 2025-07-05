@@ -166,7 +166,6 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved);
-		// TODO @gdemers there may be nested items which imply that this handle will be overwrite on next call. Fix it!
 		StreamableHandle = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
 	}
 }
