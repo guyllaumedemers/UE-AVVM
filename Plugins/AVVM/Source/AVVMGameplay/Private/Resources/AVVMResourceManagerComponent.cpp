@@ -43,20 +43,29 @@ UAVVMResourceManagerComponent::FResourceQueueingMechanism::~FResourceQueueingMec
 	CompletionDelegate.Clear();
 }
 
-bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRequest(const FOnAsyncLoadingRequestDeferred& NewRequest)
+bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushDeferredRequest(const FOnAsyncLoadingRequestDeferred& NewRequest)
 {
-	QueueRequest(NewRequest);
+	PendingRequests.Enqueue(NewRequest);
+	TryExecuteNextRequest();
+	return !HasPendingRequest();
+}
+
+bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRequest()
+{
+	if (PendingRequests.IsEmpty())
+	{
+		CompletionDelegate.ExecuteIfBound();
+		return true;
+	}
 
 	if (ensureAlwaysMsgf(HasPendingRequest(), TEXT("Queue should never be empty!")) && !HasUnfinishedStreamableHandle())
 	{
-		UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred PendingRequest;
-		PendingRequests.Dequeue(PendingRequest);
-		return PendingRequest.ExecuteIfBound();
+		UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred NextRequest;
+		PendingRequests.Dequeue(NextRequest);
+		NextRequest.ExecuteIfBound();
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasUnfinishedStreamableHandle() const
@@ -92,11 +101,6 @@ const FOnResourceAsyncLoadingComplete& UAVVMResourceManagerComponent::FResourceQ
 	return CompletionDelegate;
 }
 
-void UAVVMResourceManagerComponent::FResourceQueueingMechanism::QueueRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest)
-{
-	PendingRequests.Enqueue(NewRequest);
-}
-
 void UAVVMResourceManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -113,7 +117,7 @@ void UAVVMResourceManagerComponent::BeginPlay()
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
@@ -131,7 +135,7 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 {
 	Super::EndPlay(EndPlayReason);
 
-	const auto* Outer = GetTypedOuter<AActor>();
+	const auto* Outer = OwningOuter.Get();
 	if (!ensure(IsValid(Outer)))
 	{
 		return;
@@ -139,7 +143,7 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent to Actor \"%s\"."),
+	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName())
 
@@ -167,7 +171,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
                                                          FOnResourceAsyncLoadingComplete OnRequestCompleteCallback)
 {
 	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		OnRequestCompleteCallback.ExecuteIfBound();
 		return;
@@ -178,7 +182,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Executed from \"%s\". Resource Acquisition for \"%s\" Failed on Actor \"%s\"!"),
+		       TEXT("Executed from \"%s\". Resource Acquisition for \"%s\" Failed on Outer \"%s\"!"),
 		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 		       *Result.ItemId.ToString(),
 		       *Outer->GetName());
@@ -189,40 +193,57 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	const auto* DataTableRow = Result.GetItem<FAVVMDataTableRow>();
 	check(DataTableRow != nullptr);
 
-	const auto RequestSoftObjectsAsync = [&](const TArray<FSoftObjectPath>& ResourcePaths, const FOnResourceAsyncLoadingComplete& ActiveRequestCallback)
+	const auto RequestSoftObjectsAsync = [&](const TArray<FSoftObjectPath>& ResourcePaths,
+	                                         const FDataRegistryId& OwningRegistryId,
+	                                         const FOnResourceAsyncLoadingComplete& MainRequestCompletionCallback)
 	{
+		const auto* NewOuter = OwningOuter.Get();
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Executing Resource Acquisition Request for \"%s\" on Outer \"%s\"!"),
+		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
+		       *OwningRegistryId.ToString(),
+		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
+
 		FStreamableDelegate CompletionCallback;
 		CompletionCallback.BindUObject(this, &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
 
 		const TSharedPtr<FStreamableHandle> NewStreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, CompletionCallback);
-		QueueingMechanism.SetCompletionCallback(ActiveRequestCallback);
+		QueueingMechanism.SetCompletionCallback(MainRequestCompletionCallback);
 		QueueingMechanism.PushStreamableHandle(NewStreamableHandle);
 	};
 
-	const auto WrappedDeferredRequest = FOnAsyncLoadingRequestDeferred::CreateWeakLambda(this, RequestSoftObjectsAsync, DataTableRow->GetResourcesPaths(), OnRequestCompleteCallback);
-	const bool bWasRequestExecutedOrDeferred = QueueingMechanism.TryExecuteNextRequest(WrappedDeferredRequest);
+	const auto WrappedDeferredRequest = FOnAsyncLoadingRequestDeferred::CreateWeakLambda(this,
+	                                                                                     RequestSoftObjectsAsync,
+	                                                                                     DataTableRow->GetResourcesPaths(),
+	                                                                                     Result.ItemId,
+	                                                                                     OnRequestCompleteCallback);
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Resource Acquisition Request for \"%s\" was \"%s\"!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Result.ItemId.ToString(),
-	       bWasRequestExecutedOrDeferred ? TEXT("Executed") : TEXT("Deferred"));
+	const bool bWasRequestExecutedOrDeferred = QueueingMechanism.PushDeferredRequest(WrappedDeferredRequest);
+	if (!bWasRequestExecutedOrDeferred)
+	{
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Resource Acquisition Request for \"%s\" was Deferred on Outer \"%s\"!"),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *Result.ItemId.ToString(),
+		       *Outer->GetName());
+	}
 }
 
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
 	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		QueueingMechanism.GetCompletionDelegate().ExecuteIfBound();
+		QueueingMechanism.TryExecuteNextRequest();
 		return;
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(Outer);
 	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IAVVMResourceProvider interface!")))
 	{
-		QueueingMechanism.GetCompletionDelegate().ExecuteIfBound();
+		QueueingMechanism.TryExecuteNextRequest();
 		return;
 	}
 
@@ -235,7 +256,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	const bool bIsDoneAcquiringResources = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(Outer, OutStreamedAssets, KeepProcessingRegistriesCallback);
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Actor \"%s\"? %s"),
+	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Outer \"%s\"? %s"),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       bIsDoneAcquiringResources ? TEXT("True") : TEXT("False"));
@@ -246,15 +267,13 @@ bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FD
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem))
 	{
-		QueueingMechanism.GetCompletionDelegate().ExecuteIfBound();
-		return false;
+		return QueueingMechanism.TryExecuteNextRequest();
 	}
 
 	const bool bIsEmpty = PendingRegistriesId.IsEmpty();
 	if (bIsEmpty)
 	{
-		QueueingMechanism.GetCompletionDelegate().ExecuteIfBound();
-		return true;
+		return QueueingMechanism.TryExecuteNextRequest();
 	}
 
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);

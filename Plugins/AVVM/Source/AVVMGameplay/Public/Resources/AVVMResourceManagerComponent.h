@@ -71,7 +71,8 @@ protected:
 	struct FResourceQueueingMechanism
 	{
 		~FResourceQueueingMechanism();
-		bool TryExecuteNextRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest);
+		bool PushDeferredRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest);
+		bool TryExecuteNextRequest();
 		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback);
 		void PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle);
 		void GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const;
@@ -80,7 +81,6 @@ protected:
 	protected:
 		bool HasUnfinishedStreamableHandle() const;
 		bool HasPendingRequest() const;
-		void QueueRequest(const FOnAsyncLoadingRequestDeferred& NewRequest);
 
 		TArray<TSharedPtr<FStreamableHandle>> StreamableHandles;
 		TQueue<UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred> PendingRequests;
