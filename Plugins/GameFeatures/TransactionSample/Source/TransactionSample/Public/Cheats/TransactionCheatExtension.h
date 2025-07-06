@@ -30,8 +30,6 @@
 
 #include "TransactionCheatExtension.generated.h"
 
-class UGameStateTransactionHistory;
-
 /**
  *	Class description:
  *
@@ -61,7 +59,7 @@ public:
 	void AddTransaction(const ETransactionType NewType, const int32 PlayerIndex = 0);
 
 	UFUNCTION(Exec, BlueprintCallable, Category="Transaction|Cheats", DisplayName="Transaction.PrintAll")
-	void PrintAll(const ETransactionType NewType, const int32 PlayerIndex = 0);
+	void PrintAll(const int32 PlayerIndex = 0);
 
 #if WITH_AVVM_DEBUGGER
 	virtual void Draw() override;
@@ -71,10 +69,4 @@ protected:
 #if WITH_AVVM_DEBUGGER
 	const char* LazyGatherTransactionTypes();
 #endif
-
-	void OnStartGameInstance(UGameInstance* Game);
-	void ClearTransactionHistory();
-
-	TWeakObjectPtr<UGameStateTransactionHistory> TransactionHistory = nullptr;
-	FDelegateHandle GameInstanceDelegateHandle;
 };

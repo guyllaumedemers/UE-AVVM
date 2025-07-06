@@ -23,7 +23,6 @@
 #include "AVVMTokenizer.h"
 #include "GameStateTransactionHistory.h"
 #include "TransactionFactoryUtils.h"
-#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -42,7 +41,7 @@ namespace NSTest
 	 *
 	 *	FTransactionPayloadTest is an example Payload derive type with a single property int32.
 	 */
-	struct FTransactionPayloadTest : FTransactionPayload
+	struct FTransactionPayloadTest : public FTransactionPayload
 	{
 		FTransactionPayloadTest() = default;
 
@@ -72,7 +71,7 @@ namespace NSTest
 	 *
 	 *	FTransactionFactoryImplTest is an example Factory Payload derive type that instance a FTransactionPayloadTest.
 	 */
-	struct FTransactionFactoryImplTest : FTransactionFactoryImpl
+	struct FTransactionFactoryImplTest : public FTransactionFactoryImpl
 	{
 		virtual TInstancedStruct<FTransactionPayload> CreatePayload(const FString& NewPayload) const override
 		{
@@ -92,10 +91,6 @@ void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
 #endif
-
-	GameInstanceDelegateHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UTransactionCheatExtension::OnStartGameInstance);
-
-	ClearTransactionHistory();
 }
 
 void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
@@ -108,10 +103,6 @@ void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
 #endif
-
-	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceDelegateHandle);
-
-	ClearTransactionHistory();
 }
 
 void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionType NewType, const int32 PlayerIndex)
@@ -122,7 +113,7 @@ void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionT
 	       EnumToString(NewType),
 	       *FString::FromInt(PlayerIndex));
 
-	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	UGameStateTransactionHistory* TransactionComponent = UGameStateTransactionHistory::GetTransactionHistory(this);
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
 		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
@@ -137,7 +128,7 @@ void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
 	       TEXT("Remove All Transactions from Player Index \"%s\"."),
 	       *FString::FromInt(PlayerIndex));
 
-	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	UGameStateTransactionHistory* TransactionComponent = UGameStateTransactionHistory::GetTransactionHistory(this);
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
 		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
@@ -153,25 +144,24 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	       EnumToString(NewType),
 	       *FString::FromInt(PlayerIndex));
 
-	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	UGameStateTransactionHistory* TransactionComponent = UGameStateTransactionHistory::GetTransactionHistory(this);
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
-		const auto InstancedPayload = TInstancedStruct<NSTest::FTransactionPayloadTest>::Make(StaticCast<int32>(NewType));
+		const auto InstancedPayload = TInstancedStruct<FTransactionPayload>::Make<NSTest::FTransactionPayloadTest>(StaticCast<int32>(NewType));
 		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 		const FString Payload = UTransactionFactoryUtils::CreateStringPayload(InstancedPayload);
 		TransactionComponent->CreateAndRecordTransaction(nullptr, PlayerState, NewType, Payload);
 	}
 }
 
-void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const int32 PlayerIndex)
+void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 {
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Print All Transactions \"%s\" from Player Index \"%s\"."),
-	       EnumToString(NewType),
+	       TEXT("Print All Transactions from Player Index \"%s\"."),
 	       *FString::FromInt(PlayerIndex));
 
-	UGameStateTransactionHistory* TransactionComponent = TransactionHistory.Get();
+	UGameStateTransactionHistory* TransactionComponent = UGameStateTransactionHistory::GetTransactionHistory(this);
 	if (!ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
 		return;
@@ -190,7 +180,7 @@ void UTransactionCheatExtension::PrintAll(const ETransactionType NewType, const 
 	}
 
 	int32 Count = 0;
-	for (const UTransaction* Transaction : TransactionComponent->GetAllTransactionsOfType(UniqueNetId->ToString(), NewType))
+	for (const UTransaction* Transaction : TransactionComponent->GetAllTransactions(UniqueNetId->ToString()))
 	{
 		UE_LOG(LogGameplay,
 		       Log,
@@ -237,7 +227,7 @@ void UTransactionCheatExtension::Draw()
 
 		if (ImGui::Button("Add"))
 		{
-			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex);
+			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex + 1);
 			AddTransaction(Value, PlayerIndex);
 		}
 
@@ -252,7 +242,7 @@ void UTransactionCheatExtension::Draw()
 
 		if (ImGui::Button("RemoveAllOfType"))
 		{
-			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex);
+			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex + 1);
 			RemoveAllTransactionsOfType(Value, PlayerIndex);
 		}
 
@@ -260,8 +250,7 @@ void UTransactionCheatExtension::Draw()
 
 		if (ImGui::Button("Print All"))
 		{
-			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex);
-			PrintAll(Value, PlayerIndex);
+			PrintAll(PlayerIndex);
 		}
 
 		ImGui::SameLine();
@@ -293,24 +282,3 @@ const char* UTransactionCheatExtension::LazyGatherTransactionTypes()
 	return *StringBuilder;
 }
 #endif
-
-void UTransactionCheatExtension::OnStartGameInstance(UGameInstance* Game)
-{
-	ClearTransactionHistory();
-
-	if (!IsValid(Game))
-	{
-		return;
-	}
-
-	AGameStateBase* GameState = UGameplayStatics::GetGameState(this);
-	if (IsValid(GameState))
-	{
-		TransactionHistory = GameState->GetComponentByClass<UGameStateTransactionHistory>();
-	}
-}
-
-void UTransactionCheatExtension::ClearTransactionHistory()
-{
-	TransactionHistory.Reset();
-}

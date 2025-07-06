@@ -23,16 +23,14 @@
 
 #include "CoreMinimal.h"
 
+#include "TransactionFactoryUtils.h"
+#include "StructUtils/InstancedStruct.h"
+#include "UObject/Object.h"
 #if UE_WITH_IRIS
 #include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
 #endif // UE_WITH_IRIS
-#include "StructUtils/InstancedStruct.h"
-#include "UObject/Object.h"
 
 #include "Transaction.generated.h"
-
-struct FTransactionFactoryImpl;
-struct FTransactionPayload;
 
 /**
  *	Class description:

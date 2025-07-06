@@ -22,13 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "GameFramework/Info.h"
-#include "StructUtils/InstancedStruct.h"
 
 #include "GameStateTransactionHistory.generated.h"
 
 class AGameStateBase;
 enum class ETransactionType : uint8;
-struct FTransactionPayload;
 class UTransaction;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTransaction*, Transaction);
@@ -49,6 +47,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION(BlueprintCallable)
+	static UGameStateTransactionHistory* GetTransactionHistory(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
 	void CreateAndRecordTransaction(const AActor* NewInstigator /*Statistics Source - from which we generate*/,

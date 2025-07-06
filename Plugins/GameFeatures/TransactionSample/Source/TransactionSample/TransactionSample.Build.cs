@@ -34,7 +34,8 @@ public class TransactionSample : ModuleRules
 				"CoreUObject",
 				"DeveloperSettings",
 				"Engine",
-				"IrisCore"
+				"IrisCore",
+				"StructUtils"
 			}
 		);
 

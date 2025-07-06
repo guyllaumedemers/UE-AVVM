@@ -22,8 +22,8 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Transaction.h"
-#include "TransactionFactoryUtils.h"
 #include "GameFramework/GameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer)
@@ -81,6 +81,23 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
+}
+
+UGameStateTransactionHistory* UGameStateTransactionHistory::GetTransactionHistory(const UObject* WorldContextObject)
+{
+	static TWeakObjectPtr<UGameStateTransactionHistory> TransactionHistory = nullptr;
+	if (TransactionHistory.IsValid())
+	{
+		return TransactionHistory.Get();
+	}
+
+	AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
+	if (IsValid(GameState))
+	{
+		TransactionHistory = GameState->GetComponentByClass<UGameStateTransactionHistory>();
+	}
+
+	return TransactionHistory.Get();
 }
 
 void UGameStateTransactionHistory::CreateAndRecordTransaction(const AActor* NewInstigator,

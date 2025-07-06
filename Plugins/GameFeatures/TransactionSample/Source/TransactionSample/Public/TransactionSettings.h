@@ -26,6 +26,7 @@
 
 #include "TransactionSettings.generated.h"
 
+enum class ETransactionType : uint8;
 struct FTransactionFactoryImpl;
 
 /**
