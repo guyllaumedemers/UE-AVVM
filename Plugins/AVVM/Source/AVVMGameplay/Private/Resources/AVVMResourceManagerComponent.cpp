@@ -47,7 +47,7 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushDeferredRequ
 {
 	PendingRequests.Enqueue(NewRequest);
 	TryExecuteNextRequest();
-	return !HasPendingRequest();
+	return HasPendingRequest();
 }
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRequest()
@@ -219,8 +219,8 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	                                                                                     Result.ItemId,
 	                                                                                     OnRequestCompleteCallback);
 
-	const bool bWasRequestExecutedOrDeferred = QueueingMechanism.PushDeferredRequest(WrappedDeferredRequest);
-	if (!bWasRequestExecutedOrDeferred)
+	const bool bHasPendingRequest = QueueingMechanism.PushDeferredRequest(WrappedDeferredRequest);
+	if (bHasPendingRequest)
 	{
 		UE_LOG(LogGameplay,
 		       Log,
@@ -236,14 +236,12 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		QueueingMechanism.TryExecuteNextRequest();
 		return;
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(Outer);
 	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IAVVMResourceProvider interface!")))
 	{
-		QueueingMechanism.TryExecuteNextRequest();
 		return;
 	}
 
@@ -267,7 +265,7 @@ bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FD
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem))
 	{
-		return QueueingMechanism.TryExecuteNextRequest();
+		return false;
 	}
 
 	const bool bIsEmpty = PendingRegistriesId.IsEmpty();
