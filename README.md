@@ -57,7 +57,7 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
  * AVVMDebugger : Is a developer tool module that register descriptor context (i.e cheat extension) and execute draw calls using imgui immediate mode.
  * AVVM : Is a core system for UI development. It exposes the base class required to create View Model instance (with the Actor-View-ViewModel paradigm) and register Presenter object with the notification system from which we can forward generic payload information.
- * AVVMOnline : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected based use by the AVVM notification system.
+ * AVVMOnline : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected base class use by the AVVM notification system.
  * AVVMGameplay : Is a core system for gameplay development. It exposes the base class for supporting **Async Resource loading** using FDataRegistryId and **Input/Ability triggering** via tag activation.
  * ...
 
