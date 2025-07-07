@@ -176,6 +176,16 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Resources)
 {
 	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UItemObject* ItemObject = QueuingMechanism.PeekItem();
+	if (!IsValid(ItemObject))
+	{
+		return;
+	}
 
 	TArray<FSoftObjectPath> DeferredItems;
 	for (UObject* Resource : Resources)
@@ -186,15 +196,10 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Res
 			continue;
 		}
 
-		UItemObject* ItemObject = QueuingMechanism.PopItem();
-		if (!IsValid(ItemObject))
-		{
-			continue;
-		}
-
 		FOnRequestItemActorClassComplete Callback;
 		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
 
+		// TODO @gdemers load progression stage to allow retrieval of type override actor class
 		const int32 ProgressionStageIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, ItemObject);
 		const FSoftObjectPath& ItemActorClassSoftObjectPath = ItemProgressionAsset->GetItemActorClassSoftObjectPath(ProgressionStageIndex);
 		ItemObject->GetItemActorClassAsync(ItemActorClassSoftObjectPath, Callback);
@@ -432,7 +437,7 @@ bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::TryExecuteNextReque
 		return true;
 	}
 
-	const bool bAreContainerEquals = QueuedItems.Num() != PendingSpawnRequests.Num();
+	const bool bAreContainerEquals = QueuedItems.Num() == PendingSpawnRequests.Num();
 	if (bAreContainerEquals)
 	{
 		// @gdemers TQueues dont support size...
@@ -449,13 +454,12 @@ bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::HasPendingRequest()
 	return !PendingSpawnRequests.IsEmpty();
 }
 
-UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PopItem()
+UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() const
 {
 	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
 	if (!QueuedItems.IsEmpty())
 	{
-		ItemObject = QueuedItems[0];
-		QueuedItems.RemoveAtSwap(0);
+		ItemObject = QueuedItems[0].Get();
 	}
 
 	return ItemObject.Get();

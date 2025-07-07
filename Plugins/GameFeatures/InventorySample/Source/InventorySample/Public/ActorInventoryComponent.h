@@ -114,7 +114,7 @@ protected:
 		bool PushDeferredItem(UItemObject* NewItem, const UActorInventoryComponent::FOnAsyncSpawnRequestDeferred& NewRequest);
 		bool TryExecuteNextRequest(const bool bCanDequeueFrontItem = false);
 		bool HasPendingRequest() const;
-		UItemObject* PopItem();
+		UItemObject* PeekItem() const;
 
 		TArray<UActorInventoryComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests;
 		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
