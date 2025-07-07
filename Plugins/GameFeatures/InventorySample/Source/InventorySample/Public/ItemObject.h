@@ -52,9 +52,6 @@ struct INVENTORYSAMPLE_API FItemState
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 Counter = 1;
-
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 ProgressionIndex = 0;
 };
 
 /**

@@ -99,3 +99,18 @@ protected:
 	int32 GetProgressionStageIndex(const UItemObject* NewItem) const;
 	virtual int32 GetProgressionStageIndex_Implementation(const UItemObject* NewItem) const PURE_VIRTUAL(GetProgressionStageIndex_Implementation, return INDEX_NONE;);
 };
+
+/**
+ *	Class description:
+ *
+ *	TBD
+ */
+UCLASS(BlueprintType)
+class INVENTORYSAMPLE_API UInventoryHandlingBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static int32 GetItemProgressionStageIndex(const UItemObject* NewItem);
+};

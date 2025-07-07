@@ -70,10 +70,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestItems(const UObject* Outer);
 
-	UFUNCTION(BlueprintCallable)
 	void SetupItems(const TArray<UObject*>& Resources);
-
-	UFUNCTION(BlueprintCallable)
 	void SetupItemProgressions(const TArray<UObject*>& Resources);
 
 	UFUNCTION(BlueprintCallable)
