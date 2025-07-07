@@ -26,7 +26,6 @@
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "Data/ItemDefinitionDataAsset.h"
-#include "Data/ItemProgressionDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
@@ -134,6 +133,18 @@ void UActorInventoryComponent::RequestItems(const UObject* Outer)
 void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 {
 	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(!Resources.IsEmpty(),
+	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
+	                      *Outer->GetName()))
+	{
+		return;
+	}
+
 	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredItems;
@@ -182,28 +193,18 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Res
 	}
 
 	UItemObject* ItemObject = QueuingMechanism.PeekItem();
-	if (!IsValid(ItemObject))
+	if (!IsValid(ItemObject) || !ensureAlwaysMsgf(!Resources.IsEmpty(),
+	                                              TEXT("Attempting to load invalid Progression Definition on Item \"%s\"."),
+	                                              *ItemObject->GetName()))
 	{
 		return;
 	}
 
-	TArray<FSoftObjectPath> DeferredItems;
-	for (UObject* Resource : Resources)
-	{
-		auto* ItemProgressionAsset = Cast<UItemProgressionDefinitionDataAsset>(Resource);
-		if (!IsValid(ItemProgressionAsset))
-		{
-			continue;
-		}
+	FOnRequestItemActorClassComplete Callback;
+	Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
 
-		FOnRequestItemActorClassComplete Callback;
-		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
-
-		// TODO @gdemers load progression stage to allow retrieval of type override actor class
-		const int32 ProgressionStageIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, ItemObject);
-		const FSoftObjectPath& ItemActorClassSoftObjectPath = ItemProgressionAsset->GetItemActorClassSoftObjectPath(ProgressionStageIndex);
-		ItemObject->GetItemActorClassAsync(ItemActorClassSoftObjectPath, Callback);
-	}
+	const int32 ProgressionStageIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, ItemObject);
+	ItemObject->GetItemActorClassAsync(Resources[0], ProgressionStageIndex, Callback);
 }
 
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const

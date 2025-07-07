@@ -115,16 +115,20 @@ public:
 	const FDataRegistryId& GetItemProgressionId() const;
 
 	UFUNCTION(BlueprintCallable)
-	void GetItemActorClassAsync(const FSoftObjectPath& ItemActorSoftObjectPath,
-	                            const FOnRequestItemActorClassComplete& Callback);
+	void GetItemActorClassAsync(const UObject* NewProgressionDefinitionData,
+	                            const int32 NewProgressionStageIndex,
+	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnActorClass(const AActor* Anchor,
+	void SpawnActorClass(const AActor* NewAnchor,
 	                     const TSoftClassPtr<AActor>& NewActorClass);
 
 protected:
 	UFUNCTION()
-	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete);
+	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback);
+
+	UFUNCTION()
+	void OnProgressionStageAcquired(FOnRequestItemActorClassComplete Callback);
 
 	FTransform GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const;
 

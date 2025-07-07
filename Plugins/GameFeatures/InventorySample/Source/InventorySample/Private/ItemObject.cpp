@@ -20,6 +20,7 @@
 #include "ItemObject.h"
 
 #include "InventorySettings.h"
+#include "Data/ItemProgressionDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceManagerComponent.h"
@@ -71,17 +72,34 @@ const FDataRegistryId& UItemObject::GetItemProgressionId() const
 	return ItemProgressionId;
 }
 
-void UItemObject::GetItemActorClassAsync(const FSoftObjectPath& ItemActorSoftObjectPath,
+void UItemObject::GetItemActorClassAsync(const UObject* NewProgressionDefinitionData,
+                                         const int32 NewProgressionStageIndex,
                                          const FOnRequestItemActorClassComplete& Callback)
 {
+	const auto* ProgressionDefinitionDataAsset = Cast<UItemProgressionDefinitionDataAsset>(NewProgressionDefinitionData);
+	if (!IsValid(ProgressionDefinitionDataAsset))
+	{
+		return;
+	}
+
 	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()}, {});
 
-	FStreamableDelegate OnRequestItemActorClassComplete;
-	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
-	ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ItemActorSoftObjectPath}, OnRequestItemActorClassComplete);
+	const FSoftObjectPath ProgressionStageSoftObjectPath = ProgressionDefinitionDataAsset->GetProgressionStageItemActorOverride(NewProgressionStageIndex);
+	if (ProgressionStageSoftObjectPath.IsValid())
+	{
+		FStreamableDelegate OnRequestItemActorClassComplete;
+		OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnProgressionStageAcquired, Callback);
+		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ProgressionStageSoftObjectPath}, OnRequestItemActorClassComplete);
+	}
+	else
+	{
+		FStreamableDelegate OnRequestItemActorClassComplete;
+		OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
+		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ProgressionDefinitionDataAsset->GetDefaultItemActorClass()}, OnRequestItemActorClassComplete);
+	}
 }
 
-void UItemObject::SpawnActorClass(const AActor* Anchor,
+void UItemObject::SpawnActorClass(const AActor* NewAnchor,
                                   const TSoftClassPtr<AActor>& NewActorClass)
 {
 	if (!NewActorClass.IsValid())
@@ -94,7 +112,7 @@ void UItemObject::SpawnActorClass(const AActor* Anchor,
 	UWorld* World = GetWorld();
 	if (IsValid(World))
 	{
-		const FTransform NewItemTransform = GetSpawningAnchorTransform(Anchor, bShouldSpawnAndAttach);
+		const FTransform NewItemTransform = GetSpawningAnchorTransform(NewAnchor, bShouldSpawnAndAttach);
 		RuntimeItemActor = World->SpawnActor(NewActorClass->GetClass(), &NewItemTransform, FActorSpawnParameters());
 		ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
 	}
@@ -103,15 +121,15 @@ void UItemObject::SpawnActorClass(const AActor* Anchor,
 	                                              TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
 		// @gdemers bad practice but avoid code refactoring!
-		RuntimeItemActor->AttachToActor(const_cast<AActor*>(Anchor), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		RuntimeItemActor->AttachToActor(const_cast<AActor*>(NewAnchor), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 	}
 }
 
-void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete)
+void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback)
 {
 	if (!ItemProgressionStageHandle.IsValid())
 	{
-		OnRequestItemActorClassComplete.ExecuteIfBound(nullptr, this);
+		Callback.ExecuteIfBound(nullptr, this);
 		return;
 	}
 
@@ -120,11 +138,41 @@ void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnReques
 
 	if (!OutStreamableAssets.IsEmpty())
 	{
-		OnRequestItemActorClassComplete.ExecuteIfBound(OutStreamableAssets[0]->GetClass(), this);
+		Callback.ExecuteIfBound(OutStreamableAssets[0]->GetClass(), this);
 	}
 	else
 	{
-		OnRequestItemActorClassComplete.ExecuteIfBound(nullptr, this);
+		Callback.ExecuteIfBound(nullptr, this);
+	}
+}
+
+void UItemObject::OnProgressionStageAcquired(FOnRequestItemActorClassComplete Callback)
+{
+	if (!ItemProgressionStageHandle.IsValid())
+	{
+		Callback.ExecuteIfBound(nullptr, this);
+		return;
+	}
+
+	TArray<UObject*> OutStreamableAssets;
+	ItemProgressionStageHandle->GetLoadedAssets(OutStreamableAssets);
+
+	if (OutStreamableAssets.IsEmpty())
+	{
+		Callback.ExecuteIfBound(nullptr, this);
+		return;
+	}
+
+	const auto* ProgressionStageDefinitionDataAsset = Cast<UItemProgressionStageDefinitionDataAsset>(OutStreamableAssets[0]);
+	if (IsValid(ProgressionStageDefinitionDataAsset))
+	{
+		FStreamableDelegate OnRequestItemActorClassComplete;
+		OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
+		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ProgressionStageDefinitionDataAsset->GetOverrideItemActorClass()}, OnRequestItemActorClassComplete);
+	}
+	else
+	{
+		Callback.ExecuteIfBound(nullptr, this);
 	}
 }
 

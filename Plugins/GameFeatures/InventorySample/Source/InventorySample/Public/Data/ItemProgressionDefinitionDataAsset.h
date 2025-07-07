@@ -49,11 +49,12 @@ class INVENTORYSAMPLE_API UItemProgressionStageDefinitionDataAsset : public UDat
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	const TSoftClassPtr<AActor>& GetOverrideItemActorClass() const;
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
 	UFUNCTION(BlueprintCallable)
-	bool CanOverrideItemActorClass() const;
+	const FSoftObjectPath& GetOverrideItemActorClass() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
@@ -74,11 +75,15 @@ class INVENTORYSAMPLE_API UItemProgressionDefinitionDataAsset : public UDataAsse
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	const FSoftObjectPath& GetItemActorClassSoftObjectPath(const int32 ProgressionStageIndex);
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
 	UFUNCTION(BlueprintCallable)
-	const TSoftClassPtr<AActor>& GetDefaultItemActorClass() const;
+	const FSoftObjectPath& GetDefaultItemActorClass() const;
+
+	UFUNCTION(BlueprintCallable)
+	FSoftObjectPath GetProgressionStageItemActorOverride(const int32 ProgressionStageIndex) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

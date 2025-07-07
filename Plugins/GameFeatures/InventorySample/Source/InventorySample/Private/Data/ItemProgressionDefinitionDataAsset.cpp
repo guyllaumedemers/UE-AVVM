@@ -19,33 +19,47 @@
 //SOFTWARE.
 #include "Data/ItemProgressionDefinitionDataAsset.h"
 
-const TSoftClassPtr<AActor>& UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
+#if WITH_EDITOR
+EDataValidationResult UItemProgressionStageDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	return OverrideItemActorClass;
-}
-
-bool UItemProgressionStageDefinitionDataAsset::CanOverrideItemActorClass() const
-{
-	return bDoesOverrideItemActorClass;
-}
-
-const FSoftObjectPath& UItemProgressionDefinitionDataAsset::GetItemActorClassSoftObjectPath(const int32 ProgressionStageIndex)
-{
-	if (!ItemProgressionStageDataAssets.IsEmpty() &&
-		ensureAlwaysMsgf((ItemProgressionStageDataAssets.Num() > ProgressionStageIndex) && (ProgressionStageIndex >= 0),
-		                 TEXT("UItemProgressionDefinitionDataAsset Invalid Index Access!")))
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (OverrideItemActorClass.IsNull())
 	{
-		return ItemProgressionStageDataAssets[ProgressionStageIndex].ToSoftObjectPath();
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UItemProgressionStageDefinitionDataAsset", "", "AActor Class missing. No valid TSoftClassPtr specified!"));
 	}
-	else
-	{
-		return DefaultItemActorClass.ToSoftObjectPath();
-	}
+
+	return Result;
+}
+#endif
+
+const FSoftObjectPath& UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
+{
+	return OverrideItemActorClass.ToSoftObjectPath();
 }
 
-const TSoftClassPtr<AActor>& UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
+#if WITH_EDITOR
+EDataValidationResult UItemProgressionDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	return DefaultItemActorClass;
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (DefaultItemActorClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UItemProgressionDefinitionDataAsset", "", "AActor Class missing. No valid TSoftClassPtr specified!"));
+	}
+
+	return Result;
+}
+#endif
+
+const FSoftObjectPath& UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
+{
+	return DefaultItemActorClass.ToSoftObjectPath();
+}
+
+FSoftObjectPath UItemProgressionDefinitionDataAsset::GetProgressionStageItemActorOverride(const int32 ProgressionStageIndex) const
+{
+	return ItemProgressionStageDataAssets.IsValidIndex(ProgressionStageIndex) ? ItemProgressionStageDataAssets[ProgressionStageIndex].ToSoftObjectPath() : FSoftObjectPath();
 }
 
 #if WITH_EDITOR
