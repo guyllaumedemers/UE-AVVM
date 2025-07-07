@@ -74,6 +74,8 @@ const FDataRegistryId& UItemObject::GetItemProgressionId() const
 void UItemObject::GetItemActorClassAsync(const FSoftObjectPath& ItemActorSoftObjectPath,
                                          const FOnRequestItemActorClassComplete& Callback)
 {
+	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()}, {});
+
 	FStreamableDelegate OnRequestItemActorClassComplete;
 	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
 	ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ItemActorSoftObjectPath}, OnRequestItemActorClassComplete);
@@ -87,13 +89,14 @@ void UItemObject::SpawnActorClass(const AActor* Anchor,
 		return;
 	}
 
-	const bool bShouldSpawnAndAttach = HasRuntimeState(UInventorySettings::GetPendingSpawnEquipTags());
+	const bool bShouldSpawnAndAttach = HasRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
 
 	UWorld* World = GetWorld();
 	if (IsValid(World))
 	{
 		const FTransform NewItemTransform = GetSpawningAnchorTransform(Anchor, bShouldSpawnAndAttach);
 		RuntimeItemActor = World->SpawnActor(NewActorClass->GetClass(), &NewItemTransform, FActorSpawnParameters());
+		ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
 	}
 
 	if (bShouldSpawnAndAttach && ensureAlwaysMsgf(IsValid(RuntimeItemActor),

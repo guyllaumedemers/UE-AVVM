@@ -344,7 +344,12 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 		return;
 	}
 
-	const auto RequestItemSpawning = [&](UAVVMResourceManagerComponent* NewResourceManagerComponent, UItemObject* ItemToSpawn)
+	if (IsValid(NewItem))
+	{
+		NewItem->ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}, {});
+	}
+
+	const auto RequestItemSpawning = [&](UAVVMResourceManagerComponent* NewResourceManagerComponent, const UItemObject* ItemToSpawn)
 	{
 		if (!IsValid(ItemToSpawn))
 		{
@@ -362,7 +367,6 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 		if (ensureAlwaysMsgf(IsValid(NewResourceManagerComponent),
 		                     TEXT("Outer Actor doesn't reference a UActorInventoryComponent!")))
 		{
-			ItemToSpawn->ModifyRuntimeState(UInventorySettings::GetPendingSpawnEquipTags(), {});
 			NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemProgressionId(), {});
 		}
 	};

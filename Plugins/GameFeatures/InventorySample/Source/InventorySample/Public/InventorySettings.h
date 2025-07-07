@@ -38,26 +38,27 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static const FGameplayTagContainer& GetPendingSpawnEquipTags();
+	static const FGameplayTag& GetPendingSpawnTag();
 
 	UFUNCTION(BlueprintCallable)
-	static const FGameplayTagContainer& GetPendingSpawnDropTags();
-	UFUNCTION(BlueprintCallable)
-	static const FGameplayTagContainer& GetInstancedEquippedTags();
+	static const FGameplayTag& GetInstancedTag();
 
 	UFUNCTION(BlueprintCallable)
-	static const FGameplayTagContainer& GetInstancedDroppedTags();
+	static const FGameplayTag& GetEquippedTag();
+
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTag& GetDroppedTag();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	FGameplayTagContainer PendingSpawnEquipTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	FGameplayTagContainer PendingSpawnDropTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTag InstancedTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	FGameplayTagContainer InstancedEquippedTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTag EquippedTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	FGameplayTagContainer InstancedDroppedTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTag DroppedTag = FGameplayTag::EmptyTag;
 };

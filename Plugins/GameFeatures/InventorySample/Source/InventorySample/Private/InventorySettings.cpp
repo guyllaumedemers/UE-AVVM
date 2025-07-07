@@ -19,22 +19,22 @@
 //SOFTWARE.
 #include "InventorySettings.h"
 
-const FGameplayTagContainer& UInventorySettings::GetPendingSpawnEquipTags()
+const FGameplayTag& UInventorySettings::GetPendingSpawnTag()
 {
-	return GetDefault<UInventorySettings>()->PendingSpawnEquipTags;
+	return GetDefault<UInventorySettings>()->PendingSpawnTag;
 }
 
-const FGameplayTagContainer& UInventorySettings::GetPendingSpawnDropTags()
+const FGameplayTag& UInventorySettings::GetInstancedTag()
 {
-	return GetDefault<UInventorySettings>()->PendingSpawnDropTags;
+	return GetDefault<UInventorySettings>()->InstancedTag;
 }
 
-const FGameplayTagContainer& UInventorySettings::GetInstancedEquippedTags()
+const FGameplayTag& UInventorySettings::GetEquippedTag()
 {
-	return GetDefault<UInventorySettings>()->InstancedEquippedTags;
+	return GetDefault<UInventorySettings>()->EquippedTag;
 }
 
-const FGameplayTagContainer& UInventorySettings::GetInstancedDroppedTags()
+const FGameplayTag& UInventorySettings::GetDroppedTag()
 {
-	return GetDefault<UInventorySettings>()->InstancedDroppedTags;
+	return GetDefault<UInventorySettings>()->DroppedTag;
 }
