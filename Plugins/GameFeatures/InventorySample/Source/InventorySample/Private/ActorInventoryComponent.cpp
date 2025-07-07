@@ -63,10 +63,12 @@ void UActorInventoryComponent::BeginPlay()
 	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
 	OwningOuter = Outer;
 
+#if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay)
 	{
 		RequestItems(Outer);
 	}
+#endif
 
 	UE_LOG(LogGameplay,
 	       Log,

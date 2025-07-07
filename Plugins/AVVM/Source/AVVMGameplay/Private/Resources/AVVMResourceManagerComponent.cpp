@@ -123,10 +123,12 @@ void UAVVMResourceManagerComponent::BeginPlay()
 
 	LLM_SCOPE_BYTAG(AVVMTag);
 
+#if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay)
 	{
 		RequestAsyncLoading(IAVVMResourceProvider::Execute_GetResourceDefinitionResourceId(Outer), FOnResourceAsyncLoadingComplete{});
 	}
+#endif
 }
 
 void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
