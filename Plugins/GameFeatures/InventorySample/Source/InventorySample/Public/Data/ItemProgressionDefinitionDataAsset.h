@@ -32,8 +32,6 @@
 
 #include "ItemProgressionDefinitionDataAsset.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestItemActorClassComplete, const TSoftClassPtr<AActor>&, NewActorClass);
-
 /**
  *	Class description:
  *
@@ -78,23 +76,17 @@ class INVENTORYSAMPLE_API UItemProgressionDefinitionDataAsset : public UDataAsse
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void GetItemActorClassAsync(const int32 ProgressionStageIndex,
-	                            const FOnRequestItemActorClassComplete& Callback);
+	const FSoftObjectPath& GetItemActorClassSoftObjectPath(const int32 ProgressionStageIndex);
 
 	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<AActor>& GetDefaultItemActorClass() const;
 
 protected:
-	UFUNCTION()
-	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete);
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<TSoftObjectPtr<const UItemProgressionStageDefinitionDataAsset>> ItemProgressionStageDataAssets;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AActor> DefaultItemActorClass = nullptr;
-
-	TSharedPtr<FStreamableHandle> ItemProgressionStageHandle;
 };
 
 /**

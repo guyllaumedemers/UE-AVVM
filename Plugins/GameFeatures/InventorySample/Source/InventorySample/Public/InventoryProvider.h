@@ -95,4 +95,8 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool IsItemEquipped(const UItemObject* NewItem) const;
 	virtual bool IsItemEquipped_Implementation(const UItemObject* NewItem) const PURE_VIRTUAL(IsItemEquipped_Implementation, return false;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int32 GetProgressionStageIndex(const UItemObject* NewItem) const;
+	virtual int32 GetProgressionStageIndex_Implementation(const UItemObject* NewItem) const PURE_VIRTUAL(GetProgressionStageIndex_Implementation, return INDEX_NONE;);
 };

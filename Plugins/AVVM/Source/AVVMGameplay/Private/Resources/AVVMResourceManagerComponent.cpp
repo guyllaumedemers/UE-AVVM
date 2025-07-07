@@ -52,13 +52,13 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushDeferredRequ
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRequest()
 {
-	if (PendingRequests.IsEmpty())
+	if (!HasPendingRequest())
 	{
 		CompletionDelegate.ExecuteIfBound();
 		return true;
 	}
 
-	if (ensureAlwaysMsgf(HasPendingRequest(), TEXT("Queue should never be empty!")) && !HasUnfinishedStreamableHandle())
+	if (!HasUnfinishedStreamableHandle())
 	{
 		UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred NextRequest;
 		PendingRequests.Dequeue(NextRequest);
@@ -135,7 +135,7 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 {
 	Super::EndPlay(EndPlayReason);
 
-	const auto* Outer = OwningOuter.Get();
+	const AActor* Outer = OwningOuter.Get();
 	if (!ensure(IsValid(Outer)))
 	{
 		return;
@@ -170,7 +170,7 @@ void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& N
 void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result,
                                                          FOnResourceAsyncLoadingComplete OnRequestCompleteCallback)
 {
-	const auto* Outer = OwningOuter.Get();
+	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		OnRequestCompleteCallback.ExecuteIfBound();
@@ -197,11 +197,11 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	                                         const FDataRegistryId& OwningRegistryId,
 	                                         const FOnResourceAsyncLoadingComplete& MainRequestCompletionCallback)
 	{
-		const auto* NewOuter = OwningOuter.Get();
+		const AActor* NewOuter = this->OwningOuter.Get();
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Executing Resource Acquisition Request for \"%s\" on Outer \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
+		       UAVVMGameplayUtils::PrintNetSource(NewOuter).GetData(),
 		       *OwningRegistryId.ToString(),
 		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
 
@@ -209,8 +209,8 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		CompletionCallback.BindUObject(this, &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
 
 		const TSharedPtr<FStreamableHandle> NewStreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, CompletionCallback);
-		QueueingMechanism.SetCompletionCallback(MainRequestCompletionCallback);
-		QueueingMechanism.PushStreamableHandle(NewStreamableHandle);
+		this->QueueingMechanism.SetCompletionCallback(MainRequestCompletionCallback);
+		this->QueueingMechanism.PushStreamableHandle(NewStreamableHandle);
 	};
 
 	const auto WrappedDeferredRequest = FOnAsyncLoadingRequestDeferred::CreateWeakLambda(this,

@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "Data/ItemProgressionDefinitionDataAsset.h"
 
-#include "Engine/AssetManager.h"
-
 const TSoftClassPtr<AActor>& UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
 {
 	return OverrideItemActorClass;
@@ -31,58 +29,23 @@ bool UItemProgressionStageDefinitionDataAsset::CanOverrideItemActorClass() const
 	return bDoesOverrideItemActorClass;
 }
 
-void UItemProgressionDefinitionDataAsset::GetItemActorClassAsync(const int32 ProgressionStageIndex,
-                                                                 const FOnRequestItemActorClassComplete& Callback)
+const FSoftObjectPath& UItemProgressionDefinitionDataAsset::GetItemActorClassSoftObjectPath(const int32 ProgressionStageIndex)
 {
 	if (!ItemProgressionStageDataAssets.IsEmpty() &&
 		ensureAlwaysMsgf((ItemProgressionStageDataAssets.Num() > ProgressionStageIndex) && (ProgressionStageIndex >= 0),
 		                 TEXT("UItemProgressionDefinitionDataAsset Invalid Index Access!")))
 	{
-		FStreamableDelegate OnProgressionStageDefinitionLoaded;
-		OnProgressionStageDefinitionLoaded.BindUObject(this, &UItemProgressionDefinitionDataAsset::OnSoftObjectAcquired, Callback);
-		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ItemProgressionStageDataAssets[ProgressionStageIndex].ToSoftObjectPath()}, OnProgressionStageDefinitionLoaded);
+		return ItemProgressionStageDataAssets[ProgressionStageIndex].ToSoftObjectPath();
 	}
 	else
 	{
-		Callback.ExecuteIfBound(DefaultItemActorClass);
+		return DefaultItemActorClass.ToSoftObjectPath();
 	}
 }
 
 const TSoftClassPtr<AActor>& UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
 {
 	return DefaultItemActorClass;
-}
-
-void UItemProgressionDefinitionDataAsset::OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete)
-{
-	if (!ensureAlwaysMsgf(ItemProgressionStageHandle.IsValid(),
-	                      TEXT("UItemProgressionDefinitionDataAsset trying to access invalid FStreamableHandle")))
-	{
-		OnRequestItemActorClassComplete.ExecuteIfBound(DefaultItemActorClass);
-		return;
-	}
-
-	TArray<UObject*> OutStreamedAssets;
-	ItemProgressionStageHandle->GetLoadedAssets(OutStreamedAssets);
-
-	if (!OutStreamedAssets.IsEmpty())
-	{
-		const auto* ProgressionStageItemDefinitionDataAsset = Cast<UItemProgressionStageDefinitionDataAsset>(OutStreamedAssets[0]);
-		if (ensureAlwaysMsgf(IsValid(ProgressionStageItemDefinitionDataAsset),
-		                     TEXT("UItemProgressionDefinitionDataAsset trying to Cast object to UItemProgressionStageDefinitionDataAsset failed!")) &&
-			ProgressionStageItemDefinitionDataAsset->CanOverrideItemActorClass())
-		{
-			OnRequestItemActorClassComplete.ExecuteIfBound(ProgressionStageItemDefinitionDataAsset->GetOverrideItemActorClass());
-		}
-		else
-		{
-			OnRequestItemActorClassComplete.ExecuteIfBound(DefaultItemActorClass);
-		}
-	}
-	else
-	{
-		OnRequestItemActorClassComplete.ExecuteIfBound(DefaultItemActorClass);
-	}
 }
 
 #if WITH_EDITOR

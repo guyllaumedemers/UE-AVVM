@@ -25,6 +25,7 @@
 
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "Engine/StreamableManager.h"
 #include "UObject/Object.h"
 
 #if UE_WITH_IRIS
@@ -32,6 +33,8 @@
 #endif // UE_WITH_IRIS
 
 #include "ItemObject.generated.h"
+
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, const TSoftClassPtr<AActor>&, NewActorClass, class UItemObject*, NewItemObject);
 
 /**
  *	Class description:
@@ -109,16 +112,21 @@ public:
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	void TrySpawnEquippedItem(const AActor* Target);
+	const FDataRegistryId& GetItemProgressionId() const;
 
 	UFUNCTION(BlueprintCallable)
-	void TrySpawnDroppedItem(const AActor* Target);
+	void GetItemActorClassAsync(const FSoftObjectPath& ItemActorSoftObjectPath,
+	                            const FOnRequestItemActorClassComplete& Callback);
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnActorClass(const AActor* Anchor,
+	                     const TSoftClassPtr<AActor>& NewActorClass);
 
 protected:
 	UFUNCTION()
-	void OnResourcesLoaded();
+	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete);
 
-	FTransform GetSpawningAnchorTransform(const AActor& Target) const;
+	FTransform GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item State and how it should behave. Example : CanBeConsumed, Destroy on Drop, etc..."))
 	FGameplayTagContainer DefaultItemStateTags = FGameplayTagContainer::EmptyContainer;
@@ -147,5 +155,5 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FItemState RuntimeItemState = FItemState();
 
-	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	TSharedPtr<FStreamableHandle> ItemProgressionStageHandle;
 };

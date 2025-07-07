@@ -27,6 +27,7 @@
 
 #include "ActorInventoryComponent.generated.h"
 
+class UAVVMResourceManagerComponent;
 class UItemObject;
 
 /**
@@ -58,6 +59,8 @@ class INVENTORYSAMPLE_API UActorInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_DELEGATE(FOnAsyncSpawnRequestDeferred);
+
 public:
 	UActorInventoryComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -69,6 +72,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetupItems(const TArray<UObject*>& Resources);
+
+	UFUNCTION(BlueprintCallable)
+	void SetupItemProgressions(const TArray<UObject*>& Resources);
 
 	UFUNCTION(BlueprintCallable)
 	const TArray<UItemObject*>& GetItems() const;
@@ -95,6 +101,25 @@ protected:
 	UFUNCTION()
 	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
 
+	void SpawnEquipItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
+	                    UItemObject* NewItem);
+
+	UFUNCTION()
+	void OnItemActorClassRetrieved(const TSoftClassPtr<AActor>& NewActorClass,
+	                               UItemObject* NewItemObject);
+
+	struct FItemSpawnerQueuingMechanism
+	{
+		~FItemSpawnerQueuingMechanism();
+		bool PushDeferredItem(UItemObject* NewItem, const UActorInventoryComponent::FOnAsyncSpawnRequestDeferred& NewRequest);
+		bool TryExecuteNextRequest(const bool bCanDequeueFrontItem = false);
+		bool HasPendingRequest() const;
+		UItemObject* PopItem();
+
+		TArray<UActorInventoryComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests;
+		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
+	};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
@@ -109,4 +134,5 @@ protected:
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	FItemSpawnerQueuingMechanism QueuingMechanism;
 };

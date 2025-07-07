@@ -20,6 +20,7 @@
 #include "ItemObject.h"
 
 #include "InventorySettings.h"
+#include "Engine/AssetManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
@@ -65,108 +66,75 @@ bool UItemObject::HasExactMatch(const FGameplayTagContainer& Compare) const
 	return ItemTypeTags.HasAllExact(Compare);
 }
 
-void UItemObject::TrySpawnEquippedItem(const AActor* Target)
+const FDataRegistryId& UItemObject::GetItemProgressionId() const
 {
-	auto* ResourceManagerComponent = IsValid(Target) ? Target->GetComponentByClass<UAVVMResourceManagerComponent>() : nullptr;
-	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer Actor doesn't reference a UAVVMResourceManagerComponent!")))
-	{
-		return;
-	}
-
-	OwningOuter = Target;
-
-	FOnResourceAsyncLoadingComplete Callback;
-	Callback.BindDynamic(this, &UItemObject::OnResourcesLoaded);
-	ModifyRuntimeState(UInventorySettings::GetPendingSpawnEquipTags(), {});
-	ResourceManagerComponent->RequestAsyncLoading(ItemProgressionId, Callback);
+	return ItemProgressionId;
 }
 
-void UItemObject::TrySpawnDroppedItem(const AActor* Target)
+void UItemObject::GetItemActorClassAsync(const FSoftObjectPath& ItemActorSoftObjectPath,
+                                         const FOnRequestItemActorClassComplete& Callback)
 {
-	auto* ResourceManagerComponent = IsValid(Target) ? Target->GetComponentByClass<UAVVMResourceManagerComponent>() : nullptr;
-	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer Actor doesn't reference a UAVVMResourceManagerComponent!")))
-	{
-		return;
-	}
-
-	OwningOuter = Target;
-
-	FOnResourceAsyncLoadingComplete Callback;
-	Callback.BindDynamic(this, &UItemObject::OnResourcesLoaded);
-	ModifyRuntimeState(UInventorySettings::GetPendingSpawnDropTags(), {});
-	ResourceManagerComponent->RequestAsyncLoading(ItemProgressionId, Callback);
+	FStreamableDelegate OnRequestItemActorClassComplete;
+	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
+	ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ItemActorSoftObjectPath}, OnRequestItemActorClassComplete);
 }
 
-void UItemObject::OnResourcesLoaded()
+void UItemObject::SpawnActorClass(const AActor* Anchor,
+                                  const TSoftClassPtr<AActor>& NewActorClass)
 {
-	// TODO @gdemers The Resource Provider interface implementer Actor should handle the Spawining of the Actor in the Check function to be overriden.
-	// The Data Asset at this point is already loaded and resources are forwarded to the check function. The only thing to do here would be to update the state
-	// of the ItemObject!
-
-	auto RemovedTags = FGameplayTagContainer::EmptyContainer;
-	auto AddedTags = FGameplayTagContainer::EmptyContainer;
-
-	const bool bHasPendingEquippedTags = HasRuntimeState(UInventorySettings::GetPendingSpawnEquipTags());
-	if (bHasPendingEquippedTags)
+	if (!NewActorClass.IsValid())
 	{
-		RemovedTags = UInventorySettings::GetPendingSpawnEquipTags();
-		AddedTags = UInventorySettings::GetInstancedEquippedTags();
-
-		ModifyRuntimeState(AddedTags, RemovedTags);
 		return;
 	}
 
-	const bool bHasPendingDroppedTags = HasRuntimeState(UInventorySettings::GetPendingSpawnDropTags());
-	if (bHasPendingDroppedTags)
-	{
-		RemovedTags = UInventorySettings::GetPendingSpawnDropTags();
-		AddedTags = UInventorySettings::GetInstancedDroppedTags();
-
-		ModifyRuntimeState(AddedTags, RemovedTags);
-		return;
-	}
-
-	// TODO @gdemers Impl in the Actor IResourceProvider::Check function 
-	// const AActor* Outer = OwningOuter.Get();
-	// if (!IsValid(Outer))
-	// {
-	// 	return;
-	// }
-	//
-	// UWorld* World = GetWorld();
-	// if (IsValid(World))
-	// {
-	// 	const FTransform ItemAnchorTransform = GetSpawningAnchorTransform(*Outer);
-	// 	RuntimeItemActor = World->SpawnActor(nullptr, &ItemAnchorTransform, FActorSpawnParameters());
-	// }
-	//
-	// if (ensureAlwaysMsgf(IsValid(RuntimeItemActor),
-	//                      TEXT("Item Actor Class Failed to create an instance in World!")))
-	// {
-	// 	// @gdemers bad practice but avoid code refactoring!
-	// 	RuntimeItemActor->AttachToActor(const_cast<AActor*>(Outer), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
-	// }
-}
-
-FTransform UItemObject::GetSpawningAnchorTransform(const AActor& Target) const
-{
 	const bool bShouldSpawnAndAttach = HasRuntimeState(UInventorySettings::GetPendingSpawnEquipTags());
-	const bool bShouldSpawnAndDrop = HasRuntimeState(UInventorySettings::GetPendingSpawnDropTags());
 
-	FTransform ItemAnchorTransform = Target.GetActorTransform();
-	if (bShouldSpawnAndAttach)
+	UWorld* World = GetWorld();
+	if (IsValid(World))
 	{
-		const auto* MeshComponent = Target.GetComponentByClass<UMeshComponent>();
+		const FTransform NewItemTransform = GetSpawningAnchorTransform(Anchor, bShouldSpawnAndAttach);
+		RuntimeItemActor = World->SpawnActor(NewActorClass->GetClass(), &NewItemTransform, FActorSpawnParameters());
+	}
+
+	if (bShouldSpawnAndAttach && ensureAlwaysMsgf(IsValid(RuntimeItemActor),
+	                                              TEXT("Item Actor Class Failed to create an instance in World!")))
+	{
+		// @gdemers bad practice but avoid code refactoring!
+		RuntimeItemActor->AttachToActor(const_cast<AActor*>(Anchor), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+	}
+}
+
+void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete OnRequestItemActorClassComplete)
+{
+	if (!ItemProgressionStageHandle.IsValid())
+	{
+		OnRequestItemActorClassComplete.ExecuteIfBound(nullptr, this);
+		return;
+	}
+
+	TArray<UObject*> OutStreamableAssets;
+	ItemProgressionStageHandle->GetLoadedAssets(OutStreamableAssets);
+
+	if (!OutStreamableAssets.IsEmpty())
+	{
+		OnRequestItemActorClassComplete.ExecuteIfBound(OutStreamableAssets[0]->GetClass(), this);
+	}
+	else
+	{
+		OnRequestItemActorClassComplete.ExecuteIfBound(nullptr, this);
+	}
+}
+
+FTransform UItemObject::GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const
+{
+	FTransform ItemAnchorTransform = NewOuter->GetActorTransform();
+	if (bShouldAttachToSocket)
+	{
+		const auto* MeshComponent = NewOuter->GetComponentByClass<UMeshComponent>();
 		if (IsValid(MeshComponent))
 		{
 			ItemAnchorTransform = MeshComponent->GetSocketTransform(SocketName);
 		}
-	}
-	else if (bShouldSpawnAndDrop)
-	{
-		// TODO @gdemers retrieve the item size and move by this increment
-		const FVector3d NewLocation = ItemAnchorTransform.GetLocation() + (FVector3d::ForwardVector * 10.f);
-		ItemAnchorTransform.SetLocation(NewLocation);
 	}
 
 	return ItemAnchorTransform;

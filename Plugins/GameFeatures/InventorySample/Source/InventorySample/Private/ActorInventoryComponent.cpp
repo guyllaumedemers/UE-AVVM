@@ -23,12 +23,15 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
+#include "InventorySettings.h"
 #include "ItemObject.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "Data/ItemProgressionDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
+#include "Resources/AVVMResourceManagerComponent.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
@@ -51,7 +54,7 @@ void UActorInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 
 	const auto* Outer = GetTypedOuter<AActor>();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -86,8 +89,8 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Iterator.RemoveCurrentSwap();
 	}
 
-	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -167,6 +170,34 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved);
 		StreamableHandle = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+	}
+}
+
+void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Resources)
+{
+	const AActor* Outer = OwningOuter.Get();
+
+	TArray<FSoftObjectPath> DeferredItems;
+	for (UObject* Resource : Resources)
+	{
+		auto* ItemProgressionAsset = Cast<UItemProgressionDefinitionDataAsset>(Resource);
+		if (!IsValid(ItemProgressionAsset))
+		{
+			continue;
+		}
+
+		UItemObject* ItemObject = QueuingMechanism.PopItem();
+		if (!IsValid(ItemObject))
+		{
+			continue;
+		}
+
+		FOnRequestItemActorClassComplete Callback;
+		Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
+
+		const int32 ProgressionStageIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, ItemObject);
+		const FSoftObjectPath& ItemActorClassSoftObjectPath = ItemProgressionAsset->GetItemActorClassSoftObjectPath(ProgressionStageIndex);
+		ItemObject->GetItemActorClassAsync(ItemActorClassSoftObjectPath, Callback);
 	}
 }
 
@@ -254,13 +285,19 @@ void UActorInventoryComponent::OnItemsRetrieved()
 		return;
 	}
 
+	auto* ResourceManagerComponent = Outer->GetComponentByClass<UAVVMResourceManagerComponent>();
+	if (!IsValid(ResourceManagerComponent))
+	{
+		return;
+	}
+
 	// @gdemers handle spawning default object that are currently equipped
 	for (UItemObject* Item : Items)
 	{
 		const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, Item);
 		if (bIsItemEquipped)
 		{
-			Item->TrySpawnEquippedItem(Outer);
+			SpawnEquipItem(ResourceManagerComponent, Item);
 		}
 	}
 }
@@ -296,4 +333,126 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       SV.GetData());
+}
+
+void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
+                                              UItemObject* NewItem)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	const auto RequestItemSpawning = [&](UAVVMResourceManagerComponent* NewResourceManagerComponent, UItemObject* ItemToSpawn)
+	{
+		if (!IsValid(ItemToSpawn))
+		{
+			return;
+		}
+
+		const AActor* NewOuter = OwningOuter.Get();
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Executing Spawn Item Request for \"%s\" on Outer \"%s\"!"),
+		       UAVVMGameplayUtils::PrintNetSource(NewOuter).GetData(),
+		       *ItemToSpawn->GetName(),
+		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
+
+		if (ensureAlwaysMsgf(IsValid(NewResourceManagerComponent),
+		                     TEXT("Outer Actor doesn't reference a UActorInventoryComponent!")))
+		{
+			ItemToSpawn->ModifyRuntimeState(UInventorySettings::GetPendingSpawnEquipTags(), {});
+			NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemProgressionId(), {});
+		}
+	};
+
+	const auto WrappedDeferredRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
+	                                                                                   RequestItemSpawning,
+	                                                                                   ResourceManagerComponent,
+	                                                                                   NewItem);
+
+	const bool bHasPendingRequest = QueuingMechanism.PushDeferredItem(NewItem, WrappedDeferredRequest);
+	if (bHasPendingRequest)
+	{
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Spawn Item Request for \"%s\" was Deferred on Outer \"%s\"!"),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *NewItem->GetName(),
+		       IsValid(Outer) ? *Outer->GetName() : TEXT("Unknown"));
+	}
+}
+
+void UActorInventoryComponent::OnItemActorClassRetrieved(const TSoftClassPtr<AActor>& NewActorClass,
+                                                         UItemObject* NewItemObject)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (IsValid(NewItemObject))
+	{
+		NewItemObject->SpawnActorClass(Outer, NewActorClass);
+	}
+
+	QueuingMechanism.TryExecuteNextRequest(true);
+}
+
+UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
+{
+	PendingSpawnRequests.Empty();
+	QueuedItems.Empty();
+}
+
+bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::PushDeferredItem(UItemObject* NewItem,
+                                                                              const UActorInventoryComponent::FOnAsyncSpawnRequestDeferred& NewRequest)
+{
+	QueuedItems.Add(NewItem);
+	PendingSpawnRequests.Add(NewRequest);
+	TryExecuteNextRequest();
+	return HasPendingRequest();
+}
+
+bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::TryExecuteNextRequest(const bool bCanDequeueFrontItem)
+{
+	if (bCanDequeueFrontItem && !QueuedItems.IsEmpty())
+	{
+		QueuedItems.RemoveAtSwap(0);
+	}
+
+	if (!HasPendingRequest())
+	{
+		return true;
+	}
+
+	const bool bAreContainerEquals = QueuedItems.Num() != PendingSpawnRequests.Num();
+	if (bAreContainerEquals)
+	{
+		// @gdemers TQueues dont support size...
+		FOnAsyncSpawnRequestDeferred NextRequest = PendingSpawnRequests[0];
+		PendingSpawnRequests.RemoveAtSwap(0);
+		NextRequest.ExecuteIfBound();
+	}
+
+	return false;
+}
+
+bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::HasPendingRequest() const
+{
+	return !PendingSpawnRequests.IsEmpty();
+}
+
+UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PopItem()
+{
+	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
+	if (!QueuedItems.IsEmpty())
+	{
+		ItemObject = QueuedItems[0];
+		QueuedItems.RemoveAtSwap(0);
+	}
+
+	return ItemObject.Get();
 }

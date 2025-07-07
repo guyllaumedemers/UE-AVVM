@@ -22,11 +22,13 @@
 #include "ActorInventoryComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "Data/ItemProgressionDefinitionDataAsset.h"
 
 TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutItems;
+	TArray<UObject*> OutProgressionItems;
 
 	for (UObject* Resource : Resources)
 	{
@@ -34,21 +36,38 @@ TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorC
 		if (IsValid(ItemGroup))
 		{
 			OutResources.Append(ItemGroup->GetItemIds());
+			continue;
 		}
-		else
+
+		const auto* Item = Cast<UItemDefinitionDataAsset>(Resource);
+		if (IsValid(Item))
 		{
-			const auto* Item = Cast<UItemDefinitionDataAsset>(Resource);
-			if (IsValid(Item))
-			{
-				OutItems.Add(Resource);
-			}
+			OutItems.Add(Resource);
+			continue;
+		}
+
+		const auto* ItemProgression = Cast<UItemProgressionDefinitionDataAsset>(Resource);
+		if (IsValid(ItemProgression))
+		{
+			OutProgressionItems.Add(Resource);
+			continue;
 		}
 	}
 
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (!OutItems.IsEmpty() && IsValid(InventoryComponent) && UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(InventoryComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	{
+		return OutResources;
+	}
+
+	if (!OutItems.IsEmpty())
 	{
 		InventoryComponent->SetupItems(OutItems);
+	}
+
+	if (!OutProgressionItems.IsEmpty())
+	{
+		InventoryComponent->SetupItemProgressions(OutProgressionItems);
 	}
 
 	return OutResources;
