@@ -21,32 +21,38 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
+#include "TransactionFactoryUtils.h"
 
-#include "TransactionSettings.generated.h"
-
-enum class ETransactionType : uint8;
-class UTransactionFactoryImpl;
+#include "TransactionFactoryImplTest.generated.h"
 
 /**
  *	Class description:
  *
- *	UTransactionSettings is a developer settings class that expose a mapping of Transaction type to Factory Class
- *	for creating instanced struct from a string payload.
+ *	FTransactionPayloadTest is an example Payload derive type with a single property int32.
  */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UTransactionSettings"))
-class TRANSACTIONSAMPLE_API UTransactionSettings : public UDeveloperSettings
+USTRUCT()
+struct TRANSACTIONSAMPLE_API FTransactionPayloadTest : public FTransactionPayload
+{
+	GENERATED_BODY()
+
+	FTransactionPayloadTest() = default;
+	explicit FTransactionPayloadTest(const int32 NewDummyProperty);
+	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) override;
+	virtual FString ToString() const override;
+
+	int32 DummyProperty = INDEX_NONE;
+};
+
+/**
+ *	Class description:
+ *
+ *	UTransactionFactoryImplTest is an example Factory Payload derive type that instance a FTransactionPayloadTest.
+ */
+UCLASS(Blueprintable)
+class TRANSACTIONSAMPLE_API UTransactionFactoryImplTest : public UTransactionFactoryImpl
 {
 	GENERATED_BODY()
 
 public:
-	UTransactionSettings();
-
-	UFUNCTION(BlueprintCallable)
-	static TSubclassOf<UTransactionFactoryImpl> GetFactoryImpl(const ETransactionType NewType);
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	TMap<ETransactionType, TSubclassOf<UTransactionFactoryImpl>> Factories;
+	virtual TInstancedStruct<FTransactionPayload> CreatePayload(const FString& NewPayload) const override;
 };

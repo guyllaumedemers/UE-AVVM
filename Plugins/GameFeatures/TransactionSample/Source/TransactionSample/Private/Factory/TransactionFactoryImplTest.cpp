@@ -17,36 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Factory/TransactionFactoryImplTest.h"
 
-#include "CoreMinimal.h"
+#include "AVVMTokenizer.h"
 
-#include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
-
-#include "TransactionSettings.generated.h"
-
-enum class ETransactionType : uint8;
-class UTransactionFactoryImpl;
-
-/**
- *	Class description:
- *
- *	UTransactionSettings is a developer settings class that expose a mapping of Transaction type to Factory Class
- *	for creating instanced struct from a string payload.
- */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UTransactionSettings"))
-class TRANSACTIONSAMPLE_API UTransactionSettings : public UDeveloperSettings
+FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
+	: DummyProperty(NewDummyProperty)
 {
-	GENERATED_BODY()
+}
 
-public:
-	UTransactionSettings();
+TInstancedStruct<FTransactionPayload> FTransactionPayloadTest::Init(const FString& NewPayload)
+{
+	*this = FTransactionPayloadTest(UAVVMTokenizer::GetTokenValue<int32>(TEXT("DummyProperty"), NewPayload));
+	return TInstancedStruct<FTransactionPayload>::Make(*this);
+}
 
-	UFUNCTION(BlueprintCallable)
-	static TSubclassOf<UTransactionFactoryImpl> GetFactoryImpl(const ETransactionType NewType);
+FString FTransactionPayloadTest::ToString() const
+{
+	FStringFormatNamedArguments Args;
+	Args.Add(TEXT("DummyProperty"), FStringFormatArg{DummyProperty});
+	return FString::Format(TEXT("DummyProperty:{DummyProperty}"), Args);
+}
 
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
-	TMap<ETransactionType, TSubclassOf<UTransactionFactoryImpl>> Factories;
-};
+TInstancedStruct<FTransactionPayload> UTransactionFactoryImplTest::CreatePayload(const FString& NewPayload) const
+{
+	auto Instanced = FTransactionPayloadTest();
+	return Instanced.Init(NewPayload);
+}

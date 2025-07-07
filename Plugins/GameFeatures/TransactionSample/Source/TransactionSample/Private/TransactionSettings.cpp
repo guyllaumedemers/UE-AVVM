@@ -27,21 +27,19 @@ UTransactionSettings::UTransactionSettings()
 	CategoryName = TEXT("Game");
 }
 
-TInstancedStruct<FTransactionFactoryImpl> UTransactionSettings::GetFactoryImpl(const ETransactionType NewType)
+TSubclassOf<UTransactionFactoryImpl> UTransactionSettings::GetFactoryImpl(const ETransactionType NewType)
 {
-	TInstancedStruct<FTransactionFactoryImpl> Value;
-
 	const auto* Settings = GetDefault<UTransactionSettings>();
 	if (!ensureAlwaysMsgf(IsValid(Settings), TEXT("UTransactionDeveloperSettings CDO invalid!")))
 	{
-		return Value;
+		return nullptr;
 	}
 
-	const TInstancedStruct<FTransactionFactoryImpl>* SearchResult = Settings->Factories.Find(NewType);
+	const TSubclassOf<UTransactionFactoryImpl>* SearchResult = Settings->Factories.Find(NewType);
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("UTransactionDeveloperSettings missing TransactionType!")))
 	{
-		Value = *SearchResult;
+		return *SearchResult;
 	}
 
-	return Value;
+	return nullptr;
 }

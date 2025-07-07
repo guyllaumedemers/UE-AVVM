@@ -54,15 +54,15 @@ struct TRANSACTIONSAMPLE_API FTransactionPayload
 /**
  *	Class description:
  *
- *	FTransactionFactoryImpl is a Factory base class that generate Payload information specific to your project. Each Transaction Type should
+ *	UTransactionFactoryImpl is a Factory base class that generate Payload information specific to your project. Each Transaction Type should
  *	map to a derived class and generate an empty representation of a Payload instance.
  */
-USTRUCT(BlueprintType)
-struct TRANSACTIONSAMPLE_API FTransactionFactoryImpl
+UCLASS(Abstract, BlueprintType, NotBlueprintable)
+class TRANSACTIONSAMPLE_API UTransactionFactoryImpl : public UObject
 {
 	GENERATED_BODY()
 
-	virtual ~FTransactionFactoryImpl() = default;
+public:
 	virtual TInstancedStruct<FTransactionPayload> CreatePayload(const FString& NewPayload) const PURE_VIRTUAL(CreatePayload, return FTransactionPayload::Empty;);
 };
 
@@ -79,10 +79,7 @@ class TRANSACTIONSAMPLE_API UTransactionFactoryUtils : public UBlueprintFunction
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static TInstancedStruct<FTransactionPayload> CreateEmptyPayload(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl);
-
-	UFUNCTION(BlueprintCallable)
-	static TInstancedStruct<FTransactionPayload> CreatePayloadFromString(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl,
+	static TInstancedStruct<FTransactionPayload> CreatePayloadFromString(const TSubclassOf<UTransactionFactoryImpl>& NewFactoryImpl,
 	                                                                     const FString& NewPayload);
 
 	UFUNCTION(BlueprintCallable)

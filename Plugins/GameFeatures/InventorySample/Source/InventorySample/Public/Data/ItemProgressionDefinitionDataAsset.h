@@ -24,7 +24,6 @@
 #include "GameFramework/Actor.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
-#include "Engine/StreamableManager.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"

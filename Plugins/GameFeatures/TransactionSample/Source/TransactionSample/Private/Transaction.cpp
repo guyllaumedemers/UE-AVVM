@@ -69,8 +69,17 @@ FString UTransaction::ToString() const
 
 TInstancedStruct<FTransactionPayload> UTransaction::GetValue() const
 {
-	const TInstancedStruct<FTransactionFactoryImpl> FactoryImpl = UTransactionSettings::GetFactoryImpl(TransactionType);
-	return UTransactionFactoryUtils::CreatePayloadFromString(FactoryImpl, Payload);
+	const TSubclassOf<UTransactionFactoryImpl> FactoryImpl = UTransactionSettings::GetFactoryImpl(TransactionType);
+	if (ensureAlwaysMsgf(IsValid(FactoryImpl),
+	                     TEXT("Match not found. Missing FactoryImpl Class for Transaction Type \"%s\"."),
+	                     EnumToString(TransactionType)))
+	{
+		return UTransactionFactoryUtils::CreatePayloadFromString(FactoryImpl, Payload);
+	}
+	else
+	{
+		return FTransactionPayload::Empty;
+	}
 }
 
 FString UTransaction::GetUniqueId(const AActor* NewTarget)

@@ -21,16 +21,10 @@
 
 TInstancedStruct<FTransactionPayload> FTransactionPayload::Empty;
 
-TInstancedStruct<FTransactionPayload> UTransactionFactoryUtils::CreateEmptyPayload(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl)
-{
-	return UTransactionFactoryUtils::CreatePayloadFromString(NewFactoryImpl, TEXT(""));
-}
-
-TInstancedStruct<FTransactionPayload> UTransactionFactoryUtils::CreatePayloadFromString(const TInstancedStruct<FTransactionFactoryImpl>& NewFactoryImpl,
+TInstancedStruct<FTransactionPayload> UTransactionFactoryUtils::CreatePayloadFromString(const TSubclassOf<UTransactionFactoryImpl>& NewFactoryImpl,
                                                                                         const FString& NewPayload)
 {
-	const auto* FactoryImpl = NewFactoryImpl.GetPtr<FTransactionFactoryImpl>();
-	return (FactoryImpl != nullptr) ? FactoryImpl->CreatePayload(NewPayload) : FTransactionPayload::Empty;
+	return IsValid(NewFactoryImpl) ? NewFactoryImpl->GetDefaultObject<UTransactionFactoryImpl>()->CreatePayload(NewPayload) : FTransactionPayload::Empty;
 }
 
 FString UTransactionFactoryUtils::CreateStringPayload(const TInstancedStruct<FTransactionPayload>& NewPayload)

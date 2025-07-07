@@ -28,7 +28,6 @@
 #include "InventoryProvider.generated.h"
 
 class UItemObject;
-class UItemGroupDefinitionDataAsset;
 
 /**
  *	Class description:

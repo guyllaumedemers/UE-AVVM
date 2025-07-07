@@ -20,9 +20,9 @@
 #include "Cheats/TransactionCheatExtension.h"
 
 #include "AVVMGameplay.h"
-#include "AVVMTokenizer.h"
 #include "GameStateTransactionHistory.h"
 #include "TransactionFactoryUtils.h"
+#include "Factory/TransactionFactoryImplTest.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,56 +30,6 @@
 #include "Containers/StringFwd.h"
 #include <imgui.h>
 #endif
-
-/**
- *	A Namespace specific to Testable derived types. 
- */
-namespace NSTest
-{
-	/**
-	 *	Class description:
-	 *
-	 *	FTransactionPayloadTest is an example Payload derive type with a single property int32.
-	 */
-	struct FTransactionPayloadTest : public FTransactionPayload
-	{
-		FTransactionPayloadTest() = default;
-
-		explicit FTransactionPayloadTest(const int32 NewDummyProperty)
-			: DummyProperty(NewDummyProperty)
-		{
-		}
-
-		virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) override
-		{
-			*this = FTransactionPayloadTest(UAVVMTokenizer::GetTokenValue<int32>(TEXT("DummyProperty"), NewPayload));
-			return TInstancedStruct<FTransactionPayload>::Make(*this);
-		}
-
-		virtual FString ToString() const override
-		{
-			FStringFormatNamedArguments Args;
-			Args.Add(TEXT("DummyProperty"), FStringFormatArg{DummyProperty});
-			return FString::Format(TEXT("DummyProperty:{DummyProperty}"), Args);
-		}
-
-		int32 DummyProperty = INDEX_NONE;
-	};
-
-	/**
-	 *	Class description:
-	 *
-	 *	FTransactionFactoryImplTest is an example Factory Payload derive type that instance a FTransactionPayloadTest.
-	 */
-	struct FTransactionFactoryImplTest : public FTransactionFactoryImpl
-	{
-		virtual TInstancedStruct<FTransactionPayload> CreatePayload(const FString& NewPayload) const override
-		{
-			auto Instanced = FTransactionPayloadTest();
-			return Instanced.Init(NewPayload);
-		}
-	};
-};
 
 void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 {
@@ -147,7 +97,7 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	UGameStateTransactionHistory* TransactionComponent = UGameStateTransactionHistory::GetTransactionHistory(this);
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
-		const auto InstancedPayload = TInstancedStruct<FTransactionPayload>::Make<NSTest::FTransactionPayloadTest>(StaticCast<int32>(NewType));
+		const auto InstancedPayload = TInstancedStruct<FTransactionPayload>::Make<FTransactionPayloadTest>(StaticCast<int32>(NewType));
 		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 		const FString Payload = UTransactionFactoryUtils::CreateStringPayload(InstancedPayload);
 		TransactionComponent->CreateAndRecordTransaction(nullptr, PlayerState, NewType, Payload);
