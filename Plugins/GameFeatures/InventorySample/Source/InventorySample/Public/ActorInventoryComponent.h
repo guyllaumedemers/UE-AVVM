@@ -68,7 +68,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void RequestItems(const UObject* Outer);
+	void RequestItems(const AActor* Outer);
 
 	void SetupItems(const TArray<UObject*>& Resources);
 	void SetupItemProgressions(const TArray<UObject*>& Resources);

@@ -124,7 +124,7 @@ void UAVVMResourceManagerComponent::BeginPlay()
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 #if WITH_SERVER_CODE
-	if (bShouldAsyncLoadOnBeginPlay)
+	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
 	{
 		RequestAsyncLoading(IAVVMResourceProvider::Execute_GetResourceDefinitionResourceId(Outer), FOnResourceAsyncLoadingComplete{});
 	}

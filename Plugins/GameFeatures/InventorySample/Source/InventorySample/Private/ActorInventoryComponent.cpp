@@ -64,7 +64,7 @@ void UActorInventoryComponent::BeginPlay()
 	OwningOuter = Outer;
 
 #if WITH_SERVER_CODE
-	if (bShouldAsyncLoadOnBeginPlay)
+	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
 	{
 		RequestItems(Outer);
 	}
@@ -104,8 +104,14 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
-void UActorInventoryComponent::RequestItems(const UObject* Outer)
+void UActorInventoryComponent::RequestItems(const AActor* Outer)
 {
+	if (!IsValid(Outer) || !ensureAlwaysMsgf(Outer->HasAuthority(),
+	                                         TEXT("Outer isn't Authoritative and cannot request loading items!")))
+	{
+		return;
+	}
+
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
 	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
 	{
