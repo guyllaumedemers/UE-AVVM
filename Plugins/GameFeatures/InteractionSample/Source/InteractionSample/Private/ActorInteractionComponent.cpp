@@ -60,8 +60,8 @@ void UActorInteractionComponent::BeginPlay()
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding \"%s\" Class Instance to Outer \"%s\"."),
-	       *UActorInteractionComponent::StaticClass()->GetName(),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UActorInteractionComponent::StaticClass()->GetName(),
 	       *Outer->GetName())
 
 	if (ensureAlwaysMsgf(IsValid(InteractionImplClass),
@@ -125,8 +125,8 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing \"%s\" Class Instance to Outer \"%s\"."),
-	       *UActorInteractionComponent::StaticClass()->GetName(),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UActorInteractionComponent::StaticClass()->GetName(),
 	       *Outer->GetName())
 
 	OwningOuter.Reset();

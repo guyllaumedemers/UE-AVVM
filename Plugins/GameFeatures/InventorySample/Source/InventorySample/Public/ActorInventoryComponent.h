@@ -44,6 +44,27 @@ class INVENTORYSAMPLE_API UInventoryLayoutHandler : public UObject
 
 /**
  *	Class description:
+ *
+ *	FItemToken describe a unique identifier that increment only when default construct. Can be safely
+ *	passed by copy around.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItemToken
+{
+	GENERATED_BODY()
+
+	explicit FItemToken()
+	{
+		static uint32 GlobalUniqueId = 0;
+		UniqueId = ++GlobalUniqueId;
+	}
+
+	UPROPERTY()
+	uint32 UniqueId = 0;
+};
+
+/**
+ *	Class description:
  *	
  *	UActorInventoryComponent is the CORE component of the inventory system and allow ANY AActor to reference a set
  *	of items.
@@ -93,7 +114,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnItemsRetrieved();
+	void OnItemsRetrieved(FItemToken ItemToken);
 
 	UFUNCTION()
 	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
@@ -129,7 +150,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer OwnedGameplayTags = FGameplayTagContainer::EmptyContainer;
 
-	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 	FItemSpawnerQueuingMechanism QueuingMechanism;
 };

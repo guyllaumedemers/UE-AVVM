@@ -184,9 +184,12 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 
 	if (!DeferredItems.IsEmpty())
 	{
+		FItemToken Token;
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved);
-		StreamableHandle = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved, Token);
+
+		TSharedPtr<FStreamableHandle>& OutResult = ItemHandleSystem.FindOrAdd(Token.UniqueId);
+		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
 	}
 }
 
@@ -250,9 +253,10 @@ bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compar
 	return OwnedGameplayTags.HasAllExact(Compare);
 }
 
-void UActorInventoryComponent::OnItemsRetrieved()
+void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 {
-	if (!ensureAlwaysMsgf(StreamableHandle.IsValid(), TEXT("UActorInventoryComponent::OnItemsRetrieved Streamable handle is invalid!")))
+	const TSharedPtr<FStreamableHandle>* OutResult = ItemHandleSystem.Find(ItemToken.UniqueId);
+	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
 	{
 		return;
 	}
@@ -263,25 +267,17 @@ void UActorInventoryComponent::OnItemsRetrieved()
 		return;
 	}
 
-	// @gdemers remove first
-	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
-	{
-		RemoveReplicatedSubObject(Iterator->Get());
-		Iterator.RemoveCurrentSwap();
-	}
-
 	TArray<UObject*> OutStreamableAssets;
-	StreamableHandle->GetLoadedAssets(OutStreamableAssets);
+	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
-	Items.Reset(OutStreamableAssets.Num());
-	// @gdemers append after
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
-		auto* Item = Cast<UItemObject>(StreamableAsset);
-		if (IsValid(Item))
+		auto* ItemObjectClass = Cast<UClass>(StreamableAsset);
+		if (IsValid(ItemObjectClass))
 		{
-			AddReplicatedSubObject(Item);
-			Items.Add(Item);
+			auto* NewItem = NewObject<UItemObject>(this, ItemObjectClass);
+			AddReplicatedSubObject(NewItem);
+			Items.Add(NewItem);
 		}
 	}
 
