@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "Ability/AVVMGameplayAbility.h"
 
 #include "SellItemAbility.generated.h"
 
@@ -31,7 +32,7 @@
  *	USellItemAbility define an instance ability the local client can invoke during auction of an object. (Skill point, merch, etc...)
  */
 UCLASS()
-class INVENTORYSAMPLE_API USellItemAbility : public UGameplayAbility
+class INVENTORYSAMPLE_API USellItemAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

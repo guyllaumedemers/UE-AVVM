@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "Ability/AVVMGameplayAbility.h"
 
 #include "ToggleInventoryAbility.generated.h"
 
@@ -34,7 +35,7 @@
  *	Note : May display visual feedback for remote players.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UToggleInventoryAbility : public UGameplayAbility
+class INVENTORYSAMPLE_API UToggleInventoryAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

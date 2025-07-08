@@ -100,9 +100,9 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewProgressionDefinition
 }
 
 void UItemObject::SpawnActorClass(const AActor* NewAnchor,
-                                  const TSoftClassPtr<AActor>& NewActorClass)
+                                  const UClass* NewActorClass)
 {
-	if (!NewActorClass.IsValid())
+	if (!IsValid(NewActorClass))
 	{
 		return;
 	}
@@ -113,7 +113,7 @@ void UItemObject::SpawnActorClass(const AActor* NewAnchor,
 	if (IsValid(World))
 	{
 		const FTransform NewItemTransform = GetSpawningAnchorTransform(NewAnchor, bShouldSpawnAndAttach);
-		RuntimeItemActor = World->SpawnActor(NewActorClass->GetClass(), &NewItemTransform, FActorSpawnParameters());
+		RuntimeItemActor = World->SpawnActor(const_cast<UClass*>(NewActorClass), &NewItemTransform, FActorSpawnParameters());
 		ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
 	}
 
@@ -138,7 +138,7 @@ void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback
 
 	if (!OutStreamableAssets.IsEmpty())
 	{
-		Callback.ExecuteIfBound(OutStreamableAssets[0]->GetClass(), this);
+		Callback.ExecuteIfBound(Cast<UClass>(OutStreamableAssets[0]), this);
 	}
 	else
 	{

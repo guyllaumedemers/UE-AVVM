@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "Ability/AVVMGameplayAbility.h"
 
 #include "BuyItemAbility.generated.h"
 
@@ -31,7 +32,7 @@
  *	UBuyItemAbility define an instance ability the local client can invoke during purchase of an object. (Skill point, merch, etc...)
  */
 UCLASS()
-class INVENTORYSAMPLE_API UBuyItemAbility : public UGameplayAbility
+class INVENTORYSAMPLE_API UBuyItemAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

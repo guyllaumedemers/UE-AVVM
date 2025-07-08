@@ -108,10 +108,10 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 	TArray<UObject*> OutStreamedAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
 
-	for (UObject* Ability : OutStreamedAssets)
+	for (UObject* StreamableAsset : OutStreamedAssets)
 	{
-		const auto GameplayAbilityClass = TSoftClassPtr<UAVVMGameplayAbility>(Ability);
-		if (!GameplayAbilityClass.IsValid())
+		const auto GameplayAbilityClass = Cast<UClass>(StreamableAsset);
+		if (!IsValid(GameplayAbilityClass))
 		{
 			continue;
 		}
@@ -123,7 +123,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 		       *GameplayAbilityClass->GetName(),
 		       *Outer->GetName());
 
-		GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass.Get(), 1, GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()});
+		GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass, 1, GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()});
 	}
 }
 

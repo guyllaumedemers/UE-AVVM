@@ -102,7 +102,7 @@ protected:
 	                    UItemObject* NewItem);
 
 	UFUNCTION()
-	void OnItemActorClassRetrieved(const TSoftClassPtr<AActor>& NewActorClass,
+	void OnItemActorClassRetrieved(const UClass* NewActorClass,
 	                               UItemObject* NewItemObject);
 
 	struct FItemSpawnerQueuingMechanism

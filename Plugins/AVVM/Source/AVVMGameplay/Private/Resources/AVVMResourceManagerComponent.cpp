@@ -126,7 +126,18 @@ void UAVVMResourceManagerComponent::BeginPlay()
 #if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
 	{
-		RequestAsyncLoading(IAVVMResourceProvider::Execute_GetResourceDefinitionResourceId(Outer), FOnResourceAsyncLoadingComplete{});
+		const TArray<FDataRegistryId> ResourceIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(Outer);
+		for (const auto& ResourceId : ResourceIds)
+		{
+			UE_LOG(LogGameplay,
+			       Log,
+			       TEXT("Executed from \"%s\". Requesting Resource Acquisition for \"%s\" on Outer \"%s\"!"),
+			       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+			       *ResourceId.ToString(),
+			       *Outer->GetName());
+
+			RequestAsyncLoading(ResourceId, FOnResourceAsyncLoadingComplete{});
+		}
 	}
 #endif
 }
@@ -148,6 +159,8 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 	       *Outer->GetName())
 
 	LLM_SCOPE_BYTAG(AVVMTag);
+
+	OwningOuter.Reset();
 }
 
 void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& NewRegistryId,

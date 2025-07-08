@@ -63,19 +63,19 @@ void UActorInventoryComponent::BeginPlay()
 	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
 	OwningOuter = Outer;
 
-#if WITH_SERVER_CODE
-	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
-	{
-		RequestItems(Outer);
-	}
-#endif
-
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UActorInventoryComponent::StaticClass()->GetName(),
 	       *Outer->GetName())
+
+#if WITH_SERVER_CODE
+	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
+	{
+		RequestItems(Outer);
+	}
+#endif
 }
 
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -400,7 +400,7 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 	}
 }
 
-void UActorInventoryComponent::OnItemActorClassRetrieved(const TSoftClassPtr<AActor>& NewActorClass,
+void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorClass,
                                                          UItemObject* NewItemObject)
 {
 	const AActor* Outer = OwningOuter.Get();

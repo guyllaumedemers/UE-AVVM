@@ -47,8 +47,8 @@ class AVVMGAMEPLAY_API IAVVMResourceProvider
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	FDataRegistryId GetResourceDefinitionResourceId() const;
-	virtual FDataRegistryId GetResourceDefinitionResourceId_Implementation() const PURE_VIRTUAL(GetResourceDefinitionResourceId_Implementation, return FDataRegistryId(););
+	TArray<FDataRegistryId> GetResourceDefinitionResourceIds() const;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const PURE_VIRTUAL(GetResourceDefinitionResourceIds_Implementation, return TArray<FDataRegistryId>(););
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources,

@@ -34,7 +34,7 @@
 
 #include "ItemObject.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, const TSoftClassPtr<AActor>&, NewActorClass, class UItemObject*, NewItemObject);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, class UItemObject*, NewItemObject);
 
 /**
  *	Class description:
@@ -118,7 +118,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnActorClass(const AActor* NewAnchor,
-	                     const TSoftClassPtr<AActor>& NewActorClass);
+	                     const UClass* NewActorClass);
 
 protected:
 	UFUNCTION()

@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "Ability/AVVMGameplayAbility.h"
 
 #include "TradeItemAbility.generated.h"
 
@@ -31,7 +32,7 @@
  *	UTradeItemAbility define an instance ability the local client can invoke during exchange of objects. (consumable, weapons, etc...)
  */
 UCLASS()
-class INVENTORYSAMPLE_API UTradeItemAbility : public UGameplayAbility
+class INVENTORYSAMPLE_API UTradeItemAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

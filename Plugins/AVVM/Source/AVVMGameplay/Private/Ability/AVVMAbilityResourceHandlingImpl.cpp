@@ -34,19 +34,24 @@ TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActo
 		if (IsValid(AbilityGroup))
 		{
 			OutResources.Append(AbilityGroup->GetAbilityIds());
+			continue;
 		}
-		else
+
+		const auto* Ability = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
+		if (IsValid(Ability))
 		{
-			const auto* Ability = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
-			if (IsValid(Ability))
-			{
-				OutAbilities.Add(Resource);
-			}
+			OutAbilities.Add(Resource);
+			continue;
 		}
 	}
 
 	auto* AbilitySystemComponent = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
-	if (!OutAbilities.IsEmpty() && IsValid(AbilitySystemComponent) && UAVVMGameplayUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(AbilitySystemComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
+	{
+		return OutResources;
+	}
+
+	if (!OutAbilities.IsEmpty())
 	{
 		AbilitySystemComponent->SetupAbilities(OutAbilities);
 	}
