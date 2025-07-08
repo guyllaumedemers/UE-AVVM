@@ -52,6 +52,8 @@ void UActorInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	QueueingMechanism = MakeShared<FItemSpawnerQueuingMechanism>();
+
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -68,7 +70,7 @@ void UActorInventoryComponent::BeginPlay()
 	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UActorInventoryComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	       *Outer->GetName());
 
 #if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
@@ -81,6 +83,8 @@ void UActorInventoryComponent::BeginPlay()
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	QueueingMechanism.Reset();
 
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -99,7 +103,7 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UActorInventoryComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	       *Outer->GetName());
 
 	OwningOuter.Reset();
 }
@@ -201,7 +205,12 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Res
 		return;
 	}
 
-	UItemObject* ItemObject = QueuingMechanism.PeekItem();
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return;
+	}
+
+	UItemObject* ItemObject = QueueingMechanism->PeekItem();
 	if (!IsValid(ItemObject) || !ensureAlwaysMsgf(!Resources.IsEmpty(),
 	                                              TEXT("Attempting to load invalid Progression Definition on Item \"%s\"."),
 	                                              *ItemObject->GetName()))
@@ -273,12 +282,14 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
 		auto* ItemObjectClass = Cast<UClass>(StreamableAsset);
-		if (IsValid(ItemObjectClass))
+		if (!IsValid(ItemObjectClass))
 		{
-			auto* NewItem = NewObject<UItemObject>(this, ItemObjectClass);
-			AddReplicatedSubObject(NewItem);
-			Items.Add(NewItem);
+			continue;
 		}
+
+		auto* NewItem = NewObject<UItemObject>(this, ItemObjectClass);
+		AddReplicatedSubObject(NewItem);
+		Items.Add(NewItem);
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
@@ -352,19 +363,28 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 		return;
 	}
 
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return;
+	}
+
 	if (IsValid(NewItem))
 	{
 		NewItem->ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}, {});
 	}
 
-	const auto RequestItemSpawning = [&](UAVVMResourceManagerComponent* NewResourceManagerComponent, const UItemObject* ItemToSpawn)
+	const auto RequestItemSpawning = [](TWeakObjectPtr<UActorInventoryComponent> NewActorInventoryComponent,
+	                                    TWeakObjectPtr<UAVVMResourceManagerComponent> NewResourceManagerComponent,
+	                                    TWeakObjectPtr<UItemObject> ItemToSpawn)
 	{
-		if (!IsValid(ItemToSpawn))
+		if (!ensureAlwaysMsgf(NewActorInventoryComponent.IsValid(), TEXT("WeakObjectPtr to Actor Inventory Component Invalid!")) ||
+			!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
+			!ensureAlwaysMsgf(ItemToSpawn.IsValid(), TEXT("WeakObjectPtr to ItemObject Invalid!")))
 		{
 			return;
 		}
 
-		const AActor* NewOuter = OwningOuter.Get();
+		const AActor* NewOuter = NewActorInventoryComponent->OwningOuter.Get();
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Executing Spawn Item Request for \"%s\" on Outer \"%s\"!"),
@@ -372,19 +392,16 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 		       *ItemToSpawn->GetName(),
 		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
 
-		if (ensureAlwaysMsgf(IsValid(NewResourceManagerComponent),
-		                     TEXT("Outer Actor doesn't reference a UActorInventoryComponent!")))
-		{
-			NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemProgressionId(), {});
-		}
+		NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemProgressionId(), {});
 	};
 
-	const auto WrappedDeferredRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
-	                                                                                   RequestItemSpawning,
-	                                                                                   ResourceManagerComponent,
-	                                                                                   NewItem);
+	const auto NewRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
+	                                                                       RequestItemSpawning,
+	                                                                       TWeakObjectPtr<UActorInventoryComponent>(this),
+	                                                                       TWeakObjectPtr<UAVVMResourceManagerComponent>(ResourceManagerComponent),
+	                                                                       TWeakObjectPtr<UItemObject>(NewItem));
 
-	const bool bHasPendingRequest = QueuingMechanism.PushDeferredItem(NewItem, WrappedDeferredRequest);
+	const bool bHasPendingRequest = QueueingMechanism->PushDeferredItem(NewItem, NewRequest);
 	if (bHasPendingRequest)
 	{
 		UE_LOG(LogGameplay,
@@ -410,7 +427,10 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		NewItemObject->SpawnActorClass(Outer, NewActorClass);
 	}
 
-	QueuingMechanism.TryExecuteNextRequest(true);
+	if (ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		QueueingMechanism->TryExecuteNextRequest(true);
+	}
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()

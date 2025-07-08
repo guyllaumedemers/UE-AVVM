@@ -27,6 +27,12 @@ void UToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Act
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
 	const AActor* Outer = ActorInfo->OwnerActor.Get();
 	if (!ensure(IsValid(Outer)))
 	{
@@ -35,17 +41,35 @@ void UToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Act
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
+	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *GetName(),
-	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
+	       *Outer->GetName());
 }
 
 void UToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                               const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
+	const AActor* Outer = ActorInfo->OwnerActor.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *GetName(),
+	       *Outer->GetName());
 }
 
 bool UToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -64,19 +88,27 @@ void UToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	const AActor* Outer = ActorInfo->OwnerActor.Get();
-	if (!ensure(IsValid(Outer)))
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
 	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
+	}
+
+	const AActor* Controller = ActorInfo->PlayerController.Get();
+	if (!ensureAlwaysMsgf(IsValid(Controller),
+	                      TEXT("UToggleInventoryAbility PlayerController invalid!")))
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
 	UE_LOG(LogGameplay,
 	       Log,
-	       TEXT("Executed from \"%s\". Activate Ability \"%s\" on Actor \"%s\". IsLocallyControlled: %s."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
 	       *GetName(),
-	       *Outer->GetName(),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData());
+	       *Controller->GetName());
 }
 
 void UToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

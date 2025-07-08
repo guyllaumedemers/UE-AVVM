@@ -152,5 +152,5 @@ protected:
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-	FItemSpawnerQueuingMechanism QueuingMechanism;
+	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism;
 };

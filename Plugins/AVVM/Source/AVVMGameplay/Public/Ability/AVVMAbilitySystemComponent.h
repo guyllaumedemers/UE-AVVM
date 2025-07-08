@@ -66,7 +66,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnAbilityGrantedDeferred(FAbilityToken AbilityToken);
+	void OnAbilityGrantingDeferred(FAbilityToken AbilityToken);
 
 	virtual void OnTagUpdated(const FGameplayTag& Tag, bool TagExists) override;
 

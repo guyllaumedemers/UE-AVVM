@@ -91,5 +91,5 @@ protected:
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-	FResourceQueueingMechanism QueueingMechanism;
+	TSharedPtr<FResourceQueueingMechanism> QueueingMechanism;
 };

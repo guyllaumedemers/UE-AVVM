@@ -24,21 +24,49 @@
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Engine/AssetManager.h"
+#include "ProfilingDebugging/CountersTrace.h"
+
+TRACE_DECLARE_INT_COUNTER(UAVVMAbilitySystemComponent_InstanceCounter, TEXT("Ability System Component Instance Counter"));
 
 void UAVVMAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	const auto* Outer = GetTypedOuter<AActor>();
-	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		OwningOuter = Outer;
+		return;
 	}
+
+	TRACE_COUNTER_INCREMENT(UAVVMAbilitySystemComponent_InstanceCounter);
+
+	OwningOuter = Outer;
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UAVVMAbilitySystemComponent::StaticClass()->GetName(),
+	       *Outer->GetName());
 }
 
 void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *UAVVMAbilitySystemComponent::StaticClass()->GetName(),
+	       *Outer->GetName());
+
 	OwningOuter.Reset();
 }
 
@@ -82,14 +110,14 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	{
 		FAbilityToken Token;
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred, Token);
+		Callback.BindUObject(this, &UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred, Token);
 
 		TSharedPtr<FStreamableHandle>& OutResult = AbilityHandleSystem.FindOrAdd(Token.UniqueId);
 		OutResult = UAssetManager::Get().LoadAssetList(DeferredGrantedAbilities, Callback);
 	}
 }
 
-void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken AbilityToken)
+void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken AbilityToken)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = AbilityHandleSystem.Find(AbilityToken.UniqueId);
 	if (!ensure(OutResult != nullptr && OutResult->IsValid()))

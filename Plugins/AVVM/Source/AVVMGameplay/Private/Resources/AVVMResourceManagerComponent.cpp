@@ -80,7 +80,7 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasPendingReques
 
 void UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle)
 {
-	StreamableHandles.AddUnique(NewStreamableHandle);
+	StreamableHandles.Add(NewStreamableHandle);
 }
 
 void UAVVMResourceManagerComponent::FResourceQueueingMechanism::SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback)
@@ -92,7 +92,7 @@ void UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetLoadedAssets(
 {
 	if (!StreamableHandles.IsEmpty())
 	{
-		StreamableHandles.Top()->GetLoadedAssets(OutStreamableAssets);
+		StreamableHandles.Last()->GetLoadedAssets(OutStreamableAssets);
 	}
 }
 
@@ -104,6 +104,8 @@ const FOnResourceAsyncLoadingComplete& UAVVMResourceManagerComponent::FResourceQ
 void UAVVMResourceManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	QueueingMechanism = MakeShared<FResourceQueueingMechanism>();
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensure(IsValid(Outer)))
@@ -145,6 +147,8 @@ void UAVVMResourceManagerComponent::BeginPlay()
 void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	QueueingMechanism.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensure(IsValid(Outer)))
@@ -203,36 +207,51 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		return;
 	}
 
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return;
+	}
+
 	const auto* DataTableRow = Result.GetItem<FAVVMDataTableRow>();
 	check(DataTableRow != nullptr);
 
-	const auto RequestSoftObjectsAsync = [&](const TArray<FSoftObjectPath>& ResourcePaths,
-	                                         const FDataRegistryId& OwningRegistryId,
-	                                         const FOnResourceAsyncLoadingComplete& MainRequestCompletionCallback)
+	const auto RequestSoftObjectsAsync = [](TWeakObjectPtr<UAVVMResourceManagerComponent> NewResourceManagerComponent,
+	                                        TSharedPtr<FResourceQueueingMechanism> NewQueuingMechanism,
+	                                        TArray<FSoftObjectPath> ResourcePaths,
+	                                        FDataRegistryId NewRegistryId,
+	                                        FOnResourceAsyncLoadingComplete MainRequestCompletionCallback)
 	{
-		const AActor* NewOuter = this->OwningOuter.Get();
+		if (!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
+			!ensureAlwaysMsgf(NewQueuingMechanism.IsValid(), TEXT("SharedPtr to Queueing Mechanism Invalid!")))
+		{
+			return;
+		}
+
+		const AActor* NewOuter = NewResourceManagerComponent->OwningOuter.Get();
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Executing Resource Acquisition Request for \"%s\" on Outer \"%s\"!"),
 		       UAVVMGameplayUtils::PrintNetSource(NewOuter).GetData(),
-		       *OwningRegistryId.ToString(),
+		       *NewRegistryId.ToString(),
 		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
 
 		FStreamableDelegate CompletionCallback;
-		CompletionCallback.BindUObject(this, &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
+		CompletionCallback.BindUObject(NewResourceManagerComponent.Get(), &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
 
 		const TSharedPtr<FStreamableHandle> NewStreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, CompletionCallback);
-		this->QueueingMechanism.SetCompletionCallback(MainRequestCompletionCallback);
-		this->QueueingMechanism.PushStreamableHandle(NewStreamableHandle);
+		NewQueuingMechanism->SetCompletionCallback(MainRequestCompletionCallback);
+		NewQueuingMechanism->PushStreamableHandle(NewStreamableHandle);
 	};
 
-	const auto WrappedDeferredRequest = FOnAsyncLoadingRequestDeferred::CreateWeakLambda(this,
-	                                                                                     RequestSoftObjectsAsync,
-	                                                                                     DataTableRow->GetResourcesPaths(),
-	                                                                                     Result.ItemId,
-	                                                                                     OnRequestCompleteCallback);
+	const auto NewRequest = FOnAsyncLoadingRequestDeferred::CreateWeakLambda(this,
+	                                                                         RequestSoftObjectsAsync,
+	                                                                         TWeakObjectPtr<UAVVMResourceManagerComponent>(this),
+	                                                                         QueueingMechanism,
+	                                                                         DataTableRow->GetResourcesPaths(),
+	                                                                         Result.ItemId,
+	                                                                         OnRequestCompleteCallback);
 
-	const bool bHasPendingRequest = QueueingMechanism.PushDeferredRequest(WrappedDeferredRequest);
+	const bool bHasPendingRequest = QueueingMechanism->PushDeferredRequest(NewRequest);
 	if (bHasPendingRequest)
 	{
 		UE_LOG(LogGameplay,
@@ -246,6 +265,11 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return;
+	}
+
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -259,7 +283,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	}
 
 	TArray<UObject*> OutStreamedAssets;
-	QueueingMechanism.GetLoadedAssets(OutStreamedAssets);
+	QueueingMechanism->GetLoadedAssets(OutStreamedAssets);
 
 	FKeepProcessingResources KeepProcessingRegistriesCallback;
 	KeepProcessingRegistriesCallback.BindDynamic(this, &UAVVMResourceManagerComponent::OnProcessAdditionalResources);
@@ -281,10 +305,15 @@ bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FD
 		return false;
 	}
 
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return false;
+	}
+
 	const bool bIsEmpty = PendingRegistriesId.IsEmpty();
 	if (bIsEmpty)
 	{
-		return QueueingMechanism.TryExecuteNextRequest();
+		return QueueingMechanism->TryExecuteNextRequest();
 	}
 
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
@@ -293,7 +322,7 @@ bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FD
 	{
 		if (RegistryId.IsValid())
 		{
-			const auto CompletionCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, QueueingMechanism.GetCompletionDelegate());
+			const auto CompletionCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, QueueingMechanism->GetCompletionDelegate());
 			ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(RegistryId, CompletionCallback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 		}
 	}
