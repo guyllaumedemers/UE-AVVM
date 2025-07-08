@@ -110,7 +110,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantedDeferred(FAbilityToken Ability
 
 	for (UObject* StreamableAsset : OutStreamedAssets)
 	{
-		const auto GameplayAbilityClass = Cast<UClass>(StreamableAsset);
+		auto* GameplayAbilityClass = Cast<UClass>(StreamableAsset);
 		if (!IsValid(GameplayAbilityClass))
 		{
 			continue;
