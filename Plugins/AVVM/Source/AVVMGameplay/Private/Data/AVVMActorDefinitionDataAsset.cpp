@@ -23,16 +23,33 @@
 EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (bDoesSupportPassiveAbilities && !PassiveAbilityGroupId.IsValid())
+	if (bDoesSupportPassiveAbilities && PassiveAbilityGroupIds.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "PassiveAbilityGroupId invalid!"));
 	}
 
-	if (bDoesSupportActiveAbilities && !ActiveAbilityGroupId.IsValid())
+	if (bDoesSupportActiveAbilities && ActiveAbilityGroupIds.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActiveAbilityGroupId invalid!"));
+	}
+
+	return Result;
+}
+
+TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
+{
+	TArray<FDataRegistryId> Result;
+
+	if (bDoesSupportPassiveAbilities)
+	{
+		Result.Append(PassiveAbilityGroupIds);
+	}
+
+	if (bDoesSupportActiveAbilities)
+	{
+		Result.Append(ActiveAbilityGroupIds);
 	}
 
 	return Result;

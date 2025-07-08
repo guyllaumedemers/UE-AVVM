@@ -46,18 +46,21 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	UFUNCTION(BlueprintCallable)
+	TArray<FDataRegistryId> GetActorTraitIds() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportPassiveAbilities = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportPassiveAbilities"))
-	FDataRegistryId PassiveAbilityGroupId = FDataRegistryId();
+	TArray<FDataRegistryId> PassiveAbilityGroupIds;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportActiveAbilities = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportActiveAbilities"))
-	FDataRegistryId ActiveAbilityGroupId = FDataRegistryId();
+	TArray<FDataRegistryId> ActiveAbilityGroupIds;
 };
 
 /**
