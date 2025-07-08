@@ -76,13 +76,14 @@ protected:
 		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback);
 		void PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle);
 		void GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const;
+		void ModifyStreamableHandle();
 		const FOnResourceAsyncLoadingComplete& GetCompletionDelegate() const;
 
 	protected:
 		bool HasUnfinishedStreamableHandle() const;
 		bool HasPendingRequest() const;
 
-		TArray<TSharedPtr<FStreamableHandle>> StreamableHandles;
+		TArray<TPair<TSharedPtr<FStreamableHandle>, bool/*IsDoneStreaming*/>> StreamableHandles;
 		TQueue<UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred> PendingRequests;
 		FOnResourceAsyncLoadingComplete CompletionDelegate;
 	};

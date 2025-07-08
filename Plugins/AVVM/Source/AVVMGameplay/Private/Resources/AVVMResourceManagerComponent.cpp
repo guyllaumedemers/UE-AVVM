@@ -70,9 +70,13 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRe
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasUnfinishedStreamableHandle() const
 {
-	// @gdemers Streamable handle unbind the completion delegate post-execution allowing us to block
-	// incoming request until we fully complete the loading/execution process.
-	return !StreamableHandles.IsEmpty() && StreamableHandles.Last()->HasCompleteDelegate();
+	if (!StreamableHandles.IsEmpty())
+	{
+		const TPair<TSharedPtr<FStreamableHandle>, bool>& Last = StreamableHandles.Last();
+		return !Last.Value/*IsDoneStreaming*/;
+	}
+
+	return false;
 }
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasPendingRequest() const
@@ -82,7 +86,7 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasPendingReques
 
 void UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle)
 {
-	StreamableHandles.Add(NewStreamableHandle);
+	StreamableHandles.Add({NewStreamableHandle, false/*IsDoneStreaming*/});
 }
 
 void UAVVMResourceManagerComponent::FResourceQueueingMechanism::SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback)
@@ -92,9 +96,24 @@ void UAVVMResourceManagerComponent::FResourceQueueingMechanism::SetCompletionCal
 
 void UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const
 {
+	if (StreamableHandles.IsEmpty())
+	{
+		return;
+	}
+
+	TSharedPtr<FStreamableHandle> StreamableHandle = StreamableHandles.Last().Key;
+	if (StreamableHandle.IsValid())
+	{
+		StreamableHandle->GetLoadedAssets(OutStreamableAssets);
+	}
+}
+
+void UAVVMResourceManagerComponent::FResourceQueueingMechanism::ModifyStreamableHandle()
+{
 	if (!StreamableHandles.IsEmpty())
 	{
-		StreamableHandles.Last()->GetLoadedAssets(OutStreamableAssets);
+		TPair<TSharedPtr<FStreamableHandle>, bool>& Last = StreamableHandles.Last();
+		Last.Value = true;
 	}
 }
 
@@ -286,6 +305,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 
 	TArray<UObject*> OutStreamedAssets;
 	QueueingMechanism->GetLoadedAssets(OutStreamedAssets);
+	QueueingMechanism->ModifyStreamableHandle();
 
 	FKeepProcessingResources KeepProcessingRegistriesCallback;
 	KeepProcessingRegistriesCallback.BindDynamic(this, &UAVVMResourceManagerComponent::OnProcessAdditionalResources);
