@@ -45,6 +45,19 @@ void AAVVMPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	AbilitySystemComponent.Reset();
 }
 
+void AAVVMPlayerState::ClientInitialize(class AController* C)
+{
+	Super::ClientInitialize(C);
+
+	// @gdemers ASC has this issue on Client PIE where the ActorInfo initialize before the Owner of the Player State
+	// is set. This prevent local predicted Abilities from executing.
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		ASC->InitAbilityActorInfo(this, this);
+	}
+}
+
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent.Get();

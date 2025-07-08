@@ -54,6 +54,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	virtual void ClientInitialize(class AController* C) override;
+
 	// @gdemers PlayerState is the preferred place to host the ASC as OnPawnPosses can be used to modify the internal state of the
 	// ASC (good for state persistency between Pawn possession!).
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;

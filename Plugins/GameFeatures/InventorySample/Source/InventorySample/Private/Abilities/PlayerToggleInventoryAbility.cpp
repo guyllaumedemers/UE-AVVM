@@ -17,18 +17,18 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Abilities/ToggleInventoryAbility.h"
+#include "Abilities/PlayerToggleInventoryAbility.h"
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 
-void UToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                            const FGameplayAbilitySpec& Spec)
+void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                                  const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
+	                      TEXT("UPlayerToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
 	{
 		return;
 	}
@@ -47,13 +47,13 @@ void UToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Act
 	       *Outer->GetName());
 }
 
-void UToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                              const FGameplayAbilitySpec& Spec)
+void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                                    const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
+	                      TEXT("UPlayerToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
 	{
 		return;
 	}
@@ -72,24 +72,24 @@ void UToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* A
 	       *Outer->GetName());
 }
 
-bool UToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                 const FGameplayAbilityActorInfo* ActorInfo,
-                                                 const FGameplayTagContainer* SourceTags,
-                                                 const FGameplayTagContainer* TargetTags,
-                                                 FGameplayTagContainer* OptionalRelevantTags) const
+bool UPlayerToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                                       const FGameplayAbilityActorInfo* ActorInfo,
+                                                       const FGameplayTagContainer* SourceTags,
+                                                       const FGameplayTagContainer* TargetTags,
+                                                       FGameplayTagContainer* OptionalRelevantTags) const
 {
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
-void UToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                              const FGameplayAbilityActorInfo* ActorInfo,
-                                              const FGameplayAbilityActivationInfo ActivationInfo,
-                                              const FGameplayEventData* TriggerEventData)
+void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+                                                    const FGameplayAbilityActorInfo* ActorInfo,
+                                                    const FGameplayAbilityActivationInfo ActivationInfo,
+                                                    const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
+	                      TEXT("UPlayerToggleInventoryAbility FGameplayAbilityActorInfo invalid!")))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
@@ -97,7 +97,7 @@ void UToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 
 	const AActor* Controller = ActorInfo->PlayerController.Get();
 	if (!ensureAlwaysMsgf(IsValid(Controller),
-	                      TEXT("UToggleInventoryAbility PlayerController invalid!")))
+	                      TEXT("UPlayerToggleInventoryAbility PlayerController invalid!")))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
@@ -111,11 +111,11 @@ void UToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 	       *Controller->GetName());
 }
 
-void UToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                         const FGameplayAbilityActorInfo* ActorInfo,
-                                         const FGameplayAbilityActivationInfo ActivationInfo,
-                                         bool bReplicateEndAbility,
-                                         bool bWasCancelled)
+void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+                                               const FGameplayAbilityActorInfo* ActorInfo,
+                                               const FGameplayAbilityActivationInfo ActivationInfo,
+                                               bool bReplicateEndAbility,
+                                               bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

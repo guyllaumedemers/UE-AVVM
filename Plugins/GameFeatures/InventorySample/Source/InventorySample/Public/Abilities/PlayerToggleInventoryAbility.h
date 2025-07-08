@@ -24,18 +24,18 @@
 #include "Abilities/GameplayAbility.h"
 #include "Ability/AVVMGameplayAbility.h"
 
-#include "ToggleInventoryAbility.generated.h"
+#include "PlayerToggleInventoryAbility.generated.h"
 
 /**
  *	Class Description :
  *
- *	UToggleInventoryAbility define an instance ability the local client can interact with. Blocking Requirement Tags may
+ *	UPlayerToggleInventoryAbility define an instance ability the local client can interact with. Blocking Requirement Tags may
  *	prevent the execution of this Ability.
  *
  *	Note : May display visual feedback for remote players.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UToggleInventoryAbility : public UAVVMGameplayAbility
+class INVENTORYSAMPLE_API UPlayerToggleInventoryAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 
