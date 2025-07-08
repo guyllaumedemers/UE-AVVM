@@ -122,12 +122,25 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
+	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
+	{
+		RemoveReplicatedSubObject(Iterator->Get());
+		Iterator.RemoveCurrentSwap();
+	}
+
 	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
 	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
 	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
 	{
 		return;
 	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Requesting Items Type \"%s\" on Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       EnumToString(ItemSrcType),
+	       *Outer->GetName());
 
 	const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
 	if (bIsItemSrcStatic)
