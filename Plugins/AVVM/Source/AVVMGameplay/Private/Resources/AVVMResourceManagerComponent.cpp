@@ -70,7 +70,9 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRe
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasUnfinishedStreamableHandle() const
 {
-	return !StreamableHandles.IsEmpty() && StreamableHandles.Last()->IsLoadingInProgress();
+	// @gdemers Streamable handle unbind the completion delegate post-execution allowing us to block
+	// incoming request until we fully complete the loading/execution process.
+	return !StreamableHandles.IsEmpty() && StreamableHandles.Last()->HasCompleteDelegate();
 }
 
 bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasPendingRequest() const
