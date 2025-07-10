@@ -56,23 +56,6 @@ struct INVENTORYSAMPLE_API FItemState
 
 /**
  *	Class description:
- *
- *	FItemLayout is the Item UI layout space.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemLayout
-{
-	GENERATED_BODY()
-
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 RowHeight = 1;
-
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 ColWidth = 1;
-};
-
-/**
- *	Class description:
  *	
  *	UItemObject is any object that exist in your project LORE. It may be loaded via a FDataRegistryId (targeting: UItemDefinitionDataAsset),
  *	instanced, and tracks the state of the object based on user actions.
@@ -143,12 +126,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bCanAttachToSocket"))
 	FName SocketName = NAME_None;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bSupportGridLayout = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bSupportGridLayout"))
-	FItemLayout ItemLayout = FItemLayout();
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> RuntimeItemActor = nullptr;

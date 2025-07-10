@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Widgets/AVVMDynamicEntryBoxExtendedWidget.h"
 
+#include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonUserWidget.h"
 #include "Components/DynamicEntryBox.h"

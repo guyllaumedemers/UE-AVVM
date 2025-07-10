@@ -62,7 +62,6 @@ void UActorInventoryComponent::BeginPlay()
 
 	TRACE_COUNTER_INCREMENT(UActorInventoryComponent_InstanceCounter);
 
-	LayoutHandler = NewObject<UInventoryLayoutHandler>(this);
 	OwningOuter = Outer;
 
 	UE_LOG(LogGameplay,

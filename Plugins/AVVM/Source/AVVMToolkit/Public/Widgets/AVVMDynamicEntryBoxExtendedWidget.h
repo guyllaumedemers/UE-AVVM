@@ -23,6 +23,7 @@
 
 #include "CommonUserWidget.h"
 #include "Engine/StreamableManager.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMDynamicEntryBoxExtendedWidget.generated.h"
 

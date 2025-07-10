@@ -33,18 +33,6 @@ class UItemObject;
 /**
  *	Class description:
  *
- *	UInventoryLayoutHandler is the implementation behaviour that define how the UActorInventoryComponent
- *	content should be displayed.
- */
-UCLASS(BlueprintType, NotBlueprintable)
-class INVENTORYSAMPLE_API UInventoryLayoutHandler : public UObject
-{
-	GENERATED_BODY()
-};
-
-/**
- *	Class description:
- *
  *	FItemToken describe a unique identifier that increment only when default construct. Can be safely
  *	passed by copy around.
  */
@@ -143,9 +131,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldAsyncLoadOnBeginPlay = true;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TObjectPtr<UInventoryLayoutHandler> LayoutHandler = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
 	TArray<TObjectPtr<UItemObject>> Items;
