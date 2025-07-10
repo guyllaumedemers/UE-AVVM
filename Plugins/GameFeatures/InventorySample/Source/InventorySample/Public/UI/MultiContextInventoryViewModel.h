@@ -44,10 +44,10 @@ struct INVENTORYSAMPLE_API FExchangeContext
 	bool operator==(const FExchangeContext& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<UItemObject*> InstigatorItemObjects;
+	TArray<UItemObject*> LocalItemObjects;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<UItemObject*> TargetItemObjects;
+	TArray<UItemObject*> RemoteItemObjects;
 };
 
 /**

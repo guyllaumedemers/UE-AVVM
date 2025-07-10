@@ -28,23 +28,25 @@ FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
 		return;
 	}
 
+	// @gdemers world actor interacted with or other player.
 	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator);
 	if (IsValid(Instigator))
 	{
-		InstigatorItemObjects = Instigator->GetItems();
+		RemoteItemObjects = Instigator->GetItems();
 	}
 
+	// @gdemers self or owned pc.
 	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target);
 	if (IsValid(Target))
 	{
-		TargetItemObjects = Target->GetItems();
+		LocalItemObjects = Target->GetItems();
 	}
 }
 
 bool FExchangeContext::operator==(const FExchangeContext& Rhs) const
 {
-	return (InstigatorItemObjects == Rhs.InstigatorItemObjects)
-			&& (TargetItemObjects == Rhs.TargetItemObjects);
+	return (LocalItemObjects == Rhs.LocalItemObjects)
+			&& (RemoteItemObjects == Rhs.RemoteItemObjects);
 }
 
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)

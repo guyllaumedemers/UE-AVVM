@@ -21,14 +21,18 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "Data/AVVMHandshakePayload.h"
+#include "GameFramework/PlayerState.h"
 
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
 {
-	const auto* PC = Cast<APlayerController>(NewTarget);
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, NewTarget);
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        TargetChannelTag,
-	                                        PC,
-	                                        NewInstigator,
-	                                        Payload);
+	const auto* PlayerState = Cast<APlayerState>(NewTarget);
+	if (ensureAlwaysMsgf(IsValid(PlayerState), TEXT("NewTarget doesn't derive from APlayerState!")))
+	{
+		const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, PlayerState);
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+		                                        TargetChannelTag,
+		                                        PlayerState->GetPlayerController(),
+		                                        NewInstigator,
+		                                        Payload);
+	}
 }
