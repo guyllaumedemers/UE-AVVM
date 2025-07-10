@@ -46,7 +46,7 @@ void UMultiContextInventoryPresenter::SafeBeginPlay()
 		return;
 	}
 
-	APlayerController* PlayerController = PlayerState->GetPlayerController();
+	const APlayerController* PlayerController = PlayerState->GetPlayerController();
 	if (!IsValid(PlayerController))
 	{
 		return;

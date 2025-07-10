@@ -17,31 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class AVVMToolkit : ModuleRules
+#include "Engine/DataAsset.h"
+
+#include "AVVMWidgetPickerDataAsset.generated.h"
+
+class UCommonUserWidget;
+
+/**
+ *	Class description:
+ *
+ *	UAVVMWidgetPickerDataAsset is a Data Asset that expose a mapping of Object Class to Widget Class. User is expected
+ *	to provide ViewModel derived Class as Key and Widget derived class as Value.
+ *
+ *	Doing so will allow generating Widget Class specific to the provided UObject type when populating dynamic list widgets.
+ */
+UCLASS()
+class AVVMTOOLKIT_API UAVVMWidgetPickerDataAsset : public UDataAsset
 {
-	public AVVMToolkit(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"CommonUI",
-				"Engine",
-				"UMG"
-			}
-		);
+public:
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<UCommonUserWidget> GetWidgetClass(const UClass* ObjectClass);
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM"
-			}
-		);
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TMap<UClass*, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass;
+};

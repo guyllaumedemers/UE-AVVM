@@ -17,31 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Widgets/AVVMWidgetPickerDataAsset.h"
 
-using UnrealBuildTool;
-
-public class AVVMToolkit : ModuleRules
+TSubclassOf<UCommonUserWidget> UAVVMWidgetPickerDataAsset::GetWidgetClass(const UClass* ObjectClass)
 {
-	public AVVMToolkit(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"CommonUI",
-				"Engine",
-				"UMG"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM"
-			}
-		);
-	}
+	TSubclassOf<UCommonUserWidget>* SearchResult = ObjectClassToWidgetClass.Find(ObjectClass);
+	return (SearchResult != nullptr) ? *SearchResult : nullptr;
 }
