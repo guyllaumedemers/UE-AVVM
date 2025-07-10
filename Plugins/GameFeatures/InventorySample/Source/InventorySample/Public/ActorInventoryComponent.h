@@ -89,6 +89,9 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
+	static UActorInventoryComponent* GetActorComponent(const AActor* NewActor);
+
+	UFUNCTION(BlueprintCallable)
 	void RequestItems(const AActor* Outer);
 
 	void SetupItems(const TArray<UObject*>& Resources);

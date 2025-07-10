@@ -19,13 +19,32 @@
 //SOFTWARE.
 #include "UI/MultiContextInventoryViewModel.h"
 
+#include "ActorInventoryComponent.h"
+
 FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
 {
+	if (NewPayload == nullptr)
+	{
+		return;
+	}
+
+	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator);
+	if (IsValid(Instigator))
+	{
+		InstigatorItemObjects = Instigator->GetItems();
+	}
+
+	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target);
+	if (IsValid(Target))
+	{
+		TargetItemObjects = Target->GetItems();
+	}
 }
 
 bool FExchangeContext::operator==(const FExchangeContext& Rhs) const
 {
-	return true;
+	return (InstigatorItemObjects == Rhs.InstigatorItemObjects)
+			&& (TargetItemObjects == Rhs.TargetItemObjects);
 }
 
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)

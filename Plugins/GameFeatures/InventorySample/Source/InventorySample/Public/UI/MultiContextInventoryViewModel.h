@@ -26,6 +26,8 @@
 
 #include "MultiContextInventoryViewModel.generated.h"
 
+class UItemObject;
+
 /**
  *	Class description:
  *
@@ -41,7 +43,11 @@ struct INVENTORYSAMPLE_API FExchangeContext
 	FExchangeContext(const FAVVMHandshakePayload* NewPayload);
 	bool operator==(const FExchangeContext& Rhs) const;
 
-	// TODO @gdemers fill in!
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<UItemObject*> InstigatorItemObjects;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<UItemObject*> TargetItemObjects;
 };
 
 /**

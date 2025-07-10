@@ -108,6 +108,11 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
+UActorInventoryComponent* UActorInventoryComponent::GetActorComponent(const AActor* NewActor)
+{
+	return IsValid(NewActor) ? NewActor->GetComponentByClass<UActorInventoryComponent>() : nullptr;
+}
+
 void UActorInventoryComponent::RequestItems(const AActor* Outer)
 {
 	if (!IsValid(Outer) || !ensureAlwaysMsgf(Outer->HasAuthority(),
