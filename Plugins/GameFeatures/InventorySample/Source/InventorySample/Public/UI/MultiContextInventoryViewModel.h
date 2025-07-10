@@ -57,12 +57,14 @@ struct INVENTORYSAMPLE_API FExchangeContext
  *	and optionally, the end point user interacting with it.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UAVVMWorldActorViewModel
+class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewModelBase,
+                                                            public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
-	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) override;
+	virtual FName GetViewModelFName() const override { return TEXT("UMultiContextInventoryViewModel"); };
+	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)

@@ -67,11 +67,11 @@ void UMultiContextInventoryPresenter::SafeEndPlay()
 
 void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* WorldActorViewModel = Cast<UMultiContextInventoryViewModel>(ViewModel.Get());
-	if (ensureAlwaysMsgf(IsValid(WorldActorViewModel),
+	auto* MultiContextInventoryViewModel = Cast<UMultiContextInventoryViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(MultiContextInventoryViewModel),
 	                     TEXT("UMultiContextInventoryPresenter::ViewModel doesn't derive from UMultiContextInventoryViewModel!")))
 	{
-		WorldActorViewModel->SetPayload(Payload);
+		MultiContextInventoryViewModel->SetPayload(Payload);
 	}
 
 	StartPresenting();
