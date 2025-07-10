@@ -21,22 +21,44 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
-#include "MVVMViewModelBase.h"
+#include "Data/InventoryPayload.h"
+#include "UI/AVVMWorldActorViewModel.h"
 
 #include "MultiContextInventoryViewModel.generated.h"
 
 /**
  *	Class description:
  *
- *	UMultiContextInventoryViewModel encapsulate information about the PlayerState it's owned by.
+ *	FExchangeContext is a struct that cache information about the inventory system we are acting on. This
+ *	can be a single instance or multiple. (example : during a trade between players)
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FExchangeContext
+{
+	GENERATED_BODY()
+
+	FExchangeContext() = default;
+	FExchangeContext(const FInventoryPayload* NewPayload);
+	bool operator==(const FExchangeContext& Rhs) const;
+
+	// TODO @gdemers fill in!
+};
+
+/**
+ *	Class description:
+ *
+ *	UMultiContextInventoryViewModel is a view model type that provide ui information about the holder inventory
+ *	and optionally, the end point user interacting with it.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewModelBase,
-                                                            public IAVVMViewModelFNameHelper
+class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UAVVMWorldActorViewModel
 {
 	GENERATED_BODY()
 
 public:
-	virtual FName GetViewModelFName() const override { return TEXT("UMultiContextInventoryViewModel"); };
+	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) override;
+
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	FExchangeContext ExchangeContext = FExchangeContext();
 };

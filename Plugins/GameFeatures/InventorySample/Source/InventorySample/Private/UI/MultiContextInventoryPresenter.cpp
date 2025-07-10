@@ -27,18 +27,21 @@
 #include "CommonUserWidget.h"
 #include "MVVMViewModelBase.h"
 #include "GameFramework/PlayerState.h"
+#include "UI/MultiContextInventoryViewModel.h"
 
 AActor* UMultiContextInventoryPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<APlayerState>();
+	return GetTypedOuter<AActor>();
 }
 
 void UMultiContextInventoryPresenter::SafeBeginPlay()
 {
 	Super::SafeBeginPlay();
 
+	// @gdemers only true if held by the PlayerState, other Actor types like a Shop, a mystery box, etc...
+	// will early out and only initialize once they receive a context payload with information about the interaction end point.
 	const auto* PlayerState = GetTypedOuter<APlayerState>();
-	if (!ensureAlwaysMsgf(IsValid(PlayerState), TEXT("UMultiContextInventoryPresenter isn't owned by a valid APlayerState!")))
+	if (!IsValid(PlayerState))
 	{
 		return;
 	}
@@ -64,6 +67,13 @@ void UMultiContextInventoryPresenter::SafeEndPlay()
 
 void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	auto* WorldActorViewModel = Cast<UMultiContextInventoryViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(WorldActorViewModel),
+	                     TEXT("UMultiContextInventoryPresenter::ViewModel doesn't derive from UMultiContextInventoryViewModel!")))
+	{
+		WorldActorViewModel->SetPayload(Payload);
+	}
+
 	StartPresenting();
 }
 

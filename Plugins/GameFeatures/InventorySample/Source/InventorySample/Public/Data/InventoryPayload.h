@@ -17,10 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/MultiContextInventoryViewModel.h"
+#pragma once
 
-void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
+#include "CoreMinimal.h"
+
+#include "AVVMNotificationSubsystem.h"
+
+#include "InventoryPayload.generated.h"
+
+class UActorInventoryComponent;
+
+/**
+ *	Class description:
+ *
+ *	FInventoryPayload is a payload context that forward information about the inventory held by the end-point user
+ *	to the UI system.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FInventoryPayload : public FAVVMNotificationPayload
 {
-	UE_MVVM_SET_PROPERTY_VALUE(ExchangeContext,
-	                           FExchangeContext(NewPayload.GetPtr<FInventoryPayload>()));
-}
+	GENERATED_BODY()
+
+	FInventoryPayload() = default;
+	FInventoryPayload(const AActor* NewInstigator,
+	                  const AActor* NewTarget);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UActorInventoryComponent* Instigator = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UActorInventoryComponent* Target = nullptr;
+};
