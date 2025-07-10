@@ -17,40 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/MultiContextInventoryViewModel.h"
+#pragma once
 
-#include "ActorInventoryComponent.h"
+#include "CoreMinimal.h"
 
-FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
+#include "MVVMViewModelBase.h"
+
+#include "ItemObjectViewModel.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UItemViewModel is a view model type that encapsulate ItemUObject data. This view model type is instanced as a Slot Widget
+ *	to a dynamic container widget.
+ *
+ *	Example : DynamicEntryBox or ListViewBase.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UItemObjectViewModel : public UMVVMViewModelBase
 {
-	if (NewPayload == nullptr)
-	{
-		return;
-	}
-
-	// @gdemers world actor interacted with or other player.
-	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator);
-	if (IsValid(Instigator))
-	{
-		RemoteItemObjects = Instigator->GetItems();
-	}
-
-	// @gdemers player state.
-	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target);
-	if (IsValid(Target))
-	{
-		LocalItemObjects = Target->GetItems();
-	}
-}
-
-bool FExchangeContext::operator==(const FExchangeContext& Rhs) const
-{
-	return (LocalItemObjects == Rhs.LocalItemObjects)
-			&& (RemoteItemObjects == Rhs.RemoteItemObjects);
-}
-
-void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
-{
-	UE_MVVM_SET_PROPERTY_VALUE(ExchangeContext,
-	                           FExchangeContext(NewPayload.GetPtr<FAVVMHandshakePayload>()));
-}
+	GENERATED_BODY()
+};
