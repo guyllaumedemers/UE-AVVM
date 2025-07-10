@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Data/InteractionPayload.h"
+#include "Data/AVVMHandshakePayload.h"
 #include "UI/AVVMWorldActorViewModel.h"
 
 #include "InteractionViewModel.generated.h"
@@ -39,7 +39,7 @@ struct INTERACTIONSAMPLE_API FInputProgress
 	GENERATED_BODY()
 
 	FInputProgress() = default;
-	FInputProgress(const FInteractionPayload* NewPayload);
+	FInputProgress(const FAVVMHandshakePayload* NewPayload);
 	bool operator==(const FInputProgress& Rhs) const;
 
 	void Tick(const float NewDelta);

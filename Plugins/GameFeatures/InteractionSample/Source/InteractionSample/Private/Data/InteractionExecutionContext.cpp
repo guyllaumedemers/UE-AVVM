@@ -20,13 +20,15 @@
 #include "Data/InteractionExecutionContext.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "Data/AVVMHandshakePayload.h"
 
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, NewTarget);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
 	                                        TargetChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        FAVVMNotificationPayload::Empty);
+	                                        Payload);
 }

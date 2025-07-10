@@ -132,6 +132,11 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	OwningOuter.Reset();
 }
 
+UActorInteractionComponent* UActorInteractionComponent::GetActorComponent(const AActor* NewActor)
+{
+	return IsValid(NewActor) ? NewActor->GetComponentByClass<UActorInteractionComponent>() : nullptr;
+}
+
 bool UActorInteractionComponent::StartExecution(const AActor* NewTarget) const
 {
 	return IsValid(InteractionImpl)
@@ -161,7 +166,7 @@ void UActorInteractionComponent::Execute(const AActor* NewTarget) const
 	}
 }
 
-void UActorInteractionComponent::GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements)
+void UActorInteractionComponent::GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const
 {
 	if (IsValid(InteractionImpl))
 	{

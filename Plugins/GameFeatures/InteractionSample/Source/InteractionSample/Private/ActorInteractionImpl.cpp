@@ -25,7 +25,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
-#include "Data/InteractionPayload.h"
+#include "Data/AVVMHandshakePayload.h"
 #include "GameFramework/PlayerState.h"
 
 void UActorInteractionImpl::SafeBegin()
@@ -321,7 +321,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 #endif
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FInteractionPayload>(Instigator, Target);
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(Instigator, Target);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
 	                                        StartPromptInteractionChannel,
 	                                        Controller,

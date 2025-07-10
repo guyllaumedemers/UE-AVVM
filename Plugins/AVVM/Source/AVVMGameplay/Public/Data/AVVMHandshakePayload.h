@@ -23,28 +23,25 @@
 
 #include "AVVMNotificationSubsystem.h"
 
-#include "InventoryPayload.generated.h"
-
-class UActorInventoryComponent;
+#include "AVVMHandshakePayload.generated.h"
 
 /**
  *	Class description:
  *
- *	FInventoryPayload is a payload context that forward information about the inventory held by the end-point user
- *	to the UI system.
+ *	FAVVMHandshakePayload is a payload context that forward information about an interaction between two users to UI system.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FInventoryPayload : public FAVVMNotificationPayload
+struct AVVMGAMEPLAY_API FAVVMHandshakePayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	FInventoryPayload() = default;
-	FInventoryPayload(const AActor* NewInstigator,
-	                  const AActor* NewTarget);
+	FAVVMHandshakePayload() = default;
+	FAVVMHandshakePayload(const AActor* NewInstigator,
+	                      const AActor* NewTarget);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UActorInventoryComponent* Instigator = nullptr;
+	const AActor* Instigator = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UActorInventoryComponent* Target = nullptr;
+	const AActor* Target = nullptr;
 };

@@ -53,12 +53,15 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION(BlueprintCallable)
+	static UActorInteractionComponent* GetActorComponent(const AActor* NewActor);
+
 	bool StartExecution(const AActor* NewTarget) const;
 	bool StopExecution(const AActor* NewTarget) const;
 	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const;
 	virtual void Execute(const AActor* NewTarget) const;
 
-	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements);
+	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const;
 
 protected:
 	UFUNCTION()

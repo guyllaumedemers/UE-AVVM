@@ -23,14 +23,14 @@
 #include "InputAction.h"
 #include "Data/InteractionExecutionRequirements.h"
 
-FInputProgress::FInputProgress(const FInteractionPayload* NewPayload)
+FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 {
 	if (NewPayload == nullptr)
 	{
 		return;
 	}
 
-	UActorInteractionComponent* Instigator = NewPayload->Instigator;
+	const auto* Instigator = UActorInteractionComponent::GetActorComponent(NewPayload->Instigator);
 	if (!IsValid(Instigator))
 	{
 		return;
@@ -104,7 +104,7 @@ void FInputProgress::Tick(const float NewDelta)
 void UInteractionViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(InputContext,
-	                           FInputProgress(NewPayload.GetPtr<FInteractionPayload>()));
+	                           FInputProgress(NewPayload.GetPtr<FAVVMHandshakePayload>()));
 }
 
 void UInteractionViewModel::OnInputEvent(const float NewDelta)

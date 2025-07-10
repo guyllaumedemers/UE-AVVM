@@ -17,13 +17,11 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/InventoryPayload.h"
+#include "Data/AVVMHandshakePayload.h"
 
-#include "ActorInventoryComponent.h"
-
-FInventoryPayload::FInventoryPayload(const AActor* NewInstigator,
-                                     const AActor* NewTarget)
-	: Instigator(IsValid(NewInstigator) ? NewInstigator->GetComponentByClass<UActorInventoryComponent>() : nullptr)
-	, Target(IsValid(NewTarget) ? NewTarget->GetComponentByClass<UActorInventoryComponent>() : nullptr)
+FAVVMHandshakePayload::FAVVMHandshakePayload(const AActor* NewInstigator,
+                                             const AActor* NewTarget)
+	: Instigator(NewInstigator)
+	, Target(NewTarget)
 {
 }

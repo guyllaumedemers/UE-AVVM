@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Data/InventoryPayload.h"
+#include "Data/AVVMHandshakePayload.h"
 #include "UI/AVVMWorldActorViewModel.h"
 
 #include "MultiContextInventoryViewModel.generated.h"
@@ -38,7 +38,7 @@ struct INVENTORYSAMPLE_API FExchangeContext
 	GENERATED_BODY()
 
 	FExchangeContext() = default;
-	FExchangeContext(const FInventoryPayload* NewPayload);
+	FExchangeContext(const FAVVMHandshakePayload* NewPayload);
 	bool operator==(const FExchangeContext& Rhs) const;
 
 	// TODO @gdemers fill in!
