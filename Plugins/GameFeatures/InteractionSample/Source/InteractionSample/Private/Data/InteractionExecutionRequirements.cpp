@@ -22,7 +22,7 @@
 #include "ActorInteractionImpl.h"
 
 FInteractionExecutionFloatRequirements::FInteractionExecutionFloatRequirements(const float NewThreshold)
-	: Threshold(NewThreshold)
+	: CompletionThreshold(NewThreshold)
 {
 }
 
@@ -39,5 +39,5 @@ bool FInteractionExecutionFloatRequirements::DoesMeetRequirements(const UActorIn
 		return false;
 	}
 
-	return (Threshold >= Requirements->Threshold);
+	return (CompletionThreshold >= Requirements->CompletionThreshold);
 }

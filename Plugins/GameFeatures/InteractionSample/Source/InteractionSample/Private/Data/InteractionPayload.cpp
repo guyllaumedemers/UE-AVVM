@@ -17,41 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Data/InteractionPayload.h"
 
-using UnrealBuildTool;
+#include "ActorInteractionComponent.h"
 
-public class AVVMGameplay : ModuleRules
+FInteractionPayload::FInteractionPayload(const AActor* NewInstigator,
+                                         const AActor* NewTarget)
+	: Instigator(IsValid(NewInstigator) ? NewInstigator->GetComponentByClass<UActorInteractionComponent>() : nullptr)
+	, Target(IsValid(NewTarget) ? NewTarget->GetComponentByClass<UActorInteractionComponent>() : nullptr)
 {
-	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMOnline",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"EnhancedInput",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModularGameplayActors",
-				"ModelViewViewModel",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CommonUI",
-				"ModularGameplay",
-				"UIExtension",
-				"UMG"
-			}
-		);
-	}
 }

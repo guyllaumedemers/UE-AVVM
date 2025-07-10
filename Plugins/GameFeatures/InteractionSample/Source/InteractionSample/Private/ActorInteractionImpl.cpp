@@ -25,6 +25,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
+#include "Data/InteractionPayload.h"
 #include "GameFramework/PlayerState.h"
 
 void UActorInteractionImpl::SafeBegin()
@@ -222,6 +223,11 @@ bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
 	return true;
 }
 
+const TInstancedStruct<FInteractionExecutionRequirements>& UActorInteractionImpl::GetExecutionRequirements() const
+{
+	return Requirements;
+}
+
 TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
                                                                           const AActor* NewInstigator,
                                                                           const AActor* NewTarget) const
@@ -315,11 +321,12 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 #endif
 
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FInteractionPayload>(Instigator, Target);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
 	                                        StartPromptInteractionChannel,
 	                                        Controller,
 	                                        Instigator,
-	                                        FAVVMNotificationPayload::Empty);
+	                                        Payload);
 }
 
 void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewRecords,

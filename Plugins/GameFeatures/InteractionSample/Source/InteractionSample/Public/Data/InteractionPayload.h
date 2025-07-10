@@ -17,41 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class AVVMGameplay : ModuleRules
+#include "AVVMNotificationSubsystem.h"
+
+#include "InteractionPayload.generated.h"
+
+class UActorInteractionComponent;
+
+/**
+ *	Class description:
+ *
+ *	FInteractionPayload is a payload context that forward information about an interaction end-point
+ *	to UI system.
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FInteractionPayload : public FAVVMNotificationPayload
 {
-	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMOnline",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"EnhancedInput",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModularGameplayActors",
-				"ModelViewViewModel",
-			}
-		);
+	FInteractionPayload() = default;
+	FInteractionPayload(const AActor* NewInstigator,
+	                    const AActor* NewTarget);
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CommonUI",
-				"ModularGameplay",
-				"UIExtension",
-				"UMG"
-			}
-		);
-	}
-}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UActorInteractionComponent* Instigator = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UActorInteractionComponent* Target = nullptr;
+};

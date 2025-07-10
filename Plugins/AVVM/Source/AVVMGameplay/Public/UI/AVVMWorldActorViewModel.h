@@ -23,15 +23,18 @@
 
 #include "AVVM.h"
 #include "MVVMViewModelBase.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMWorldActorViewModel.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
  *	Class description:
  *
- *	UAVVMWorldActorViewModel encapsulate information about the world Actor it's owned by.
+ *	UAVVMWorldActorViewModel encapsulate information about the world Actor it's owned by and possible actions that can be executed from it.
  */
-UCLASS()
+UCLASS(Abstract)
 class AVVMGAMEPLAY_API UAVVMWorldActorViewModel : public UMVVMViewModelBase,
                                                   public IAVVMViewModelFNameHelper
 {
@@ -39,4 +42,5 @@ class AVVMGAMEPLAY_API UAVVMWorldActorViewModel : public UMVVMViewModelBase,
 
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMWorldActorViewModel"); };
+	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) PURE_VIRTUAL(SetPayload, return;);
 };

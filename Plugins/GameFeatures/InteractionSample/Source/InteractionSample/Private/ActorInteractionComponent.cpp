@@ -161,6 +161,14 @@ void UActorInteractionComponent::Execute(const AActor* NewTarget) const
 	}
 }
 
+void UActorInteractionComponent::GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements)
+{
+	if (IsValid(InteractionImpl))
+	{
+		OutRequirements = InteractionImpl->GetExecutionRequirements();
+	}
+}
+
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
                                                                   AActor* OtherActor,
                                                                   UPrimitiveComponent* OtherComp,

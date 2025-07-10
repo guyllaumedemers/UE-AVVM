@@ -25,6 +25,7 @@
 #include "MVVMViewModelBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "UI/AVVMWorldActorViewModel.h"
 
 AActor* UAVVMWorldActorPresenter::GetOuterKey() const
 {
@@ -52,6 +53,13 @@ void UAVVMWorldActorPresenter::SafeEndPlay()
 
 void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
+	auto* WorldActorViewModel = Cast<UAVVMWorldActorViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(WorldActorViewModel),
+	                     TEXT("UAVVMWorldActorPresenter::ViewModel doesn't derive from UAVVMWorldActorViewModel!")))
+	{
+		WorldActorViewModel->SetPayload(Payload);
+	}
+
 	StartPresenting();
 }
 

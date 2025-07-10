@@ -38,6 +38,8 @@ public class InteractionSample : ModuleRules
 				"GameplayTags",
 				"GameplayTasks",
 				"IrisCore",
+				// TODO @gdemers maybe worth stripping dependency when building dedicated server ?
+				"ModelViewViewModel"
 			}
 		);
 
@@ -45,6 +47,7 @@ public class InteractionSample : ModuleRules
 			new string[]
 			{
 				"AVVM",
+				"EnhancedInput",
 			}
 		);
 	}

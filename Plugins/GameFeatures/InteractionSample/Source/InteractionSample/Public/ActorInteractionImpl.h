@@ -71,6 +71,8 @@ public:
 	                 const TArray<UInteraction*>& NewRecords,
 	                 const bool bShouldPreventContingency);
 
+	const TInstancedStruct<FInteractionExecutionRequirements>& GetExecutionRequirements() const;
+
 protected:
 	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
 	                                                   const AActor* NewInstigator,
@@ -79,13 +81,13 @@ protected:
 	TArray<UInteraction*> GetPartialMatchingInteractions(const TArray<UInteraction*>& Records,
 	                                                     const AActor* NewInstigator) const;
 
-	bool AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
-	                         const AActor* NewInstigator,
-	                         const bool bShouldPreventContingency);
+	virtual bool AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
+	                                 const AActor* NewInstigator,
+	                                 const bool bShouldPreventContingency);
 
-	bool AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
-	                       const AActor* NewInstigator,
-	                       const AActor* NewTarget);
+	virtual bool AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
+	                               const AActor* NewInstigator,
+	                               const AActor* NewTarget);
 
 	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
 

@@ -46,7 +46,7 @@ struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	// @gdemers encapsulate a collection of user defined type.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Payload = FString();
 };
 
@@ -68,7 +68,7 @@ struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 
 	// @gdemers Options[0] = {CurrencyId={}, Amount={}}
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Options;
 };
 
@@ -86,21 +86,21 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Gamertag = FString();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Xp = FString();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Wallet = FString();
 
 	// @gdemers placeholder. conditional to your game if achievements are tracked.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Achievements = FString();
 
 	// @gdemers placeholder. conditional to your game if presets of type are allowed.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Presets = FString();
 };
 
@@ -117,12 +117,12 @@ struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 	bool operator==(const FAVVMHostConfiguration& Rhs) const;
 
 	// @gdemers define the experience the players of a party will go through
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString GameplayGameMode = FString();
 
 	// @gdemers define any other project specific information that should be run for setting up the gameplay
 	// experience
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
 
@@ -140,7 +140,7 @@ struct AVVMONLINE_API FAVVMRuntimeResource : public FAVVMNotificationPayload
 	bool operator==(const FAVVMRuntimeResource& Rhs) const;
 
 	// @gdemers {ResourceId={}, Amount={}}
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
 
@@ -157,7 +157,7 @@ struct AVVMONLINE_API FAVVMRuntimeChallenge : public FAVVMNotificationPayload
 	bool operator==(const FAVVMRuntimeChallenge& Rhs) const;
 
 	// @gdemers {ChallengeId={}, ChallengeProgress={}, ChallengeGoal={}}
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
 
@@ -189,23 +189,23 @@ struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
 
 	// @gdemers backend profile as json
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PlayerProfile = FString();
 
 	// @gdemers transient state in which a player connection can be.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
 
 	// @gdemers convert using FUniqueNetIdString::Create()
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString UniqueNetId = FString();
 
 	// @gdemers backend challenges as json (convert into a collection)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString RuntimeChallenges = FString();
 
 	// @gdemers backend resources as json (convert into a collection)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString RuntimeResources = FString();
 };
 
@@ -221,13 +221,13 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMParty& Rhs) const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PartyUniqueId = FString();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString HostConfiguration = FString();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PlayerConnections = FString();
 };
 
@@ -296,18 +296,18 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerRequest& Rhs) const;
 
 	// @gdemers caller.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString SrcPlayerUniqueNetId = FString();
 
 	// @gdemers receiver.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString DestPlayerUniqueNetId = FString();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerRequestType RequestType = EAVVMPlayerRequestType::None;
 
 	// @gdemers payload can represent any data sent over the network, maybe during a trade, etc...
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Payload = FString();
 };
 

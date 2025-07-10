@@ -58,6 +58,8 @@ public:
 	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const;
 	virtual void Execute(const AActor* NewTarget) const;
 
+	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements);
+
 protected:
 	UFUNCTION()
 	void OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,

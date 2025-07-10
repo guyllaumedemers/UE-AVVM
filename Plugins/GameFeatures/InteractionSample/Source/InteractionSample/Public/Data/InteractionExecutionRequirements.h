@@ -24,6 +24,7 @@
 #include "InteractionExecutionRequirements.generated.h"
 
 class UActorInteractionImpl;
+class UInputAction;
 
 /**
  *	Class description:
@@ -37,6 +38,9 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
 
 	virtual ~FInteractionExecutionRequirements() = default;
 	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UInputAction* InputAction = nullptr;
 };
 
 /**
@@ -53,6 +57,12 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FIn
 	FInteractionExecutionFloatRequirements(const float NewThreshold);
 	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="!bRequireInputMashing"))
+	bool bRequireInputHolding = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="!bRequireInputHolding"))
+	bool bRequireInputMashing = false;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Threshold = 0.f;
+	float CompletionThreshold = 0.f;
 };
