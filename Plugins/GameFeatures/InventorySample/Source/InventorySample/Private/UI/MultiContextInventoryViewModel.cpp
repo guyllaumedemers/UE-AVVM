@@ -19,6 +19,15 @@
 //SOFTWARE.
 #include "UI/MultiContextInventoryViewModel.h"
 
+FExchangeContext::FExchangeContext(const FInventoryPayload* NewPayload)
+{
+}
+
+bool FExchangeContext::operator==(const FExchangeContext& Rhs) const
+{
+	return true;
+}
+
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(ExchangeContext,

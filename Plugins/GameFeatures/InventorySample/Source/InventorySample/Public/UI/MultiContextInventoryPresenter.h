@@ -34,7 +34,7 @@ class UAbilitySystemComponent;
 /**
  *	Class description:
  *
- *	UMultiContextInventoryPresenter is owned by ANY Actor type that reference an UActorInventoryComponent, and configures details about the inventory system.
+ *	UMultiContextInventoryPresenter is owned by ANY Actor type that reference an UActorInventoryComponent and configures details about the inventory system.
  *	As a MultiContext Presenter, it's able to display content from multiple end-users.
  */
 UCLASS()
