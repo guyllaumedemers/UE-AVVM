@@ -47,6 +47,22 @@ struct AVVMTOOLKIT_API FWindowZOrder
 /**
  *	Class description:
  *
+ *	UAVVMWindowDecorator is an abstract around the implementation details of a Widget behavior.
+ *	Derived types such as Drag/Drop, Docking and Minimized are expected!
+ */
+UCLASS(Abstract, BlueprintType, NotBlueprintable)
+class AVVMTOOLKIT_API UAVVMWindowDecorator : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual bool DoesSupportTick() const PURE_VIRTUAL(DoesSupportTick, return false;)
+	virtual void Tick(const float NewDeltaTime) PURE_VIRTUAL(Tick, return;);
+};
+
+/**
+ *	Class description:
+ *
  *	UAVVMMultiContextWindowWidget is an Abstract class from which we can instance and destroy context window. This widget should be referenced
  *	on Views where multiple segments should be display.
  *
@@ -71,9 +87,17 @@ public:
 	void CloseAllWindows();
 
 protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) PURE_VIRTUAL(SetupWindows_Internal, return;);
 	virtual void AddWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddWindow_Internal, return;);
 	virtual void RemoveWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveWindow_Internal, return;);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSubclassOf<UAVVMWindowDecorator>> WindowDecoratorClasses;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TObjectPtr<UAVVMWindowDecorator>> WindowDecorators;
 
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> WindowContexts;

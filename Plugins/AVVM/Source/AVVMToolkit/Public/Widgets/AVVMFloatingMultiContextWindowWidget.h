@@ -33,21 +33,6 @@ class UCanvasPanel;
 /**
  *	Class description:
  *
- *	UAVVMFloatingWindowBehaviourImpl is an abstract around the implementation details of a Widget behavior. Derived type
- *	for supporting behavior such as Drag/Drop, Docking and Minimized are expected!
- */
-UCLASS(Abstract, BlueprintType, NotBlueprintable)
-class AVVMTOOLKIT_API UAVVMFloatingWindowBehaviourImpl : public UObject
-{
-	GENERATED_BODY()
-
-public:
-	virtual bool DoesSupportTick() const PURE_VIRTUAL(DoesSupportTick, return false;)
-};
-
-/**
- *	Class description:
- *
  *	UAVVMFloatingMultiContextWindowWidget is the Floating version of the MultiContextWindowWidget that define
  *	a free form layout with multiple context. Context Window can be opened, closed and moved around.
  *
@@ -66,16 +51,10 @@ protected:
 	bool HasWidgetClass();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<TSubclassOf<UAVVMFloatingWindowBehaviourImpl>> FloatingBehaviourClasses;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UCanvasPanel> FloatingWindowRoot = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UAVVMFloatingWindowBehaviourImpl>> FloatingBehaviours;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

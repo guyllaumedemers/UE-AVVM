@@ -42,3 +42,21 @@ void UAVVMMultiContextWindowWidget::CloseAllWindows()
 		Iterator.RemoveCurrent();
 	}
 }
+
+void UAVVMMultiContextWindowWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	WindowDecorators.Reset(WindowDecoratorClasses.Num());
+	for (const TSubclassOf<UAVVMWindowDecorator>& WindowDecoratorClass : WindowDecoratorClasses)
+	{
+		auto* NewDecorator = NewObject<UAVVMWindowDecorator>(this, WindowDecoratorClass);
+		WindowDecorators.Add(NewDecorator);
+	}
+}
+
+void UAVVMMultiContextWindowWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+	WindowDecorators.Reset();
+}
