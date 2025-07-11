@@ -40,8 +40,8 @@ struct AVVMGAMEPLAY_API FAVVMHandshakePayload : public FAVVMNotificationPayload
 	                      const AActor* NewTarget);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	const AActor* Instigator = nullptr;
+	TWeakObjectPtr<const AActor> Instigator = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	const AActor* Target = nullptr;
+	TWeakObjectPtr<const AActor> Target = nullptr;
 };

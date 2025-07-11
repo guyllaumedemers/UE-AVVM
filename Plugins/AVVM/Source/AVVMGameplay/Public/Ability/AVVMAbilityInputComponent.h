@@ -72,6 +72,9 @@ protected:
 	void BindInputActions(UEnhancedInputComponent* EnhancedInputComponent, const UInputMappingContext* InputMappingContext);
 	void OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext);
 
+	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const UInputAction>, FGameplayTag> AbilityTriggerTags;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<APlayerController> OwningOuter = nullptr;
 };

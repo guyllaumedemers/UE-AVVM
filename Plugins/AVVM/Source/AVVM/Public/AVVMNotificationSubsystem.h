@@ -76,7 +76,7 @@ struct AVVM_API FAVVMNotificationContextArgs
 
 	// @gdemers if no target is provided, we broadcast to all observers of the channel tag.
 	UPROPERTY(Transient, BlueprintReadWrite, meta=(ToolTip="Unique Owner of the Presenter we are targeting."))
-	const AActor* Target = nullptr;
+	TWeakObjectPtr<const AActor> Target = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TInstancedStruct<FAVVMNotificationPayload> Payload;

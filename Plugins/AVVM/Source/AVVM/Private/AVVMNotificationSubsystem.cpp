@@ -176,7 +176,7 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(cons
 	}
 
 	const TInstancedStruct<FAVVMNotificationPayload>& Payload = NotificationContext.Payload;
-	const AActor* Target = NotificationContext.Target;
+	const AActor* Target = NotificationContext.Target.Get();
 	if (!IsValid(Target))
 	{
 		SearchResult->BroadcastAll(Payload);

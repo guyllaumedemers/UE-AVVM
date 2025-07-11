@@ -84,7 +84,7 @@ struct AVVMGAMEPLAY_API FAVVMQuicktimeEvent : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	AActor* Caller = nullptr;
+	TWeakObjectPtr<const AActor> Caller = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EAVVMQuicktimeEventRequestType RequestType = EAVVMQuicktimeEventRequestType::None;

@@ -40,7 +40,7 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
 	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	UInputAction* InputAction = nullptr;
+	TObjectPtr<UInputAction> InputAction = nullptr;
 };
 
 /**

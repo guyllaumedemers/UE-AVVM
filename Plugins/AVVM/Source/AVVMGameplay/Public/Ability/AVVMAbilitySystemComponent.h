@@ -70,6 +70,8 @@ protected:
 
 	virtual void OnTagUpdated(const FGameplayTag& Tag, bool TagExists) override;
 
-	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 };

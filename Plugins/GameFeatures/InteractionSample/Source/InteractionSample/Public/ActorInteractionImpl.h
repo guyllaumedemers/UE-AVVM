@@ -120,7 +120,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TInstancedStruct<FInteractionExecutionRequirements> Requirements;
 
+	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	friend struct FInteractionExecutionFloatRequirements;

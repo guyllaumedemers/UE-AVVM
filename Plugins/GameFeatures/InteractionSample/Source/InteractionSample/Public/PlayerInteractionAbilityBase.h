@@ -76,5 +76,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UActorInteractionComponent> TargetComponent = nullptr;
 };

@@ -138,7 +138,9 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer OwnedGameplayTags = FGameplayTagContainer::EmptyContainer;
 
-	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
 	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism;
 };

@@ -62,5 +62,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAbilitySystemComponent> OwnerASC = nullptr;
 };

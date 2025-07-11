@@ -45,7 +45,7 @@ struct INTERACTIONSAMPLE_API FInputProgress
 	void Tick(const float NewDelta);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	UInputAction* InputAction = nullptr;
+	TWeakObjectPtr<UInputAction> InputAction = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	bool bRequireInputHolding = false;

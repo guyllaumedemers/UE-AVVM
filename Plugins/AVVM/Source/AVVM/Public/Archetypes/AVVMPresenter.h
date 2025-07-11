@@ -71,6 +71,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag TargetTag = FGameplayTag::EmptyTag;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
 
 	friend class UAVVMComponent;

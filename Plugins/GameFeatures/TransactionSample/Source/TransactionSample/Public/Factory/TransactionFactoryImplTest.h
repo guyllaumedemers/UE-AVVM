@@ -40,6 +40,7 @@ struct TRANSACTIONSAMPLE_API FTransactionPayloadTest : public FTransactionPayloa
 	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) override;
 	virtual FString ToString() const override;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 DummyProperty = INDEX_NONE;
 };
 

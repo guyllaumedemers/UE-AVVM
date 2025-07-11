@@ -91,6 +91,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	
 	TSharedPtr<FResourceQueueingMechanism> QueueingMechanism;
 };

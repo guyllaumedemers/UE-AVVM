@@ -61,5 +61,6 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;
 };

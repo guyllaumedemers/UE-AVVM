@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	ESlateVisibility DefaultVisibilityOnStart = ESlateVisibility::SelfHitTestInvisible;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UCommonUserWidget> WorldWidget = nullptr;
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

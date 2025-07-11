@@ -30,7 +30,7 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 		return;
 	}
 
-	const auto* Instigator = UActorInteractionComponent::GetActorComponent(NewPayload->Instigator);
+	const auto* Instigator = UActorInteractionComponent::GetActorComponent(NewPayload->Instigator.Get());
 	if (!IsValid(Instigator))
 	{
 		return;
@@ -63,7 +63,7 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 	       Log,
 	       TEXT("New \"%s\" Interaction Recorded. Interaction through Input Action \"%s\". Has Max Threshold \"%s\"."),
 	       InteractionType.GetData(),
-	       IsValid(InputAction) ? *InputAction->GetName() : TEXT("InputAction Unknown"),
+	       InputAction.IsValid() ? *InputAction->GetName() : TEXT("InputAction Unknown"),
 	       *FString::SanitizeFloat(CompletionThreshold, 2));
 #endif
 }

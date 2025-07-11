@@ -29,14 +29,14 @@ FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
 	}
 
 	// @gdemers world actor interacted with or other player.
-	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator);
+	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator.Get());
 	if (IsValid(Instigator))
 	{
 		RemoteItemObjects = Instigator->GetItems();
 	}
 
 	// @gdemers player state.
-	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target);
+	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target.Get());
 	if (IsValid(Target))
 	{
 		LocalItemObjects = Target->GetItems();

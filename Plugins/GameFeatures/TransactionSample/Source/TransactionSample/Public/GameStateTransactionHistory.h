@@ -80,5 +80,6 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewTransactionRecorded")
 	TArray<TObjectPtr<const UTransaction>> Transactions;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AGameStateBase> OwningOuter = nullptr;
 };
