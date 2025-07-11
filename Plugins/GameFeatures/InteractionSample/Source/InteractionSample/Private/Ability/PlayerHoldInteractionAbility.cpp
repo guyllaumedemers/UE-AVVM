@@ -23,6 +23,7 @@
 #include "ActorInteractionImpl.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "Ability/AVVMAbilityTask_TickUntil.h"
 #include "Data/InteractionExecutionRequirements.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 
@@ -31,11 +32,18 @@ void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHa
                                                     const FGameplayAbilityActivationInfo ActivationInfo,
                                                     const FGameplayEventData* TriggerEventData)
 {
-	auto* Task = UAbilityTask_WaitInputRelease::WaitInputRelease(this);
-	if (IsValid(Task))
+	auto* ParentTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this);
+	if (IsValid(ParentTask))
 	{
-		Task->OnRelease.AddUniqueDynamic(this, &UPlayerHoldInteractionAbility::OnInputReleased);
-		Task->ReadyForActivation();
+		ParentTask->OnRelease.AddUniqueDynamic(this, &UPlayerHoldInteractionAbility::OnInputReleased);
+		ParentTask->ReadyForActivation();
+	}
+
+	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, true);
+	if (IsValid(ChildTask))
+	{
+		ChildTask->OnTick.AddUniqueDynamic(this, &UPlayerHoldInteractionAbility::OnTick);
+		ChildTask->ReadyForActivation();
 	}
 }
 
@@ -90,5 +98,28 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	else
 	{
 		EndAbility(SpecHandle, ActorInfo, ActivationInfo, true, false);
+	}
+}
+
+void UPlayerHoldInteractionAbility::OnTick(const float NewDelta)
+{
+	const FGameplayAbilitySpecHandle SpecHandle = GetCurrentAbilitySpecHandle();
+	const FGameplayAbilityActorInfo* ActorInfo = GetCurrentActorInfo();
+	const FGameplayAbilityActivationInfo ActivationInfo = GetCurrentActivationInfo();
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr, TEXT("Invalid FGameplayAbilityActorInfo!")))
+	{
+		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+		return;
+	}
+
+	UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
+	if (!ensureAlwaysMsgf(IsValid(InteractionComponent), TEXT("Invalid Interaction Component cached!")))
+	{
+		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+	}
+	else
+	{
+		InteractionComponent->Tick(ActorInfo->PlayerController.Get(), NewDelta);
 	}
 }

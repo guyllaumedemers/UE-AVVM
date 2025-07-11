@@ -75,11 +75,9 @@ class INTERACTIONSAMPLE_API UInteractionViewModel : public UAVVMWorldActorViewMo
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UInteractionViewModel"); };
 	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) override;
+	virtual void PumpHeartbeat(const float NewHeartbeat) override;
 
 protected:
-	UFUNCTION()
-	void OnInputEvent(const float NewDelta);
-
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
 	FInputProgress InputContext = FInputProgress();
 

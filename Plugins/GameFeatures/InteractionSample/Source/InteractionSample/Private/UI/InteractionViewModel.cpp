@@ -117,8 +117,15 @@ void UInteractionViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationP
 	                           FInputProgress(NewPayload.GetPtr<FAVVMHandshakePayload>()));
 }
 
-void UInteractionViewModel::OnInputEvent(const float NewDelta)
+void UInteractionViewModel::PumpHeartbeat(const float NewHeartbeat)
 {
-	const float NewProgress = InputContext.Tick(InputProgress, NewDelta);
-	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, NewProgress);
+	if (!FMath::IsNearlyEqual(NewHeartbeat, INDEX_NONE))
+	{
+		const float NewProgress = InputContext.Tick(InputProgress, NewHeartbeat);
+		UE_MVVM_SET_PROPERTY_VALUE(InputProgress, NewProgress);
+	}
+	else
+	{
+		// TODO @gdemers Notify Interaction Failure
+	}
 }

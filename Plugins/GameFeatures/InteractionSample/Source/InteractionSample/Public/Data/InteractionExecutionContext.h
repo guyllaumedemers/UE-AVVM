@@ -37,8 +37,12 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 
 	virtual ~FInteractionExecutionContext() = default;
 
+	virtual void Tick(const AActor* NewInstigator,
+	                  const AActor* NewTarget,
+	                  const float NewDelta) const;
+
 	virtual void Execute(const AActor* NewInstigator,
-	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;);
+	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;)
 };
 
 /**
@@ -51,9 +55,16 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContextAVVMNotify : public FIn
 {
 	GENERATED_BODY()
 
+	virtual void Tick(const AActor* NewInstigator,
+	                  const AActor* NewTarget,
+	                  const float NewDelta) const;
+
 	virtual void Execute(const AActor* NewInstigator,
 	                     const AActor* NewTarget) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag TargetChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag TickingChannelTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag ExecutionChannelTag = FGameplayTag::EmptyTag;
 };

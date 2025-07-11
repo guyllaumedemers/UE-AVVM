@@ -17,34 +17,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Data/AVVMHearbeatPayload.h"
 
-#include "CoreMinimal.h"
-
-#include "PlayerInteractionAbilityBase.h"
-
-#include "PlayerHoldInteractionAbility.generated.h"
-
-/**
- *	Class Description :
- *
- *	UPlayerInteractionAbilityBase is an instance ability that can be invoked through user input when in-range of a world actor
- *	with an UActorInteractionComponent.
- */
-UCLASS(BlueprintType, Blueprintable)
-class INTERACTIONSAMPLE_API UPlayerHoldInteractionAbility : public UPlayerInteractionAbilityBase
+FAVVMHearbeatPayload::FAVVMHearbeatPayload(const float NewValue)
+	: Value(NewValue)
 {
-	GENERATED_BODY()
-
-protected:
-	virtual void RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
-	                             const FGameplayAbilityActorInfo* ActorInfo,
-	                             const FGameplayAbilityActivationInfo ActivationInfo,
-	                             const FGameplayEventData* TriggerEventData) override;
-
-	UFUNCTION()
-	void OnInputReleased(float TimeHeld);
-
-	UFUNCTION()
-	void OnTick(const float NewDelta);
-};
+}

@@ -17,34 +17,43 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Ability/AVVMAbilityTask_TickUntil.h"
 
-#include "CoreMinimal.h"
-
-#include "PlayerInteractionAbilityBase.h"
-
-#include "PlayerHoldInteractionAbility.generated.h"
-
-/**
- *	Class Description :
- *
- *	UPlayerInteractionAbilityBase is an instance ability that can be invoked through user input when in-range of a world actor
- *	with an UActorInteractionComponent.
- */
-UCLASS(BlueprintType, Blueprintable)
-class INTERACTIONSAMPLE_API UPlayerHoldInteractionAbility : public UPlayerInteractionAbilityBase
+UAVVMAbilityTask_TickUntil::UAVVMAbilityTask_TickUntil(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	GENERATED_BODY()
+	bTickingTask = true;
+}
 
-protected:
-	virtual void RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
-	                             const FGameplayAbilityActorInfo* ActorInfo,
-	                             const FGameplayAbilityActivationInfo ActivationInfo,
-	                             const FGameplayEventData* TriggerEventData) override;
+UAVVMAbilityTask_TickUntil* UAVVMAbilityTask_TickUntil::TickUntil(UGameplayAbility* OwningAbility, const bool bTestAlreadyReleased)
+{
+	UAVVMAbilityTask_TickUntil* Task = NewAbilityTask<UAVVMAbilityTask_TickUntil>(OwningAbility);
+	Task->bTestInitialState = bTestAlreadyReleased;
+	return Task;
+}
 
-	UFUNCTION()
-	void OnInputReleased(float TimeHeld);
+void UAVVMAbilityTask_TickUntil::TickTask(float DeltaTime)
+{
+	Super::TickTask(DeltaTime);
+	OnTick.Broadcast(DeltaTime);
+}
 
-	UFUNCTION()
-	void OnTick(const float NewDelta);
-};
+void UAVVMAbilityTask_TickUntil::Activate()
+{
+	Super::Activate();
+
+	if (!IsLocallyControlled())
+	{
+		EndTask();
+		return;
+	}
+
+	if (bTestInitialState)
+	{
+		const auto* GameplayAbility = Cast<UGameplayAbility>(TaskOwner.Get());
+		if (IsValid(GameplayAbility) && !GameplayAbility->IsActive())
+		{
+			EndTask();
+		}
+	}
+}

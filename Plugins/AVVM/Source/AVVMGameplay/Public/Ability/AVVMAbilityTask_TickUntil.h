@@ -21,30 +21,37 @@
 
 #include "CoreMinimal.h"
 
-#include "PlayerInteractionAbilityBase.h"
+#include "Abilities/Tasks/AbilityTask.h"
 
-#include "PlayerHoldInteractionAbility.generated.h"
+#include "AVVMAbilityTask_TickUntil.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbilityTaskTickDelegate, const float, NewValue);
 
 /**
  *	Class Description :
  *
- *	UPlayerInteractionAbilityBase is an instance ability that can be invoked through user input when in-range of a world actor
- *	with an UActorInteractionComponent.
+ *	UAVVMAbilityTask_TickUntil is a tickable task that share the lifetime of it's owning GameplayAbility. Once EndAbility is called on the TaskOwner, the task will be destroyed
+ *	and garbage collected.
  */
-UCLASS(BlueprintType, Blueprintable)
-class INTERACTIONSAMPLE_API UPlayerHoldInteractionAbility : public UPlayerInteractionAbilityBase
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMAbilityTask_TickUntil : public UAbilityTask
 {
 	GENERATED_BODY()
 
+public:
+	UAVVMAbilityTask_TickUntil(const FObjectInitializer& ObjectInitializer);
+
+	UFUNCTION(BlueprintCallable)
+	static UAVVMAbilityTask_TickUntil* TickUntil(UGameplayAbility* OwningAbility, const bool bTestAlreadyReleased = false);
+
+	virtual void TickTask(float DeltaTime) override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAbilityTaskTickDelegate OnTick;
+
 protected:
-	virtual void RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
-	                             const FGameplayAbilityActorInfo* ActorInfo,
-	                             const FGameplayAbilityActivationInfo ActivationInfo,
-	                             const FGameplayEventData* TriggerEventData) override;
+	virtual void Activate() override;
 
-	UFUNCTION()
-	void OnInputReleased(float TimeHeld);
-
-	UFUNCTION()
-	void OnTick(const float NewDelta);
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bTestInitialState = false;
 };

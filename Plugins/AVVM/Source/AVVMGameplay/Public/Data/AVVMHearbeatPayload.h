@@ -21,30 +21,24 @@
 
 #include "CoreMinimal.h"
 
-#include "PlayerInteractionAbilityBase.h"
+#include "AVVMNotificationSubsystem.h"
 
-#include "PlayerHoldInteractionAbility.generated.h"
+#include "AVVMHearbeatPayload.generated.h"
 
 /**
- *	Class Description :
+ *	Class description:
  *
- *	UPlayerInteractionAbilityBase is an instance ability that can be invoked through user input when in-range of a world actor
- *	with an UActorInteractionComponent.
+ *	FAVVMHearbeatPayload is a payload context that forward information about delta time between heartbeats. To be used when needed to support
+ *	tracking progress over time or testing connection status.
  */
-UCLASS(BlueprintType, Blueprintable)
-class INTERACTIONSAMPLE_API UPlayerHoldInteractionAbility : public UPlayerInteractionAbilityBase
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMHearbeatPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
-	                             const FGameplayAbilityActorInfo* ActorInfo,
-	                             const FGameplayAbilityActivationInfo ActivationInfo,
-	                             const FGameplayEventData* TriggerEventData) override;
+	FAVVMHearbeatPayload() = default;
+	FAVVMHearbeatPayload(const float NewValue);
 
-	UFUNCTION()
-	void OnInputReleased(float TimeHeld);
-
-	UFUNCTION()
-	void OnTick(const float NewDelta);
+	UPROPERTY(Transient, BlueprintReadWrite)
+	float Value = 0.f;
 };

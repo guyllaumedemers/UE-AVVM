@@ -157,6 +157,17 @@ bool UActorInteractionComponent::DoesMeetExecutionRequirements(const TInstancedS
 	return (Instanced != nullptr) ? Instanced->DoesMeetRequirements(InteractionImpl) : false;
 }
 
+void UActorInteractionComponent::Tick(const AActor* NewTarget, const float NewDelta) const
+{
+	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	if (ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	{
+		Instanced->Tick(OwningOuter.Get(),
+		                NewTarget,
+		                NewDelta);
+	}
+}
+
 void UActorInteractionComponent::Execute(const AActor* NewTarget) const
 {
 	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();

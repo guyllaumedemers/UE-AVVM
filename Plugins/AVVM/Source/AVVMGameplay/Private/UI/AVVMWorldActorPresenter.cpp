@@ -25,6 +25,7 @@
 #include "MVVMViewModelBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "Data/AVVMHearbeatPayload.h"
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWorldActorViewModel.h"
 
@@ -67,6 +68,17 @@ void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StartPresenter(const TI
 void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	StopPresenting();
+}
+
+void UAVVMWorldActorPresenter::BP_OnNotificationReceived_TickPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* WorldActorViewModel = Cast<UAVVMWorldActorViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(WorldActorViewModel),
+	                     TEXT("UAVVMWorldActorPresenter::ViewModel doesn't derive from UAVVMWorldActorViewModel!")))
+	{
+		const auto* NewHeatbeat = Payload.GetPtr<FAVVMHearbeatPayload>();
+		WorldActorViewModel->PumpHeartbeat((NewHeatbeat != nullptr) ? NewHeatbeat->Value : INDEX_NONE);
+	}
 }
 
 void UAVVMWorldActorPresenter::StartPresenting()

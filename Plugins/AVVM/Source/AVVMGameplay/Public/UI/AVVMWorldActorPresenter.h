@@ -67,6 +67,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_TickPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 

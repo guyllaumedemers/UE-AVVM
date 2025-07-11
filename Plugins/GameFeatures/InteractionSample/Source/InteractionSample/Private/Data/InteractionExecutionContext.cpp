@@ -21,7 +21,23 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "Data/AVVMHandshakePayload.h"
-#include "GameFramework/PlayerState.h"
+#include "Data/AVVMHearbeatPayload.h"
+
+void FInteractionExecutionContextAVVMNotify::Tick(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const
+{
+	const auto* PC = Cast<APlayerController>(NewTarget);
+	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerState!")))
+	{
+		return;
+	}
+
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(NewDelta);
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+	                                        TickingChannelTag,
+	                                        PC,
+	                                        NewInstigator,
+	                                        Payload);
+}
 
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
 {
@@ -33,7 +49,7 @@ void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator
 
 	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, PC);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        TargetChannelTag,
+	                                        ExecutionChannelTag,
 	                                        PC,
 	                                        NewInstigator,
 	                                        Payload);

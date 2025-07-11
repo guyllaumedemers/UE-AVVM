@@ -43,4 +43,5 @@ class AVVMGAMEPLAY_API UAVVMWorldActorViewModel : public UMVVMViewModelBase,
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMWorldActorViewModel"); };
 	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) PURE_VIRTUAL(SetPayload, return;);
+	virtual void PumpHeartbeat(const float NewHeartbeat) PURE_VIRTUAL(PumpHeartbeat, return;);
 };
