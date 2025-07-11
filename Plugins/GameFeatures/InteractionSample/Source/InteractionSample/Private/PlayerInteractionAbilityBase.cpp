@@ -197,7 +197,7 @@ bool UPlayerInteractionAbilityBase::CommitAbility(const FGameplayAbilitySpecHand
 		return false;
 	}
 
-	InteractionComponent->Execute(ActorInfo->OwnerActor.Get());
+	InteractionComponent->Execute(ActorInfo->PlayerController.Get());
 	return true;
 }
 

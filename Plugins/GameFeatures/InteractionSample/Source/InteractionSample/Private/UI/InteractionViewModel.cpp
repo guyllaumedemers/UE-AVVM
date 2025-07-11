@@ -44,11 +44,10 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 	const auto* FloatRequirements = OutRequirements.GetPtr<FInteractionExecutionFloatRequirements>();
 	if (FloatRequirements != nullptr)
 	{
-		const auto* PlayerState = Cast<APlayerState>(NewPayload->Target.Get());
-		if (IsValid(PlayerState))
+		const auto* PC = Cast<APlayerController>(NewPayload->Target.Get());
+		if (IsValid(PC))
 		{
-			const APlayerController* PC = PlayerState->GetPlayerController();
-			auto* InputSubsystem = UCommonInputSubsystem::Get(IsValid(PC) ? PC->GetLocalPlayer() : nullptr);
+			auto* InputSubsystem = UCommonInputSubsystem::Get(PC->GetLocalPlayer());
 			SlateBrush = CommonUI::GetIconForEnhancedInputAction(InputSubsystem, FloatRequirements->InputAction);
 		}
 
