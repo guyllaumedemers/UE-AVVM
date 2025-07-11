@@ -21,45 +21,30 @@
 
 #include "CoreMinimal.h"
 
-#include "CommonUserWidget.h"
-#include "Engine/StreamableManager.h"
-#include "Templates/SubclassOf.h"
+#include "AVVMMultiContextWindowWidget.h"
 
-#include "AVVMDynamicEntryBoxExtendedWidget.generated.h"
+#include "AVVMStaticMultiContextWindowWidget.generated.h"
 
-class UAVVMWidgetPickerDataAsset;
-class UDynamicEntryBox;
+class UAVVMDynamicEntryBoxExtendedWidget;
 
 /**
  *	Class description:
  *
- *	UAVVMDynamicEntryBoxExtendedWidget is a Widget class that define an api covering basic use cases when interfacing with DynamicEntryBox. It extend the basic api
- *	and make use of the MVVM plugin to provide data to dynamic entries.
+ *	UAVVMStaticMultiContextWindowWidget is the Static version of the MultiContextWindowWidget that define
+ *	a fix layout with multiple context. Context Window can still be opened and closed but are anchored to defined anchor.
+ *
+ *	Example : Crafting system where user has to drag from items from left to right and stack them to output a new Item.
  */
 UCLASS()
-class AVVMTOOLKIT_API UAVVMDynamicEntryBoxExtendedWidget : public UCommonUserWidget
+class AVVMTOOLKIT_API UAVVMStaticMultiContextWindowWidget : public UAVVMMultiContextWindowWidget
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable)
-	void SetupEntries(TArray<UObject*> NewViewModels);
-
-	UFUNCTION(BlueprintCallable)
-	void AddEntry(UObject* NewViewModel);
-
-	UFUNCTION(BlueprintCallable)
-	void RemoveEntry(UCommonUserWidget* NewWidget);
-
 protected:
-	virtual void NativeDestruct() override;
-	bool HasWidgetClass() const;
+	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) override;
+	virtual void AddWindow_Internal(UObject* NewViewModel) override;
+	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
-	TObjectPtr<UDynamicEntryBox> DynamicEntryBox = nullptr;
-
-	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
+	TObjectPtr<UAVVMDynamicEntryBoxExtendedWidget> StaticWindowRoot = nullptr;
 };

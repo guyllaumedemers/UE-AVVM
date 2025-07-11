@@ -17,51 +17,47 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Widgets/AVVMDynamicEntryBoxExtendedWidget.h"
+#include "Widgets/AVVMFloatingMultiContextWindowWidget.h"
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
-#include "CommonUserWidget.h"
-#include "Components/DynamicEntryBox.h"
+#include "Components/CanvasPanel.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Widgets/AVVMWidgetPickerDataAsset.h"
 
-void UAVVMDynamicEntryBoxExtendedWidget::SetupEntries(TArray<UObject*> NewViewModels)
+void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
 {
 	if (!ensureAlwaysMsgf(HasWidgetClass(), TEXT("Invalid Widget Class!")))
 	{
 		return;
 	}
 
-	if (!IsValid(DynamicEntryBox))
+	if (!IsValid(FloatingWindowRoot))
 	{
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UDynamicEntryBox& NewDynamicBox,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingMultiContextWindowWidget& NewMultiContextWidget,
 	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass,
+	                                             UCanvasPanel& CanvasPanel,
 	                                             UObject* NewViewModel)
 	{
-		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
-		auto* WidgetInstance = NewDynamicBox.CreateEntry<UCommonUserWidget>(NewWidgetClass);
+		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewMultiContextWidget, NewWidgetClass, NAME_None));
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
+		if (IsValid(WidgetInstance))
+		{
+			CanvasPanel.AddChild(WidgetInstance);
+		}
 	};
 
-	DynamicEntryBox->Reset(true);
+	FloatingWindowRoot->ClearChildren();
 
 	TSubclassOf<UCommonUserWidget> WidgetClass = nullptr;
-	if (WidgetPickerDataAsset.IsNull())
-	{
-		WidgetClass = DynamicEntryBox->GetEntryWidgetClass();
-		for (UObject* ViewModel : NewViewModels)
-		{
-			CreateWidgetAndBindViewModel(*DynamicEntryBox, WidgetClass, ViewModel);
-		}
-	}
-	else if (!WidgetPickerDataAsset.IsValid())
+	if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMDynamicEntryBoxExtendedWidget::SetupEntries, NewViewModels);
+		Callback.BindUObject(this, &UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal, NewViewModels);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -69,67 +65,62 @@ void UAVVMDynamicEntryBoxExtendedWidget::SetupEntries(TArray<UObject*> NewViewMo
 		for (UObject* ViewModel : NewViewModels)
 		{
 			WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(ViewModel) ? ViewModel->GetClass() : nullptr);
-			CreateWidgetAndBindViewModel(*DynamicEntryBox, WidgetClass, ViewModel);
+			CreateWidgetAndBindViewModel(*this, WidgetClass, *FloatingWindowRoot, ViewModel);
 		}
 	}
 }
 
-void UAVVMDynamicEntryBoxExtendedWidget::AddEntry(UObject* NewViewModel)
+void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewModel)
 {
 	if (!ensureAlwaysMsgf(HasWidgetClass(), TEXT("Invalid Widget Class!")))
 	{
 		return;
 	}
 
-	if (!IsValid(DynamicEntryBox))
+	if (!IsValid(FloatingWindowRoot))
 	{
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UDynamicEntryBox& NewDynamicBox,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingMultiContextWindowWidget& NewMultiContextWidget,
 	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass,
+	                                             UCanvasPanel& CanvasPanel,
 	                                             UObject* NewViewModel)
 	{
-		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
-		auto* WidgetInstance = NewDynamicBox.CreateEntry<UCommonUserWidget>(NewWidgetClass);
+		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewMultiContextWidget, NewWidgetClass, NAME_None));
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
+		if (IsValid(WidgetInstance))
+		{
+			CanvasPanel.AddChild(WidgetInstance);
+		}
 	};
 
+	FloatingWindowRoot->ClearChildren();
+
 	TSubclassOf<UCommonUserWidget> WidgetClass = nullptr;
-	if (WidgetPickerDataAsset.IsNull())
-	{
-		WidgetClass = DynamicEntryBox->GetEntryWidgetClass();
-		CreateWidgetAndBindViewModel(*DynamicEntryBox, WidgetClass, NewViewModel);
-	}
-	else if (!WidgetPickerDataAsset.IsValid())
+	if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMDynamicEntryBoxExtendedWidget::AddEntry, NewViewModel);
+		Callback.BindUObject(this, &UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal, NewViewModel);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
 	{
 		WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
-		CreateWidgetAndBindViewModel(*DynamicEntryBox, WidgetClass, NewViewModel);
+		CreateWidgetAndBindViewModel(*this, WidgetClass, *FloatingWindowRoot, NewViewModel);
 	}
 }
 
-void UAVVMDynamicEntryBoxExtendedWidget::RemoveEntry(UCommonUserWidget* NewWidget)
+void UAVVMFloatingMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewViewModel)
 {
-	if (IsValid(DynamicEntryBox))
+	if (IsValid(FloatingWindowRoot))
 	{
-		DynamicEntryBox->RemoveEntry(NewWidget);
+		const FWindowZOrder* SearchResult = WindowContexts.Find(NewViewModel);
+		FloatingWindowRoot->RemoveChild((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
 	}
 }
 
-void UAVVMDynamicEntryBoxExtendedWidget::NativeDestruct()
+bool UAVVMFloatingMultiContextWindowWidget::HasWidgetClass()
 {
-	Super::NativeDestruct();
-	StreamableHandle.Reset();
-}
-
-bool UAVVMDynamicEntryBoxExtendedWidget::HasWidgetClass() const
-{
-	return !WidgetPickerDataAsset.IsNull() ||
-			(IsValid(DynamicEntryBox) && IsValid(DynamicEntryBox->GetEntryWidgetClass()));
+	return !WidgetPickerDataAsset.IsNull();
 }
