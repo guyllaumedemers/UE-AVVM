@@ -46,5 +46,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<TObjectPtr<UClass>, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass;
+	TMap<TSoftClassPtr<UClass>, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass;
 };

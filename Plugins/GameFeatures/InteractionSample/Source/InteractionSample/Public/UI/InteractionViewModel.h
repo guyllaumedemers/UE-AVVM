@@ -31,7 +31,7 @@ class UInputAction;
 /**
  *	Class description:
  *
- *	FInputProgress is a struct that cache progress information triggered from input events.
+ *	FInputProgress is a struct that cache context information specific to an input event.
  */
 USTRUCT(BlueprintType)
 struct INTERACTIONSAMPLE_API FInputProgress
@@ -42,7 +42,7 @@ struct INTERACTIONSAMPLE_API FInputProgress
 	FInputProgress(const FAVVMHandshakePayload* NewPayload);
 	bool operator==(const FInputProgress& Rhs) const;
 
-	void Tick(const float NewDelta);
+	float Tick(const float OldProgress, const float NewDelta) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UInputAction> InputAction = nullptr;
@@ -55,9 +55,6 @@ struct INTERACTIONSAMPLE_API FInputProgress
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	bool bRequireInputMashing = false;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	float InputProgress = 0.f;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float CompletionThreshold = 0.f;
@@ -85,4 +82,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
 	FInputProgress InputContext = FInputProgress();
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	float InputProgress = 0.f;
 };

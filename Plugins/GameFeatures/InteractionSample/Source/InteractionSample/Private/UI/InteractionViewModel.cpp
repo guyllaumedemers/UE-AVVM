@@ -23,7 +23,6 @@
 #include "CommonInputSubsystem.h"
 #include "CommonUITypes.h"
 #include "Data/InteractionExecutionRequirements.h"
-#include "GameFramework/PlayerState.h"
 
 FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 {
@@ -80,15 +79,15 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 bool FInputProgress::operator==(const FInputProgress& Rhs) const
 {
 	return (InputAction == Rhs.InputAction)
+			&& (SlateBrush == Rhs.SlateBrush)
 			&& (bRequireInputHolding == Rhs.bRequireInputHolding)
 			&& (bRequireInputMashing == Rhs.bRequireInputMashing)
-			&& (InputProgress == Rhs.InputProgress)
-			&& (CompletionThreshold == Rhs.CompletionThreshold);
+			&& (FMath::IsNearlyEqual(CompletionThreshold, Rhs.CompletionThreshold));
 }
 
-void FInputProgress::Tick(const float NewDelta)
+float FInputProgress::Tick(const float OldProgress, const float NewDelta) const
 {
-	InputProgress = FMath::Clamp(InputProgress + NewDelta, 0.f, CompletionThreshold);
+	const float NewProgress = FMath::Clamp(OldProgress + (NewDelta / CompletionThreshold), 0.f, CompletionThreshold);
 
 #if !UE_BUILD_SHIPPING
 	FStringView InteractionType = TEXT("Unknown");
@@ -105,9 +104,11 @@ void FInputProgress::Tick(const float NewDelta)
 	       Log,
 	       TEXT("\"%s\" Ticked. Progress: \"%s\"/\"%s\"."),
 	       InteractionType.GetData(),
-	       *FString::SanitizeFloat(InputProgress, 2),
+	       *FString::SanitizeFloat(NewProgress, 2),
 	       *FString::SanitizeFloat(CompletionThreshold, 2));
 #endif
+
+	return NewProgress;
 }
 
 void UInteractionViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
@@ -118,5 +119,6 @@ void UInteractionViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationP
 
 void UInteractionViewModel::OnInputEvent(const float NewDelta)
 {
-	InputContext.Tick(NewDelta);
+	const float NewProgress = InputContext.Tick(InputProgress, NewDelta);
+	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, NewProgress);
 }
