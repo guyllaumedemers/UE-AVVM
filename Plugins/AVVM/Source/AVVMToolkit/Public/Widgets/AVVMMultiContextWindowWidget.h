@@ -99,5 +99,5 @@ protected:
 	TArray<TObjectPtr<UAVVMWindowDecorator>> WindowDecorators;
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> WindowContexts;
+	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> ViewModelToWindowContext;
 };

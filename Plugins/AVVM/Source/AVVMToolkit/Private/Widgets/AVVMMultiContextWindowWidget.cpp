@@ -36,7 +36,7 @@ void UAVVMMultiContextWindowWidget::RemoveWindow(UObject* NewViewModel)
 
 void UAVVMMultiContextWindowWidget::CloseAllWindows()
 {
-	for (auto Iterator = WindowContexts.CreateIterator(); Iterator; ++Iterator)
+	for (auto Iterator = ViewModelToWindowContext.CreateIterator(); Iterator; ++Iterator)
 	{
 		RemoveWindow(Iterator.Key().Get());
 		Iterator.RemoveCurrent();

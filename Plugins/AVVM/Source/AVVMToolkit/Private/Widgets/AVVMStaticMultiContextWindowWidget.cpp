@@ -41,7 +41,7 @@ void UAVVMStaticMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewView
 {
 	if (IsValid(StaticWindowRoot))
 	{
-		const FWindowZOrder* SearchResult = WindowContexts.Find(NewViewModel);
+		const FWindowZOrder* SearchResult = ViewModelToWindowContext.Find(NewViewModel);
 		StaticWindowRoot->RemoveEntry((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
 	}
 }

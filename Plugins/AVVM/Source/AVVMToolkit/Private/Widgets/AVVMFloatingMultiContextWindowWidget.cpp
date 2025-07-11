@@ -115,7 +115,7 @@ void UAVVMFloatingMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewVi
 {
 	if (IsValid(FloatingWindowRoot))
 	{
-		const FWindowZOrder* SearchResult = WindowContexts.Find(NewViewModel);
+		const FWindowZOrder* SearchResult = ViewModelToWindowContext.Find(NewViewModel);
 		FloatingWindowRoot->RemoveChild((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
 	}
 }
