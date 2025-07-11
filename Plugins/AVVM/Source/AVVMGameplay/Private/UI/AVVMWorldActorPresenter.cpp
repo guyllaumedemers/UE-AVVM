@@ -25,6 +25,7 @@
 #include "MVVMViewModelBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/AssetManager.h"
 #include "UI/AVVMWorldActorViewModel.h"
 
 AActor* UAVVMWorldActorPresenter::GetOuterKey() const
@@ -39,7 +40,7 @@ void UAVVMWorldActorPresenter::SafeBeginPlay()
 	const bool bDoesDisplayInWorld = (PreviewType == EAVVMWidgetPreviewType::InWorld);
 	if (bDoesDisplayInWorld)
 	{
-		SetupWorldWidget();
+		DeferredWidgetClassLoading();
 	}
 }
 
@@ -106,6 +107,26 @@ void UAVVMWorldActorPresenter::StopPresenting()
 	}
 }
 
+void UAVVMWorldActorPresenter::DeferredWidgetClassLoading()
+{
+	if (!ensureAlwaysMsgf(!WorldWidgetClass.IsNull(),
+	                      TEXT("Cannot load World Widget Class. Is Null!")))
+	{
+		return;
+	}
+
+	if (!WorldWidgetClass.IsValid())
+	{
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UAVVMWorldActorPresenter::SetupWorldWidget);
+		UAssetManager::Get().LoadAssetList({WorldWidgetClass.ToSoftObjectPath()}, Callback);
+	}
+	else
+	{
+		SetupWorldWidget();
+	}
+}
+
 void UAVVMWorldActorPresenter::SetupWorldWidget()
 {
 	const AActor* Outer = GetTypedOuter<AActor>();
@@ -122,7 +143,7 @@ void UAVVMWorldActorPresenter::SetupWorldWidget()
 		return;
 	}
 
-	WidgetComponent->SetWidgetClass(WorldWidgetClass);
+	WidgetComponent->SetWidgetClass(WorldWidgetClass.Get());
 
 	auto* Target = Cast<UCommonUserWidget>(WidgetComponent->GetWidget());
 	if (IsValid(Target))

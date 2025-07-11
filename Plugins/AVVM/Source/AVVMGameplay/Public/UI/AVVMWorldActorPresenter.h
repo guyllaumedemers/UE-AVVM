@@ -70,13 +70,14 @@ protected:
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 
+	void DeferredWidgetClassLoading();
 	void SetupWorldWidget();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	EAVVMWidgetPreviewType PreviewType = EAVVMWidgetPreviewType::InWorld;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EAVVMWidgetPreviewType::InWorld"))
-	TSubclassOf<UCommonUserWidget> WorldWidgetClass = nullptr;
+	TSoftClassPtr<UCommonUserWidget> WorldWidgetClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	ESlateVisibility DefaultVisibilityOnStart = ESlateVisibility::SelfHitTestInvisible;
