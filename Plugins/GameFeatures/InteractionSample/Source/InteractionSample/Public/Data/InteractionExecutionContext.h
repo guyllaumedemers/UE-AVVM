@@ -37,9 +37,9 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 
 	virtual ~FInteractionExecutionContext() = default;
 
-	virtual void Tick(const AActor* NewInstigator,
-	                  const AActor* NewTarget,
-	                  const float NewDelta) const;
+	virtual void PumpHeartbeat(const AActor* NewInstigator,
+	                           const AActor* NewTarget,
+	                           const float NewDelta) const;
 
 	virtual void Execute(const AActor* NewInstigator,
 	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;)
@@ -55,9 +55,9 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContextAVVMNotify : public FIn
 {
 	GENERATED_BODY()
 
-	virtual void Tick(const AActor* NewInstigator,
-	                  const AActor* NewTarget,
-	                  const float NewDelta) const;
+	virtual void PumpHeartbeat(const AActor* NewInstigator,
+	                           const AActor* NewTarget,
+	                           const float NewDelta) const override;
 
 	virtual void Execute(const AActor* NewInstigator,
 	                     const AActor* NewTarget) const override;

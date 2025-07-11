@@ -23,7 +23,7 @@
 #include "Data/AVVMHandshakePayload.h"
 #include "Data/AVVMHearbeatPayload.h"
 
-void FInteractionExecutionContextAVVMNotify::Tick(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const
+void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);
 	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerState!")))

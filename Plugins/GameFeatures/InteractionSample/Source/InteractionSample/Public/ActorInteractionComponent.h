@@ -59,7 +59,7 @@ public:
 	bool StartExecution(const AActor* NewTarget) const;
 	bool StopExecution(const AActor* NewTarget) const;
 	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const;
-	virtual void Tick(const AActor* NewTarget, const float NewDelta) const;
+	virtual void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
 	virtual void Execute(const AActor* NewTarget) const;
 
 	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const;

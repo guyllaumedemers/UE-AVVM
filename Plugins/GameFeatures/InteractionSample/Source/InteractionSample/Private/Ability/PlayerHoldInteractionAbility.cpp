@@ -120,6 +120,6 @@ void UPlayerHoldInteractionAbility::OnTick(const float NewDelta)
 	}
 	else
 	{
-		InteractionComponent->Tick(ActorInfo->PlayerController.Get(), NewDelta);
+		InteractionComponent->PumpHeartbeat(ActorInfo->PlayerController.Get(), NewDelta);
 	}
 }
