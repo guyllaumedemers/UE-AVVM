@@ -26,6 +26,8 @@
 
 #include "AVVMAbilityInputAction.generated.h"
 
+class UTexture2D;
+
 /**
  *	Class description:
  *
@@ -41,12 +43,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetInputId() const;
 
+	UFUNCTION(BlueprintCallable)
+	const TSoftObjectPtr<UTexture2D>& GetInputTexture() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag AbilityTriggerTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 InputId = INDEX_NONE;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UTexture2D> InputTexture = nullptr;
 
 	friend class UAVVMAbilityInputComponent;
 };

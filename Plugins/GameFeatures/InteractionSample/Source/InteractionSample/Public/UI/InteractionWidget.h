@@ -23,55 +23,73 @@
 
 #include "CommonUserWidget.h"
 
-#include "AVVMProgressBarWidget.generated.h"
+#include "InteractionWidget.generated.h"
 
+class UAVVMProgressBarWidget;
 class UCommonLazyImage;
-class UMaterialInstance;
+class UCommonTextBlock;
+class UInputAction;
 
 /**
  *	Class description:
  *
- *	UAVVMProgressBarWidget is a utility widget class that expose material properties to an image
- *	and simulate a progress bar.
- *
- *	Why do this ? UProgressBar doesn't support circular progression motion. Using materials, we can provide
- *	various styles with progression value that can be lerp through the exposed material parameters.
+ *	UInteractionWidget is a widget class that provide visual feedback to available interaction during gameplay.
  */
 UCLASS()
-class AVVMTOOLKIT_API UAVVMProgressBarWidget : public UCommonUserWidget
+class INTERACTIONSAMPLE_API UInteractionWidget : public UCommonUserWidget
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetValue(const float NewValue);
+	void SetInputAction(const UInputAction* NewInputAction);
+
+	UFUNCTION(BlueprintCallable)
+	void SetProgressBarValue(const float NewValue);
+
+	UFUNCTION(BlueprintCallable)
+	void SetInputHoldingText(const bool bDoesRequireInputHolding);
+
+	UFUNCTION(BlueprintCallable)
+	void SetInputMashingText(const bool bDoesRequireInputMashing);
 
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-	virtual void SynchronizeProperties() override;
 
 	UFUNCTION()
 	void OnLoadingStateChanged(bool bIsLoading);
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void BP_PlayOnConstruct() const;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UMaterialInstance> MaterialInstance = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FName MaterialParameterName = NAME_None;
-
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=0.f, UIMax=1.f))
-	float PreviewValue = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	TObjectPtr<UInputAction> PreviewInputAction = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	bool bDoesPreviewComplexInteraction = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesPreviewComplexInteraction"))
+	bool bToggleTextPreview = false;
 #endif
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	FText InputPressText = FText();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	FText InputHoldingText = FText();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	FText InputMashingText = FText();
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
+	TObjectPtr<UAVVMProgressBarWidget> ProgressBar = nullptr;
+
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
-	TObjectPtr<UCommonLazyImage> MaterialImage = nullptr;
+	TObjectPtr<UCommonLazyImage> InputImage = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> PromptText = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial = nullptr;
+	TWeakObjectPtr<UTexture2D> InputTexture = nullptr;
 };

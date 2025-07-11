@@ -34,12 +34,14 @@ public class InteractionSample : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"FieldNotification",
 				"GameplayAbilities",
 				"GameplayTags",
 				"GameplayTasks",
 				"IrisCore",
 				// TODO @gdemers maybe worth stripping dependency when building dedicated server ?
-				"ModelViewViewModel"
+				"ModelViewViewModel",
+				"UMG"
 			}
 		);
 
@@ -47,7 +49,9 @@ public class InteractionSample : ModuleRules
 			new string[]
 			{
 				"AVVM",
+				"AVVMToolkit",
 				"EnhancedInput",
+				"SlateCore",
 			}
 		);
 	}

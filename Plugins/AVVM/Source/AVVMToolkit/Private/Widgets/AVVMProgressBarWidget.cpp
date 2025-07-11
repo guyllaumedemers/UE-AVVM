@@ -33,37 +33,32 @@ void UAVVMProgressBarWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
-	if (!IsValid(Image))
+	if (!IsValid(MaterialImage) || MaterialInstance.IsNull())
 	{
 		return;
 	}
 
-	if (MaterialInstance.IsNull())
-	{
-		return;
-	}
-
-	FOnLoadGuardStateChangedEvent Delegate = Image->OnLoadingStateChanged();
+	FOnLoadGuardStateChangedEvent Delegate = MaterialImage->OnLoadingStateChanged();
 	if (!Delegate.IsBoundToObject(this))
 	{
-		Image->OnLoadingStateChanged().AddUObject(this, &UAVVMProgressBarWidget::OnLoadingStateChanged);
+		MaterialImage->OnLoadingStateChanged().AddUObject(this, &UAVVMProgressBarWidget::OnLoadingStateChanged);
 	}
 
 	if (!MaterialInstance.IsValid())
 	{
-		Image->SetBrushFromLazyMaterial(MaterialInstance);
+		MaterialImage->SetBrushFromLazyMaterial(MaterialInstance);
 	}
 
-	OnLoadingStateChanged(Image->IsLoading());
+	OnLoadingStateChanged(MaterialImage->IsLoading());
 }
 
 void UAVVMProgressBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (IsValid(Image))
+	if (IsValid(MaterialImage))
 	{
-		OnLoadingStateChanged(Image->IsLoading());
+		OnLoadingStateChanged(MaterialImage->IsLoading());
 	}
 }
 
@@ -71,9 +66,9 @@ void UAVVMProgressBarWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
 
-	if (IsValid(Image))
+	if (IsValid(MaterialImage))
 	{
-		Image->OnLoadingStateChanged().RemoveAll(this);
+		MaterialImage->OnLoadingStateChanged().RemoveAll(this);
 	}
 }
 
@@ -93,9 +88,9 @@ void UAVVMProgressBarWidget::OnLoadingStateChanged(bool bIsLoading)
 		return;
 	}
 
-	if (IsValid(Image))
+	if (IsValid(MaterialImage))
 	{
-		DynamicMaterial = Image->GetDynamicMaterial();
+		DynamicMaterial = MaterialImage->GetDynamicMaterial();
 	}
 
 	BP_PlayOnConstruct();
