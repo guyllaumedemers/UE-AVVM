@@ -23,8 +23,3 @@ int32 UAVVMAbilityInputAction::GetInputId() const
 {
 	return InputId;
 }
-
-const TSoftObjectPtr<UTexture2D>& UAVVMAbilityInputAction::GetInputTexture() const
-{
-	return InputTexture;
-}

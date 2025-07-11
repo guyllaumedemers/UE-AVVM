@@ -21,18 +21,11 @@
 
 #include "CommonLazyImage.h"
 #include "CommonTextBlock.h"
-#include "Inputs/AVVMAbilityInputAction.h"
 #include "Widgets/AVVMProgressBarWidget.h"
 
-void UInteractionWidget::SetInputAction(const UInputAction* NewInputAction)
+void UInteractionWidget::SetSlateBrush(const FSlateBrush& NewSlateBrush)
 {
 	if (!IsValid(InputImage))
-	{
-		return;
-	}
-
-	const auto* InputAction = Cast<UAVVMAbilityInputAction>(NewInputAction);
-	if (!IsValid(InputAction))
 	{
 		return;
 	}
@@ -45,7 +38,7 @@ void UInteractionWidget::SetInputAction(const UInputAction* NewInputAction)
 
 	if (!InputTexture.IsValid())
 	{
-		InputImage->SetBrushFromLazyTexture(InputAction->GetInputTexture());
+		InputImage->SetBrushFromLazyDisplayAsset(NewSlateBrush.GetResourceObject());
 	}
 
 	OnLoadingStateChanged(InputImage->IsLoading());

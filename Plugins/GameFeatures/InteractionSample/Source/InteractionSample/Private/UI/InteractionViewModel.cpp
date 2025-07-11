@@ -20,8 +20,10 @@
 #include "UI/InteractionViewModel.h"
 
 #include "ActorInteractionComponent.h"
-#include "InputAction.h"
+#include "CommonInputSubsystem.h"
+#include "CommonUITypes.h"
 #include "Data/InteractionExecutionRequirements.h"
+#include "GameFramework/PlayerState.h"
 
 FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 {
@@ -42,6 +44,14 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 	const auto* FloatRequirements = OutRequirements.GetPtr<FInteractionExecutionFloatRequirements>();
 	if (FloatRequirements != nullptr)
 	{
+		const auto* PlayerState = Cast<APlayerState>(NewPayload->Target.Get());
+		if (IsValid(PlayerState))
+		{
+			const APlayerController* PC = PlayerState->GetPlayerController();
+			auto* InputSubsystem = UCommonInputSubsystem::Get(IsValid(PC) ? PC->GetLocalPlayer() : nullptr);
+			SlateBrush = CommonUI::GetIconForEnhancedInputAction(InputSubsystem, FloatRequirements->InputAction);
+		}
+
 		InputAction = FloatRequirements->InputAction;
 		bRequireInputHolding = FloatRequirements->bRequireInputHolding;
 		bRequireInputMashing = FloatRequirements->bRequireInputMashing;

@@ -42,7 +42,7 @@ class INTERACTIONSAMPLE_API UInteractionWidget : public UCommonUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetInputAction(const UInputAction* NewInputAction);
+	void SetSlateBrush(const FSlateBrush& NewSlateBrush);
 
 	UFUNCTION(BlueprintCallable)
 	void SetProgressBarValue(const float NewValue);

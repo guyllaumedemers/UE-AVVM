@@ -48,6 +48,9 @@ struct INTERACTIONSAMPLE_API FInputProgress
 	TWeakObjectPtr<UInputAction> InputAction = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
+	FSlateBrush SlateBrush = FSlateBrush();
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	bool bRequireInputHolding = false;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

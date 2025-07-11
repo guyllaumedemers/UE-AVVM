@@ -50,6 +50,7 @@ public class InteractionSample : ModuleRules
 			{
 				"AVVM",
 				"AVVMToolkit",
+				"CommonInput",
 				"EnhancedInput",
 				"SlateCore",
 			}
