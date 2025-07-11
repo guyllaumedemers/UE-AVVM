@@ -40,10 +40,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "HandshakeSample",
-			"Enabled": true
-		},
-		{
 			"Name": "InteractionSample",
 			"Enabled": true
 		},
