@@ -102,10 +102,9 @@ float FInputProgress::Tick(const float OldProgress, const float NewDelta) const
 
 	UE_LOG(LogUI,
 	       Log,
-	       TEXT("\"%s\" Ticked. Progress: \"%s\"/\"%s\"."),
+	       TEXT("\"%s\" Ticked. Progress: \"%s\"/\"1.f\"."),
 	       InteractionType.GetData(),
-	       *FString::SanitizeFloat(NewProgress, 2),
-	       *FString::SanitizeFloat(CompletionThreshold, 2));
+	       *FString::SanitizeFloat(NewProgress, 2));
 #endif
 
 	return NewProgress;

@@ -175,6 +175,20 @@ void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHa
 	}
 }
 
+void UPlayerInteractionAbilityBase::CancelAbility(const FGameplayAbilitySpecHandle Handle,
+                                                  const FGameplayAbilityActorInfo* ActorInfo,
+                                                  const FGameplayAbilityActivationInfo ActivationInfo,
+                                                  bool bReplicateCancelAbility)
+{
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
+	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
+	if (ActorInfo != nullptr && IsValid(InteractionComponent))
+	{
+		InteractionComponent->Kill(ActorInfo->PlayerController.Get());
+	}
+}
+
 void UPlayerInteractionAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle,
                                                const FGameplayAbilityActorInfo* ActorInfo,
                                                const FGameplayAbilityActivationInfo ActivationInfo,
@@ -182,7 +196,6 @@ void UPlayerInteractionAbilityBase::EndAbility(const FGameplayAbilitySpecHandle 
                                                bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-
 	TargetComponent.Reset();
 }
 

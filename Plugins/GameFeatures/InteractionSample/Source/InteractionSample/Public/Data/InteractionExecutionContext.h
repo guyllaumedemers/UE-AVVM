@@ -39,10 +39,13 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 
 	virtual void PumpHeartbeat(const AActor* NewInstigator,
 	                           const AActor* NewTarget,
-	                           const float NewDelta) const;
+	                           const float NewDelta) const PURE_VIRTUAL(PumpHeartbeat, return;);
 
 	virtual void Execute(const AActor* NewInstigator,
 	                     const AActor* NewTarget) const PURE_VIRTUAL(Execute, return;)
+
+	virtual void Kill(const AActor* NewInstigator,
+	                  const AActor* NewTarget) const PURE_VIRTUAL(Kill, return;);
 };
 
 /**
@@ -62,9 +65,15 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContextAVVMNotify : public FIn
 	virtual void Execute(const AActor* NewInstigator,
 	                     const AActor* NewTarget) const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag TickingChannelTag = FGameplayTag::EmptyTag;
+	virtual void Kill(const AActor* NewInstigator,
+	                  const AActor* NewTarget) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag ExecutionChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag PumpHeartbeatChannelTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag ExecuteChannelTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag KillChannelTag = FGameplayTag::EmptyTag;
 };

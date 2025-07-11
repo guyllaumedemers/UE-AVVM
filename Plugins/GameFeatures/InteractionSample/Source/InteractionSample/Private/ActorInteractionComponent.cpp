@@ -160,21 +160,38 @@ bool UActorInteractionComponent::DoesMeetExecutionRequirements(const TInstancedS
 void UActorInteractionComponent::PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const
 {
 	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
-	if (ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
 	{
-		Instanced->PumpHeartbeat(OwningOuter.Get(),
-		                         NewTarget,
-		                         NewDelta);
+		return;
 	}
+
+	Instanced->PumpHeartbeat(OwningOuter.Get(),
+	                         NewTarget,
+	                         NewDelta);
 }
 
 void UActorInteractionComponent::Execute(const AActor* NewTarget) const
 {
 	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
-	if (ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
 	{
-		Instanced->Execute(OwningOuter.Get(), NewTarget);
+		return;
 	}
+
+	Instanced->Execute(OwningOuter.Get(),
+	                   NewTarget);
+}
+
+void UActorInteractionComponent::Kill(const AActor* NewTarget) const
+{
+	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	{
+		return;
+	}
+
+	Instanced->Kill(OwningOuter.Get(),
+	                NewTarget);
 }
 
 void UActorInteractionComponent::GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const

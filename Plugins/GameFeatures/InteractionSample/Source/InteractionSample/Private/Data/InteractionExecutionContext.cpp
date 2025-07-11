@@ -26,14 +26,14 @@
 void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);
-	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerState!")))
+	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerController!")))
 	{
 		return;
 	}
 
 	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(NewDelta);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        TickingChannelTag,
+	                                        PumpHeartbeatChannelTag,
 	                                        PC,
 	                                        NewInstigator,
 	                                        Payload);
@@ -42,14 +42,31 @@ void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInst
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);
-	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerState!")))
+	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerController!")))
 	{
 		return;
 	}
 
 	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, PC);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        ExecutionChannelTag,
+	                                        ExecuteChannelTag,
+	                                        PC,
+	                                        NewInstigator,
+	                                        Payload);
+}
+
+void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
+                                                  const AActor* NewTarget) const
+{
+	const auto* PC = Cast<APlayerController>(NewTarget);
+	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerController!")))
+	{
+		return;
+	}
+
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(INDEX_NONE);
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+	                                        KillChannelTag,
 	                                        PC,
 	                                        NewInstigator,
 	                                        Payload);
