@@ -70,12 +70,13 @@ struct INTERACTIONSAMPLE_API FInputProgress
  *
  *	Example : Hold time.
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class INTERACTIONSAMPLE_API UInteractionViewModel : public UAVVMWorldActorViewModel
 {
 	GENERATED_BODY()
 
 public:
+	virtual FName GetViewModelFName() const override { return TEXT("UInteractionViewModel"); };
 	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) override;
 
 protected:

@@ -34,7 +34,7 @@ struct FAVVMNotificationPayload;
  *
  *	UAVVMWorldActorViewModel encapsulate information about the world Actor it's owned by and possible actions that can be executed from it.
  */
-UCLASS(Abstract)
+UCLASS(Abstract, NotBlueprintable)
 class AVVMGAMEPLAY_API UAVVMWorldActorViewModel : public UMVVMViewModelBase,
                                                   public IAVVMViewModelFNameHelper
 {
