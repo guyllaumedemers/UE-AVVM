@@ -60,3 +60,21 @@ void UAVVMMultiContextWindowWidget::NativeDestruct()
 	Super::NativeDestruct();
 	WindowDecorators.Reset();
 }
+
+void UAVVMMultiContextWindowWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	for (auto Iterator = WindowDecorators.CreateIterator(); Iterator; ++Iterator)
+	{
+		const TObjectPtr<UAVVMWindowDecorator>& Decorator = *Iterator;
+		if (!IsValid(Decorator))
+		{
+			Iterator.RemoveCurrentSwap();
+		}
+		else if (Decorator->DoesSupportTick())
+		{
+			Decorator->Tick(InDeltaTime);
+		}
+	}
+}

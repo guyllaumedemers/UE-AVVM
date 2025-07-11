@@ -63,10 +63,8 @@ public:
 /**
  *	Class description:
  *
- *	UAVVMMultiContextWindowWidget is an Abstract class from which we can instance and destroy context window. This widget should be referenced
+ *	UAVVMMultiContextWindowWidget is an Abstract class from which we can instance and destroy multiple context window. This widget should be referenced
  *	on Views where multiple segments should be display.
- *
- *	Example : Diablo 1 Inventory system with side by side shop. (Derived class are available for Static and Floating Context)
  */
 UCLASS(Abstract, NotBlueprintable)
 class AVVMTOOLKIT_API UAVVMMultiContextWindowWidget : public UCommonUserWidget
@@ -89,6 +87,7 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) PURE_VIRTUAL(SetupWindows_Internal, return;);
 	virtual void AddWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddWindow_Internal, return;);
 	virtual void RemoveWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveWindow_Internal, return;);

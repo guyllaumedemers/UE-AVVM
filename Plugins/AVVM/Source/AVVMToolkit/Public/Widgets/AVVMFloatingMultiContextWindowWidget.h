@@ -36,9 +36,10 @@ class UCanvasPanel;
  *	UAVVMFloatingMultiContextWindowWidget is the Floating version of the MultiContextWindowWidget that define
  *	a free form layout with multiple context. Context Window can be opened, closed and moved around.
  *
- *	Example : Diablo Inventory system.
+ *	Example : World of Warcraft floating inventory. (Mostly a PC only feature. Console would have to simulate such
+ *	behavior using a free cursor for dragging floating content)
  */
-UCLASS()
+UCLASS(Blueprintable)
 class AVVMTOOLKIT_API UAVVMFloatingMultiContextWindowWidget : public UAVVMMultiContextWindowWidget
 {
 	GENERATED_BODY()
@@ -47,7 +48,7 @@ protected:
 	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) override;
 	virtual void AddWindow_Internal(UObject* NewViewModel) override;
 	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
-	
+
 	bool HasWidgetClass();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
