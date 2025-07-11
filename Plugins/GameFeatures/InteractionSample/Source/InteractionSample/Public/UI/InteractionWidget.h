@@ -63,7 +63,7 @@ protected:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TObjectPtr<UInputAction> PreviewInputAction = nullptr;
+	FSlateBrush PreviewSlateBrush = FSlateBrush();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	bool bDoesPreviewComplexInteraction = false;

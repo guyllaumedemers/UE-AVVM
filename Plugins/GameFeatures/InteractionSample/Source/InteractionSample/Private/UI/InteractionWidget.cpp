@@ -78,7 +78,7 @@ void UInteractionWidget::NativePreConstruct()
 	}
 
 #if WITH_EDITORONLY_DATA
-	SetInputAction(PreviewInputAction);
+	SetSlateBrush(PreviewSlateBrush);
 	if (bDoesPreviewComplexInteraction)
 	{
 		SetInputHoldingText(bToggleTextPreview);

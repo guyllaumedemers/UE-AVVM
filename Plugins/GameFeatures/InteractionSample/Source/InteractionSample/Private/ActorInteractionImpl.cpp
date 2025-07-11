@@ -321,7 +321,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 #endif
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(Instigator, Target);
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(Instigator, Controller->PlayerState);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
 	                                        StartPromptInteractionChannel,
 	                                        Controller,
