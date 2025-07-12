@@ -321,12 +321,11 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 #endif
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(Instigator, Controller);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
 	                                        StartPromptInteractionChannel,
 	                                        Controller,
 	                                        Instigator,
-	                                        Payload);
+	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(Instigator, Controller));
 }
 
 void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewRecords,

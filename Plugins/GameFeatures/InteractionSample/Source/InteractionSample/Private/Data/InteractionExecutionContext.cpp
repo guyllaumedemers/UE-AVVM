@@ -31,12 +31,11 @@ void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInst
 		return;
 	}
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(NewDelta);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
 	                                        PumpHeartbeatChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        Payload);
+	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(NewDelta));
 }
 
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
@@ -47,12 +46,11 @@ void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator
 		return;
 	}
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, PC);
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
 	                                        ExecuteChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        Payload);
+	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, PC));
 }
 
 void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
@@ -64,10 +62,9 @@ void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
 		return;
 	}
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE));
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
 	                                        KillChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        Payload);
+	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE)));
 }
