@@ -103,7 +103,7 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	}
 	else
 	{
-		EndAbility(SpecHandle, ActorInfo, ActivationInfo, true, false);
+		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
 	}
 }
 

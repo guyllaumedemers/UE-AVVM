@@ -51,6 +51,12 @@ public:
 	                                const FGameplayTagContainer* TargetTags = nullptr,
 	                                FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
+	virtual void PreActivate(const FGameplayAbilitySpecHandle Handle,
+	                         const FGameplayAbilityActorInfo* ActorInfo,
+	                         const FGameplayAbilityActivationInfo ActivationInfo,
+	                         FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
+	                         const FGameplayEventData* TriggerEventData = nullptr) override;
+
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	                             const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
@@ -77,6 +83,8 @@ protected:
 	                             const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
 	                             const FGameplayEventData* TriggerEventData);
+
+	const AActor* GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;

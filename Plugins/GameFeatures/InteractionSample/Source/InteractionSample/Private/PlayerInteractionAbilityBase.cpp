@@ -94,6 +94,27 @@ bool UPlayerInteractionAbilityBase::CanActivateAbility(const FGameplayAbilitySpe
 	return Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
+void UPlayerInteractionAbilityBase::PreActivate(const FGameplayAbilitySpecHandle Handle,
+                                                const FGameplayAbilityActorInfo* ActorInfo,
+                                                const FGameplayAbilityActivationInfo ActivationInfo,
+                                                FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
+                                                const FGameplayEventData* TriggerEventData)
+{
+	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
+	const AActor* EffectCauser = GetEffectCauser(ActorInfo->AbilitySystemComponent.Get());
+	if (IsValid(EffectCauser))
+	{
+		TargetComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
+	}
+}
+
 void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                     const FGameplayAbilityActorInfo* ActorInfo,
                                                     const FGameplayAbilityActivationInfo ActivationInfo,
@@ -123,46 +144,12 @@ void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHa
 	       *GetName(),
 	       *Controller->GetName());
 
-	const auto* ASC = ActorInfo->AbilitySystemComponent.Get();
-	if (!IsValid(ASC))
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
-	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(GEQueryTags);
-	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = ASC->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
-	if (GEActiveHandles.IsEmpty())
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
-	ensureAlwaysMsgf(GEActiveHandles.Num() == 1, TEXT("Multiple Matches Found! There should only ever be one match!"));
-
-	const FActiveGameplayEffect* GEActive = ASC->GetActiveGameplayEffect(GEActiveHandles[0]);
-	if (GEActive == nullptr)
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
-	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
-	const AActor* GEEffectCauser = GECtx.GetEffectCauser();
-	if (!IsValid(GEEffectCauser))
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
-	auto* InteractionComponent = GEEffectCauser->GetComponentByClass<UActorInteractionComponent>();
+	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (!IsValid(InteractionComponent))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
-
-	TargetComponent = InteractionComponent;
 
 	const bool bCanStartExecution = InteractionComponent->StartExecution(Controller);
 	if (bCanStartExecution)
@@ -180,13 +167,14 @@ void UPlayerInteractionAbilityBase::CancelAbility(const FGameplayAbilitySpecHand
                                                   const FGameplayAbilityActivationInfo ActivationInfo,
                                                   bool bReplicateCancelAbility)
 {
-	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
-
 	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
-	if (ActorInfo != nullptr && IsValid(InteractionComponent))
+	if (IsValid(InteractionComponent))
 	{
-		InteractionComponent->Kill(ActorInfo->PlayerController.Get());
+		InteractionComponent->Kill((ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr);
 	}
+
+	// @gdemers calls EndAbility which clear TargetComponent otherwise
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 }
 
 void UPlayerInteractionAbilityBase::EndAbility(const FGameplayAbilitySpecHandle Handle,
@@ -205,12 +193,12 @@ bool UPlayerInteractionAbilityBase::CommitAbility(const FGameplayAbilitySpecHand
                                                   FGameplayTagContainer* OptionalRelevantTags)
 {
 	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
-	if (ActorInfo == nullptr || !IsValid(InteractionComponent) || !Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
+	if (!IsValid(InteractionComponent) || !Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
 	{
 		return false;
 	}
 
-	InteractionComponent->Execute(ActorInfo->PlayerController.Get());
+	InteractionComponent->Execute((ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr);
 	return true;
 }
 
@@ -220,4 +208,30 @@ void UPlayerInteractionAbilityBase::RunOptionalTask(const FGameplayAbilitySpecHa
                                                     const FGameplayEventData* TriggerEventData)
 {
 	CommitAbility(Handle, ActorInfo, ActivationInfo);
+}
+
+const AActor* UPlayerInteractionAbilityBase::GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!IsValid(AbilitySystemComponent))
+	{
+		return nullptr;
+	}
+
+	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(GEQueryTags);
+	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = AbilitySystemComponent->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
+	if (GEActiveHandles.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	ensureAlwaysMsgf(GEActiveHandles.Num() == 1, TEXT("Multiple Matches Found! There should only ever be one match!"));
+
+	const FActiveGameplayEffect* GEActive = AbilitySystemComponent->GetActiveGameplayEffect(GEActiveHandles[0]);
+	if (GEActive == nullptr)
+	{
+		return nullptr;
+	}
+
+	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
+	return GECtx.GetEffectCauser();
 }
