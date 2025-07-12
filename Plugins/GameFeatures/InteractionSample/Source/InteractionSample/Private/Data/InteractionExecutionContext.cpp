@@ -64,7 +64,7 @@ void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
 		return;
 	}
 
-	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(INDEX_NONE);
+	const auto Payload = TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE));
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
 	                                        KillChannelTag,
 	                                        PC,
