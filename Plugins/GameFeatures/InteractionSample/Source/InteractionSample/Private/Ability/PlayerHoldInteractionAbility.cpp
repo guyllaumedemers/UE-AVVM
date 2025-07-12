@@ -32,6 +32,8 @@ void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHa
                                                     const FGameplayAbilityActivationInfo ActivationInfo,
                                                     const FGameplayEventData* TriggerEventData)
 {
+	PlayerController = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+
 	auto* ParentTask = UAbilityTask_WaitInputRelease::WaitInputRelease(this);
 	if (IsValid(ParentTask))
 	{
@@ -59,7 +61,7 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	const FGameplayAbilityActorInfo* ActorInfo = GetCurrentActorInfo();
 	const FGameplayAbilityActivationInfo ActivationInfo = GetCurrentActivationInfo();
 
-	const AActor* Controller = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+	const AActor* Controller = PlayerController.Get();
 	if (!ensureAlwaysMsgf(IsValid(Controller),
 	                      TEXT("UPlayerInteractionAbility PlayerController invalid!")))
 	{
@@ -104,23 +106,16 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 
 void UPlayerHoldInteractionAbility::OnTick(const float NewDelta)
 {
-	const FGameplayAbilitySpecHandle SpecHandle = GetCurrentAbilitySpecHandle();
-	const FGameplayAbilityActorInfo* ActorInfo = GetCurrentActorInfo();
-	const FGameplayAbilityActivationInfo ActivationInfo = GetCurrentActivationInfo();
-
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr, TEXT("Invalid FGameplayAbilityActorInfo!")))
-	{
-		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
 	UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
-	if (!ensureAlwaysMsgf(IsValid(InteractionComponent), TEXT("Invalid Interaction Component cached!")))
+	if (ensureAlwaysMsgf(IsValid(InteractionComponent), TEXT("Invalid Interaction Component cached!")))
 	{
-		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+		InteractionComponent->PumpHeartbeat(PlayerController.Get(), NewDelta);
 	}
 	else
 	{
-		InteractionComponent->PumpHeartbeat(ActorInfo->PlayerController.Get(), NewDelta);
+		// @gdemers Having to do this makes me question Unreal functional approach to this function signature. The Ability already has all that data
+		// cached. OOP already allows access to these arguments through the Object so why require argument passing here AND more important why retrieve that data via copy (ActivationInfo and SpecHandle).
+		// The functional approach here prevents actions like the one this call is made from to easily call CancelAbility without having to copy data around.
+		CancelAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true);
 	}
 }

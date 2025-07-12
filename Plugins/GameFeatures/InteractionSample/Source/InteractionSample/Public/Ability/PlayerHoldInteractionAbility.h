@@ -25,6 +25,8 @@
 
 #include "PlayerHoldInteractionAbility.generated.h"
 
+class APlayerController;
+
 /**
  *	Class Description :
  *
@@ -47,4 +49,7 @@ protected:
 
 	UFUNCTION()
 	void OnTick(const float NewDelta);
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const APlayerController> PlayerController = nullptr;
 };
