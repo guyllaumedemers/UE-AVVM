@@ -55,7 +55,7 @@ protected:
 	virtual void NativeDestruct() override;
 	bool HasWidgetClass() const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))

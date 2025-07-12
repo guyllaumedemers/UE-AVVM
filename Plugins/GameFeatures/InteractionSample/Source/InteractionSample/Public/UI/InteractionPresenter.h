@@ -91,6 +91,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EWidgetPreviewType::InWorld"))
 	TSoftClassPtr<UCommonUserWidget> WorldWidgetClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag PostInteractionChannelTag = FGameplayTag::EmptyTag;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	ESlateVisibility DefaultVisibilityOnStart = ESlateVisibility::SelfHitTestInvisible;
 

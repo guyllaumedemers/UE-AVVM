@@ -214,4 +214,9 @@ void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess)
 	{
 		InteractionViewModel->Execute();
 	}
+
+	UE_AVVM_NOTIFY(this,
+	               PostInteractionChannelTag,
+	               OwningOuter.Get(),
+	               FAVVMNotificationPayload::Empty);
 }

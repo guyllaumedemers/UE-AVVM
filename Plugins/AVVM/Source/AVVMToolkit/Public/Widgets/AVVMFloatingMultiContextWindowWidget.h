@@ -51,7 +51,7 @@ protected:
 
 	bool HasWidgetClass();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
