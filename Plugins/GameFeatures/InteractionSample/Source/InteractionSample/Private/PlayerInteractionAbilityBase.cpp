@@ -31,14 +31,8 @@ void UPlayerInteractionAbilityBase::OnGiveAbility(const FGameplayAbilityActorInf
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
-	{
-		return;
-	}
-
-	const AActor* Outer = ActorInfo->OwnerActor.Get();
-	if (!ensure(IsValid(Outer)))
+	const AActor* Outer = (ActorInfo != nullptr) ? ActorInfo->OwnerActor.Get() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -56,14 +50,8 @@ void UPlayerInteractionAbilityBase::OnRemoveAbility(const FGameplayAbilityActorI
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
-	{
-		return;
-	}
-
-	const AActor* Outer = ActorInfo->OwnerActor.Get();
-	if (!ensure(IsValid(Outer)))
+	const AActor* Outer = (ActorInfo != nullptr) ? ActorInfo->OwnerActor.Get() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
@@ -102,13 +90,7 @@ void UPlayerInteractionAbilityBase::PreActivate(const FGameplayAbilitySpecHandle
 {
 	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
 
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
-	{
-		return;
-	}
-
-	const AActor* EffectCauser = GetEffectCauser(ActorInfo->AbilitySystemComponent.Get());
+	const AActor* EffectCauser = GetEffectCauser((ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr);
 	if (IsValid(EffectCauser))
 	{
 		TargetComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
@@ -122,14 +104,7 @@ void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHa
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
-	const AActor* Controller = ActorInfo->PlayerController.Get();
+	const AActor* Controller = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
 	if (!ensureAlwaysMsgf(IsValid(Controller),
 	                      TEXT("UPlayerInteractionAbility PlayerController invalid!")))
 	{

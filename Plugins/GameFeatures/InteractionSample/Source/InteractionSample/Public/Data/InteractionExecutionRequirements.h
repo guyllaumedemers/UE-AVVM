@@ -21,6 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "StructUtils/InstancedStruct.h"
+
 #include "InteractionExecutionRequirements.generated.h"
 
 class UActorInteractionImpl;
@@ -39,9 +41,19 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
 	virtual ~FInteractionExecutionRequirements() = default;
 	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
 
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FInteractionExecutionRequirements>::Make<T>
+	template <typename TChild, typename... TArgs>
+	static TInstancedStruct<FInteractionExecutionRequirements> Make(TArgs&&... Args);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UInputAction> InputAction = nullptr;
 };
+
+template <typename TChild, typename... TArgs>
+TInstancedStruct<FInteractionExecutionRequirements> FInteractionExecutionRequirements::Make(TArgs&&... Args)
+{
+	return TInstancedStruct<FInteractionExecutionRequirements>::Make<TChild>(Forward<TArgs>(Args)...);
+}
 
 /**
 *	Class description:

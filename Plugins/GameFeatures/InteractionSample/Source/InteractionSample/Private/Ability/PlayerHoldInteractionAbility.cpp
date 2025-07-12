@@ -55,20 +55,15 @@ void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHa
 
 void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 {
-	const FGameplayAbilitySpecHandle SpecHandle = GetCurrentAbilitySpecHandle();
+	const FGameplayAbilitySpecHandle Handle = GetCurrentAbilitySpecHandle();
 	const FGameplayAbilityActorInfo* ActorInfo = GetCurrentActorInfo();
 	const FGameplayAbilityActivationInfo ActivationInfo = GetCurrentActivationInfo();
 
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr, TEXT("Invalid FGameplayAbilityActorInfo!")))
+	const AActor* Controller = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(Controller),
+	                      TEXT("UPlayerInteractionAbility PlayerController invalid!")))
 	{
-		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
-		return;
-	}
-
-	const AActor* Controller = ActorInfo->PlayerController.Get();
-	if (!IsValid(Controller))
-	{
-		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
@@ -82,29 +77,28 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (!ensureAlwaysMsgf(IsValid(InteractionComponent), TEXT("Invalid Interaction Component cached!")))
 	{
-		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
-	const FInteractionExecutionFloatRequirements Requirements(TimeHeld);
-	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->DoesMeetExecutionRequirements(
-			TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
+	const auto Requirements = FInteractionExecutionRequirements::Make<FInteractionExecutionFloatRequirements>(TimeHeld);
+	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->DoesMeetExecutionRequirements(Requirements);
 
 	if (bCanCommit)
 	{
-		const bool bWasCommitted = CommitAbility(SpecHandle, ActorInfo, ActivationInfo);
+		const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
 		if (bWasCommitted)
 		{
-			EndAbility(SpecHandle, ActorInfo, ActivationInfo, true, false);
+			EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 		}
 		else
 		{
-			CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+			CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		}
 	}
 	else
 	{
-		CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
 }
 
