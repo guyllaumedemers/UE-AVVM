@@ -27,17 +27,17 @@
 #include "Components/SlateWrapperTypes.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "AVVMWorldActorPresenter.generated.h"
+#include "InteractionPresenter.generated.h"
 
 class UCommonUserWidget;
 
 /**
  *	Class description:
  *
- *	EAVVMWidgetPreviewType define if the widget should be displayed in world or on HUD.
+ *	EWidgetPreviewType define if the widget should be displayed in world or on HUD.
  */
 UENUM(BlueprintType)
-enum class EAVVMWidgetPreviewType : uint8
+enum class EWidgetPreviewType : uint8
 {
 	InWorld = 0,
 	OnHUD
@@ -46,12 +46,12 @@ enum class EAVVMWidgetPreviewType : uint8
 /**
  *	Class description:
  *
- *	UAVVMWorldActorPresenter is a presenter class that allow opening/closing context specific Widgets following world interaction between local client and world actor.
- *	When available, it can display the Widgets in World or on the HUD, then based on user Input, can open the Widget context specific to the owning system.
+ *	UInteractionPresenter is a presenter class that updates visual feedback presented to the local player when performing interaction
+ *	between itself and a world actor.
  */
 UCLASS()
-class AVVMGAMEPLAY_API UAVVMWorldActorPresenter : public UAVVMPresenter,
-                                                  public IAVVMUIExtensionInterface
+class INTERACTIONSAMPLE_API UInteractionPresenter : public UAVVMPresenter,
+                                                    public IAVVMUIExtensionInterface
 {
 	GENERATED_BODY()
 
@@ -68,7 +68,13 @@ protected:
 	void BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_TickPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_PumpHeartbeat(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+
+	UFUNCTION(BlueprintCallable)
+	void BP_OnNotificationReceived_Kill(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
@@ -77,9 +83,9 @@ protected:
 	void SetupWorldWidget();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	EAVVMWidgetPreviewType PreviewType = EAVVMWidgetPreviewType::InWorld;
+	EWidgetPreviewType PreviewType = EWidgetPreviewType::InWorld;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EAVVMWidgetPreviewType::InWorld"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="PreviewType == EWidgetPreviewType::InWorld"))
 	TSoftClassPtr<UCommonUserWidget> WorldWidgetClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -87,7 +93,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UCommonUserWidget> WorldWidget = nullptr;
-	
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

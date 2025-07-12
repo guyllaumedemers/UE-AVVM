@@ -21,8 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
+#include "MVVMViewModelBase.h"
 #include "Data/AVVMHandshakePayload.h"
-#include "UI/AVVMWorldActorViewModel.h"
 
 #include "MultiContextInventoryViewModel.generated.h"
 

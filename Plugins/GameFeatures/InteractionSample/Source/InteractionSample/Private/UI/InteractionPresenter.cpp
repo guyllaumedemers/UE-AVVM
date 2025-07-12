@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/AVVMWorldActorPresenter.h"
+#include "UI/InteractionPresenter.h"
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
@@ -27,25 +27,25 @@
 #include "Components/WidgetComponent.h"
 #include "Data/AVVMHearbeatPayload.h"
 #include "Engine/AssetManager.h"
-#include "UI/AVVMWorldActorViewModel.h"
+#include "UI/InteractionViewModel.h"
 
-AActor* UAVVMWorldActorPresenter::GetOuterKey() const
+AActor* UInteractionPresenter::GetOuterKey() const
 {
 	return GetTypedOuter<AActor>();
 }
 
-void UAVVMWorldActorPresenter::SafeBeginPlay()
+void UInteractionPresenter::SafeBeginPlay()
 {
 	Super::SafeBeginPlay();
 
-	const bool bDoesDisplayInWorld = (PreviewType == EAVVMWidgetPreviewType::InWorld);
+	const bool bDoesDisplayInWorld = (PreviewType == EWidgetPreviewType::InWorld);
 	if (bDoesDisplayInWorld)
 	{
 		DeferredWidgetClassLoading();
 	}
 }
 
-void UAVVMWorldActorPresenter::SafeEndPlay()
+void UInteractionPresenter::SafeEndPlay()
 {
 	Super::SafeEndPlay();
 
@@ -53,37 +53,57 @@ void UAVVMWorldActorPresenter::SafeEndPlay()
 	WorldWidget.Reset();
 }
 
-void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UInteractionPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* WorldActorViewModel = Cast<UAVVMWorldActorViewModel>(ViewModel.Get());
-	if (ensureAlwaysMsgf(IsValid(WorldActorViewModel),
-	                     TEXT("UAVVMWorldActorPresenter::ViewModel doesn't derive from UAVVMWorldActorViewModel!")))
+	auto* InteractionViewModel = Cast<UInteractionViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
+	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
 	{
-		WorldActorViewModel->SetPayload(Payload);
+		InteractionViewModel->SetPayload(Payload);
 	}
 
 	StartPresenting();
 }
 
-void UAVVMWorldActorPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UInteractionPresenter::BP_OnNotificationReceived_StopPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	StopPresenting();
 }
 
-void UAVVMWorldActorPresenter::BP_OnNotificationReceived_TickPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+void UInteractionPresenter::BP_OnNotificationReceived_PumpHeartbeat(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	auto* WorldActorViewModel = Cast<UAVVMWorldActorViewModel>(ViewModel.Get());
-	if (ensureAlwaysMsgf(IsValid(WorldActorViewModel),
-	                     TEXT("UAVVMWorldActorPresenter::ViewModel doesn't derive from UAVVMWorldActorViewModel!")))
+	auto* InteractionViewModel = Cast<UInteractionViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
+	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
 	{
 		const auto* NewHeatbeat = Payload.GetPtr<FAVVMHearbeatPayload>();
-		WorldActorViewModel->PumpHeartbeat((NewHeatbeat != nullptr) ? NewHeatbeat->Value : INDEX_NONE);
+		InteractionViewModel->PumpHeartbeat((NewHeatbeat != nullptr) ? NewHeatbeat->Value : INDEX_NONE);
 	}
 }
 
-void UAVVMWorldActorPresenter::StartPresenting()
+void UInteractionPresenter::BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const bool bDoesDisplayOnHUD = (PreviewType == EAVVMWidgetPreviewType::OnHUD);
+	auto* InteractionViewModel = Cast<UInteractionViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
+	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
+	{
+		InteractionViewModel->Execute();
+	}
+}
+
+void UInteractionPresenter::BP_OnNotificationReceived_Kill(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	auto* InteractionViewModel = Cast<UInteractionViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
+	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
+	{
+		InteractionViewModel->Kill();
+	}
+}
+
+void UInteractionPresenter::StartPresenting()
+{
+	const bool bDoesDisplayOnHUD = (PreviewType == EWidgetPreviewType::OnHUD);
 	if (bDoesDisplayOnHUD)
 	{
 		FAVVMUIExtensionContextArgs CtxArgs;
@@ -103,9 +123,9 @@ void UAVVMWorldActorPresenter::StartPresenting()
 	}
 }
 
-void UAVVMWorldActorPresenter::StopPresenting()
+void UInteractionPresenter::StopPresenting()
 {
-	const bool bDoesDisplayOnHUD = (PreviewType == EAVVMWidgetPreviewType::OnHUD);
+	const bool bDoesDisplayOnHUD = (PreviewType == EWidgetPreviewType::OnHUD);
 	if (bDoesDisplayOnHUD)
 	{
 		IAVVMUIExtensionInterface::PopContentToExtensionPoint(ExtensionRequestHandle);
@@ -119,7 +139,7 @@ void UAVVMWorldActorPresenter::StopPresenting()
 	}
 }
 
-void UAVVMWorldActorPresenter::DeferredWidgetClassLoading()
+void UInteractionPresenter::DeferredWidgetClassLoading()
 {
 	if (!ensureAlwaysMsgf(!WorldWidgetClass.IsNull(),
 	                      TEXT("Cannot load World Widget Class. Is Null!")))
@@ -130,7 +150,7 @@ void UAVVMWorldActorPresenter::DeferredWidgetClassLoading()
 	if (!WorldWidgetClass.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMWorldActorPresenter::SetupWorldWidget);
+		Callback.BindUObject(this, &UInteractionPresenter::SetupWorldWidget);
 		UAssetManager::Get().LoadAssetList({WorldWidgetClass.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -139,7 +159,7 @@ void UAVVMWorldActorPresenter::DeferredWidgetClassLoading()
 	}
 }
 
-void UAVVMWorldActorPresenter::SetupWorldWidget()
+void UInteractionPresenter::SetupWorldWidget()
 {
 	const AActor* Outer = GetTypedOuter<AActor>();
 	if (!IsValid(Outer))

@@ -29,6 +29,7 @@ public class InteractionSample : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
 				"AVVMGameplay",
 				"CommonUI",
 				"Core",
@@ -39,8 +40,8 @@ public class InteractionSample : ModuleRules
 				"GameplayTags",
 				"GameplayTasks",
 				"IrisCore",
-				// TODO @gdemers maybe worth stripping dependency when building dedicated server ?
 				"ModelViewViewModel",
+				"UIExtension",
 				"UMG"
 			}
 		);
@@ -48,7 +49,6 @@ public class InteractionSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVM",
 				"AVVMToolkit",
 				"CommonInput",
 				"EnhancedInput",

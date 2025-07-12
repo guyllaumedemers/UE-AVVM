@@ -21,8 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVM.h"
+#include "MVVMViewModelBase.h"
 #include "Data/AVVMHandshakePayload.h"
-#include "UI/AVVMWorldActorViewModel.h"
 
 #include "InteractionViewModel.generated.h"
 
@@ -68,14 +69,17 @@ struct INTERACTIONSAMPLE_API FInputProgress
  *	Example : Hold time.
  */
 UCLASS(BlueprintType, Blueprintable)
-class INTERACTIONSAMPLE_API UInteractionViewModel : public UAVVMWorldActorViewModel
+class INTERACTIONSAMPLE_API UInteractionViewModel : public UMVVMViewModelBase,
+                                                    public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UInteractionViewModel"); };
-	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload) override;
-	virtual void PumpHeartbeat(const float NewHeartbeat) override;
+	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+	virtual void PumpHeartbeat(const float NewHeartbeat);
+	virtual void Execute();
+	virtual void Kill();
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)

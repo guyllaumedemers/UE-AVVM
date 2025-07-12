@@ -39,6 +39,12 @@ void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHa
 		ParentTask->ReadyForActivation();
 	}
 
+	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+	if (!IsValid(PC) || !PC->IsLocalController())
+	{
+		return;
+	}
+
 	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, true);
 	if (IsValid(ChildTask))
 	{
