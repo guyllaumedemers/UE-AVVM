@@ -77,7 +77,7 @@ void UInteractionPresenter::BP_OnNotificationReceived_PumpHeartbeat(const TInsta
 	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
 	{
 		const auto* NewHeatbeat = Payload.GetPtr<FAVVMHearbeatPayload>();
-		InteractionViewModel->PumpHeartbeat((NewHeatbeat != nullptr) ? NewHeatbeat->Value : INDEX_NONE);
+		InteractionViewModel->PumpHeartbeat((NewHeatbeat != nullptr) ? NewHeatbeat->Value : static_cast<float>(INDEX_NONE));
 	}
 }
 

@@ -210,7 +210,7 @@ void UPlayerInteractionAbilityBase::RunOptionalTask(const FGameplayAbilitySpecHa
 	CommitAbility(Handle, ActorInfo, ActivationInfo);
 }
 
-const AActor* UPlayerInteractionAbilityBase::GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent)
+const AActor* UPlayerInteractionAbilityBase::GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent) const
 {
 	if (!IsValid(AbilitySystemComponent))
 	{

@@ -119,7 +119,7 @@ void UInteractionViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationP
 
 void UInteractionViewModel::PumpHeartbeat(const float NewHeartbeat)
 {
-	if (!FMath::IsNearlyEqual(NewHeartbeat, INDEX_NONE))
+	if (!FMath::IsNearlyEqual(NewHeartbeat, static_cast<float>(INDEX_NONE)))
 	{
 		const float NewProgress = InputContext.Tick(InputProgress, NewHeartbeat);
 		UE_MVVM_SET_PROPERTY_VALUE(InputProgress, NewProgress);
