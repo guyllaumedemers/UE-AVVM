@@ -20,6 +20,7 @@
 #include "UI/InteractionPresenter.h"
 
 #include "AVVM.h"
+#include "AVVMGameStateHandshakeComponent.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonUserWidget.h"
 #include "MVVMViewModelBase.h"
@@ -76,18 +77,8 @@ void UInteractionPresenter::BP_OnNotificationReceived_PumpHeartbeat(const TInsta
 	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
 	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
 	{
-		const auto* NewHeatbeat = Payload.GetPtr<FAVVMHearbeatPayload>();
-		InteractionViewModel->PumpHeartbeat((NewHeatbeat != nullptr) ? NewHeatbeat->Value : static_cast<float>(INDEX_NONE));
-	}
-}
-
-void UInteractionPresenter::BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
-{
-	auto* InteractionViewModel = Cast<UInteractionViewModel>(ViewModel.Get());
-	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
-	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
-	{
-		InteractionViewModel->Execute();
+		const auto* NewHeartbeat = Payload.GetPtr<FAVVMHearbeatPayload>();
+		InteractionViewModel->PumpHeartbeat((NewHeartbeat != nullptr) ? NewHeartbeat->Value : static_cast<float>(INDEX_NONE));
 	}
 }
 
@@ -98,6 +89,25 @@ void UInteractionPresenter::BP_OnNotificationReceived_Kill(const TInstancedStruc
 	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
 	{
 		InteractionViewModel->Kill();
+	}
+}
+
+void UInteractionPresenter::BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+{
+	const auto* HandshakePayload = Payload.GetPtr<FAVVMHandshakePayload>();
+	if (!ensureAlwaysMsgf(HandshakePayload != nullptr,
+	                      TEXT("Notified Execution Channel Tag with invalid Struct type.")))
+	{
+		return;
+	}
+
+	const auto* HandshakeComponent = UAVVMGameStateHandshakeComponent::GetActorComponent(this);
+	if (ensureAlwaysMsgf(IsValid(HandshakeComponent),
+	                     TEXT("Missing Handshake component on AGameStateBase!")))
+	{
+		FOnHandshakeRequestComplete Callback;
+		Callback.BindDynamic(this, &UInteractionPresenter::PostHandshakeValidation);
+		HandshakeComponent->ProcessHandshake(*HandshakePayload, Callback);
 	}
 }
 
@@ -189,4 +199,19 @@ void UInteractionPresenter::SetupWorldWidget()
 	}
 
 	OwningOuter = Outer;
+}
+
+void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess)
+{
+	if (!bWasSuccess)
+	{
+		return;
+	}
+
+	auto* InteractionViewModel = Cast<UInteractionViewModel>(ViewModel.Get());
+	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
+	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
+	{
+		InteractionViewModel->Execute();
+	}
 }

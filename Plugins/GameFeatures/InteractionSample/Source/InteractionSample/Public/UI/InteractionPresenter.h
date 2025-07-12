@@ -71,16 +71,19 @@ protected:
 	void BP_OnNotificationReceived_PumpHeartbeat(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_Kill(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable)
-	void BP_OnNotificationReceived_Kill(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
+	void BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 
 	void DeferredWidgetClassLoading();
 	void SetupWorldWidget();
+
+	UFUNCTION()
+	void PostHandshakeValidation(const bool bWasSuccess);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	EWidgetPreviewType PreviewType = EWidgetPreviewType::InWorld;

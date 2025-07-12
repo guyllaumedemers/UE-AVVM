@@ -130,6 +130,20 @@ void UInteractionViewModel::PumpHeartbeat(const float NewHeartbeat)
 	}
 }
 
+void UInteractionViewModel::Kill()
+{
+	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, 0.f);
+
+	const UInputAction* InputAction = InputContext.InputAction.Get();
+	if (IsValid(InputAction))
+	{
+		UE_LOG(LogUI,
+			   Log,
+			   TEXT("\"%s\" Interaction Cancelled."),
+			   *InputAction->GetName());
+	}
+}
+
 void UInteractionViewModel::Execute()
 {
 	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, 0.f);
@@ -140,20 +154,6 @@ void UInteractionViewModel::Execute()
 		UE_LOG(LogUI,
 		       Log,
 		       TEXT("\"%s\" Interaction Executed."),
-		       *InputAction->GetName());
-	}
-}
-
-void UInteractionViewModel::Kill()
-{
-	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, 0.f);
-
-	const UInputAction* InputAction = InputContext.InputAction.Get();
-	if (IsValid(InputAction))
-	{
-		UE_LOG(LogUI,
-		       Log,
-		       TEXT("\"%s\" Interaction Cancelled."),
 		       *InputAction->GetName());
 	}
 }

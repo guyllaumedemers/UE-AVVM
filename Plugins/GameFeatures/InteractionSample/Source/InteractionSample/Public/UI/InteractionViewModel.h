@@ -78,8 +78,8 @@ public:
 	virtual FName GetViewModelFName() const override { return TEXT("UInteractionViewModel"); };
 	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
 	virtual void PumpHeartbeat(const float NewHeartbeat);
-	virtual void Execute();
 	virtual void Kill();
+	virtual void Execute();
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
