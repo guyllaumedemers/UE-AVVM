@@ -325,7 +325,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	                                        StartPromptInteractionChannel,
 	                                        Controller,
 	                                        Instigator,
-	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(Instigator, Controller));
+	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(Instigator, Controller));
 }
 
 void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewRecords,

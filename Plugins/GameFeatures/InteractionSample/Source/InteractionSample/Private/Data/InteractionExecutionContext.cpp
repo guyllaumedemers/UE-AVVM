@@ -35,7 +35,7 @@ void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInst
 	                                        PumpHeartbeatChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(NewDelta));
+	                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(NewDelta));
 }
 
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
@@ -50,7 +50,7 @@ void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator
 	                                        ExecuteChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHandshakePayload>(NewInstigator, PC));
+	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(NewInstigator, PC));
 }
 
 void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
@@ -66,5 +66,5 @@ void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
 	                                        KillChannelTag,
 	                                        PC,
 	                                        NewInstigator,
-	                                        TInstancedStruct<FAVVMNotificationPayload>::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE)));
+	                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE)));
 }
