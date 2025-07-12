@@ -167,10 +167,18 @@ void UPlayerInteractionAbilityBase::CancelAbility(const FGameplayAbilitySpecHand
                                                   const FGameplayAbilityActivationInfo ActivationInfo,
                                                   bool bReplicateCancelAbility)
 {
+	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Aborting Ability \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
+	       *GetClass()->GetName());
+
 	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (IsValid(InteractionComponent))
 	{
-		InteractionComponent->Kill((ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr);
+		InteractionComponent->Kill(PC);
 	}
 
 	// @gdemers calls EndAbility which clear TargetComponent otherwise
@@ -192,13 +200,25 @@ bool UPlayerInteractionAbilityBase::CommitAbility(const FGameplayAbilitySpecHand
                                                   const FGameplayAbilityActivationInfo ActivationInfo,
                                                   FGameplayTagContainer* OptionalRelevantTags)
 {
-	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
-	if (!IsValid(InteractionComponent) || !Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
+	if (!Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
 	{
 		return false;
 	}
 
-	InteractionComponent->Execute((ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr);
+	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Commiting Ability \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
+	       *GetClass()->GetName());
+
+	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
+	if (IsValid(InteractionComponent))
+	{
+		InteractionComponent->Execute(PC);
+	}
+
 	return true;
 }
 
@@ -207,7 +227,15 @@ void UPlayerInteractionAbilityBase::RunOptionalTask(const FGameplayAbilitySpecHa
                                                     const FGameplayAbilityActivationInfo ActivationInfo,
                                                     const FGameplayEventData* TriggerEventData)
 {
-	CommitAbility(Handle, ActorInfo, ActivationInfo);
+	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
+	if (bWasCommitted)
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	}
+	else
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+	}
 }
 
 const AActor* UPlayerInteractionAbilityBase::GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent) const

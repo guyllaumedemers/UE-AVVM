@@ -90,16 +90,17 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 	bool bCanCommit = InteractionComponent->StopExecution(Controller) && InteractionComponent->DoesMeetExecutionRequirements(
 			TInstancedStruct<FInteractionExecutionFloatRequirements>::Make(Requirements));
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". \"%s\" Ability \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(GetOwningActorFromActorInfo()).GetData(),
-	       bCanCommit ? TEXT("Committing") : TEXT("Aborting"),
-	       *UPlayerInteractionAbilityBase::StaticClass()->GetName());
-
 	if (bCanCommit)
 	{
-		CommitAbility(SpecHandle, ActorInfo, ActivationInfo);
+		const bool bWasCommitted = CommitAbility(SpecHandle, ActorInfo, ActivationInfo);
+		if (bWasCommitted)
+		{
+			EndAbility(SpecHandle, ActorInfo, ActivationInfo, true, false);
+		}
+		else
+		{
+			CancelAbility(SpecHandle, ActorInfo, ActivationInfo, true);
+		}
 	}
 	else
 	{
