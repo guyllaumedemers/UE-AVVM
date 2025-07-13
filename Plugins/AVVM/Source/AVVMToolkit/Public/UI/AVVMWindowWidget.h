@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "CommonUserWidget.h"
+#include "AVVMFrameWidget.h"
 #include "GameplayTagContainer.h"
 
 #include "AVVMWindowWidget.generated.h"
@@ -57,13 +57,11 @@ struct AVVMTOOLKIT_API FWindowState
  *	UAVVMWindowWidget is a widget class that can be child to a UAVVMFrameWidget.
  */
 UCLASS()
-class AVVMTOOLKIT_API UAVVMWindowWidget : public UCommonUserWidget
+class AVVMTOOLKIT_API UAVVMWindowWidget : public UAVVMFrameWidget
 {
 	GENERATED_BODY()
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FWindowState WindowState = FWindowState();
-
-	// TODO @gdemers define how neighboring should be handled. HOws the data cached ? and how do we update it ?
 };

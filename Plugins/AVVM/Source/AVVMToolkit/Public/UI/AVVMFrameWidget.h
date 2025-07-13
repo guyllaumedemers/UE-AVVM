@@ -135,7 +135,10 @@ protected:
 	TArray<TSubclassOf<UAVVMWindowDecorator>> WindowDecoratorClasses;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UAVVMWindowDecorator>> WindowDecorators;
+	TArray<TObjectPtr<const UAVVMWindowDecorator>> WindowDecorators;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UAVVMFrameWidget> Parent = nullptr;
 
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> ViewModelToWindowContext;
