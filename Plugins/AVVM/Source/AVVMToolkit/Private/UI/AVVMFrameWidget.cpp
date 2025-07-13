@@ -21,9 +21,9 @@
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Overlay.h"
+#include "Components/PanelSlot.h"
 #include "Engine/AssetManager.h"
 #include "UI/AVVMFrameSettings.h"
-#include "Components/PanelSlot.h"
 
 #if WITH_EDITORONLY_DATA
 #include "UI/AVVMEditorPreviewViewModel.h"
@@ -219,6 +219,7 @@ void UAVVMFrameBorder::SwapSlots(UAVVMFrameWidget* NewFrame)
 
 	if (IsValid(Anchor))
 	{
+		Anchor->ClearChildren();
 		Anchor->AddChild(NewFrameSlot->Content);
 	}
 }

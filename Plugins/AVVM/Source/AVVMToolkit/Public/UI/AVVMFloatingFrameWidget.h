@@ -61,6 +61,8 @@ protected:
 	virtual void RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const override;
 	virtual void UnRegisterChild_Internal(const UObject* NewViewModel) const override;
 
+	virtual bool AllowInnerBorders() const override;
+
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> Root = nullptr;
 };

@@ -136,3 +136,8 @@ void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(const UObject* NewViewMo
 		Root->RemoveChild((SearchResult != nullptr) ? SearchResult->Frame.Get() : nullptr);
 	}
 }
+
+bool UAVVMFloatingFrameWidget::AllowInnerBorders() const
+{
+	return true;
+}

@@ -29,7 +29,10 @@
 #include "AVVMFrameWidget.generated.h"
 
 class UAVVMFrameBorder;
+class UAVVMFrameWidget;
 class UAVVMWidgetPickerDataAsset;
+class UCommonButtonBase;
+class UCommonTextBlock;
 class UOverlay;
 
 /**
@@ -212,4 +215,10 @@ public:
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UOverlay> Anchor = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> Title = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UCommonButtonBase> Button = nullptr;
 };
