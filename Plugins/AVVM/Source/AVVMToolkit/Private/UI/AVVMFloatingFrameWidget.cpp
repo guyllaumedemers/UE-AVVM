@@ -113,15 +113,18 @@ void UAVVMFloatingFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
 
 void UAVVMFloatingFrameWidget::RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
 {
+	if (!IsValid(Root))
+	{
+		return;
+	}
+
 	auto* ChildFrame = NewZOrder.Frame.Get();
 	if (IsValid(ChildFrame))
 	{
-		ChildFrame->SetParent(this);
-	}
-
-	if (IsValid(Root))
-	{
 		Root->AddChild(ChildFrame);
+		// @gdemers orders matter here. SetParent handle PanelSlot swap. we expect to be already slotted
+		// to a parent.
+		ChildFrame->SetParent(this);
 	}
 }
 

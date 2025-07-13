@@ -30,6 +30,7 @@
 
 class UAVVMFrameBorder;
 class UAVVMWidgetPickerDataAsset;
+class UOverlay;
 
 /**
  *	Class description:
@@ -119,6 +120,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetParent(const UAVVMFrameWidget* NewParent);
 
+	UFUNCTION(BlueprintCallable)
+	UAVVMFrameWidget* GetSelfOrBorder();
+
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
@@ -137,6 +141,9 @@ protected:
 
 	void UnRegisterChild(UObject* NewViewModel);
 	virtual void UnRegisterChild_Internal(const UObject* NewViewModel) const PURE_VIRTUAL(UnRegisterChild_Internal, return;);
+
+	UAVVMFrameBorder* IfCheckCreateBorder() const;
+	virtual bool AllowInnerBorders() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
@@ -200,4 +207,12 @@ UCLASS(Blueprintable)
 class AVVMTOOLKIT_API UAVVMFrameBorder : public UAVVMFrameWidget
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void SwapSlots(UAVVMFrameWidget* NewFrame);
+
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UOverlay> Anchor = nullptr;
 };

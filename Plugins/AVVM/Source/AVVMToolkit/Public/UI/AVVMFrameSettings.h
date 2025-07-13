@@ -17,4 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/AVVMWindowWidget.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "AVVMFrameSettings.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMFrameSettings is a Settings UObject that define global values that can accessed in code. It aggregates all the properties
+ *	specific to UI that aren't already defined under UGameUserSettings.
+ *
+ *	TBD! (More later)
+ */
+UCLASS(BlueprintType, NotBlueprintable, config=GameUserSettings, configdonotcheckdefaults)
+class AVVMTOOLKIT_API UAVVMFrameSettings : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool IsUIBorderless();
+
+protected:
+	UPROPERTY(BlueprintReadOnly, config)
+	bool bIsUIBorderless = false;
+};
