@@ -65,7 +65,7 @@ void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* New
 {
 	Parent = NewParent;
 
-	if (BorderWidgetClass.IsNull())
+	if (!bSupportBorderClass || BorderWidgetClass.IsNull())
 	{
 		return;
 	}

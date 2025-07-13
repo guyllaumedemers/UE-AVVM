@@ -155,6 +155,9 @@ protected:
 	TSoftClassPtr<UAVVMFrameWidget> WidgetClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	bool bSupportBorderClass = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bSupportBorderClass"))
 	TSoftClassPtr<UAVVMFrameBorder> BorderWidgetClass = nullptr;
 
 #if WITH_EDITORONLY_DATA

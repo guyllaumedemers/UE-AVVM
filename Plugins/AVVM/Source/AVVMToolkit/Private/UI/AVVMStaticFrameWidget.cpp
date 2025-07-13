@@ -55,8 +55,8 @@ void UAVVMStaticFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels
 
 	Root->Reset(true);
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
-	if (WidgetPickerDataAsset.IsNull())
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		for (UObject* NewViewModel : NewViewModels)
 		{
@@ -92,8 +92,8 @@ void UAVVMStaticFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 	};
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
-	if (WidgetPickerDataAsset.IsNull() || bOverrideWidgetPicker)
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 	}

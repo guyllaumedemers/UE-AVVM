@@ -53,8 +53,8 @@ void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewMode
 
 	Root->ClearChildren();
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
-	if (WidgetPickerDataAsset.IsNull())
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		for (UObject* NewViewModel : NewViewModels)
 		{
@@ -88,8 +88,8 @@ void UAVVMFloatingFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 	};
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
-	if (WidgetPickerDataAsset.IsNull())
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
 	}
