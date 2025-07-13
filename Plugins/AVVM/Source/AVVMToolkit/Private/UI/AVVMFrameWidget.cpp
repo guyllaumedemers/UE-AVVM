@@ -87,9 +87,9 @@ void UAVVMFrameWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	WindowDecorators.Reset(WindowDecoratorClasses.Num());
-	for (const TSubclassOf<UAVVMWindowDecorator>& WindowDecoratorClass : WindowDecoratorClasses)
+	for (const TSubclassOf<UAVVMFrameDecorator>& WindowDecoratorClass : WindowDecoratorClasses)
 	{
-		auto* NewDecorator = NewObject<UAVVMWindowDecorator>(this, WindowDecoratorClass);
+		auto* NewDecorator = NewObject<UAVVMFrameDecorator>(this, WindowDecoratorClass);
 		WindowDecorators.Add(NewDecorator);
 	}
 }
@@ -107,7 +107,7 @@ void UAVVMFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 	for (auto Iterator = WindowDecorators.CreateIterator(); Iterator; ++Iterator)
 	{
-		const TObjectPtr<const UAVVMWindowDecorator>& Decorator = *Iterator;
+		const TObjectPtr<const UAVVMFrameDecorator>& Decorator = *Iterator;
 		if (!IsValid(Decorator))
 		{
 			Iterator.RemoveCurrentSwap();

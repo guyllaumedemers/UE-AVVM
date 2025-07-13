@@ -28,8 +28,8 @@
 
 #include "AVVMFrameWidget.generated.h"
 
+class UAVVMFrameBorder;
 class UAVVMWidgetPickerDataAsset;
-class UAVVMWindowWidget;
 
 /**
  *	Class description:
@@ -59,10 +59,11 @@ struct AVVMTOOLKIT_API FFrameZOrder
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EFrameBitmask : uint8
 {
-	None      = 0 UMETA(Hidden),
-	Docked    = 1 << 0,
-	Minimized = 1 << 1,
-	Closed    = 1 << 2,
+	None       = 0 UMETA(Hidden),
+	Docked     = 1 << 0,
+	Minimized  = 1 << 1,
+	Closed     = 1 << 2,
+	Borderless = 1 << 3,
 };
 
 ENUM_CLASS_FLAGS(EFrameBitmask);
@@ -70,17 +71,17 @@ ENUM_CLASS_FLAGS(EFrameBitmask);
 /**
  *	Class description:
  *
- *	UAVVMWindowDecorator is an abstract around the implementation details of a Widget behavior. Derived types such as Drag/Drop, Docking and Minimized are expected!
- *	Instead of having all Context Window own instance running the same behaviour, the Frame will hold all instance and batch update registered windows.
+ *	UAVVMFrameDecorator is an abstraction detail around the behavior of a UAVVMFrameWidget. Derived types such as Drag/Drop, Docking and Minimized are expected!
+ *	Instead of having all Context Window own instance running the same behavior, the Frame will hold all instance and batch update registered windows.
  */
 UCLASS(Abstract, BlueprintType, NotBlueprintable)
-class AVVMTOOLKIT_API UAVVMWindowDecorator : public UObject
+class AVVMTOOLKIT_API UAVVMFrameDecorator : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	virtual bool DoesSupportTick() const PURE_VIRTUAL(DoesSupportTick, return false;)
-	virtual void Tick(UAVVMWindowWidget* Window, const float NewDeltaTime) const PURE_VIRTUAL(Tick, return;);
+	virtual void Tick(UAVVMFrameWidget* Frame, const float NewDeltaTime) const PURE_VIRTUAL(Tick, return;);
 };
 
 /**
@@ -97,7 +98,7 @@ public:
  *
  *	See UAVVMFloatingFrameWidget & UAVVMStaticFrameWidget for additional details.
  */
-UCLASS(Abstract, NotBlueprintable)
+UCLASS(Abstract, BlueprintType, NotBlueprintable)
 class AVVMTOOLKIT_API UAVVMFrameWidget : public UCommonUserWidget
 {
 	GENERATED_BODY()
@@ -167,10 +168,10 @@ protected:
 	FGameplayTag FrameIdTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TArray<TSubclassOf<UAVVMWindowDecorator>> WindowDecoratorClasses;
+	TArray<TSubclassOf<UAVVMFrameDecorator>> WindowDecoratorClasses;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<const UAVVMWindowDecorator>> WindowDecorators;
+	TArray<TObjectPtr<const UAVVMFrameDecorator>> WindowDecorators;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UAVVMFrameWidget> Parent = nullptr;
@@ -184,5 +185,19 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 ZOrder = INDEX_NONE;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<UAVVMFrameBorder> OwningBorder = nullptr;
+
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMFrameHeader is a widget class that owns a Frame and is only visible when the owned Frame is non-borderless.
+ */
+UCLASS(Blueprintable)
+class AVVMTOOLKIT_API UAVVMFrameBorder : public UAVVMFrameWidget
+{
+	GENERATED_BODY()
 };

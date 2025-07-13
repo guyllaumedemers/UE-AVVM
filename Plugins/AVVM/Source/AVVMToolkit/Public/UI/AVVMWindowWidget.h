@@ -28,9 +28,12 @@
 /**
  *	Class description:
  *
- *	UAVVMWindowWidget is a widget class that can be child to a UAVVMFrameWidget.
+ *	UAVVMWindowWidget is a widget class that can be child to UAVVMFrameWidget and contains feature specific children. i.e Inventory content,
+ *	minimap, etc...
+ *
+ *	This is where your feature design should be referenced.
  */
-UCLASS()
+UCLASS(Blueprintable)
 class AVVMTOOLKIT_API UAVVMWindowWidget : public UAVVMFrameWidget
 {
 	GENERATED_BODY()
