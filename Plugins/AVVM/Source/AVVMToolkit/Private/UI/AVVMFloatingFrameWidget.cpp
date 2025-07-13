@@ -48,13 +48,7 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 	{
 		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
-
-		if (IsValid(WidgetInstance))
-		{
-			WidgetInstance->SetParent(&NewParent);
-		}
 	};
 
 	Root->ClearChildren();
@@ -91,13 +85,7 @@ void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 	{
 		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
-
-		if (IsValid(WidgetInstance))
-		{
-			WidgetInstance->SetParent(&NewParent);
-		}
 	};
 
 	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
@@ -125,9 +113,15 @@ void UAVVMFloatingFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
 
 void UAVVMFloatingFrameWidget::RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
 {
+	auto* ChildFrame = NewZOrder.Frame.Get();
+	if (IsValid(ChildFrame))
+	{
+		ChildFrame->SetParent(this);
+	}
+
 	if (IsValid(Root))
 	{
-		Root->AddChild(NewZOrder.Frame.Get());
+		Root->AddChild(ChildFrame);
 	}
 }
 

@@ -50,13 +50,7 @@ void UAVVMStaticFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModel
 		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
 		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
-
-		if (IsValid(WidgetInstance))
-		{
-			WidgetInstance->SetParent(&NewParent);
-		}
 	};
 
 	Root->Reset(true);
@@ -95,13 +89,7 @@ void UAVVMStaticFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
 		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
-
-		if (IsValid(WidgetInstance))
-		{
-			WidgetInstance->SetParent(&NewParent);
-		}
 	};
 
 	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
@@ -129,6 +117,11 @@ void UAVVMStaticFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
 
 void UAVVMStaticFrameWidget::RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
 {
+	auto* ChildFrame = NewZOrder.Frame.Get();
+	if (IsValid(ChildFrame))
+	{
+		ChildFrame->SetParent(this);
+	}
 }
 
 void UAVVMStaticFrameWidget::UnRegisterChild_Internal(const UObject* NewViewModel) const
