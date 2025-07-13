@@ -96,7 +96,7 @@ void UAVVMFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 	for (auto Iterator = WindowDecorators.CreateIterator(); Iterator; ++Iterator)
 	{
-		const TObjectPtr<UAVVMWindowDecorator>& Decorator = *Iterator;
+		const TObjectPtr<const UAVVMWindowDecorator>& Decorator = *Iterator;
 		if (!IsValid(Decorator))
 		{
 			Iterator.RemoveCurrentSwap();

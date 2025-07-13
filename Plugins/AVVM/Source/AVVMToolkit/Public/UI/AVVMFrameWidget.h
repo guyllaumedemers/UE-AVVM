@@ -60,7 +60,7 @@ class AVVMTOOLKIT_API UAVVMWindowDecorator : public UObject
 
 public:
 	virtual bool DoesSupportTick() const PURE_VIRTUAL(DoesSupportTick, return false;)
-	virtual void Tick(UAVVMWindowWidget* Window, const float NewDeltaTime) PURE_VIRTUAL(Tick, return;);
+	virtual void Tick(UAVVMWindowWidget* Window, const float NewDeltaTime) const PURE_VIRTUAL(Tick, return;);
 };
 
 /**
