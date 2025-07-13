@@ -34,15 +34,18 @@ class UAVVMWindowWidget;
 /**
  *	Class description:
  *
- *	FWindowZOrder is a POD that cache data about the window context and the layer on which it lives.
+ *	FFrameZOrder is a POD that cache data about the Frame context and the layer on which it lives.
  */
 USTRUCT(BlueprintType)
-struct AVVMTOOLKIT_API FWindowZOrder
+struct AVVMTOOLKIT_API FFrameZOrder
 {
 	GENERATED_BODY()
 
+	FFrameZOrder() = default;
+	explicit FFrameZOrder(UAVVMFrameWidget* NewFrame, const int32 NewZOrder);
+
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<UCommonUserWidget> Window;
+	TWeakObjectPtr<UAVVMFrameWidget> Frame = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 ZOrder = INDEX_NONE;
@@ -51,7 +54,7 @@ struct AVVMTOOLKIT_API FWindowZOrder
 /**
  *	Class description:
  *
- *	FWindowState is a representation of the Window status.
+ *	EFrameBitmask is a bitmask system that tracks the state of a Frame object.
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EFrameBitmask : uint8
@@ -128,6 +131,12 @@ protected:
 	virtual void PreviewEntries();
 #endif
 
+	void RegisterChild(UObject* NewViewModel, const FFrameZOrder& NewZOrder);
+	virtual void RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const PURE_VIRTUAL(RegisterChild_Internal, return;);
+
+	void UnRegisterChild(UObject* NewViewModel);
+	virtual void UnRegisterChild_Internal(const UObject* NewViewModel) const PURE_VIRTUAL(UnRegisterChild_Internal, return;);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
 
@@ -167,10 +176,13 @@ protected:
 	TWeakObjectPtr<const UAVVMFrameWidget> Parent = nullptr;
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> ViewModelToWindowContext;
+	TMap<TWeakObjectPtr<UObject>, FFrameZOrder> ViewModelToWindowContext;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	EFrameBitmask FrameFlags = EFrameBitmask::None;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 ZOrder = INDEX_NONE;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

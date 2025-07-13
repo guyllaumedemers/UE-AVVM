@@ -43,12 +43,12 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 	}
 
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
-	                                             UCanvasPanel& NewCanvasPanel,
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
 		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
-		NewCanvasPanel.AddChild(WidgetInstance);
+		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
+
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 
 		if (IsValid(WidgetInstance))
@@ -64,7 +64,7 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 	{
 		for (UObject* NewViewModel : NewViewModels)
 		{
-			CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
+			CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
 		}
 	}
 	else if (!WidgetPickerDataAsset.IsValid())
@@ -78,25 +78,20 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 		for (UObject* NewViewModel : NewViewModels)
 		{
 			WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
-			CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
+			CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
 		}
 	}
 }
 
 void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 {
-	if (!IsValid(Root))
-	{
-		return;
-	}
-
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
-	                                             UCanvasPanel& NewCanvasPanel,
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
 		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
-		NewCanvasPanel.AddChild(WidgetInstance);
+		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
+
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 
 		if (IsValid(WidgetInstance))
@@ -108,7 +103,7 @@ void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
 	if (WidgetPickerDataAsset.IsNull())
 	{
-		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
+		CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
 	}
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
@@ -119,15 +114,28 @@ void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 	else
 	{
 		NewWidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
-		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
+		CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
 	}
 }
 
 void UAVVMFloatingFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
 {
+	UnRegisterChild(NewViewModel);
+}
+
+void UAVVMFloatingFrameWidget::RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
+{
 	if (IsValid(Root))
 	{
-		const FWindowZOrder* SearchResult = ViewModelToWindowContext.Find(NewViewModel);
-		Root->RemoveChild((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
+		Root->AddChild(NewZOrder.Frame.Get());
+	}
+}
+
+void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(const UObject* NewViewModel) const
+{
+	if (IsValid(Root))
+	{
+		const FFrameZOrder* SearchResult = ViewModelToWindowContext.Find(NewViewModel);
+		Root->RemoveChild((SearchResult != nullptr) ? SearchResult->Frame.Get() : nullptr);
 	}
 }

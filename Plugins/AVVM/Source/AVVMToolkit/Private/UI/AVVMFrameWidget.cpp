@@ -25,6 +25,12 @@
 #include "UI/AVVMEditorPreviewViewModel.h"
 #endif
 
+FFrameZOrder::FFrameZOrder(UAVVMFrameWidget* NewFrame, const int32 NewZOrder)
+	: Frame(NewFrame)
+	, ZOrder(NewZOrder)
+{
+}
+
 void UAVVMFrameWidget::SetupWindows(const TArray<UObject*>& NewViewModels)
 {
 	SetupWindows_Internal(NewViewModels);
@@ -142,3 +148,16 @@ void UAVVMFrameWidget::PreviewEntries()
 	SetupWindows_Internal(EditorPreviewObjects);
 }
 #endif
+
+void UAVVMFrameWidget::RegisterChild(UObject* NewViewModel, const FFrameZOrder& NewZOrder)
+{
+	FFrameZOrder& SearchResult = ViewModelToWindowContext.FindOrAdd(NewViewModel);
+	SearchResult = NewZOrder;
+	RegisterChild_Internal(NewViewModel, NewZOrder);
+}
+
+void UAVVMFrameWidget::UnRegisterChild(UObject* NewViewModel)
+{
+	UnRegisterChild_Internal(NewViewModel);
+	ViewModelToWindowContext.Remove(NewViewModel);
+}
