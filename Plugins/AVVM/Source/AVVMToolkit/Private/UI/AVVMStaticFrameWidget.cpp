@@ -50,7 +50,7 @@ void UAVVMStaticFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModel
 		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
 		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-		
+
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 
 		if (IsValid(WidgetInstance))
@@ -87,11 +87,6 @@ void UAVVMStaticFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModel
 
 void UAVVMStaticFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 {
-	if (!IsValid(Root))
-	{
-		return;
-	}
-
 	const auto CreateWidgetAndBindViewModel = [](UAVVMStaticFrameWidget& NewParent,
 	                                             UDynamicEntryBox& NewDynamicBox,
 	                                             UObject* NewViewModel,
@@ -100,7 +95,7 @@ void UAVVMStaticFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
 		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-		
+
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 
 		if (IsValid(WidgetInstance))
