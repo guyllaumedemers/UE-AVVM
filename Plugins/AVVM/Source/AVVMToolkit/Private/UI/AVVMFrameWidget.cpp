@@ -65,15 +65,29 @@ void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* New
 {
 	Parent = NewParent;
 
-	UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
-	if (IsValid(NewBorder))
+	if (BorderWidgetClass.IsNull())
 	{
-		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
-		NewBorder->SwapSlots(this);
-		Parent = NewBorder;
+		return;
 	}
 
-	OwningBorder = NewBorder;
+	if (!BorderWidgetClass.IsValid())
+	{
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UAVVMFrameWidget::SetParent, NewParent, NewViewModel);
+		BorderClassHandle = UAssetManager::Get().LoadAssetList({BorderWidgetClass.ToSoftObjectPath()}, Callback);
+	}
+	else
+	{
+		UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
+		if (IsValid(NewBorder))
+		{
+			UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
+			NewBorder->SwapSlots(this);
+			Parent = NewBorder;
+		}
+
+		OwningBorder = NewBorder;
+	}
 }
 
 void UAVVMFrameWidget::NativePreConstruct()
@@ -94,7 +108,7 @@ void UAVVMFrameWidget::NativePreConstruct()
 #if WITH_EDITORONLY_DATA
 		Callback.BindUObject(this, &UAVVMFrameWidget::PreviewEntries);
 #endif
-		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetClass.ToSoftObjectPath()}, Callback);
+		WidgetClassHandle = UAssetManager::Get().LoadAssetList({WidgetClass.ToSoftObjectPath()}, Callback);
 	}
 }
 
@@ -113,7 +127,9 @@ void UAVVMFrameWidget::NativeConstruct()
 void UAVVMFrameWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
-	StreamableHandle.Reset();
+	WidgetClassPickerHandle.Reset();
+	WidgetClassHandle.Reset();
+	BorderClassHandle.Reset();
 	WindowDecorators.Reset();
 }
 

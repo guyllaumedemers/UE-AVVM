@@ -65,13 +65,13 @@ void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewMode
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::SetupFrames_Internal, NewViewModels);
-		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
+		WidgetClassPickerHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
 	{
 		for (UObject* NewViewModel : NewViewModels)
 		{
-			WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
+			NewWidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
 			CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
 		}
 	}
@@ -97,7 +97,7 @@ void UAVVMFloatingFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::AddFrame_Internal, NewViewModel);
-		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
+		WidgetClassPickerHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
 	{

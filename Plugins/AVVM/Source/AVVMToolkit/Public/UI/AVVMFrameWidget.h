@@ -198,7 +198,9 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMFrameBorder> OwningBorder = nullptr;
 
-	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+	TSharedPtr<FStreamableHandle> WidgetClassPickerHandle = nullptr;
+	TSharedPtr<FStreamableHandle> WidgetClassHandle = nullptr;
+	TSharedPtr<FStreamableHandle> BorderClassHandle = nullptr;
 };
 
 /**

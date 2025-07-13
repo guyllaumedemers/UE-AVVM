@@ -67,7 +67,7 @@ void UAVVMStaticFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMStaticFrameWidget::SetupFrames_Internal, NewViewModels);
-		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
+		WidgetClassPickerHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
 	{
@@ -101,7 +101,7 @@ void UAVVMStaticFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMStaticFrameWidget::AddFrame_Internal, NewViewModel);
-		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
+		WidgetClassPickerHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
 	{
