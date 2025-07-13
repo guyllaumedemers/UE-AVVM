@@ -111,7 +111,7 @@ void UAVVMFloatingFrameWidget::RemoveFrame_Internal(UObject* NewViewModel)
 	UnRegisterChild(NewViewModel);
 }
 
-void UAVVMFloatingFrameWidget::RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
+void UAVVMFloatingFrameWidget::RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
 {
 	if (!IsValid(Root))
 	{
@@ -124,11 +124,11 @@ void UAVVMFloatingFrameWidget::RegisterChild_Internal(const UObject* NewViewMode
 		Root->AddChild(ChildFrame);
 		// @gdemers orders matter here. SetParent handle PanelSlot swap. we expect to be already slotted
 		// to a parent.
-		ChildFrame->SetParent(this);
+		ChildFrame->SetParent(this, NewViewModel);
 	}
 }
 
-void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(const UObject* NewViewModel) const
+void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(UObject* NewViewModel) const
 {
 	if (IsValid(Root))
 	{
@@ -139,5 +139,5 @@ void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(const UObject* NewViewMo
 
 bool UAVVMFloatingFrameWidget::AllowInnerBorders() const
 {
-	return true;
+	return !Parent.Get();
 }

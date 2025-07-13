@@ -121,7 +121,7 @@ public:
 	void CloseAllFrames();
 
 	UFUNCTION(BlueprintCallable)
-	void SetParent(const UAVVMFrameWidget* NewParent);
+	void SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel);
 
 protected:
 	virtual void NativePreConstruct() override;
@@ -137,12 +137,12 @@ protected:
 #endif
 
 	void RegisterChild(UObject* NewViewModel, const FFrameZOrder& NewZOrder);
-	virtual void RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const PURE_VIRTUAL(RegisterChild_Internal, return;);
+	virtual void RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const PURE_VIRTUAL(RegisterChild_Internal, return;);
 
 	void UnRegisterChild(UObject* NewViewModel);
-	virtual void UnRegisterChild_Internal(const UObject* NewViewModel) const PURE_VIRTUAL(UnRegisterChild_Internal, return;);
+	virtual void UnRegisterChild_Internal(UObject* NewViewModel) const PURE_VIRTUAL(UnRegisterChild_Internal, return;);
 
-	UAVVMFrameBorder* IfCheckCreateBorder() const;
+	UAVVMFrameBorder* IfCheckCreateBorder();
 	virtual bool AllowInnerBorders() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
@@ -153,6 +153,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bOverrideWidgetPicker"))
 	TSoftClassPtr<UAVVMFrameWidget> WidgetClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<UAVVMFrameBorder> BorderWidgetClass = nullptr;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Designers", meta=(Bitmask, BitmaskEnum="EFrameBitmask"))

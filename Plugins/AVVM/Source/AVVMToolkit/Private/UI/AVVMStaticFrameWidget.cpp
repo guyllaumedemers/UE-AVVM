@@ -115,16 +115,16 @@ void UAVVMStaticFrameWidget::RemoveFrame_Internal(UObject* NewViewModel)
 	UnRegisterChild(NewViewModel);
 }
 
-void UAVVMStaticFrameWidget::RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
+void UAVVMStaticFrameWidget::RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
 {
 	auto* ChildFrame = NewZOrder.Frame.Get();
 	if (IsValid(ChildFrame))
 	{
-		ChildFrame->SetParent(this);
+		ChildFrame->SetParent(this, NewViewModel);
 	}
 }
 
-void UAVVMStaticFrameWidget::UnRegisterChild_Internal(const UObject* NewViewModel) const
+void UAVVMStaticFrameWidget::UnRegisterChild_Internal(UObject* NewViewModel) const
 {
 	if (IsValid(Root))
 	{

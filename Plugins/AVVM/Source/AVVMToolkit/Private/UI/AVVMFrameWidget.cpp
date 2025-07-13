@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMFrameWidget.h"
 
+#include "AVVM.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Overlay.h"
 #include "Components/PanelSlot.h"
@@ -59,13 +61,14 @@ void UAVVMFrameWidget::CloseAllFrames()
 	}
 }
 
-void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent)
+void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel)
 {
 	Parent = NewParent;
 
 	UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
 	if (IsValid(NewBorder))
 	{
+		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
 		NewBorder->SwapSlots(this);
 		Parent = NewBorder;
 	}
@@ -175,7 +178,7 @@ void UAVVMFrameWidget::UnRegisterChild(UObject* NewViewModel)
 	ViewModelToWindowContext.Remove(NewViewModel);
 }
 
-UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder() const
+UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder()
 {
 	const UAVVMFrameWidget* NewParent = Parent.Get();
 	if (!IsValid(NewParent) || !NewParent->AllowInnerBorders() || UAVVMFrameSettings::IsUIBorderless() || (UAVVMFrameBorder::StaticClass() == GetClass()))
@@ -183,10 +186,10 @@ UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder() const
 		return nullptr;
 	}
 
-	UAVVMFrameBorder* NewBorder = nullptr;
+	auto* NewBorder = Cast<UAVVMFrameBorder>(UUserWidget::CreateWidgetInstance(*this, BorderWidgetClass.Get(), NAME_None));
 	if (IsValid(NewBorder))
 	{
-		NewBorder->SetParent(NewParent);
+		NewBorder->SetParent(NewParent, nullptr);
 	}
 
 	return NewBorder;
