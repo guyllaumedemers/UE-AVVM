@@ -21,24 +21,34 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMMultiContextWindowWidget.h"
+#include "AVVMFrameWidget.h"
 
-#include "AVVMStaticMultiContextWindowWidget.generated.h"
+#include "AVVMFloatingFrameWidget.generated.h"
 
-class UDynamicEntryBox;
-
+class UCanvasPanel;
 
 /**
  *	Class description:
  *
- *	UAVVMStaticMultiContextWindowWidget is the Static version of the MultiContextWindowWidget that define
- *	a fix layout with multiple context. Context Window can still be opened and closed but are anchored to defined anchor.
+ *	UAVVMFloatingFrameWidget is a widget class that can holds many UAVVMStaticFrameWidget. It references
+ *	the anchor to with elements can be child.
  *
- *	Example : Crafting system where user has to drag from items from left to right and stack them to output a new Item
- *	or Diablo 1 inventory style with the backup storage system sitting side by side.
+ *	How to use ?
+ *
+ *		* There should always be one Outer most UAVVMFloatingFrameWidget that exists on the CommonActivatable Widget
+ *		that's active.
+ *
+ *		* Based on the View Model received (likely provided from user opening UI system context), we create a UAVVMStaticFrameWidget
+ *		that we anchor to our Outer most.
+ *
+ *		* Our child UAVVMStaticFrameWidget may be a complex element, built with many subdivisions which could support being detached. If so,
+ *		detaching a subdivision should be handled and anchored to our Outer most UAVVMFloatingFrameWidget.
+ *
+ *	Example : Guild Wars (1 - not 2, the second is garbage. For Ascalon!) UI system allowed opening many contexts windows on screen
+ *	such as minimap, inventory, achievements, etc... The inventory bags provided a unique context that could be detached.
  */
 UCLASS(Blueprintable)
-class AVVMTOOLKIT_API UAVVMStaticMultiContextWindowWidget : public UAVVMMultiContextWindowWidget
+class AVVMTOOLKIT_API UAVVMFloatingFrameWidget : public UAVVMFrameWidget
 {
 	GENERATED_BODY()
 
@@ -49,5 +59,5 @@ protected:
 	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
-	TObjectPtr<UDynamicEntryBox> Root = nullptr;
+	TObjectPtr<UCanvasPanel> Root = nullptr;
 };

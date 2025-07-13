@@ -21,32 +21,49 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMMultiContextWindowWidget.h"
+#include "CommonUserWidget.h"
+#include "GameplayTagContainer.h"
 
-#include "AVVMFloatingMultiContextWindowWidget.generated.h"
-
-class UCanvasPanel;
+#include "AVVMWindowWidget.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMFloatingMultiContextWindowWidget is the Floating version of the MultiContextWindowWidget that define
- *	a free form layout with multiple context. Context Window can be opened, closed and moved around.
- *
- *	Example : World of Warcraft floating inventory. (Mostly a PC only feature. Console would have to simulate such
- *	behavior using a free cursor for dragging floating content)
+ *	FWindowState is a representation of the Window status.
  */
-UCLASS(Blueprintable)
-class AVVMTOOLKIT_API UAVVMFloatingMultiContextWindowWidget : public UAVVMMultiContextWindowWidget
+USTRUCT(BlueprintType)
+struct AVVMTOOLKIT_API FWindowState
+{
+	GENERATED_BODY()
+
+	FWindowState() = default;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTag InstanceTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTag ParentTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bIsUndock = false;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bIsMinimized = false;
+};
+
+/**
+ *	Class description:
+ *
+ *	UAVVMWindowWidget is a widget class that can be child to a UAVVMFrameWidget.
+ */
+UCLASS()
+class AVVMTOOLKIT_API UAVVMWindowWidget : public UCommonUserWidget
 {
 	GENERATED_BODY()
 
 protected:
-	virtual void NativeConstruct() override;
-	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) override;
-	virtual void AddWindow_Internal(UObject* NewViewModel) override;
-	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FWindowState WindowState = FWindowState();
 
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
-	TObjectPtr<UCanvasPanel> Root = nullptr;
+	// TODO @gdemers define how neighboring should be handled. HOws the data cached ? and how do we update it ?
 };

@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMToolkit/Public/UI/AVVMFloatingMultiContextWindowWidget.h"
+#include "AVVMToolkit/Public/UI/AVVMFloatingFrameWidget.h"
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
@@ -25,7 +25,7 @@
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWidgetPickerDataAsset.h"
 
-void UAVVMFloatingMultiContextWindowWidget::NativeConstruct()
+void UAVVMFloatingFrameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -35,14 +35,14 @@ void UAVVMFloatingMultiContextWindowWidget::NativeConstruct()
 	}
 }
 
-void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
+void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
 {
 	if (!IsValid(Root))
 	{
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingMultiContextWindowWidget& NewMultiContextWidget,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewMultiContextWidget,
 	                                             UCanvasPanel& CanvasPanel,
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
@@ -68,7 +68,7 @@ void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal, NewViewModels);
+		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::SetupWindows_Internal, NewViewModels);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -81,14 +81,14 @@ void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject
 	}
 }
 
-void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewModel)
+void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 {
 	if (!IsValid(Root))
 	{
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingMultiContextWindowWidget& NewMultiContextWidget,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewMultiContextWidget,
 	                                             UCanvasPanel& CanvasPanel,
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
@@ -109,7 +109,7 @@ void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewM
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal, NewViewModel);
+		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::AddWindow_Internal, NewViewModel);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -119,7 +119,7 @@ void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewM
 	}
 }
 
-void UAVVMFloatingMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewViewModel)
+void UAVVMFloatingFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
 {
 	if (IsValid(Root))
 	{

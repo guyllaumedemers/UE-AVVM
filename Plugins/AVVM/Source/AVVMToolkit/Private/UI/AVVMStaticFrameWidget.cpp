@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMToolkit/Public/UI/AVVMStaticMultiContextWindowWidget.h"
+#include "AVVMToolkit/Public/UI/AVVMStaticFrameWidget.h"
 
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
@@ -25,7 +25,7 @@
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWidgetPickerDataAsset.h"
 
-void UAVVMStaticMultiContextWindowWidget::NativeConstruct()
+void UAVVMStaticFrameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -35,7 +35,7 @@ void UAVVMStaticMultiContextWindowWidget::NativeConstruct()
 	}
 }
 
-void UAVVMStaticMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
+void UAVVMStaticFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
 {
 	if (!IsValid(Root))
 	{
@@ -64,7 +64,7 @@ void UAVVMStaticMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*>
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMStaticMultiContextWindowWidget::SetupWindows_Internal, NewViewModels);
+		Callback.BindUObject(this, &UAVVMStaticFrameWidget::SetupWindows_Internal, NewViewModels);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -77,7 +77,7 @@ void UAVVMStaticMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*>
 	}
 }
 
-void UAVVMStaticMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewModel)
+void UAVVMStaticFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 {
 	if (!IsValid(Root))
 	{
@@ -101,7 +101,7 @@ void UAVVMStaticMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewMod
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMStaticMultiContextWindowWidget::AddWindow_Internal, NewViewModel);
+		Callback.BindUObject(this, &UAVVMStaticFrameWidget::AddWindow_Internal, NewViewModel);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -111,7 +111,7 @@ void UAVVMStaticMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewMod
 	}
 }
 
-void UAVVMStaticMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewViewModel)
+void UAVVMStaticFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
 {
 	if (IsValid(Root))
 	{

@@ -25,9 +25,10 @@
 #include "Engine/StreamableManager.h"
 #include "Templates/SubclassOf.h"
 
-#include "AVVMMultiContextWindowWidget.generated.h"
+#include "AVVMFrameWidget.generated.h"
 
 class UAVVMWidgetPickerDataAsset;
+class UAVVMWindowWidget;
 
 /**
  *	Class description:
@@ -49,8 +50,8 @@ struct AVVMTOOLKIT_API FWindowZOrder
 /**
  *	Class description:
  *
- *	UAVVMWindowDecorator is an abstract around the implementation details of a Widget behavior.
- *	Derived types such as Drag/Drop, Docking and Minimized are expected!
+ *	UAVVMWindowDecorator is an abstract around the implementation details of a Widget behavior. Derived types such as Drag/Drop, Docking and Minimized are expected!
+ *	Instead of having all Context Window own instance running the same behaviour, the Frame will hold all instance and batch update registered windows.
  */
 UCLASS(Abstract, BlueprintType, NotBlueprintable)
 class AVVMTOOLKIT_API UAVVMWindowDecorator : public UObject
@@ -59,19 +60,25 @@ class AVVMTOOLKIT_API UAVVMWindowDecorator : public UObject
 
 public:
 	virtual bool DoesSupportTick() const PURE_VIRTUAL(DoesSupportTick, return false;)
-	virtual void Tick(const float NewDeltaTime) PURE_VIRTUAL(Tick, return;);
+	virtual void Tick(UAVVMWindowWidget* Window, const float NewDeltaTime) PURE_VIRTUAL(Tick, return;);
 };
 
 /**
  *	Class description:
  *
- *	UAVVMMultiContextWindowWidget is an Abstract class from which we can instance and destroy multiple context window. This widget should be referenced
- *	on Views where multiple segments are expected to be displayed.
+ *	UAVVMFrameWidget is a widget class that define the base behaviour for our frame system.
  *
- *	Editor previewing options are available in the NativePreConstruct. See "Designer" property category!
+ *	What is a Frame System ?
+ *
+ *		* No, I'm not talking about a Render frame... but rather the anchor used for Window docking/undocking,
+ *		dragging, etc...
+ *
+ *		* The goal is simple! Be able to instance a View that can accept free form content. i.e a Window (and it's children).
+ *
+ *	See UAVVMFloatingFrameWidget & UAVVMStaticFrameWidget for additional details.
  */
 UCLASS(Abstract, NotBlueprintable)
-class AVVMTOOLKIT_API UAVVMMultiContextWindowWidget : public UCommonUserWidget
+class AVVMTOOLKIT_API UAVVMFrameWidget : public UCommonUserWidget
 {
 	GENERATED_BODY()
 

@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMToolkit/Public/UI/AVVMMultiContextWindowWidget.h"
+#include "AVVMToolkit/Public/UI/AVVMFrameWidget.h"
 
 #include "Engine/AssetManager.h"
 
@@ -25,22 +25,22 @@
 #include "UI/AVVMEditorPreviewViewModel.h"
 #endif
 
-void UAVVMMultiContextWindowWidget::SetupWindows(const TArray<UObject*>& NewViewModels)
+void UAVVMFrameWidget::SetupWindows(const TArray<UObject*>& NewViewModels)
 {
 	SetupWindows_Internal(NewViewModels);
 }
 
-void UAVVMMultiContextWindowWidget::AddWindow(UObject* NewViewModel)
+void UAVVMFrameWidget::AddWindow(UObject* NewViewModel)
 {
 	AddWindow_Internal(NewViewModel);
 }
 
-void UAVVMMultiContextWindowWidget::RemoveWindow(UObject* NewViewModel)
+void UAVVMFrameWidget::RemoveWindow(UObject* NewViewModel)
 {
 	RemoveWindow_Internal(NewViewModel);
 }
 
-void UAVVMMultiContextWindowWidget::CloseAllWindows()
+void UAVVMFrameWidget::CloseAllWindows()
 {
 	for (auto Iterator = ViewModelToWindowContext.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -49,7 +49,7 @@ void UAVVMMultiContextWindowWidget::CloseAllWindows()
 	}
 }
 
-void UAVVMMultiContextWindowWidget::NativePreConstruct()
+void UAVVMFrameWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
@@ -65,13 +65,13 @@ void UAVVMMultiContextWindowWidget::NativePreConstruct()
 	{
 		FStreamableDelegate Callback;
 #if WITH_EDITORONLY_DATA
-		Callback.BindUObject(this, &UAVVMMultiContextWindowWidget::PreviewEntries);
+		Callback.BindUObject(this, &UAVVMFrameWidget::PreviewEntries);
 #endif
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetClass.ToSoftObjectPath()}, Callback);
 	}
 }
 
-void UAVVMMultiContextWindowWidget::NativeConstruct()
+void UAVVMFrameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -83,14 +83,14 @@ void UAVVMMultiContextWindowWidget::NativeConstruct()
 	}
 }
 
-void UAVVMMultiContextWindowWidget::NativeDestruct()
+void UAVVMFrameWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
 	StreamableHandle.Reset();
 	WindowDecorators.Reset();
 }
 
-void UAVVMMultiContextWindowWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UAVVMFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
@@ -103,13 +103,13 @@ void UAVVMMultiContextWindowWidget::NativeTick(const FGeometry& MyGeometry, floa
 		}
 		else if (Decorator->DoesSupportTick())
 		{
-			Decorator->Tick(InDeltaTime);
+			Decorator->Tick(nullptr, InDeltaTime);
 		}
 	}
 }
 
 #if WITH_EDITORONLY_DATA
-void UAVVMMultiContextWindowWidget::PreviewEntries()
+void UAVVMFrameWidget::PreviewEntries()
 {
 	if (!IsDesignTime())
 	{

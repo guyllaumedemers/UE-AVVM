@@ -17,33 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-
-using UnrealBuildTool;
-
-public class AVVMToolkit : ModuleRules
-{
-	public AVVMToolkit(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"Core",
-				"CoreUObject",
-				"CommonUI",
-				"Engine",
-				"GameplayTags",
-				"ModelViewViewModel",
-				"UMG"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
-}
+#include "UI/AVVMWindowWidget.h"
