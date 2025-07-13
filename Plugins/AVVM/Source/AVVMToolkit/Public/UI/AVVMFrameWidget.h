@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "CommonUserWidget.h"
+#include "GameplayTagContainer.h"
 #include "Engine/StreamableManager.h"
 #include "Templates/SubclassOf.h"
 
@@ -46,6 +47,22 @@ struct AVVMTOOLKIT_API FWindowZOrder
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 ZOrder = INDEX_NONE;
 };
+
+/**
+ *	Class description:
+ *
+ *	FWindowState is a representation of the Window status.
+ */
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
+enum class EFrameBitmask : uint8
+{
+	None      = 0 UMETA(Hidden),
+	Docked    = 1 << 0,
+	Minimized = 1 << 1,
+	Closed    = 1 << 2,
+};
+
+ENUM_CLASS_FLAGS(EFrameBitmask);
 
 /**
  *	Class description:
@@ -94,7 +111,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CloseAllWindows();
-	
+
 	UFUNCTION(BlueprintCallable)
 	void SetParent(const UAVVMFrameWidget* NewParent);
 
@@ -121,6 +138,9 @@ protected:
 	TSoftClassPtr<UAVVMFrameWidget> WidgetClass = nullptr;
 
 #if WITH_EDITORONLY_DATA
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Designers", meta=(Bitmask, BitmaskEnum="EFrameBitmask"))
+	int32 PreviewFrameFlags = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=1, UIMax=20))
 	int32 NumPreviewEntries = 5;
 
@@ -135,6 +155,9 @@ protected:
 #endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	FGameplayTag FrameIdTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TArray<TSubclassOf<UAVVMWindowDecorator>> WindowDecoratorClasses;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -145,6 +168,9 @@ protected:
 
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> ViewModelToWindowContext;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	EFrameBitmask FrameFlags = EFrameBitmask::None;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

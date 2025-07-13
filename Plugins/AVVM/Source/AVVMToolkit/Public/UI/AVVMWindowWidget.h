@@ -22,34 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "AVVMFrameWidget.h"
-#include "GameplayTagContainer.h"
 
 #include "AVVMWindowWidget.generated.h"
-
-/**
- *	Class description:
- *
- *	FWindowState is a representation of the Window status.
- */
-USTRUCT(BlueprintType)
-struct AVVMTOOLKIT_API FWindowState
-{
-	GENERATED_BODY()
-
-	FWindowState() = default;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTag InstanceTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTag ParentTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bIsUndock = false;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bIsMinimized = false;
-};
 
 /**
  *	Class description:
@@ -60,8 +34,4 @@ UCLASS()
 class AVVMTOOLKIT_API UAVVMWindowWidget : public UAVVMFrameWidget
 {
 	GENERATED_BODY()
-
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FWindowState WindowState = FWindowState();
 };
