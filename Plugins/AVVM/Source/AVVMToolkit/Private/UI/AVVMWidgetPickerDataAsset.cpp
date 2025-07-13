@@ -17,31 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Widgets/AVVMStaticMultiContextWindowWidget.h"
+#include "AVVMToolkit/Public/UI/AVVMWidgetPickerDataAsset.h"
 
-#include "Widgets/AVVMDynamicEntryBoxExtendedWidget.h"
-
-void UAVVMStaticMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
+TSubclassOf<UCommonUserWidget> UAVVMWidgetPickerDataAsset::GetWidgetClass(const UClass* ObjectClass)
 {
-	if (IsValid(StaticWindowRoot))
-	{
-		StaticWindowRoot->SetupEntries(NewViewModels);
-	}
-}
-
-void UAVVMStaticMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewModel)
-{
-	if (IsValid(StaticWindowRoot))
-	{
-		StaticWindowRoot->AddEntry(NewViewModel);
-	}
-}
-
-void UAVVMStaticMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewViewModel)
-{
-	if (IsValid(StaticWindowRoot))
-	{
-		const FWindowZOrder* SearchResult = ViewModelToWindowContext.Find(NewViewModel);
-		StaticWindowRoot->RemoveEntry((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
-	}
+	TSubclassOf<UCommonUserWidget>* SearchResult = ObjectClassToWidgetClass.Find(ObjectClass);
+	return (SearchResult != nullptr) ? *SearchResult : nullptr;
 }

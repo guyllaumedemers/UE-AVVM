@@ -22,10 +22,12 @@
 #include "CoreMinimal.h"
 
 #include "CommonUserWidget.h"
+#include "Engine/StreamableManager.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMMultiContextWindowWidget.generated.h"
 
-class UCommonUserWidget;
+class UAVVMWidgetPickerDataAsset;
 
 /**
  *	Class description:
@@ -64,7 +66,9 @@ public:
  *	Class description:
  *
  *	UAVVMMultiContextWindowWidget is an Abstract class from which we can instance and destroy multiple context window. This widget should be referenced
- *	on Views where multiple segments should be display.
+ *	on Views where multiple segments are expected to be displayed.
+ *
+ *	Editor previewing options are available in the NativePreConstruct. See "Designer" property category!
  */
 UCLASS(Abstract, NotBlueprintable)
 class AVVMTOOLKIT_API UAVVMMultiContextWindowWidget : public UCommonUserWidget
@@ -85,6 +89,7 @@ public:
 	void CloseAllWindows();
 
 protected:
+	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
@@ -92,7 +97,34 @@ protected:
 	virtual void AddWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddWindow_Internal, return;);
 	virtual void RemoveWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveWindow_Internal, return;);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+#if WITH_EDITORONLY_DATA
+	virtual void PreviewEntries();
+#endif
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	bool bOverrideWidgetPicker = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bOverrideWidgetPicker"))
+	TSoftClassPtr<UCommonUserWidget> WidgetClass = nullptr;
+
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=1, UIMax=20))
+	int32 NumPreviewEntries = 5;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TObjectPtr<UObject>> EditorPreviewObjects;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TSubclassOf<UCommonUserWidget> PreviousWidgetClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 PreviousNumPreviewEntries = 0;
+#endif
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TArray<TSubclassOf<UAVVMWindowDecorator>> WindowDecoratorClasses;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -100,4 +132,6 @@ protected:
 
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<UObject>, FWindowZOrder> ViewModelToWindowContext;
+
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

@@ -17,31 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Widgets/AVVMFloatingMultiContextWindowWidget.h"
+#include "AVVMToolkit/Public/UI/AVVMFloatingMultiContextWindowWidget.h"
 
-#include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
-#include "Widgets/AVVMWidgetPickerDataAsset.h"
+#include "UI/AVVMWidgetPickerDataAsset.h"
+
+void UAVVMFloatingMultiContextWindowWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (IsValid(Root))
+	{
+		Root->ClearChildren();
+	}
+}
 
 void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
 {
-	if (!ensureAlwaysMsgf(HasWidgetClass(), TEXT("Invalid Widget Class!")))
-	{
-		return;
-	}
-
-	if (!IsValid(FloatingWindowRoot))
+	if (!IsValid(Root))
 	{
 		return;
 	}
 
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingMultiContextWindowWidget& NewMultiContextWidget,
-	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass,
 	                                             UCanvasPanel& CanvasPanel,
-	                                             UObject* NewViewModel)
+	                                             UObject* NewViewModel,
+	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
 	{
 		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewMultiContextWidget, NewWidgetClass, NAME_None));
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
@@ -51,10 +54,17 @@ void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject
 		}
 	};
 
-	FloatingWindowRoot->ClearChildren();
+	Root->ClearChildren();
 
-	TSubclassOf<UCommonUserWidget> WidgetClass = nullptr;
-	if (!WidgetPickerDataAsset.IsValid())
+	TSubclassOf<UCommonUserWidget> NewWidgetClass = WidgetClass.Get();
+	if (WidgetPickerDataAsset.IsNull())
+	{
+		for (UObject* NewViewModel : NewViewModels)
+		{
+			CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
+		}
+	}
+	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal, NewViewModels);
@@ -62,30 +72,25 @@ void UAVVMFloatingMultiContextWindowWidget::SetupWindows_Internal(TArray<UObject
 	}
 	else
 	{
-		for (UObject* ViewModel : NewViewModels)
+		for (UObject* NewViewModel : NewViewModels)
 		{
-			WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(ViewModel) ? ViewModel->GetClass() : nullptr);
-			CreateWidgetAndBindViewModel(*this, WidgetClass, *FloatingWindowRoot, ViewModel);
+			WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
+			CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 		}
 	}
 }
 
 void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewModel)
 {
-	if (!ensureAlwaysMsgf(HasWidgetClass(), TEXT("Invalid Widget Class!")))
-	{
-		return;
-	}
-
-	if (!IsValid(FloatingWindowRoot))
+	if (!IsValid(Root))
 	{
 		return;
 	}
 
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingMultiContextWindowWidget& NewMultiContextWidget,
-	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass,
 	                                             UCanvasPanel& CanvasPanel,
-	                                             UObject* NewViewModel)
+	                                             UObject* NewViewModel,
+	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
 	{
 		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewMultiContextWidget, NewWidgetClass, NAME_None));
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
@@ -95,10 +100,12 @@ void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewM
 		}
 	};
 
-	FloatingWindowRoot->ClearChildren();
-
-	TSubclassOf<UCommonUserWidget> WidgetClass = nullptr;
-	if (!WidgetPickerDataAsset.IsValid())
+	TSubclassOf<UCommonUserWidget> NewWidgetClass = WidgetClass.Get();
+	if (WidgetPickerDataAsset.IsNull())
+	{
+		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
+	}
+	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal, NewViewModel);
@@ -106,21 +113,16 @@ void UAVVMFloatingMultiContextWindowWidget::AddWindow_Internal(UObject* NewViewM
 	}
 	else
 	{
-		WidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
-		CreateWidgetAndBindViewModel(*this, WidgetClass, *FloatingWindowRoot, NewViewModel);
+		NewWidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
+		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 	}
 }
 
 void UAVVMFloatingMultiContextWindowWidget::RemoveWindow_Internal(UObject* NewViewModel)
 {
-	if (IsValid(FloatingWindowRoot))
+	if (IsValid(Root))
 	{
 		const FWindowZOrder* SearchResult = ViewModelToWindowContext.Find(NewViewModel);
-		FloatingWindowRoot->RemoveChild((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
+		Root->RemoveChild((SearchResult != nullptr) ? SearchResult->Window.Get() : nullptr);
 	}
-}
-
-bool UAVVMFloatingMultiContextWindowWidget::HasWidgetClass()
-{
-	return !WidgetPickerDataAsset.IsNull();
 }

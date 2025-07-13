@@ -21,31 +21,25 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMMultiContextWindowWidget.h"
+#include "AVVM.h"
+#include "MVVMViewModelBase.h"
 
-#include "AVVMStaticMultiContextWindowWidget.generated.h"
-
-class UAVVMDynamicEntryBoxExtendedWidget;
+#include "AVVMEditorPreviewViewModel.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMStaticMultiContextWindowWidget is the Static version of the MultiContextWindowWidget that define
- *	a fix layout with multiple context. Context Window can still be opened and closed but are anchored to defined anchor.
+ *	UAVVMEditorPreviewViewModel is a placeholder View Model for widget that requires UObject arguments
+ *	as function to create dynamic entries.
  *
- *	Example : Crafting system where user has to drag from items from left to right and stack them to output a new Item
- *	or Diablo 1 inventory style with the backup storage system sitting side by side.
+ *	This is to be used in dynamic container types like UAVVMDynamicEntryBoxExtended and types deriving from UListViewBase.
  */
-UCLASS(Blueprintable)
-class AVVMTOOLKIT_API UAVVMStaticMultiContextWindowWidget : public UAVVMMultiContextWindowWidget
+UCLASS()
+class AVVMTOOLKIT_API UAVVMEditorPreviewViewModel : public UMVVMViewModelBase,
+                                                    public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) override;
-	virtual void AddWindow_Internal(UObject* NewViewModel) override;
-	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
-
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
-	TObjectPtr<UAVVMDynamicEntryBoxExtendedWidget> StaticWindowRoot = nullptr;
+public:
+	virtual FName GetViewModelFName() const override { return TEXT("UAVVMEditorPreviewViewModel"); };
 };

@@ -22,12 +22,9 @@
 #include "CoreMinimal.h"
 
 #include "AVVMMultiContextWindowWidget.h"
-#include "Engine/StreamableManager.h"
-#include "Templates/SubclassOf.h"
 
 #include "AVVMFloatingMultiContextWindowWidget.generated.h"
 
-class UAVVMWidgetPickerDataAsset;
 class UCanvasPanel;
 
 /**
@@ -45,17 +42,11 @@ class AVVMTOOLKIT_API UAVVMFloatingMultiContextWindowWidget : public UAVVMMultiC
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeConstruct() override;
 	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) override;
 	virtual void AddWindow_Internal(UObject* NewViewModel) override;
 	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
 
-	bool HasWidgetClass();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
-	TObjectPtr<UCanvasPanel> FloatingWindowRoot = nullptr;
-
-	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UCanvasPanel> Root = nullptr;
 };

@@ -21,7 +21,7 @@
 
 #include "CommonLazyImage.h"
 #include "CommonTextBlock.h"
-#include "Widgets/AVVMProgressBarWidget.h"
+#include "UI/AVVMProgressBarWidget.h"
 
 void UInteractionWidget::SetSlateBrush(const FSlateBrush& NewSlateBrush)
 {

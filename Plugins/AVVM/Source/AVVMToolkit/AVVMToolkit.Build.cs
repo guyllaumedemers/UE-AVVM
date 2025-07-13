@@ -29,10 +29,12 @@ public class AVVMToolkit : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
 				"Core",
 				"CoreUObject",
 				"CommonUI",
 				"Engine",
+				"ModelViewViewModel",
 				"UMG"
 			}
 		);
@@ -40,7 +42,6 @@ public class AVVMToolkit : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVM"
 			}
 		);
 	}

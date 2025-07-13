@@ -17,7 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Widgets/AVVMMultiContextWindowWidget.h"
+#include "AVVMToolkit/Public/UI/AVVMMultiContextWindowWidget.h"
+
+#include "Engine/AssetManager.h"
+
+#if WITH_EDITORONLY_DATA
+#include "UI/AVVMEditorPreviewViewModel.h"
+#endif
 
 void UAVVMMultiContextWindowWidget::SetupWindows(const TArray<UObject*>& NewViewModels)
 {
@@ -43,6 +49,28 @@ void UAVVMMultiContextWindowWidget::CloseAllWindows()
 	}
 }
 
+void UAVVMMultiContextWindowWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+#if WITH_EDITORONLY_DATA
+	if (WidgetClass.IsValid())
+	{
+		PreviewEntries();
+		return;
+	}
+#endif
+
+	if (bOverrideWidgetPicker && !WidgetClass.IsNull() && !WidgetClass.IsValid())
+	{
+		FStreamableDelegate Callback;
+#if WITH_EDITORONLY_DATA
+		Callback.BindUObject(this, &UAVVMMultiContextWindowWidget::PreviewEntries);
+#endif
+		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetClass.ToSoftObjectPath()}, Callback);
+	}
+}
+
 void UAVVMMultiContextWindowWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -58,6 +86,7 @@ void UAVVMMultiContextWindowWidget::NativeConstruct()
 void UAVVMMultiContextWindowWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+	StreamableHandle.Reset();
 	WindowDecorators.Reset();
 }
 
@@ -78,3 +107,33 @@ void UAVVMMultiContextWindowWidget::NativeTick(const FGeometry& MyGeometry, floa
 		}
 	}
 }
+
+#if WITH_EDITORONLY_DATA
+void UAVVMMultiContextWindowWidget::PreviewEntries()
+{
+	if (!IsDesignTime())
+	{
+		return;
+	}
+
+	const bool bHasIdenticalNumEntries = (PreviousNumPreviewEntries == NumPreviewEntries);
+	const bool bHasIdenticalClasses = (WidgetClass.Get() == PreviousWidgetClass);
+
+	if (bHasIdenticalNumEntries && bHasIdenticalClasses)
+	{
+		return;
+	}
+
+	PreviousNumPreviewEntries = NumPreviewEntries;
+	PreviousWidgetClass = WidgetClass.Get();
+
+	EditorPreviewObjects.Reset(NumPreviewEntries);
+	for (int32 i = 0; i < NumPreviewEntries; ++i)
+	{
+		auto* EditorPreviewObject = NewObject<UAVVMEditorPreviewViewModel>(this);
+		EditorPreviewObjects.Add(EditorPreviewObject);
+	}
+
+	SetupWindows_Internal(EditorPreviewObjects);
+}
+#endif
