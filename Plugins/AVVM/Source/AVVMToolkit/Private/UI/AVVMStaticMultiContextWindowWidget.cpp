@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMStaticMultiContextWindowWidget.h"
 
+#include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Components/DynamicEntryBox.h"
 #include "Engine/AssetManager.h"

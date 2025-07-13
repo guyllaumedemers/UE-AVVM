@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMFloatingMultiContextWindowWidget.h"
 
+#include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Engine/AssetManager.h"
