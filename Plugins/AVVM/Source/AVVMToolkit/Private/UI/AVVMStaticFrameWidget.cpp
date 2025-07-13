@@ -42,23 +42,29 @@ void UAVVMStaticFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModel
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UDynamicEntryBox& NewDynamicBox,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMStaticFrameWidget& NewParent,
+	                                             UDynamicEntryBox& NewDynamicBox,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
 		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
-		auto* WidgetInstance = NewDynamicBox.CreateEntry<UCommonUserWidget>(NewWidgetClass);
+		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
+
+		if (IsValid(WidgetInstance))
+		{
+			WidgetInstance->SetParent(&NewParent);
+		}
 	};
 
 	Root->Reset(true);
 
-	TSubclassOf<UCommonUserWidget> NewWidgetClass = WidgetClass.Get();
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
 	if (WidgetPickerDataAsset.IsNull())
 	{
 		for (UObject* NewViewModel : NewViewModels)
 		{
-			CreateWidgetAndBindViewModel(*Root, NewViewModel, NewWidgetClass);
+			CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 		}
 	}
 	else if (!WidgetPickerDataAsset.IsValid())
@@ -72,7 +78,7 @@ void UAVVMStaticFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModel
 		for (UObject* NewViewModel : NewViewModels)
 		{
 			NewWidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
-			CreateWidgetAndBindViewModel(*Root, NewViewModel, NewWidgetClass);
+			CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 		}
 	}
 }
@@ -84,19 +90,25 @@ void UAVVMStaticFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UDynamicEntryBox& NewDynamicBox,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMStaticFrameWidget& NewParent,
+	                                             UDynamicEntryBox& NewDynamicBox,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
 		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
-		auto* WidgetInstance = NewDynamicBox.CreateEntry<UCommonUserWidget>(NewWidgetClass);
+		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
+
+		if (IsValid(WidgetInstance))
+		{
+			WidgetInstance->SetParent(&NewParent);
+		}
 	};
 
-	TSubclassOf<UCommonUserWidget> NewWidgetClass = WidgetClass.Get();
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
 	if (WidgetPickerDataAsset.IsNull() || bOverrideWidgetPicker)
 	{
-		CreateWidgetAndBindViewModel(*Root, NewViewModel, NewWidgetClass);
+		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 	}
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
@@ -107,7 +119,7 @@ void UAVVMStaticFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 	else
 	{
 		NewWidgetClass = WidgetPickerDataAsset->GetWidgetClass(IsValid(NewViewModel) ? NewViewModel->GetClass() : nullptr);
-		CreateWidgetAndBindViewModel(*Root, NewViewModel, NewWidgetClass);
+		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
 	}
 }
 

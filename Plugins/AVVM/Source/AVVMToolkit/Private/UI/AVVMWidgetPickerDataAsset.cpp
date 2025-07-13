@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMWidgetPickerDataAsset.h"
 
-TSubclassOf<UCommonUserWidget> UAVVMWidgetPickerDataAsset::GetWidgetClass(const UClass* ObjectClass)
+TSubclassOf<UAVVMFrameWidget> UAVVMWidgetPickerDataAsset::GetWidgetClass(const UClass* ObjectClass)
 {
-	TSubclassOf<UCommonUserWidget>* SearchResult = ObjectClassToWidgetClass.Find(ObjectClass);
+	TSubclassOf<UAVVMFrameWidget>* SearchResult = ObjectClassToWidgetClass.Find(ObjectClass);
 	return (SearchResult != nullptr) ? *SearchResult : nullptr;
 }

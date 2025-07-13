@@ -94,6 +94,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CloseAllWindows();
+	
+	UFUNCTION(BlueprintCallable)
+	void SetParent(const UAVVMFrameWidget* NewParent);
 
 protected:
 	virtual void NativePreConstruct() override;
@@ -115,7 +118,7 @@ protected:
 	bool bOverrideWidgetPicker = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bOverrideWidgetPicker"))
-	TSoftClassPtr<UCommonUserWidget> WidgetClass = nullptr;
+	TSoftClassPtr<UAVVMFrameWidget> WidgetClass = nullptr;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=1, UIMax=20))
@@ -125,7 +128,7 @@ protected:
 	TArray<TObjectPtr<UObject>> EditorPreviewObjects;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TSubclassOf<UCommonUserWidget> PreviousWidgetClass = nullptr;
+	TSubclassOf<UAVVMFrameWidget> PreviousWidgetClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 PreviousNumPreviewEntries = 0;

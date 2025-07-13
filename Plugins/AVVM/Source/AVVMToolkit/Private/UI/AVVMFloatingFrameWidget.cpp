@@ -42,22 +42,24 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewMultiContextWidget,
-	                                             UCanvasPanel& CanvasPanel,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
+	                                             UCanvasPanel& NewCanvasPanel,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
-		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewMultiContextWidget, NewWidgetClass, NAME_None));
+		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
+		NewCanvasPanel.AddChild(WidgetInstance);
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
+
 		if (IsValid(WidgetInstance))
 		{
-			CanvasPanel.AddChild(WidgetInstance);
+			WidgetInstance->SetParent(&NewParent);
 		}
 	};
 
 	Root->ClearChildren();
 
-	TSubclassOf<UCommonUserWidget> NewWidgetClass = WidgetClass.Get();
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
 	if (WidgetPickerDataAsset.IsNull())
 	{
 		for (UObject* NewViewModel : NewViewModels)
@@ -88,20 +90,22 @@ void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 		return;
 	}
 
-	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewMultiContextWidget,
-	                                             UCanvasPanel& CanvasPanel,
+	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
+	                                             UCanvasPanel& NewCanvasPanel,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
-		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewMultiContextWidget, NewWidgetClass, NAME_None));
+		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
+		NewCanvasPanel.AddChild(WidgetInstance);
 		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
+
 		if (IsValid(WidgetInstance))
 		{
-			CanvasPanel.AddChild(WidgetInstance);
+			WidgetInstance->SetParent(&NewParent);
 		}
 	};
 
-	TSubclassOf<UCommonUserWidget> NewWidgetClass = WidgetClass.Get();
+	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = WidgetClass.Get();
 	if (WidgetPickerDataAsset.IsNull())
 	{
 		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);

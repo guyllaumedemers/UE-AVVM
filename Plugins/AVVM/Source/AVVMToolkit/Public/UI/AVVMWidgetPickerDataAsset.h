@@ -25,7 +25,7 @@
 
 #include "AVVMWidgetPickerDataAsset.generated.h"
 
-class UCommonUserWidget;
+class UAVVMFrameWidget;
 
 /**
  *	Class description:
@@ -42,9 +42,9 @@ class AVVMTOOLKIT_API UAVVMWidgetPickerDataAsset : public UDataAsset
 
 public:
 	UFUNCTION(BlueprintCallable)
-	TSubclassOf<UCommonUserWidget> GetWidgetClass(const UClass* ObjectClass);
+	TSubclassOf<UAVVMFrameWidget> GetWidgetClass(const UClass* ObjectClass);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<TSoftClassPtr<UClass>, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass;
+	TMap<TSoftClassPtr<UClass>, TSubclassOf<UAVVMFrameWidget>> ObjectClassToWidgetClass;
 };

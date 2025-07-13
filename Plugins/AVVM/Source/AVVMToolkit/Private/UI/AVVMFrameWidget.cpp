@@ -49,6 +49,11 @@ void UAVVMFrameWidget::CloseAllWindows()
 	}
 }
 
+void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent)
+{
+	Parent = NewParent;
+}
+
 void UAVVMFrameWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
