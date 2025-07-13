@@ -35,26 +35,26 @@ FFrameZOrder::FFrameZOrder(UAVVMFrameWidget* NewFrame, const int32 NewZOrder)
 {
 }
 
-void UAVVMFrameWidget::SetupWindows(const TArray<UObject*>& NewViewModels)
+void UAVVMFrameWidget::SetupFrames(const TArray<UObject*>& NewViewModels)
 {
-	SetupWindows_Internal(NewViewModels);
+	SetupFrames_Internal(NewViewModels);
 }
 
-void UAVVMFrameWidget::AddWindow(UObject* NewViewModel)
+void UAVVMFrameWidget::AddFrame(UObject* NewViewModel)
 {
-	AddWindow_Internal(NewViewModel);
+	AddFrame_Internal(NewViewModel);
 }
 
-void UAVVMFrameWidget::RemoveWindow(UObject* NewViewModel)
+void UAVVMFrameWidget::RemoveFrame(UObject* NewViewModel)
 {
-	RemoveWindow_Internal(NewViewModel);
+	RemoveFrame_Internal(NewViewModel);
 }
 
-void UAVVMFrameWidget::CloseAllWindows()
+void UAVVMFrameWidget::CloseAllFrames()
 {
 	for (auto Iterator = ViewModelToWindowContext.CreateIterator(); Iterator; ++Iterator)
 	{
-		RemoveWindow(Iterator.Key().Get());
+		RemoveFrame(Iterator.Key().Get());
 		Iterator.RemoveCurrent();
 	}
 }
@@ -71,11 +71,6 @@ void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent)
 	}
 
 	OwningBorder = NewBorder;
-}
-
-UAVVMFrameWidget* UAVVMFrameWidget::GetSelfOrBorder()
-{
-	return OwningBorder.IsValid() ? OwningBorder.Get() : this;
 }
 
 void UAVVMFrameWidget::NativePreConstruct()
@@ -163,7 +158,7 @@ void UAVVMFrameWidget::PreviewEntries()
 		EditorPreviewObjects.Add(EditorPreviewObject);
 	}
 
-	SetupWindows_Internal(EditorPreviewObjects);
+	SetupFrames_Internal(EditorPreviewObjects);
 }
 #endif
 
@@ -215,15 +210,15 @@ void UAVVMFrameBorder::SwapSlots(UAVVMFrameWidget* NewFrame)
 		return;
 	}
 
-	if (IsValid(Anchor))
-	{
-		Anchor->AddChild(NewFrameSlot->Content);
-	}
-
 	UPanelWidget* NewFrameParent = NewFrameSlot->Parent;
 	if (IsValid(NewFrameParent))
 	{
-		NewFrameParent->AddChild(Slot->Content);
 		NewFrameParent->RemoveChild(NewFrameSlot->Content);
+		NewFrameParent->AddChild(Slot->Content);
+	}
+
+	if (IsValid(Anchor))
+	{
+		Anchor->AddChild(NewFrameSlot->Content);
 	}
 }

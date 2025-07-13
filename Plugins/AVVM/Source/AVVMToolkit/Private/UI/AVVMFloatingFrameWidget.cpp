@@ -35,7 +35,7 @@ void UAVVMFloatingFrameWidget::NativeConstruct()
 	}
 }
 
-void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewModels)
+void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels)
 {
 	if (!IsValid(Root))
 	{
@@ -64,7 +64,7 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::SetupWindows_Internal, NewViewModels);
+		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::SetupFrames_Internal, NewViewModels);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -77,7 +77,7 @@ void UAVVMFloatingFrameWidget::SetupWindows_Internal(TArray<UObject*> NewViewMod
 	}
 }
 
-void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
+void UAVVMFloatingFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 {
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
 	                                             UObject* NewViewModel,
@@ -96,7 +96,7 @@ void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 	else if (!WidgetPickerDataAsset.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::AddWindow_Internal, NewViewModel);
+		Callback.BindUObject(this, &UAVVMFloatingFrameWidget::AddFrame_Internal, NewViewModel);
 		StreamableHandle = UAssetManager::Get().LoadAssetList({WidgetPickerDataAsset.ToSoftObjectPath()}, Callback);
 	}
 	else
@@ -106,7 +106,7 @@ void UAVVMFloatingFrameWidget::AddWindow_Internal(UObject* NewViewModel)
 	}
 }
 
-void UAVVMFloatingFrameWidget::RemoveWindow_Internal(UObject* NewViewModel)
+void UAVVMFloatingFrameWidget::RemoveFrame_Internal(UObject* NewViewModel)
 {
 	UnRegisterChild(NewViewModel);
 }

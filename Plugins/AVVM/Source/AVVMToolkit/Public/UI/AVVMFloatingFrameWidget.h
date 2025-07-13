@@ -54,9 +54,9 @@ class AVVMTOOLKIT_API UAVVMFloatingFrameWidget : public UAVVMFrameWidget
 
 protected:
 	virtual void NativeConstruct() override;
-	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) override;
-	virtual void AddWindow_Internal(UObject* NewViewModel) override;
-	virtual void RemoveWindow_Internal(UObject* NewViewModel) override;
+	virtual void SetupFrames_Internal(TArray<UObject*> NewViewModels) override;
+	virtual void AddFrame_Internal(UObject* NewViewModel) override;
+	virtual void RemoveFrame_Internal(UObject* NewViewModel) override;
 
 	virtual void RegisterChild_Internal(const UObject* NewViewModel, const FFrameZOrder& NewZOrder) const override;
 	virtual void UnRegisterChild_Internal(const UObject* NewViewModel) const override;

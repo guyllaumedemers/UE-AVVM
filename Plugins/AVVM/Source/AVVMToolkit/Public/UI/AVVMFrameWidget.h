@@ -106,31 +106,28 @@ class AVVMTOOLKIT_API UAVVMFrameWidget : public UCommonUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetupWindows(const TArray<UObject*>& NewViewModels);
+	void SetupFrames(const TArray<UObject*>& NewViewModels);
 
 	UFUNCTION(BlueprintCallable)
-	void AddWindow(UObject* NewViewModel);
+	void AddFrame(UObject* NewViewModel);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveWindow(UObject* NewViewModel);
+	void RemoveFrame(UObject* NewViewModel);
 
 	UFUNCTION(BlueprintCallable)
-	void CloseAllWindows();
+	void CloseAllFrames();
 
 	UFUNCTION(BlueprintCallable)
 	void SetParent(const UAVVMFrameWidget* NewParent);
-
-	UFUNCTION(BlueprintCallable)
-	UAVVMFrameWidget* GetSelfOrBorder();
 
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	virtual void SetupWindows_Internal(TArray<UObject*> NewViewModels) PURE_VIRTUAL(SetupWindows_Internal, return;);
-	virtual void AddWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddWindow_Internal, return;);
-	virtual void RemoveWindow_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveWindow_Internal, return;);
+	virtual void SetupFrames_Internal(TArray<UObject*> NewViewModels) PURE_VIRTUAL(SetupFrames_Internal, return;);
+	virtual void AddFrame_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddFrame_Internal, return;);
+	virtual void RemoveFrame_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveFrame_Internal, return;);
 
 #if WITH_EDITORONLY_DATA
 	virtual void PreviewEntries();
