@@ -28,8 +28,8 @@ FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
 
 TInstancedStruct<FTransactionPayload> FTransactionPayloadTest::Init(const FString& NewPayload)
 {
-	*this = FTransactionPayloadTest(UAVVMTokenizer::GetTokenValue<int32>(TEXT("DummyProperty"), NewPayload));
-	return TInstancedStruct<FTransactionPayload>::Make(*this);
+	const int32 Property = UAVVMTokenizer::GetTokenValue<int32>(TEXT("DummyProperty"), NewPayload);
+	return FTransactionPayload::Make<FTransactionPayloadTest>(Property);
 }
 
 FString FTransactionPayloadTest::ToString() const
