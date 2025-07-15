@@ -80,10 +80,10 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_OnVisiblityBlocked();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
