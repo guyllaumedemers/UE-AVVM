@@ -36,6 +36,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "FencingSample",
+			"Enabled": true
+		},
+		{
 			"Name": "GameFeatures",
 			"Enabled": true
 		},
