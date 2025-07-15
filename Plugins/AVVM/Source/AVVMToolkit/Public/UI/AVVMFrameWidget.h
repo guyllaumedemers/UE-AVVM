@@ -102,7 +102,7 @@ public:
  *
  *	See UAVVMFloatingFrameWidget & UAVVMStaticFrameWidget for additional details.
  */
-UCLASS(Abstract, BlueprintType, NotBlueprintable)
+UCLASS(Abstract, NotBlueprintable)
 class AVVMTOOLKIT_API UAVVMFrameWidget : public UCommonUserWidget
 {
 	GENERATED_BODY()

@@ -36,6 +36,7 @@ public class AVVMToolkit : ModuleRules
 				"Engine",
 				"GameplayTags",
 				"ModelViewViewModel",
+				"UIExtension",
 				"UMG"
 			}
 		);

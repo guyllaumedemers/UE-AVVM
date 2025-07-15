@@ -44,7 +44,7 @@ class UCanvasPanel;
  *		* Our child UAVVMStaticFrameWidget may be a complex element, built with many subdivisions which could support being detached. If so,
  *		detaching a subdivision should be handled and anchored to our Outer most UAVVMFloatingFrameWidget.
  *
- *	Example : Guild Wars (1 - not 2, the second is garbage. For Ascalon!) UI system allowed opening many contexts windows on screen
+ *	Example : Guild Wars (1) UI system allowed opening many contexts windows on screen
  *	such as minimap, inventory, achievements, etc... The inventory bags provided a unique context that could be detached.
  */
 UCLASS(Blueprintable)
