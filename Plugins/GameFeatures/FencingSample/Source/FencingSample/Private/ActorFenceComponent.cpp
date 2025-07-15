@@ -140,6 +140,8 @@ void UActorFenceComponent::TryLower()
 	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
 	if (bDoesMeetAllRequirements)
 	{
+		BP_Execute();
+
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Removing Fence Requirements \"%s\"."),

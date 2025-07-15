@@ -43,5 +43,24 @@ public class FencingSample : ModuleRules
 				"AVVMGameplay"
 			}
 		);
+
+		if (Target.bBuildDeveloperTools)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMDebugger",
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"ImGui"
+				});
+
+			PrivateDefinitions.Add(
+				string.Format("IMPLOT_API=DLLIMPORT")
+			);
+		}
 	}
 }

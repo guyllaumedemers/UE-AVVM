@@ -55,6 +55,9 @@ protected:
 	UFUNCTION()
 	void OnReplicatedTagChanged(const FGameplayTagContainer& NewTags);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_Execute() const;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer FenceRequirements = FGameplayTagContainer::EmptyContainer;
 
