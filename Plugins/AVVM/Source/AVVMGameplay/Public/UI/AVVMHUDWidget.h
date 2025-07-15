@@ -34,7 +34,7 @@
  *	moved around or minimized in any way.
  */
 UCLASS()
-class AVVMTOOLKIT_API UAVVMHUDWidget : public UCommonActivatableWidget
+class AVVMGAMEPLAY_API UAVVMHUDWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
@@ -63,7 +63,7 @@ public:
  *	held by the HUD slot.
  */
 UCLASS()
-class AVVMTOOLKIT_API UAVVMHUDSlotWidget : public UUIExtensionPointWidget
+class AVVMGAMEPLAY_API UAVVMHUDSlotWidget : public UUIExtensionPointWidget
 {
 	GENERATED_BODY()
 
