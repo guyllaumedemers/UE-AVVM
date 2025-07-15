@@ -79,4 +79,8 @@ This GameFeature plugin is a sample plugin for caching statistics captured durin
 
 This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished to support world instantiation of item Actors. Abilities for consuming, equipping and/or dropping items are yet to be put in place. TBD!
 
+### Fencing Sample
+
+This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system levrage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
+
 **Notes : All plugins defined above are example cases that utilize the api from AVVM plugin.**
