@@ -50,10 +50,10 @@ public:
 	void Remove(const FGameplayTagContainer& NewTags);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAnyExact(const FGameplayTagContainer& OldFlags);
+	bool HasAnyExact(const FGameplayTagContainer& NewTags);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAllExact(const FGameplayTagContainer& OldFlags);
+	bool HasAllExact(const FGameplayTagContainer& NewTags);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnReplicatedTagChanged OnReplicatedTagChanged;

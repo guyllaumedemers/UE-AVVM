@@ -50,14 +50,14 @@ void UAVVMReplicatedTagComponent::Remove(const FGameplayTagContainer& NewTags)
 	OnRep_FlagsModified(OldTags);
 }
 
-bool UAVVMReplicatedTagComponent::HasAnyExact(const FGameplayTagContainer& OldFlags)
+bool UAVVMReplicatedTagComponent::HasAnyExact(const FGameplayTagContainer& NewTags)
 {
-	return Flags.HasAnyExact(OldFlags);
+	return Flags.HasAnyExact(NewTags);
 }
 
-bool UAVVMReplicatedTagComponent::HasAllExact(const FGameplayTagContainer& OldFlags)
+bool UAVVMReplicatedTagComponent::HasAllExact(const FGameplayTagContainer& NewTags)
 {
-	return Flags.HasAllExact(OldFlags);
+	return Flags.HasAllExact(NewTags);
 }
 
 void UAVVMReplicatedTagComponent::OnRep_FlagsModified(const FGameplayTagContainer OldFlags)
