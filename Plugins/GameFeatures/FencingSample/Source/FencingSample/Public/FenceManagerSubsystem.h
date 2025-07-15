@@ -37,7 +37,8 @@ class FENCINGSAMPLE_API UFenceManagerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllFenceRemoved);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAllFencesRemoved);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFencesCountModified);
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
@@ -55,7 +56,10 @@ public:
 	                                 const UActorFenceComponent* NewActorFenceComponent);
 
 	UPROPERTY(BlueprintAssignable)
-	FOnAllFenceRemoved OnAllFenceRemoved;
+	FOnAllFencesRemoved OnAllFencesRemoved;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFencesCountModified OnFencesCountModified;
 
 protected:
 	void Raise(const UActorFenceComponent* NewActorFenceComponent);
@@ -63,4 +67,6 @@ protected:
 
 	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<const UActorFenceComponent>> Fences;
+
+	friend class UFenceCheatExtension;
 };

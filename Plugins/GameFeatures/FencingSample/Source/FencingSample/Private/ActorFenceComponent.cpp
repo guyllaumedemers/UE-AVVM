@@ -157,3 +157,12 @@ void UActorFenceComponent::OnReplicatedTagChanged(const FGameplayTagContainer& N
 {
 	TryLower();
 }
+
+void UActorFenceComponent::ForceLowering() const
+{
+	UAVVMReplicatedTagComponent* TagComponent = ReplicatedTagComponent.Get();
+	if (IsValid(TagComponent))
+	{
+		TagComponent->Append(FenceRequirements);
+	}
+}

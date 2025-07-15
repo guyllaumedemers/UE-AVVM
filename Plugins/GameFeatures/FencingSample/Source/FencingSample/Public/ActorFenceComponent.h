@@ -66,4 +66,10 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+private:
+	// @gdemers WARNING! Cheats Only, should never be used elsewhere!
+	void ForceLowering() const;
+
+	friend class UFenceCheatExtension;
 };

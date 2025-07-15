@@ -100,13 +100,16 @@ void UFenceManagerSubsystem::Static_RegisterFence(const UObject* WorldContextObj
 void UFenceManagerSubsystem::Raise(const UActorFenceComponent* NewActorFenceComponent)
 {
 	Fences.Add(NewActorFenceComponent);
+	OnFencesCountModified.Broadcast();
 }
 
 void UFenceManagerSubsystem::Lower(const UActorFenceComponent* NewActorFenceComponent)
 {
 	Fences.Remove(NewActorFenceComponent);
+	OnFencesCountModified.Broadcast();
+
 	if (Fences.IsEmpty())
 	{
-		OnAllFenceRemoved.Broadcast();
+		OnAllFencesRemoved.Broadcast();
 	}
 }
