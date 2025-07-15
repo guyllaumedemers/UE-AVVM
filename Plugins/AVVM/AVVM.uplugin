@@ -41,7 +41,7 @@
     },
     {
       "Name": "AVVMToolkit",
-      "Type": "ClientOnly",
+      "Type": "Runtime",
       "LoadingPhase": "Default"
     }
   ],
