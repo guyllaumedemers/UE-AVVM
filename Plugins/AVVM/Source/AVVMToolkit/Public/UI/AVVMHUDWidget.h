@@ -21,13 +21,11 @@
 
 #include "CoreMinimal.h"
 
-#include "CommonUserWidget.h"
+#include "CommonActivatableWidget.h"
 #include "GameplayTagContainer.h"
 #include "Widgets/UIExtensionPointWidget.h"
 
 #include "AVVMHUDWidget.generated.h"
-
-class UAVVMHUDSlotWidget;
 
 /**
  *	Class description:
@@ -36,7 +34,7 @@ class UAVVMHUDSlotWidget;
  *	moved around or minimized in any way.
  */
 UCLASS()
-class AVVMTOOLKIT_API UAVVMHUDWidget : public UCommonUserWidget
+class AVVMTOOLKIT_API UAVVMHUDWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
