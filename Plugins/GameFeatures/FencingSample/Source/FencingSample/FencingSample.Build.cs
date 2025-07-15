@@ -32,6 +32,7 @@ public class FencingSample : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"GameplayTags"
 			}
 		);
 
@@ -39,6 +40,7 @@ public class FencingSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMGameplay"
 			}
 		);
 	}

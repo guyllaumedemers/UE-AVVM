@@ -25,7 +25,6 @@
 /**
  *	Plugin Description :
  *
- *	FencingSample is a system that defines protection around a sequence of processes and await their completion before executing a set of actions.
- *
- *	TBD - Further expand on this!
+ *	FencingSample is a system that defines protection around a sequence of processes and await their completion before notifying external systems,
+ *	allowing deferred execution.
  */

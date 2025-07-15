@@ -63,7 +63,10 @@ public:
 
 	static UAVVMSubsystem* Get(const UWorld* WorldContext);
 
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static bool Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context);
+	
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static UMVVMViewModelBase* Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context);
 
 protected:
