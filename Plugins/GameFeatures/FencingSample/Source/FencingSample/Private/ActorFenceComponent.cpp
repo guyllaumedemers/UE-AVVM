@@ -114,6 +114,10 @@ void UActorFenceComponent::TryRaise()
 		NewReplicatedTagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &UActorFenceComponent::OnReplicatedTagChanged);
 		UFenceManagerSubsystem::Static_RegisterFence(this, this);
 	}
+	else
+	{
+		BP_Execute();
+	}
 }
 
 void UActorFenceComponent::TryLower()
