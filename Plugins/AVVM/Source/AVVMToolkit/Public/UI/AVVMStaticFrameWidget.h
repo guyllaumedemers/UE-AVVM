@@ -30,18 +30,15 @@ class UDynamicEntryBox;
 /**
  *	Class description:
  *
- *	UAVVMStaticFrameWidget is a widget class that can holds many UAVVMWindowWidget. It references
- *	a grid-like container type to with elements can be child.
+ *	UAVVMStaticFrameWidget is a widget class that can holds many UAVVMWindowWidget (Frame encapsulating your feature). It can be parented to a Floating Frame
+ *	or nested with a Static Frame. There's two case scenarios in which you want to use this Widget type.
  *
-*	How to use ?
+ *		A) For dynamic usage where child content needs to be dynamically created and fill a grid-like container without offering
+ *		scrolling capabilities.
  *
-*		* Based on the View Model received (likely provided from the Parent View Model sub-ViewModels), we create a set of UAVVMWindowWidget
- *		that child to our container.
- *
- *		* Our child UAVVMWindowWidget may require specific anchoring. Being able to retrieve it's expected position in regards to existing neighbors is of utmost importance.
- *		Floating elements may be targeted as anchor.
- *
- *	Notes : Being able to anchor from a position outside our control should be taken into consideration.
+ *		B) For static usage where your feature has explicit property child to be bound in the View Model Property binding editor. In this case,
+ *		calling SetupFrames or AddFrame is irrelevant. The View Model bound should have explicit View Model properties to be directly reference
+ *		through the property editor.
  */
 UCLASS(Blueprintable)
 class AVVMTOOLKIT_API UAVVMStaticFrameWidget : public UAVVMFrameWidget
@@ -57,6 +54,6 @@ protected:
 	virtual void RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const override;
 	virtual void UnRegisterChild_Internal(UObject* NewViewModel) const override;
 
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UDynamicEntryBox> Root = nullptr;
 };
