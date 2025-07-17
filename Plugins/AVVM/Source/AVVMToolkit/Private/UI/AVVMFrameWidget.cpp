@@ -306,7 +306,7 @@ void UAVVMFrameBorder::SwapRoots(UAVVMFrameWidget* NewFrame)
 		NewSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
 	}
 
-	NewFrameWidgetTree->RootWidget = this;
+	NewFrameWidgetTree->RootWidget = WidgetTree->RootWidget;
 }
 
 void UAVVMFrameBorder::Revert(UAVVMFrameWidget* NewFrame)
