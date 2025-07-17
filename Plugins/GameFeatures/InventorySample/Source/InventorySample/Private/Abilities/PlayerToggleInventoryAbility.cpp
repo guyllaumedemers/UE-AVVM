@@ -21,6 +21,8 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMNotificationSubsystem.h"
+#include "GameFramework/PlayerState.h"
 
 void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                   const FGameplayAbilitySpec& Spec)
@@ -95,8 +97,8 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 		return;
 	}
 
-	const AActor* Controller = ActorInfo->PlayerController.Get();
-	if (!ensureAlwaysMsgf(IsValid(Controller),
+	const APlayerController* PC = ActorInfo->PlayerController.Get();
+	if (!ensureAlwaysMsgf(IsValid(PC),
 	                      TEXT("UPlayerToggleInventoryAbility PlayerController invalid!")))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
@@ -106,9 +108,15 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
 	       *GetName(),
-	       *Controller->GetName());
+	       *PC->GetName());
+
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+	                                        ChannelTag,
+	                                        PC,
+	                                        PC->PlayerState,
+	                                        FAVVMNotificationPayload::Empty);
 }
 
 void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

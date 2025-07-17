@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Abilities/GameplayAbility.h"
 #include "Ability/AVVMGameplayAbility.h"
 
@@ -62,4 +63,8 @@ public:
 	                        const FGameplayAbilityActivationInfo ActivationInfo,
 	                        bool bReplicateEndAbility,
 	                        bool bWasCancelled) override;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 };
