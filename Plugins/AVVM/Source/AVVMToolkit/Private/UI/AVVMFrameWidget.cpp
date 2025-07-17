@@ -64,52 +64,15 @@ void UAVVMFrameWidget::CloseAllFrames()
 void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel)
 {
 	Parent = NewParent;
-
-	if (!bSupportBorderClass || BorderWidgetClass.IsNull())
-	{
-		return;
-	}
-
-	if (!BorderWidgetClass.IsValid())
-	{
-		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMFrameWidget::SetParent, NewParent, NewViewModel);
-		BorderClassHandle = UAssetManager::Get().LoadAssetList({BorderWidgetClass.ToSoftObjectPath()}, Callback);
-	}
-	else
-	{
-		UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
-		if (IsValid(NewBorder))
-		{
-			UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
-			NewBorder->SwapSlots(this);
-			Parent = NewBorder;
-		}
-
-		OwningBorder = NewBorder;
-	}
+	AddBorder(NewViewModel);
 }
 
 void UAVVMFrameWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
-#if WITH_EDITORONLY_DATA
-	if (WidgetClass.IsValid())
-	{
-		PreviewEntries();
-		return;
-	}
-#endif
-
-	if (bOverrideWidgetPicker && !WidgetClass.IsNull() && !WidgetClass.IsValid())
-	{
-		FStreamableDelegate Callback;
-#if WITH_EDITORONLY_DATA
-		Callback.BindUObject(this, &UAVVMFrameWidget::PreviewEntries);
-#endif
-		WidgetClassHandle = UAssetManager::Get().LoadAssetList({WidgetClass.ToSoftObjectPath()}, Callback);
-	}
+	MakeWidgetClass();
+	MakeBorderClass();
 }
 
 void UAVVMFrameWidget::NativeConstruct()
@@ -151,6 +114,46 @@ void UAVVMFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	}
 }
 
+void UAVVMFrameWidget::MakeWidgetClass()
+{
+#if WITH_EDITORONLY_DATA
+	if (WidgetClass.IsValid())
+	{
+		PreviewEntries();
+		return;
+	}
+#endif
+
+	if (bOverrideWidgetPicker && !WidgetClass.IsNull() && !WidgetClass.IsValid())
+	{
+		FStreamableDelegate Callback;
+#if WITH_EDITORONLY_DATA
+		Callback.BindUObject(this, &UAVVMFrameWidget::MakeWidgetClass);
+#endif
+		WidgetClassHandle = UAssetManager::Get().LoadAssetList({WidgetClass.ToSoftObjectPath()}, Callback);
+	}
+}
+
+void UAVVMFrameWidget::MakeBorderClass()
+{
+#if WITH_EDITORONLY_DATA
+	if (BorderWidgetClass.IsValid())
+	{
+		PreviewBorder();
+		return;
+	}
+#endif
+
+	if (bSupportBorderClass && !BorderWidgetClass.IsNull() && !BorderWidgetClass.IsValid())
+	{
+		FStreamableDelegate Callback;
+#if WITH_EDITORONLY_DATA
+		Callback.BindUObject(this, &UAVVMFrameWidget::MakeBorderClass);
+#endif
+		BorderClassHandle = UAssetManager::Get().LoadAssetList({BorderWidgetClass.ToSoftObjectPath()}, Callback);
+	}
+}
+
 #if WITH_EDITORONLY_DATA
 void UAVVMFrameWidget::PreviewEntries()
 {
@@ -160,7 +163,7 @@ void UAVVMFrameWidget::PreviewEntries()
 	}
 
 	const bool bHasIdenticalNumEntries = (PreviousNumPreviewEntries == NumPreviewEntries);
-	const bool bHasIdenticalClasses = (WidgetClass.Get() == PreviousWidgetClass);
+	const bool bHasIdenticalClasses = (WidgetClass.IsValid() && IsValid(PreviousWidgetClass) && (WidgetClass->GetClass() == PreviousWidgetClass->GetClass()));
 
 	if (bHasIdenticalNumEntries && bHasIdenticalClasses)
 	{
@@ -178,6 +181,25 @@ void UAVVMFrameWidget::PreviewEntries()
 	}
 
 	SetupFrames_Internal(EditorPreviewObjects);
+}
+
+void UAVVMFrameWidget::PreviewBorder()
+{
+	if (!IsDesignTime())
+	{
+		return;
+	}
+
+	const bool bHasIdenticalClasses = (BorderWidgetClass.IsValid() && IsValid(PreviousBorderClass) && (BorderWidgetClass->GetClass() == PreviousBorderClass->GetClass()));
+	if (bHasIdenticalClasses)
+	{
+		return;
+	}
+
+	PreviousBorderClass = BorderWidgetClass.Get();
+
+	auto* NewViewModel = NewObject<UAVVMEditorPreviewViewModel>(this);
+	AddBorder(NewViewModel);
 }
 #endif
 
@@ -197,7 +219,8 @@ void UAVVMFrameWidget::UnRegisterChild(UObject* NewViewModel)
 UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder()
 {
 	const UAVVMFrameWidget* NewParent = Parent.Get();
-	if (!IsValid(NewParent) || !NewParent->AllowInnerBorders() || UAVVMFrameSettings::IsUIBorderless() || (UAVVMFrameBorder::StaticClass() == GetClass()))
+	const bool bDoesFailIfCheck = (!IsValid(NewParent) || !NewParent->AllowInnerBorders() || UAVVMFrameSettings::IsUIBorderless() || (UAVVMFrameBorder::StaticClass() == GetClass()));
+	if (!IsDesignTime() && bDoesFailIfCheck)
 	{
 		return nullptr;
 	}
@@ -216,8 +239,36 @@ bool UAVVMFrameWidget::AllowInnerBorders() const
 	return false;
 }
 
+void UAVVMFrameWidget::AddBorder(UObject* NewViewModel)
+{
+	if (!bSupportBorderClass || BorderWidgetClass.IsNull())
+	{
+		return;
+	}
+
+	if (!BorderWidgetClass.IsValid())
+	{
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UAVVMFrameWidget::AddBorder, NewViewModel);
+		BorderClassHandle = UAssetManager::Get().LoadAssetList({BorderWidgetClass.ToSoftObjectPath()}, Callback);
+	}
+	else
+	{
+		UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
+		if (IsValid(NewBorder))
+		{
+			UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
+			NewBorder->SwapSlots(this);
+			Parent = NewBorder;
+		}
+
+		OwningBorder = NewBorder;
+	}
+}
+
 void UAVVMFrameBorder::SwapSlots(UAVVMFrameWidget* NewFrame)
 {
+	// TODO @gdemers Fix this! Doesnt work in Editor and prob not also in gameplay
 	if (!IsValid(Slot))
 	{
 		return;

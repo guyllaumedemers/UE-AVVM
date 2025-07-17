@@ -25,6 +25,21 @@
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWidgetPickerDataAsset.h"
 
+void UAVVMFloatingFrameWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	if (IsValid(Root))
+	{
+		auto Slots = Root->GetSlots();
+		for (auto MySlot : Slots)
+		{
+			Cast<UCanvasPanelSlot>(MySlot)->SetAutoSize(bSizeToContent);
+			Cast<UCanvasPanelSlot>(MySlot)->SetAnchors(OverrideAnchorData.Anchors);
+		}
+	}
+}
+
 void UAVVMFloatingFrameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

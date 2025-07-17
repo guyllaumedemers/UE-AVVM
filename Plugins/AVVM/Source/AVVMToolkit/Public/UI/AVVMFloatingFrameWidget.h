@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMFrameWidget.h"
+#include "Components/CanvasPanelSlot.h"
 
 #include "AVVMFloatingFrameWidget.generated.h"
 
@@ -53,6 +54,7 @@ class AVVMTOOLKIT_API UAVVMFloatingFrameWidget : public UAVVMFrameWidget
 	GENERATED_BODY()
 
 protected:
+	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void SetupFrames_Internal(TArray<UObject*> NewViewModels) override;
 	virtual void AddFrame_Internal(UObject* NewViewModel) override;
@@ -62,6 +64,12 @@ protected:
 	virtual void UnRegisterChild_Internal(UObject* NewViewModel) const override;
 
 	virtual bool AllowInnerBorders() const override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	bool bSizeToContent = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	FAnchorData OverrideAnchorData = FAnchorData();
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> Root = nullptr;

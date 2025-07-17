@@ -132,8 +132,12 @@ protected:
 	virtual void AddFrame_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddFrame_Internal, return;);
 	virtual void RemoveFrame_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveFrame_Internal, return;);
 
+	void MakeWidgetClass();
+	void MakeBorderClass();
+
 #if WITH_EDITORONLY_DATA
 	virtual void PreviewEntries();
+	virtual void PreviewBorder();
 #endif
 
 	void RegisterChild(UObject* NewViewModel, const FFrameZOrder& NewZOrder);
@@ -144,6 +148,7 @@ protected:
 
 	UAVVMFrameBorder* IfCheckCreateBorder();
 	virtual bool AllowInnerBorders() const;
+	void AddBorder(UObject* NewViewModel);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
@@ -172,6 +177,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TSubclassOf<UAVVMFrameWidget> PreviousWidgetClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TSubclassOf<UAVVMFrameBorder> PreviousBorderClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 PreviousNumPreviewEntries = 0;

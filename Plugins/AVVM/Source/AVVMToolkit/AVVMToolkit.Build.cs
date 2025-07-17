@@ -37,7 +37,9 @@ public class AVVMToolkit : ModuleRules
 				"GameplayTags",
 				"ModelViewViewModel",
 				"UIExtension",
-				"UMG"
+				"UMG",
+				"Slate",
+				"SlateCore"
 			}
 		);
 
