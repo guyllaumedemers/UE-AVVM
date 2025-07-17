@@ -51,8 +51,8 @@ protected:
 	virtual void AddFrame_Internal(UObject* NewViewModel) override;
 	virtual void RemoveFrame_Internal(UObject* NewViewModel) override;
 
-	virtual void RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const override;
-	virtual void UnRegisterChild_Internal(UObject* NewViewModel) const override;
+	virtual void RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) override;
+	virtual void UnRegisterChild_Internal(UObject* NewViewModel) override;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UDynamicEntryBox> Root = nullptr;

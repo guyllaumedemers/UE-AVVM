@@ -27,6 +27,7 @@
 
 #include "MultiContextInventoryViewModel.generated.h"
 
+class UInventoryContextViewModel;
 class UItemObject;
 
 /**
@@ -45,10 +46,32 @@ struct INVENTORYSAMPLE_API FExchangeContext
 	bool operator==(const FExchangeContext& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<UItemObject*> LocalItemObjects;
+	TObjectPtr<const UInventoryContextViewModel> Src = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<UItemObject*> RemoteItemObjects;
+	TObjectPtr<const UInventoryContextViewModel> Dest = nullptr;
+};
+
+/**
+ *	TBD
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UInventoryContextViewModel : public UMVVMViewModelBase,
+                                                       public IAVVMViewModelFNameHelper
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static UInventoryContextViewModel* Make(const TArray<UItemObject*>& NewItems);
+
+	virtual FName GetViewModelFName() const override { return TEXT("UInventoryContextViewModel"); };
+
+	void Init(const TArray<UItemObject*>& NewItems);
+
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TArray<UItemObject*> Items;
 };
 
 /**

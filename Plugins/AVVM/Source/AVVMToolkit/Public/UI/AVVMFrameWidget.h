@@ -121,9 +121,10 @@ public:
 	void CloseAllFrames();
 
 	UFUNCTION(BlueprintCallable)
-	void SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel);
+	void SetParent(UAVVMFrameWidget* NewParent, UObject* NewViewModel);
 
 protected:
+	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
@@ -141,10 +142,10 @@ protected:
 #endif
 
 	void RegisterChild(UObject* NewViewModel, const FFrameZOrder& NewZOrder);
-	virtual void RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const PURE_VIRTUAL(RegisterChild_Internal, return;);
+	virtual void RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) PURE_VIRTUAL(RegisterChild_Internal, return;);
 
 	void UnRegisterChild(UObject* NewViewModel);
-	virtual void UnRegisterChild_Internal(UObject* NewViewModel) const PURE_VIRTUAL(UnRegisterChild_Internal, return;);
+	virtual void UnRegisterChild_Internal(UObject* NewViewModel) PURE_VIRTUAL(UnRegisterChild_Internal, return;);
 
 	UAVVMFrameBorder* IfCheckCreateBorder();
 	virtual bool AllowInnerBorders() const;
@@ -198,7 +199,7 @@ protected:
 	TArray<TObjectPtr<const UAVVMFrameDecorator>> WindowDecorators;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const UAVVMFrameWidget> Parent = nullptr;
+	TWeakObjectPtr<UAVVMFrameWidget> Parent = nullptr;
 
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<UObject>, FFrameZOrder> ViewModelToWindowContext;

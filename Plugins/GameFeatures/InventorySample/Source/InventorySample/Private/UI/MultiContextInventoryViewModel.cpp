@@ -21,6 +21,18 @@
 
 #include "ActorInventoryComponent.h"
 
+UInventoryContextViewModel* UInventoryContextViewModel::Make(const TArray<UItemObject*>& NewItems)
+{
+	auto* ViewModel = NewObject<UInventoryContextViewModel>();
+	ViewModel->Init(NewItems);
+	return ViewModel;
+}
+
+void UInventoryContextViewModel::Init(const TArray<UItemObject*>& NewItems)
+{
+	Items = NewItems;
+}
+
 FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
 {
 	if (NewPayload == nullptr)
@@ -32,21 +44,20 @@ FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
 	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator.Get());
 	if (IsValid(Instigator))
 	{
-		RemoteItemObjects = Instigator->GetItems();
+		Src = UInventoryContextViewModel::Make(Instigator->GetItems());
 	}
 
 	// @gdemers player state.
 	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target.Get());
 	if (IsValid(Target))
 	{
-		LocalItemObjects = Target->GetItems();
+		Dest = UInventoryContextViewModel::Make(Target->GetItems());
 	}
 }
 
 bool FExchangeContext::operator==(const FExchangeContext& Rhs) const
 {
-	return (LocalItemObjects == Rhs.LocalItemObjects)
-			&& (RemoteItemObjects == Rhs.RemoteItemObjects);
+	return (Src == Rhs.Src) && (Dest == Rhs.Dest);
 }
 
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)

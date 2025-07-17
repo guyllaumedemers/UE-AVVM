@@ -62,10 +62,23 @@ void UAVVMFrameWidget::CloseAllFrames()
 	}
 }
 
-void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel)
+void UAVVMFrameWidget::SetParent(UAVVMFrameWidget* NewParent, UObject* NewViewModel)
 {
 	Parent = NewParent;
-	SafeAddBorder(NewViewModel);
+
+	if (IsValid(NewViewModel))
+	{
+		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewParent);
+		SafeAddBorder(NewViewModel);
+	}
+}
+
+void UAVVMFrameWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+
+	MakeWidgetClass();
+	MakeBorderClass();
 }
 
 void UAVVMFrameWidget::NativeConstruct()
@@ -229,7 +242,7 @@ UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder()
 	const UAVVMFrameWidget* NewParent = Parent.Get();
 
 	const bool bDoesFailIfCheck = (IsValid(NewParent) && !NewParent->AllowInnerBorders());
-	if (!IsValid(WidgetTree) || IsA(UAVVMFrameBorder::StaticClass()) || UAVVMFrameSettings::IsUIBorderless() || (!IsDesignTime() && bDoesFailIfCheck))
+	if (!IsValid(WidgetTree) || UAVVMFrameSettings::IsUIBorderless() || (!IsDesignTime() && bDoesFailIfCheck))
 	{
 		return nullptr;
 	}
@@ -250,7 +263,7 @@ bool UAVVMFrameWidget::AllowInnerBorders() const
 
 void UAVVMFrameWidget::SafeAddBorder(UObject* NewViewModel)
 {
-	if (!bSupportBorderClass || BorderWidgetClass.IsNull())
+	if (!bSupportBorderClass || BorderWidgetClass.IsNull() || IsA(UAVVMFrameBorder::StaticClass()))
 	{
 		return;
 	}
@@ -271,8 +284,7 @@ void UAVVMFrameWidget::SafeAddBorder(UObject* NewViewModel)
 		UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
 		if (IsValid(NewBorder))
 		{
-			UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
-			NewBorder->SetParent(Parent.Get(), nullptr);
+			NewBorder->SetParent(Parent.Get(), NewViewModel);
 			Parent = NewBorder;
 		}
 

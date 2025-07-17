@@ -44,10 +44,10 @@ void UAVVMFloatingFrameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (IsValid(Root))
-	{
-		Root->ClearChildren();
-	}
+	// if (IsValid(Root))
+	// {
+	// 	Root->ClearChildren();
+	// }
 }
 
 void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels)
@@ -61,9 +61,9 @@ void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewMode
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
+		if (!IsValid(NewWidgetClass)) return;
 		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 	};
 
 	Root->ClearChildren();
@@ -98,9 +98,9 @@ void UAVVMFloatingFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
+		if (!IsValid(NewWidgetClass)) return;
 		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
-		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, WidgetInstance);
 	};
 
 	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
@@ -126,7 +126,7 @@ void UAVVMFloatingFrameWidget::RemoveFrame_Internal(UObject* NewViewModel)
 	UnRegisterChild(NewViewModel);
 }
 
-void UAVVMFloatingFrameWidget::RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder) const
+void UAVVMFloatingFrameWidget::RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder)
 {
 	if (!IsValid(Root))
 	{
@@ -134,16 +134,24 @@ void UAVVMFloatingFrameWidget::RegisterChild_Internal(UObject* NewViewModel, con
 	}
 
 	auto* ChildFrame = NewZOrder.Frame.Get();
-	if (IsValid(ChildFrame))
+	if (!IsValid(ChildFrame))
 	{
-		Root->AddChild(ChildFrame);
-		// @gdemers orders matter here. SetParent handle PanelSlot swap. we expect to be already slotted
-		// to a parent.
-		ChildFrame->SetParent(this, NewViewModel);
+		return;
 	}
+
+	auto* NewSlot = Cast<UCanvasPanelSlot>(Root->AddChild(ChildFrame));
+	if (IsValid(NewSlot))
+	{
+		// TODO @gdemers child placement have to be resolved here through some external means! (maybe some placement system)
+		NewSlot->SetAutoSize(bSizeToContent);
+		NewSlot->SetAnchors(OverrideAnchorData.Anchors);
+	}
+
+	// @gdemers orders matter here. SetParent handle PanelSlot swap. we expect to be already slotted to a parent.
+	ChildFrame->SetParent(this, NewViewModel);
 }
 
-void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(UObject* NewViewModel) const
+void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(UObject* NewViewModel)
 {
 	if (IsValid(Root))
 	{
