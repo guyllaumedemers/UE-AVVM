@@ -23,6 +23,7 @@
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/PanelSlot.h"
 #include "Engine/AssetManager.h"
 #include "UI/AVVMFrameSettings.h"
@@ -64,7 +65,7 @@ void UAVVMFrameWidget::CloseAllFrames()
 void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel)
 {
 	Parent = NewParent;
-	AddBorder(NewViewModel);
+	SafeAddBorder(NewViewModel);
 }
 
 void UAVVMFrameWidget::NativePreConstruct()
@@ -72,7 +73,6 @@ void UAVVMFrameWidget::NativePreConstruct()
 	Super::NativePreConstruct();
 
 	MakeWidgetClass();
-	MakeBorderClass();
 }
 
 void UAVVMFrameWidget::NativeConstruct()
@@ -112,6 +112,15 @@ void UAVVMFrameWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 			Decorator->Tick(nullptr, InDeltaTime);
 		}
 	}
+}
+
+bool UAVVMFrameWidget::Initialize()
+{
+	const bool bResult = Super::Initialize();
+
+	MakeBorderClass();
+
+	return bResult;
 }
 
 void UAVVMFrameWidget::MakeWidgetClass()
@@ -163,7 +172,7 @@ void UAVVMFrameWidget::PreviewEntries()
 	}
 
 	const bool bHasIdenticalNumEntries = (PreviousNumPreviewEntries == NumPreviewEntries);
-	const bool bHasIdenticalClasses = (WidgetClass.IsValid() && IsValid(PreviousWidgetClass) && (WidgetClass->GetClass() == PreviousWidgetClass->GetClass()));
+	const bool bHasIdenticalClasses = (WidgetClass.Get() == PreviousWidgetClass.Get());
 
 	if (bHasIdenticalNumEntries && bHasIdenticalClasses)
 	{
@@ -190,16 +199,18 @@ void UAVVMFrameWidget::PreviewBorder()
 		return;
 	}
 
-	const bool bHasIdenticalClasses = (BorderWidgetClass.IsValid() && IsValid(PreviousBorderClass) && (BorderWidgetClass->GetClass() == PreviousBorderClass->GetClass()));
-	if (bHasIdenticalClasses)
+	const bool bHasIdenticalClasses = (BorderWidgetClass.Get() == PreviousBorderClass.Get());
+	const bool bIdenticalState = (bSupportBorderClass == bPreviousBorderFlagStatus);
+	if (bHasIdenticalClasses && bIdenticalState)
 	{
 		return;
 	}
 
+	bPreviousBorderFlagStatus = bSupportBorderClass;
 	PreviousBorderClass = BorderWidgetClass.Get();
 
 	auto* NewViewModel = NewObject<UAVVMEditorPreviewViewModel>(this);
-	AddBorder(NewViewModel);
+	SafeAddBorder(NewViewModel);
 }
 #endif
 
@@ -219,19 +230,20 @@ void UAVVMFrameWidget::UnRegisterChild(UObject* NewViewModel)
 UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder()
 {
 	const UAVVMFrameWidget* NewParent = Parent.Get();
+
 	const bool bDoesFailIfCheck = (!IsValid(NewParent) || !NewParent->AllowInnerBorders() || UAVVMFrameSettings::IsUIBorderless() || (UAVVMFrameBorder::StaticClass() == GetClass()));
-	if (!IsDesignTime() && bDoesFailIfCheck)
+	if (!IsValid(WidgetTree) || (WidgetTree->RootWidget.GetClass() == UAVVMFrameBorder::StaticClass()) || (!IsDesignTime() && bDoesFailIfCheck))
 	{
 		return nullptr;
 	}
 
-	auto* NewBorder = Cast<UAVVMFrameBorder>(UUserWidget::CreateWidgetInstance(*this, BorderWidgetClass.Get(), NAME_None));
-	if (IsValid(NewBorder))
+	auto* NewFrameBorder = WidgetTree->ConstructWidget<UAVVMFrameBorder>(BorderWidgetClass.Get(), NAME_None);
+	if (IsValid(NewFrameBorder))
 	{
-		NewBorder->SetParent(NewParent, nullptr);
+		NewFrameBorder->SwapRoots(this);
 	}
 
-	return NewBorder;
+	return NewFrameBorder;
 }
 
 bool UAVVMFrameWidget::AllowInnerBorders() const
@@ -239,7 +251,7 @@ bool UAVVMFrameWidget::AllowInnerBorders() const
 	return false;
 }
 
-void UAVVMFrameWidget::AddBorder(UObject* NewViewModel)
+void UAVVMFrameWidget::SafeAddBorder(UObject* NewViewModel)
 {
 	if (!bSupportBorderClass || BorderWidgetClass.IsNull())
 	{
@@ -249,16 +261,21 @@ void UAVVMFrameWidget::AddBorder(UObject* NewViewModel)
 	if (!BorderWidgetClass.IsValid())
 	{
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMFrameWidget::AddBorder, NewViewModel);
+		Callback.BindUObject(this, &UAVVMFrameWidget::SafeAddBorder, NewViewModel);
 		BorderClassHandle = UAssetManager::Get().LoadAssetList({BorderWidgetClass.ToSoftObjectPath()}, Callback);
 	}
 	else
 	{
+		if (OwningBorder.IsValid())
+		{
+			OwningBorder->Revert(this);
+		}
+
 		UAVVMFrameBorder* NewBorder = IfCheckCreateBorder();
 		if (IsValid(NewBorder))
 		{
 			UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewBorder);
-			NewBorder->SwapSlots(this);
+			NewBorder->SetParent(Parent.Get(), nullptr);
 			Parent = NewBorder;
 		}
 
@@ -266,30 +283,33 @@ void UAVVMFrameWidget::AddBorder(UObject* NewViewModel)
 	}
 }
 
-void UAVVMFrameBorder::SwapSlots(UAVVMFrameWidget* NewFrame)
+void UAVVMFrameBorder::SwapRoots(UAVVMFrameWidget* NewFrame)
 {
-	// TODO @gdemers Fix this! Doesnt work in Editor and prob not also in gameplay
-	if (!IsValid(Slot))
+	if (!IsValid(Anchor))
 	{
 		return;
 	}
 
-	const UPanelSlot* NewFrameSlot = IsValid(NewFrame) ? NewFrame->Slot : nullptr;
-	if (!IsValid(NewFrameSlot))
+	UWidgetTree* NewFrameWidgetTree = IsValid(NewFrame) ? NewFrame->WidgetTree.Get() : nullptr;
+	if (!IsValid(NewFrameWidgetTree))
 	{
 		return;
 	}
 
-	UPanelWidget* NewFrameParent = NewFrameSlot->Parent;
-	if (IsValid(NewFrameParent))
+	Anchor->ClearChildren();
+
+	auto* NewSlot = Cast<UOverlaySlot>(Anchor->AddChild(NewFrameWidgetTree->RootWidget));
+	if (IsValid(NewSlot))
 	{
-		NewFrameParent->RemoveChild(NewFrameSlot->Content);
-		NewFrameParent->AddChild(Slot->Content);
+		NewSlot->SetPadding(FMargin());
+		NewSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Fill);
+		NewSlot->SetVerticalAlignment(EVerticalAlignment::VAlign_Fill);
 	}
 
-	if (IsValid(Anchor))
-	{
-		Anchor->ClearChildren();
-		Anchor->AddChild(NewFrameSlot->Content);
-	}
+	NewFrameWidgetTree->RootWidget = this;
+}
+
+void UAVVMFrameBorder::Revert(UAVVMFrameWidget* NewFrame)
+{
+	// TODO @gdemers handle removing the border at runtime during GameSetting property change for borderless
 }

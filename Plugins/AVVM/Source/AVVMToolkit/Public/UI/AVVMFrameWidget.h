@@ -23,6 +23,7 @@
 
 #include "CommonUserWidget.h"
 #include "GameplayTagContainer.h"
+#include "Components/ContentWidget.h"
 #include "Engine/StreamableManager.h"
 #include "Templates/SubclassOf.h"
 
@@ -128,6 +129,7 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual bool Initialize() override;
 	virtual void SetupFrames_Internal(TArray<UObject*> NewViewModels) PURE_VIRTUAL(SetupFrames_Internal, return;);
 	virtual void AddFrame_Internal(UObject* NewViewModel) PURE_VIRTUAL(AddFrame_Internal, return;);
 	virtual void RemoveFrame_Internal(UObject* NewViewModel) PURE_VIRTUAL(RemoveFrame_Internal, return;);
@@ -148,7 +150,7 @@ protected:
 
 	UAVVMFrameBorder* IfCheckCreateBorder();
 	virtual bool AllowInnerBorders() const;
-	void AddBorder(UObject* NewViewModel);
+	void SafeAddBorder(UObject* NewViewModel);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
@@ -177,6 +179,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TSubclassOf<UAVVMFrameWidget> PreviousWidgetClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bPreviousBorderFlagStatus = false;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TSubclassOf<UAVVMFrameBorder> PreviousBorderClass = nullptr;
@@ -226,7 +231,10 @@ class AVVMTOOLKIT_API UAVVMFrameBorder : public UAVVMFrameWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void SwapSlots(UAVVMFrameWidget* NewFrame);
+	void SwapRoots(UAVVMFrameWidget* NewFrame);
+
+	UFUNCTION(BlueprintCallable)
+	void Revert(UAVVMFrameWidget* NewFrame);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
