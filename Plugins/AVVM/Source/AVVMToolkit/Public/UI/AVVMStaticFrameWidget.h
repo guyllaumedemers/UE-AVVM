@@ -46,7 +46,7 @@ class AVVMTOOLKIT_API UAVVMStaticFrameWidget : public UAVVMFrameWidget
 	GENERATED_BODY()
 
 protected:
-	virtual void NativeConstruct() override;
+	virtual void NativePreConstruct() override;
 	virtual void SetupFrames_Internal(TArray<UObject*> NewViewModels) override;
 	virtual void AddFrame_Internal(UObject* NewViewModel) override;
 	virtual void RemoveFrame_Internal(UObject* NewViewModel) override;

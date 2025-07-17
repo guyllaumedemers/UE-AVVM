@@ -27,27 +27,25 @@
 
 void UAVVMFloatingFrameWidget::NativePreConstruct()
 {
-	Super::NativePreConstruct();
-
 	if (IsValid(Root))
 	{
-		auto Slots = Root->GetSlots();
-		for (auto MySlot : Slots)
+		Root->ClearChildren();
+	}
+
+	Super::NativePreConstruct();
+
+#if WITH_EDITORONLY_DATA
+	const TArray<UPanelSlot*> Slots = IsValid(Root) ? Root->GetSlots() : TArray<UPanelSlot*>{};
+	for (auto MySlot : Slots)
+	{
+		auto* NewSlot = Cast<UCanvasPanelSlot>(MySlot);
+		if (IsValid(NewSlot))
 		{
-			Cast<UCanvasPanelSlot>(MySlot)->SetAutoSize(bSizeToContent);
-			Cast<UCanvasPanelSlot>(MySlot)->SetAnchors(OverrideAnchorData.Anchors);
+			NewSlot->SetAutoSize(bSizeToContent);
+			NewSlot->SetAnchors(OverrideAnchorData.Anchors);
 		}
 	}
-}
-
-void UAVVMFloatingFrameWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	// if (IsValid(Root))
-	// {
-	// 	Root->ClearChildren();
-	// }
+#endif
 }
 
 void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels)

@@ -25,14 +25,14 @@
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWidgetPickerDataAsset.h"
 
-void UAVVMStaticFrameWidget::NativeConstruct()
+void UAVVMStaticFrameWidget::NativePreConstruct()
 {
-	Super::NativeConstruct();
-
 	if (IsValid(Root))
 	{
 		Root->Reset(true);
 	}
+
+	Super::NativePreConstruct();
 }
 
 void UAVVMStaticFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels)
@@ -47,7 +47,7 @@ void UAVVMStaticFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
-		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
+		if (!IsValid(NewWidgetClass)) return;
 		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
 	};
@@ -85,7 +85,7 @@ void UAVVMStaticFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 	                                             UObject* NewViewModel,
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
-		// @gdemers UDynamicEntryBox::CreateEntry already has a fallback support for NULL WidgetClass 
+		if (!IsValid(NewWidgetClass)) return;
 		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
 	};

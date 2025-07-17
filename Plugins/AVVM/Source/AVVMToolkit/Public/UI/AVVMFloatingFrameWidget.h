@@ -55,7 +55,6 @@ class AVVMTOOLKIT_API UAVVMFloatingFrameWidget : public UAVVMFrameWidget
 
 protected:
 	virtual void NativePreConstruct() override;
-	virtual void NativeConstruct() override;
 	virtual void SetupFrames_Internal(TArray<UObject*> NewViewModels) override;
 	virtual void AddFrame_Internal(UObject* NewViewModel) override;
 	virtual void RemoveFrame_Internal(UObject* NewViewModel) override;
