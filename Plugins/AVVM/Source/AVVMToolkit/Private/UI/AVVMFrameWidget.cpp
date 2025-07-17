@@ -68,13 +68,6 @@ void UAVVMFrameWidget::SetParent(const UAVVMFrameWidget* NewParent, UObject* New
 	SafeAddBorder(NewViewModel);
 }
 
-void UAVVMFrameWidget::NativePreConstruct()
-{
-	Super::NativePreConstruct();
-
-	MakeWidgetClass();
-}
-
 void UAVVMFrameWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -118,7 +111,11 @@ bool UAVVMFrameWidget::Initialize()
 {
 	const bool bResult = Super::Initialize();
 
-	MakeBorderClass();
+	if (bResult)
+	{
+		MakeWidgetClass();
+		MakeBorderClass();
+	}
 
 	return bResult;
 }
@@ -231,8 +228,8 @@ UAVVMFrameBorder* UAVVMFrameWidget::IfCheckCreateBorder()
 {
 	const UAVVMFrameWidget* NewParent = Parent.Get();
 
-	const bool bDoesFailIfCheck = (!IsValid(NewParent) || !NewParent->AllowInnerBorders() || UAVVMFrameSettings::IsUIBorderless() || (UAVVMFrameBorder::StaticClass() == GetClass()));
-	if (!IsValid(WidgetTree) || (WidgetTree->RootWidget.GetClass() == UAVVMFrameBorder::StaticClass()) || (!IsDesignTime() && bDoesFailIfCheck))
+	const bool bDoesFailIfCheck = (IsValid(NewParent) && !NewParent->AllowInnerBorders());
+	if (!IsValid(WidgetTree) || IsA(UAVVMFrameBorder::StaticClass()) || UAVVMFrameSettings::IsUIBorderless() || (!IsDesignTime() && bDoesFailIfCheck))
 	{
 		return nullptr;
 	}
@@ -311,5 +308,22 @@ void UAVVMFrameBorder::SwapRoots(UAVVMFrameWidget* NewFrame)
 
 void UAVVMFrameBorder::Revert(UAVVMFrameWidget* NewFrame)
 {
-	// TODO @gdemers handle removing the border at runtime during GameSetting property change for borderless
+	if (!IsValid(Anchor))
+	{
+		return;
+	}
+
+	UWidgetTree* NewFrameWidgetTree = IsValid(NewFrame) ? NewFrame->WidgetTree.Get() : nullptr;
+	if (!IsValid(NewFrameWidgetTree))
+	{
+		return;
+	}
+
+	UWidget* OldFrameBorderRoot = NewFrameWidgetTree->RootWidget;
+	if (IsValid(OldFrameBorderRoot))
+	{
+		OldFrameBorderRoot->RemoveFromParent();
+	}
+
+	NewFrameWidgetTree->RootWidget = Anchor->GetChildAt(0);
 }

@@ -23,7 +23,6 @@
 
 #include "CommonUserWidget.h"
 #include "GameplayTagContainer.h"
-#include "Components/ContentWidget.h"
 #include "Engine/StreamableManager.h"
 #include "Templates/SubclassOf.h"
 
@@ -125,7 +124,6 @@ public:
 	void SetParent(const UAVVMFrameWidget* NewParent, UObject* NewViewModel);
 
 protected:
-	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

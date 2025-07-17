@@ -154,5 +154,5 @@ void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(UObject* NewViewModel) c
 
 bool UAVVMFloatingFrameWidget::AllowInnerBorders() const
 {
-	return !Parent.Get();
+	return true;
 }
