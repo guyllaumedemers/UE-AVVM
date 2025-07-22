@@ -22,6 +22,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
+#include "Data/AVVMHandshakePayload.h"
 #include "GameFramework/PlayerState.h"
 
 void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -116,7 +117,7 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 	                                        ChannelTag,
 	                                        PC,
 	                                        PC->PlayerState,
-	                                        FAVVMNotificationPayload::Empty);
+	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, nullptr));
 }
 
 void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

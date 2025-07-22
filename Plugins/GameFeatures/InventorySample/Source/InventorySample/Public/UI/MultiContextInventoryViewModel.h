@@ -27,57 +27,117 @@
 
 #include "MultiContextInventoryViewModel.generated.h"
 
-class UInventoryContextViewModel;
 class UItemObject;
+class UItemObjectViewModel;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExchangeContextChanged, const UItemObjectViewModel*, NewModifiedItem);
 
 /**
  *	Class description:
  *
- *	FExchangeContext is a struct that cache information about the inventory system we are acting on. This
- *	can be a single instance or multiple. (example : during a trade between players)
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FExchangeContext
-{
-	GENERATED_BODY()
-
-	FExchangeContext() = default;
-	FExchangeContext(const FAVVMHandshakePayload* NewPayload);
-	bool operator==(const FExchangeContext& Rhs) const;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TObjectPtr<const UInventoryContextViewModel> Src = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TObjectPtr<const UInventoryContextViewModel> Dest = nullptr;
-};
-
-/**
- *	TBD
+ *	UItemObjectViewModel is a view model type that provides ui information about a singular object, and it's state.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UInventoryContextViewModel : public UMVVMViewModelBase,
-                                                       public IAVVMViewModelFNameHelper
+class INVENTORYSAMPLE_API UItemObjectViewModel : public UMVVMViewModelBase,
+                                                 public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static UInventoryContextViewModel* Make(const TArray<UItemObject*>& NewItems);
+	static UItemObjectViewModel* Make(UItemObject* NewItem);
 
-	virtual FName GetViewModelFName() const override { return TEXT("UInventoryContextViewModel"); };
+	virtual FName GetViewModelFName() const override { return TEXT("UItemObjectViewModel"); };
 
-	void Init(const TArray<UItemObject*>& NewItems);
+	UPROPERTY(BlueprintAssignable)
+	FOnExchangeContextChanged OnExchangeContextChanged;
 
 protected:
+	void Init(UItemObject* NewItem);
+
+	UFUNCTION()
+	void OnItemRuntimeStateChanged(const FGameplayTagContainer& NewStateTags);
+
+	UFUNCTION()
+	void OnItemRuntimeCountChanged(const int32 NewCounter);
+
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<UItemObject*> Items;
+	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	int32 Counter = 1;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<UItemObject> Item = nullptr;
 };
 
 /**
  *	Class description:
  *
- *	UMultiContextInventoryViewModel is a view model type that provide ui information about the holder inventory
+ *	FExchangeContextState is a POD class that define the ui state of the running exchange. This simply tracks information
+ *	and updates ui elements.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FExchangeContextState
+{
+	GENERATED_BODY()
+};
+
+/**
+ *	Class description:
+ *
+ *	UExchangeContextViewModel is an Abstract view model type that provides ui information about an action between two end users or
+ *	between a player and itself.
+ *
+ *	Example : During a trade, player A selects the items to be put under the "trade" window (shared by both players) and awaits confirmation
+ *	or acceptance from player B.
+ *
+ *	Other cases could involve a single player equipping gear from their inventory onto the character available preview slots.
+ *
+ *	Derived view model type should be added for specific actions.
+ *
+ *	Example : UTradeExchangeContextViewModel, UConsumptionExchangeViewModel, etc... The creation of one of these view model contexts
+ *	would most likely involve pushing a prompt on screen to confirm any pending action.
+ */
+UCLASS(Abstract, NotBlueprintable)
+class INVENTORYSAMPLE_API UExchangeContextViewModel : public UMVVMViewModelBase,
+                                                      public IAVVMViewModelFNameHelper
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static UExchangeContextViewModel* Make(const TArray<UItemObject*>& NewItems);
+
+	virtual FName GetViewModelFName() const override { return TEXT("UExchangeContextViewModel"); }
+	virtual void Process(const UItemObjectViewModel* NewModifiedItem, const bool bIsOwnedBySrc = true) PURE_VIRTUAL(Process, return;);
+
+protected:
+	void Init(const TArray<UItemObject*>& NewItems);
+
+	UFUNCTION()
+	void OnItemChanged(const UItemObjectViewModel* NewModifiedItem);
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TArray<TObjectPtr<const UItemObjectViewModel>> ItemViewModels;
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TArray<TObjectPtr<const UItemObjectViewModel>> PendingItemViewModels;
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	FExchangeContextState ExchangeContextState = FExchangeContextState();
+
+	// TODO @gdemers complex cases where singular context representing a player could drag/drop around items between sections
+	// of a more complex ui. example : from backpack to equip slot armor. a prompt could display the items context for swaping.
+	// To be further defined!
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TObjectPtr<UExchangeContextViewModel> NestedContext = nullptr;
+};
+
+/**
+ *	Class description:
+ *
+ *	UMultiContextInventoryViewModel is a view model type that provides ui information about the holder inventory
  *	and optionally, the end point user interacting with it.
  */
 UCLASS()
@@ -88,9 +148,12 @@ class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewMode
 
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UMultiContextInventoryViewModel"); };
-	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+	void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FExchangeContext ExchangeContext = FExchangeContext();
+	TObjectPtr<UExchangeContextViewModel> Src = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	TObjectPtr<UExchangeContextViewModel> Dest = nullptr;
 };

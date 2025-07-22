@@ -50,11 +50,18 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 {
 	RuntimeItemState.StateTags.RemoveTags(RemovedTags);
 	RuntimeItemState.StateTags.AppendTags(AddedTags);
+	OnRep_ItemStateModified(RuntimeItemState);
 }
 
-bool UItemObject::HasRuntimeState(const FGameplayTagContainer& Compare) const
+void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 {
-	return RuntimeItemState.StateTags.HasAllExact(Compare);
+	RuntimeItemState.Counter = FMath::Clamp<int32>((RuntimeItemState.Counter + NewCountModifier), 0, 999);
+	OnRep_ItemStateModified(RuntimeItemState);
+}
+
+bool UItemObject::DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const
+{
+	return (Compare.Num() == RuntimeItemState.StateTags.Num()) && RuntimeItemState.StateTags.HasAllExact(Compare);
 }
 
 bool UItemObject::HasPartialMatch(const FGameplayTagContainer& Compare) const
@@ -65,6 +72,16 @@ bool UItemObject::HasPartialMatch(const FGameplayTagContainer& Compare) const
 bool UItemObject::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
 	return ItemTypeTags.HasAllExact(Compare);
+}
+
+const FGameplayTagContainer& UItemObject::GetRuntimeState() const
+{
+	return RuntimeItemState.StateTags;
+}
+
+const int32& UItemObject::GetRuntimeCount() const
+{
+	return RuntimeItemState.Counter;
 }
 
 const FDataRegistryId& UItemObject::GetItemProgressionId() const
@@ -107,7 +124,7 @@ void UItemObject::SpawnActorClass(const AActor* NewAnchor,
 		return;
 	}
 
-	const bool bShouldSpawnAndAttach = HasRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
+	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
 
 	UWorld* World = GetWorld();
 	if (IsValid(World))
@@ -189,4 +206,19 @@ FTransform UItemObject::GetSpawningAnchorTransform(const AActor* NewOuter, const
 	}
 
 	return ItemAnchorTransform;
+}
+
+void UItemObject::OnRep_ItemStateModified(const FItemState& OldItemState)
+{
+	const bool bHasModifiedState = !DoesRuntimeStateEquals(OldItemState.StateTags);
+	if (bHasModifiedState)
+	{
+		OnItemRuntimeStateChanged.Broadcast(RuntimeItemState.StateTags);
+	}
+
+	const bool bHasDifferentCount = (RuntimeItemState.Counter != OldItemState.Counter);
+	if (bHasDifferentCount)
+	{
+		OnItemRuntimeCountChanged.Broadcast(RuntimeItemState.Counter);
+	}
 }

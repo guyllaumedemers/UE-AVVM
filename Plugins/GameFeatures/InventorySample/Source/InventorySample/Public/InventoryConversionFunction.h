@@ -21,20 +21,21 @@
 
 #include "CoreMinimal.h"
 
-#include "MVVMViewModelBase.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "ItemObjectViewModel.generated.h"
+#include "InventoryConversionFunction.generated.h"
 
 /**
  *	Class description:
  *
- *	UItemViewModel is a view model type that encapsulate ItemUObject data. This view model type is instanced as a Slot Widget
- *	to a dynamic container widget.
- *
- *	Example : DynamicEntryBox or ListViewBase.
+ *	UInventoryConversionFunction is a blueprint function library that exposes user defined api specific to inventory content handling
+ *	and allows filtering of a collection set to a reduced set.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UItemObjectViewModel : public UMVVMViewModelBase
+class INVENTORYSAMPLE_API UInventoryConversionFunction : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
+
+	// TODO @gdemers define api to handle filtering of user content so we can forward reduce set
+	// via MVVM view bindings.
 };

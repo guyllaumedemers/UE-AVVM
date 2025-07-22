@@ -36,6 +36,10 @@
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, class UItemObject*, NewItemObject);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeStateChanged, const FGameplayTagContainer&, NewState);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeCountChanged, const int32, NewState);
+
 /**
  *	Class description:
  *
@@ -83,13 +87,22 @@ public:
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasRuntimeState(const FGameplayTagContainer& Compare) const;
+	void ModifyRuntimeCount(const int32 NewCountModifier);
+
+	UFUNCTION(BlueprintCallable)
+	bool DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	const FGameplayTagContainer& GetRuntimeState() const;
+
+	UFUNCTION(BlueprintCallable)
+	const int32& GetRuntimeCount() const;
 
 	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& GetItemProgressionId() const;
@@ -103,6 +116,12 @@ public:
 	void SpawnActorClass(const AActor* NewAnchor,
 	                     const UClass* NewActorClass);
 
+	UPROPERTY(BlueprintAssignable)
+	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnItemRuntimeCountChanged OnItemRuntimeCountChanged;
+
 protected:
 	UFUNCTION()
 	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback);
@@ -111,6 +130,9 @@ protected:
 	void OnProgressionStageAcquired(FOnRequestItemActorClassComplete Callback);
 
 	FTransform GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const;
+
+	UFUNCTION()
+	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item State and how it should behave. Example : CanBeConsumed, Destroy on Drop, etc..."))
 	FGameplayTagContainer DefaultItemStateTags = FGameplayTagContainer::EmptyContainer;
@@ -130,7 +152,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> RuntimeItemActor = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemStateModified")
 	FItemState RuntimeItemState = FItemState();
 
 	TSharedPtr<FStreamableHandle> ItemProgressionStageHandle;

@@ -20,48 +20,100 @@
 #include "UI/MultiContextInventoryViewModel.h"
 
 #include "ActorInventoryComponent.h"
+#include "ItemObject.h"
 
-UInventoryContextViewModel* UInventoryContextViewModel::Make(const TArray<UItemObject*>& NewItems)
+UItemObjectViewModel* UItemObjectViewModel::Make(UItemObject* NewItem)
 {
-	auto* ViewModel = NewObject<UInventoryContextViewModel>();
-	ViewModel->Init(NewItems);
-	return ViewModel;
+	UItemObjectViewModel* NewViewModel = nullptr;
+	if (IsValid(NewItem))
+	{
+		NewViewModel = NewObject<UItemObjectViewModel>();
+		NewViewModel->Init(NewItem);
+	}
+
+	return NewViewModel;
 }
 
-void UInventoryContextViewModel::Init(const TArray<UItemObject*>& NewItems)
+void UItemObjectViewModel::Init(UItemObject* NewItem)
 {
-	Items = NewItems;
-}
-
-FExchangeContext::FExchangeContext(const FAVVMHandshakePayload* NewPayload)
-{
-	if (NewPayload == nullptr)
+	if (!IsValid(NewItem))
 	{
 		return;
 	}
 
-	// @gdemers world actor interacted with or other player.
-	const auto* Instigator = UActorInventoryComponent::GetActorComponent(NewPayload->Instigator.Get());
-	if (IsValid(Instigator))
+	NewItem->OnItemRuntimeStateChanged.AddUniqueDynamic(this, &UItemObjectViewModel::OnItemRuntimeStateChanged);
+	NewItem->OnItemRuntimeCountChanged.AddUniqueDynamic(this, &UItemObjectViewModel::OnItemRuntimeCountChanged);
+	OnItemRuntimeStateChanged(NewItem->GetRuntimeState());
+	OnItemRuntimeCountChanged(NewItem->GetRuntimeCount());
+}
+
+void UItemObjectViewModel::OnItemRuntimeStateChanged(const FGameplayTagContainer& NewStateTags)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(StateTags, NewStateTags);
+	OnExchangeContextChanged.Broadcast(this);
+}
+
+void UItemObjectViewModel::OnItemRuntimeCountChanged(const int32 NewCounter)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(Counter, NewCounter);
+	OnExchangeContextChanged.Broadcast(this);
+}
+
+UExchangeContextViewModel* UExchangeContextViewModel::Make(const TArray<UItemObject*>& NewItems)
+{
+	UExchangeContextViewModel* NewViewModel = nullptr;
+	if (!NewItems.IsEmpty())
 	{
-		Src = UInventoryContextViewModel::Make(Instigator->GetItems());
+		NewViewModel = NewObject<UExchangeContextViewModel>();
+		NewViewModel->Init(NewItems);
 	}
 
-	// @gdemers player state.
-	const auto* Target = UActorInventoryComponent::GetActorComponent(NewPayload->Target.Get());
-	if (IsValid(Target))
+	return NewViewModel;
+}
+
+void UExchangeContextViewModel::Init(const TArray<UItemObject*>& NewItems)
+{
+	FOnExchangeContextChanged Callback;
+	Callback.AddUniqueDynamic(this, &UExchangeContextViewModel::OnItemChanged);
+
+	PendingItemViewModels.Reset();
+	ItemViewModels.Reset(NewItems.Num());
+
+	for (UItemObject* Item : NewItems)
 	{
-		Dest = UInventoryContextViewModel::Make(Target->GetItems());
+		auto* NewViewModel = UItemObjectViewModel::Make(Item);
+		if (IsValid(NewViewModel))
+		{
+			NewViewModel->OnExchangeContextChanged = Callback;
+			ItemViewModels.Add(NewViewModel);
+		}
 	}
 }
 
-bool FExchangeContext::operator==(const FExchangeContext& Rhs) const
+void UExchangeContextViewModel::OnItemChanged(const UItemObjectViewModel* NewModifiedItem)
 {
-	return (Src == Rhs.Src) && (Dest == Rhs.Dest);
+	Process(NewModifiedItem);
 }
 
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
-	UE_MVVM_SET_PROPERTY_VALUE(ExchangeContext,
-	                           FExchangeContext(NewPayload.GetPtr<FAVVMHandshakePayload>()));
+	const auto* HandshakePayload = NewPayload.GetPtr<FAVVMHandshakePayload>();
+	if (HandshakePayload == nullptr)
+	{
+		return;
+	}
+
+	const auto* Instigator = UActorInventoryComponent::GetActorComponent(HandshakePayload->Instigator.Get());
+	if (IsValid(Instigator))
+	{
+		auto* NewSrc = UExchangeContextViewModel::Make(Instigator->GetItems());
+		UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
+	}
+
+	const auto* Target = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
+	if (IsValid(Target))
+	{
+		auto* NewDest = UExchangeContextViewModel::Make(Target->GetItems());
+		UE_MVVM_SET_PROPERTY_VALUE(Dest, NewDest);
+	}
 }
