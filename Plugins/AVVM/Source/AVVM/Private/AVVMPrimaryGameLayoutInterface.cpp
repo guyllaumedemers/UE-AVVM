@@ -26,8 +26,8 @@
 
 void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
 {
-	ULocalPlayer* FirstLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstLocalPlayer(Outer);
-	if (!IsValid(FirstLocalPlayer))
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Outer);
+	if (!IsValid(LocalPlayer))
 	{
 		return;
 	}
@@ -50,7 +50,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 		}
 	};
 
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(FirstLocalPlayer);
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(LocalPlayer);
 	if (ensure(IsValid(GameLayout)))
 	{
 		GameLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(ContextArgs.LayerTag,
@@ -63,7 +63,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObject* Outer,
                                                                       UCommonActivatableWidget* Target)
 {
-	ULocalPlayer* FirstLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstLocalPlayer(Outer);
+	ULocalPlayer* FirstLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Outer);
 	if (!IsValid(FirstLocalPlayer))
 	{
 		return;

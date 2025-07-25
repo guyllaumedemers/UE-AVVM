@@ -138,6 +138,9 @@ public:
 	static void Static_BroadcastChannel(const UObject* WorldContextObject,
 	                                    const FAVVMNotificationContextArgs& NotificationContext);
 
+	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	static void Static_ExecuteDeferredNotifications(const UObject* WorldContextObject);
+
 protected:
 	struct FAVVMObservers
 	{
@@ -155,8 +158,10 @@ protected:
 		~FAVVObserversFilteringMechanism();
 		void Unregister(const AActor* Target, const FGameplayTag& ChannelTag);
 		void Register(const AActor* Target, const FGameplayTag& ChannelTag, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
-		void Broadcast(const FAVVMNotificationContextArgs& NotificationContext) const;
+		void Broadcast(const FAVVMNotificationContextArgs& NotificationContext);
+		void ExecuteDeferredNotifications();
 
+		TArray<FAVVMNotificationContextArgs> PendingRequests;
 		TMap<const FGameplayTag, FAVVMObservers> TagToObservers;
 	};
 

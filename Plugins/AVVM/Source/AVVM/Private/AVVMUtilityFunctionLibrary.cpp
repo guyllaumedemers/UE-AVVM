@@ -22,6 +22,7 @@
 #include "AVVM.h"
 #include "CommonUserWidget.h"
 #include "MVVMSubsystem.h"
+#include "GameFramework/PlayerState.h"
 #include "View/MVVMView.h"
 
 void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
@@ -42,11 +43,23 @@ void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMView
 	}
 }
 
-ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstLocalPlayer(const UObject* WorldContextObject)
+ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject)
 {
 	if (!IsValid(WorldContextObject))
 	{
 		return nullptr;
+	}
+
+	auto* PlayerState = Cast<APlayerState>(WorldContextObject);
+	if (IsValid(PlayerState))
+	{
+		return UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(PlayerState->GetPlayerController());
+	}
+
+	auto* PC = Cast<APlayerController>(WorldContextObject);
+	if (IsValid(PC))
+	{
+		return PC->GetLocalPlayer();
 	}
 
 	const UWorld* World = WorldContextObject->GetWorld();

@@ -109,6 +109,16 @@ void UAVVMNotificationSubsystem::Static_BroadcastChannel(const UObject* WorldCon
 	}
 }
 
+void UAVVMNotificationSubsystem::Static_ExecuteDeferredNotifications(const UObject* WorldContextObject)
+{
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
+	if (IsValid(AVVMNotificationSubsystem))
+	{
+		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
+		FilteringMechanism.ExecuteDeferredNotifications();
+	}
+}
+
 UAVVMNotificationSubsystem::FAVVMObservers::~FAVVMObservers()
 {
 	Observers.Reset();
@@ -167,11 +177,18 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Register(const
 	SearchResult.Register(Target, Callback);
 }
 
-void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(const FAVVMNotificationContextArgs& NotificationContext) const
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(const FAVVMNotificationContextArgs& NotificationContext)
 {
 	const FAVVMObservers* SearchResult = TagToObservers.Find(NotificationContext.ChannelTag);
-	if (!ensureAlwaysMsgf(SearchResult != nullptr, TEXT("FAVVMNotificationContextArgs provided with invalid Channel Tag")))
+	if (SearchResult == nullptr)
 	{
+		UE_LOG(LogUI,
+		       Log,
+		       TEXT("Deferring Tag Channel \"%s\" Notification on \"%s\"."),
+		       *NotificationContext.ChannelTag.ToString(),
+		       NotificationContext.Target.IsValid() ? *NotificationContext.Target->GetName() : TEXT("All Registered Actors"));
+
+		PendingRequests.Add(NotificationContext);
 		return;
 	}
 
@@ -184,5 +201,15 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(cons
 	else
 	{
 		SearchResult->Broadcast(Target, Payload);
+	}
+}
+
+void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::ExecuteDeferredNotifications()
+{
+	for (auto Iterator = PendingRequests.CreateIterator(); Iterator; ++Iterator)
+	{
+		const FAVVMNotificationContextArgs OldCtxArgs = *Iterator;
+		Iterator.RemoveCurrentSwap();
+		Broadcast(OldCtxArgs);
 	}
 }

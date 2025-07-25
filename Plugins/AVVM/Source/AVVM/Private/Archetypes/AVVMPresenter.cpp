@@ -37,6 +37,11 @@ void UAVVMPresenter::SafeBeginPlay()
 	{
 		BP_RegisterNotificationChannels();
 	}
+
+	if (bAllowDeferredBroadcast)
+	{
+		BP_BroadcastDeferredNotifications();
+	}
 }
 
 void UAVVMPresenter::SafeEndPlay()

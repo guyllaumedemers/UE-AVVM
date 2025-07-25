@@ -56,8 +56,14 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_UnregisterNotificationChannels();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_BroadcastDeferredNotifications();
+
 	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
 	virtual void StopPresenting() PURE_VIRTUAL(StartPresenting, return;);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="GFP may broadcast before the presenter channel is registered. This flag allow OnBeginPlay broadcast for deferred calls."))
+	bool bAllowDeferredBroadcast = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
