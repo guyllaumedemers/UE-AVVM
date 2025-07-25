@@ -50,7 +50,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 		}
 	};
 
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayoutForPrimaryPlayer(LocalPlayer);
+	auto* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(LocalPlayer);
 	if (ensure(IsValid(GameLayout)))
 	{
 		GameLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(ContextArgs.LayerTag,
