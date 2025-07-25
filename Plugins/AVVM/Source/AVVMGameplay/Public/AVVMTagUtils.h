@@ -17,41 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class AVVMGameplay : ModuleRules
+#include "GameplayTagContainer.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+
+#include "AVVMTagUtils.generated.h"
+
+class UAVVMReplicatedTagComponent;
+
+/**
+ *	Class Description :
+ *
+ *	UAVVMTagUtils is a blueprint function library for reusable api specific to tag comparison.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMTagUtils : public UBlueprintFunctionLibrary
 {
-	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMOnline",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"EnhancedInput",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModularGameplayActors",
-				"ModelViewViewModel",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"ModularGameplay",
-				"UIExtension",
-				"UMG"
-			}
-		);
-	}
-}
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool DoesMeetRequirements(const UAVVMReplicatedTagComponent* NewTagComponent,
+	                                 const FGameplayTagContainer& NewRequiredTags,
+	                                 const FGameplayTagContainer& NewBlockingTags);
+};

@@ -17,41 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Ability/AVVMAbilityUtils.h"
 
-using UnrealBuildTool;
+#include "AbilitySystemComponent.h"
+#include "GameplayEffect.h"
 
-public class AVVMGameplay : ModuleRules
+const AActor* UAVVMAbilityUtils::GetEffectCauser(const UAbilitySystemComponent* NewAbilitySystemComponent,
+                                                 const FGameplayTagContainer& NewGEQueryTags)
 {
-	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
+	if (!IsValid(NewAbilitySystemComponent))
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMOnline",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"EnhancedInput",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModularGameplayActors",
-				"ModelViewViewModel",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"ModularGameplay",
-				"UIExtension",
-				"UMG"
-			}
-		);
+		return nullptr;
 	}
+
+	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(NewGEQueryTags);
+	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = NewAbilitySystemComponent->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
+	if (GEActiveHandles.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	ensureAlwaysMsgf(GEActiveHandles.Num() == 1, TEXT("Multiple Matches Found! There should only ever be one match!"));
+
+	const FActiveGameplayEffect* GEActive = NewAbilitySystemComponent->GetActiveGameplayEffect(GEActiveHandles[0]);
+	if (GEActive == nullptr)
+	{
+		return nullptr;
+	}
+
+	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
+	return GECtx.GetEffectCauser();
 }

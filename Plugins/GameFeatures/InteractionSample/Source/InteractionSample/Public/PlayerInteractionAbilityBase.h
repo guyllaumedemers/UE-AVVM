@@ -84,8 +84,6 @@ protected:
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
 	                             const FGameplayEventData* TriggerEventData);
 
-	const AActor* GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent) const;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
 

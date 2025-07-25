@@ -42,6 +42,8 @@ class AVVMGAMEPLAY_API UAVVMReplicatedTagComponent : public UActorComponent
 public:
 	UAVVMReplicatedTagComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
 	void Append(const FGameplayTagContainer& NewTags);
@@ -50,10 +52,13 @@ public:
 	void Remove(const FGameplayTagContainer& NewTags);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAnyExact(const FGameplayTagContainer& NewTags);
+	bool HasAnyExact(const FGameplayTagContainer& NewTags) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAllExact(const FGameplayTagContainer& NewTags);
+	bool HasAllExact(const FGameplayTagContainer& NewTags) const;
+
+	UFUNCTION(BlueprintCallable)
+	static UAVVMReplicatedTagComponent* GetActorComponent(const AActor* NewTarget);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnReplicatedTagChanged OnReplicatedTagChanged;
@@ -64,4 +69,10 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_FlagsModified")
 	FGameplayTagContainer Flags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTagContainer PendingFlags = FGameplayTagContainer::EmptyContainer;
 };

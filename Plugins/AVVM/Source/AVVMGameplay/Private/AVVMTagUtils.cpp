@@ -17,41 +17,20 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AVVMTagUtils.h"
 
-using UnrealBuildTool;
+#include "AVVMReplicatedTagComponent.h"
 
-public class AVVMGameplay : ModuleRules
+bool UAVVMTagUtils::DoesMeetRequirements(const UAVVMReplicatedTagComponent* NewTagComponent,
+                                         const FGameplayTagContainer& NewRequiredTags,
+                                         const FGameplayTagContainer& NewBlockingTags)
 {
-	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
+	if (!IsValid(NewTagComponent))
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMOnline",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"EnhancedInput",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModularGameplayActors",
-				"ModelViewViewModel",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"ModularGameplay",
-				"UIExtension",
-				"UMG"
-			}
-		);
+		return false;
 	}
+
+	const bool bHasAllRequiredTags = NewTagComponent->HasAllExact(NewRequiredTags);
+	const bool bHasAnyBlockingTags = NewTagComponent->HasAnyExact(NewBlockingTags);
+	return bHasAllRequiredTags && !bHasAnyBlockingTags;
 }

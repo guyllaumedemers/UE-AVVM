@@ -22,10 +22,14 @@
 #include "ActorInteractionImpl.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMReplicatedTagComponent.h"
+#include "AVVMTagUtils.h"
 #include "Interaction.h"
+#include "Components/ShapeComponent.h"
 #include "Data/InteractionExecutionContext.h"
 #include "Data/InteractionExecutionRequirements.h"
-#include "Components/ShapeComponent.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
@@ -214,14 +218,26 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 		return;
 	}
 
+	const AActor* Instigator = OwningOuter.Get();
+	const AController* Target = OtherActor->GetInstigatorController();
+
+	const UAVVMReplicatedTagComponent* ReplicatedTagComponent = nullptr;
+	if (IsValid(Target))
+	{
+		const AActor* PlayerState = IsValid(Target) ? Target->PlayerState : nullptr;
+		ReplicatedTagComponent = UAVVMReplicatedTagComponent::GetActorComponent(IsValid(PlayerState) ? PlayerState : Target->GetPawn());
+	}
+
+	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, RequiredTags, BlockingTags))
+	{
+		return;
+	}
+
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
 	if (!IsValid(Impl))
 	{
 		return;
 	}
-
-	const AActor* Instigator = OwningOuter.Get();
-	const AActor* Target = OtherActor->GetInstigatorController();
 
 	const bool bResult = Impl->HandleBeginOverlap(Records,
 	                                              Instigator/*World Actor*/,
@@ -249,14 +265,26 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 		return;
 	}
 
+	const AActor* Instigator = OwningOuter.Get();
+	const AController* Target = OtherActor->GetInstigatorController();
+
+	const UAVVMReplicatedTagComponent* ReplicatedTagComponent = nullptr;
+	if (IsValid(Target))
+	{
+		const AActor* PlayerState = IsValid(Target) ? Target->PlayerState : nullptr;
+		ReplicatedTagComponent = UAVVMReplicatedTagComponent::GetActorComponent(IsValid(PlayerState) ? PlayerState : Target->GetPawn());
+	}
+
+	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, RequiredTags, BlockingTags))
+	{
+		return;
+	}
+
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
 	if (!IsValid(Impl))
 	{
 		return;
 	}
-
-	const AActor* Instigator = OwningOuter.Get();
-	const AActor* Target = OtherActor->GetInstigatorController();
 
 	const bool bResult = Impl->HandleEndOverlap(Records,
 	                                            Instigator/*World Actor*/,

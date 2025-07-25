@@ -23,6 +23,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
 #include "Templates/SubclassOf.h"
@@ -88,6 +89,12 @@ protected:
 
 	UFUNCTION()
 	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Only allow interactions to run for holder of given tags."))
+	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Block any interaction if tags are present."))
+	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldPreventContingency = true;

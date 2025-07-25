@@ -20,10 +20,10 @@
 #include "PlayerInteractionAbilityBase.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
 #include "ActorInteractionComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 
 void UPlayerInteractionAbilityBase::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -90,7 +90,8 @@ void UPlayerInteractionAbilityBase::PreActivate(const FGameplayAbilitySpecHandle
 {
 	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
 
-	const AActor* EffectCauser = GetEffectCauser((ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr);
+	const AActor* EffectCauser = UAVVMAbilityUtils::GetEffectCauser((ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr,
+	                                                                GEQueryTags);
 	if (IsValid(EffectCauser))
 	{
 		TargetComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
@@ -211,30 +212,4 @@ void UPlayerInteractionAbilityBase::RunOptionalTask(const FGameplayAbilitySpecHa
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
-}
-
-const AActor* UPlayerInteractionAbilityBase::GetEffectCauser(const UAbilitySystemComponent* AbilitySystemComponent) const
-{
-	if (!IsValid(AbilitySystemComponent))
-	{
-		return nullptr;
-	}
-
-	const auto GEQuery = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(GEQueryTags);
-	const TArray<FActiveGameplayEffectHandle> GEActiveHandles = AbilitySystemComponent->GetActiveGameplayEffects().GetActiveEffects(GEQuery);
-	if (GEActiveHandles.IsEmpty())
-	{
-		return nullptr;
-	}
-
-	ensureAlwaysMsgf(GEActiveHandles.Num() == 1, TEXT("Multiple Matches Found! There should only ever be one match!"));
-
-	const FActiveGameplayEffect* GEActive = AbilitySystemComponent->GetActiveGameplayEffect(GEActiveHandles[0]);
-	if (GEActive == nullptr)
-	{
-		return nullptr;
-	}
-
-	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
-	return GECtx.GetEffectCauser();
 }
