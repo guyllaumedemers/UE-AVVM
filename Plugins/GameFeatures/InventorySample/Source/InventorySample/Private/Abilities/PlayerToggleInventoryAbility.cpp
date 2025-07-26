@@ -22,6 +22,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
+#include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "GameFramework/PlayerState.h"
 
@@ -81,7 +82,16 @@ bool UPlayerToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpe
                                                        const FGameplayTagContainer* TargetTags,
                                                        FGameplayTagContainer* OptionalRelevantTags) const
 {
-	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return false;
+	}
+
+	// @gdemers required to pass the internal call to ShouldActivateAbility(AvatarActor->GetLocalRole()) since our ASC is owned
+	// by the player state which is simulated_proxy on client.
+	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
+	return Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
