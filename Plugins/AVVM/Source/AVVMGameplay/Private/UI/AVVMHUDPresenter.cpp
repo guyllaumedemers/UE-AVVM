@@ -24,22 +24,24 @@
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Cheats/AVVMTagRulesCheatData.h"
-#include "GameFramework/GameStateBase.h"
 #include "UI/AVVMHUDViewModel.h"
 
 AActor* UAVVMHUDPresenter::GetOuterKey() const
 {
-	return GetTypedOuter<AGameStateBase>();
+	return GetTypedOuter<APlayerController>();
 }
 
 void UAVVMHUDPresenter::SafeBeginPlay()
 {
+	// @gdemers Order matters. Deferred notification will execute in Super::SafeBeginPlay().
+	OwningOuter = GetOuterKey();
 	Super::SafeBeginPlay();
 }
 
 void UAVVMHUDPresenter::SafeEndPlay()
 {
 	Super::SafeEndPlay();
+	OwningOuter.Reset();
 }
 
 void UAVVMHUDPresenter::BP_OnNotificationReceived_StartPresenter(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -71,15 +73,26 @@ void UAVVMHUDPresenter::BP_OnNotificationReceived_ModifyVisibilityRequirements(c
 
 void UAVVMHUDPresenter::StartPresenting()
 {
-	FAVVMPrimaryGameLayoutContextArgs CtxArgs;
-	CtxArgs.LayerTag = TargetTag;
-	CtxArgs.WidgetClass = WidgetClass;
-	IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(this, CtxArgs);
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(OwningOuter.Get());
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("UAVVMHUDPresenter couldn't find a valid LocalPlayer!")))
+	{
+		return;
+	}
+
+	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
+	ContextArgs.LayerTag = TargetTag;
+	ContextArgs.WidgetClass = WidgetClass;
+	PushContentToPrimaryGameLayout(this, LocalPlayer, ContextArgs);
 }
 
 void UAVVMHUDPresenter::StopPresenting()
 {
-	IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(OwningOuter.Get());
+	if (IsValid(LocalPlayer))
+	{
+		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
+	}
 }
 
 void UAVVMHUDPresenter::BindViewModel() const

@@ -201,7 +201,8 @@ void UInteractionPresenter::SetupWorldWidget()
 	OwningOuter = Outer;
 }
 
-void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess)
+void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess,
+                                                    const FAVVMHandshakePayload& Payload)
 {
 	if (!bWasSuccess)
 	{
@@ -218,5 +219,5 @@ void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess)
 	UE_AVVM_NOTIFY(this,
 	               PostInteractionChannelTag,
 	               OwningOuter.Get(),
-	               FAVVMNotificationPayload::Empty);
+	               FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(Payload.Instigator.Get(), Payload.Target.Get()));
 }

@@ -21,12 +21,10 @@
 
 #include "AbilitySystemComponent.h"
 #include "AVVM.h"
-#include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
-#include "CommonUserWidget.h"
 #include "MVVMViewModelBase.h"
-#include "GameFramework/PlayerState.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "UI/MultiContextInventoryViewModel.h"
 
 AActor* UMultiContextInventoryPresenter::GetOuterKey() const
@@ -34,34 +32,10 @@ AActor* UMultiContextInventoryPresenter::GetOuterKey() const
 	return GetTypedOuter<AActor>();
 }
 
-void UMultiContextInventoryPresenter::SafeBeginPlay()
-{
-	Super::SafeBeginPlay();
-
-	// @gdemers only true if held by the PlayerState, other Actor types like a Shop, a mystery box, etc...
-	// will early out and only initialize once they receive a context payload with information about the interaction end point.
-	const auto* PlayerState = GetTypedOuter<APlayerState>();
-	if (!IsValid(PlayerState))
-	{
-		return;
-	}
-
-	const APlayerController* PlayerController = PlayerState->GetPlayerController();
-	if (!IsValid(PlayerController))
-	{
-		return;
-	}
-
-	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(PlayerController);
-	if (bHasActorAuthority)
-	{
-		OwnerASC = PlayerState->GetComponentByClass<UAbilitySystemComponent>();
-	}
-}
-
 void UMultiContextInventoryPresenter::SafeEndPlay()
 {
 	Super::SafeEndPlay();
+	Target.Reset();
 	OwnerASC.Reset();
 }
 
@@ -74,6 +48,16 @@ void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StartPresenter(c
 		MultiContextInventoryViewModel->SetPayload(Payload);
 	}
 
+	const auto* Handshake = Payload.GetPtr<FAVVMHandshakePayload>();
+	if (Handshake != nullptr)
+	{
+		// @gdemers Expect to receive a PlayerState here (due to ASC ownership). Always! If interaction with a world object, the PC with net authority
+		// can execute Ability such as PlayerToggleInventory, and any PlayerInteractionAbility with either Role_Authority or Role_AutonomousProxy resulting in triggering of local ui.
+		const AActor* PlayerState = Handshake->Target.Get();
+		OwnerASC = UAVVMAbilityUtils::GetAbilitySystemComponent(PlayerState);
+		Target = PlayerState;
+	}
+
 	StartPresenting();
 }
 
@@ -84,26 +68,39 @@ void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UMultiContextInventoryPresenter::StartPresenting()
 {
-	FAVVMPrimaryGameLayoutContextArgs CtxArgs;
-	CtxArgs.LayerTag = TargetTag;
-	CtxArgs.WidgetClass = WidgetClass;
-	IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(this, CtxArgs);
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Target.Get());
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("UMultiContextInventoryPresenter couldn't find a valid LocalPlayer!")))
+	{
+		return;
+	}
 
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
 		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
 	}
+
+	FAVVMPrimaryGameLayoutContextArgs CtxArgs;
+	CtxArgs.LayerTag = TargetTag;
+	CtxArgs.WidgetClass = WidgetClass;
+	IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(this, LocalPlayer, CtxArgs);
 }
 
 void UMultiContextInventoryPresenter::StopPresenting()
 {
-	IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
-
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
 		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
+		OwnerASC.Reset();
+	}
+
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Target.Get());
+	if (IsValid(LocalPlayer))
+	{
+		IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
+		Target.Reset();
 	}
 }
 

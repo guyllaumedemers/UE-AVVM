@@ -20,6 +20,8 @@
 #include "Ability/AVVMAbilityUtils.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "GameplayEffect.h"
 
 const AActor* UAVVMAbilityUtils::GetEffectCauser(const UAbilitySystemComponent* NewAbilitySystemComponent,
@@ -47,4 +49,17 @@ const AActor* UAVVMAbilityUtils::GetEffectCauser(const UAbilitySystemComponent* 
 
 	const FGameplayEffectContextHandle& GECtx = GEActive->Spec.GetEffectContext();
 	return GECtx.GetEffectCauser();
+}
+
+UAbilitySystemComponent* UAVVMAbilityUtils::GetAbilitySystemComponent(const AActor* NewActor)
+{
+	auto ASCInterface = TScriptInterface<const IAbilitySystemInterface>(NewActor);
+
+	const bool bDoesActorImplements = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(ASCInterface);
+	if (bDoesActorImplements)
+	{
+		return ASCInterface->GetAbilitySystemComponent();
+	}
+
+	return nullptr;
 }

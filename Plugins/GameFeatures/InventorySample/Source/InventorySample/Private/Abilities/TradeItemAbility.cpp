@@ -21,6 +21,8 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "Ability/AVVMAbilityUtils.h"
+#include "Ability/AVVMGameplayAbilityActorInfo.h"
 
 void UTradeItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                       const FGameplayAbilitySpec& Spec)
@@ -78,7 +80,32 @@ bool UTradeItemAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Hand
                                            const FGameplayTagContainer* TargetTags,
                                            FGameplayTagContainer* OptionalRelevantTags) const
 {
-	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return false;
+	}
+
+	// @gdemers required to pass the internal call to ShouldActivateAbility(AvatarActor->GetLocalRole()) since our ASC is owned
+	// by the player state which is simulated_proxy on client.
+	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
+	return Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+}
+
+void UTradeItemAbility::PreActivate(const FGameplayAbilitySpecHandle Handle,
+                                    const FGameplayAbilityActorInfo* ActorInfo,
+                                    const FGameplayAbilityActivationInfo ActivationInfo,
+                                    FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
+                                    const FGameplayEventData* TriggerEventData)
+{
+	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
+
+	const AActor* EffectCauser = UAVVMAbilityUtils::GetEffectCauser((ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr,
+	                                                                GEQueryTags);
+	// if (IsValid(EffectCauser))
+	// {
+	// 	TargetComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();
+	// }
 }
 
 void UTradeItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,

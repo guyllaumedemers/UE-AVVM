@@ -69,15 +69,26 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 
 void UAVVMAccountLoginPresenter::StartPresenting()
 {
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("UAVVMAccountLoginPresenter couldn't find a valid LocalPlayer!")))
+	{
+		return;
+	}
+
 	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
 	ContextArgs.LayerTag = TargetTag;
 	ContextArgs.WidgetClass = WidgetClass;
-	PushContentToPrimaryGameLayout(this, ContextArgs);
+	PushContentToPrimaryGameLayout(this, LocalPlayer, ContextArgs);
 }
 
 void UAVVMAccountLoginPresenter::StopPresenting()
 {
-	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (IsValid(LocalPlayer))
+	{
+		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
+	}
 }
 
 void UAVVMAccountLoginPresenter::BindViewModel() const

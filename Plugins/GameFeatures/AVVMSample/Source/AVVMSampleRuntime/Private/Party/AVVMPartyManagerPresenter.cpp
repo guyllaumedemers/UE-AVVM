@@ -172,15 +172,26 @@ void UAVVMPartyManagerPresenter::SetLocalParty(const TInstancedStruct<FAVVMNotif
 
 void UAVVMPartyManagerPresenter::StartPresenting()
 {
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("UAVVMPartyManagerPresenter couldn't find a valid LocalPlayer!")))
+	{
+		return;
+	}
+
 	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
 	ContextArgs.LayerTag = TargetTag;
 	ContextArgs.WidgetClass = WidgetClass;
-	PushContentToPrimaryGameLayout(this, ContextArgs);
+	PushContentToPrimaryGameLayout(this, LocalPlayer, ContextArgs);
 }
 
 void UAVVMPartyManagerPresenter::StopPresenting()
 {
-	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (IsValid(LocalPlayer))
+	{
+		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
+	}
 }
 
 void UAVVMPartyManagerPresenter::BindViewModel() const

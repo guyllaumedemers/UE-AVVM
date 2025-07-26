@@ -146,15 +146,26 @@ void UAVVMPlayerProfilePresenter::SetPlayerProfile(const TInstancedStruct<FAVVMN
 
 void UAVVMPlayerProfilePresenter::StartPresenting()
 {
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("UAVVMPlayerProfilePresenter couldn't find a valid LocalPlayer!")))
+	{
+		return;
+	}
+
 	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
 	ContextArgs.LayerTag = TargetTag;
 	ContextArgs.WidgetClass = WidgetClass;
-	PushContentToPrimaryGameLayout(this, ContextArgs);
+	PushContentToPrimaryGameLayout(this, LocalPlayer, ContextArgs);
 }
 
 void UAVVMPlayerProfilePresenter::StopPresenting()
 {
-	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (IsValid(LocalPlayer))
+	{
+		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
+	}
 }
 
 void UAVVMPlayerProfilePresenter::BindViewModel() const

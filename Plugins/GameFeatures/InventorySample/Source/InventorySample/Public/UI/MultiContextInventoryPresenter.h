@@ -45,7 +45,6 @@ class INVENTORYSAMPLE_API UMultiContextInventoryPresenter : public UAVVMPresente
 
 public:
 	virtual AActor* GetOuterKey() const override;
-	virtual void SafeBeginPlay() override;
 	virtual void SafeEndPlay() override;
 
 protected:
@@ -64,4 +63,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAbilitySystemComponent> OwnerASC = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Target is whomever interacted with the Outer and request Start/Stop Presenting. Most-likely a Player."))
+	TWeakObjectPtr<const AActor> Target = nullptr;
 };

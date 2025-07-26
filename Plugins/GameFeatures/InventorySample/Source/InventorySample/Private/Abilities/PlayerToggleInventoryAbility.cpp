@@ -127,7 +127,7 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 	                                        ChannelTag,
 	                                        PC,
 	                                        PC->PlayerState,
-	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, nullptr));
+	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, PC->PlayerState));
 }
 
 void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

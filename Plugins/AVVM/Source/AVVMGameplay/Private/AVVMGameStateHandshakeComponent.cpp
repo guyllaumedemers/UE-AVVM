@@ -79,5 +79,5 @@ void UAVVMGameStateHandshakeComponent::ProcessHandshake(const FAVVMHandshakePayl
                                                         const FOnHandshakeRequestComplete& NewCallback) const
 {
 	// TODO @gdemers Add validtion impl details here!
-	NewCallback.ExecuteIfBound(true);
+	NewCallback.ExecuteIfBound(true, NewHandshakePayload);
 }

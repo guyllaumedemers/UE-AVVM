@@ -29,6 +29,7 @@
 
 #include "InteractionPresenter.generated.h"
 
+struct FAVVMHandshakePayload;
 class UCommonUserWidget;
 
 /**
@@ -83,7 +84,8 @@ protected:
 	void SetupWorldWidget();
 
 	UFUNCTION()
-	void PostHandshakeValidation(const bool bWasSuccess);
+	void PostHandshakeValidation(const bool bWasSuccess,
+	                             const FAVVMHandshakePayload& Payload);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	EWidgetPreviewType PreviewType = EWidgetPreviewType::InWorld;

@@ -58,4 +58,7 @@ protected:
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;
 	virtual void BindViewModel() const override;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

@@ -67,8 +67,8 @@ class AVVM_API IAVVMPrimaryGameLayoutInterface
 	GENERATED_BODY()
 
 protected:
-	void PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs);
-	void PopContentFromPrimaryGameLayout(const UObject* Outer, UCommonActivatableWidget* Target);
+	void PushContentToPrimaryGameLayout(UObject* Outer, ULocalPlayer* LocalPlayer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs);
+	void PopContentFromPrimaryGameLayout(ULocalPlayer* LocalPlayer, UCommonActivatableWidget* Target);
 	void OnPushActivatableWidgetCompleted(EAsyncWidgetLayerState State, UCommonActivatableWidget* ActivatableWidget);
 	virtual void BindViewModel() const PURE_VIRTUAL(BindViewModel, return;);
 

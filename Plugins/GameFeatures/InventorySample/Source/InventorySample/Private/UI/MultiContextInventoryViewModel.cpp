@@ -106,14 +106,16 @@ void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNot
 	const auto* Instigator = UActorInventoryComponent::GetActorComponent(HandshakePayload->Instigator.Get());
 	if (IsValid(Instigator))
 	{
-		auto* NewSrc = UExchangeContextViewModel::Make(Instigator->GetItems());
-		UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
+		// TODO @gdemers create derive class
+		// auto* NewSrc = UExchangeContextViewModel::Make(Instigator->GetItems());
+		// UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
 	}
 
 	const auto* Target = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
 	if (IsValid(Target))
 	{
-		auto* NewDest = UExchangeContextViewModel::Make(Target->GetItems());
-		UE_MVVM_SET_PROPERTY_VALUE(Dest, NewDest);
+		// TODO @gdemers create derive class
+		// auto* NewDest = UExchangeContextViewModel::Make(Target->GetItems());
+		// UE_MVVM_SET_PROPERTY_VALUE(Dest, NewDest);
 	}
 }

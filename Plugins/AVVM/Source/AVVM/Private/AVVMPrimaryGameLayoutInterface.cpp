@@ -24,9 +24,10 @@
 #include "CommonActivatableWidget.h"
 #include "PrimaryGameLayout.h"
 
-void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer, const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
+void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Outer,
+                                                                     ULocalPlayer* LocalPlayer,
+                                                                     const FAVVMPrimaryGameLayoutContextArgs& ContextArgs)
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Outer);
 	if (!IsValid(LocalPlayer))
 	{
 		return;
@@ -50,8 +51,10 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 		}
 	};
 
-	auto* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(LocalPlayer);
-	if (ensure(IsValid(GameLayout)))
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(LocalPlayer);
+	if (ensureAlwaysMsgf(IsValid(GameLayout),
+	                     TEXT("IAVVMPrimaryGameLayoutInterface can't retrieve a valid PrimaryGameLayout for Local Player \"%s\"."),
+	                     *LocalPlayer->GetName()))
 	{
 		GameLayout->PushWidgetToLayerStackAsync<UCommonActivatableWidget>(ContextArgs.LayerTag,
 		                                                                  true,
@@ -60,16 +63,17 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 	}
 }
 
-void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(const UObject* Outer,
+void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(ULocalPlayer* LocalPlayer,
                                                                       UCommonActivatableWidget* Target)
 {
-	ULocalPlayer* FirstLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Outer);
-	if (!IsValid(FirstLocalPlayer))
+	if (!IsValid(LocalPlayer))
 	{
 		return;
 	}
 
-	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(FirstLocalPlayer);
+	// @gdemers Unreal CommonGame plugin remove player from the list mapping <ULocalPlayer, PrimaryGameLayout>
+	// which imply this will fail during exit process.
+	UPrimaryGameLayout* GameLayout = UPrimaryGameLayout::GetPrimaryGameLayout(LocalPlayer);
 	if (IsValid(GameLayout))
 	{
 		GameLayout->FindAndRemoveWidgetFromLayer(Target);

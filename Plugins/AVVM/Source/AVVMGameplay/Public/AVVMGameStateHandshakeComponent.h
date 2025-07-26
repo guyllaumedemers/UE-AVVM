@@ -27,7 +27,7 @@
 
 struct FAVVMHandshakePayload;
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnHandshakeRequestComplete, const bool, bWasSuccess);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnHandshakeRequestComplete, const bool, bWasSuccess, const FAVVMHandshakePayload&, NewHandshakePayload);
 
 /**
  *	Class description:

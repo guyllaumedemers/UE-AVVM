@@ -116,15 +116,26 @@ void UAVVMStorePresenter::SetItems(const TInstancedStruct<FAVVMNotificationPaylo
 
 void UAVVMStorePresenter::StartPresenting()
 {
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("UAVVMStorePresenter couldn't find a valid LocalPlayer!")))
+	{
+		return;
+	}
+
 	FAVVMPrimaryGameLayoutContextArgs ContextArgs;
 	ContextArgs.LayerTag = TargetTag;
 	ContextArgs.WidgetClass = WidgetClass;
-	PushContentToPrimaryGameLayout(this, ContextArgs);
+	PushContentToPrimaryGameLayout(this, LocalPlayer, ContextArgs);
 }
 
 void UAVVMStorePresenter::StopPresenting()
 {
-	PopContentFromPrimaryGameLayout(this, ActivatableView.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	if (IsValid(LocalPlayer))
+	{
+		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
+	}
 }
 
 void UAVVMStorePresenter::BindViewModel() const
