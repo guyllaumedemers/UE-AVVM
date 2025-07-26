@@ -21,13 +21,13 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "Components/ActorComponent.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMGameStateHandshakeComponent.generated.h"
 
-struct FAVVMHandshakePayload;
-
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnHandshakeRequestComplete, const bool, bWasSuccess, const FAVVMHandshakePayload&, NewHandshakePayload);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnHandshakeRequestComplete, const bool, bWasSuccess, const TInstancedStruct<FAVVMNotificationPayload>&, NewHandshakePayload);
 
 /**
  *	Class description:
@@ -49,7 +49,7 @@ public:
 	static UAVVMGameStateHandshakeComponent* GetActorComponent(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable)
-	void ProcessHandshake(const FAVVMHandshakePayload& NewHandshakePayload,
+	void ProcessHandshake(const TInstancedStruct<FAVVMNotificationPayload>& NewHandshakePayload,
 	                      const FOnHandshakeRequestComplete& NewCallback) const;
 
 protected:

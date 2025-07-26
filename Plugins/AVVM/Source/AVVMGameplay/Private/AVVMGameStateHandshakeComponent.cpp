@@ -75,7 +75,7 @@ UAVVMGameStateHandshakeComponent* UAVVMGameStateHandshakeComponent::GetActorComp
 	return IsValid(GameStateBase) ? GameStateBase->GetComponentByClass<UAVVMGameStateHandshakeComponent>() : nullptr;
 }
 
-void UAVVMGameStateHandshakeComponent::ProcessHandshake(const FAVVMHandshakePayload& NewHandshakePayload,
+void UAVVMGameStateHandshakeComponent::ProcessHandshake(const TInstancedStruct<FAVVMNotificationPayload>& NewHandshakePayload,
                                                         const FOnHandshakeRequestComplete& NewCallback) const
 {
 	// TODO @gdemers Add validtion impl details here!

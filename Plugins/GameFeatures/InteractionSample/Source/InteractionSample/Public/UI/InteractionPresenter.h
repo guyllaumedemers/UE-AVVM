@@ -85,7 +85,7 @@ protected:
 
 	UFUNCTION()
 	void PostHandshakeValidation(const bool bWasSuccess,
-	                             const FAVVMHandshakePayload& Payload);
+	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	EWidgetPreviewType PreviewType = EWidgetPreviewType::InWorld;

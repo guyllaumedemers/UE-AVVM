@@ -94,20 +94,13 @@ void UInteractionPresenter::BP_OnNotificationReceived_Kill(const TInstancedStruc
 
 void UInteractionPresenter::BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* HandshakePayload = Payload.GetPtr<FAVVMHandshakePayload>();
-	if (!ensureAlwaysMsgf(HandshakePayload != nullptr,
-	                      TEXT("Notified Execution Channel Tag with invalid Struct type.")))
-	{
-		return;
-	}
-
 	const auto* HandshakeComponent = UAVVMGameStateHandshakeComponent::GetActorComponent(this);
 	if (ensureAlwaysMsgf(IsValid(HandshakeComponent),
 	                     TEXT("Missing Handshake component on AGameStateBase!")))
 	{
 		FOnHandshakeRequestComplete Callback;
 		Callback.BindDynamic(this, &UInteractionPresenter::PostHandshakeValidation);
-		HandshakeComponent->ProcessHandshake(*HandshakePayload, Callback);
+		HandshakeComponent->ProcessHandshake(Payload, Callback);
 	}
 }
 
@@ -202,7 +195,7 @@ void UInteractionPresenter::SetupWorldWidget()
 }
 
 void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess,
-                                                    const FAVVMHandshakePayload& Payload)
+                                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	if (!bWasSuccess)
 	{
@@ -219,5 +212,5 @@ void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess,
 	UE_AVVM_NOTIFY(this,
 	               PostInteractionChannelTag,
 	               OwningOuter.Get(),
-	               FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(Payload.Instigator.Get(), Payload.Target.Get()));
+	               Payload);
 }
