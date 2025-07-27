@@ -41,9 +41,9 @@ const TSoftClassPtr<UItemObject>& UItemDefinitionDataAsset::GetItemObjectClass()
 bool UItemDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,
                                              const FGameplayTagContainer& BlockingTags) const
 {
-	const bool bMeetRequirements = RequiredTagsForItemAccess.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsForItemAccess);
-	const bool bIsntBlocked = BlockingTagsForItemAccess.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsForItemAccess);
-	return bIsntBlocked && bMeetRequirements;
+	const bool bHasRequiredTags = RequirementTags.HasAllExact(RequiredTagsForItemAccess);
+	const bool bHasBlockingTags = BlockingTags.HasAnyExact(BlockingTagsForItemAccess);
+	return !bHasBlockingTags && bHasRequiredTags;
 }
 
 #if WITH_EDITOR
