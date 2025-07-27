@@ -61,32 +61,47 @@ void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 
 bool UItemObject::DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const
 {
-	return (Compare.Num() == RuntimeItemState.StateTags.Num()) && RuntimeItemState.StateTags.HasAllExact(Compare);
+	return (Compare.Num() == RuntimeItemState.StateTags.Num()) && Compare.HasAllExact(RuntimeItemState.StateTags);
 }
 
 bool UItemObject::DoesTypeHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return ItemTypeTags.HasAnyExact(Compare);
+	return Compare.HasAnyExact(ItemTypeTags);
 }
 
 bool UItemObject::DoesTypeHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return ItemTypeTags.HasAllExact(Compare);
+	return Compare.HasAllExact(ItemTypeTags);
 }
 
 bool UItemObject::DoesBehaviourHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return ItemBehaviourTypeTags.HasAnyExact(Compare);
+	return Compare.HasAnyExact(ItemBehaviourTypeTags);
 }
 
 bool UItemObject::DoesBehaviourHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return ItemBehaviourTypeTags.HasAllExact(Compare);
+	return Compare.HasAllExact(ItemBehaviourTypeTags);
 }
 
 const FGameplayTagContainer& UItemObject::GetRuntimeState() const
 {
 	return RuntimeItemState.StateTags;
+}
+
+bool UItemObject::DoesRuntimeStateHasPartialMatch(const FGameplayTagContainer& Compare) const
+{
+	return Compare.HasAnyExact(RuntimeItemState.StateTags);
+}
+
+bool UItemObject::DoesRuntimeStateHasExactMatch(const FGameplayTagContainer& Compare) const
+{
+	return Compare.HasAllExact(RuntimeItemState.StateTags);
+}
+
+bool UItemObject::IsEmpty() const
+{
+	return (false == !!RuntimeItemState.Counter);
 }
 
 const int32& UItemObject::GetRuntimeCount() const

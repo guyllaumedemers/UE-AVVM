@@ -108,6 +108,15 @@ public:
 	const FGameplayTagContainer& GetRuntimeState() const;
 
 	UFUNCTION(BlueprintCallable)
+	bool DoesRuntimeStateHasPartialMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool DoesRuntimeStateHasExactMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool IsEmpty() const;
+
+	UFUNCTION(BlueprintCallable)
 	const int32& GetRuntimeCount() const;
 
 	UFUNCTION(BlueprintCallable)

@@ -61,11 +61,27 @@ TArray<UObject*> UInventoryConversionFunction::GetConsumables(const TArray<UObje
 TArray<UObject*> UInventoryConversionFunction::GetArrayByFilterContext(const FGameplayTagContainer& NewFilteringRules,
                                                                        const TArray<UObject*>& NewObjects)
 {
+	const auto DoesItemMeetRequirements = [](const UItemObject* NewItem,
+	                                         const FGameplayTagContainer& NewRequirements)
+	{
+		if (!IsValid(NewItem))
+		{
+			return false;
+		}
+
+		const bool bDoesTypeHasExactMatch = NewItem->DoesTypeHasExactMatch(NewRequirements);
+		// @gdemers lookup accessibility state.
+		const bool bDoesRuntimeStateHasExactMatch = NewItem->DoesRuntimeStateHasExactMatch(NewRequirements);
+		const bool bIsItemCountNull = NewItem->IsEmpty();
+
+		return bDoesTypeHasExactMatch && bDoesRuntimeStateHasExactMatch && !bIsItemCountNull;
+	};
+
 	TArray<UObject*> OutResult;
 	for (auto Iterator = NewObjects.CreateConstIterator(); Iterator; ++Iterator)
 	{
-		auto* NewItem = Cast<UItemObject>(*Iterator);
-		if (IsValid(NewItem) && NewItem->DoesTypeHasPartialMatch(NewFilteringRules))
+		const bool bDoesMeetRequirements = DoesItemMeetRequirements(Cast<UItemObject>(*Iterator), NewFilteringRules);
+		if (bDoesMeetRequirements)
 		{
 			OutResult.Add(*Iterator);
 		}

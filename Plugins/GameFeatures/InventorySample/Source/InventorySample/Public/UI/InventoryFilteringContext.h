@@ -37,22 +37,22 @@ class INVENTORYSAMPLE_API UInventoryConversionFunction : public UBlueprintFuncti
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items from the activate storage selected."))
 	static TArray<UObject*> GetStorageItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items equipped."))
 	static TArray<UObject*> GetEquippedItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are passive."))
 	static TArray<UObject*> GetPassiveItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are offensive."))
 	static TArray<UObject*> GetOffensiveItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are defensive."))
 	static TArray<UObject*> GetDefensiveItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory")
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are consumable."))
 	static TArray<UObject*> GetConsumables(const TArray<UObject*>& NewObjects);
 
 private:
