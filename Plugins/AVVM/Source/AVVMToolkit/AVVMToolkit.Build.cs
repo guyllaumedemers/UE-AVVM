@@ -39,7 +39,8 @@ public class AVVMToolkit : ModuleRules
 				"UIExtension",
 				"UMG",
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"StructUtils"
 			}
 		);
 

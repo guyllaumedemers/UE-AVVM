@@ -17,30 +17,43 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/MultiContextInventoryViewModel.h"
+#include "UI/ItemObjectViewModel.h"
 
-#include "ActorInventoryComponent.h"
-#include "UI/ExchangeContextViewModel.h"
+#include "ItemObject.h"
 
-void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
+UItemObjectViewModel* UItemObjectViewModel::Make(UItemObject* NewItem)
 {
-	const auto* HandshakePayload = NewPayload.GetPtr<FAVVMHandshakePayload>();
-	if (HandshakePayload == nullptr)
+	UItemObjectViewModel* NewViewModel = nullptr;
+	if (IsValid(NewItem))
+	{
+		NewViewModel = NewObject<UItemObjectViewModel>();
+		NewViewModel->Init(NewItem);
+	}
+
+	return NewViewModel;
+}
+
+void UItemObjectViewModel::Init(UItemObject* NewItem)
+{
+	if (!IsValid(NewItem))
 	{
 		return;
 	}
 
-	const auto* Instigator = UActorInventoryComponent::GetActorComponent(HandshakePayload->Instigator.Get());
-	if (IsValid(Instigator))
-	{
-		auto* NewSrc = UExchangeContextViewModel::Make(Instigator->GetItems());
-		UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
-	}
+	NewItem->OnItemRuntimeStateChanged.AddUniqueDynamic(this, &UItemObjectViewModel::OnItemRuntimeStateChanged);
+	NewItem->OnItemRuntimeCountChanged.AddUniqueDynamic(this, &UItemObjectViewModel::OnItemRuntimeCountChanged);
+	OnItemRuntimeStateChanged(NewItem->GetRuntimeState());
+	OnItemRuntimeCountChanged(NewItem->GetRuntimeCount());
+}
 
-	const auto* Target = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
-	if (IsValid(Target))
-	{
-		auto* NewDest = UExchangeContextViewModel::Make(Target->GetItems());
-		UE_MVVM_SET_PROPERTY_VALUE(Dest, NewDest);
-	}
+void UItemObjectViewModel::OnItemRuntimeStateChanged(const FGameplayTagContainer& NewStateTags)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(StateTags, NewStateTags);
+	OnExchangeContextChanged.Broadcast(this);
+}
+
+void UItemObjectViewModel::OnItemRuntimeCountChanged(const int32 NewCounter)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(Counter, NewCounter);
+	OnExchangeContextChanged.Broadcast(this);
 }

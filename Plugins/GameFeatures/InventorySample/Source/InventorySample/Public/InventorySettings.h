@@ -49,6 +49,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static const FGameplayTag& GetDroppedTag();
 
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetStorageRuleset();
+
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetEquippedRuleset();
+
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetPassiveRuleset();
+
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetOffensiveRuleset();
+
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetDefensiveRuleset();
+
+	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetConsumableRuleset();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
@@ -61,4 +79,22 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTag DroppedTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer EquippedRuleset = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer PassiveRuleset = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer OffensiveRuleset = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer DefensiveRuleset = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer ConsumableRuleset = FGameplayTagContainer::EmptyContainer;
 };

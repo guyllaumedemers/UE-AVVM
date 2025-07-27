@@ -38,3 +38,33 @@ const FGameplayTag& UInventorySettings::GetDroppedTag()
 {
 	return GetDefault<UInventorySettings>()->DroppedTag;
 }
+
+const FGameplayTagContainer& UInventorySettings::GetStorageRuleset()
+{
+	return GetDefault<UInventorySettings>()->StorageRuleset;
+}
+
+const FGameplayTagContainer& UInventorySettings::GetEquippedRuleset()
+{
+	return GetDefault<UInventorySettings>()->EquippedRuleset;
+}
+
+const FGameplayTagContainer& UInventorySettings::GetPassiveRuleset()
+{
+	return GetDefault<UInventorySettings>()->PassiveRuleset;
+}
+
+const FGameplayTagContainer& UInventorySettings::GetOffensiveRuleset()
+{
+	return GetDefault<UInventorySettings>()->OffensiveRuleset;
+}
+
+const FGameplayTagContainer& UInventorySettings::GetDefensiveRuleset()
+{
+	return GetDefault<UInventorySettings>()->DefensiveRuleset;
+}
+
+const FGameplayTagContainer& UInventorySettings::GetConsumableRuleset()
+{
+	return GetDefault<UInventorySettings>()->ConsumableRuleset;
+}

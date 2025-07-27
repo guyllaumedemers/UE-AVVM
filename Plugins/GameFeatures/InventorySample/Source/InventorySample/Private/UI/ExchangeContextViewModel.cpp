@@ -17,25 +17,42 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "UI/ExchangeContextViewModel.h"
 
-#include "CoreMinimal.h"
+#include "UI/ItemObjectViewModel.h"
 
-#include "Kismet/BlueprintFunctionLibrary.h"
-
-#include "InventoryConversionFunction.generated.h"
-
-/**
- *	Class description:
- *
- *	UInventoryConversionFunction is a blueprint function library that exposes user defined api specific to inventory content handling
- *	and allows filtering of a collection set to a reduced set.
- */
-UCLASS()
-class INVENTORYSAMPLE_API UInventoryConversionFunction : public UBlueprintFunctionLibrary
+UExchangeContextViewModel* UExchangeContextViewModel::Make(const TArray<UItemObject*>& NewItems)
 {
-	GENERATED_BODY()
+	UExchangeContextViewModel* NewViewModel = nullptr;
+	if (!NewItems.IsEmpty())
+	{
+		NewViewModel = NewObject<UExchangeContextViewModel>();
+		NewViewModel->Init(NewItems);
+	}
 
-	// TODO @gdemers define api to handle filtering of user content so we can forward reduce set
-	// via MVVM view bindings.
-};
+	return NewViewModel;
+}
+
+void UExchangeContextViewModel::Init(const TArray<UItemObject*>& NewItems)
+{
+	FOnExchangeContextChanged Callback;
+	Callback.AddUniqueDynamic(this, &UExchangeContextViewModel::OnItemChanged);
+
+	PendingItemViewModels.Reset();
+	ItemViewModels.Reset(NewItems.Num());
+
+	for (UItemObject* Item : NewItems)
+	{
+		auto* NewViewModel = UItemObjectViewModel::Make(Item);
+		if (IsValid(NewViewModel))
+		{
+			NewViewModel->OnExchangeContextChanged = Callback;
+			ItemViewModels.Add(NewViewModel);
+		}
+	}
+}
+
+void UExchangeContextViewModel::OnItemChanged(const UItemObjectViewModel* NewModifiedItem)
+{
+	Process(NewModifiedItem);
+}

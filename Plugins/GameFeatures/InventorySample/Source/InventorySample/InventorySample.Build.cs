@@ -31,6 +31,7 @@ public class InventorySample : ModuleRules
 			{
 				"AVVM",
 				"AVVMGameplay",
+				"AVVMToolkit",
 				"CommonUI",
 				"Core",
 				"CoreUObject",
@@ -41,7 +42,7 @@ public class InventorySample : ModuleRules
 				"GameplayTags",
 				"IrisCore",
 				"ModelViewViewModel",
-				"StructUtils"
+				"StructUtils",
 			}
 		);
 

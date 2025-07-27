@@ -22,33 +22,51 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
+#include "GameplayTagContainer.h"
 #include "MVVMViewModelBase.h"
-#include "Data/AVVMHandshakePayload.h"
 
-#include "MultiContextInventoryViewModel.generated.h"
+#include "ItemObjectViewModel.generated.h"
 
-class UExchangeContextViewModel;
+class UItemObject;
+class UItemObjectViewModel;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExchangeContextChanged, const UItemObjectViewModel*, NewModifiedItem);
 
 /**
  *	Class description:
  *
- *	UMultiContextInventoryViewModel is a view model type that provides ui information about the holder inventory
- *	and optionally, the end point user interacting with it.
+ *	UItemObjectViewModel is a view model type that provides ui information about a singular object, and it's state.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewModelBase,
-                                                            public IAVVMViewModelFNameHelper
+class INVENTORYSAMPLE_API UItemObjectViewModel : public UMVVMViewModelBase,
+                                                 public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
-	virtual FName GetViewModelFName() const override { return TEXT("UMultiContextInventoryViewModel"); };
-	void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+	UFUNCTION(BlueprintCallable)
+	static UItemObjectViewModel* Make(UItemObject* NewItem);
+
+	virtual FName GetViewModelFName() const override { return TEXT("UItemObjectViewModel"); };
+
+	UPROPERTY(BlueprintAssignable)
+	FOnExchangeContextChanged OnExchangeContextChanged;
 
 protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TObjectPtr<UExchangeContextViewModel> Src = nullptr;
+	void Init(UItemObject* NewItem);
+
+	UFUNCTION()
+	void OnItemRuntimeStateChanged(const FGameplayTagContainer& NewStateTags);
+
+	UFUNCTION()
+	void OnItemRuntimeCountChanged(const int32 NewCounter);
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TObjectPtr<UExchangeContextViewModel> Dest = nullptr;
+	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
+	int32 Counter = 1;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<UItemObject> Item = nullptr;
 };

@@ -50,7 +50,7 @@ struct INVENTORYSAMPLE_API FItemState
 {
 	GENERATED_BODY()
 
-	// @gdemers Complex state. Example : CanBeConsumed & InBackupStorage & PendingForTrade
+	// @gdemers Complex state. Example : CanBeConsumed & IsAccessible & PendingForTrade
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
 
@@ -134,10 +134,10 @@ protected:
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item State and how it should behave. Example : CanBeConsumed, Destroy on Drop, etc..."))
-	FGameplayTagContainer DefaultItemStateTags = FGameplayTagContainer::EmptyContainer;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
+	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item Category. Example : Weapon, Armor, etc... and the Slot where it can be equipped!"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc..."))
 	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
