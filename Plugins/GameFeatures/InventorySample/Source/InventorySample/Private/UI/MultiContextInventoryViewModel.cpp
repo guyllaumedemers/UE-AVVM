@@ -20,7 +20,8 @@
 #include "UI/MultiContextInventoryViewModel.h"
 
 #include "ActorInventoryComponent.h"
-#include "UI/ExchangeContextViewModel.h"
+#include "AVVMUtilityFunctionLibrary.h"
+#include "UI/SingleContextInventoryViewModel.h"
 
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
@@ -30,17 +31,21 @@ void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNot
 		return;
 	}
 
-	const auto* Instigator = UActorInventoryComponent::GetActorComponent(HandshakePayload->Instigator.Get());
-	if (IsValid(Instigator))
+	const AActor* InstigatorPlayerState = HandshakePayload->Instigator.Get();
+	const auto* InstigatorInventoryComponent = UActorInventoryComponent::GetActorComponent(InstigatorPlayerState);
+	if (IsValid(InstigatorInventoryComponent))
 	{
-		auto* NewSrc = UExchangeContextViewModel::Make(Instigator->GetItems());
+		ULocalPlayer* InstigatorLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(InstigatorPlayerState);
+		auto* NewSrc = USingleContextInventoryViewModel::Make(InstigatorInventoryComponent->GetItems(), InstigatorLocalPlayer);
 		UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
 	}
 
-	const auto* Target = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
-	if (IsValid(Target))
+	const AActor* TargetPlayerState = HandshakePayload->Instigator.Get();
+	const auto* TargetInventoryComponent = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
+	if (IsValid(TargetPlayerState))
 	{
-		auto* NewDest = UExchangeContextViewModel::Make(Target->GetItems());
+		ULocalPlayer* TargetLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(TargetPlayerState);
+		auto* NewDest = USingleContextInventoryViewModel::Make(TargetInventoryComponent->GetItems(), TargetLocalPlayer);
 		UE_MVVM_SET_PROPERTY_VALUE(Dest, NewDest);
 	}
 }

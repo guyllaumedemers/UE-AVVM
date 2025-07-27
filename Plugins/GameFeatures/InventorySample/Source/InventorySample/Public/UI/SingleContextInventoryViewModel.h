@@ -23,32 +23,37 @@
 
 #include "AVVM.h"
 #include "MVVMViewModelBase.h"
-#include "Data/AVVMHandshakePayload.h"
 
-#include "MultiContextInventoryViewModel.generated.h"
+#include "SingleContextInventoryViewModel.generated.h"
 
-class USingleContextInventoryViewModel;
+class UItemObject;
+class UItemObjectViewModel;
 
 /**
  *	Class description:
  *
- *	UMultiContextInventoryViewModel is a view model type that provides ui information about the holder inventory
- *	and optionally, the end point user interacting with it.
+ *	USingleContextInventoryViewModel is a view model type that store data about the owner items.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UMultiContextInventoryViewModel : public UMVVMViewModelBase,
-                                                            public IAVVMViewModelFNameHelper
+class INVENTORYSAMPLE_API USingleContextInventoryViewModel : public UMVVMViewModelBase,
+                                                             public IAVVMViewModelFNameHelper
 {
 	GENERATED_BODY()
 
 public:
-	virtual FName GetViewModelFName() const override { return TEXT("UMultiContextInventoryViewModel"); };
-	void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+	UFUNCTION(BlueprintCallable)
+	static USingleContextInventoryViewModel* Make(const TArray<UItemObject*>& NewItems,
+	                                              ULocalPlayer* NewLocalPlayer);
+
+	virtual FName GetViewModelFName() const override { return TEXT("USingleContextInventoryViewModel"); }
+	void Process(const UItemObjectViewModel* NewModifiedItem);
 
 protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TObjectPtr<USingleContextInventoryViewModel> Src = nullptr;
+	void Init(const TArray<UItemObject*>& NewItems);
+
+	UFUNCTION()
+	void OnItemChanged(const UItemObjectViewModel* NewModifiedItem);
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TObjectPtr<USingleContextInventoryViewModel> Dest = nullptr;
+	TArray<TObjectPtr<UItemObjectViewModel>> ItemViewModels;
 };

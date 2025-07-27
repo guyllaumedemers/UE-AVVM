@@ -17,30 +17,35 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "UI/ExchangeContextViewModel.h"
+#include "UI/SingleContextInventoryViewModel.h"
 
+#include "ItemPlacementManager.h"
 #include "UI/ItemObjectViewModel.h"
 
-UExchangeContextViewModel* UExchangeContextViewModel::Make(const TArray<UItemObject*>& NewItems)
+USingleContextInventoryViewModel* USingleContextInventoryViewModel::Make(const TArray<UItemObject*>& NewItems,
+                                                                         ULocalPlayer* NewLocalPlayer)
 {
-	UExchangeContextViewModel* NewViewModel = nullptr;
+	USingleContextInventoryViewModel* NewViewModel = nullptr;
 	if (!NewItems.IsEmpty())
 	{
-		NewViewModel = NewObject<UExchangeContextViewModel>();
+		NewViewModel = NewObject<USingleContextInventoryViewModel>(NewLocalPlayer);
 		NewViewModel->Init(NewItems);
 	}
 
 	return NewViewModel;
 }
 
-void UExchangeContextViewModel::Init(const TArray<UItemObject*>& NewItems)
+void USingleContextInventoryViewModel::Process(const UItemObjectViewModel* NewModifiedItem)
+{
+	// TODO @gdemers Define how the status change of an item affect the inventory state.
+}
+
+void USingleContextInventoryViewModel::Init(const TArray<UItemObject*>& NewItems)
 {
 	FOnExchangeContextChanged Callback;
-	Callback.AddUniqueDynamic(this, &UExchangeContextViewModel::OnItemChanged);
+	Callback.AddUniqueDynamic(this, &USingleContextInventoryViewModel::OnItemChanged);
 
-	PendingItemViewModels.Reset();
 	ItemViewModels.Reset(NewItems.Num());
-
 	for (UItemObject* Item : NewItems)
 	{
 		auto* NewViewModel = UItemObjectViewModel::Make(Item);
@@ -50,9 +55,19 @@ void UExchangeContextViewModel::Init(const TArray<UItemObject*>& NewItems)
 			ItemViewModels.Add(NewViewModel);
 		}
 	}
+
+	// TODO @gdemers object placement would only be configured for outer referencing a local player. in the case of a shop displaying
+	// content, the current default state would be to display items based on ordering defined in it's data asset.
+	// May require Fix later!
+	const auto* OwningLocalPlayer = GetTypedOuter<ULocalPlayer>();
+	auto* Subsystem = UItemPlacementManager::GetSubsystem(OwningLocalPlayer);
+	if (IsValid(Subsystem))
+	{
+		Subsystem->SetupItemPlacements(ItemViewModels);
+	}
 }
 
-void UExchangeContextViewModel::OnItemChanged(const UItemObjectViewModel* NewModifiedItem)
+void USingleContextInventoryViewModel::OnItemChanged(const UItemObjectViewModel* NewModifiedItem)
 {
 	Process(NewModifiedItem);
 }

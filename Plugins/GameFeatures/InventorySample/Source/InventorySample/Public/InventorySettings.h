@@ -53,6 +53,9 @@ public:
 	static const FGameplayTagContainer& GetStorageRuleset();
 
 	UFUNCTION(BlueprintCallable)
+	static const FGameplayTagContainer& GetHoldingRuleset();
+
+	UFUNCTION(BlueprintCallable)
 	static const FGameplayTagContainer& GetEquippedRuleset();
 
 	UFUNCTION(BlueprintCallable)
@@ -82,6 +85,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	FGameplayTagContainer HoldingRuleset = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTagContainer EquippedRuleset = FGameplayTagContainer::EmptyContainer;

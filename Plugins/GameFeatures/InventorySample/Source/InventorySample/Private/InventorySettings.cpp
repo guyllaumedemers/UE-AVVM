@@ -44,6 +44,11 @@ const FGameplayTagContainer& UInventorySettings::GetStorageRuleset()
 	return GetDefault<UInventorySettings>()->StorageRuleset;
 }
 
+const FGameplayTagContainer& UInventorySettings::GetHoldingRuleset()
+{
+	return GetDefault<UInventorySettings>()->HoldingRuleset;
+}
+
 const FGameplayTagContainer& UInventorySettings::GetEquippedRuleset()
 {
 	return GetDefault<UInventorySettings>()->EquippedRuleset;

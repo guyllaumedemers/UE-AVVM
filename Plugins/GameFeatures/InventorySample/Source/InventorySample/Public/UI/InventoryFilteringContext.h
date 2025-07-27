@@ -37,25 +37,28 @@ class INVENTORYSAMPLE_API UInventoryConversionFunction : public UBlueprintFuncti
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items from the activate storage selected."))
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items from owner storage."))
 	static TArray<UObject*> GetStorageItems(const TArray<UObject*>& NewObjects);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items from owner holdings."))
+	static TArray<UObject*> GetHeldItems(const TArray<UObject*>& NewObjects);
 
 	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items equipped."))
 	static TArray<UObject*> GetEquippedItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are passive."))
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of passive items."))
 	static TArray<UObject*> GetPassiveItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are offensive."))
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of offensive items."))
 	static TArray<UObject*> GetOffensiveItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are defensive."))
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of defensive items."))
 	static TArray<UObject*> GetDefensiveItems(const TArray<UObject*>& NewObjects);
 
-	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of items held by user that are consumable."))
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta=(ToolTip="Returns reduce set of consumable items."))
 	static TArray<UObject*> GetConsumables(const TArray<UObject*>& NewObjects);
 
 private:
-	static TArray<UObject*> GetArrayByFilterContext(const FGameplayTagContainer& NewFilteringRules,
+	static TArray<UObject*> GetArrayByFilterRuleset(const FGameplayTagContainer& NewFilteringRules,
 	                                                const TArray<UObject*>& NewObjects);
 };
