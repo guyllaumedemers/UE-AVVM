@@ -45,7 +45,7 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UActorInventoryComponent, Items);
-	DOREPLIFETIME(UActorInventoryComponent, OwnedGameplayTags);
+	DOREPLIFETIME(UActorInventoryComponent, ComponentStateTags);
 }
 
 void UActorInventoryComponent::BeginPlay()
@@ -183,7 +183,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 			continue;
 		}
 
-		if (!ItemAsset->CanAccessItem(OwnedGameplayTags, OwnedGameplayTags))
+		if (!ItemAsset->CanAccessItem(ComponentStateTags, ComponentStateTags))
 		{
 			UE_LOG(LogGameplay,
 			       Log,
@@ -247,36 +247,20 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 	return Items;
 }
 
-const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByPartialMatch(const FGameplayTagContainer& FilteringTags) const
-{
-	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Param)
-	{
-		return IsValid(Param) && Param->HasPartialMatch(Compare);
-	});
-}
-
-const TArray<UItemObject*>& UActorInventoryComponent::GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const
-{
-	return Items.FilterByPredicate([Compare = FilteringTags](const UItemObject* Param)
-	{
-		return IsValid(Param) && Param->HasExactMatch(Compare);
-	});
-}
-
 void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
 {
-	OwnedGameplayTags.RemoveTags(RemovedTags);
-	OwnedGameplayTags.AppendTags(AddedTags);
+	ComponentStateTags.RemoveTags(RemovedTags);
+	ComponentStateTags.AppendTags(AddedTags);
 }
 
 bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return OwnedGameplayTags.HasAnyExact(Compare);
+	return ComponentStateTags.HasAnyExact(Compare);
 }
 
 bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return OwnedGameplayTags.HasAllExact(Compare);
+	return ComponentStateTags.HasAllExact(Compare);
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)

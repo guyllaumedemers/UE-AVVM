@@ -22,125 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
-#include "StructUtils/InstancedStruct.h"
 
 #include "InventoryFilteringContext.generated.h"
-
-/**
- *	Class description:
- *
- *	FInventoryFilteringContext is the base filtering context that abstract the implementation details for using conversion function with View model bindings.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual ~FInventoryFilteringContext() = default;
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const PURE_VIRTUAL(GetReduceSet, return TArray<UObject*>{};);
-
-	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMNotificationPayload>::Make<T>
-	template <typename TChild, typename... TArgs>
-	static TInstancedStruct<FInventoryFilteringContext> Make(TArgs&&... Args);
-};
-
-template <typename TChild, typename... TArgs>
-TInstancedStruct<FInventoryFilteringContext> FInventoryFilteringContext::Make(TArgs&&... Args)
-{
-	return TInstancedStruct<FInventoryFilteringContext>::Make<TChild>(Forward<TArgs>(Args)...);
-}
-
-/**
- *	Class description:
- *
- *	FEquipFilteringContext is a filtering context object that parses a collection set and returns all items that are
- *	stored.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FStorageFilteringContext : public FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const;
-};
-
-/**
- *	Class description:
- *
- *	FEquipFilteringContext is a filtering context object that parses a collection set and returns all items that are
- *	equipped.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FEquipFilteringContext : public FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const;
-};
-
-/**
- *	Class description:
- *
- *	FPassiveFilteringContext is a filtering context object that parses a collection set and returns all items that are
- *	passive.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FPassiveFilteringContext : public FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const;
-};
-
-/**
- *	Class description:
- *
- *	FOffensiveFilteringContext is a filtering context object that parses a collection set and returns all items that are
- *	offensive.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FOffensiveFilteringContext : public FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const;
-};
-
-/**
- *	Class description:
- *
- *	FDefensiveFilteringContext is a filtering context object that parses a collection set and returns all items that are
- *	defensive.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FDefensiveFilteringContext : public FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const;
-};
-
-/**
- *	Class description:
- *
- *	FConsumableFilteringContext is a filtering context object that parses a collection set and returns all items that are
- *	consumable.
- */
-USTRUCT()
-struct INVENTORYSAMPLE_API FConsumableFilteringContext : public FInventoryFilteringContext
-{
-	GENERATED_BODY()
-
-	virtual TArray<UObject*> GetReduceSet(const TArray<UObject*>& NewObjects,
-	                                      const FGameplayTagContainer& NewRequirements) const;
-};
 
 /**
  *	Class description:
@@ -173,7 +56,6 @@ public:
 	static TArray<UObject*> GetConsumables(const TArray<UObject*>& NewObjects);
 
 private:
-	static TArray<UObject*> GetArrayByFilterContext(const TInstancedStruct<FInventoryFilteringContext>& NewFilteringContext,
-	                                                const FGameplayTagContainer& NewFilteringRules,
+	static TArray<UObject*> GetArrayByFilterContext(const FGameplayTagContainer& NewFilteringRules,
 	                                                const TArray<UObject*>& NewObjects);
 };

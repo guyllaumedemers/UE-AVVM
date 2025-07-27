@@ -20,88 +20,56 @@
 #include "UI/InventoryFilteringContext.h"
 
 #include "InventorySettings.h"
-
-TArray<UObject*> FStorageFilteringContext::GetReduceSet(const TArray<UObject*>& NewObjects, const FGameplayTagContainer& NewRequirements) const
-{
-	return TArray<UObject*>{};
-}
-
-TArray<UObject*> FEquipFilteringContext::GetReduceSet(const TArray<UObject*>& NewObjects, const FGameplayTagContainer& NewRequirements) const
-{
-	return TArray<UObject*>{};
-}
-
-TArray<UObject*> FPassiveFilteringContext::GetReduceSet(const TArray<UObject*>& NewObjects, const FGameplayTagContainer& NewRequirements) const
-{
-	return TArray<UObject*>{};
-}
-
-TArray<UObject*> FOffensiveFilteringContext::GetReduceSet(const TArray<UObject*>& NewObjects, const FGameplayTagContainer& NewRequirements) const
-{
-	return TArray<UObject*>{};
-}
-
-TArray<UObject*> FDefensiveFilteringContext::GetReduceSet(const TArray<UObject*>& NewObjects, const FGameplayTagContainer& NewRequirements) const
-{
-	return TArray<UObject*>{};
-}
-
-TArray<UObject*> FConsumableFilteringContext::GetReduceSet(const TArray<UObject*>& NewObjects, const FGameplayTagContainer& NewRequirements) const
-{
-	return TArray<UObject*>{};
-}
+#include "ItemObject.h"
 
 TArray<UObject*> UInventoryConversionFunction::GetStorageItems(const TArray<UObject*>& NewObjects)
 {
-	return UInventoryConversionFunction::GetArrayByFilterContext(FInventoryFilteringContext::Make<FStorageFilteringContext>(),
-	                                                             UInventorySettings::GetStorageRuleset(),
+	return UInventoryConversionFunction::GetArrayByFilterContext(UInventorySettings::GetStorageRuleset(),
 	                                                             NewObjects);
 }
 
 TArray<UObject*> UInventoryConversionFunction::GetEquippedItems(const TArray<UObject*>& NewObjects)
 {
-	return UInventoryConversionFunction::GetArrayByFilterContext(FInventoryFilteringContext::Make<FEquipFilteringContext>(),
-	                                                             UInventorySettings::GetEquippedRuleset(),
+	return UInventoryConversionFunction::GetArrayByFilterContext(UInventorySettings::GetEquippedRuleset(),
 	                                                             NewObjects);
 }
 
 TArray<UObject*> UInventoryConversionFunction::GetPassiveItems(const TArray<UObject*>& NewObjects)
 {
-	return UInventoryConversionFunction::GetArrayByFilterContext(FInventoryFilteringContext::Make<FEquipFilteringContext>(),
-	                                                             UInventorySettings::GetPassiveRuleset(),
+	return UInventoryConversionFunction::GetArrayByFilterContext(UInventorySettings::GetPassiveRuleset(),
 	                                                             NewObjects);
 }
 
 TArray<UObject*> UInventoryConversionFunction::GetOffensiveItems(const TArray<UObject*>& NewObjects)
 {
-	return UInventoryConversionFunction::GetArrayByFilterContext(FInventoryFilteringContext::Make<FOffensiveFilteringContext>(),
-	                                                             UInventorySettings::GetOffensiveRuleset(),
+	return UInventoryConversionFunction::GetArrayByFilterContext(UInventorySettings::GetOffensiveRuleset(),
 	                                                             NewObjects);
 }
 
 TArray<UObject*> UInventoryConversionFunction::GetDefensiveItems(const TArray<UObject*>& NewObjects)
 {
-	return UInventoryConversionFunction::GetArrayByFilterContext(FInventoryFilteringContext::Make<FDefensiveFilteringContext>(),
-	                                                             UInventorySettings::GetDefensiveRuleset(),
+	return UInventoryConversionFunction::GetArrayByFilterContext(UInventorySettings::GetDefensiveRuleset(),
 	                                                             NewObjects);
 }
 
 TArray<UObject*> UInventoryConversionFunction::GetConsumables(const TArray<UObject*>& NewObjects)
 {
-	return UInventoryConversionFunction::GetArrayByFilterContext(FInventoryFilteringContext::Make<FConsumableFilteringContext>(),
-	                                                             UInventorySettings::GetConsumableRuleset(),
+	return UInventoryConversionFunction::GetArrayByFilterContext(UInventorySettings::GetConsumableRuleset(),
 	                                                             NewObjects);
 }
 
-TArray<UObject*> UInventoryConversionFunction::GetArrayByFilterContext(const TInstancedStruct<FInventoryFilteringContext>& NewFilteringContext,
-                                                                       const FGameplayTagContainer& NewFilteringRules,
+TArray<UObject*> UInventoryConversionFunction::GetArrayByFilterContext(const FGameplayTagContainer& NewFilteringRules,
                                                                        const TArray<UObject*>& NewObjects)
 {
-	const auto* Context = NewFilteringContext.GetPtr<FInventoryFilteringContext>();
-	if (Context != nullptr)
+	TArray<UObject*> OutResult;
+	for (auto Iterator = NewObjects.CreateConstIterator(); Iterator; ++Iterator)
 	{
-		return Context->GetReduceSet(NewObjects, NewFilteringRules);
+		auto* NewItem = Cast<UItemObject>(*Iterator);
+		if (IsValid(NewItem) && NewItem->DoesTypeHasPartialMatch(NewFilteringRules))
+		{
+			OutResult.Add(*Iterator);
+		}
 	}
 
-	return TArray<UObject*>{};
+	return OutResult;
 }

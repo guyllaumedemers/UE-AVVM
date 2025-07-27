@@ -93,10 +93,16 @@ public:
 	bool DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
+	bool DoesTypeHasPartialMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
+	bool DoesTypeHasExactMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool DoesBehaviourHasPartialMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool DoesBehaviourHasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
 	const FGameplayTagContainer& GetRuntimeState() const;
@@ -137,7 +143,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
 	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc..."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
 	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

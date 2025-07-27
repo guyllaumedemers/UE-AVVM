@@ -89,12 +89,6 @@ public:
 	const TArray<UItemObject*>& GetItems() const;
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<UItemObject*>& GetItemsByPartialMatch(const FGameplayTagContainer& FilteringTags) const;
-
-	UFUNCTION(BlueprintCallable)
-	const TArray<UItemObject*>& GetItemsByExactMatch(const FGameplayTagContainer& FilteringTags) const;
-
-	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 
 	UFUNCTION(BlueprintCallable)
@@ -136,7 +130,7 @@ protected:
 	TArray<TObjectPtr<UItemObject>> Items;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
-	FGameplayTagContainer OwnedGameplayTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
