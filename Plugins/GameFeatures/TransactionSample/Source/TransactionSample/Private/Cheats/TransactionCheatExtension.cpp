@@ -97,7 +97,7 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	UGameStateTransactionHistory* TransactionComponent = UGameStateTransactionHistory::GetTransactionHistory(this);
 	if (ensureAlwaysMsgf(IsValid(TransactionComponent), TEXT("Invalid Transaction History Component!")))
 	{
-		const auto InstancedPayload = TInstancedStruct<FTransactionPayload>::Make<FTransactionPayloadTest>(StaticCast<int32>(NewType));
+		const auto InstancedPayload = FTransactionPayload::Make<FTransactionPayloadTest>(StaticCast<int32>(NewType));
 		const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 		const FString Payload = UTransactionFactoryUtils::CreateStringPayload(InstancedPayload);
 		TransactionComponent->CreateAndRecordTransaction(nullptr, PlayerState, NewType, Payload);
@@ -129,13 +129,11 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 		return;
 	}
 
-	int32 Count = 0;
 	for (const UTransaction* Transaction : TransactionComponent->GetAllTransactions(UniqueNetId->ToString()))
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("T%s\n\t%s."),
-		       *FString::FromInt(++Count),
+		       TEXT("%s"),
 		       *Transaction->ToString());
 	}
 }

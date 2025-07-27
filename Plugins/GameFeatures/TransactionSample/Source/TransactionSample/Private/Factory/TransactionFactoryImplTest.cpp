@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "Factory/TransactionFactoryImplTest.h"
 
-#include "AVVMTokenizer.h"
-
 FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
 	: DummyProperty(NewDummyProperty)
 {
@@ -28,15 +26,34 @@ FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
 
 TInstancedStruct<FTransactionPayload> FTransactionPayloadTest::Init(const FString& NewPayload)
 {
-	const int32 Property = UAVVMTokenizer::GetTokenValue<int32>(TEXT("DummyProperty"), NewPayload);
-	return FTransactionPayload::Make<FTransactionPayloadTest>(Property);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return FTransactionPayload::Empty;
+	}
+
+	FTransactionPayloadTest Test;
+	Test.DummyProperty = JsonData->GetIntegerField(TEXT("DummyProperty"));
+
+	return FTransactionPayload::Make<FTransactionPayloadTest>(Test.DummyProperty);
 }
 
 FString FTransactionPayloadTest::ToString() const
 {
-	FStringFormatNamedArguments Args;
-	Args.Add(TEXT("DummyProperty"), FStringFormatArg{DummyProperty});
-	return FString::Format(TEXT("DummyProperty:{DummyProperty}"), Args);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("DummyProperty"), DummyProperty);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return JsonOutput;
+	}
+
+	return TEXT("Unknown");
 }
 
 TInstancedStruct<FTransactionPayload> UTransactionFactoryImplTest::CreatePayload(const FString& NewPayload) const

@@ -59,12 +59,21 @@ bool UTransaction::DoesPartialMatch(const FString& NewTargetId) const
 
 FString UTransaction::ToString() const
 {
-	FStringFormatNamedArguments Args;
-	Args.Add(TEXT("Instigator"), FStringFormatArg{InstigatorId});
-	Args.Add(TEXT("Target"), FStringFormatArg{TargetId});
-	Args.Add(TEXT("TransactionType"), FStringFormatArg{EnumToString(TransactionType)});
-	Args.Add(TEXT("Payload"), FStringFormatArg{Payload});
-	return FString::Format(TEXT("Instigator:{Instigator}\nTarget:{Target}\nTransactionType:{TransactionType}\nValue:\n\t{Payload}.\n"), Args);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetStringField(TEXT("Instigator"), InstigatorId);
+	JsonData->SetStringField(TEXT("Target"), TargetId);
+	JsonData->SetStringField(TEXT("TransactionType"), EnumToString(TransactionType));
+	JsonData->SetStringField(TEXT("Payload"), Payload);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return JsonOutput;
+	}
+
+	return TEXT("Unknown");
 }
 
 TInstancedStruct<FTransactionPayload> UTransaction::GetValue() const

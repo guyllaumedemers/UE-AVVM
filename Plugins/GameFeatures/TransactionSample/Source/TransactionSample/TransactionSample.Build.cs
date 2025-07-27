@@ -43,7 +43,8 @@ public class TransactionSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMToolkit"
+				"AVVMToolkit",
+				"Json"
 			}
 		);
 
