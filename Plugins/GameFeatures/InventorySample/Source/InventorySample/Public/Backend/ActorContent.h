@@ -28,8 +28,26 @@
 /**
  *	Class description:
  *
+ *	FItem is the RUNTIME POD representation of the item that's bound to an Actor.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 UniqueId = INDEX_NONE;
+
+	// @gdemers {FDataRegistryId={}, State={}, Count={}}
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FString Options = FString();
+};
+
+/**
+ *	Class description:
+ *
  *	FItemHolder is a backend POD representation of the items held. You can look at it
- *	like the a bag and it's content, or a tabulation and it's items, or a NPC equipped items, etc...
+ *	like a bag and it's content, or a tabulation and it's items, or a NPC equipped items, etc...
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemHolder
@@ -46,6 +64,8 @@ struct INVENTORYSAMPLE_API FItemHolder
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 Position = INDEX_NONE;
 
+	// @gdemers the unique identifier of the item owned by this holder. the index position of the entry in Array
+	// represents the visual position shown when displaying the item holder in UI.
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<int32> ItemIds;
 };

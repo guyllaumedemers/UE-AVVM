@@ -68,6 +68,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	NewPlayerProfile.Gamertag = JsonData->GetStringField(TEXT("Gamertag"));
 	NewPlayerProfile.Xp = JsonData->GetStringField(TEXT("Xp"));
 	NewPlayerProfile.Wallet = JsonData->GetStringField(TEXT("Wallet"));
+	NewPlayerProfile.Inventory = JsonData->GetStringField(TEXT("Inventory"));
 	NewPlayerProfile.Achievements = JsonData->GetStringField(TEXT("Achievements"));
 	NewPlayerProfile.Presets = JsonData->GetStringField(TEXT("Presets"));
 
@@ -81,6 +82,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerProfile& NewPlayerProfil
 	JsonData->SetStringField(TEXT("Gamertag"), NewPlayerProfile.Gamertag);
 	JsonData->SetStringField(TEXT("Xp"), NewPlayerProfile.Xp);
 	JsonData->SetStringField(TEXT("Wallet"), NewPlayerProfile.Wallet);
+	JsonData->SetStringField(TEXT("Inventory"), NewPlayerProfile.Inventory);
 	JsonData->SetStringField(TEXT("Achievements"), NewPlayerProfile.Achievements);
 	JsonData->SetStringField(TEXT("Presets"), NewPlayerProfile.Presets);
 

@@ -74,6 +74,9 @@ struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
  *	FAVVMPlayerProfile define a user profile information.
  *
  *	example : profile name, xp, wallet, etc...
+ *
+ *	Note : A player profile is NOT an account. An account could hold various Player profiles. These are tied to a
+ *	Character that's playable by the account holder.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
@@ -90,6 +93,10 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Wallet = FString();
+
+	// @gdemers placeholder inventory, storage, any gathered items bound to this player profile.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Inventory = FString();
 
 	// @gdemers placeholder. conditional to your game if achievements are tracked.
 	UPROPERTY(Transient, BlueprintReadWrite)
