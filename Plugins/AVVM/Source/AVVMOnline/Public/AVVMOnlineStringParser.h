@@ -38,31 +38,35 @@ class AVVMONLINE_API UAVVMOnlineStringParser : public UObject
 
 public:
 	void FromString(const FString& NewPayload, FAVVMPlayerWallet& OutPlayerWallet) const;
-	void ToString(const FAVVMPlayerWallet& PlayerWallet, FString& OutFormat) const;
+	void ToString(const FAVVMPlayerWallet& NewPlayerWallet, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMPlayerProfile& OutPlayerProfile) const;
-	void ToString(const FAVVMPlayerProfile& PlayerProfile, FString& OutFormat) const;
+	void ToString(const FAVVMPlayerProfile& NewPlayerProfile, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMHostConfiguration& OutHostConfiguration) const;
-	void ToString(const FAVVMHostConfiguration& HostConfiguration, FString& OutFormat) const;
+	void ToString(const FAVVMHostConfiguration& NewHostConfiguration, FString& OutFormat) const;
 
 	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMParty>& OutParties) const;
+	void ToString(const TArray<FAVVMParty>& NewParties, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMParty& OutParty) const;
-	void ToString(const FAVVMParty& Party, FString& OutFormat) const;
+	void ToString(const FAVVMParty& NewParty, FString& OutFormat) const;
 
-	void FromString(const FAVVMStringPayload& Payload, TArray<FAVVMPlayerConnection>& OutPlayerConnections) const;
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPlayerConnection>& OutPlayerConnections) const;
+	void ToString(const TArray<FAVVMPlayerConnection>& NewPlayerConnections, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMPlayerConnection& OutPlayerConnection) const;
-	void ToString(const FAVVMPlayerConnection& PlayerConnection, FString& OutFormat) const;
+	void ToString(const FAVVMPlayerConnection& NewPlayerConnection, FString& OutFormat) const;
 
-	void FromString(const FAVVMStringPayload& Payload, TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges) const;
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges) const;
+	void ToString(const TArray<FAVVMRuntimeChallenge>& NewPlayerChallenges, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMRuntimeChallenge& OutPlayerChallenge) const;
-	void ToString(const FAVVMRuntimeChallenge& PlayerChallenge, FString& OutFormat) const;
+	void ToString(const FAVVMRuntimeChallenge& NewPlayerChallenge, FString& OutFormat) const;
 
-	void FromString(const FAVVMStringPayload& Payload, TArray<FAVVMRuntimeResource>& OutPlayerResources) const;
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMRuntimeResource>& OutPlayerResources) const;
+	void ToString(const TArray<FAVVMRuntimeResource>& NewPlayerResources, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMRuntimeResource& OutPlayerResource) const;
-	void ToString(const FAVVMRuntimeResource& PlayerResource, FString& OutFormat) const;
+	void ToString(const FAVVMRuntimeResource& NewPlayerResource, FString& OutFormat) const;
 };

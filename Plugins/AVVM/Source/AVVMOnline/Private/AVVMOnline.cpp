@@ -37,13 +37,6 @@ void FAVVMOnlineModule::StartupModule()
 			                         TEXT("Stub Data for Testing Online request callback result. bWasSuccess=True/False."));
 
 	CVarOnlineRequestReturnedStatus = MakeShareable<IConsoleVariable>(NewCVar);
-
-	const TSubclassOf<UAVVMOnlineStringParser> ParserClass = UAVVMOnlineSettings::GetJsonParserClass();
-	if (IsValid(ParserClass))
-	{
-		auto* Parser = NewObject<UAVVMOnlineStringParser>(GEngine, ParserClass.Get());
-		JsonParser = TStrongObjectPtr<UAVVMOnlineStringParser>(Parser);
-	}
 }
 
 void FAVVMOnlineModule::ShutdownModule()
@@ -61,6 +54,12 @@ TSharedRef<IConsoleVariable> FAVVMOnlineModule::GetCVarOnlineRequestReturnedStat
 
 UAVVMOnlineStringParser* FAVVMOnlineModule::GetJsonParser()
 {
+	if (!JsonParser.IsValid())
+	{
+		auto* Parser = NewObject<UAVVMOnlineStringParser>(GEngine, UAVVMOnlineSettings::GetJsonParserClass());
+		JsonParser = TStrongObjectPtr<UAVVMOnlineStringParser>(Parser);
+	}
+
 	return JsonParser.Get();
 }
 
