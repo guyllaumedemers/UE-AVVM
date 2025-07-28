@@ -73,7 +73,7 @@ This GameFeature plugin is a sample plugin for supporting general interaction be
 
 ### Transaction Sample
 
-This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Transaction payload are parsed using unreal json object and store statistic properties via a string property making the replication process lightweight. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
+This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Transaction payload are parsed using Unreal json object and store statistics via a string field. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
 
 ### Inventory Sample
 
