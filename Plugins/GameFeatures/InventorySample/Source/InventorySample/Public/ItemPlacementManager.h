@@ -26,8 +26,9 @@
 
 #include "ItemPlacementManager.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBackendSyncCompleted, const bool bWasSuccess, const FString& NewFile);
+
 class UItemObjectViewModel;
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBackSyncCompleted, const bool bWasSuccess, const FString& NewFile);
 
 /**
  *	Class description:
@@ -51,7 +52,7 @@ public:
 
 protected:
 	virtual bool DoesRequireBackendSync() const;
-	virtual void SyncBackend(const FOnBackSyncCompleted& Callback);
+	virtual void SyncBackend(const FOnBackendSyncCompleted& Callback);
 
 	UFUNCTION()
 	void OnBackendSyncComplete(const bool bWasSuccess, const FString& NewFileValue, TArray<UItemObjectViewModel*> NewViewModels);

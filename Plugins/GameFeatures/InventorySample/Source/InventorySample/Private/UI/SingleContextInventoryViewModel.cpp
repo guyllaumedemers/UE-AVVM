@@ -63,6 +63,8 @@ void USingleContextInventoryViewModel::Init(const TArray<UItemObject*>& NewItems
 	auto* Subsystem = UItemPlacementManager::GetSubsystem(OwningLocalPlayer);
 	if (IsValid(Subsystem))
 	{
+		// TODO @gdemers We arent yet defining the context used to retrieve position information from. The owner of the ViewModel
+		// should provide the unique id required for requesting backend information or caching a new context.
 		Subsystem->SetupItemPlacements(ItemViewModels);
 	}
 }

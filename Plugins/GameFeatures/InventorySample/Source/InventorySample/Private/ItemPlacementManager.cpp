@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "ItemPlacementManager.h"
 
+#include "UI/ItemObjectViewModel.h"
+
 bool UItemPlacementManager::ShouldCreateSubsystem(UObject* Outer) const
 {
 	if (IsRunningDedicatedServer())
@@ -48,7 +50,7 @@ void UItemPlacementManager::SetupItemPlacements(const TArray<UItemObjectViewMode
 	const bool bDoesRequireBackendSync = DoesRequireBackendSync();
 	if (bDoesRequireBackendSync)
 	{
-		FOnBackSyncCompleted OnSyncCompleted;
+		FOnBackendSyncCompleted OnSyncCompleted;
 		OnSyncCompleted.AddUObject(this, &UItemPlacementManager::OnBackendSyncComplete, NewViewModels);
 		SyncBackend(OnSyncCompleted);
 	}
@@ -78,7 +80,7 @@ bool UItemPlacementManager::DoesRequireBackendSync() const
 	return true;
 }
 
-void UItemPlacementManager::SyncBackend(const FOnBackSyncCompleted& Callback)
+void UItemPlacementManager::SyncBackend(const FOnBackendSyncCompleted& Callback)
 {
 	Callback.Broadcast(true, TEXT(""));
 }
@@ -94,17 +96,17 @@ void UItemPlacementManager::OnBackendSyncComplete(const bool bWasSuccess,
 		ModifyFile(NewFile, NewFileValue);
 	}
 
-	FString OutFileValue = TEXT("");
+	FString OutFileValue;
 	GetFile(NewFile, OutFileValue);
 
 	if (OutFileValue.IsEmpty())
 	{
-		const FString TokenizedValues = TEXT("") /*Tokenized View Model id*/;
-		ensureAlwaysMsgf(WriteFileOnDisk(NewFile, TokenizedValues),
+		const FString Tokens;
+		ensureAlwaysMsgf(WriteFileOnDisk(NewFile, Tokens),
 		                 TEXT("Failed to write to file \"%s\"."),
 		                 *NewFile);
 
-		RefreshTokens(TokenizedValues, NewViewModels);
+		RefreshTokens(Tokens, NewViewModels);
 	}
 	else
 	{
