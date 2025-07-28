@@ -23,11 +23,12 @@
 
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
-#include "AVVMOnlineStringParser.h"
 #include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
 
 #include "AVVMStoreViewModel.generated.h"
+
+class UAVVMOnlineStringParser;
 
 /**
 *	Class description:
@@ -43,7 +44,7 @@ class AVVMSAMPLERUNTIME_API UAVVMStoreViewModel : public UMVVMViewModelBase,
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMStoreViewModel"); };
 
-	void SetStoreItems(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+	void SetStoreItems(const UAVVMOnlineStringParser* JsonParser,
 	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

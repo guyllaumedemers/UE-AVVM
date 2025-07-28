@@ -21,12 +21,13 @@
 #include "AVVMOnline.h"
 
 #include "AVVMOnlineSettings.h"
+#include "AVVMOnlineStringParser.h"
 #include "Engine.h"
 
 DEFINE_LOG_CATEGORY(LogOnline);
 
 TSharedPtr<IConsoleVariable> FAVVMOnlineModule::CVarOnlineRequestReturnedStatus = nullptr;
-TStrongObjectPtr<UObject> FAVVMOnlineModule::JsonParser = nullptr;
+TStrongObjectPtr<UAVVMOnlineStringParser> FAVVMOnlineModule::JsonParser = nullptr;
 
 void FAVVMOnlineModule::StartupModule()
 {
@@ -37,11 +38,11 @@ void FAVVMOnlineModule::StartupModule()
 
 	CVarOnlineRequestReturnedStatus = MakeShareable<IConsoleVariable>(NewCVar);
 
-	const TSubclassOf<UObject> ParserClass = UAVVMOnlineSettings::GetJsonParserClass();
+	const TSubclassOf<UAVVMOnlineStringParser> ParserClass = UAVVMOnlineSettings::GetJsonParserClass();
 	if (IsValid(ParserClass))
 	{
-		UObject* Parser = NewObject<UObject>(GEngine, ParserClass.Get());
-		JsonParser = TStrongObjectPtr<UObject>(Parser);
+		auto* Parser = NewObject<UAVVMOnlineStringParser>(GEngine, ParserClass.Get());
+		JsonParser = TStrongObjectPtr<UAVVMOnlineStringParser>(Parser);
 	}
 }
 
@@ -58,7 +59,7 @@ TSharedRef<IConsoleVariable> FAVVMOnlineModule::GetCVarOnlineRequestReturnedStat
 	return CVarOnlineRequestReturnedStatus.ToSharedRef();
 }
 
-UObject* FAVVMOnlineModule::GetJsonParser()
+UAVVMOnlineStringParser* FAVVMOnlineModule::GetJsonParser()
 {
 	return JsonParser.Get();
 }

@@ -26,6 +26,8 @@
 
 #include "AVVMOnlineSettings.generated.h"
 
+class UAVVMOnlineStringParser;
+
 /**
 *	Class description:
  *
@@ -40,9 +42,9 @@ public:
 	UAVVMOnlineSettings();
 
 	UFUNCTION(BlueprintCallable)
-	static TSubclassOf<UObject> GetJsonParserClass();
+	static TSubclassOf<UAVVMOnlineStringParser> GetJsonParserClass();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta=(MustImplement="AVVMOnlineJsonParser"))
-	TSubclassOf<UObject> JsonParserClass = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	TSubclassOf<UAVVMOnlineStringParser> JsonParserClass = nullptr;
 };

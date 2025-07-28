@@ -175,8 +175,8 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 template <typename TPayload>
 FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto& StringParser = TScriptInterface<IAVVMOnlineStringParser>(FAVVMOnlineModule::GetJsonParser());
-	if (!ensureAlways(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(StringParser)))
+	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
+	if (!IsValid(StringParser))
 	{
 		UE_LOG(LogOnline,
 		       Log,
@@ -190,7 +190,7 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 	{
 		UE_LOG(LogOnline,
 		       Log,
-		       TEXT("TPayload isn't of received type."))
+		       TEXT("TPayload isn't deriving from received type."))
 
 		return FString();
 	}
@@ -203,8 +203,8 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 template <typename TPayload>
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::DeserializeString(const FString& Payload)
 {
-	const auto& StringParser = TScriptInterface<IAVVMOnlineStringParser>(FAVVMOnlineModule::GetJsonParser());
-	if (!ensureAlways(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(StringParser)))
+	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
+	if (!IsValid(StringParser))
 	{
 		UE_LOG(LogOnline,
 		       Log,
@@ -215,5 +215,5 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::Deserializ
 
 	TPayload OutPayload;
 	StringParser->FromString(Payload, OutPayload);
-	return TInstancedStruct<TPayload>::Make(OutPayload);
+	return FAVVMNotificationPayload::Make<TPayload>(OutPayload);
 }

@@ -23,11 +23,12 @@
 
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
-#include "AVVMOnlineStringParser.h"
 #include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
 
 #include "AVVMChallengeManagerViewModel.generated.h"
+
+class UAVVMOnlineStringParser;
 
 /**
  *	Class description:
@@ -43,7 +44,7 @@ class AVVMSAMPLERUNTIME_API UAVVMChallengeManagerViewModel : public UMVVMViewMod
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMChallengeManagerViewModel"); };
 
-	void SetChallenges(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+	void SetChallenges(const UAVVMOnlineStringParser* JsonParser,
 	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

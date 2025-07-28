@@ -20,13 +20,11 @@
 #include "Party/AVVMPartyManagerViewModel.h"
 
 #include "AVVMOnlineStringParser.h"
-#include "AVVMUtilityFunctionLibrary.h"
 
-void UAVVMPartyManagerViewModel::SetParties(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+void UAVVMPartyManagerViewModel::SetParties(const UAVVMOnlineStringParser* JsonParser,
                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(JsonParser);
-	if (!ensureAlways(bIsValid))
+	if (!ensureAlwaysMsgf(IsValid(JsonParser), TEXT("Invalid JsonParser Object!")))
 	{
 		return;
 	}

@@ -40,6 +40,7 @@ public class AVVMOnline : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Json"
 			}
 		);
 	}

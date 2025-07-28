@@ -26,6 +26,8 @@
 #include "AVVMNotificationSubsystem.h"
 #include "StructUtils/InstancedStruct.h"
 
+class UAVVMOnlineStringParser;
+
 AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogOnline, Log, All);
 
 /**
@@ -71,12 +73,12 @@ public:
 	virtual void ShutdownModule() override;
 
 	static AVVMONLINE_API TSharedRef<IConsoleVariable> GetCVarOnlineRequestReturnedStatus();
-	static AVVMONLINE_API UObject* GetJsonParser();
+	static AVVMONLINE_API UAVVMOnlineStringParser* GetJsonParser();
 
 private:
 	// cvar that allow user testing. returns the status of a stub request (true/false) without an actual backend hooked.
 	static AVVMONLINE_API TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
-	static AVVMONLINE_API TStrongObjectPtr<UObject> JsonParser;
+	static AVVMONLINE_API TStrongObjectPtr<UAVVMOnlineStringParser> JsonParser;
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);

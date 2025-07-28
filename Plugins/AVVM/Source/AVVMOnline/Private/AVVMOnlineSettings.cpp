@@ -24,7 +24,7 @@ UAVVMOnlineSettings::UAVVMOnlineSettings()
 	CategoryName = TEXT("Game");
 }
 
-TSubclassOf<UObject> UAVVMOnlineSettings::GetJsonParserClass()
+TSubclassOf<UAVVMOnlineStringParser> UAVVMOnlineSettings::GetJsonParserClass()
 {
 	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass;
 }

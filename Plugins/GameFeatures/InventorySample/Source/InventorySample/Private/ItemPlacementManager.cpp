@@ -118,7 +118,8 @@ void UItemPlacementManager::GetFile(const FString& NewFile,
 	const bool bDoesFileExist = DoesFileOnDiskExist(NewFile);
 	if (!bDoesFileExist)
 	{
-		ensureAlwaysMsgf(CreateFileOnDisk(NewFile),
+		const FString NewDir = GetDirFromFile(NewFile);
+		ensureAlwaysMsgf(CreateFileDirOnDisk(NewDir),
 		                 TEXT("Failed to create file \"%s\"."),
 		                 *NewFile);
 	}
@@ -128,13 +129,19 @@ void UItemPlacementManager::GetFile(const FString& NewFile,
 	                 *NewFile);
 }
 
+FString UItemPlacementManager::GetDirFromFile(const FString& NewFile) const
+{
+	return TEXT("");
+}
+
 void UItemPlacementManager::ModifyFile(const FString& NewFile,
                                        const FString& NewFileValue) const
 {
 	const bool bDoesFileExist = DoesFileOnDiskExist(NewFile);
 	if (!bDoesFileExist)
 	{
-		ensureAlwaysMsgf(CreateFileOnDisk(NewFile),
+		const FString NewDir = GetDirFromFile(NewFile);
+		ensureAlwaysMsgf(CreateFileDirOnDisk(NewDir),
 		                 TEXT("Failed to create file \"%s\"."),
 		                 *NewFile);
 	}
@@ -146,28 +153,26 @@ void UItemPlacementManager::ModifyFile(const FString& NewFile,
 
 bool UItemPlacementManager::DoesFileOnDiskExist(const FString& NewFile) const
 {
-	// TODO @gdemers setup io stream to validate
-	return false;
+	return IPlatformFile::GetPlatformPhysical().FileExists(*NewFile);
 }
 
-bool UItemPlacementManager::CreateFileOnDisk(const FString& NewFile) const
+bool UItemPlacementManager::CreateFileDirOnDisk(const FString& NewDir) const
 {
-	// TODO @gdemers setup io stream to create
-	return true;
+	return IPlatformFile::GetPlatformPhysical().CreateDirectory(*NewDir);
 }
 
 bool UItemPlacementManager::ReadFileOnDisk(const FString& NewFile,
                                            FString& OutValue) const
 {
-	// TODO @gdemers setup io stream to read
-	return true;
+	return FFileHelper::LoadFileToString(OutValue,
+	                                     &IPlatformFile::GetPlatformPhysical(),
+	                                     *NewFile);
 }
 
 bool UItemPlacementManager::WriteFileOnDisk(const FString& NewFile,
                                             const FString& NewValue) const
 {
-	// TODO @gdemers setup io stream to write
-	return true;
+	return FFileHelper::SaveStringToFile(NewValue, *NewFile);
 }
 
 void UItemPlacementManager::RefreshTokens(const FString& NewValue,

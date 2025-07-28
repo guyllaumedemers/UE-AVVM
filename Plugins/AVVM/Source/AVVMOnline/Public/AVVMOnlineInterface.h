@@ -50,10 +50,6 @@ struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 	FString Payload = FString();
 };
 
-// ---------------------------------------------------------------------------------------------------------------------//
-//							SomeUtils::To/FromJson api should be define for most Struct type here						//
-// ---------------------------------------------------------------------------------------------------------------------//
-
 /*
  *	Class description:
  *
@@ -67,9 +63,9 @@ struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 
-	// @gdemers Options[0] = {CurrencyId={}, Amount={}}
+	// @gdemers {CurrencyId={}, Amount={}}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Options;
+	FString Options = FString();
 };
 
 /**
@@ -173,6 +169,21 @@ enum class EAVVMPlayerStatus : uint8
 	Ready,
 	PendingAction
 };
+
+inline const TCHAR* EnumToString(EAVVMPlayerStatus State)
+{
+	switch (State)
+	{
+		case EAVVMPlayerStatus::Default:
+			return TEXT("Default");
+		case EAVVMPlayerStatus::Ready:
+			return TEXT("Ready");
+		case EAVVMPlayerStatus::PendingAction:
+			return TEXT("PendingAction");
+	}
+	ensure(false);
+	return TEXT("Unknown");
+}
 
 /**
  *	Class description:

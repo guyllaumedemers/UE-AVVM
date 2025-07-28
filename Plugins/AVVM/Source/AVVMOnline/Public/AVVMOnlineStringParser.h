@@ -22,7 +22,6 @@
 #include "CoreMinimal.h"
 
 #include "AVVMOnlineInterface.h"
-#include "UObject/Interface.h"
 
 #include "AVVMOnlineStringParser.generated.h"
 
@@ -32,104 +31,38 @@
  *	UAVVMOnlineInterface is the interface to be implemented by your parser system. It defines the api for general use case
  *	with Struct Types defined here.
  */
-UINTERFACE(BlueprintType, Blueprintable)
-class AVVMONLINE_API UAVVMOnlineStringParser : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class AVVMONLINE_API IAVVMOnlineStringParser
+UCLASS(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineStringParser : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	virtual void FromString(const FString& Payload,
-	                        FAVVMPlayerWallet& OutPlayerWallet) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMPlayerWallet& OutPlayerWallet) const;
+	void ToString(const FAVVMPlayerWallet& PlayerWallet, FString& OutFormat) const;
 
-	virtual void ToString(const FAVVMPlayerWallet& PlayerWallet,
-	                      FString& OutFormat) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMPlayerProfile& OutPlayerProfile) const;
+	void ToString(const FAVVMPlayerProfile& PlayerProfile, FString& OutFormat) const;
 
-	virtual void FromString(const FString& Payload,
-	                        FAVVMPlayerProfile& OutPlayerProfile) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMHostConfiguration& OutHostConfiguration) const;
+	void ToString(const FAVVMHostConfiguration& HostConfiguration, FString& OutFormat) const;
 
-	virtual void ToString(const FAVVMPlayerProfile& PlayerProfile,
-	                      FString& OutFormat) const
-	{
-	};
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMParty>& OutParties) const;
 
-	virtual void FromString(const FString& Payload,
-	                        FAVVMHostConfiguration& OutHostConfiguration) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMParty& OutParty) const;
+	void ToString(const FAVVMParty& Party, FString& OutFormat) const;
 
-	virtual void ToString(const FAVVMHostConfiguration& HostConfiguration,
-	                      FString& OutFormat) const
-	{
-	};
+	void FromString(const FAVVMStringPayload& Payload, TArray<FAVVMPlayerConnection>& OutPlayerConnections) const;
 
-	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMParty>& OutParties) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMPlayerConnection& OutPlayerConnection) const;
+	void ToString(const FAVVMPlayerConnection& PlayerConnection, FString& OutFormat) const;
 
-	virtual void FromString(const FString& Payload,
-	                        FAVVMParty& OutParty) const
-	{
-	};
+	void FromString(const FAVVMStringPayload& Payload, TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges) const;
 
-	virtual void ToString(const FAVVMParty& Party,
-	                      FString& OutFormat) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMRuntimeChallenge& OutPlayerChallenge) const;
+	void ToString(const FAVVMRuntimeChallenge& PlayerChallenge, FString& OutFormat) const;
 
-	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMPlayerConnection>& OutPlayerConnections) const
-	{
-	};
+	void FromString(const FAVVMStringPayload& Payload, TArray<FAVVMRuntimeResource>& OutPlayerResources) const;
 
-	virtual void FromString(const FString& Payload,
-	                        FAVVMPlayerConnection& OutPlayerConnection) const
-	{
-	};
-
-	virtual void ToString(const FAVVMPlayerConnection& PlayerConnection,
-	                      FString& OutFormat) const
-	{
-	};
-
-	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMRuntimeChallenge>& OutPlayerChallenges) const
-	{
-	};
-
-	virtual void FromString(const FString& Payload,
-	                        FAVVMRuntimeChallenge& OutPlayerChallenge) const
-	{
-	};
-
-	virtual void ToString(const FAVVMRuntimeChallenge& PlayerChallenge,
-	                      FString& OutFormat) const
-	{
-	};
-
-	virtual void FromString(const FAVVMStringPayload& Payload,
-	                        TArray<FAVVMRuntimeResource>& OutPlayerResources) const
-	{
-	};
-
-	virtual void FromString(const FString& Payload,
-	                        FAVVMRuntimeResource& OutPlayerResource) const
-	{
-	};
-
-	virtual void ToString(const FAVVMRuntimeResource& PlayerResource,
-	                      FString& OutFormat) const
-	{
-	};
+	void FromString(const FString& NewPayload, FAVVMRuntimeResource& OutPlayerResource) const;
+	void ToString(const FAVVMRuntimeResource& PlayerResource, FString& OutFormat) const;
 };

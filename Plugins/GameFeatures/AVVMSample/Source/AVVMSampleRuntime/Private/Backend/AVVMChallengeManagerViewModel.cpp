@@ -20,13 +20,11 @@
 #include "Backend/AVVMChallengeManagerViewModel.h"
 
 #include "AVVMOnlineStringParser.h"
-#include "AVVMUtilityFunctionLibrary.h"
 
-void UAVVMChallengeManagerViewModel::SetChallenges(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+void UAVVMChallengeManagerViewModel::SetChallenges(const UAVVMOnlineStringParser* JsonParser,
                                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(JsonParser);
-	if (!ensureAlways(bIsValid))
+	if (!ensureAlwaysMsgf(IsValid(JsonParser), TEXT("Invalid JsonParser Object!")))
 	{
 		return;
 	}

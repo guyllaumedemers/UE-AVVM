@@ -67,9 +67,10 @@ protected:
 
 private:
 	void GetFile(const FString& NewFile, FString& OutValue);
+	FString GetDirFromFile(const FString& NewFile) const;
 	void ModifyFile(const FString& NewFile, const FString& NewFileValue) const;
 	bool DoesFileOnDiskExist(const FString& NewFile) const;
-	bool CreateFileOnDisk(const FString& NewFile) const;
+	bool CreateFileDirOnDisk(const FString& NewDir) const;
 	bool ReadFileOnDisk(const FString& NewFile, FString& OutValue) const;
 	bool WriteFileOnDisk(const FString& NewFile, const FString& NewValue) const;
 	void RefreshTokens(const FString& NewValue, const TArray<UItemObjectViewModel*>& NewViewModels);

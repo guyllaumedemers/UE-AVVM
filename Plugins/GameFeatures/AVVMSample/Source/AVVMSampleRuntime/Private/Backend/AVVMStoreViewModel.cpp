@@ -19,13 +19,12 @@
 //SOFTWARE.
 #include "Backend/AVVMStoreViewModel.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMOnlineStringParser.h"
 
-void UAVVMStoreViewModel::SetStoreItems(const TScriptInterface<IAVVMOnlineStringParser>& JsonParser,
+void UAVVMStoreViewModel::SetStoreItems(const UAVVMOnlineStringParser* JsonParser,
                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(JsonParser);
-	if (!ensureAlways(bIsValid))
+	if (!ensureAlwaysMsgf(IsValid(JsonParser), TEXT("Invalid JsonParser Object!")))
 	{
 		return;
 	}
