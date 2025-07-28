@@ -57,7 +57,7 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
  * AVVMDebugger : Is a developer tool module that register descriptor context (i.e cheat extension) and execute draw calls using imgui immediate mode.
  * AVVM : Is a core system for UI development. It exposes the base class required to create View Model instance (with the Actor-View-ViewModel paradigm) and register Presenter object with the notification system from which we can forward generic payload information.
- * AVVMOnline : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected base class use by the AVVM notification system.
+ * AVVMOnline : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected base class use by the AVVM notification system. User defined types exposed here all support serialization through Unreal json object and can be converted back/from string, facilitating interfacing with your backend api.
  * AVVMGameplay : Is a core system for gameplay development. It exposes the base class for supporting **Async Resource loading** using FDataRegistryId and **Input/Ability triggering** via tag activation.
  * ...
 
@@ -65,7 +65,7 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 ## GameFeature Plugin Sample Modules
 
-To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime**, **InteractionSample** and **InventorySample**. Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
+To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime**, **InteractionSample**, **FencingSample** and **InventorySample**. Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
 
 ### Interaction Sample
 
@@ -73,14 +73,14 @@ This GameFeature plugin is a sample plugin for supporting general interaction be
 
 ### Transaction Sample
 
-This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Implementation details are still under construction for the Tokenizer class that manage the parsing of the payload string storing statistic properties. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
+This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Transaction payload are parsed using unreal json object and store statistic properties via a string property making the replication process lightweight. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
 
 ### Inventory Sample
 
-This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished to support world instantiation of item Actors. Abilities for consuming, equipping and/or dropping items are yet to be put in place. TBD!
+This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished. Abilities for consuming, equipping and/or dropping items are yet to be put in place. TBD!
 
 ### Fencing Sample
 
-This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system levrage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
+This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system leverage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
 
 **Notes : All plugins defined above are example cases that utilize the api from AVVM plugin.**
