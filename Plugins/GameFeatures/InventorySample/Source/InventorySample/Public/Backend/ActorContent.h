@@ -28,7 +28,8 @@
 /**
  *	Class description:
  *
- *	FItemHolder is a backend POD representation of the items held. 
+ *	FItemHolder is a backend POD representation of the items held. You can look at it
+ *	like the a bag and it's content, or a tabulation and it's items, or a NPC equipped items, etc...
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemHolder

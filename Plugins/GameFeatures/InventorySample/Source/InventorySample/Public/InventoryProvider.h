@@ -88,6 +88,10 @@ protected:
 	virtual EItemSrcType GetItemSrcType_Implementation() const PURE_VIRTUAL(GetItemSrcType_Implementation, return EItemSrcType::None;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int32 GetProviderUniqueId() const;
+	virtual int32 GetProviderUniqueId_Implementation() const PURE_VIRTUAL(GetProviderUniqueId_Implementation, return INDEX_NONE;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool DoesSupportSpawnOnLoad() const;
 	virtual bool DoesSupportSpawnOnLoad_Implementation() const PURE_VIRTUAL(DoesSupportSpawnOnLoad_Implementation, return false;);
 
