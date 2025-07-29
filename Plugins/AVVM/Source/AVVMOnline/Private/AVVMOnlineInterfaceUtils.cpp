@@ -130,12 +130,12 @@ FString UAVVMOnlineInterfaceUtils::SerializePlayerConnection(const TInstancedStr
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerChallenge(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMRuntimeChallenge>(Payload);
+	return SerializeToString<FAVVMPlayerChallenge>(Payload);
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerResource(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMRuntimeResource>(Payload);
+	return SerializeToString<FAVVMPlayerResource>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerWallet(const FString& Payload)
@@ -165,10 +165,10 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerC
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerChallenge(const FString& Payload)
 {
-	return DeserializeString<FAVVMRuntimeChallenge>(Payload);
+	return DeserializeString<FAVVMPlayerChallenge>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerResource(const FString& Payload)
 {
-	return DeserializeString<FAVVMRuntimeResource>(Payload);
+	return DeserializeString<FAVVMPlayerResource>(Payload);
 }

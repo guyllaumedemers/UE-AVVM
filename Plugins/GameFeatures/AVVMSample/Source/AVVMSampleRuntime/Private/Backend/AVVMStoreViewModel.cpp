@@ -32,7 +32,7 @@ void UAVVMStoreViewModel::SetStoreItems(const UAVVMOnlineStringParser* JsonParse
 	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
 	if (StringPayload != nullptr)
 	{
-		TArray<FAVVMRuntimeResource> OutResult;
+		TArray<FAVVMPlayerResource> OutResult;
 		JsonParser->FromString(*StringPayload, OutResult);
 		UE_MVVM_SET_PROPERTY_VALUE(StoreItems, OutResult);
 	}

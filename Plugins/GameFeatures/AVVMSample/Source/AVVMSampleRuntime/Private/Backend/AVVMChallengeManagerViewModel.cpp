@@ -32,7 +32,7 @@ void UAVVMChallengeManagerViewModel::SetChallenges(const UAVVMOnlineStringParser
 	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
 	if (StringPayload != nullptr)
 	{
-		TArray<FAVVMRuntimeChallenge> OutResult;
+		TArray<FAVVMPlayerChallenge> OutResult;
 		JsonParser->FromString(*StringPayload, OutResult);
 		UE_MVVM_SET_PROPERTY_VALUE(Challenges, OutResult);
 	}

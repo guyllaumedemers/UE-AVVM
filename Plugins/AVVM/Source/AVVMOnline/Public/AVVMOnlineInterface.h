@@ -45,7 +45,9 @@ struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	// @gdemers encapsulate a collection of user defined type.
+	bool operator==(const FAVVMStringPayload& Rhs) const;
+
+	// @gdemers used to prevent creation of an explicit type wrapping a collection of user defined structs.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Payload = FString();
 };
@@ -53,8 +55,27 @@ struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 /*
  *	Class description:
  *
- *	FAVVMPlayerWallet encapsulate currencies that your profile own. Crypto, event coupons,
- *	coins, etc...
+ *	FAVVMCurrency is the POD representation of a currency. IRL or URL currency.
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMCurrency : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMCurrency& Rhs) const;
+
+	// @gdemers {FDataRegistryId}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString CurrencyId = FString();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 TotalAmount = INDEX_NONE;
+};
+
+/*
+ *	Class description:
+ *
+ *	FAVVMPlayerWallet is a POD representation of a player account IRL money. (This includes Crypto, Gems, Token, etc...)
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
@@ -63,17 +84,15 @@ struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 
-	// @gdemers {CurrencyId={}, Amount={}}
+	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Options = FString();
+	TArray<FString> IrlMoneys;
 };
 
 /**
  *	Class description:
  *
- *	FAVVMPlayerProfile define a user profile information.
- *
- *	example : profile name, xp, wallet, etc...
+ *	FAVVMPlayerProfile is a POD representation of a playable character.
  *
  *	Note : A player profile is NOT an account. An account could hold various Player profiles. These are tied to a
  *	Character that's playable by the account holder.
@@ -85,32 +104,55 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 
+	// @gdemers may refer to a unique name tied to your playable character.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString ProfileId = FString();
+
+	// @gdemers may refer to a complex system that captures progression details of items, skills, etc...
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Progression = FString();
+
+	// @gdemers may refer to a complex system that captures details about item ownership.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Inventory = FString();
+
+	// @gdemers may refer to a complex system that captures details about profile achievements, quest completion such as map exploration, doing
+	// 100 headshots, etc...
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FString> Achievements;
+
+	// @gdemers may refer to a complex system that captures details about the playable character builds.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FString> Presets;
+};
+
+/*
+ *	Class description:
+ *
+ *	FAVVMPlayerAccount is a POD representation of the player Account and is Unique.
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMPlayerAccount : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerAccount& Rhs) const;
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Gamertag = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Xp = FString();
-
-	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Wallet = FString();
 
-	// @gdemers placeholder inventory, storage, any gathered items bound to this player profile.
+	// @gdemers {FAVVMPlayerProfile} collection of characters tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Inventory = FString();
-
-	// @gdemers placeholder. conditional to your game if achievements are tracked.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Achievements = FString();
-
-	// @gdemers placeholder. conditional to your game if presets of type are allowed.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Presets = FString();
+	TArray<FString> Profiles;
 };
 
 /**
  *	Class description:
  *
- *	FAVVMHostConfiguration define a configuration for a play session.
+ *	FAVVMHostConfiguration is a POD representation of the Session configuration.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
@@ -119,12 +161,11 @@ struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMHostConfiguration& Rhs) const;
 
-	// @gdemers define the experience the players of a party will go through
+	// @gdemers define the experience the players of a party will go through.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString GameplayGameMode = FString();
+	FString GameMode = FString();
 
-	// @gdemers define any other project specific information that should be run for setting up the gameplay
-	// experience
+	// @gdemers may define complex properties tied to the gameplay experience to be run.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
@@ -132,17 +173,21 @@ struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
- *	FAVVMRuntimeResource encapsulate any item that can be gathered by the user during gameplay or general
- *	information about the player - i.e health, stamina, etc...
+ *	FAVVMPlayerResource is a POD representation of resources that can be owned by a player profile, consumed, bought, sell, etc...
+ *	example : Gear, Ammunition, Skills, Potions, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMRuntimeResource : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	bool operator==(const FAVVMRuntimeResource& Rhs) const;
+	bool operator==(const FAVVMPlayerResource& Rhs) const;
 
-	// @gdemers {ResourceId={}, Amount={}}
+	// @gdemers {FDataRegistry}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString ResourceId = FString();
+
+	// @gdmers may define complex properties such as {Price}, {ResellPrice}, {Stats}, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
@@ -150,16 +195,26 @@ struct AVVMONLINE_API FAVVMRuntimeResource : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
- *	FAVVMRuntimeChallenge encapsulate the progress of any challenge that are available to the player during gameplay.
+ *	FAVVMPlayerChallenge is a POD representation of a challenge that has no tie. It can be daily, weekly, specific to a level, etc...
  */
 USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMRuntimeChallenge : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	bool operator==(const FAVVMRuntimeChallenge& Rhs) const;
+	bool operator==(const FAVVMPlayerChallenge& Rhs) const;
 
-	// @gdemers {ChallengeId={}, ChallengeProgress={}, ChallengeGoal={}}
+	// @gdemers {FDataRegistry}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString ChallengeId = FString();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Progress = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Goal = INDEX_NONE;
+
+	// @gdmers may define complex properties specific to reward content earned post-completion.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
@@ -167,7 +222,7 @@ struct AVVMONLINE_API FAVVMRuntimeChallenge : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
- *	EAVVMPlayerStatus define a set of possible state our player can be in.
+ *	EAVVMPlayerStatus track player state pre-gameplay. This is used before any seamless travel is invoked to sync players.
  */
 UENUM(BlueprintType)
 enum class EAVVMPlayerStatus : uint8
@@ -195,9 +250,8 @@ inline const TCHAR* EnumToString(EAVVMPlayerStatus State)
 /**
  *	Class description:
  *
- *	FAVVMPlayerConnection encapsulate the player status when part of a party.
- *
- *	example : information about the visual representation of the player.
+ *	FAVVMPlayerConnection is a POD representation of a player being connected with a party. It exposes information about the
+ *	user to other connected members.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
@@ -206,31 +260,22 @@ struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
 
-	// @gdemers backend profile as json
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PlayerProfile = FString();
-
-	// @gdemers transient state in which a player connection can be.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
-
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString UniqueNetId = FString();
 
-	// @gdemers backend challenges as json (convert into a collection)
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString RuntimeChallenges = FString();
+	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
 
-	// @gdemers backend resources as json (convert into a collection)
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString RuntimeResources = FString();
+	FString PlayerProfile = FString();
 };
 
 /**
  *	Class description:
  *
- *	FAVVMParty define a group of person that a player can join and information about how their session is configured.
+ *	FAVVMParty is a POD representation of a group of player connections. It exposed information about the session configuration
+ *	to all client connected.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
@@ -240,13 +285,13 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 	bool operator==(const FAVVMParty& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PartyUniqueId = FString();
+	FString PartyId = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString HostConfiguration = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PlayerConnections = FString();
+	TArray<FString> PlayerConnections;
 };
 
 /**
@@ -523,7 +568,7 @@ class AVVMONLINE_API IAVVMOnlineChallengesInterface
 	GENERATED_BODY()
 
 public:
-	virtual void ClaimChallenge(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void ClaimChallenge(const FAVVMPlayerChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
@@ -556,7 +601,7 @@ public:
 		return true;
 	}
 
-	virtual void ClaimBattlePass(const FAVVMRuntimeChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void ClaimBattlePass(const FAVVMPlayerChallenge& ChallengeContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
@@ -583,12 +628,12 @@ class AVVMONLINE_API IAVVMOnlineStoreInterface
 	GENERATED_BODY()
 
 public:
-	virtual void SellItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void SellItem(const FAVVMPlayerResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void BuyItem(const FAVVMRuntimeResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void BuyItem(const FAVVMPlayerResource& ResourceContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}

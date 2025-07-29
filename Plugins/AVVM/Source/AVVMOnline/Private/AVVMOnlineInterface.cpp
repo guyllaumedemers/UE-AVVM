@@ -19,6 +19,16 @@
 //SOFTWARE.
 #include "AVVMOnlineInterface.h"
 
+bool FAVVMPlayerAccount::operator==(const FAVVMPlayerAccount& Rhs) const
+{
+	return true;
+}
+
+bool FAVVMStringPayload::operator==(const FAVVMStringPayload& Rhs) const
+{
+	return true;
+}
+
 bool FAVVMPlayerWallet::operator==(const FAVVMPlayerWallet& Rhs) const
 {
 	return true;
@@ -34,12 +44,12 @@ bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
 	return true;
 }
 
-bool FAVVMRuntimeResource::operator==(const FAVVMRuntimeResource& Rhs) const
+bool FAVVMPlayerResource::operator==(const FAVVMPlayerResource& Rhs) const
 {
 	return true;
 }
 
-bool FAVVMRuntimeChallenge::operator==(const FAVVMRuntimeChallenge& Rhs) const
+bool FAVVMPlayerChallenge::operator==(const FAVVMPlayerChallenge& Rhs) const
 {
 	return true;
 }

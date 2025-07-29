@@ -71,7 +71,7 @@ void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ClaimChallengeRew
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMChallengeManagerPresenter::OnForcePullChallengesCompleted);
 
-	const auto* Challenge = Payload.GetPtr<FAVVMRuntimeChallenge>();
+	const auto* Challenge = Payload.GetPtr<FAVVMPlayerChallenge>();
 	if (Challenge != nullptr)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Claim Challenge Rewards Request. In-Progress..."));
@@ -80,7 +80,7 @@ void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ClaimChallengeRew
 	else
 	{
 		UE_LOG(LogOnline, Log, TEXT("Claim Empty Challenge Rewards Request. In-Progress..."));
-		OnlineInterface->ClaimChallenge(FAVVMRuntimeChallenge{}, Callback);
+		OnlineInterface->ClaimChallenge(FAVVMPlayerChallenge{}, Callback);
 	}
 }
 

@@ -71,7 +71,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_SellItem(const TInstancedStr
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMStorePresenter::OnSellItemCompleted);
 
-	const auto* Resource = Payload.GetPtr<FAVVMRuntimeResource>();
+	const auto* Resource = Payload.GetPtr<FAVVMPlayerResource>();
 	if (!ensure(Resource != nullptr))
 	{
 		return;
@@ -93,7 +93,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_BuyItem(const TInstancedStru
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMStorePresenter::OnBuyItemCompleted);
 
-	const auto* Resource = Payload.GetPtr<FAVVMRuntimeResource>();
+	const auto* Resource = Payload.GetPtr<FAVVMPlayerResource>();
 	if (!ensure(Resource != nullptr))
 	{
 		return;
