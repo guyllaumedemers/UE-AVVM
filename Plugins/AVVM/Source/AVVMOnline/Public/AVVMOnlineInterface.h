@@ -161,7 +161,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdmers contains set of unique identifier to player owned items. example : Skills, Gear, etc...
+	// @gdemers contains set of unique identifier to player owned items. example : Skills, Gear, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> EquippedItems;
 };
@@ -287,6 +287,10 @@ struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
 
+	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString UniqueNetId = FString();
@@ -311,6 +315,11 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMParty& Rhs) const;
 
+	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 UniqueId = INDEX_NONE;
+
+	// @gdemers may represent a party name or guild name.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PartyId = FString();
 
@@ -318,7 +327,7 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 	FString HostConfiguration = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> PlayerConnections;
+	TArray<int32> PlayerConnectionIds;
 };
 
 /**

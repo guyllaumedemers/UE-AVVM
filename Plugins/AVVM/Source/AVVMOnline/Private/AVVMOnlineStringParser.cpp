@@ -309,13 +309,14 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	}
 
 	FAVVMParty NewParty;
+	NewParty.UniqueId = JsonData->GetNumberField(TEXT("UniqueId"));
 	NewParty.PartyId = JsonData->GetStringField(TEXT("PartyId"));
 	NewParty.HostConfiguration = JsonData->GetStringField(TEXT("HostConfiguration"));
 
-	TArray<TSharedPtr<FJsonValue>> PlayerConnections = JsonData->GetArrayField(TEXT("PlayerConnections"));
-	for (const auto& PlayerConnection : PlayerConnections)
+	TArray<TSharedPtr<FJsonValue>> PlayerConnectionIds = JsonData->GetArrayField(TEXT("PlayerConnectionIds"));
+	for (const auto& PlayerConnectionId : PlayerConnectionIds)
 	{
-		NewParty.PlayerConnections.Add(PlayerConnection->AsString());
+		NewParty.PlayerConnectionIds.Add(PlayerConnectionId->AsNumber());
 	}
 
 	OutParty = NewParty;
@@ -324,16 +325,17 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 void UAVVMOnlineStringParser::ToString(const FAVVMParty& NewParty,
                                        FString& OutFormat) const
 {
-	TArray<TSharedPtr<FJsonValue>> PlayerConnections;
-	for (const FString& PlayerConnection : NewParty.PlayerConnections)
+	TArray<TSharedPtr<FJsonValue>> PlayerConnectionIds;
+	for (const int32 PlayerConnectionId : NewParty.PlayerConnectionIds)
 	{
-		PlayerConnections.Add(MakeShareable(new FJsonValueString(PlayerConnection)));
+		PlayerConnectionIds.Add(MakeShareable(new FJsonValueNumber(PlayerConnectionId)));
 	}
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewParty.UniqueId);
 	JsonData->SetStringField(TEXT("PartyId"), NewParty.PartyId);
 	JsonData->SetStringField(TEXT("HostConfiguration"), NewParty.HostConfiguration);
-	JsonData->SetArrayField(TEXT("PlayerConnections"), PlayerConnections);
+	JsonData->SetArrayField(TEXT("PlayerConnections"), PlayerConnectionIds);
 
 	FString JsonOutput;
 
@@ -406,6 +408,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	}
 
 	FAVVMPlayerConnection NewPlayerConnection;
+	NewPlayerConnection.UniqueId = JsonData->GetNumberField(TEXT("UniqueId"));
 	NewPlayerConnection.UniqueNetId = JsonData->GetStringField(TEXT("UniqueNetId"));
 	NewPlayerConnection.PlayerStatus = StaticCast<EAVVMPlayerStatus>(JsonData->GetIntegerField(TEXT("PlayerStatus")));
 	NewPlayerConnection.PlayerProfile = JsonData->GetStringField(TEXT("PlayerProfile"));
@@ -417,6 +420,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerConnection& NewPlayerCon
                                        FString& OutFormat) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerConnection.UniqueId);
 	JsonData->SetStringField(TEXT("UniqueNetId"), NewPlayerConnection.UniqueNetId);
 	JsonData->SetStringField(TEXT("PlayerStatus"), EnumToString(NewPlayerConnection.PlayerStatus));
 	JsonData->SetStringField(TEXT("PlayerProfile"), NewPlayerConnection.PlayerProfile);
