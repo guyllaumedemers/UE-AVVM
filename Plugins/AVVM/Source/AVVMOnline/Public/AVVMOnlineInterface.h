@@ -102,6 +102,10 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerResource& Rhs) const;
 
+	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers {FDataRegistry}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ResourceId = FString();
@@ -123,19 +127,21 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerChallenge& Rhs) const;
 
+	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers {FDataRegistry}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ChallengeId = FString();
 
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 Progress = INDEX_NONE;
-
+	// @gdemers progress should be handled specific to the player profile in the progression system.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 Goal = INDEX_NONE;
 
-	// @gdmers {FAVVMPlayerResource} or may define complex properties specific to reward content earned post-completion.
+	// @gdmers {FAVVMPlayerResource}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Options = FString();
+	TArray<int32> ResourceIds;
 };
 
 /**
@@ -179,7 +185,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ProfileId = FString();
 
-	// @gdemers may refer to a complex system that captures progression details of items, skills, etc...
+	// @gdemers may refer to a complex system that captures progression details of items, skills, achievements, challenges, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
 
@@ -187,10 +193,9 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Inventory = FString();
 
-	// @gdemers may refer to a complex system that captures details about profile achievements, quest completion such as map exploration, doing
-	// 100 headshots, etc...
+	// @gdemers store shared challenges by id that are active for this profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Achievements;
+	TArray<int32> ChallengeIds;
 
 	// @gdemers may refer to a complex system that captures details about the playable character builds.
 	UPROPERTY(Transient, BlueprintReadWrite)

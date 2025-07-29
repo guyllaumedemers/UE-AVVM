@@ -116,10 +116,10 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	NewPlayerProfile.Progression = JsonData->GetStringField(TEXT("Progression"));
 	NewPlayerProfile.Inventory = JsonData->GetStringField(TEXT("Inventory"));
 
-	const TArray<TSharedPtr<FJsonValue>> Achievements = JsonData->GetArrayField(TEXT("Achievements"));
-	for (const auto& Achievement : Achievements)
+	const TArray<TSharedPtr<FJsonValue>> ChallengeIds = JsonData->GetArrayField(TEXT("ChallengeIds"));
+	for (const auto& ChallengeId : ChallengeIds)
 	{
-		NewPlayerProfile.Achievements.Add(Achievement->AsString());
+		NewPlayerProfile.ChallengeIds.Add(ChallengeId->AsNumber());
 	}
 
 	const TArray<TSharedPtr<FJsonValue>> Presets = JsonData->GetArrayField(TEXT("Presets"));
@@ -134,10 +134,10 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerProfile& NewPlayerProfile,
                                        FString& OutFormat) const
 {
-	TArray<TSharedPtr<FJsonValue>> Achievements;
-	for (const FString& Achievement : NewPlayerProfile.Achievements)
+	TArray<TSharedPtr<FJsonValue>> ChallengeIds;
+	for (const int32 ChallengeId : NewPlayerProfile.ChallengeIds)
 	{
-		Achievements.Add(MakeShareable(new FJsonValueString(Achievement)));
+		ChallengeIds.Add(MakeShareable(new FJsonValueNumber(ChallengeId)));
 	}
 
 	TArray<TSharedPtr<FJsonValue>> Presets;
@@ -150,7 +150,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerProfile& NewPlayerProfil
 	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfile.ProfileId);
 	JsonData->SetStringField(TEXT("Progression"), NewPlayerProfile.Progression);
 	JsonData->SetStringField(TEXT("Inventory"), NewPlayerProfile.Inventory);
-	JsonData->SetArrayField(TEXT("Achievements"), Achievements);
+	JsonData->SetArrayField(TEXT("ChallengeIds"), ChallengeIds);
 	JsonData->SetArrayField(TEXT("Presets"), Presets);
 
 	FString JsonOutput;
@@ -492,10 +492,15 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	}
 
 	FAVVMPlayerChallenge NewPlayerChallenge;
+	NewPlayerChallenge.UniqueId = JsonData->GetNumberField(TEXT("UniqueId"));
 	NewPlayerChallenge.ChallengeId = JsonData->GetStringField(TEXT("ChallengeId"));
-	NewPlayerChallenge.Progress = JsonData->GetNumberField(TEXT("Progress"));
 	NewPlayerChallenge.Goal = JsonData->GetNumberField(TEXT("Goal"));
-	NewPlayerChallenge.Options = JsonData->GetStringField(TEXT("Options"));
+
+	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ResourceIds"));
+	for (const auto JsonValue : JsonValues)
+	{
+		NewPlayerChallenge.ResourceIds.Add(JsonValue->AsNumber());
+	}
 
 	OutPlayerChallenge = NewPlayerChallenge;
 }
@@ -503,11 +508,17 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerChallenge& NewPlayerChallenge,
                                        FString& OutFormat) const
 {
+	TArray<TSharedPtr<FJsonValue>> ResourceIds;
+	for (const auto ResourceId : NewPlayerChallenge.ResourceIds)
+	{
+		ResourceIds.Add(MakeShareable(new FJsonValueNumber(ResourceId)));
+	}
+
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerChallenge.UniqueId);
 	JsonData->SetStringField(TEXT("ChallengeId"), NewPlayerChallenge.ChallengeId);
-	JsonData->SetNumberField(TEXT("Progress"), NewPlayerChallenge.Progress);
 	JsonData->SetNumberField(TEXT("Goal"), NewPlayerChallenge.Goal);
-	JsonData->SetStringField(TEXT("Options"), NewPlayerChallenge.Options);
+	JsonData->SetArrayField(TEXT("ResourceIds"), ResourceIds);
 
 	FString JsonOutput;
 
@@ -580,6 +591,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	}
 
 	FAVVMPlayerResource NewPlayerResource;
+	NewPlayerResource.UniqueId = JsonData->GetNumberField(TEXT("UniqueId"));
 	NewPlayerResource.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 	NewPlayerResource.Options = JsonData->GetStringField(TEXT("Options"));
 
@@ -590,6 +602,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerResource& NewPlayerResou
                                        FString& OutFormat) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerResource.UniqueId);
 	JsonData->SetStringField(TEXT("ResourceId"), NewPlayerResource.ResourceId);
 	JsonData->SetStringField(TEXT("Options"), NewPlayerResource.Options);
 
