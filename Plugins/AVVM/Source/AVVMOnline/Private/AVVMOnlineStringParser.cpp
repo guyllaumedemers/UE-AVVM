@@ -579,11 +579,11 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FAVVMPlayerResource NewRuntimeResource;
-	NewRuntimeResource.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
-	NewRuntimeResource.Options = JsonData->GetStringField(TEXT("Options"));
+	FAVVMPlayerResource NewPlayerResource;
+	NewPlayerResource.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
+	NewPlayerResource.Options = JsonData->GetStringField(TEXT("Options"));
 
-	OutPlayerResource = NewRuntimeResource;
+	OutPlayerResource = NewPlayerResource;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerResource& NewPlayerResource,
@@ -592,6 +592,53 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerResource& NewPlayerResou
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetStringField(TEXT("ResourceId"), NewPlayerResource.ResourceId);
 	JsonData->SetStringField(TEXT("Options"), NewPlayerResource.Options);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
+}
+
+void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
+                                         FAVVMPlayerPreset& OutPlayerPreset) const
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPlayerPreset NewPlayerPreset;
+	NewPlayerPreset.PresetId = JsonData->GetStringField(TEXT("PresetId"));
+
+	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("EquippedItems"));
+	for (const auto& JsonValue : JsonValues)
+	{
+		NewPlayerPreset.EquippedItems.Add(JsonValue->AsNumber());
+	}
+
+	OutPlayerPreset = NewPlayerPreset;
+}
+
+void UAVVMOnlineStringParser::ToString(const FAVVMPlayerPreset& NewPlayerPreset,
+                                       FString& OutFormat) const
+{
+	TArray<TSharedPtr<FJsonValue>> EquippedItems;
+	for (const int32 EquippedItem : NewPlayerPreset.EquippedItems)
+	{
+		EquippedItems.Add(MakeShareable(new FJsonValueNumber(EquippedItem)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetStringField(TEXT("PresetId"), NewPlayerPreset.PresetId);
+	JsonData->SetArrayField(TEXT("EquippedItems"), EquippedItems);
 
 	FString JsonOutput;
 

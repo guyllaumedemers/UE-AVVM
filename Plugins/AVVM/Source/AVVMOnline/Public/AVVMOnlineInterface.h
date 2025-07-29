@@ -92,6 +92,77 @@ struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
+ *	FAVVMPlayerResource is a POD representation of resources that can be owned by a player profile, consumed, bought, sell, etc...
+ *	example : Gear, Ammunition, Skills, Potions, etc...
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerResource& Rhs) const;
+
+	// @gdemers {FDataRegistry}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString ResourceId = FString();
+
+	// @gdmers may define complex properties such as {Price}, {ResellPrice}, {Stats}, etc...
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Options = FString();
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMPlayerChallenge is a POD representation of a challenge that has no tie. It can be daily, weekly, specific to a level, etc...
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerChallenge& Rhs) const;
+
+	// @gdemers {FDataRegistry}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString ChallengeId = FString();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Progress = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Goal = INDEX_NONE;
+
+	// @gdmers {FAVVMPlayerResource} or may define complex properties specific to reward content earned post-completion.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Options = FString();
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMPlayerPreset is a POD representation of a player preset. This is a build that can equip
+ *	all items referenced using their id.
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMPlayerPreset : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerPreset& Rhs) const;
+
+	// @gdemers {FDataRegistry}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString PresetId = FString();
+
+	// @gdmers contains set of unique identifier to player owned items. example : Skills, Gear, etc...
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> EquippedItems;
+};
+
+/**
+ *	Class description:
+ *
  *	FAVVMPlayerProfile is a POD representation of a playable character.
  *
  *	Note : A player profile is NOT an account. An account could hold various Player profiles. These are tied to a
@@ -166,55 +237,6 @@ struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
 	FString GameMode = FString();
 
 	// @gdemers may define complex properties tied to the gameplay experience to be run.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Options = FString();
-};
-
-/**
- *	Class description:
- *
- *	FAVVMPlayerResource is a POD representation of resources that can be owned by a player profile, consumed, bought, sell, etc...
- *	example : Gear, Ammunition, Skills, Potions, etc...
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMPlayerResource& Rhs) const;
-
-	// @gdemers {FDataRegistry}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ResourceId = FString();
-
-	// @gdmers may define complex properties such as {Price}, {ResellPrice}, {Stats}, etc...
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Options = FString();
-};
-
-/**
- *	Class description:
- *
- *	FAVVMPlayerChallenge is a POD representation of a challenge that has no tie. It can be daily, weekly, specific to a level, etc...
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMPlayerChallenge& Rhs) const;
-
-	// @gdemers {FDataRegistry}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ChallengeId = FString();
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 Progress = INDEX_NONE;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 Goal = INDEX_NONE;
-
-	// @gdmers may define complex properties specific to reward content earned post-completion.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };

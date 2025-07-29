@@ -75,4 +75,7 @@ public:
 
 	void FromString(const FString& NewPayload, FAVVMPlayerResource& OutPlayerResource) const;
 	void ToString(const FAVVMPlayerResource& NewPlayerResource, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPlayerPreset& OutPlayerPreset) const;
+	void ToString(const FAVVMPlayerPreset& NewPlayerPreset, FString& OutFormat) const;
 };
