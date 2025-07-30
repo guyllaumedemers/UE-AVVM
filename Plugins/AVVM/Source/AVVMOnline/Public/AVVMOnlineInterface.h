@@ -84,6 +84,9 @@ struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> IrlMoneys;
@@ -140,7 +143,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 Goal = INDEX_NONE;
 
-	// @gdmers {FAVVMPlayerResource}
+	// @gdmers {FAVVMPlayerResource.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ResourceIds;
 };
@@ -166,7 +169,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdemers contains set of unique identifier to player owned items {FAVVMPlayerResource}. example : Skills, Gear, etc...
+	// @gdemers {FAVVMPlayerResource.UniqueId} contains set of unique identifier to player owned items. example : Skills, Gear, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> EquippedItems;
 };
@@ -197,14 +200,16 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
 
-	// @gdemers may refer to a complex system that captures details about item ownership.
+	// @gdemers {InventorySample::FActorContent.UniqueId}. TArray<int32> is used for scenarios like "Resident Evil" where story branching prevents
+	// Character.A items to be available during Character.B playtime. Storing unique instances here is required!
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Inventory = FString();
+	TArray<int32> InventoryIds;
 
-	// @gdemers store shared challenges by id that are active for this profile.
+	// @gdemers {FAVVMPlayerChallenge.UniqueId} store shared challenges by id that are active for this profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ChallengeIds;
 
+	// @gdemers {FAVVMPlayerPreset.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 EquippedPresetId = INDEX_NONE;
 };
@@ -227,14 +232,15 @@ struct AVVMONLINE_API FAVVMPlayerAccount : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Gamertag = FString();
 
+	// @gdemers {FAVVMPlayerWallet.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 WalletId = INDEX_NONE;
 
-	// @gdemers keep id reference for all owned profiles.
+	// @gdemers {FAVVMPlayerProfile.UniqueId} keep id reference for all owned profiles.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ProfileIds;
 
-	// @gdemers may refer to a complex system that captures details about the playable character builds.
+	// @gdemers {FAVVMPlayerPreset.UniqueId} may refer to a complex system that captures details about the playable character builds.
 	// Id referral allows preset sharing across profiles.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> PresetIds;
@@ -313,7 +319,7 @@ struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
 
-	// @gdemers keep id reference for selected profile.
+	// @gdemers {FAVVMPlayerProfile.UniqueId} keep id reference for selected profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 ProfileId = INDEX_NONE;
 };
@@ -350,6 +356,7 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString HostConfiguration = FString();
 
+	// @gdemers {FAVVMPlayerProfile.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> PlayerConnectionIds;
 };

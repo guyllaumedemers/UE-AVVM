@@ -32,7 +32,8 @@ bool FAVVMCurrency::operator==(const FAVVMCurrency& Rhs) const
 
 bool FAVVMPlayerWallet::operator==(const FAVVMPlayerWallet& Rhs) const
 {
-	return (IrlMoneys == Rhs.IrlMoneys);
+	return (UniqueId == Rhs.UniqueId)
+			&& (IrlMoneys == Rhs.IrlMoneys);
 }
 
 bool FAVVMPlayerResource::operator==(const FAVVMPlayerResource& Rhs) const
@@ -62,7 +63,7 @@ bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 	return (UniqueId == Rhs.UniqueId)
 			&& (ProfileId.Equals(Rhs.ProfileId))
 			&& (Progression.Equals(Rhs.Progression))
-			&& (Inventory.Equals(Rhs.Inventory))
+			&& (InventoryIds == Rhs.InventoryIds)
 			&& (ChallengeIds == Rhs.ChallengeIds)
 			&& (EquippedPresetId == Rhs.EquippedPresetId);
 }

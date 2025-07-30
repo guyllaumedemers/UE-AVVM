@@ -28,17 +28,19 @@
 /**
  *	Class description:
  *
- *	FItem is the RUNTIME POD representation of the item that's bound to an Actor.
+ *	FItemModifier is the POD representation of a modifier being applied to an item.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItem
+struct INVENTORYSAMPLE_API FItemModifier
 {
 	GENERATED_BODY()
+
+	bool operator==(const FItemModifier& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistryId={}, State={}, Count={}}
+	// @gdemers {Stats_Modifier}, etc...
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString Options = FString();
 };
@@ -46,28 +48,50 @@ struct INVENTORYSAMPLE_API FItem
 /**
  *	Class description:
  *
- *	FItemHolder is a backend POD representation of the items held. You can look at it
- *	like a bag and it's content, or a tabulation and it's items, or a NPC equipped items, etc...
+ *	FItem is the RUNTIME POD representation of the item that's bound to an Actor.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItem
+{
+	GENERATED_BODY()
+
+	bool operator==(const FItem& Rhs) const;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 UniqueId = INDEX_NONE;
+
+	// @gdemers {FAVVMPlayerResource.UniqueId} the POD defined by GD. WITHOUT any player mods applied.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 ResourceId = INDEX_NONE;
+
+	// @gdemers {FItemModifier.UniqueId} the POD applied by the player profile to this item. may be null.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<int32> ModIds;
+};
+
+/**
+ *	Class description:
+ *
+ *	FItemHolder is a backend POD representation of the items held. You can look at it like a bag and it's content,
+ *	or a tabulation and it's items, or a NPC equipped items, etc...
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemHolder
 {
 	GENERATED_BODY()
 
+	bool operator==(const FItemHolder& Rhs) const;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 MaxSlots = INDEX_NONE;
-
-	// @gdemers the position used to visualize a holder (example : a bag, tabulation, etc...) in UI.
-	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 Position = INDEX_NONE;
-
-	// @gdemers the unique identifier of the item owned by this holder. the index position of the entry in Array
-	// represents the visual position shown when displaying the item holder in UI.
+	// @gdemers {FItem.UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<int32> ItemIds;
+
+	// @gdemers {MaxSlot}, {HolderSlot_Position}, {Holder_Type}
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FString Options = FString();
 };
 
 /**
@@ -80,12 +104,15 @@ struct INVENTORYSAMPLE_API FActorContent
 {
 	GENERATED_BODY()
 
+	bool operator==(const FActorContent& Rhs) const;
+
 	// @gdemers the unique identifier of the actor content. For cases like storage actors from which we buy/sell/trade with, the content
 	// may be shared across instances in a level using a share unique id that can be used to reference the actor type.
 	// Note : int32 can be converted to an enum if required by your project. Prob. what I would do for shared id.
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
+	// @gdemers {FItemHolder.UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<int32> ItemHolderIds;
 };
