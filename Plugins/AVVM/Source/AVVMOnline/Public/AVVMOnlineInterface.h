@@ -111,6 +111,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	FString ResourceId = FString();
 
 	// @gdmers may define complex properties such as {Price}, {ResellPrice}, {Stats}, etc...
+	// Note : These SHOULD NOT store any profile specifics modifier applied. Only the base stats defined by GD. Custom mods should be stored separately.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Options = FString();
 };
@@ -118,7 +119,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
- *	FAVVMPlayerChallenge is a POD representation of a challenge that has no tie. It can be daily, weekly, specific to a level, etc...
+ *	FAVVMPlayerChallenge is a POD representation of a challenge. It contains details information WITHOUT progression.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
@@ -147,8 +148,8 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
- *	FAVVMPlayerPreset is a POD representation of a player preset. This is a build that can equip
- *	all items referenced using their id.
+ *	FAVVMPlayerPreset is a POD representation of a player preset. This is a build that can equip all items referenced using their id.
+ *	Note : It's possible that this POD type be only serialized to disk. Up to the user!
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerPreset : public FAVVMNotificationPayload
@@ -157,11 +158,15 @@ struct AVVMONLINE_API FAVVMPlayerPreset : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerPreset& Rhs) const;
 
+	// @gdemers uniquely identified to allow access between profiles owned by player account.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers {FDataRegistry}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdemers contains set of unique identifier to player owned items. example : Skills, Gear, etc...
+	// @gdemers contains set of unique identifier to player owned items {FAVVMPlayerResource}. example : Skills, Gear, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> EquippedItems;
 };
@@ -181,6 +186,9 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers may refer to a unique name tied to your playable character.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ProfileId = FString();
@@ -196,10 +204,6 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 	// @gdemers store shared challenges by id that are active for this profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ChallengeIds;
-
-	// @gdemers may refer to a complex system that captures details about the playable character builds.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Presets;
 };
 
 /*
@@ -215,14 +219,22 @@ struct AVVMONLINE_API FAVVMPlayerAccount : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerAccount& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Gamertag = FString();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Wallet = FString();
+	int32 WalletId = INDEX_NONE;
 
-	// @gdemers {FAVVMPlayerProfile} collection of characters tied to player account.
+	// @gdemers keep id reference for all owned profiles.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Profiles;
+	TArray<int32> ProfileIds;
+
+	// @gdemers may refer to a complex system that captures details about the playable character builds.
+	// Id referral allows preset sharing across profiles.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> PresetIds;
 };
 
 /**
@@ -298,8 +310,9 @@ struct AVVMONLINE_API FAVVMPlayerConnection : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
 
+	// @gdemers keep id reference for selected profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PlayerProfile = FString();
+	int32 ProfileId = INDEX_NONE;
 };
 
 /**
@@ -319,9 +332,17 @@ struct AVVMONLINE_API FAVVMParty : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers may represent a party name or guild name.
+	// @gdemers may represent a party name.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PartyId = FString();
+
+	// @gdemers NA, China, Russia, etc...
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 RegionId = INDEX_NONE;
+
+	// @gdemers sub-identifier to the region.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 DistrictId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString HostConfiguration = FString();
