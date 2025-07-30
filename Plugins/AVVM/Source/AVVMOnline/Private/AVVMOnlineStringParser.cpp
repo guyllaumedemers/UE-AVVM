@@ -116,6 +116,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	NewPlayerProfile.ProfileId = JsonData->GetStringField(TEXT("ProfileId"));
 	NewPlayerProfile.Progression = JsonData->GetStringField(TEXT("Progression"));
 	NewPlayerProfile.Inventory = JsonData->GetStringField(TEXT("Inventory"));
+	NewPlayerProfile.EquippedPresetId = JsonData->GetIntegerField(TEXT("EquippedPresetId"));
 
 	const TArray<TSharedPtr<FJsonValue>> ChallengeIds = JsonData->GetArrayField(TEXT("ChallengeIds"));
 	for (const auto& ChallengeId : ChallengeIds)
@@ -140,6 +141,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerProfile& NewPlayerProfil
 	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfile.ProfileId);
 	JsonData->SetStringField(TEXT("Progression"), NewPlayerProfile.Progression);
 	JsonData->SetStringField(TEXT("Inventory"), NewPlayerProfile.Inventory);
+	JsonData->SetNumberField(TEXT("EquippedPresetId"), NewPlayerProfile.EquippedPresetId);
 	JsonData->SetArrayField(TEXT("ChallengeIds"), ChallengeIds);
 
 	FString JsonOutput;

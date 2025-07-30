@@ -204,6 +204,9 @@ struct AVVMONLINE_API FAVVMPlayerProfile : public FAVVMNotificationPayload
 	// @gdemers store shared challenges by id that are active for this profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ChallengeIds;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 EquippedPresetId = INDEX_NONE;
 };
 
 /*
