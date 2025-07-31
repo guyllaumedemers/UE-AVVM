@@ -109,7 +109,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistry}
+	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ResourceId = FString();
 
@@ -135,7 +135,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistry}
+	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ChallengeId = FString();
 
@@ -165,7 +165,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistry}
+	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 

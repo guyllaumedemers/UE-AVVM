@@ -26,6 +26,8 @@
 
 #include "InventorySettings.generated.h"
 
+class UInventoryStringParser;
+
 /**
  *	Class description:
  *
@@ -37,6 +39,9 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	static TSubclassOf<UInventoryStringParser> GetJsonParserClass();
+	
 	UFUNCTION(BlueprintCallable)
 	static const FGameplayTag& GetPendingSpawnTag();
 
@@ -71,6 +76,9 @@ public:
 	static const FGameplayTagContainer& GetConsumableRuleset();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	TSubclassOf<UInventoryStringParser> JsonParserClass = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
 

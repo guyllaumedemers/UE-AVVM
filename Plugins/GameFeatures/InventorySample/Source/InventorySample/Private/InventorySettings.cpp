@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "InventorySettings.h"
 
+TSubclassOf<UInventoryStringParser> UInventorySettings::GetJsonParserClass()
+{
+	return GetDefault<UInventorySettings>()->JsonParserClass;
+}
+
 const FGameplayTag& UInventorySettings::GetPendingSpawnTag()
 {
 	return GetDefault<UInventorySettings>()->PendingSpawnTag;

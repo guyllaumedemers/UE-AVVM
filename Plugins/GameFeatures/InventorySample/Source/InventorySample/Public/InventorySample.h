@@ -19,7 +19,12 @@
 //SOFTWARE.
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+
+class UInventoryStringParser;
+
+INVENTORYSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogInventorySample, Log, All);
 
 /**
  *	Plugin Description :
@@ -46,3 +51,14 @@
  *
  *	Note : This system expect to make direct calls to the HandshakeSample GFP for running validations!
  */
+class FInventorySampleModule : public IModuleInterface
+{
+public:
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+
+	static INVENTORYSAMPLE_API UInventoryStringParser* GetJsonParser();
+
+private:
+	static INVENTORYSAMPLE_API TStrongObjectPtr<UInventoryStringParser> JsonParser;
+};

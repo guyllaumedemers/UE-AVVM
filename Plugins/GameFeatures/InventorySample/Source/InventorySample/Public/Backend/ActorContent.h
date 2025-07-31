@@ -40,6 +40,10 @@ struct INVENTORYSAMPLE_API FItemModifier
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
+	// @gdemers {FDataRegistryId}
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FString ModifierId = FString();
+
 	// @gdemers {Stats_Modifier}, etc...
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString Options = FString();

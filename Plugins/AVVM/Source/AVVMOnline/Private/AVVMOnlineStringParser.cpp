@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMOnlineStringParser.h"
 
+#include "AVVMOnlineInterface.h"
+
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMCurrency& OutCurrency) const
 {

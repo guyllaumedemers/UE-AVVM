@@ -21,15 +21,27 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMOnlineInterface.h"
+#include "UObject/Object.h"
 
 #include "AVVMOnlineStringParser.generated.h"
+
+struct FAVVMCurrency;
+struct FAVVMHostConfiguration;
+struct FAVVMParty;
+struct FAVVMPlayerAccount;
+struct FAVVMPlayerChallenge;
+struct FAVVMPlayerConnection;
+struct FAVVMPlayerPreset;
+struct FAVVMPlayerProfile;
+struct FAVVMPlayerResource;
+struct FAVVMPlayerWallet;
+struct FAVVMStringPayload;
 
 /**
  *	Class description:
  *
- *	UAVVMOnlineInterface is the interface to be implemented by your parser system. It defines the api for general use case
- *	with Struct Types defined here.
+ *	UAVVMOnlineStringParser is the UObject interfacing with Unreal JSon system to parse the FString payload that defines
+ *	the data schema of the project backend.
  */
 UCLASS(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineStringParser : public UObject
@@ -39,7 +51,7 @@ class AVVMONLINE_API UAVVMOnlineStringParser : public UObject
 public:
 	void FromString(const FString& NewPayload, FAVVMCurrency& OutCurrency) const;
 	void ToString(const FAVVMCurrency& NewCurrency, FString& OutFormat) const;
-	
+
 	void FromString(const FString& NewPayload, FAVVMPlayerWallet& OutPlayerWallet) const;
 	void ToString(const FAVVMPlayerWallet& NewPlayerWallet, FString& OutFormat) const;
 
