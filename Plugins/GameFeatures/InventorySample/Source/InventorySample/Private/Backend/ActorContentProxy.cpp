@@ -17,30 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/ActorContent.h"
+#include "Backend/ActorContentProxy.h"
 
-bool FItemModifier::operator==(const FItemModifier& Rhs) const
+bool FItemModifierProxy::operator==(const FItemModifierProxy& Rhs) const
 {
-	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId.Equals(Rhs.ResourceId));
+	return (ResourceId.Equals(Rhs.ResourceId));
 }
 
-bool FItem::operator==(const FItem& Rhs) const
+bool FItemProxy::operator==(const FItemProxy& Rhs) const
 {
-	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId.Equals(Rhs.ResourceId))
-			&& (ModIds == Rhs.ModIds);
+	return (ResourceId.Equals(Rhs.ResourceId))
+			&& (ModValues == Rhs.ModValues);
 }
 
-bool FItemHolder::operator==(const FItemHolder& Rhs) const
+bool FItemHolderProxy::operator==(const FItemHolderProxy& Rhs) const
 {
-	return (UniqueId == Rhs.UniqueId)
-			&& (ItemIds == Rhs.ItemIds)
-			&& (ResourceId.Equals(Rhs.ResourceId));
+	return (ResourceId.Equals(Rhs.ResourceId))
+			&& (ItemValues == Rhs.ItemValues);
 }
 
-bool FActorContent::operator==(const FActorContent& Rhs) const
+bool FActorContentProxy::operator==(const FActorContentProxy& Rhs) const
 {
-	return (UniqueId == Rhs.UniqueId)
-			&& (ItemHolderIds == Rhs.ItemHolderIds);
+	return (ItemHolderValues == Rhs.ItemHolderValues);
 }

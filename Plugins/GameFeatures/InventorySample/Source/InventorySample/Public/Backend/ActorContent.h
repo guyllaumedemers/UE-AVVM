@@ -28,7 +28,8 @@
 /**
  *	Class description:
  *
- *	FItemModifier is the POD representation of a modifier being applied to an item.
+ *	FItemModifier is the POD representation of a modifier being applied to an item. This POD defines the data layout
+ *  stored on the backend.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemModifier
@@ -40,19 +41,16 @@ struct INVENTORYSAMPLE_API FItemModifier
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistryId}
+	// @gdemers {FDataRegistry}. Contains details about {Base_Stats}.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString ModifierId = FString();
-
-	// @gdemers {Stats_Modifier}, etc...
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FString Options = FString();
+	FString ResourceId = FString();
 };
 
 /**
  *	Class description:
  *
- *	FItem is the RUNTIME POD representation of the item that's bound to an Actor.
+ *	FItem is the RUNTIME POD representation of the item that's bound to an Actor. This POD defines the data layout
+ *  stored on the backend.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItem
@@ -64,9 +62,9 @@ struct INVENTORYSAMPLE_API FItem
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FAVVMPlayerResource.UniqueId} the POD defined by GD. WITHOUT any player mods applied.
+	// @gdemers {FDataRegistryId}. Contains details about {Base_Stats}.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 ResourceId = INDEX_NONE;
+	FString ResourceId = FString();
 
 	// @gdemers {FItemModifier.UniqueId} the POD applied by the player profile to this item. may be null.
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -77,7 +75,7 @@ struct INVENTORYSAMPLE_API FItem
  *	Class description:
  *
  *	FItemHolder is a backend POD representation of the items held. You can look at it like a bag and it's content,
- *	or a tabulation and it's items, or a NPC equipped items, etc...
+ *	or a tabulation and it's items, or a NPC equipped items, etc... This POD defines the data layout stored on the backend.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemHolder
@@ -89,19 +87,20 @@ struct INVENTORYSAMPLE_API FItemHolder
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
+	// @gdemers {FDataRegistryId}. Contains details about {MaxSlot}, {HolderSlot_Position}, {Holder_Type}.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FString ResourceId = FString();
+
 	// @gdemers {FItem.UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<int32> ItemIds;
-
-	// @gdemers {MaxSlot}, {HolderSlot_Position}, {Holder_Type}
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FString Options = FString();
 };
 
 /**
  *	Class description:
  *
- *	FActorContent is a backend POD representation of the content an Actor has ownership on.
+ *	FActorContent is a backend POD representation of the content an Actor has ownership on.  This POD defines the data layout
+ *	stored on the backend.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FActorContent

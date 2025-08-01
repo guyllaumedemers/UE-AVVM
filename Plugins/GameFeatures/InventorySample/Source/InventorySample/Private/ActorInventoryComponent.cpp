@@ -154,6 +154,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	else
 	{
 		// @gdemers using the Outer UniqueId, request the associated entry on backend {FActorContent.UniqueId}.
+		// https://miro.com/app/board/uXjVJYdFx2Y=/
 		IInventoryProvider::Execute_RequestItemsFromMicroService(Outer);
 	}
 }

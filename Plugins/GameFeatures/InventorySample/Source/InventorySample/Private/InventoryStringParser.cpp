@@ -81,7 +81,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 
 	FItemHolder NewItemHolder;
 	NewItemHolder.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
-	NewItemHolder.Options = JsonData->GetStringField(TEXT("Options"));
+	NewItemHolder.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemIds"));
 	for (const auto& JsonValue : JsonValues)
@@ -103,8 +103,8 @@ void UInventoryStringParser::ToString(const FItemHolder& NewItemHolder,
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItemHolder.UniqueId);
+	JsonData->SetStringField(TEXT("ResourceId"), NewItemHolder.ResourceId);
 	JsonData->SetArrayField(TEXT("ItemIds"), ItemIds);
-	JsonData->SetStringField(TEXT("Options"), NewItemHolder.Options);
 
 	FString JsonOutput;
 
@@ -130,7 +130,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 
 	FItem NewItem;
 	NewItem.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
-	NewItem.ResourceId = JsonData->GetIntegerField(TEXT("ResourceId"));
+	NewItem.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ModIds"));
 	for (const auto& JsonValue : JsonValues)
@@ -152,7 +152,7 @@ void UInventoryStringParser::ToString(const FItem& NewItem,
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItem.UniqueId);
-	JsonData->SetNumberField(TEXT("ResourceId"), NewItem.ResourceId);
+	JsonData->SetStringField(TEXT("ResourceId"), NewItem.ResourceId);
 	JsonData->SetArrayField(TEXT("ModIds"), ModIds);
 
 	FString JsonOutput;
@@ -179,8 +179,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 
 	FItemModifier NewItemModifier;
 	NewItemModifier.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
-	NewItemModifier.ModifierId = JsonData->GetStringField(TEXT("ModifierId"));
-	NewItemModifier.Options = JsonData->GetStringField(TEXT("Options"));
+	NewItemModifier.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 
 	OutItemModifier = NewItemModifier;
 }
@@ -190,8 +189,7 @@ void UInventoryStringParser::ToString(const FItemModifier& NewItemModifier,
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItemModifier.UniqueId);
-	JsonData->SetStringField(TEXT("ModifierId"), NewItemModifier.ModifierId);
-	JsonData->SetStringField(TEXT("Options"), NewItemModifier.Options);
+	JsonData->SetStringField(TEXT("ResourceId"), NewItemModifier.ResourceId);
 
 	FString JsonOutput;
 
