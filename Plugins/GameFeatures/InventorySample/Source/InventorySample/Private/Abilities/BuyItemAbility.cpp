@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Abilities/BuyItemAbility.h"
 
-#include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "InventorySample.h"
 
 void UBuyItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                     const FGameplayAbilitySpec& Spec)
@@ -39,7 +39,7 @@ void UBuyItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -64,7 +64,7 @@ void UBuyItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -103,7 +103,7 @@ void UBuyItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),

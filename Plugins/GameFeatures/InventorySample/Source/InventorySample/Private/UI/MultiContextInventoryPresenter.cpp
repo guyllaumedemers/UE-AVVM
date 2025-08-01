@@ -68,7 +68,7 @@ void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UMultiContextInventoryPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Target.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(Target.Get());
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UMultiContextInventoryPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -96,7 +96,7 @@ void UMultiContextInventoryPresenter::StopPresenting()
 		OwnerASC.Reset();
 	}
 
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(Target.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(Target.Get());
 	if (IsValid(LocalPlayer))
 	{
 		IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());

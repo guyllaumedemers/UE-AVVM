@@ -19,10 +19,10 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 
-#include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
+#include "InventorySample.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "Data/ItemDefinitionDataAsset.h"
@@ -64,7 +64,7 @@ void UActorInventoryComponent::BeginPlay()
 
 	OwningOuter = Outer;
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -97,7 +97,7 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -139,7 +139,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Requesting Items Type \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -153,6 +153,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	}
 	else
 	{
+		// @gdemers request using the Outer UniqueId the associated entry on backend {FActorContent.UniqueId}.
 		IInventoryProvider::Execute_RequestItemsFromMicroService(Outer);
 	}
 }
@@ -185,7 +186,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 
 		if (!ItemAsset->CanAccessItem(ComponentStateTags, ComponentStateTags))
 		{
-			UE_LOG(LogGameplay,
+			UE_LOG(LogInventorySample,
 			       Log,
 			       TEXT("Executed from \"%s\". Failed to Meet \"%s\" Requirements."),
 			       IsServerOrClientString,
@@ -194,7 +195,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 			continue;
 		}
 
-		UE_LOG(LogGameplay,
+		UE_LOG(LogInventorySample,
 		       Log,
 		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
 		       IsServerOrClientString,
@@ -347,7 +348,7 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 		SV = TEXT("has decreased!");
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Item Collection modified on Outer \"%s\"! Collection %s"),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -386,7 +387,7 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 		}
 
 		const AActor* NewOuter = NewActorInventoryComponent->OwningOuter.Get();
-		UE_LOG(LogGameplay,
+		UE_LOG(LogInventorySample,
 		       Log,
 		       TEXT("Executed from \"%s\". Executing Spawn Item Request for \"%s\" on Outer \"%s\"!"),
 		       UAVVMGameplayUtils::PrintNetSource(NewOuter).GetData(),
@@ -405,7 +406,7 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 	const bool bHasPendingRequest = QueueingMechanism->PushDeferredItem(NewItem, NewRequest);
 	if (bHasPendingRequest)
 	{
-		UE_LOG(LogGameplay,
+		UE_LOG(LogInventorySample,
 		       Log,
 		       TEXT("Executed from \"%s\". Spawn Item Request for \"%s\" was Deferred on Outer \"%s\"!"),
 		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),

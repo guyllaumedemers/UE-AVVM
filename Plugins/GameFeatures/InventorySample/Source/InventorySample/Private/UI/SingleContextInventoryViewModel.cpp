@@ -23,21 +23,16 @@
 #include "UI/ItemObjectViewModel.h"
 
 USingleContextInventoryViewModel* USingleContextInventoryViewModel::Make(const TArray<UItemObject*>& NewItems,
-                                                                         ULocalPlayer* NewLocalPlayer)
+                                                                         UObject* NewOuter)
 {
 	USingleContextInventoryViewModel* NewViewModel = nullptr;
 	if (!NewItems.IsEmpty())
 	{
-		NewViewModel = NewObject<USingleContextInventoryViewModel>(NewLocalPlayer);
+		NewViewModel = NewObject<USingleContextInventoryViewModel>(NewOuter);
 		NewViewModel->Init(NewItems);
 	}
 
 	return NewViewModel;
-}
-
-void USingleContextInventoryViewModel::Process(const UItemObjectViewModel* NewModifiedItem)
-{
-	// TODO @gdemers Define how the status change of an item affect the inventory state.
 }
 
 void USingleContextInventoryViewModel::Init(const TArray<UItemObject*>& NewItems)
@@ -57,16 +52,18 @@ void USingleContextInventoryViewModel::Init(const TArray<UItemObject*>& NewItems
 	}
 
 	// TODO @gdemers object placement would only be configured for outer referencing a local player. in the case of a shop displaying
-	// content, the current default state would be to display items based on ordering defined in it's data asset.
-	// May require Fix later!
+	// content, the current default state would be to display items based on ordering defined in it's data asset. May require Fix later!
 	const auto* OwningLocalPlayer = GetTypedOuter<ULocalPlayer>();
 	auto* Subsystem = UItemPlacementManager::GetSubsystem(OwningLocalPlayer);
 	if (IsValid(Subsystem))
 	{
-		// TODO @gdemers We arent yet defining the context used to retrieve position information from. The owner of the ViewModel
-		// should provide the unique id required for requesting backend information or caching a new context.
 		Subsystem->SetupItemPlacements(ItemViewModels);
 	}
+}
+
+void USingleContextInventoryViewModel::Process(const UItemObjectViewModel* NewModifiedItem)
+{
+	// TODO @gdemers Define how the status change of an item affect the inventory state.
 }
 
 void USingleContextInventoryViewModel::OnItemChanged(const UItemObjectViewModel* NewModifiedItem)

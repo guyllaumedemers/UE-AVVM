@@ -46,13 +46,16 @@ AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogOnline, Log, All);
  *	Here's an exhaustive list of relevant types available in the plugin for your everyday use. Note that we expect
  *	the usage of a Parser object to properly convert from FString->YourType and to YourType->FString.
  *
- *		Types :
+*		Types :
  *
+ *			* FAVVMCurrency
  *			* FAVVMPlayerWallet
+ *			* FAVVMPlayerResource
+ *			* FAVVMPlayerChallenge
+ *			* FAVVMPlayerPreset
  *			* FAVVMPlayerProfile
+ *			* FAVVMPlayerAccount
  *			* FAVVMHostConfiguration
- *			* FAVVMRuntimeResource
- *			* FAVVMRuntimeChallenge
  *			* FAVVMPlayerConnection
  *			* FAVVMParty
  *			* FAVVMPlayerRequest

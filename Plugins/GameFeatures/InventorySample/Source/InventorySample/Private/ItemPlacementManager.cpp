@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "ItemPlacementManager.h"
 
+#include "AVVMIOUtils.h"
+#include "InventorySample.h"
 #include "UI/ItemObjectViewModel.h"
 
 bool UItemPlacementManager::ShouldCreateSubsystem(UObject* Outer) const
@@ -38,6 +40,44 @@ bool UItemPlacementManager::ShouldCreateSubsystem(UObject* Outer) const
 	{
 		return false;
 	}
+}
+
+void UItemPlacementManager::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	const auto* Outer = GetTypedOuter<ULocalPlayer>();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogInventorySample,
+	       Log,
+	       TEXT("Initializing \"%s\" on Outer \"%s\"."),
+	       *UItemPlacementManager::StaticClass()->GetName(),
+	       *Outer->GetName());
+
+	OwningOuter = Outer;
+}
+
+void UItemPlacementManager::Deinitialize()
+{
+	Super::Deinitialize();
+
+	const ULocalPlayer* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogInventorySample,
+	       Log,
+	       TEXT("Deinitializing \"%s\" on Outer \"%s\"."),
+	       *UItemPlacementManager::StaticClass()->GetName(),
+	       *Outer->GetName());
+
+	OwningOuter.Reset();
 }
 
 UItemPlacementManager* UItemPlacementManager::GetSubsystem(const ULocalPlayer* NewLocalPlayer)
@@ -63,16 +103,17 @@ void UItemPlacementManager::SetupItemPlacements(const TArray<UItemObjectViewMode
 
 FString UItemPlacementManager::GetFileName() const
 {
-	const auto* OwningOuter = GetTypedOuter<ULocalPlayer>();
+	const auto* Outer = OwningOuter.Get();
 
 	FStringFormatNamedArguments Args;
-	if (IsValid(OwningOuter))
+	if (IsValid(Outer))
 	{
 		Args.Add(TEXT("ProjectUserConfigFilename"), GetProjectUserConfigFilename());
-		Args.Add(TEXT("PlayerId"), OwningOuter->GetName());
+		Args.Add(TEXT("PlayerId"), Outer->GetName());
+		return FString::Format(TEXT("{ProjectUserConfigFilename}/{PlayerId}_InventoryPreset.ini"), Args);
 	}
 
-	return IsValid(OwningOuter) ? FString::Format(TEXT("{ProjectUserConfigFilename}/{PlayerId}_InventoryPreset.ini"), Args) : TEXT("Unknown");
+	return TEXT("Unknown");
 }
 
 bool UItemPlacementManager::DoesRequireBackendSync() const
@@ -82,6 +123,8 @@ bool UItemPlacementManager::DoesRequireBackendSync() const
 
 void UItemPlacementManager::SyncBackend(const FOnBackendSyncCompleted& Callback)
 {
+	// TODO @gdemers backend api should require passing in the function signature the id of the inventory
+	// specific to the owning local player we are trying to configure here!
 	Callback.Broadcast(true, TEXT(""));
 }
 
@@ -89,96 +132,25 @@ void UItemPlacementManager::OnBackendSyncComplete(const bool bWasSuccess,
                                                   const FString& NewFileValue,
                                                   TArray<UItemObjectViewModel*> NewViewModels)
 {
-	const FString NewFile = GetFileName();
+	const FString NewFileName = GetFileName();
 
-	if (bWasSuccess)
-	{
-		ModifyFile(NewFile, NewFileValue);
-	}
-
-	FString OutFileValue;
-	GetFile(NewFile, OutFileValue);
-
-	if (OutFileValue.IsEmpty())
-	{
-		const FString Tokens;
-		ensureAlwaysMsgf(WriteFileOnDisk(NewFile, Tokens),
-		                 TEXT("Failed to write to file \"%s\"."),
-		                 *NewFile);
-
-		RefreshTokens(Tokens, NewViewModels);
-	}
-	else
-	{
-		RefreshTokens(OutFileValue, NewViewModels);
-	}
-}
-
-void UItemPlacementManager::GetFile(const FString& NewFile,
-                                    FString& OutValue)
-{
-	const bool bDoesFileExist = DoesFileOnDiskExist(NewFile);
-	if (!bDoesFileExist)
-	{
-		const FString NewDir = GetDirFromFile(NewFile);
-		ensureAlwaysMsgf(CreateFileDirOnDisk(NewDir),
-		                 TEXT("Failed to create file \"%s\"."),
-		                 *NewFile);
-	}
-
-	ensureAlwaysMsgf(ReadFileOnDisk(NewFile, OutValue),
-	                 TEXT("Failed to read from file \"%s\"."),
-	                 *NewFile);
-}
-
-FString UItemPlacementManager::GetDirFromFile(const FString& NewFile) const
-{
-	return TEXT("");
-}
-
-void UItemPlacementManager::ModifyFile(const FString& NewFile,
-                                       const FString& NewFileValue) const
-{
-	const bool bDoesFileExist = DoesFileOnDiskExist(NewFile);
-	if (!bDoesFileExist)
-	{
-		const FString NewDir = GetDirFromFile(NewFile);
-		ensureAlwaysMsgf(CreateFileDirOnDisk(NewDir),
-		                 TEXT("Failed to create file \"%s\"."),
-		                 *NewFile);
-	}
-
-	ensureAlwaysMsgf(WriteFileOnDisk(NewFile, NewFileValue),
-	                 TEXT("Failed to write to file \"%s\"."),
-	                 *NewFile);
-}
-
-bool UItemPlacementManager::DoesFileOnDiskExist(const FString& NewFile) const
-{
-	return IPlatformFile::GetPlatformPhysical().FileExists(*NewFile);
-}
-
-bool UItemPlacementManager::CreateFileDirOnDisk(const FString& NewDir) const
-{
-	return IPlatformFile::GetPlatformPhysical().CreateDirectory(*NewDir);
-}
-
-bool UItemPlacementManager::ReadFileOnDisk(const FString& NewFile,
-                                           FString& OutValue) const
-{
-	return FFileHelper::LoadFileToString(OutValue,
-	                                     &IPlatformFile::GetPlatformPhysical(),
-	                                     *NewFile);
-}
-
-bool UItemPlacementManager::WriteFileOnDisk(const FString& NewFile,
-                                            const FString& NewValue) const
-{
-	return FFileHelper::SaveStringToFile(NewValue, *NewFile);
+	FOnGetSetFileFromDiskComplete Callback;
+	Callback.AddUObject(this, &UItemPlacementManager::RefreshTokens, NewViewModels);
+	UAVVMIOUtils::GetSetDataFromDisk(NewFileName, NewFileValue, bWasSuccess, Callback);
 }
 
 void UItemPlacementManager::RefreshTokens(const FString& NewValue,
-                                          const TArray<UItemObjectViewModel*>& NewViewModels)
+                                          TArray<UItemObjectViewModel*> NewViewModels)
 {
-	// TODO @gdemers refresh TokenGroups. NewValue return {Tag}{{A.Id},{B.Id}, etc...}
+	const auto* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	UE_LOG(LogInventorySample,
+	       Log,
+	       TEXT("Refreshing Tokens for player \"%s\". New Value : \"%s\"."),
+	       *Outer->GetName(),
+	       *NewValue);
 }

@@ -19,9 +19,9 @@
 //SOFTWARE.
 #include "Abilities/PlayerToggleInventoryAbility.h"
 
-#include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
+#include "InventorySample.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "GameFramework/PlayerState.h"
@@ -43,7 +43,7 @@ void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInf
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -68,7 +68,7 @@ void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorI
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -116,7 +116,7 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),

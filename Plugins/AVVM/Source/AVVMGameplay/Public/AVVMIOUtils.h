@@ -21,39 +21,34 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
-#include "MVVMViewModelBase.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "SingleContextInventoryViewModel.generated.h"
+#include "AVVMIOUtils.generated.h"
 
-class UItemObject;
-class UItemObjectViewModel;
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnGetSetFileFromDiskComplete, const FString&);
 
 /**
  *	Class description:
  *
- *	USingleContextInventoryViewModel is a view model type that store data about the owner items.
+ *	UAVVMIO is a blueprint function library that interface with Unreal systems to safely read/write to disk.
  */
 UCLASS()
-class INVENTORYSAMPLE_API USingleContextInventoryViewModel : public UMVVMViewModelBase,
-                                                             public IAVVMViewModelFNameHelper
+class AVVMGAMEPLAY_API UAVVMIOUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
+	static void GetSetDataFromDisk(const FString& NewFileName,
+	                               const FString& NewValue,
+	                               const bool bShouldOverride,
+	                               const FOnGetSetFileFromDiskComplete& Callback);
+
 	UFUNCTION(BlueprintCallable)
-	static USingleContextInventoryViewModel* Make(const TArray<UItemObject*>& NewItems,
-	                                              UObject* NewOuter);
+	static FString GetDirFromFile(const FString& NewFileName);
 
-	virtual FName GetViewModelFName() const override { return TEXT("USingleContextInventoryViewModel"); }
+	UFUNCTION(BlueprintCallable)
+	static void GetFile(const FString& NewFileName, FString& OutValue);
 
-protected:
-	void Init(const TArray<UItemObject*>& NewItems);
-	virtual void Process(const UItemObjectViewModel* NewModifiedItem);
-
-	UFUNCTION()
-	void OnItemChanged(const UItemObjectViewModel* NewModifiedItem);
-
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<TObjectPtr<UItemObjectViewModel>> ItemViewModels;
+	UFUNCTION(BlueprintCallable)
+	static void ModifyFile(const FString& NewFileName, const FString& NewValue);
 };

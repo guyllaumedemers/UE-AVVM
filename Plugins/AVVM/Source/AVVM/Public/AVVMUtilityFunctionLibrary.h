@@ -56,6 +56,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
 	static ULocalPlayer* GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
+	static ULocalPlayer* GetTargetLocalPlayer(const UObject* WorldContextObject);
 };
 
 template <typename T>

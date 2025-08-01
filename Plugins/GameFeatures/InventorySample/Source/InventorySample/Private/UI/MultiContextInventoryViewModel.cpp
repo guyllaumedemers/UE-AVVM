@@ -31,21 +31,27 @@ void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNot
 		return;
 	}
 
-	const AActor* InstigatorPlayerState = HandshakePayload->Instigator.Get();
-	const auto* InstigatorInventoryComponent = UActorInventoryComponent::GetActorComponent(InstigatorPlayerState);
+	const AActor* Instigator = HandshakePayload->Instigator.Get();
+	const auto* InstigatorInventoryComponent = UActorInventoryComponent::GetActorComponent(Instigator);
+
 	if (IsValid(InstigatorInventoryComponent))
 	{
-		ULocalPlayer* InstigatorLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(InstigatorPlayerState);
-		auto* NewSrc = USingleContextInventoryViewModel::Make(InstigatorInventoryComponent->GetItems(), InstigatorLocalPlayer);
+		ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(Instigator);
+		auto* NewOuter = IsValid(LocalPlayer) ? Cast<UObject>(LocalPlayer) : Cast<UObject>(this);
+
+		auto* NewSrc = USingleContextInventoryViewModel::Make(InstigatorInventoryComponent->GetItems(), NewOuter);
 		UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
 	}
 
-	const AActor* TargetPlayerState = HandshakePayload->Instigator.Get();
+	const AActor* Target = HandshakePayload->Instigator.Get();
 	const auto* TargetInventoryComponent = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
-	if (IsValid(TargetPlayerState))
+
+	if (IsValid(Target))
 	{
-		ULocalPlayer* TargetLocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(TargetPlayerState);
-		auto* NewDest = USingleContextInventoryViewModel::Make(TargetInventoryComponent->GetItems(), TargetLocalPlayer);
+		ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(Instigator);
+		auto* NewOuter = IsValid(LocalPlayer) ? Cast<UObject>(LocalPlayer) : Cast<UObject>(this);
+
+		auto* NewDest = USingleContextInventoryViewModel::Make(TargetInventoryComponent->GetItems(), NewOuter);
 		UE_MVVM_SET_PROPERTY_VALUE(Dest, NewDest);
 	}
 }

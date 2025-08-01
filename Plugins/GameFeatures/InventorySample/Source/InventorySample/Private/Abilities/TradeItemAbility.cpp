@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "Abilities/TradeItemAbility.h"
 
-#include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "InventorySample.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 
@@ -41,7 +41,7 @@ void UTradeItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -66,7 +66,7 @@ void UTradeItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorIn
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -130,7 +130,7 @@ void UTradeItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),

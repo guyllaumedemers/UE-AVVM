@@ -50,16 +50,10 @@ ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(const UOb
 		return nullptr;
 	}
 
-	auto* PlayerState = Cast<APlayerState>(WorldContextObject);
-	if (IsValid(PlayerState))
+	ULocalPlayer* TargetLocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(WorldContextObject);
+	if (IsValid(TargetLocalPlayer))
 	{
-		return UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(PlayerState->GetPlayerController());
-	}
-
-	auto* PC = Cast<APlayerController>(WorldContextObject);
-	if (IsValid(PC))
-	{
-		return PC->GetLocalPlayer();
+		return TargetLocalPlayer;
 	}
 
 	const UWorld* World = WorldContextObject->GetWorld();
@@ -77,4 +71,21 @@ ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(const UOb
 	{
 		return nullptr;
 	}
+}
+
+ULocalPlayer* UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(const UObject* WorldContextObject)
+{
+	auto* PlayerState = Cast<APlayerState>(WorldContextObject);
+	if (IsValid(PlayerState))
+	{
+		return UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(PlayerState->GetPlayerController());
+	}
+
+	auto* PC = Cast<APlayerController>(WorldContextObject);
+	if (IsValid(PC))
+	{
+		return PC->GetLocalPlayer();
+	}
+
+	return nullptr;
 }

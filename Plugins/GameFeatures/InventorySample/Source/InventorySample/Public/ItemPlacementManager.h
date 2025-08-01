@@ -43,6 +43,8 @@ class UItemPlacementManager : public ULocalPlayerSubsystem
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	UFUNCTION(BlueprintCallable)
 	static UItemPlacementManager* GetSubsystem(const ULocalPlayer* NewLocalPlayer);
@@ -51,28 +53,24 @@ public:
 	void SetupItemPlacements(const TArray<UItemObjectViewModel*>& NewViewModels);
 
 protected:
+	virtual FString GetFileName() const;
 	virtual bool DoesRequireBackendSync() const;
 	virtual void SyncBackend(const FOnBackendSyncCompleted& Callback);
 
 	UFUNCTION()
-	void OnBackendSyncComplete(const bool bWasSuccess, const FString& NewFileValue, TArray<UItemObjectViewModel*> NewViewModels);
+	void OnBackendSyncComplete(const bool bWasSuccess,
+	                           const FString& NewFileValue,
+	                           TArray<UItemObjectViewModel*> NewViewModels);
 
-	virtual FString GetFileName() const;
+private:
+	void RefreshTokens(const FString& NewValue,
+	                   TArray<UItemObjectViewModel*> NewViewModels);
 
 	struct FItemGroup
 	{
 		TArray<TWeakObjectPtr<const UItemObjectViewModel>> Items;
 	};
 
+	TWeakObjectPtr<const ULocalPlayer> OwningOuter = nullptr;
 	TMap<FGameplayTag, FItemGroup> TokenGroups;
-
-private:
-	void GetFile(const FString& NewFile, FString& OutValue);
-	FString GetDirFromFile(const FString& NewFile) const;
-	void ModifyFile(const FString& NewFile, const FString& NewFileValue) const;
-	bool DoesFileOnDiskExist(const FString& NewFile) const;
-	bool CreateFileDirOnDisk(const FString& NewDir) const;
-	bool ReadFileOnDisk(const FString& NewFile, FString& OutValue) const;
-	bool WriteFileOnDisk(const FString& NewFile, const FString& NewValue) const;
-	void RefreshTokens(const FString& NewValue, const TArray<UItemObjectViewModel*>& NewViewModels);
 };
