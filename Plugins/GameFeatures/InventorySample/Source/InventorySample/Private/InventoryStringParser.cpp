@@ -20,6 +20,7 @@
 #include "InventoryStringParser.h"
 
 #include "Backend/ActorContent.h"
+#include "Backend/ActorContentProxy.h"
 
 void UInventoryStringParser::FromString(const FString& NewPayload,
                                         FActorContent& OutActorContent) const
@@ -185,6 +186,187 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 }
 
 void UInventoryStringParser::ToString(const FItemModifier& NewItemModifier,
+                                      FString& OutFormat) const
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewItemModifier.UniqueId);
+	JsonData->SetStringField(TEXT("ResourceId"), NewItemModifier.ResourceId);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
+}
+
+void UInventoryStringParser::FromString(const FString& NewPayload,
+                                        FActorContentProxy& OutActorContent) const
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FActorContentProxy NewActorContentProxy;
+	NewActorContentProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+
+	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemHolderValues"));
+	for (const auto& JsonValue : JsonValues)
+	{
+		NewActorContentProxy.ItemHolderValues.Add(JsonValue->AsString());
+	}
+
+	OutActorContent = NewActorContentProxy;
+}
+
+void UInventoryStringParser::ToString(const FActorContentProxy& NewActorContent,
+                                      FString& OutFormat) const
+{
+	TArray<TSharedPtr<FJsonValue>> ItemHolderValues;
+	for (const FString& ItemHolderValue : NewActorContent.ItemHolderValues)
+	{
+		ItemHolderValues.Add(MakeShareable(new FJsonValueString(ItemHolderValue)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewActorContent.UniqueId);
+	JsonData->SetArrayField(TEXT("ItemHolderValues"), ItemHolderValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
+}
+
+void UInventoryStringParser::FromString(const FString& NewPayload,
+                                        FItemHolderProxy& OutItemHolder) const
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FItemHolderProxy NewItemHolderProxy;
+	NewItemHolderProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	NewItemHolderProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
+
+	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemValues"));
+	for (const auto& JsonValue : JsonValues)
+	{
+		NewItemHolderProxy.ItemValues.Add(JsonValue->AsString());
+	}
+
+	OutItemHolder = NewItemHolderProxy;
+}
+
+void UInventoryStringParser::ToString(const FItemHolderProxy& NewItemHolder,
+                                      FString& OutFormat) const
+{
+	TArray<TSharedPtr<FJsonValue>> ItemValues;
+	for (const FString& ItemValue : NewItemHolder.ItemValues)
+	{
+		ItemValues.Add(MakeShareable(new FJsonValueString(ItemValue)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewItemHolder.UniqueId);
+	JsonData->SetStringField(TEXT("ResourceId"), NewItemHolder.ResourceId);
+	JsonData->SetArrayField(TEXT("ItemValues"), ItemValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
+}
+
+void UInventoryStringParser::FromString(const FString& NewPayload,
+                                        FItemProxy& OutItem) const
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FItemProxy NewItemProxy;
+	NewItemProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	NewItemProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
+
+	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ModValues"));
+	for (const auto& JsonValue : JsonValues)
+	{
+		NewItemProxy.ModValues.Add(JsonValue->AsString());
+	}
+
+	OutItem = NewItemProxy;
+}
+
+void UInventoryStringParser::ToString(const FItemProxy& NewItem,
+                                      FString& OutFormat) const
+{
+	TArray<TSharedPtr<FJsonValue>> ModValues;
+	for (const FString& ModValue : NewItem.ModValues)
+	{
+		ModValues.Add(MakeShareable(new FJsonValueString(ModValue)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewItem.UniqueId);
+	JsonData->SetStringField(TEXT("ResourceId"), NewItem.ResourceId);
+	JsonData->SetArrayField(TEXT("ModValues"), ModValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
+}
+
+void UInventoryStringParser::FromString(const FString& NewPayload,
+                                        FItemModifierProxy& OutItemModifier) const
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FItemModifierProxy NewItemModifierProxy;
+	NewItemModifierProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	NewItemModifierProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
+
+	OutItemModifier = NewItemModifierProxy;
+}
+
+void UInventoryStringParser::ToString(const FItemModifierProxy& NewItemModifier,
                                       FString& OutFormat) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);

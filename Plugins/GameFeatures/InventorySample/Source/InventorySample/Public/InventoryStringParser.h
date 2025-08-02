@@ -25,10 +25,15 @@
 
 #include "InventoryStringParser.generated.h"
 
+struct FItemModifierProxy;
 struct FActorContent;
+struct FActorContentProxy;
 struct FItem;
+struct FItemProxy;
 struct FItemHolder;
+struct FItemHolderProxy;
 struct FItemModifier;
+struct FItemModifierPRoxy;
 
 /**
 *	Class description:
@@ -53,4 +58,16 @@ public:
 
 	void FromString(const FString& NewPayload, FItemModifier& OutItemModifier) const;
 	void ToString(const FItemModifier& NewItemModifier, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FActorContentProxy& OutActorContent) const;
+	void ToString(const FActorContentProxy& NewActorContent, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FItemHolderProxy& OutItemHolder) const;
+	void ToString(const FItemHolderProxy& NewItemHolder, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FItemProxy& OutItem) const;
+	void ToString(const FItemProxy& NewItem, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FItemModifierProxy& OutItemModifier) const;
+	void ToString(const FItemModifierProxy& NewItemModifier, FString& OutFormat) const;
 };

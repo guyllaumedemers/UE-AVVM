@@ -35,6 +35,10 @@ struct INVENTORYSAMPLE_API FItemModifierProxy
 
 	bool operator==(const FItemModifierProxy& Rhs) const;
 
+	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
+	UPROPERTY(Transient, BlueprintType)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString ResourceId = FString();
@@ -51,6 +55,10 @@ struct INVENTORYSAMPLE_API FItemProxy
 	GENERATED_BODY()
 
 	bool operator==(const FItemProxy& Rhs) const;
+
+	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
+	UPROPERTY(Transient, BlueprintType)
+	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -73,6 +81,10 @@ struct INVENTORYSAMPLE_API FItemHolderProxy
 
 	bool operator==(const FItemHolderProxy& Rhs) const;
 
+	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
+	UPROPERTY(Transient, BlueprintType)
+	int32 UniqueId = INDEX_NONE;
+
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString ResourceId = FString();
@@ -93,6 +105,10 @@ struct INVENTORYSAMPLE_API FActorContentProxy
 	GENERATED_BODY()
 
 	bool operator==(const FActorContentProxy& Rhs) const;
+
+	// @gdemers UniqueId here is used to retrieve the entry on the backend and apply ordering changes to children based on local array ordering.
+	UPROPERTY(Transient, BlueprintType)
+	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers TArray{FItemHolderProxy}
 	UPROPERTY(Transient, BlueprintType)
