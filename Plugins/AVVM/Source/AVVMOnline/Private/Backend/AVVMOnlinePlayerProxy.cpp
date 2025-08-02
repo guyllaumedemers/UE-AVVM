@@ -29,6 +29,12 @@ bool FAVVMPlayerAccountProxy::operator==(const FAVVMPlayerAccountProxy& Rhs) con
 			&& (Presets == Rhs.Presets);
 }
 
+bool FAVVMPlayerWalletProxy::operator==(const FAVVMPlayerWalletProxy& Rhs) const
+{
+	return (UniqueId == Rhs.UniqueId)
+			&& (IrlMoneys == Rhs.IrlMoneys);
+}
+
 bool FAVVMPlayerProfileProxy::operator==(const FAVVMPlayerProfileProxy& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
@@ -62,4 +68,11 @@ bool FAVVMPlayerConnectionProxy::operator==(const FAVVMPlayerConnectionProxy& Rh
 			&& (UniqueNetId.Equals(Rhs.UniqueNetId))
 			&& (PlayerStatus == Rhs.PlayerStatus)
 			&& (Profile.Equals(Rhs.Profile));
+}
+
+bool FAVVMHostConfigurationProxy::operator==(const FAVVMHostConfigurationProxy& Rhs) const
+{
+	return (UniqueId == Rhs.UniqueId)
+			&& (GameMode.Equals(Rhs.GameMode))
+			&& (Options.Equals(Rhs.Options));
 }

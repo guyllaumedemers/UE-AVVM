@@ -22,7 +22,7 @@
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMSampleRuntimeModule.h"
-#include "Backend/AVVMOnlinePlayer.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/GameMode.h"
 #include "Party/AVVMHostConfigurationViewModel.h"
 
@@ -65,7 +65,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted);
 
-	const auto* ModifiedHostConfiguration = Payload.GetPtr<FAVVMHostConfiguration>();
+	const auto* ModifiedHostConfiguration = Payload.GetPtr<FAVVMHostConfigurationProxy>();
 	if (ModifiedHostConfiguration != nullptr)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Commit Modified Host Configuration Request. In-Progress..."));
@@ -74,7 +74,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 	else
 	{
 		UE_LOG(LogOnline, Log, TEXT("Commit Empty Host Configuration Request. In-Progress..."));
-		OnlineInterface->CommitModifiedHostConfiguration(FAVVMHostConfiguration{}, Callback);
+		OnlineInterface->CommitModifiedHostConfiguration(FAVVMHostConfigurationProxy{}, Callback);
 	}
 }
 

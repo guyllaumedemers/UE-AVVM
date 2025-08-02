@@ -26,7 +26,7 @@
 
 #include "AVVMOnlineInterface.generated.h"
 
-struct FAVVMHostConfiguration;
+struct FAVVMHostConfigurationProxy;
 struct FAVVMPlayerLoginContext;
 struct FAVVMPartyProxy;
 struct FAVVMPlayerChallenge;
@@ -175,7 +175,7 @@ public:
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}
 
-	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfiguration& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
+	virtual void CommitModifiedHostConfiguration(const FAVVMHostConfigurationProxy& ConfigurationContext, FAVVMOnlineResquestDelegate Callback)
 	{
 		AVVM_EXECUTE_ONLINE_SCOPED_DEBUGLOG(Callback);
 	}

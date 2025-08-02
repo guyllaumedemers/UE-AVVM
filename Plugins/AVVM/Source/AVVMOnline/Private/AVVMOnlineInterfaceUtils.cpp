@@ -106,7 +106,7 @@ FUniqueNetIdPtr UAVVMOnlineInterfaceUtils::GetUniqueNetIdPtr(const ULocalPlayer*
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMPlayerWallet>(Payload);
+	return SerializeToString<FAVVMPlayerWalletProxy>(Payload);
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -116,7 +116,7 @@ FString UAVVMOnlineInterfaceUtils::SerializePlayerProfile(const TInstancedStruct
 
 FString UAVVMOnlineInterfaceUtils::SerializeHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMHostConfiguration>(Payload);
+	return SerializeToString<FAVVMHostConfigurationProxy>(Payload);
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializeParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -141,7 +141,7 @@ FString UAVVMOnlineInterfaceUtils::SerializePlayerResource(const TInstancedStruc
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerWallet(const FString& Payload)
 {
-	return DeserializeString<FAVVMPlayerWallet>(Payload);
+	return DeserializeString<FAVVMPlayerWalletProxy>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerProfile(const FString& Payload)
@@ -151,7 +151,7 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerP
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetHostConfiguration(const FString& Payload)
 {
-	return DeserializeString<FAVVMHostConfiguration>(Payload);
+	return DeserializeString<FAVVMHostConfigurationProxy>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetParty(const FString& Payload)

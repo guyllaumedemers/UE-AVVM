@@ -27,6 +27,7 @@
 
 struct FAVVMCurrency;
 struct FAVVMHostConfiguration;
+struct FAVVMHostConfigurationProxy;
 struct FAVVMParty;
 struct FAVVMPartyProxy;
 struct FAVVMPlayerAccount;
@@ -41,6 +42,7 @@ struct FAVVMPlayerProfile;
 struct FAVVMPlayerProfileProxy;
 struct FAVVMPlayerResource;
 struct FAVVMPlayerWallet;
+struct FAVVMPlayerWalletProxy;
 struct FAVVMStringPayload;
 
 /**
@@ -103,6 +105,9 @@ public:
 	void FromString(const FString& NewPayload, FAVVMPlayerAccountProxy& OutPlayerAccountProxy) const;
 	void ToString(const FAVVMPlayerAccountProxy& NewPlayerAccountProxy, FString& OutFormat) const;
 
+	void FromString(const FString& NewPayload, FAVVMPlayerWalletProxy& OutPlayerWalletProxy) const;
+	void ToString(const FAVVMPlayerWalletProxy& NewPlayerWalletProxy, FString& OutFormat) const;
+
 	void FromString(const FString& NewPayload, FAVVMPlayerProfileProxy& OutPlayerProfileProxy) const;
 	void ToString(const FAVVMPlayerProfileProxy& NewPlayerProfileProxy, FString& OutFormat) const;
 
@@ -120,4 +125,7 @@ public:
 
 	void FromString(const FString& NewPayload, FAVVMPlayerConnectionProxy& OutPlayerConnectionProxy) const;
 	void ToString(const FAVVMPlayerConnectionProxy& NewPlayerConnectionProxy, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMHostConfigurationProxy& OutHostConfigurationProxy) const;
+	void ToString(const FAVVMHostConfigurationProxy& NewHostConfigurationProxy, FString& OutFormat) const;
 };

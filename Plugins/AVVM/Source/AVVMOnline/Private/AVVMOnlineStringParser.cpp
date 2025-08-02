@@ -557,7 +557,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	NewParty.PartyId = JsonData->GetStringField(TEXT("PartyId"));
 	NewParty.RegionId = JsonData->GetIntegerField(TEXT("RegionId"));
 	NewParty.DistrictId = JsonData->GetIntegerField(TEXT("DistrictId"));
-	NewParty.HostConfiguration = JsonData->GetStringField(TEXT("HostConfiguration"));
+	NewParty.HostConfigurationId = JsonData->GetIntegerField(TEXT("HostConfigurationId"));
 
 	TArray<TSharedPtr<FJsonValue>> PlayerConnectionIds = JsonData->GetArrayField(TEXT("PlayerConnectionIds"));
 	for (const auto& PlayerConnectionId : PlayerConnectionIds)
@@ -582,7 +582,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMParty& NewParty,
 	JsonData->SetStringField(TEXT("PartyId"), NewParty.PartyId);
 	JsonData->SetNumberField(TEXT("RegionId"), NewParty.RegionId);
 	JsonData->SetNumberField(TEXT("DistrictId"), NewParty.DistrictId);
-	JsonData->SetStringField(TEXT("HostConfiguration"), NewParty.HostConfiguration);
+	JsonData->SetNumberField(TEXT("HostConfigurationId"), NewParty.HostConfigurationId);
 	JsonData->SetArrayField(TEXT("PlayerConnections"), PlayerConnectionIds);
 
 	FString JsonOutput;
@@ -696,6 +696,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	}
 
 	FAVVMHostConfiguration NewHostConfiguration;
+	NewHostConfiguration.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewHostConfiguration.GameMode = JsonData->GetStringField(TEXT("GameMode"));
 	NewHostConfiguration.Options = JsonData->GetStringField(TEXT("Options"));
 
@@ -706,6 +707,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMHostConfiguration& NewHostConf
                                        FString& OutFormat) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewHostConfiguration.UniqueId);
 	JsonData->SetStringField(TEXT("GameMode"), NewHostConfiguration.GameMode);
 	JsonData->SetStringField(TEXT("Options"), NewHostConfiguration.Options);
 
@@ -726,6 +728,16 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerAccountProxy& NewPlayerAccountProxy,
+                                       FString& OutFormat) const
+{
+}
+
+void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
+                                         FAVVMPlayerWalletProxy& OutPlayerWalletProxy) const
+{
+}
+
+void UAVVMOnlineStringParser::ToString(const FAVVMPlayerWalletProxy& NewPlayerWalletProxy,
                                        FString& OutFormat) const
 {
 }
@@ -786,6 +798,16 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerConnectionProxy& NewPlayerConnectionProxy,
+                                       FString& OutFormat) const
+{
+}
+
+void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
+                                         FAVVMHostConfigurationProxy& OutHostConfigurationProxy) const
+{
+}
+
+void UAVVMOnlineStringParser::ToString(const FAVVMHostConfigurationProxy& NewHostConfigurationProxy,
                                        FString& OutFormat) const
 {
 }

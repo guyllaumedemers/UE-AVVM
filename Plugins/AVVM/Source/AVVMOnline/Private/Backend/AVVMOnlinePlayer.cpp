@@ -83,7 +83,7 @@ bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
 			&& (PartyId.Equals(Rhs.PartyId))
 			&& (RegionId == Rhs.RegionId)
 			&& (DistrictId == Rhs.DistrictId)
-			&& (HostConfiguration.Equals(Rhs.HostConfiguration))
+			&& (HostConfigurationId == Rhs.HostConfigurationId)
 			&& (PlayerConnectionIds == Rhs.PlayerConnectionIds);
 }
 

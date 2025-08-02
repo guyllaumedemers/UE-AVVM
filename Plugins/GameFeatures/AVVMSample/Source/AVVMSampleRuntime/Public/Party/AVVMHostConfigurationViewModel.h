@@ -24,7 +24,7 @@
 #include "AVVM.h"
 #include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlinePlayer.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 
 #include "AVVMHostConfigurationViewModel.generated.h"
 
@@ -45,5 +45,5 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMHostConfiguration HostConfiguration;
+	FAVVMHostConfigurationProxy HostConfiguration;
 };

@@ -48,7 +48,7 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Gamertag = FString();
 
-	// @gdemers {FAVVMPlayerWallet}
+	// @gdemers {FAVVMPlayerWalletProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Wallet = FString();
 
@@ -59,6 +59,26 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 	// @gdemers {FAVVMPlayerPresetProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Presets;
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMPlayerWalletProxy is the POD representation of the RESOLVED data returned by the backend following user request.
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMPlayerWalletProxy : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMPlayerWalletProxy& Rhs) const;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
+
+	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FString> IrlMoneys;
 };
 
 /**
@@ -147,7 +167,7 @@ struct AVVMONLINE_API FAVVMPartyProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString District = FString();
 
-	// @gdemers {FAVVMHostConfiguration}
+	// @gdemers {FAVVMHostConfigurationProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString HostConfiguration = FString();
 
@@ -181,4 +201,26 @@ struct AVVMONLINE_API FAVVMPlayerConnectionProxy : public FAVVMNotificationPaylo
 	// @gdemers {FAVVMPlayerProfileProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Profile = FString();
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMHostConfigurationProxy is the POD representation of the RESOLVED data returned by the backend following user request.
+ */
+USTRUCT(BlueprintType)
+struct AVVMONLINE_API FAVVMHostConfigurationProxy : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	bool operator==(const FAVVMHostConfigurationProxy& Rhs) const;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString GameMode = FString();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Options = FString();
 };

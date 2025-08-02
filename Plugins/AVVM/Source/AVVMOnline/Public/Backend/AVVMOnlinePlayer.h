@@ -94,7 +94,7 @@ struct AVVMONLINE_API FAVVMPlayerAccount
  *	on the backend.
  */
 USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMPlayerWallet : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMPlayerWallet
 {
 	GENERATED_BODY()
 
@@ -305,8 +305,9 @@ struct AVVMONLINE_API FAVVMParty
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 DistrictId = INDEX_NONE;
 
+	// @gdemers {FAVVMHostConfiguration.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString HostConfiguration = FString();
+	int32 HostConfigurationId = INDEX_NONE;
 
 	// @gdemers {FAVVMPlayerConnection.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -349,11 +350,14 @@ struct AVVMONLINE_API FAVVMPlayerConnection
  *	on the backend.
  */
 USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMHostConfiguration : public FAVVMNotificationPayload
+struct AVVMONLINE_API FAVVMHostConfiguration
 {
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMHostConfiguration& Rhs) const;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers define the experience the players of a party will go through.
 	UPROPERTY(Transient, BlueprintReadWrite)
