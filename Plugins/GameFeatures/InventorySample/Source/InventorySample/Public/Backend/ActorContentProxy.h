@@ -64,7 +64,7 @@ struct INVENTORYSAMPLE_API FItemProxy
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString ResourceId = FString();
 
-	// @gdemers TArray{FItemModifierProxy}
+	// @gdemers {FItemModifierProxy}
 	UPROPERTY(Transient, BlueprintType)
 	TArray<FString> ModValues;
 };
@@ -89,7 +89,7 @@ struct INVENTORYSAMPLE_API FItemHolderProxy
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString ResourceId = FString();
 
-	// @gdemers TArray{FItemProxy}
+	// @gdemers {FItemProxy}
 	UPROPERTY(Transient, BlueprintType)
 	TArray<FString> ItemValues;
 };
@@ -110,7 +110,7 @@ struct INVENTORYSAMPLE_API FActorContentProxy
 	UPROPERTY(Transient, BlueprintType)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers TArray{FItemHolderProxy}
+	// @gdemers {FItemHolderProxy}
 	UPROPERTY(Transient, BlueprintType)
 	TArray<FString> ItemHolderValues;
 };

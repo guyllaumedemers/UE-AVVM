@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMStoreViewModel.h"
 
+#include "AVVMOnlineInterface.h"
 #include "AVVMOnlineStringParser.h"
 
 void UAVVMStoreViewModel::SetStoreItems(const UAVVMOnlineStringParser* JsonParser,

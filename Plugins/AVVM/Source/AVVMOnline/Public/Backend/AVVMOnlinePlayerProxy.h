@@ -52,11 +52,11 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Wallet = FString();
 
-	// @gdemers TArray{FAVVMPlayerProfileProxy}
+	// @gdemers {FAVVMPlayerProfileProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Profiles;
 
-	// @gdemers TArray{FAVVMPlayerPresetProxy}
+	// @gdemers {FAVVMPlayerPresetProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Presets;
 };
@@ -83,11 +83,11 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
 
-	// @gdemers TArray{FActorContentProxy}
+	// @gdemers {InventorySample::FActorContentProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Inventories;
 
-	// @gdemers TArray{FAVVMPlayerChallenge}
+	// @gdemers {FAVVMPlayerChallenge}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Challenges;
 
@@ -115,7 +115,7 @@ struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdemers TArray{FItemProxy}.
+	// @gdemers {FItemProxy}.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> EquippedItems;
 };

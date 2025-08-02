@@ -22,8 +22,10 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 
 #include "AVVMPlayerManagerViewModel.generated.h"
 
@@ -49,5 +51,5 @@ public:
 protected:
 	// @gdemers backend payload resolving into a collection of player connections.
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMPlayerConnection> PlayerConnections;
+	TArray<FAVVMPlayerConnectionProxy> PlayerConnections;
 };

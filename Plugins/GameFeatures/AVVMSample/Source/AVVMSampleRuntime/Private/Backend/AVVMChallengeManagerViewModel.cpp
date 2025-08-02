@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMChallengeManagerViewModel.h"
 
+#include "AVVMOnlineInterface.h"
 #include "AVVMOnlineStringParser.h"
 
 void UAVVMChallengeManagerViewModel::SetChallenges(const UAVVMOnlineStringParser* JsonParser,

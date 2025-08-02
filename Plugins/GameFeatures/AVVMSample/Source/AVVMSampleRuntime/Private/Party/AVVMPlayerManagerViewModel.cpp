@@ -32,7 +32,7 @@ void UAVVMPlayerManagerViewModel::SetPlayerConnections(const UAVVMOnlineStringPa
 	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
 	if (StringPayload != nullptr)
 	{
-		TArray<FAVVMPlayerConnection> OutResult;
+		TArray<FAVVMPlayerConnectionProxy> OutResult;
 		JsonParser->FromString(*StringPayload, OutResult);
 		UE_MVVM_SET_PROPERTY_VALUE(PlayerConnections, OutResult);
 	}
