@@ -25,8 +25,9 @@
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
-#include "GameFramework/GameMode.h"
 #include "Backend/AVVMChallengeManagerViewModel.h"
+#include "Backend/AVVMOnlinePlayer.h"
+#include "GameFramework/GameMode.h"
 
 AActor* UAVVMChallengeManagerPresenter::GetOuterKey() const
 {

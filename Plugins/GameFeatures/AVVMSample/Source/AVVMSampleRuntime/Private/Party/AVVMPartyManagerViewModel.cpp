@@ -32,7 +32,7 @@ void UAVVMPartyManagerViewModel::SetParties(const UAVVMOnlineStringParser* JsonP
 	const auto* StringPayload = Payload.GetPtr<FAVVMStringPayload>();
 	if (StringPayload != nullptr)
 	{
-		TArray<FAVVMParty> OutResult;
+		TArray<FAVVMPartyProxy> OutResult;
 		JsonParser->FromString(*StringPayload, OutResult);
 		UE_MVVM_SET_PROPERTY_VALUE(Parties, OutResult);
 	}
@@ -40,7 +40,7 @@ void UAVVMPartyManagerViewModel::SetParties(const UAVVMOnlineStringParser* JsonP
 
 void UAVVMPartyManagerViewModel::SetLocalParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* NewLocalParty = Payload.GetPtr<FAVVMParty>();
+	const auto* NewLocalParty = Payload.GetPtr<FAVVMPartyProxy>();
 	if (NewLocalParty != nullptr)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(LocalParty, *NewLocalParty);

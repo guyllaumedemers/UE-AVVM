@@ -26,6 +26,12 @@
 
 TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
+	if (!IsValid(InventoryComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	{
+		return TArray<FDataRegistryId>{};
+	}
+
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutItems;
 	TArray<UObject*> OutProgressionItems;
@@ -52,12 +58,6 @@ TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorC
 			OutProgressionItems.Add(Resource);
 			continue;
 		}
-	}
-
-	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (!IsValid(InventoryComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
-	{
-		return OutResources;
 	}
 
 	if (!OutItems.IsEmpty())

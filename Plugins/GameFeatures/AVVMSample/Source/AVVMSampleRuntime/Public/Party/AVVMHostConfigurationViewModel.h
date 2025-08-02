@@ -22,8 +22,9 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
-#include "AVVMOnlineInterface.h"
+#include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlinePlayer.h"
 
 #include "AVVMHostConfigurationViewModel.generated.h"
 

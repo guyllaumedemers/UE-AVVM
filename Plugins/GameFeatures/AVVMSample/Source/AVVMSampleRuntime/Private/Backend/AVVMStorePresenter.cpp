@@ -26,6 +26,7 @@
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMStoreViewModel.h"
+#include "Backend/AVVMOnlinePlayer.h"
 #include "GameFramework/GameMode.h"
 
 AActor* UAVVMStorePresenter::GetOuterKey() const

@@ -22,13 +22,13 @@
 bool FItemModifier::operator==(const FItemModifier& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId.Equals(Rhs.ResourceId));
+			&& (ResourceId == Rhs.ResourceId);
 }
 
 bool FItem::operator==(const FItem& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId.Equals(Rhs.ResourceId))
+			&& (ResourceId == Rhs.ResourceId)
 			&& (ModIds == Rhs.ModIds);
 }
 
@@ -36,7 +36,7 @@ bool FItemHolder::operator==(const FItemHolder& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ItemIds == Rhs.ItemIds)
-			&& (ResourceId.Equals(Rhs.ResourceId));
+			&& (ResourceId == Rhs.ResourceId);
 }
 
 bool FActorContent::operator==(const FActorContent& Rhs) const

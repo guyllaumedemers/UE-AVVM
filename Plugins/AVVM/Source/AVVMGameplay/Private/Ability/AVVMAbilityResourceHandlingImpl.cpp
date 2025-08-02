@@ -25,6 +25,12 @@
 
 TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
+	auto* AbilitySystemComponent = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
+	if (!IsValid(AbilitySystemComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
+	{
+		return TArray<FDataRegistryId>{};
+	}
+
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutAbilities;
 
@@ -43,12 +49,6 @@ TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActo
 			OutAbilities.Add(Resource);
 			continue;
 		}
-	}
-
-	auto* AbilitySystemComponent = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
-	if (!IsValid(AbilitySystemComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
-	{
-		return OutResources;
 	}
 
 	if (!OutAbilities.IsEmpty())

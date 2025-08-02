@@ -21,6 +21,7 @@
 
 #include "AVVMOnlineInterface.h"
 #include "AVVMUtilityFunctionLibrary.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
@@ -110,7 +111,7 @@ FString UAVVMOnlineInterfaceUtils::SerializePlayerWallet(const TInstancedStruct<
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMPlayerProfile>(Payload);
+	return SerializeToString<FAVVMPlayerProfileProxy>(Payload);
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializeHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -120,12 +121,12 @@ FString UAVVMOnlineInterfaceUtils::SerializeHostConfiguration(const TInstancedSt
 
 FString UAVVMOnlineInterfaceUtils::SerializeParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMParty>(Payload);
+	return SerializeToString<FAVVMPartyProxy>(Payload);
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	return SerializeToString<FAVVMPlayerConnection>(Payload);
+	return SerializeToString<FAVVMPlayerConnectionProxy>(Payload);
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerChallenge(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
@@ -145,7 +146,7 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerW
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerProfile(const FString& Payload)
 {
-	return DeserializeString<FAVVMPlayerProfile>(Payload);
+	return DeserializeString<FAVVMPlayerProfileProxy>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetHostConfiguration(const FString& Payload)
@@ -155,12 +156,12 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetHostCon
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetParty(const FString& Payload)
 {
-	return DeserializeString<FAVVMParty>(Payload);
+	return DeserializeString<FAVVMPartyProxy>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerConnection(const FString& Payload)
 {
-	return DeserializeString<FAVVMPlayerConnection>(Payload);
+	return DeserializeString<FAVVMPlayerConnectionProxy>(Payload);
 }
 
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerChallenge(const FString& Payload)

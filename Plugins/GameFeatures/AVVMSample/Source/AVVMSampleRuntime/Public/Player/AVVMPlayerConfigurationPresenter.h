@@ -21,13 +21,13 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMUIExtensionInterface.h"
 #include "Archetypes/AVVMPresenter.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerConfigurationPresenter.generated.h"
-
-struct FAVVMPlayerConnection;
 
 /**
  *	Class description:
@@ -57,7 +57,7 @@ protected:
 	void BP_OnNotificationReceived_RemotePlayerProfileChanged(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	void SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
-	bool DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemoteConnection) const;
+	bool DoesMatchPlayerConnection(const FAVVMPlayerConnectionProxy& RemoteConnection) const;
 
 	virtual void StartPresenting() override;
 	virtual void StopPresenting() override;

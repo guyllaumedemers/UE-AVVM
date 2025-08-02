@@ -28,11 +28,17 @@
 struct FAVVMCurrency;
 struct FAVVMHostConfiguration;
 struct FAVVMParty;
+struct FAVVMPartyProxy;
 struct FAVVMPlayerAccount;
+struct FAVVMPlayerAccountProxy;
 struct FAVVMPlayerChallenge;
 struct FAVVMPlayerConnection;
+struct FAVVMPlayerConnectionProxy;
+struct FAVVMPlayerLoginContext;
 struct FAVVMPlayerPreset;
+struct FAVVMPlayerPresetProxy;
 struct FAVVMPlayerProfile;
+struct FAVVMPlayerProfileProxy;
 struct FAVVMPlayerResource;
 struct FAVVMPlayerWallet;
 struct FAVVMStringPayload;
@@ -49,20 +55,35 @@ class AVVMONLINE_API UAVVMOnlineStringParser : public UObject
 	GENERATED_BODY()
 
 public:
-	void FromString(const FString& NewPayload, FAVVMCurrency& OutCurrency) const;
-	void ToString(const FAVVMCurrency& NewCurrency, FString& OutFormat) const;
-
-	void FromString(const FString& NewPayload, FAVVMPlayerWallet& OutPlayerWallet) const;
-	void ToString(const FAVVMPlayerWallet& NewPlayerWallet, FString& OutFormat) const;
-
-	void FromString(const FString& NewPayload, FAVVMPlayerProfile& OutPlayerProfile) const;
-	void ToString(const FAVVMPlayerProfile& NewPlayerProfile, FString& OutFormat) const;
+	void FromString(const FString& NewPayload, FAVVMPlayerLoginContext& OutPlayerLoginContext) const;
+	void ToString(const FAVVMPlayerLoginContext& NewPlayerLoginContext, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMPlayerAccount& OutPlayerAccount) const;
 	void ToString(const FAVVMPlayerAccount& NewPlayerAccount, FString& OutFormat) const;
 
-	void FromString(const FString& NewPayload, FAVVMHostConfiguration& OutHostConfiguration) const;
-	void ToString(const FAVVMHostConfiguration& NewHostConfiguration, FString& OutFormat) const;
+	void FromString(const FString& NewPayload, FAVVMPlayerWallet& OutPlayerWallet) const;
+	void ToString(const FAVVMPlayerWallet& NewPlayerWallet, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMCurrency& OutCurrency) const;
+	void ToString(const FAVVMCurrency& NewCurrency, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPlayerProfile& OutPlayerProfile) const;
+	void ToString(const FAVVMPlayerProfile& NewPlayerProfile, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPlayerPreset& OutPlayerPreset) const;
+	void ToString(const FAVVMPlayerPreset& NewPlayerPreset, FString& OutFormat) const;
+
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPlayerResource>& OutPlayerResources) const;
+	void ToString(const TArray<FAVVMPlayerResource>& NewPlayerResources, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPlayerResource& OutPlayerResource) const;
+	void ToString(const FAVVMPlayerResource& NewPlayerResource, FString& OutFormat) const;
+
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPlayerChallenge>& OutPlayerChallenges) const;
+	void ToString(const TArray<FAVVMPlayerChallenge>& NewPlayerChallenges, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPlayerChallenge& OutPlayerChallenge) const;
+	void ToString(const FAVVMPlayerChallenge& NewPlayerChallenge, FString& OutFormat) const;
 
 	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMParty>& OutParties) const;
 	void ToString(const TArray<FAVVMParty>& NewParties, FString& OutFormat) const;
@@ -76,18 +97,27 @@ public:
 	void FromString(const FString& NewPayload, FAVVMPlayerConnection& OutPlayerConnection) const;
 	void ToString(const FAVVMPlayerConnection& NewPlayerConnection, FString& OutFormat) const;
 
-	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPlayerChallenge>& OutPlayerChallenges) const;
-	void ToString(const TArray<FAVVMPlayerChallenge>& NewPlayerChallenges, FString& OutFormat) const;
+	void FromString(const FString& NewPayload, FAVVMHostConfiguration& OutHostConfiguration) const;
+	void ToString(const FAVVMHostConfiguration& NewHostConfiguration, FString& OutFormat) const;
 
-	void FromString(const FString& NewPayload, FAVVMPlayerChallenge& OutPlayerChallenge) const;
-	void ToString(const FAVVMPlayerChallenge& NewPlayerChallenge, FString& OutFormat) const;
+	void FromString(const FString& NewPayload, FAVVMPlayerAccountProxy& OutPlayerAccountProxy) const;
+	void ToString(const FAVVMPlayerAccountProxy& NewPlayerAccountProxy, FString& OutFormat) const;
 
-	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPlayerResource>& OutPlayerResources) const;
-	void ToString(const TArray<FAVVMPlayerResource>& NewPlayerResources, FString& OutFormat) const;
+	void FromString(const FString& NewPayload, FAVVMPlayerProfileProxy& OutPlayerProfileProxy) const;
+	void ToString(const FAVVMPlayerProfileProxy& NewPlayerProfileProxy, FString& OutFormat) const;
 
-	void FromString(const FString& NewPayload, FAVVMPlayerResource& OutPlayerResource) const;
-	void ToString(const FAVVMPlayerResource& NewPlayerResource, FString& OutFormat) const;
+	void FromString(const FString& NewPayload, FAVVMPlayerPresetProxy& OutPlayerPresetProxy) const;
+	void ToString(const FAVVMPlayerPresetProxy& NewPlayerPresetProxy, FString& OutFormat) const;
 
-	void FromString(const FString& NewPayload, FAVVMPlayerPreset& OutPlayerPreset) const;
-	void ToString(const FAVVMPlayerPreset& NewPlayerPreset, FString& OutFormat) const;
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPartyProxy>& OutPartyProxies) const;
+	void ToString(const TArray<FAVVMPartyProxy>& NewPartyProxies, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPartyProxy& OutPartyProxy) const;
+	void ToString(const FAVVMPartyProxy& NewPartyProxy, FString& OutFormat) const;
+
+	void FromString(const FAVVMStringPayload& NewPayload, TArray<FAVVMPlayerConnectionProxy>& OutPlayerConnectionProxies) const;
+	void ToString(const TArray<FAVVMPlayerConnectionProxy>& NewPlayerConnectionProxies, FString& OutFormat) const;
+
+	void FromString(const FString& NewPayload, FAVVMPlayerConnectionProxy& OutPlayerConnectionProxy) const;
+	void ToString(const FAVVMPlayerConnectionProxy& NewPlayerConnectionProxy, FString& OutFormat) const;
 };

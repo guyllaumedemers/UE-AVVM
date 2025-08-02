@@ -22,8 +22,10 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 
 #include "AVVMPartyManagerViewModel.generated.h"
 
@@ -50,8 +52,8 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMParty> Parties;
+	TArray<FAVVMPartyProxy> Parties;
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMParty LocalParty;
+	FAVVMPartyProxy LocalParty;
 };

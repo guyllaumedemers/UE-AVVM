@@ -24,6 +24,7 @@
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Backend/AVVMPlayerProfileViewModel.h"
 #include "GameFramework/GameMode.h"
 
@@ -60,7 +61,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 
 	// @gdemers we obviously wouldnt commit an empty player account. we expect the online subsystem to run validation on the account
 	// before executing any request to overwrite the backend data.
-	const auto* ModifiedPlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
+	const auto* ModifiedPlayerProfile = Payload.GetPtr<FAVVMPlayerProfileProxy>();
 	if (ModifiedPlayerProfile != nullptr)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Committing Player Profile Request. In-Progress..."));
@@ -69,7 +70,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 	else
 	{
 		UE_LOG(LogOnline, Log, TEXT("Committing Empty Player Profile Request. In-Progress..."));
-		OnlineInterface->CommitModifiedPlayerProfile(FAVVMPlayerProfile{}, Callback);
+		OnlineInterface->CommitModifiedPlayerProfile(FAVVMPlayerProfileProxy{}, Callback);
 	}
 }
 

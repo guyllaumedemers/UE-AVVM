@@ -19,11 +19,11 @@
 //SOFTWARE.
 #include "Party/AVVMPartyManagerPresenter.h"
 
-#include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMSampleRuntimeModule.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/GameMode.h"
 #include "Party/AVVMPartyManagerViewModel.h"
 
@@ -70,7 +70,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted);
 
-	const auto* Party = Payload.GetPtr<FAVVMParty>();
+	const auto* Party = Payload.GetPtr<FAVVMPartyProxy>();
 	if (Party != nullptr)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Join Party Request. In-Progress..."));
@@ -81,7 +81,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 		// @gdemers joining an empty party imply being in our default state, i.e post-login we make a request
 		// to create a new party.
 		UE_LOG(LogOnline, Log, TEXT("Join Empty Party Request. In-Progress..."));
-		OnlineInterface->JoinParty(FAVVMParty{}, Callback);
+		OnlineInterface->JoinParty(FAVVMPartyProxy{}, Callback);
 	}
 }
 
@@ -99,7 +99,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInst
 
 	// @gdemers implicit that only the local player can exit a party. other actions
 	// are name specific.
-	const auto* Party = Payload.GetPtr<FAVVMParty>();
+	const auto* Party = Payload.GetPtr<FAVVMPartyProxy>();
 	if (Party != nullptr)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Exit Party Request. In-Progress..."));
@@ -108,7 +108,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInst
 	else
 	{
 		UE_LOG(LogOnline, Log, TEXT("Exit Empty Party Request. In-Progress..."));
-		OnlineInterface->ExitParty(FAVVMParty{}, Callback);
+		OnlineInterface->ExitParty(FAVVMPartyProxy{}, Callback);
 	}
 }
 

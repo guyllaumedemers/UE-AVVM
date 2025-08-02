@@ -41,9 +41,9 @@ struct INVENTORYSAMPLE_API FItemModifier
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistry}. Contains details about {Base_Stats}.
+	// @gdemers {FAVVMPlayerResource.UniqueId}.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString ResourceId = FString();
+	int32 ResourceId = INDEX_NONE;
 };
 
 /**
@@ -62,9 +62,9 @@ struct INVENTORYSAMPLE_API FItem
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistryId}. Contains details about {Base_Stats}.
+	// @gdemers {FAVVMPlayerResource.UniqueId}.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString ResourceId = FString();
+	int32 ResourceId = INDEX_NONE;
 
 	// @gdemers {FItemModifier.UniqueId} the POD applied by the player profile to this item. may be null.
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -87,9 +87,9 @@ struct INVENTORYSAMPLE_API FItemHolder
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistryId}. Contains details about {MaxSlot}, {HolderSlot_Position}, {Holder_Type}.
+	// @gdemers {FAVVMPlayerResource.UniqueId}.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString ResourceId = FString();
+	int32 ResourceId = INDEX_NONE;
 
 	// @gdemers {FItem.UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)

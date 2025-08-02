@@ -22,8 +22,10 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
-#include "AVVMOnlineInterface.h"
+#include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerConfigurationViewModel.generated.h"
 
@@ -41,9 +43,9 @@ class AVVMSAMPLERUNTIME_API UAVVMPlayerConfigurationViewModel : public UMVVMView
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerConfigurationViewModel"); };
 	void SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-	bool DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemotePlayerConnection);
+	bool DoesMatchPlayerConnection(const FAVVMPlayerConnectionProxy& RemotePlayerConnection);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMPlayerConnection PlayerConnection;
+	FAVVMPlayerConnectionProxy PlayerConnection;
 };

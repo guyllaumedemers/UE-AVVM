@@ -21,7 +21,7 @@
 
 void UAVVMPlayerProfileViewModel::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* NewPlayerProfile = Payload.GetPtr<FAVVMPlayerProfile>();
+	const auto* NewPlayerProfile = Payload.GetPtr<FAVVMPlayerProfileProxy>();
 	if (NewPlayerProfile != nullptr)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(PlayerProfile, *NewPlayerProfile);

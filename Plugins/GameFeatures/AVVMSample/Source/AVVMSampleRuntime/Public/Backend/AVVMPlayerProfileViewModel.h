@@ -22,8 +22,9 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
-#include "AVVMOnlineInterface.h"
+#include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerProfileViewModel.generated.h"
@@ -47,5 +48,5 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMPlayerProfile PlayerProfile;
+	FAVVMPlayerProfileProxy PlayerProfile;
 };

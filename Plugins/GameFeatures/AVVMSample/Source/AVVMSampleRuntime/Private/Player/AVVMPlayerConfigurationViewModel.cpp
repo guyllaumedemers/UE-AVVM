@@ -21,14 +21,14 @@
 
 void UAVVMPlayerConfigurationViewModel::SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* NewPlayerConnnection = Payload.GetPtr<FAVVMPlayerConnection>();
+	const auto* NewPlayerConnnection = Payload.GetPtr<FAVVMPlayerConnectionProxy>();
 	if (NewPlayerConnnection != nullptr)
 	{
 		UE_MVVM_SET_PROPERTY_VALUE(PlayerConnection, *NewPlayerConnnection);
 	}
 }
 
-bool UAVVMPlayerConfigurationViewModel::DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemotePlayerConnection)
+bool UAVVMPlayerConfigurationViewModel::DoesMatchPlayerConnection(const FAVVMPlayerConnectionProxy& RemotePlayerConnection)
 {
 	return (PlayerConnection == RemotePlayerConnection);
 }

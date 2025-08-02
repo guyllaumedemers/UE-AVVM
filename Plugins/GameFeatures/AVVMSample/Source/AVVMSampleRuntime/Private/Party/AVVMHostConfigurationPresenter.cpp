@@ -22,6 +22,7 @@
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMSampleRuntimeModule.h"
+#include "Backend/AVVMOnlinePlayer.h"
 #include "GameFramework/GameMode.h"
 #include "Party/AVVMHostConfigurationViewModel.h"
 

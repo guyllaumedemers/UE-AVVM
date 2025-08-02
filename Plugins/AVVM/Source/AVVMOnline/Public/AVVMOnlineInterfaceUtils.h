@@ -21,10 +21,11 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMOnline.h"
 #include "AVVMOnlineStringParser.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMOnlineInterfaceUtils.generated.h"
 

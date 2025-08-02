@@ -42,7 +42,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerLe
 {
 	// @gdemers made this call separate to Changed event call so we can run the edge case of only leveling once if during the
 	// session the Outer is destroyed and re-created!
-	const auto* RemoteConnection = Payload.GetPtr<FAVVMPlayerConnection>();
+	const auto* RemoteConnection = Payload.GetPtr<FAVVMPlayerConnectionProxy>();
 	if (ensure(RemoteConnection != nullptr) && DoesMatchPlayerConnection(*RemoteConnection))
 	{
 		// @gdemers here our notification channel are type specific and not instance specific
@@ -57,7 +57,7 @@ void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerLe
 
 void UAVVMPlayerConfigurationPresenter::BP_OnNotificationReceived_RemotePlayerProfileChanged(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* RemoteConnection = Payload.GetPtr<FAVVMPlayerConnection>();
+	const auto* RemoteConnection = Payload.GetPtr<FAVVMPlayerConnectionProxy>();
 	if (ensure(RemoteConnection != nullptr) && DoesMatchPlayerConnection(*RemoteConnection))
 	{
 		UE_LOG(LogOnline, Log, TEXT("[Remote] Player Profile Changed!"));
@@ -78,7 +78,7 @@ void UAVVMPlayerConfigurationPresenter::SetPlayerConnection(const TInstancedStru
 	}
 }
 
-bool UAVVMPlayerConfigurationPresenter::DoesMatchPlayerConnection(const FAVVMPlayerConnection& RemoteConnection) const
+bool UAVVMPlayerConfigurationPresenter::DoesMatchPlayerConnection(const FAVVMPlayerConnectionProxy& RemoteConnection) const
 {
 	auto* PlayerConfigurationViewModel = Cast<UAVVMPlayerConfigurationViewModel>(ViewModel.Get());
 	if (IsValid(PlayerConfigurationViewModel))
