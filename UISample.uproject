@@ -74,6 +74,10 @@
 		{
 			"Name": "UIExtension",
 			"Enabled": true
+		},
+		{
+			"Name": "WeaponSample",
+			"Enabled": true
 		}
 	]
 }
