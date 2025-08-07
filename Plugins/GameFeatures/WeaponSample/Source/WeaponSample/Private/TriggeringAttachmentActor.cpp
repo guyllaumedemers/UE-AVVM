@@ -19,8 +19,12 @@
 //SOFTWARE.
 #include "TriggeringAttachmentActor.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "TriggeringActor.h"
+#include "GameplayEffect.h"
 #include "WeaponSample.h"
 #include "GameFramework/Actor.h"
 
@@ -28,7 +32,7 @@ void ATriggeringAttachmentActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto* Outer = GetTypedOuter<ATriggeringActor>();
+	auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -41,14 +45,28 @@ void ATriggeringAttachmentActor::BeginPlay()
 	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName());
 
-	Outer->RegisteredAttachments.FindOrAdd(TargetSlotTag, this);
+	OwningOuter = Outer;
+
+#if WITH_SERVER_CODE
+	if (HasAuthority())
+	{
+		auto* AttachementManagerComponent = UAttachmentManagerComponent::GetActorComponent(Outer);
+		if (IsValid(AttachementManagerComponent))
+		{
+			FGetAttachmentDefinitionRequestArgs Args;
+			Args.AttachmentActor = this;
+			Args.AttachmentId = AttachmentDefinitionId;
+			AttachementManagerComponent->GetAttachmentDefinition(Args);
+		}
+	}
+#endif
 }
 
 void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	auto* Outer = GetTypedOuter<ATriggeringActor>();
+	AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -61,10 +79,47 @@ void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName());
 
-	Outer->RegisteredAttachments.Remove(TargetSlotTag);
+#if WITH_SERVER_CODE
+	if (HasAuthority())
+	{
+		UnRegisterGameplayEffects();
+	}
+#endif
 }
 
-void ATriggeringAttachmentActor::ApplyModifier(FWeaponAttachmentModifierContext& OutResult) const
+void ATriggeringAttachmentActor::RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
+                                                         const TArray<UObject*>& NewResources)
 {
-	OutResult.Modifiers.Add(ModifierArgs);
+	if (!IsValid(NewAbilitySystemComponent))
+	{
+		return;
+	}
+
+	UnRegisterGameplayEffects();
+
+	GameplayEffectSpecHandles.Reset(NewResources.Num());
+	for (UObject* Resource : NewResources)
+	{
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(Cast<UClass>(Resource), this, OwningOuter.Get());
+		GameplayEffectSpecHandles.Add(NewAbilitySystemComponent->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle));
+	}
+}
+
+void ATriggeringAttachmentActor::UnRegisterGameplayEffects()
+{
+	if (GameplayEffectSpecHandles.IsEmpty())
+	{
+		return;
+	}
+
+	auto* ASC = GameplayEffectSpecHandles[0].GetOwningAbilitySystemComponent();
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	for (FActiveGameplayEffectHandle& ActiveGameplayEffect : GameplayEffectSpecHandles)
+	{
+		ASC->RemoveActiveGameplayEffect(ActiveGameplayEffect);
+	}
 }

@@ -26,6 +26,7 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "GameFramework/Actor.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceProvider.h"
 

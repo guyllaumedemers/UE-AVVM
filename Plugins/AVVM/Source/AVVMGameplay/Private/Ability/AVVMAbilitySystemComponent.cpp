@@ -54,6 +54,11 @@ void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 {
 	Super::EndPlay(EndPlayReason);
 
+	for (const FGameplayAbilitySpecHandle& AbilitySpecHandle : AbilitySpecHandles)
+	{
+		ClearAbility(AbilitySpecHandle);
+	}
+
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -151,7 +156,13 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 		       *GameplayAbilityClass->GetName(),
 		       *Outer->GetName());
 
-		GiveAbility(FGameplayAbilitySpec{GameplayAbilityClass, 1, GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()});
+		const FGameplayAbilitySpecHandle NewAbilitySpecHandle = GiveAbility(FGameplayAbilitySpec{
+			GameplayAbilityClass,
+			1,
+			GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
+		});
+
+		AbilitySpecHandles.Add(NewAbilitySpecHandle);
 	}
 }
 

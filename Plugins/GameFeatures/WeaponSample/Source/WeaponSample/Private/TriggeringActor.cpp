@@ -21,18 +21,21 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMGameplayAbility.h"
-#include "Ability/TriggeringAbility.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/AssetManager.h"
+#include "Resources/AVVMResourceManagerComponent.h"
 
 ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	ResourceManagerComponent = CreateDefaultSubobject<UAVVMResourceManagerComponent>(TEXT("ResourceManagerComponent"));
+	AttachmentManagerComponent = CreateDefaultSubobject<UAttachmentManagerComponent>(TEXT("AttachmentManagerComponent"));
+	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	// TODO @gdemers Would be nice if we could override the collision preset referenced on the skeletal mesh
 	// with something defined at 'this' level. This may provide better visibility during system config to small
 	// issue like setting bad collision preset.
@@ -101,8 +104,16 @@ void ATriggeringActor::SpawnAndSwapAttachment(const TSubclassOf<ATriggeringAttac
 	// TODO @gdemers Define how Swaping is executed
 }
 
+UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const
+{
+	return ResourceManagerComponent;
+}
+
 void ATriggeringActor::RegisterAbility()
 {
+	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
+	// Doing so would prevent caching of the Ability and removal of it upon destruction.
+	// the AVVMResourceManagerComponent also require passing in an UActorComponent during the recursive load request of resource
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
 	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnSoftObjectAcquired);
 	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({TriggeringAbilityClass.ToSoftObjectPath()});
@@ -110,7 +121,7 @@ void ATriggeringActor::RegisterAbility()
 
 void ATriggeringActor::UnRegisterAbility()
 {
-	if (!TriggeringAbility.IsValid())
+	if (!TriggeringAbilitySpecHandle.IsValid())
 	{
 		return;
 	}
@@ -118,7 +129,7 @@ void ATriggeringActor::UnRegisterAbility()
 	auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningOuter.Get());
 	if (IsValid(ASC))
 	{
-		ASC->ClearAbility(TriggeringAbility->GetCurrentAbilitySpecHandle());
+		ASC->ClearAbility(TriggeringAbilitySpecHandle);
 	}
 }
 
@@ -146,21 +157,9 @@ void ATriggeringActor::OnSoftObjectAcquired()
 		return;
 	}
 
-	ASC->GiveAbility(FGameplayAbilitySpec{
+	TriggeringAbilitySpecHandle = ASC->GiveAbility(FGameplayAbilitySpec{
 		GameplayAbilityClass,
 		1,
 		GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
 	});
-}
-
-void ATriggeringActor::GetAllAttachmentMods(FWeaponAttachmentModifierContext& OutResult)
-{
-	OutResult.Modifiers.Reset(RegisteredAttachments.Num());
-	for (const auto& [SlotTag, Attachment] : RegisteredAttachments)
-	{
-		if (Attachment.IsValid())
-		{
-			Attachment->ApplyModifier(OutResult);
-		}
-	}
 }

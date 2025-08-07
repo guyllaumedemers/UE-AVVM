@@ -17,33 +17,36 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AttachmentResourceImpl.h"
 
-using UnrealBuildTool;
+#include "AttachmentManagerComponent.h"
+#include "AVVMGameplayUtils.h"
+#include "Data/AttachmentDefinitionDataAsset.h"
 
-public class WeaponSample : ModuleRules
+TArray<FDataRegistryId> UAttachmentResourceImpl::ProcessResources(UActorComponent* ActorComponent,
+                                                                  const TArray<UObject*>& Resources) const
 {
-	public WeaponSample(ReadOnlyTargetRules Target) : base(Target)
+	auto* AttachmentManagerComponent = Cast<UAttachmentManagerComponent>(ActorComponent);
+	if (!IsValid(AttachmentManagerComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(AttachmentManagerComponent->GetTypedOuter<AActor>()))
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
+		return TArray<FDataRegistryId>{};
 	}
+
+	TArray<UObject*> OutResources;
+	for (UObject* Resource : Resources)
+	{
+		const auto* AttachmentDefinition = Cast<UAttachmentDefinitionDataAsset>(Resource);
+		if (IsValid(AttachmentDefinition))
+		{
+			// TODO @gdemers fix this! (its late...)
+			// OutResources.Append(AttachmentDefinition->GetModifiers());
+		}
+	}
+
+	if (!OutResources.IsEmpty())
+	{
+		AttachmentManagerComponent->SetupAttachmentModifiers(OutResources);
+	}
+
+	return TArray<FDataRegistryId>{};
 }

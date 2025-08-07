@@ -21,14 +21,17 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayAbilitySpecHandle.h"
 #include "GameplayTagContainer.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
+#include "Resources/AVVMResourceProvider.h"
 
 #include "TriggeringActor.generated.h"
 
-struct FWeaponAttachmentModifierContext;
 class ATriggeringAttachmentActor;
+class UAttachmentManagerComponent;
+class UAVVMResourceManagerComponent;
 class USkeletalMeshComponent;
 class UTriggeringAbility;
 
@@ -53,7 +56,8 @@ struct WEAPONSAMPLE_API FWeaponTargetHitDataArgs
  *	targeting. It is invoked from the referenced ability and apply instancing actors such as Vfx for ability location src (Muzzle), Impacts and Decals.
  */
 UCLASS()
-class WEAPONSAMPLE_API ATriggeringActor : public AActor
+class WEAPONSAMPLE_API ATriggeringActor : public AActor,
+                                          public IAVVMResourceProvider
 {
 	GENERATED_BODY()
 
@@ -75,17 +79,24 @@ public:
 	void SpawnAndSwapAttachment(const TSubclassOf<ATriggeringAttachmentActor>& NewAttachmentClass,
 	                            const FGameplayTag& NewAttachmentSlotTag);
 
-protected:
-	UFUNCTION(BlueprintCallable)
-	void RegisterAbility();
+	// @gdemers IAVVMResourceProvider
+	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 
-	UFUNCTION(BlueprintCallable)
+protected:
+	void RegisterAbility();
 	void UnRegisterAbility();
 
 	UFUNCTION()
 	void OnSoftObjectAcquired();
 
-	void GetAllAttachmentMods(FWeaponAttachmentModifierContext& OutResult);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
 	bool bShouldAsyncLoadOnBeginPlay = true;
@@ -94,25 +105,10 @@ protected:
 	TSoftClassPtr<UTriggeringAbility> TriggeringAbilityClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const UTriggeringAbility> TriggeringAbility = nullptr;
+	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Flag for tracking the state of the Triggering Actor so we allow swapping attachment on already occupied slot. Required=True, for editing."))
-	bool bCanEditAttachments = false;
-
-	UPROPERTY(Transient)
-	TMap<FGameplayTag, TWeakObjectPtr<const ATriggeringAttachmentActor>> RegisteredAttachments;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
-
-	struct FAttachmentSpawnerQueuingMechanism
-	{
-		// TODO @gdemers Define how swapping request are queued and executed.
-	};
-
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle;
-	friend class ATriggeringAttachmentActor;
 };

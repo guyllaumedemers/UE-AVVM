@@ -22,10 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Templates/SubclassOf.h"
+#include "UObject/Interface.h"
 
 #include "AVVMResourceProvider.generated.h"
 
+class UAVVMResourceManagerComponent;
 class UAVVMResourceHandlingImpl;
 
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
@@ -56,6 +59,10 @@ public:
 
 	virtual bool CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources,
 	                                                          const FKeepProcessingResources& Callback) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return false;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UAVVMResourceManagerComponent* GetResourceManagerComponent() const;
+	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const PURE_VIRTUAL(GetResourceManagerComponent_Implementation, return nullptr;);
 };
 
 /**

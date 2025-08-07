@@ -17,33 +17,42 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class WeaponSample : ModuleRules
+#include "Engine/DataAsset.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
+#include "AttachmentDefinitionDataAsset.generated.h"
+
+class UGameplayEffect;
+
+/**
+ *	Class description:
+ *
+ *	UAttachmentDefinitionDataAsset is a POD asset that define the properties of an attachment.
+ */
+UCLASS(BlueprintType, NotBlueprintable)
+class WEAPONSAMPLE_API UAttachmentDefinitionDataAsset : public UDataAsset
 {
-	public WeaponSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-			}
-		);
+public:
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
+	UFUNCTION(BlueprintCallable)
+	const TArray<TSoftClassPtr<UGameplayEffect>>& GetModifiers() const;
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bDoesSupportModifiers = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportModifiers"))
+	TArray<TSoftClassPtr<UGameplayEffect>> ModifierEffectClasses;
+};

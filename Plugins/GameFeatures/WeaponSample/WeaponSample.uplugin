@@ -22,6 +22,10 @@
   ],
   "Plugins": [
     {
+      "Name": "DataRegistry",
+      "Enabled": true
+    },
+    {
       "Name": "GameplayAbilities",
       "Enabled": true
     }

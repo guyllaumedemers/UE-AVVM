@@ -21,39 +21,12 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
+#include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 
 #include "TriggeringAttachmentActor.generated.h"
-
-/**
- *	Class description:
- *
- *	FWeaponAttachmentModifierArgs is a POD that define the properties of an attachment, and it's
- *	property modifiers to apply to the owning ATriggeringActor.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FWeaponAttachmentModifierArgs
-{
-	GENERATED_BODY()
-
-	// TODO @gdemers Define arguments that represent a modifier to an attachment 
-};
-
-/**
- *	Class description:
- *
- *	FWeaponAttachmentModifierContext is a POD that retrieve all modifiers specific to the attachments held
- *	by the ATriggeringActor.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FWeaponAttachmentModifierContext
-{
-	GENERATED_BODY()
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FWeaponAttachmentModifierArgs> Modifiers;
-};
 
 /**
  *	Class description:
@@ -74,15 +47,27 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ApplyModifier(FWeaponAttachmentModifierContext& OutResult) const;
+	void RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
+	                             const TArray<UObject*>& NewResources);
+
+	UFUNCTION(BlueprintCallable)
+	void UnRegisterGameplayEffects();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTag TargetSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName SocketName = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FWeaponAttachmentModifierArgs ModifierArgs = FWeaponAttachmentModifierArgs();
+	FDataRegistryId AttachmentDefinitionId = FDataRegistryId();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TWeakObjectPtr<AActor> OwningOuter = nullptr;
+
+	UPROPERTY(Transient)
+	TArray<FActiveGameplayEffectHandle> GameplayEffectSpecHandles;
+
+	friend class UAttachmentManagerComponent;
 };

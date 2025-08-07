@@ -73,5 +73,8 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<FGameplayAbilitySpecHandle> AbilitySpecHandles;
+
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 };

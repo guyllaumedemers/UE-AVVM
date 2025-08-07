@@ -37,6 +37,7 @@ EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataVali
 
 	return Result;
 }
+#endif
 
 TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
 {
@@ -55,6 +56,7 @@ TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
 	return Result;
 }
 
+#if WITH_EDITOR
 EDataValidationResult FAVVMActorDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);

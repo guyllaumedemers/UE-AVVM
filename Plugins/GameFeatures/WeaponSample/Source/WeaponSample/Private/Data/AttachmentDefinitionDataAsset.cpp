@@ -17,33 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Data/AttachmentDefinitionDataAsset.h"
 
-using UnrealBuildTool;
-
-public class WeaponSample : ModuleRules
+#if WITH_EDITOR
+EDataValidationResult UAttachmentDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
-	public WeaponSample(ReadOnlyTargetRules Target) : base(Target)
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (bDoesSupportModifiers && ModifierEffectClasses.IsEmpty())
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAttachmentDefinitionDataAsset", "", "ModifierEffectClasses Empty!"));
 	}
+
+	return Result;
+}
+#endif
+
+const TArray<TSoftClassPtr<UGameplayEffect>>& UAttachmentDefinitionDataAsset::GetModifiers() const
+{
+	return ModifierEffectClasses;
 }

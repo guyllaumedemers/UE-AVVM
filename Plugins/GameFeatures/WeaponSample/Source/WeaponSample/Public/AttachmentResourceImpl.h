@@ -17,33 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class WeaponSample : ModuleRules
+#include "Resources/AVVMResourceHandlingImpl.h"
+
+#include "AttachmentResourceImpl.generated.h"
+
+/**
+ *	Class description:
+ *
+*	UAttachmentResourceImpl implement resource loading for Attachment resources.
+ */
+UCLASS()
+class WEAPONSAMPLE_API UAttachmentResourceImpl : public UAVVMResourceHandlingImpl
 {
-	public WeaponSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
-}
+public:
+	virtual TArray<FDataRegistryId> ProcessResources(UActorComponent* ActorComponent,
+	                                                 const TArray<UObject*>& Resources) const override;
+};
