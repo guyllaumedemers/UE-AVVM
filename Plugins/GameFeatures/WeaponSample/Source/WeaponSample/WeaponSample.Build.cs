@@ -31,7 +31,9 @@ public class WeaponSample : ModuleRules
 			{
 				"Core",
 				"CoreUObject",
-				"Engine"
+				"Engine",
+				"GameplayAbilities",
+				"GameplayTags",
 			}
 		);
 
@@ -39,6 +41,7 @@ public class WeaponSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMGameplay"
 			}
 		);
 	}

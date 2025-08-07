@@ -28,6 +28,7 @@
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"

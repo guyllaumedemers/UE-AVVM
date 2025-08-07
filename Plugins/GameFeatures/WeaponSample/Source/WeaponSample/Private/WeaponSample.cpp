@@ -19,4 +19,6 @@
 //SOFTWARE.
 #include "WeaponSample.h"
 
+DEFINE_LOG_CATEGORY(LogWeaponSample);
+
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, WeaponSample)

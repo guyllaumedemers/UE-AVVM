@@ -21,7 +21,9 @@
 
 #include "InventorySettings.h"
 #include "Data/ItemProgressionDefinitionDataAsset.h"
+#include "Components/MeshComponent.h"
 #include "Engine/AssetManager.h"
+#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 

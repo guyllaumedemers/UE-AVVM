@@ -21,6 +21,8 @@
 
 #include "Modules/ModuleManager.h"
 
+WEAPONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogWeaponSample, Log, All);
+
 /**
  *	Plugin Description :
  *
