@@ -60,7 +60,7 @@ void ATriggeringActor::BeginPlay()
 	       *ATriggeringActor::StaticClass()->GetName());
 
 #if WITH_SERVER_CODE
-	if (bShouldAsyncLoadOnBeginPlay)
+	if (bShouldAsyncLoadOnBeginPlay && HasAuthority())
 	{
 		Swap(true);
 
@@ -89,7 +89,10 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	       *ATriggeringActor::StaticClass()->GetName());
 
 #if WITH_SERVER_CODE
-	Swap(false);
+	if (HasAuthority())
+	{
+		Swap(false);
+	}
 #endif
 }
 
