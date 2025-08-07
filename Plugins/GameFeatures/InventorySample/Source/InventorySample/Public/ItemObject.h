@@ -144,8 +144,6 @@ protected:
 	UFUNCTION()
 	void OnProgressionStageAcquired(FOnRequestItemActorClassComplete Callback);
 
-	FTransform GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const;
-
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
@@ -158,10 +156,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FDataRegistryId ItemProgressionId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bCanAttachToSocket = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bCanAttachToSocket"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName SocketName = NAME_None;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)

@@ -21,7 +21,6 @@
 
 #include "InventorySettings.h"
 #include "Data/ItemProgressionDefinitionDataAsset.h"
-#include "Components/MeshComponent.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
@@ -158,9 +157,8 @@ void UItemObject::SpawnActorClass(AActor* NewAnchor,
 	{
 		FActorSpawnParameters Params;
 		Params.Owner = NewAnchor;
-		const FTransform NewItemTransform = GetSpawningAnchorTransform(NewAnchor, bShouldSpawnAndAttach);
 
-		RuntimeItemActor = World->SpawnActor(NewActorClass, &NewItemTransform, Params);
+		RuntimeItemActor = World->SpawnActor(NewActorClass, &FTransform::Identity, Params);
 		ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
 	}
 
@@ -220,26 +218,6 @@ void UItemObject::OnProgressionStageAcquired(FOnRequestItemActorClassComplete Ca
 	{
 		Callback.ExecuteIfBound(nullptr, this);
 	}
-}
-
-FTransform UItemObject::GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const
-{
-	if (!IsValid(NewOuter))
-	{
-		return FTransform();
-	}
-
-	FTransform ItemAnchorTransform = NewOuter->GetActorTransform();
-	if (bShouldAttachToSocket)
-	{
-		const auto* MeshComponent = NewOuter->GetComponentByClass<UMeshComponent>();
-		if (IsValid(MeshComponent))
-		{
-			ItemAnchorTransform = MeshComponent->GetSocketTransform(SocketName);
-		}
-	}
-
-	return ItemAnchorTransform;
 }
 
 void UItemObject::OnRep_ItemStateModified(const FItemState& OldItemState)
