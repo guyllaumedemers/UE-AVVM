@@ -38,8 +38,7 @@ TArray<FDataRegistryId> UAttachmentResourceImpl::ProcessResources(UActorComponen
 		const auto* AttachmentDefinition = Cast<UAttachmentDefinitionDataAsset>(Resource);
 		if (IsValid(AttachmentDefinition))
 		{
-			// TODO @gdemers fix this! (its late...)
-			// OutResources.Append(AttachmentDefinition->GetModifiers());
+			OutResources.Add(Resource);
 		}
 	}
 

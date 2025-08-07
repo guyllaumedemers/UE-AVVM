@@ -24,7 +24,7 @@
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "Containers/Queue.h"
+#include "Engine/StreamableManager.h"
 
 #include "AttachmentManagerComponent.generated.h"
 
@@ -70,6 +70,27 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 /**
  *	Class description:
  *
+ *	FAttachmentToken describe a unique identifier that increment only when default construct. Can be safely
+ *	passed by copy around.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FAttachmentToken
+{
+	GENERATED_BODY()
+
+	explicit FAttachmentToken()
+	{
+		static uint32 GlobalUniqueId = 0;
+		UniqueId = ++GlobalUniqueId;
+	}
+
+	UPROPERTY()
+	uint32 UniqueId = 0;
+};
+
+/**
+ *	Class description:
+ *
  *	UAttachmentManagerComponent is a system handling attachment equip/unequiping behaviour and applying GameplayEffects owned by the active Attachments.
  */
 UCLASS()
@@ -81,6 +102,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION(BlueprintCallable)
 	static UAttachmentManagerComponent* GetActorComponent(const AActor* NewActor);
 
@@ -91,13 +114,38 @@ public:
 	void SetupAttachmentModifiers(const TArray<UObject*>& NewResources);
 
 protected:
+	UFUNCTION()
+	void OnAttachmentModifiersRetrieved(FAttachmentToken AttachmentToken);
+
+	// @gdemers POD type that maps the attachment actor request to the Unique token id that identify
+	// a streamable handle.
+	struct FAttachmentStreamableContext
+	{
+		~FAttachmentStreamableContext() = default;
+
+		FAttachmentStreamableContext() = default;
+		FAttachmentStreamableContext(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment);
+
+		int32 StreamableContextId = INDEX_NONE;
+		TWeakObjectPtr<ATriggeringAttachmentActor> Attachment = nullptr;
+	};
+
+	// @gdemers POD type that queue data registry request.
 	struct FAttachmentQueuingMechanism
 	{
+		FAttachmentQueuingMechanism() = default;
 		~FAttachmentQueuingMechanism();
-		void Push(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewRequest);
-		TWeakObjectPtr<ATriggeringAttachmentActor> Pop();
-		TQueue<TWeakObjectPtr<ATriggeringAttachmentActor>> QueuedRequest;
+
+		void Push(const FAttachmentStreamableContext& NewContext);
+		TWeakObjectPtr<ATriggeringAttachmentActor> PeekAtIndex(const int32 NewIndex);
+
+		void ModifyIndex(const int32 NewIndex);
+
+		TArray<TSharedPtr<FAttachmentStreamableContext>> QueuedRequest;
 	};
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
+	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
@@ -105,5 +153,6 @@ protected:
 	UPROPERTY(Transient)
 	TMap<FGameplayTag, TWeakObjectPtr<ATriggeringAttachmentActor>> EquippedAttachments;
 
-	FAttachmentQueuingMechanism QueuingMechanism;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
+	TSharedPtr<FAttachmentQueuingMechanism> QueueingMechanism;
 };

@@ -33,7 +33,38 @@ EDataValidationResult UAttachmentDefinitionDataAsset::IsDataValid(class FDataVal
 }
 #endif
 
-const TArray<TSoftClassPtr<UGameplayEffect>>& UAttachmentDefinitionDataAsset::GetModifiers() const
+TArray<FSoftObjectPath> UAttachmentDefinitionDataAsset::GetModifiersSoftObjectPaths() const
 {
-	return ModifierEffectClasses;
+	TArray<FSoftObjectPath> OutResults;
+	for (const auto& ModifierEffectClass : ModifierEffectClasses)
+	{
+		OutResults.Add(ModifierEffectClass.ToSoftObjectPath());
+	}
+
+	return OutResults;
+}
+
+bool UAttachmentDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,
+                                                   const FGameplayTagContainer& BlockingTags) const
+{
+	return true;
+}
+
+#if WITH_EDITOR
+EDataValidationResult FAttachmentDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (AttachmentDefinition.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FAttachmentDefinitionDataTableRow", "", "UAttachmentDefinitionDataAsset missing. No valid UDataAsset specified!"));
+	}
+
+	return Result;
+}
+#endif
+
+TArray<FSoftObjectPath> FAttachmentDefinitionDataTableRow::GetResourcesPaths() const
+{
+	return {AttachmentDefinition.ToSoftObjectPath()};
 }

@@ -24,6 +24,7 @@
 #include "DataRegistryId.h"
 #include "DataRegistryTypes.h"
 #include "Components/ActorComponent.h"
+#include "Containers/Queue.h"
 #include "Engine/StreamableManager.h"
 
 #include "AVVMResourceManagerComponent.generated.h"
@@ -93,6 +94,6 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-	
+
 	TSharedPtr<FResourceQueueingMechanism> QueueingMechanism;
 };

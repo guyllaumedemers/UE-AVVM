@@ -82,8 +82,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestItems(const AActor* Outer);
 
-	void SetupItems(const TArray<UObject*>& Resources);
-	void SetupItemProgressions(const TArray<UObject*>& Resources);
+	void SetupItems(const TArray<UObject*>& NewResources);
+	void SetupItemProgressions(const TArray<UObject*>& NewResources);
 
 	UFUNCTION(BlueprintCallable)
 	const TArray<UItemObject*>& GetItems() const;

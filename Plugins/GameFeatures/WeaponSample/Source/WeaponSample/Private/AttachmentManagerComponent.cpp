@@ -23,6 +23,8 @@
 #include "AVVMGameplayUtils.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
+#include "Data/AttachmentDefinitionDataAsset.h"
+#include "Engine/AssetManager.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -30,6 +32,8 @@
 void UAttachmentManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	QueueingMechanism = MakeShared<FAttachmentQueuingMechanism>();
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -51,6 +55,8 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 {
 	Super::EndPlay(EndPlayReason);
 
+	QueueingMechanism.Reset();
+
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -63,6 +69,11 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UAttachmentManagerComponent::StaticClass()->GetName(),
 	       *Outer->GetName());
+}
+
+void UAttachmentManagerComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 UAttachmentManagerComponent* UAttachmentManagerComponent::GetActorComponent(const AActor* NewActor)
@@ -78,10 +89,11 @@ void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapConte
 
 void UAttachmentManagerComponent::GetAttachmentDefinition(const FGetAttachmentDefinitionRequestArgs& NewRequestArgs)
 {
-	QueuingMechanism.Push(NewRequestArgs.AttachmentActor);
+	if (QueueingMechanism.IsValid())
+	{
+		QueueingMechanism->Push(FAttachmentStreamableContext{NewRequestArgs.AttachmentActor.Get()});
+	}
 
-	// @gdemers racing conditions isnt possible due to how the resource manager component system behave.
-	// the above push/pop behaviour is safe.
 	auto* ResourceComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(OwningOuter.Get());
 	if (ensureAlwaysMsgf(IsValid(ResourceComponent),
 	                     TEXT("Outer is missing IAVVMResourceProvider::GetResourceManagerComponent impl or return nullptr.")))
@@ -92,14 +104,99 @@ void UAttachmentManagerComponent::GetAttachmentDefinition(const FGetAttachmentDe
 
 void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*>& NewResources)
 {
-	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueuingMechanism.Pop();
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
+	                      TEXT("Attempting to load invalid Attachment set on Outer \"%s\"."),
+	                      *Outer->GetName()))
+	{
+		return;
+	}
+
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
+
+	TArray<FSoftObjectPath> DeferredItems;
+	for (const UObject* Resource : NewResources)
+	{
+		const auto* AttachmentAsset = Cast<UAttachmentDefinitionDataAsset>(Resource);
+		if (!IsValid(AttachmentAsset))
+		{
+			continue;
+		}
+
+		if (!AttachmentAsset->CanAccessItem(ComponentStateTags, ComponentStateTags))
+		{
+			UE_LOG(LogWeaponSample,
+			       Log,
+			       TEXT("Executed from \"%s\". Failed to Meet \"%s\" Requirements."),
+			       IsServerOrClientString,
+			       *AttachmentAsset->GetName());
+
+			continue;
+		}
+
+		UE_LOG(LogWeaponSample,
+		       Log,
+		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
+		       IsServerOrClientString,
+		       *AttachmentAsset->GetName());
+
+		DeferredItems.Append(AttachmentAsset->GetModifiersSoftObjectPaths());
+	}
+
+	if (!DeferredItems.IsEmpty())
+	{
+		FAttachmentToken Token;
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentModifiersRetrieved, Token);
+
+		// TODO @gdemers ordering should be garantied from the AVVMResourceManagerComponent but still double check the possibility of a racing conditions.
+		// I remember fixing issues on the resource manager system for this kind of cases.
+		if (QueueingMechanism.IsValid())
+		{
+			QueueingMechanism->ModifyIndex(Token.UniqueId);
+		}
+
+		TSharedPtr<FStreamableHandle>& OutResult = AttachmentHandleSystem.FindOrAdd(Token.UniqueId);
+		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+	}
+}
+
+void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToken AttachmentToken)
+{
+	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentHandleSystem.Find(AttachmentToken.UniqueId);
+	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
+	{
+		return;
+	}
+
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
+	{
+		return;
+	}
+
+	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId);
 	if (AttachmentActor.IsValid())
 	{
+		TArray<UObject*> OutStreamableAssets;
+		(*OutResult)->GetLoadedAssets(OutStreamableAssets);
+
 		// TODO @gdemers Outer isnt the player state that holds the triggerable actor
 		// but the triggerable actor itself. maybe a recursive search of parent impose. TBD!
-		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningOuter.Get());
-		AttachmentActor->RegisterGameplayEffects(ASC, NewResources);
+		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Outer);
+		AttachmentActor->RegisterGameplayEffects(ASC, OutStreamableAssets);
 	}
+}
+
+UAttachmentManagerComponent::FAttachmentStreamableContext::FAttachmentStreamableContext(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
+	: StreamableContextId(INDEX_NONE)
+	, Attachment(NewAttachment)
+{
 }
 
 UAttachmentManagerComponent::FAttachmentQueuingMechanism::~FAttachmentQueuingMechanism()
@@ -107,14 +204,36 @@ UAttachmentManagerComponent::FAttachmentQueuingMechanism::~FAttachmentQueuingMec
 	QueuedRequest.Empty();
 }
 
-void UAttachmentManagerComponent::FAttachmentQueuingMechanism::Push(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewRequest)
+void UAttachmentManagerComponent::FAttachmentQueuingMechanism::Push(const FAttachmentStreamableContext& NewContext)
 {
-	QueuedRequest.Enqueue(NewRequest);
+	QueuedRequest.Add(MakeShared<FAttachmentStreamableContext>(NewContext));
 }
 
-TWeakObjectPtr<ATriggeringAttachmentActor> UAttachmentManagerComponent::FAttachmentQueuingMechanism::Pop()
+TWeakObjectPtr<ATriggeringAttachmentActor> UAttachmentManagerComponent::FAttachmentQueuingMechanism::PeekAtIndex(const int32 NewIndex)
 {
+	const TSharedPtr<FAttachmentStreamableContext>* SearchResult = QueuedRequest.FindByPredicate([SearchIndex = NewIndex](TSharedPtr<FAttachmentStreamableContext> NewContext)
+	{
+		return NewContext.IsValid() && NewContext->StreamableContextId == SearchIndex;
+	});
+
 	TWeakObjectPtr<ATriggeringAttachmentActor> Out;
-	QueuedRequest.Dequeue(Out);
+	if (SearchResult != nullptr && SearchResult->IsValid())
+	{
+		Out = (*SearchResult)->Attachment;
+	}
+
 	return Out;
+}
+
+void UAttachmentManagerComponent::FAttachmentQueuingMechanism::ModifyIndex(const int32 NewIndex)
+{
+	const TSharedPtr<FAttachmentStreamableContext>* SearchResult = QueuedRequest.FindByPredicate([](TSharedPtr<FAttachmentStreamableContext> NewContext)
+	{
+		return NewContext.IsValid() && NewContext->StreamableContextId == INDEX_NONE;
+	});
+
+	if (SearchResult != nullptr && SearchResult->IsValid())
+	{
+		(*SearchResult)->StreamableContextId = NewIndex;
+	}
 }

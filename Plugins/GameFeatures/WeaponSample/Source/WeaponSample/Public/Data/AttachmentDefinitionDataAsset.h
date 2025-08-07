@@ -20,7 +20,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 
+#include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
 #if WITH_EDITOR
@@ -47,7 +49,11 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	const TArray<TSoftClassPtr<UGameplayEffect>>& GetModifiers() const;
+	TArray<FSoftObjectPath> GetModifiersSoftObjectPaths() const;
+
+	UFUNCTION(BlueprintCallable)
+	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
+	                   const FGameplayTagContainer& BlockingTags) const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
@@ -55,4 +61,30 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportModifiers"))
 	TArray<TSoftClassPtr<UGameplayEffect>> ModifierEffectClasses;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTagContainer BlockingTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
+};
+
+/**
+ *	Class description:
+ *
+ *	FAttachmentDefinitionDataTableRow is an entry in a DataTableRow for a unique UAttachmentDefinitionDataAsset.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FAttachmentDefinitionDataTableRow : public FAVVMDataTableRow
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UAttachmentDefinitionDataAsset> AttachmentDefinition = nullptr;
 };

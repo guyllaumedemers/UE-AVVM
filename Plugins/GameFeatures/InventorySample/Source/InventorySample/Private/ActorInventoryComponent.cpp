@@ -32,6 +32,7 @@
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
+#include "Resources/AVVMResourceProvider.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
@@ -160,7 +161,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	}
 }
 
-void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
+void UActorInventoryComponent::SetupItems(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -168,7 +169,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 		return;
 	}
 
-	if (!ensureAlwaysMsgf(!Resources.IsEmpty(),
+	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
 	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
 	                      *Outer->GetName()))
 	{
@@ -178,7 +179,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredItems;
-	for (const UObject* Resource : Resources)
+	for (const UObject* Resource : NewResources)
 	{
 		const auto* ItemAsset = Cast<UItemDefinitionDataAsset>(Resource);
 		if (!IsValid(ItemAsset))
@@ -217,7 +218,7 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& Resources)
 	}
 }
 
-void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Resources)
+void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -231,7 +232,7 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Res
 	}
 
 	UItemObject* ItemObject = QueueingMechanism->PeekItem();
-	if (!IsValid(ItemObject) || !ensureAlwaysMsgf(!Resources.IsEmpty(),
+	if (!IsValid(ItemObject) || !ensureAlwaysMsgf(!NewResources.IsEmpty(),
 	                                              TEXT("Attempting to load invalid Progression Definition on Item \"%s\"."),
 	                                              *ItemObject->GetName()))
 	{
@@ -242,7 +243,7 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& Res
 	Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
 
 	const int32 ProgressionStageIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, ItemObject);
-	ItemObject->GetItemActorClassAsync(Resources[0], ProgressionStageIndex, Callback);
+	ItemObject->GetItemActorClassAsync(NewResources[0], ProgressionStageIndex, Callback);
 }
 
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
@@ -308,7 +309,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		return;
 	}
 
-	auto* ResourceManagerComponent = Outer->GetComponentByClass<UAVVMResourceManagerComponent>();
+	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(Outer);
 	if (!IsValid(ResourceManagerComponent))
 	{
 		return;
