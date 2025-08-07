@@ -156,7 +156,7 @@ void ATriggeringActor::OnSoftObjectAcquired()
 void ATriggeringActor::GetAllAttachmentMods(FWeaponAttachmentModifierContext& OutResult)
 {
 	OutResult.Modifiers.Reset(RegisteredAttachments.Num());
-	for (const TWeakObjectPtr<const ATriggeringAttachmentActor>& Attachment : RegisteredAttachments)
+	for (const auto& [SlotTag, Attachment] : RegisteredAttachments)
 	{
 		if (Attachment.IsValid())
 		{
