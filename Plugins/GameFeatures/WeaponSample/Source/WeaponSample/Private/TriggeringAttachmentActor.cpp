@@ -53,10 +53,10 @@ void ATriggeringAttachmentActor::BeginPlay()
 		auto* AttachementManagerComponent = UAttachmentManagerComponent::GetActorComponent(Outer);
 		if (IsValid(AttachementManagerComponent))
 		{
-			FGetAttachmentDefinitionRequestArgs Args;
+			FGetAttachmentModifierDefinitionRequestArgs Args;
 			Args.AttachmentActor = this;
-			Args.AttachmentId = AttachmentDefinitionId;
-			AttachementManagerComponent->GetAttachmentDefinition(Args);
+			Args.AttachmentModifierDefinitionId = AttachmentModifierDefinitionId;
+			AttachementManagerComponent->GetAttachmentModifierDefinition(Args);
 		}
 	}
 #endif

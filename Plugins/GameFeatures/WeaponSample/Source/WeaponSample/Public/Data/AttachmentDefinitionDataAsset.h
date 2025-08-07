@@ -37,6 +37,52 @@ class UGameplayEffect;
 /**
  *	Class description:
  *
+ *	UAttachmentModifierDefinitionDataAsset is a POD asset that defines the properties of an attachment.
+ */
+UCLASS(BlueprintType, NotBlueprintable)
+class WEAPONSAMPLE_API UAttachmentModifierDefinitionDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FSoftObjectPath> GetModifiersSoftObjectPaths() const;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bDoesSupportModifiers = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportModifiers"))
+	TArray<TSoftClassPtr<UGameplayEffect>> ModifierEffectClasses;
+};
+
+/**
+ *	Class description:
+ *
+ *	FAttachmentModifierDefinitionDataTableRow is an entry in a DataTableRow for a unique UAttachmentModifierDefinitionDataAsset.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FAttachmentModifierDefinitionDataTableRow : public FAVVMDataTableRow
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UAttachmentModifierDefinitionDataAsset> AttachmentModifierDefinition = nullptr;
+};
+
+/**
+ *	Class description:
+ *
  *	UAttachmentDefinitionDataAsset is a POD asset that defines the properties of an attachment.
  */
 UCLASS(BlueprintType, NotBlueprintable)
@@ -50,7 +96,7 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FSoftObjectPath> GetModifiersSoftObjectPaths() const;
+	const TSoftClassPtr<ATriggeringAttachmentActor>& GetTriggeringAttachmentClass() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
@@ -60,11 +106,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<ATriggeringAttachmentActor> TriggeringAttachmentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
-	bool bDoesSupportModifiers = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportModifiers"))
-	TArray<TSoftClassPtr<UGameplayEffect>> ModifierEffectClasses;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName SocketName = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;

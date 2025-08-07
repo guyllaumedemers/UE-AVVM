@@ -35,6 +35,7 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutAttachmentDefinition;
+	TArray<UObject*> OutAttachmentModifierDefinition;
 
 	for (UObject* Resource : Resources)
 	{
@@ -51,11 +52,23 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 			OutAttachmentDefinition.Add(Resource);
 			continue;
 		}
+
+		const auto* AttachmentModifierDefinition = Cast<UAttachmentModifierDefinitionDataAsset>(Resource);
+		if (IsValid(AttachmentModifierDefinition))
+		{
+			OutAttachmentModifierDefinition.Add(Resource);
+			continue;
+		}
 	}
 
-	if (!OutResources.IsEmpty())
+	if (!OutAttachmentDefinition.IsEmpty())
 	{
-		AttachmentManagerComponent->SetupAttachmentAndModifiers(OutAttachmentDefinition);
+		AttachmentManagerComponent->SetupAttachments(OutAttachmentDefinition);
+	}
+
+	if (!OutAttachmentModifierDefinition.IsEmpty())
+	{
+		AttachmentManagerComponent->SetupAttachmentModifiers(OutAttachmentModifierDefinition);
 	}
 
 	return OutResources;

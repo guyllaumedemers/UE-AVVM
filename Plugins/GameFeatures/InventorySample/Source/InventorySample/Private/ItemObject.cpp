@@ -222,6 +222,11 @@ void UItemObject::OnProgressionStageAcquired(FOnRequestItemActorClassComplete Ca
 
 FTransform UItemObject::GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const
 {
+	if (!IsValid(NewOuter))
+	{
+		return FTransform();
+	}
+
 	FTransform ItemAnchorTransform = NewOuter->GetActorTransform();
 	if (bShouldAttachToSocket)
 	{

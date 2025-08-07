@@ -23,8 +23,10 @@
 #include "AVVMGameplayUtils.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
+#include "Components/MeshComponent.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
+#include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -87,7 +89,7 @@ void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapConte
 	// all GE from the owning attachment.
 }
 
-void UAttachmentManagerComponent::GetAttachmentDefinition(const FGetAttachmentDefinitionRequestArgs& NewRequestArgs)
+void UAttachmentManagerComponent::GetAttachmentModifierDefinition(const FGetAttachmentModifierDefinitionRequestArgs& NewRequestArgs)
 {
 	if (QueueingMechanism.IsValid())
 	{
@@ -98,11 +100,11 @@ void UAttachmentManagerComponent::GetAttachmentDefinition(const FGetAttachmentDe
 	if (ensureAlwaysMsgf(IsValid(ResourceComponent),
 	                     TEXT("Outer is missing IAVVMResourceProvider::GetResourceManagerComponent impl or return nullptr.")))
 	{
-		ResourceComponent->RequestAsyncLoading(NewRequestArgs.AttachmentId, {});
+		ResourceComponent->RequestAsyncLoading(NewRequestArgs.AttachmentModifierDefinitionId, {});
 	}
 }
 
-void UAttachmentManagerComponent::SetupAttachmentAndModifiers(const TArray<UObject*>& NewResources)
+void UAttachmentManagerComponent::SetupAttachments(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -119,7 +121,6 @@ void UAttachmentManagerComponent::SetupAttachmentAndModifiers(const TArray<UObje
 
 	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
-	// TODO @gdemers Check how loading/spawning Actor class for the attachment would work from here!
 	TArray<FSoftObjectPath> DeferredItems;
 	for (const UObject* Resource : NewResources)
 	{
@@ -146,7 +147,53 @@ void UAttachmentManagerComponent::SetupAttachmentAndModifiers(const TArray<UObje
 		       IsServerOrClientString,
 		       *AttachmentAsset->GetName());
 
-		DeferredItems.Append(AttachmentAsset->GetModifiersSoftObjectPaths());
+		DeferredItems.Add(AttachmentAsset->GetTriggeringAttachmentClass().ToSoftObjectPath());
+	}
+
+	if (!DeferredItems.IsEmpty())
+	{
+		FAttachmentToken Token;
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentActorRetrieved, Token);
+
+		TSharedPtr<FStreamableHandle>& OutResult = AttachmentHandleSystem.FindOrAdd(Token.UniqueId);
+		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+	}
+}
+
+void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*>& NewResources)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
+	                      TEXT("Attempting to load invalid Attachment Modifier set on Outer \"%s\"."),
+	                      *Outer->GetName()))
+	{
+		return;
+	}
+
+	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
+
+	TArray<FSoftObjectPath> DeferredItems;
+	for (const UObject* Resource : NewResources)
+	{
+		const auto* AttachmentModifierAsset = Cast<UAttachmentModifierDefinitionDataAsset>(Resource);
+		if (!IsValid(AttachmentModifierAsset))
+		{
+			continue;
+		}
+
+		UE_LOG(LogWeaponSample,
+		       Log,
+		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
+		       IsServerOrClientString,
+		       *AttachmentModifierAsset->GetName());
+
+		DeferredItems.Append(AttachmentModifierAsset->GetModifiersSoftObjectPaths());
 	}
 
 	if (!DeferredItems.IsEmpty())
@@ -155,15 +202,38 @@ void UAttachmentManagerComponent::SetupAttachmentAndModifiers(const TArray<UObje
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentModifiersRetrieved, Token);
 
-		// TODO @gdemers ordering should be garantied from the AVVMResourceManagerComponent but still double check the possibility of a racing conditions.
-		// I remember fixing issues on the resource manager system for this kind of cases.
-		if (QueueingMechanism.IsValid())
-		{
-			QueueingMechanism->ModifyIndex(Token.UniqueId);
-		}
-
 		TSharedPtr<FStreamableHandle>& OutResult = AttachmentHandleSystem.FindOrAdd(Token.UniqueId);
 		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+	}
+}
+
+void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken AttachmentToken)
+{
+	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentHandleSystem.Find(AttachmentToken.UniqueId);
+	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
+	{
+		return;
+	}
+
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
+	{
+		return;
+	}
+
+	TArray<UObject*> OutStreamableAssets;
+	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
+
+	if (OutStreamableAssets.IsEmpty())
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		const FTransform NewItemTransform = GetSpawningAnchorTransform(OwningOuter.Get(), true);
+		World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &NewItemTransform, FActorSpawnParameters());
 	}
 }
 
@@ -181,7 +251,7 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToke
 		return;
 	}
 
-	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId);
+	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism.IsValid() ? QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId) : nullptr;
 	if (AttachmentActor.IsValid())
 	{
 		TArray<UObject*> OutStreamableAssets;
@@ -192,6 +262,26 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToke
 		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Outer);
 		AttachmentActor->RegisterGameplayEffects(ASC, OutStreamableAssets);
 	}
+}
+
+FTransform UAttachmentManagerComponent::GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const
+{
+	if (!IsValid(NewOuter))
+	{
+		return FTransform();
+	}
+
+	FTransform ItemAnchorTransform = NewOuter->GetActorTransform();
+	if (bShouldAttachToSocket)
+	{
+		const auto* MeshComponent = NewOuter->GetComponentByClass<UMeshComponent>();
+		if (IsValid(MeshComponent))
+		{
+			ItemAnchorTransform = MeshComponent->GetSocketTransform({}/*TODO*/);
+		}
+	}
+
+	return ItemAnchorTransform;
 }
 
 UAttachmentManagerComponent::FAttachmentStreamableContext::FAttachmentStreamableContext(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)

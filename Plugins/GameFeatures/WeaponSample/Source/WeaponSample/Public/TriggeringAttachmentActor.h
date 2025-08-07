@@ -55,13 +55,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName SocketName = NAME_None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FDataRegistryId AttachmentDefinitionId = FDataRegistryId();
+	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;

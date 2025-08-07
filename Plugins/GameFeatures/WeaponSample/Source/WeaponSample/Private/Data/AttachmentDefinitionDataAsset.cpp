@@ -20,20 +20,20 @@
 #include "Data/AttachmentDefinitionDataAsset.h"
 
 #if WITH_EDITOR
-EDataValidationResult UAttachmentDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UAttachmentModifierDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 	if (bDoesSupportModifiers && ModifierEffectClasses.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAttachmentDefinitionDataAsset", "", "ModifierEffectClasses Empty!"));
+		Context.AddError(NSLOCTEXT("UAttachmentModifierDefinitionDataAsset", "", "ModifierEffectClasses Empty!"));
 	}
 
 	return Result;
 }
 #endif
 
-TArray<FSoftObjectPath> UAttachmentDefinitionDataAsset::GetModifiersSoftObjectPaths() const
+TArray<FSoftObjectPath> UAttachmentModifierDefinitionDataAsset::GetModifiersSoftObjectPaths() const
 {
 	TArray<FSoftObjectPath> OutResults;
 	for (const auto& ModifierEffectClass : ModifierEffectClasses)
@@ -42,6 +42,44 @@ TArray<FSoftObjectPath> UAttachmentDefinitionDataAsset::GetModifiersSoftObjectPa
 	}
 
 	return OutResults;
+}
+
+#if WITH_EDITOR
+EDataValidationResult FAttachmentModifierDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (AttachmentModifierDefinition.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FAttachmentModifierDefinitionDataTableRow", "", "UAttachmentModifierDefinitionDataAsset missing. No valid UDataAsset specified!"));
+	}
+
+	return Result;
+}
+#endif
+
+TArray<FSoftObjectPath> FAttachmentModifierDefinitionDataTableRow::GetResourcesPaths() const
+{
+	return {AttachmentModifierDefinition.ToSoftObjectPath()};
+}
+
+#if WITH_EDITOR
+EDataValidationResult UAttachmentDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (TriggeringAttachmentClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAttachmentDefinitionDataAsset", "", "AttachmentActorClasses Empty!"));
+	}
+
+	return Result;
+}
+#endif
+
+const TSoftClassPtr<ATriggeringAttachmentActor>& UAttachmentDefinitionDataAsset::GetTriggeringAttachmentClass() const
+{
+	return TriggeringAttachmentClass;
 }
 
 bool UAttachmentDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,

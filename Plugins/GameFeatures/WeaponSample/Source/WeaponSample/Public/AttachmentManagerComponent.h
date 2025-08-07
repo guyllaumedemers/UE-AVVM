@@ -36,12 +36,12 @@ class ATriggeringAttachmentActor;
  *	FGetAttachmentDefinitionRequestArgs is a POD type to encapsulate signature function args.
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FGetAttachmentDefinitionRequestArgs
+struct WEAPONSAMPLE_API FGetAttachmentModifierDefinitionRequestArgs
 {
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FDataRegistryId AttachmentId = FDataRegistryId();
+	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = nullptr;
@@ -110,12 +110,19 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Swap(const FAttachmentSwapContextArgs& NewAttachmentSwapContext);
 
-	void GetAttachmentDefinition(const FGetAttachmentDefinitionRequestArgs& NewRequestArgs);
-	void SetupAttachmentAndModifiers(const TArray<UObject*>& NewResources);
+	void GetAttachmentModifierDefinition(const FGetAttachmentModifierDefinitionRequestArgs& NewRequestArgs);
+	void SetupAttachments(const TArray<UObject*>& NewResources);
+	void SetupAttachmentModifiers(const TArray<UObject*>& NewResources);
 
 protected:
 	UFUNCTION()
+	void OnAttachmentActorRetrieved(FAttachmentToken AttachmentToken);
+
+	UFUNCTION()
 	void OnAttachmentModifiersRetrieved(FAttachmentToken AttachmentToken);
+
+	FTransform GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const;
+	void SpawnAttachment(UClass* NewActorClass);
 
 	// @gdemers POD type that maps the attachment actor request to the Unique token id that identify
 	// a streamable handle.
