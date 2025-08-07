@@ -230,10 +230,18 @@ void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken At
 	}
 
 	UWorld* World = GetWorld();
-	if (IsValid(World))
+	if (!IsValid(World))
 	{
-		const FTransform NewItemTransform = GetSpawningAnchorTransform(OwningOuter.Get(), true);
-		World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &NewItemTransform, FActorSpawnParameters());
+		return;
+	}
+
+	FActorSpawnParameters Params;
+	Params.Owner = const_cast<AActor*>(Outer);
+
+	auto* NewAttachment = Cast<ATriggeringAttachmentActor>(World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &FTransform::Identity, Params));
+	if (IsValid(NewAttachment))
+	{
+		NewAttachment->Attach();
 	}
 }
 

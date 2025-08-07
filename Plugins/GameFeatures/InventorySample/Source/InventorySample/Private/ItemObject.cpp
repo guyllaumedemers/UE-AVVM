@@ -143,8 +143,8 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewProgressionDefinition
 	}
 }
 
-void UItemObject::SpawnActorClass(const AActor* NewAnchor,
-                                  const UClass* NewActorClass)
+void UItemObject::SpawnActorClass(AActor* NewAnchor,
+                                  UClass* NewActorClass)
 {
 	if (!IsValid(NewActorClass))
 	{
@@ -156,8 +156,11 @@ void UItemObject::SpawnActorClass(const AActor* NewAnchor,
 	UWorld* World = GetWorld();
 	if (IsValid(World))
 	{
+		FActorSpawnParameters Params;
+		Params.Owner = NewAnchor;
 		const FTransform NewItemTransform = GetSpawningAnchorTransform(NewAnchor, bShouldSpawnAndAttach);
-		RuntimeItemActor = World->SpawnActor(const_cast<UClass*>(NewActorClass), &NewItemTransform, FActorSpawnParameters());
+
+		RuntimeItemActor = World->SpawnActor(NewActorClass, &NewItemTransform, Params);
 		ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
 	}
 
@@ -165,7 +168,7 @@ void UItemObject::SpawnActorClass(const AActor* NewAnchor,
 	                                              TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
 		// @gdemers bad practice but avoid code refactoring!
-		RuntimeItemActor->AttachToActor(const_cast<AActor*>(NewAnchor), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		RuntimeItemActor->AttachToActor(NewAnchor, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 	}
 }
 

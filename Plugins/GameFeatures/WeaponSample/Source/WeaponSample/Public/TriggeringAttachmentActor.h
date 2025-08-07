@@ -47,6 +47,12 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
+	void Attach();
+
+	UFUNCTION(BlueprintCallable)
+	void Detach();
+
+	UFUNCTION(BlueprintCallable)
 	void RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
 	                             const TArray<UObject*>& NewResources);
 
@@ -58,7 +64,13 @@ protected:
 	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TWeakObjectPtr<AActor> OwningOuter = nullptr;
+	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FName SocketName = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)
 	TArray<FActiveGameplayEffectHandle> GameplayEffectSpecHandles;

@@ -418,7 +418,7 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 	}
 }
 
-void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorClass,
+void UActorInventoryComponent::OnItemActorClassRetrieved(UClass* NewActorClass,
                                                          UItemObject* NewItemObject)
 {
 	const AActor* Outer = OwningOuter.Get();
@@ -429,7 +429,7 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 
 	if (IsValid(NewItemObject))
 	{
-		NewItemObject->SpawnActorClass(Outer, NewActorClass);
+		NewItemObject->SpawnActorClass(const_cast<AActor*>(Outer), NewActorClass);
 	}
 
 	if (ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))

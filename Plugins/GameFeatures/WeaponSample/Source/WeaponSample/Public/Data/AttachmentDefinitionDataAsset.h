@@ -106,12 +106,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<ATriggeringAttachmentActor> TriggeringAttachmentClass = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName SocketName = NAME_None;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 

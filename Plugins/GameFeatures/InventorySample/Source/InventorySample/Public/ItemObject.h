@@ -34,7 +34,7 @@
 
 #include "ItemObject.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, class UItemObject*, NewItemObject);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, UClass*, NewActorClass, class UItemObject*, NewItemObject);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeStateChanged, const FGameplayTagContainer&, NewState);
 
@@ -128,8 +128,8 @@ public:
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnActorClass(const AActor* NewAnchor,
-	                     const UClass* NewActorClass);
+	void SpawnActorClass(AActor* NewAnchor,
+	                     UClass* NewActorClass);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;

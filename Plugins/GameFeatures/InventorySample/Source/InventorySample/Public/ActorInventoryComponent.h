@@ -108,7 +108,7 @@ protected:
 	                    UItemObject* NewItem);
 
 	UFUNCTION()
-	void OnItemActorClassRetrieved(const UClass* NewActorClass,
+	void OnItemActorClassRetrieved(UClass* NewActorClass,
 	                               UItemObject* NewItemObject);
 
 	struct FItemSpawnerQueuingMechanism

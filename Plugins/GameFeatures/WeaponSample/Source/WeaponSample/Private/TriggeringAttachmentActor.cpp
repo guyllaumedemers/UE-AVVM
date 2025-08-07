@@ -26,13 +26,14 @@
 #include "AVVMGameplayUtils.h"
 #include "GameplayEffect.h"
 #include "WeaponSample.h"
+#include "Components/MeshComponent.h"
 #include "GameFramework/Actor.h"
 
 void ATriggeringAttachmentActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto* Outer = GetTypedOuter<AActor>();
+	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -50,13 +51,13 @@ void ATriggeringAttachmentActor::BeginPlay()
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
-		auto* AttachementManagerComponent = UAttachmentManagerComponent::GetActorComponent(Outer);
-		if (IsValid(AttachementManagerComponent))
+		auto* AttachmentManagerComponent = UAttachmentManagerComponent::GetActorComponent(Outer);
+		if (IsValid(AttachmentManagerComponent))
 		{
 			FGetAttachmentModifierDefinitionRequestArgs Args;
 			Args.AttachmentActor = this;
 			Args.AttachmentModifierDefinitionId = AttachmentModifierDefinitionId;
-			AttachementManagerComponent->GetAttachmentModifierDefinition(Args);
+			AttachmentManagerComponent->GetAttachmentModifierDefinition(Args);
 		}
 	}
 #endif
@@ -66,7 +67,7 @@ void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReaso
 {
 	Super::EndPlay(EndPlayReason);
 
-	AActor* Outer = OwningOuter.Get();
+	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -87,6 +88,47 @@ void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReaso
 #endif
 }
 
+void ATriggeringAttachmentActor::Attach()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogWeaponSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
+	       *Outer->GetName(),
+	       *SocketName.ToString());
+
+	// @gdemers exception case in which I violate const-ness on purpose. theres no reason why the attachment should modify
+	// the owning type other than during attach/detach behaviour or when adding itself as children to the Owner child list for replication.
+	// In my opinion, the engine didnt set properly their access specifier. We modify the parent RootComponent, not the actor.
+	AttachToActor(const_cast<AActor*>(Outer), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+}
+
+void ATriggeringAttachmentActor::Detach()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogWeaponSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Detaching \"%s\" from Outer \"%s\" at SocketName \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
+	       *Outer->GetName(),
+	       *SocketName.ToString());
+
+	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+}
+
 void ATriggeringAttachmentActor::RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
                                                          const TArray<UObject*>& NewResources)
 {
@@ -100,7 +142,7 @@ void ATriggeringAttachmentActor::RegisterGameplayEffects(UAbilitySystemComponent
 	GameplayEffectSpecHandles.Reset(NewResources.Num());
 	for (UObject* Resource : NewResources)
 	{
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(Cast<UClass>(Resource), this, OwningOuter.Get());
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(Cast<UClass>(Resource), this, const_cast<AActor*>(OwningOuter.Get()));
 		GameplayEffectSpecHandles.Add(NewAbilitySystemComponent->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle));
 	}
 }
