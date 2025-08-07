@@ -132,7 +132,7 @@ void ATriggeringAttachmentActor::Detach()
 void ATriggeringAttachmentActor::RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
                                                          const TArray<UObject*>& NewResources)
 {
-	if (!IsValid(NewAbilitySystemComponent))
+	if (!ensureAlwaysMsgf(IsValid(NewAbilitySystemComponent), TEXT("Outer didn't return a valid Ability System Component!")))
 	{
 		return;
 	}
@@ -154,14 +154,14 @@ void ATriggeringAttachmentActor::UnRegisterGameplayEffects()
 		return;
 	}
 
-	auto* ASC = GameplayEffectSpecHandles[0].GetOwningAbilitySystemComponent();
-	if (!IsValid(ASC))
+	auto* NewAbilitySystemComponent = GameplayEffectSpecHandles[0].GetOwningAbilitySystemComponent();
+	if (!ensureAlwaysMsgf(IsValid(NewAbilitySystemComponent), TEXT("The GameplayEffectSpecHandle didn't reference a valid Ability System Component!")))
 	{
 		return;
 	}
 
-	for (FActiveGameplayEffectHandle& ActiveGameplayEffect : GameplayEffectSpecHandles)
+	for (const FActiveGameplayEffectHandle& ActiveGameplayEffect : GameplayEffectSpecHandles)
 	{
-		ASC->RemoveActiveGameplayEffect(ActiveGameplayEffect);
+		NewAbilitySystemComponent->RemoveActiveGameplayEffect(ActiveGameplayEffect);
 	}
 }

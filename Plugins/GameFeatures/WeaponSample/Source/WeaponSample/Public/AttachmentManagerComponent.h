@@ -67,7 +67,7 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 /**
  *	Class description:
  *
- *	FAttachmentToken describe a unique identifier that increment only when default construct. Can be safely
+ *	FAttachmentToken describe a unique identifier that increments only when default construct. Can be safely
  *	passed by copy around.
  */
 USTRUCT(BlueprintType)
@@ -145,6 +145,8 @@ protected:
 		TArray<TSharedPtr<FAttachmentStreamableContext>> QueuedRequest;
 	};
 
+	// @gdemers POD type that aggregate actor to be destroyed. Actors should be kept, deactivated until batching happens so if a swap
+	// action occurs, we can pull out the actor and prevent allocation in world of a new actor.
 	struct FAttachmentBatchingMechanism
 	{
 		~FAttachmentBatchingMechanism();

@@ -28,6 +28,7 @@
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -284,14 +285,21 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToke
 	}
 
 	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId);
-	if (AttachmentActor.IsValid())
+	if (!AttachmentActor.IsValid())
 	{
-		TArray<UObject*> OutStreamableAssets;
-		(*OutResult)->GetLoadedAssets(OutStreamableAssets);
+		return;
+	}
 
-		// TODO @gdemers Outer isnt the player state that holds the triggerable actor
-		// but the triggerable actor itself. maybe a recursive search of parent impose. TBD!
-		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Outer);
+	TArray<UObject*> OutStreamableAssets;
+	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
+
+	// @gdemers our Outer actor refers to the TriggeringActor which doesn't hold an ASC. It is expected that the user adds an ASC
+	// to a Controller when using this system with AI and on the PlayerState for local player behaviour. 
+	auto* Controller = GetTypedOuter<AController>();
+	if (ensureAlwaysMsgf(IsValid(Controller), TEXT("GetTypedOuter doesn't refer to any Controller derived type!")))
+	{
+		auto* ASCHolder = IsValid(Controller->PlayerState) ? Cast<AActor>(Controller->PlayerState) : Cast<AActor>(Controller);
+		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(ASCHolder);
 		AttachmentActor->RegisterGameplayEffects(ASC, OutStreamableAssets);
 	}
 }
