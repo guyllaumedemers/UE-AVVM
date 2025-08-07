@@ -167,7 +167,6 @@ void UItemObject::SpawnActorClass(AActor* NewAnchor,
 	if (bShouldSpawnAndAttach && ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                                              TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
-		// @gdemers bad practice but avoid code refactoring!
 		RuntimeItemActor->AttachToActor(NewAnchor, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 	}
 }
