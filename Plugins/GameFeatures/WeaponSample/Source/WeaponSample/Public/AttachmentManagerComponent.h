@@ -155,7 +155,8 @@ protected:
 		TArray<TWeakObjectPtr<ATriggeringAttachmentActor>> PendingDestroy;
 	};
 
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
+	// @gdemers property updated on the server only, theres no point in replicating this on the client as swapping, attach/detach will be request process server-side ALWAYS!
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
