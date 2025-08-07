@@ -23,15 +23,15 @@
 
 #include "Resources/AVVMResourceHandlingImpl.h"
 
-#include "AttachmentResourceImpl.generated.h"
+#include "TriggeringResourceImpl.generated.h"
 
 /**
  *	Class description:
  *
-*	UAttachmentResourceImpl implement resource loading for Attachment resources.
+*	UTriggeringResourceImpl implement resource loading for Triggering Actor and nested Attachment resources.
  */
 UCLASS()
-class WEAPONSAMPLE_API UAttachmentResourceImpl : public UAVVMResourceHandlingImpl
+class WEAPONSAMPLE_API UTriggeringResourceImpl : public UAVVMResourceHandlingImpl
 {
 	GENERATED_BODY()
 

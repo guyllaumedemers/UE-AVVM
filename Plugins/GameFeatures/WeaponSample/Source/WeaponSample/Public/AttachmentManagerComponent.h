@@ -111,7 +111,7 @@ public:
 	void Swap(const FAttachmentSwapContextArgs& NewAttachmentSwapContext);
 
 	void GetAttachmentDefinition(const FGetAttachmentDefinitionRequestArgs& NewRequestArgs);
-	void SetupAttachmentModifiers(const TArray<UObject*>& NewResources);
+	void SetupAttachmentAndModifiers(const TArray<UObject*>& NewResources);
 
 protected:
 	UFUNCTION()

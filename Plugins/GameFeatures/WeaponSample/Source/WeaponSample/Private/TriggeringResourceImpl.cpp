@@ -17,13 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AttachmentResourceImpl.h"
+#include "TriggeringResourceImpl.h"
 
 #include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
+#include "Data/TriggeringDefinitionDataAsset.h"
 
-TArray<FDataRegistryId> UAttachmentResourceImpl::ProcessResources(UActorComponent* ActorComponent,
+TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponent* ActorComponent,
                                                                   const TArray<UObject*>& Resources) const
 {
 	auto* AttachmentManagerComponent = Cast<UAttachmentManagerComponent>(ActorComponent);
@@ -32,20 +33,30 @@ TArray<FDataRegistryId> UAttachmentResourceImpl::ProcessResources(UActorComponen
 		return TArray<FDataRegistryId>{};
 	}
 
-	TArray<UObject*> OutResources;
+	TArray<FDataRegistryId> OutResources;
+	TArray<UObject*> OutAttachmentDefinition;
+
 	for (UObject* Resource : Resources)
 	{
+		const auto* TriggeringDefinition = Cast<UTriggeringDefinitionDataAsset>(Resource);
+		if (IsValid(TriggeringDefinition))
+		{
+			OutResources.Append(TriggeringDefinition->GetDefaultAttachmentIds());
+			continue;
+		}
+
 		const auto* AttachmentDefinition = Cast<UAttachmentDefinitionDataAsset>(Resource);
 		if (IsValid(AttachmentDefinition))
 		{
-			OutResources.Add(Resource);
+			OutAttachmentDefinition.Add(Resource);
+			continue;
 		}
 	}
 
 	if (!OutResources.IsEmpty())
 	{
-		AttachmentManagerComponent->SetupAttachmentModifiers(OutResources);
+		AttachmentManagerComponent->SetupAttachmentAndModifiers(OutAttachmentDefinition);
 	}
 
-	return TArray<FDataRegistryId>{};
+	return OutResources;
 }

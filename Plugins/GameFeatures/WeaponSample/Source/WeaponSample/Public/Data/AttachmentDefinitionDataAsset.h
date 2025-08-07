@@ -20,8 +20,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 
+#include "GameplayTagContainer.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
@@ -31,12 +31,13 @@
 
 #include "AttachmentDefinitionDataAsset.generated.h"
 
+class ATriggeringAttachmentActor;
 class UGameplayEffect;
 
 /**
  *	Class description:
  *
- *	UAttachmentDefinitionDataAsset is a POD asset that define the properties of an attachment.
+ *	UAttachmentDefinitionDataAsset is a POD asset that defines the properties of an attachment.
  */
 UCLASS(BlueprintType, NotBlueprintable)
 class WEAPONSAMPLE_API UAttachmentDefinitionDataAsset : public UDataAsset
@@ -56,6 +57,9 @@ public:
 	                   const FGameplayTagContainer& BlockingTags) const;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftClassPtr<ATriggeringAttachmentActor> TriggeringAttachmentClass = nullptr;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
 	bool bDoesSupportModifiers = true;
 

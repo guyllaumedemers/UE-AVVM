@@ -77,12 +77,14 @@ EDataValidationResult UItemGroupDefinitionDataAsset::IsDataValid(class FDataVali
 
 	return Result;
 }
+#endif
 
 const TArray<FDataRegistryId>& UItemGroupDefinitionDataAsset::GetItemIds() const
 {
 	return ItemIds;
 }
 
+#if WITH_EDITOR
 EDataValidationResult FItemGroupDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);

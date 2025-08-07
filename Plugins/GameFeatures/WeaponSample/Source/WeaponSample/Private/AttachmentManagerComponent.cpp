@@ -102,7 +102,7 @@ void UAttachmentManagerComponent::GetAttachmentDefinition(const FGetAttachmentDe
 	}
 }
 
-void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*>& NewResources)
+void UAttachmentManagerComponent::SetupAttachmentAndModifiers(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -119,6 +119,7 @@ void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*
 
 	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
+	// TODO @gdemers Check how loading/spawning Actor class for the attachment would work from here!
 	TArray<FSoftObjectPath> DeferredItems;
 	for (const UObject* Resource : NewResources)
 	{

@@ -21,15 +21,58 @@
 
 #include "CoreMinimal.h"
 
-#include "UObject/Object.h"
+#include "GameplayTagContainer.h"
+#include "DataRegistryId.h"
+#include "Data/AVVMDataTableRow.h"
+#include "Engine/DataAsset.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
 
 #include "TriggeringDefinitionDataAsset.generated.h"
 
 /**
- * 
+ *	Class description:
+ *
+ *	UTriggeringDefinitionDataAsset is a POD asset that defines the properties of a Triggering Actor.
  */
 UCLASS()
-class WEAPONSAMPLE_API UTriggeringDefinitionDataAsset : public UObject
+class WEAPONSAMPLE_API UTriggeringDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
+
+public:
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	const TArray<FDataRegistryId>& GetDefaultAttachmentIds() const;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	bool bDoesSupportDefaultAttachments = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportDefaultAttachments"))
+	TArray<FDataRegistryId> DefaultAttachmentIds;
+};
+
+/**
+ *	Class description:
+ *
+ *	FTriggeringDefinitionDataTableRow is an entry in a DataTableRow for a unique UTriggeringDefinitionDataAsset.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FTriggeringDefinitionDataTableRow : public FAVVMDataTableRow
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftObjectPtr<UTriggeringDefinitionDataAsset> TriggeringDefinition = nullptr;
 };

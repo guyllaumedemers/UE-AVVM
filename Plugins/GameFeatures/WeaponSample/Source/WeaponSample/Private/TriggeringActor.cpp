@@ -63,6 +63,11 @@ void ATriggeringActor::BeginPlay()
 	if (bShouldAsyncLoadOnBeginPlay)
 	{
 		Swap(true);
+
+		if (IsValid(ResourceManagerComponent))
+		{
+			ResourceManagerComponent->RequestAsyncLoading(TriggeringDefinitionId, {});
+		}
 	}
 #endif
 }

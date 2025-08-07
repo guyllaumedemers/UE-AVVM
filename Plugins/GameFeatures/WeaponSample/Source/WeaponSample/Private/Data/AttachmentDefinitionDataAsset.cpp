@@ -47,7 +47,9 @@ TArray<FSoftObjectPath> UAttachmentDefinitionDataAsset::GetModifiersSoftObjectPa
 bool UAttachmentDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,
                                                    const FGameplayTagContainer& BlockingTags) const
 {
-	return true;
+	const bool bHasRequiredTags = RequirementTags.HasAllExact(RequiredTagsForItemAccess);
+	const bool bHasBlockingTags = BlockingTags.HasAnyExact(BlockingTagsForItemAccess);
+	return !bHasBlockingTags && bHasRequiredTags;
 }
 
 #if WITH_EDITOR

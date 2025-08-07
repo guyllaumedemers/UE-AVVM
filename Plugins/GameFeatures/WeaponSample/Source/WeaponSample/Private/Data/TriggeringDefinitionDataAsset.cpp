@@ -18,3 +18,41 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Data/TriggeringDefinitionDataAsset.h"
+
+#if WITH_EDITOR
+EDataValidationResult UTriggeringDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (bDoesSupportDefaultAttachments && DefaultAttachmentIds.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UTriggeringDefinitionDataAsset", "", "FDataRegistry Collection is Empty. No valid entries detected!"));
+	}
+
+	return Result;
+}
+#endif
+
+const TArray<FDataRegistryId>& UTriggeringDefinitionDataAsset::GetDefaultAttachmentIds() const
+{
+	return DefaultAttachmentIds;
+}
+
+#if WITH_EDITOR
+EDataValidationResult FTriggeringDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (TriggeringDefinition.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FTriggeringDefinitionDataTableRow", "", "UTriggeringDefinitionDataAsset missing. No valid UDataAsset specified!"));
+	}
+
+	return Result;
+}
+#endif
+
+TArray<FSoftObjectPath> FTriggeringDefinitionDataTableRow::GetResourcesPaths() const
+{
+	return {TriggeringDefinition.ToSoftObjectPath()};
+}

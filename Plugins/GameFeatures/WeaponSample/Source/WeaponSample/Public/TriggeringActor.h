@@ -102,6 +102,9 @@ protected:
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftClassPtr<UTriggeringAbility> TriggeringAbilityClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
