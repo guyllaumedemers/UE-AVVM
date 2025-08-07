@@ -58,10 +58,7 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<ATriggeringAttachmentActor> Src = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<ATriggeringAttachmentActor> Dest = nullptr;
+	TWeakObjectPtr<ATriggeringAttachmentActor> Attachment = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayTag TargetSlotTag = FGameplayTag::EmptyTag;
@@ -121,9 +118,6 @@ protected:
 	UFUNCTION()
 	void OnAttachmentModifiersRetrieved(FAttachmentToken AttachmentToken);
 
-	FTransform GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const;
-	void SpawnAttachment(UClass* NewActorClass);
-
 	// @gdemers POD type that maps the attachment actor request to the Unique token id that identify
 	// a streamable handle.
 	struct FAttachmentStreamableContext
@@ -151,6 +145,16 @@ protected:
 		TArray<TSharedPtr<FAttachmentStreamableContext>> QueuedRequest;
 	};
 
+	struct FAttachmentBatchingMechanism
+	{
+		~FAttachmentBatchingMechanism();
+
+		void PushPendingDestroy(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment);
+		void BatchDestroy();
+
+		TArray<TWeakObjectPtr<ATriggeringAttachmentActor>> PendingDestroy;
+	};
+
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
@@ -161,5 +165,6 @@ protected:
 	TMap<FGameplayTag, TWeakObjectPtr<ATriggeringAttachmentActor>> EquippedAttachments;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
+	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;
 	TSharedPtr<FAttachmentQueuingMechanism> QueueingMechanism;
 };

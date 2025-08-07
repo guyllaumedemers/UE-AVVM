@@ -310,7 +310,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	}
 
 	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(Outer);
-	if (!IsValid(ResourceManagerComponent))
+	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer doesn't return valid AVVMResourceManagerComponent!")))
 	{
 		return;
 	}

@@ -35,6 +35,7 @@ void UAttachmentManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	BatchingMechanism = MakeShared<FAttachmentBatchingMechanism>();
 	QueueingMechanism = MakeShared<FAttachmentQueuingMechanism>();
 
 	const auto* Outer = GetTypedOuter<AActor>();
@@ -57,6 +58,7 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 {
 	Super::EndPlay(EndPlayReason);
 
+	BatchingMechanism.Reset();
 	QueueingMechanism.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
@@ -85,8 +87,24 @@ UAttachmentManagerComponent* UAttachmentManagerComponent::GetActorComponent(cons
 
 void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapContextArgs& NewAttachmentSwapContext)
 {
-	// TODO @gdemers Handle slot swapping. Removing a Slot without reassigning should remove
-	// all GE from the owning attachment.
+	TWeakObjectPtr<ATriggeringAttachmentActor>* SearchResult = EquippedAttachments.Find(NewAttachmentSwapContext.TargetSlotTag);
+	if ((SearchResult == nullptr) || !SearchResult->IsValid())
+	{
+		EquippedAttachments.Add({NewAttachmentSwapContext.TargetSlotTag, NewAttachmentSwapContext.Attachment});
+		return;
+	}
+
+	if (BatchingMechanism.IsValid())
+	{
+		// @gdemers add to batch destroy collection
+		BatchingMechanism->PushPendingDestroy(*SearchResult);
+	}
+
+	// @gdemers detach old actor from parent 
+	(*SearchResult)->Detach();
+
+	// @gdemers update entry reference
+	*SearchResult = NewAttachmentSwapContext.Attachment;
 }
 
 void UAttachmentManagerComponent::GetAttachmentModifierDefinition(const FGetAttachmentModifierDefinitionRequestArgs& NewRequestArgs)
@@ -96,11 +114,10 @@ void UAttachmentManagerComponent::GetAttachmentModifierDefinition(const FGetAtta
 		QueueingMechanism->Push(FAttachmentStreamableContext{NewRequestArgs.AttachmentActor.Get()});
 	}
 
-	auto* ResourceComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(OwningOuter.Get());
-	if (ensureAlwaysMsgf(IsValid(ResourceComponent),
-	                     TEXT("Outer is missing IAVVMResourceProvider::GetResourceManagerComponent impl or return nullptr.")))
+	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(OwningOuter.Get());
+	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer doesn't return valid AVVMResourceManagerComponent!")))
 	{
-		ResourceComponent->RequestAsyncLoading(NewRequestArgs.AttachmentModifierDefinitionId, {});
+		ResourceManagerComponent->RequestAsyncLoading(NewRequestArgs.AttachmentModifierDefinitionId, {});
 	}
 }
 
@@ -239,8 +256,9 @@ void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken At
 	Params.Owner = const_cast<AActor*>(Outer);
 
 	auto* NewAttachment = Cast<ATriggeringAttachmentActor>(World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &FTransform::Identity, Params));
-	if (IsValid(NewAttachment))
+	if (ensureAlwaysMsgf(IsValid(NewAttachment), TEXT("Attachment Actor Class Failed to create an instance in World!")))
 	{
+		Swap(FAttachmentSwapContextArgs{NewAttachment, NewAttachment->SlotTag});
 		NewAttachment->Attach();
 	}
 }
@@ -259,7 +277,12 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToke
 		return;
 	}
 
-	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism.IsValid() ? QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId) : nullptr;
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return;
+	}
+
+	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId);
 	if (AttachmentActor.IsValid())
 	{
 		TArray<UObject*> OutStreamableAssets;
@@ -270,26 +293,6 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToke
 		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Outer);
 		AttachmentActor->RegisterGameplayEffects(ASC, OutStreamableAssets);
 	}
-}
-
-FTransform UAttachmentManagerComponent::GetSpawningAnchorTransform(const AActor* NewOuter, const bool bShouldAttachToSocket) const
-{
-	if (!IsValid(NewOuter))
-	{
-		return FTransform();
-	}
-
-	FTransform ItemAnchorTransform = NewOuter->GetActorTransform();
-	if (bShouldAttachToSocket)
-	{
-		const auto* MeshComponent = NewOuter->GetComponentByClass<UMeshComponent>();
-		if (IsValid(MeshComponent))
-		{
-			ItemAnchorTransform = MeshComponent->GetSocketTransform({}/*TODO*/);
-		}
-	}
-
-	return ItemAnchorTransform;
 }
 
 UAttachmentManagerComponent::FAttachmentStreamableContext::FAttachmentStreamableContext(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
@@ -335,4 +338,17 @@ void UAttachmentManagerComponent::FAttachmentQueuingMechanism::ModifyIndex(const
 	{
 		(*SearchResult)->StreamableContextId = NewIndex;
 	}
+}
+
+UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingMechanism()
+{
+	PendingDestroy.Reset();
+}
+
+void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
+{
+}
+
+void UAttachmentManagerComponent::FAttachmentBatchingMechanism::BatchDestroy()
+{
 }
