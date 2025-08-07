@@ -28,7 +28,10 @@
 class ATriggeringActor;
 
 /**
- * 
+ *	Class description:
+ *
+ *	UTriggeringAbility is the ability that enables user to execute firing/triggering behaviour based on the owning actor that
+ *	granted the ability.
  */
 UCLASS()
 class WEAPONSAMPLE_API UTriggeringAbility : public UGameplayAbility

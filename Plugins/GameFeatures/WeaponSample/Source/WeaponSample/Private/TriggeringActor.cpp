@@ -22,10 +22,21 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "AVVMGameplayUtils.h"
-#include "TriggeringAbility.h"
+#include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMGameplayAbility.h"
+#include "Ability/TriggeringAbility.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/AssetManager.h"
+
+ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	// TODO @gdemers Would be nice if we could override the collision preset referenced on the skeletal mesh
+	// with something defined at 'this' level. This may provide better visibility during system config to small
+	// issue like setting bad collision preset.
+}
 
 void ATriggeringActor::BeginPlay()
 {
@@ -84,6 +95,12 @@ void ATriggeringActor::Swap_Implementation(const bool bIsActive)
 	}
 }
 
+void ATriggeringActor::SpawnAndSwapAttachment(const TSubclassOf<ATriggeringAttachmentActor>& NewAttachmentClass,
+                                              const FGameplayTag& NewAttachmentSlotTag)
+{
+	// TODO @gdemers Define how Swaping is executed
+}
+
 void ATriggeringActor::RegisterAbility()
 {
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
@@ -134,4 +151,16 @@ void ATriggeringActor::OnSoftObjectAcquired()
 		1,
 		GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
 	});
+}
+
+void ATriggeringActor::GetAllAttachmentMods(FWeaponAttachmentModifierContext& OutResult)
+{
+	OutResult.Modifiers.Reset(RegisteredAttachments.Num());
+	for (const TWeakObjectPtr<const ATriggeringAttachmentActor>& Attachment : RegisteredAttachments)
+	{
+		if (Attachment.IsValid())
+		{
+			Attachment->ApplyModifier(OutResult);
+		}
+	}
 }

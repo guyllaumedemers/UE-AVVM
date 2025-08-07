@@ -21,11 +21,15 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 
 #include "TriggeringActor.generated.h"
 
+struct FWeaponAttachmentModifierContext;
+class ATriggeringAttachmentActor;
+class USkeletalMeshComponent;
 class UTriggeringAbility;
 
 /**
@@ -54,6 +58,7 @@ class WEAPONSAMPLE_API ATriggeringActor : public AActor
 	GENERATED_BODY()
 
 public:
+	ATriggeringActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -66,6 +71,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, meta=(ToolTip="Apply markers to targeted actors."))
 	void Mark(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
 
+	UFUNCTION(BlueprintCallable)
+	void SpawnAndSwapAttachment(const TSubclassOf<ATriggeringAttachmentActor>& NewAttachmentClass,
+	                            const FGameplayTag& NewAttachmentSlotTag);
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	void RegisterAbility();
@@ -75,6 +84,8 @@ protected:
 
 	UFUNCTION()
 	void OnSoftObjectAcquired();
+
+	void GetAllAttachmentMods(FWeaponAttachmentModifierContext& OutResult);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
 	bool bShouldAsyncLoadOnBeginPlay = true;
@@ -88,5 +99,20 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Flag for tracking the state of the Triggering Actor so we allow swapping attachment on already occupied slot. Required=True, for editing."))
+	bool bCanEditAttachments = false;
+
+	UPROPERTY(Transient)
+	TMap<FGameplayTag, TWeakObjectPtr<const ATriggeringAttachmentActor>> RegisteredAttachments;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+
+	struct FAttachmentSpawnerQueuingMechanism
+	{
+		// TODO @gdemers Define how swapping request are queued and executed.
+	};
+
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle;
+	friend class ATriggeringAttachmentActor;
 };
