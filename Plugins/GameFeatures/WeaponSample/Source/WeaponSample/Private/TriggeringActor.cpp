@@ -106,10 +106,12 @@ void ATriggeringActor::Swap_Implementation(const bool bIsActive)
 	}
 }
 
-void ATriggeringActor::SpawnAndSwapAttachment(const TSubclassOf<ATriggeringAttachmentActor>& NewAttachmentClass,
-                                              const FGameplayTag& NewAttachmentSlotTag)
+void ATriggeringActor::SpawnAndSwapAttachment_Implementation(const FDataRegistryId& NewAttachmentId)
 {
-	// TODO @gdemers Define how Swaping is executed
+	if (IsValid(ResourceManagerComponent))
+	{
+		ResourceManagerComponent->RequestAsyncLoading(NewAttachmentId, {});
+	}
 }
 
 UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const

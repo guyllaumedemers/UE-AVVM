@@ -75,9 +75,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, meta=(ToolTip="Apply markers to targeted actors."))
 	void Mark(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
 
-	UFUNCTION(BlueprintCallable)
-	void SpawnAndSwapAttachment(const TSubclassOf<ATriggeringAttachmentActor>& NewAttachmentClass,
-	                            const FGameplayTag& NewAttachmentSlotTag);
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void SpawnAndSwapAttachment(const FDataRegistryId& NewAttachmentId);
 
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;

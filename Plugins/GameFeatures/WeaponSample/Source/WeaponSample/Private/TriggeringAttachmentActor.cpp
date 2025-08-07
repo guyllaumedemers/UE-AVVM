@@ -127,6 +127,9 @@ void ATriggeringAttachmentActor::Detach()
 	       *SocketName.ToString());
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	// TODO @gdemers verify that theres no overlap with Active GameplayEffect. we dont want to be firing, swap attachment and apply bonus damage or other stats
+	// due to GE stacking for the duration of a frame or more.
+	UnRegisterGameplayEffects();
 }
 
 void ATriggeringAttachmentActor::RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
