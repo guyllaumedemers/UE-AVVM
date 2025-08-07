@@ -347,8 +347,17 @@ UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingM
 
 void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
 {
+	PendingDestroy.Add(NewAttachment);
 }
 
 void UAttachmentManagerComponent::FAttachmentBatchingMechanism::BatchDestroy()
 {
+	for (auto Iterator = PendingDestroy.CreateIterator(); Iterator; ++Iterator)
+	{
+		if (Iterator->IsValid())
+		{
+			Iterator->Get()->Destroy();
+			Iterator.RemoveCurrentSwap();
+		}
+	}
 }
