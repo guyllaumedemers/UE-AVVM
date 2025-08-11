@@ -53,10 +53,10 @@ public:
 	TArray<FSoftObjectPath> GetModifiersSoftObjectPaths() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportModifiers = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportModifiers"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportModifiers"))
 	TArray<TSoftClassPtr<UGameplayEffect>> ModifierEffectClasses;
 };
 
@@ -76,7 +76,7 @@ struct WEAPONSAMPLE_API FAttachmentModifierDefinitionDataTableRow : public FAVVM
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAttachmentModifierDefinitionDataAsset> AttachmentModifierDefinition = nullptr;
 };
 
@@ -103,13 +103,13 @@ public:
 	                   const FGameplayTagContainer& BlockingTags) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<ATriggeringAttachmentActor> TriggeringAttachmentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer BlockingTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 };
 
@@ -129,6 +129,6 @@ struct WEAPONSAMPLE_API FAttachmentDefinitionDataTableRow : public FAVVMDataTabl
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAttachmentDefinitionDataAsset> AttachmentDefinition = nullptr;
 };

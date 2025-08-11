@@ -57,10 +57,10 @@ public:
 	const FSoftObjectPath& GetOverrideItemActorClass() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesOverrideItemActorClass = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesOverrideItemActorClass"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesOverrideItemActorClass"))
 	TSoftClassPtr<AActor> OverrideItemActorClass = nullptr;
 };
 
@@ -86,10 +86,10 @@ public:
 	FSoftObjectPath GetProgressionStageItemActorOverride(const int32 ProgressionStageIndex) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TArray<TSoftObjectPtr<const UItemProgressionStageDefinitionDataAsset>> ItemProgressionStageDataAssets;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<AActor> DefaultItemActorClass = nullptr;
 };
 
@@ -109,6 +109,6 @@ struct INVENTORYSAMPLE_API FItemProgressionDefinitionDataTableRow : public FAVVM
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UItemProgressionDefinitionDataAsset> ItemProgressionDefinition = nullptr;
 };

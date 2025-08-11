@@ -23,6 +23,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
 
 #include "InventorySettings.generated.h"
 
@@ -41,7 +42,7 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 public:
 	UFUNCTION(BlueprintCallable)
 	static TSubclassOf<UInventoryStringParser> GetJsonParserClass();
-	
+
 	UFUNCTION(BlueprintCallable)
 	static const FGameplayTag& GetPendingSpawnTag();
 
@@ -76,39 +77,39 @@ public:
 	static const FGameplayTagContainer& GetConsumableRuleset();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UInventoryStringParser> JsonParserClass = nullptr;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag InstancedTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag EquippedTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag DroppedTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer HoldingRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer EquippedRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer PassiveRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer OffensiveRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer DefensiveRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer ConsumableRuleset = FGameplayTagContainer::EmptyContainer;
 };

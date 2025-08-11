@@ -21,6 +21,7 @@
 
 #include "Backend/ActorContent.h"
 #include "Backend/ActorContentProxy.h"
+#include "Serialization/JsonSerializer.h"
 
 void UInventoryStringParser::FromString(const FString& NewPayload,
                                         FActorContent& OutActorContent) const

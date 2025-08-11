@@ -21,6 +21,8 @@
 
 #include "AVVMIOUtils.h"
 #include "InventorySample.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
 #include "UI/ItemObjectViewModel.h"
 
 bool UItemPlacementManager::ShouldCreateSubsystem(UObject* Outer) const

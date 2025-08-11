@@ -67,6 +67,6 @@ public:
 	                        bool bWasCancelled) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
 };

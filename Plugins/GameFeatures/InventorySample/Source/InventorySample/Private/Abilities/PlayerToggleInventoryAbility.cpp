@@ -24,6 +24,7 @@
 #include "InventorySample.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Data/AVVMHandshakePayload.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 
 void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,

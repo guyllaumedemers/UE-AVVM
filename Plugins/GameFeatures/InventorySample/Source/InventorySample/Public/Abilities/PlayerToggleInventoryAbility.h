@@ -65,6 +65,6 @@ public:
 	                        bool bWasCancelled) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 };

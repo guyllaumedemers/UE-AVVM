@@ -23,6 +23,7 @@
 #include "InventorySample.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
+#include "GameFramework/PlayerController.h"
 
 void UTradeItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                       const FGameplayAbilitySpec& Spec)

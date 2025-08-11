@@ -21,6 +21,7 @@
 
 #include "AVVMGameplayUtils.h"
 #include "InventorySample.h"
+#include "GameFramework/PlayerController.h"
 
 void USellItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                      const FGameplayAbilitySpec& Spec)

@@ -65,17 +65,17 @@ public:
 	                   const FGameplayTagContainer& BlockingTags) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UItemObject> ItemObjectClass = nullptr;
 
 	// @gdemers tags that define if this item can be accessed by the actor type.
 	// Example : PlayerClass.Mage -> Cannot hold axe, but can hold staff
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 
 	// @gdemers tags that define if this item should not be accessed.
 	// Example : Tag.InTutorial
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer BlockingTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
 };
 
@@ -95,7 +95,7 @@ struct INVENTORYSAMPLE_API FItemDefinitionDataTableRow : public FAVVMDataTableRo
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UItemDefinitionDataAsset> ItemDefinition = nullptr;
 };
 
@@ -117,7 +117,7 @@ public:
 	const TArray<FDataRegistryId>& GetItemIds() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TArray<FDataRegistryId> ItemIds;
 };
 
@@ -137,6 +137,6 @@ struct INVENTORYSAMPLE_API FItemGroupDefinitionDataTableRow : public FAVVMDataTa
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UItemGroupDefinitionDataAsset> ItemGroupDefinition = nullptr;
 };

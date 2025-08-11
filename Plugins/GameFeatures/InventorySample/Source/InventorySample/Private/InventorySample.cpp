@@ -22,6 +22,7 @@
 
 #include "InventorySettings.h"
 #include "InventoryStringParser.h"
+#include "Engine/Engine.h"
 
 DEFINE_LOG_CATEGORY(LogInventorySample);
 

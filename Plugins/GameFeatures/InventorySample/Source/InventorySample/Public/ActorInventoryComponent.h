@@ -57,8 +57,7 @@ struct INVENTORYSAMPLE_API FItemToken
  *	UActorInventoryComponent is the CORE component of the inventory system and allow ANY AActor to reference a set
  *	of items.
  *
- *	This system handle the loading request of all referenced items through the owning A UINTERFACE() IInventoryProvider api
- *	and provide layout information specific to the instance type at hand.
+ *	This system handle the loading request of all referenced items through the owning Actor implementation of the IInventoryProvider api.
  *
  *	Note : This system participate in the 'Handshake' process following user interaction with UI and Ability execution for buying,
  *	selling, trading or consuming content.
@@ -123,7 +122,7 @@ protected:
 		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
 	};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")

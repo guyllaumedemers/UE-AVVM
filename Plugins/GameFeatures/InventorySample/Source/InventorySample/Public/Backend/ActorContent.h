@@ -99,7 +99,7 @@ struct INVENTORYSAMPLE_API FItemHolder
 /**
  *	Class description:
  *
- *	FActorContent is a backend POD representation of the content an Actor has ownership on.  This POD defines the data layout
+ *	FActorContent is a backend POD representation of the content an Actor has ownership on. This POD defines the data layout
  *	stored on the backend.
  */
 USTRUCT(BlueprintType)

@@ -21,6 +21,7 @@
 
 #include "ActorInventoryComponent.h"
 #include "AVVMUtilityFunctionLibrary.h"
+#include "Engine/LocalPlayer.h"
 #include "UI/SingleContextInventoryViewModel.h"
 
 void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)

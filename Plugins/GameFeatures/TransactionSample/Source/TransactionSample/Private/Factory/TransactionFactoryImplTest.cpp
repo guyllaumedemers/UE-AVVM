@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Factory/TransactionFactoryImplTest.h"
 
+#include "Serialization/JsonSerializer.h"
+
 FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
 	: DummyProperty(NewDummyProperty)
 {

@@ -47,6 +47,6 @@ public:
 	static TSubclassOf<UTransactionFactoryImpl> GetFactoryImpl(const ETransactionType NewType);
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TMap<ETransactionType, TSubclassOf<UTransactionFactoryImpl>> Factories;
 };

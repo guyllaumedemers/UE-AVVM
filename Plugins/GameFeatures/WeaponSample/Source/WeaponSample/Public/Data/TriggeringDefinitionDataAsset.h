@@ -50,10 +50,10 @@ public:
 	const TArray<FDataRegistryId>& GetDefaultAttachmentIds() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportDefaultAttachments = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportDefaultAttachments"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportDefaultAttachments"))
 	TArray<FDataRegistryId> DefaultAttachmentIds;
 };
 
@@ -73,6 +73,6 @@ struct WEAPONSAMPLE_API FTriggeringDefinitionDataTableRow : public FAVVMDataTabl
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UTriggeringDefinitionDataAsset> TriggeringDefinition = nullptr;
 };

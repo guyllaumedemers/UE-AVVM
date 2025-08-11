@@ -90,7 +90,7 @@ struct WEAPONSAMPLE_API FAttachmentToken
  *
  *	UAttachmentManagerComponent is a system handling attachment equip/unequiping behaviour and applying GameplayEffects owned by the active Attachments.
  */
-UCLASS()
+UCLASS(ClassGroup=("Weapon"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class WEAPONSAMPLE_API UAttachmentManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()

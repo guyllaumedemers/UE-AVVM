@@ -88,23 +88,23 @@ protected:
 	UFUNCTION()
 	void OnSoftObjectAcquired();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UTriggeringAbility> TriggeringAbilityClass = nullptr;
+
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
+
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
