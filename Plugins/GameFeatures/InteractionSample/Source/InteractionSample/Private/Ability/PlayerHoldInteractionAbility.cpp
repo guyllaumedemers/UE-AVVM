@@ -25,6 +25,7 @@
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityTask_TickUntil.h"
 #include "Data/InteractionExecutionRequirements.h"
+#include "GameFramework/PlayerController.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 
 void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHandle Handle,

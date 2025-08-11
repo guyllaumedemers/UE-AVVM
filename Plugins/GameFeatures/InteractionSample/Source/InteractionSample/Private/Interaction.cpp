@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Interaction.h"
 
+#include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 
 void UInteraction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

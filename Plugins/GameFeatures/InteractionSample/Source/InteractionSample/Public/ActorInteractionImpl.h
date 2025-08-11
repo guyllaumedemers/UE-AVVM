@@ -108,16 +108,16 @@ protected:
 	                              const AActor* NewInstigator,
 	                              const AActor* NewTarget);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag StartPromptInteractionChannel = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FInteractionExecutionRequirements> Requirements;
 
 	UPROPERTY(Transient)

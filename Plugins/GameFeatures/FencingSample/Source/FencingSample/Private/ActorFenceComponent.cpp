@@ -23,6 +23,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "FenceManagerSubsystem.h"
+#include "GameFramework/Actor.h"
 
 void UActorFenceComponent::BeginPlay()
 {

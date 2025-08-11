@@ -68,12 +68,12 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContextAVVMNotify : public FIn
 	virtual void Kill(const AActor* NewInstigator,
 	                  const AActor* NewTarget) const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag PumpHeartbeatChannelTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag ExecuteChannelTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag KillChannelTag = FGameplayTag::EmptyTag;
 };

@@ -22,6 +22,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Data/AVVMHearbeatPayload.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 
 void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const

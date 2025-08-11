@@ -24,6 +24,7 @@
 #include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Data/AVVMHandshakePayload.h"
+#include "Styling/SlateBrush.h"
 
 #include "InteractionViewModel.generated.h"
 

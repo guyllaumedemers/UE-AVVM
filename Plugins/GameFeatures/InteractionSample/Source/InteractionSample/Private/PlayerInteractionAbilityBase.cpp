@@ -25,6 +25,7 @@
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
+#include "GameFramework/PlayerController.h"
 
 void UPlayerInteractionAbilityBase::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                   const FGameplayAbilitySpec& Spec)

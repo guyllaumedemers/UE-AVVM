@@ -24,6 +24,7 @@
 #include "CommonUITypes.h"
 #include "MVVMViewModelBase.h"
 #include "Data/InteractionExecutionRequirements.h"
+#include "GameFramework/PlayerController.h"
 
 FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 {

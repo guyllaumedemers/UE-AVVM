@@ -90,19 +90,19 @@ protected:
 	UFUNCTION()
 	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Only allow interactions to run for holder of given tags."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Only allow interactions to run for holder of given tags."))
 	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Block any interaction if tags are present."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Block any interaction if tags are present."))
 	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldPreventContingency = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

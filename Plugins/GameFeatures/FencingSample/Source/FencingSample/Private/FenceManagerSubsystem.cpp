@@ -21,6 +21,7 @@
 
 #include "ActorFenceComponent.h"
 #include "AVVMGameplay.h"
+#include "Engine/World.h"
 
 bool UFenceManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {

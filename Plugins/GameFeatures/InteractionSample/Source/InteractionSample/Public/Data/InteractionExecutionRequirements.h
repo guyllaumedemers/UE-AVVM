@@ -69,12 +69,12 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FIn
 	FInteractionExecutionFloatRequirements(const float NewThreshold);
 	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="!bRequireInputMashing"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bRequireInputMashing"))
 	bool bRequireInputHolding = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="!bRequireInputHolding"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bRequireInputHolding"))
 	bool bRequireInputMashing = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float CompletionThreshold = 0.f;
 };

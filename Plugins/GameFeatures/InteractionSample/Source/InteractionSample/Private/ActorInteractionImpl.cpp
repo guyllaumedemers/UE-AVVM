@@ -26,6 +26,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "Data/AVVMHandshakePayload.h"
+#include "GameFramework/Controller.h"
 #include "GameFramework/PlayerState.h"
 
 void UActorInteractionImpl::SafeBegin()
