@@ -23,7 +23,6 @@
 
 #include "DataRegistryId.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Templates/SubclassOf.h"
 #include "UObject/Interface.h"
 
 #include "AVVMResourceProvider.generated.h"

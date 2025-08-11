@@ -58,21 +58,21 @@ public:
 	static TSubclassOf<UActorComponent> GetInteractionComponentClass();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UActorComponent> HealthComponentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UActorComponent> StaminaComponentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UActorComponent> StatusEffectComponentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UActorComponent> AbilityComponentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UActorComponent> CurrencyComponentClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UActorComponent> InteractionComponentClass = nullptr;
 };

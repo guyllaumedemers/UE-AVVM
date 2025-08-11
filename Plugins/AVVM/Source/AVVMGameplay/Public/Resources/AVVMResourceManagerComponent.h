@@ -89,7 +89,7 @@ protected:
 		FOnResourceAsyncLoadingComplete CompletionDelegate;
 	};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

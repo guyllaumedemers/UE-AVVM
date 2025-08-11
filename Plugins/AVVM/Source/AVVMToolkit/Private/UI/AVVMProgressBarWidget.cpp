@@ -17,9 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMToolkit/Public/UI/AVVMProgressBarWidget.h"
+#include "UI/AVVMProgressBarWidget.h"
 
 #include "CommonLazyImage.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 void UAVVMProgressBarWidget::SetValue(const float NewValue)
 {

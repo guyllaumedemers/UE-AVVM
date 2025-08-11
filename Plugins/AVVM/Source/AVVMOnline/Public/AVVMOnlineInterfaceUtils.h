@@ -25,6 +25,7 @@
 #include "AVVMOnlineStringParser.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Online/CoreOnlineFwd.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMOnlineInterfaceUtils.generated.h"

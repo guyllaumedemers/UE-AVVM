@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Engine/DataAsset.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMWidgetPickerDataAsset.generated.h"
 
@@ -45,6 +46,6 @@ public:
 	TSubclassOf<UAVVMFrameWidget> GetWidgetClass(const UClass* ObjectClass);
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TMap<TSoftClassPtr<UClass>, TSubclassOf<UAVVMFrameWidget>> ObjectClassToWidgetClass;
 };

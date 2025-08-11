@@ -44,6 +44,6 @@ struct AVVMGAMEPLAY_API FAVVMTagRulesCheatData : public FAVVMCheatData
 
 	const FGameplayTagContainer& GetRequirementTags() const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequirementTags = FGameplayTagContainer::EmptyContainer;
 };

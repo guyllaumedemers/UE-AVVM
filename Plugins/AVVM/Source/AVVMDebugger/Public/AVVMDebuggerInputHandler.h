@@ -67,7 +67,7 @@ public:
 	TSharedPtr<FAVVMDebuggerInputPreprocessor> GetPreprocessor() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TArray<FKey> Keys;
 
 	TSharedPtr<FAVVMDebuggerInputPreprocessor> DebuggerPreprocessor = nullptr;

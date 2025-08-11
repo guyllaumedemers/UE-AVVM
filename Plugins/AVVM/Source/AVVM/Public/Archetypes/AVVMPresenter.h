@@ -62,19 +62,19 @@ protected:
 	virtual void StartPresenting() PURE_VIRTUAL(StartPresenting, return;);
 	virtual void StopPresenting() PURE_VIRTUAL(StartPresenting, return;);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="GFP may broadcast before the presenter channel is registered. This flag allow OnBeginPlay broadcast for deferred calls."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="GFP may broadcast before the presenter channel is registered. This flag allow OnBeginPlay broadcast for deferred calls."))
 	bool bAllowDeferredBroadcast = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
 
 	// @gdemers widget to be pushed onto the target tag. UCommonActivatableWidget for menus, UCommonUserWidget
 	// for HUD elements.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<UCommonUserWidget> WidgetClass = nullptr;
 
 	// @gdemers primarylayout.layer.tag or hud.extensionpoint.tag
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag TargetTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

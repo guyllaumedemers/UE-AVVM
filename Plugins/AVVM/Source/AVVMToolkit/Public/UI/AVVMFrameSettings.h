@@ -41,6 +41,6 @@ public:
 	static bool IsUIBorderless();
 
 protected:
-	UPROPERTY(BlueprintReadOnly, config)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, config, Category="Designers")
 	bool bIsUIBorderless = false;
 };

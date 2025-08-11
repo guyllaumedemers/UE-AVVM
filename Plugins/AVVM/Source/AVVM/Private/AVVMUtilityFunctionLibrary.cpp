@@ -22,6 +22,7 @@
 #include "AVVM.h"
 #include "CommonUserWidget.h"
 #include "MVVMSubsystem.h"
+#include "Engine/GameInstance.h"
 #include "GameFramework/PlayerState.h"
 #include "View/MVVMView.h"
 

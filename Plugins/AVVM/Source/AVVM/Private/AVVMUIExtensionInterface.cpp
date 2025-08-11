@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMUIExtensionInterface.h"
 
+#include "Engine/World.h"
+
 FUIExtensionHandle IAVVMUIExtensionInterface::PushContentToExtensionPoint(const FAVVMUIExtensionContextArgs& ContextArgs)
 {
 	auto* ExtensionSubsystem = UWorld::GetSubsystem<UUIExtensionSubsystem>(ContextArgs.World);

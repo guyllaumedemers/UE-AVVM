@@ -24,7 +24,9 @@
 #include "AVVMDebuggerSettings.h"
 #include "ImGuiDelegates.h"
 #include "ImGuiModule.h"
+#include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Engine/World.h"
 
 FAVVMImGuiDebugContext::FAVVMImGuiDebugContext(FImGuiModuleProperties& InProperties)
 {

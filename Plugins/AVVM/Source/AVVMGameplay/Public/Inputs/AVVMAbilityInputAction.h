@@ -42,10 +42,10 @@ public:
 	int32 GetInputId() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag AbilityTriggerTag = FGameplayTag::EmptyTag;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	int32 InputId = INDEX_NONE;
 
 	friend class UAVVMAbilityInputComponent;

@@ -23,6 +23,8 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnline.h"
+#include "Online/CoreOnlineFwd.h"
+#include "UObject/Interface.h"
 
 #include "AVVMOnlineInterface.generated.h"
 

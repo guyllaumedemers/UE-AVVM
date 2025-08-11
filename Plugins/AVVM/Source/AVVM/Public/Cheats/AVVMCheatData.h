@@ -23,6 +23,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "Engine/DataAsset.h"
+#include "Engine/DataTable.h"
 #include "StructUtils/InstancedStruct.h"
 
 #if WITH_EDITOR

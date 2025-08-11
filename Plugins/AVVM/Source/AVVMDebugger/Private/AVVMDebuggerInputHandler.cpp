@@ -19,7 +19,8 @@
 //SOFTWARE.
 #include "AVVMDebuggerInputHandler.h"
 
-#include "Application/SlateApplicationBase.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Modules/ModuleManager.h"
 
 void FAVVMDebuggerInputPreprocessor::RegisterKeys(const TArray<FKey>& NewKeys)
 {

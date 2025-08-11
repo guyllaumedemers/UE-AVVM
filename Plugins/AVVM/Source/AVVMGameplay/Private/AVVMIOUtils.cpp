@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMIOUtils.h"
 
+#include "Misc/FileHelper.h"
+
 void UAVVMIOUtils::GetSetDataFromDisk(const FString& NewFileName,
                                       const FString& NewValue,
                                       const bool bShouldOverride,

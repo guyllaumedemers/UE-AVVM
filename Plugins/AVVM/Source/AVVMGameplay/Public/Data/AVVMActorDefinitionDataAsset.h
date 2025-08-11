@@ -50,16 +50,16 @@ public:
 	TArray<FDataRegistryId> GetActorTraitIds() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportPassiveAbilities = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportPassiveAbilities"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportPassiveAbilities"))
 	TArray<FDataRegistryId> PassiveAbilityGroupIds;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportActiveAbilities = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportActiveAbilities"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActiveAbilities"))
 	TArray<FDataRegistryId> ActiveAbilityGroupIds;
 };
 
@@ -79,6 +79,6 @@ struct AVVMGAMEPLAY_API FAVVMActorDefinitionDataTableRow : public FAVVMDataTable
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMActorDefinitionDataAsset> ActorDefinition = nullptr;
 };

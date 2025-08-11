@@ -21,6 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 
 UAVVMReplicatedTagComponent::UAVVMReplicatedTagComponent(const FObjectInitializer& ObjectInitializer)

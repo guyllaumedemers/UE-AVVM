@@ -57,17 +57,17 @@ public:
 	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UGameplayAbility> GameplayAbilityClass = nullptr;
 
 	// @gdemers tags that define if this ability can be granted to the actor type.
 	// Example : Tag.IsPlayer, Tag.IsFlyingType
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequiredTagsForGrantingAbility = FGameplayTagContainer::EmptyContainer;
 
 	// @gdemers tags that define if this ability should not be granted.
 	// Example : Tag.IsWorldWaterLevel -> Blocks Tag.IsFlyingType
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer BlockingTagsForGrantingAbility = FGameplayTagContainer::EmptyContainer;
 };
 
@@ -87,7 +87,7 @@ struct AVVMGAMEPLAY_API FAVVMAbilityDefinitionDataTableRow : public FAVVMDataTab
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMAbilityDefinitionDataAsset> AbilityDefinitionDataAsset = nullptr;
 };
 
@@ -106,7 +106,7 @@ public:
 	const TArray<FDataRegistryId>& GetAbilityIds() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TArray<FDataRegistryId> AbilityIds;
 };
 
@@ -122,6 +122,6 @@ struct AVVMGAMEPLAY_API FAVVMAbilityGroupDefinitionDataTableRow : public FAVVMDa
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMAbilityGroupDefinitionDataAsset> AbilityGroupDefinitionDataAsset;
 };

@@ -45,6 +45,6 @@ public:
 	int32 GetInputId() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMAbilityInputAction> InputAction = nullptr;
 };

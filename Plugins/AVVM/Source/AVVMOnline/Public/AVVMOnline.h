@@ -21,9 +21,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
+#include "Modules/ModuleManager.h"
 #include "AVVMNotificationSubsystem.h"
+#include "HAL/IConsoleManager.h"
 #include "StructUtils/InstancedStruct.h"
 
 class UAVVMOnlineStringParser;

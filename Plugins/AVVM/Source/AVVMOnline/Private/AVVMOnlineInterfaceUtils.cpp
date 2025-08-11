@@ -22,6 +22,8 @@
 #include "AVVMOnlineInterface.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
+#include "Engine/GameInstance.h"
+#include "Engine/LocalPlayer.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,

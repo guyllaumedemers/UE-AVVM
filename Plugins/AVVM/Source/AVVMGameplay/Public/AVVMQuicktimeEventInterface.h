@@ -25,6 +25,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMNotificationSubsystem.h"
+#include "UObject/Interface.h"
 
 #include "AVVMQuicktimeEventInterface.generated.h"
 
@@ -83,13 +84,13 @@ struct AVVMGAMEPLAY_API FAVVMQuicktimeEvent : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const AActor> Caller = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMQuicktimeEventRequestType RequestType = EAVVMQuicktimeEventRequestType::None;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TInstancedStruct<FAVVMNotificationPayload> Payload;
 };
 

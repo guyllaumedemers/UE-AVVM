@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
 
 #include "AVVMDebuggerSettings.generated.h"
 
@@ -44,6 +45,6 @@ public:
 	static TSubclassOf<UAVVMDebuggerInputHandler> GetInputHandlerClass();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UAVVMDebuggerInputHandler> InputHandlerClass = nullptr;
 };

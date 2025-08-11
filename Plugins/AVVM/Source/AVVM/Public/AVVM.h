@@ -20,7 +20,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Modules/ModuleManager.h"
+#include "UObject/Interface.h"
 
 #include "AVVM.generated.h"
 

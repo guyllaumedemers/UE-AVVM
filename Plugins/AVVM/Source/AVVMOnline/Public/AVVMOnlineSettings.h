@@ -45,6 +45,6 @@ public:
 	static TSubclassOf<UAVVMOnlineStringParser> GetJsonParserClass();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UAVVMOnlineStringParser> JsonParserClass = nullptr;
 };

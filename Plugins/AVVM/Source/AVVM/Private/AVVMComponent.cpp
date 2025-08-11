@@ -21,6 +21,7 @@
 
 #include "AVVM.h"
 #include "Archetypes/AVVMPresenter.h"
+#include "GameFramework/Actor.h"
 
 // @gdemers extern symbol for global access to custom LLM_tag
 extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;

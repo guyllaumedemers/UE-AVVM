@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "AVVMGameplayUtils.h"
 
+#include "Engine/NetConnection.h"
+#include "GameFramework/Actor.h"
+
 bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
 {
 	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))

@@ -22,6 +22,7 @@
 #include "AVVM.h"
 #include "MVVMViewModelBase.h"
 #include "Archetypes/AVVMPresenter.h"
+#include "Engine/World.h"
 
 bool UAVVMSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
