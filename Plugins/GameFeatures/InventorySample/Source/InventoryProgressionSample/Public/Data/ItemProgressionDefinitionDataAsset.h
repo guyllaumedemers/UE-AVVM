@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "GameFramework/Actor.h"
+#include "DataRegistryId.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
@@ -31,20 +31,15 @@
 
 #include "ItemProgressionDefinitionDataAsset.generated.h"
 
+class UGameplayEffect;
+
 /**
  *	Class description:
  *
- *	UItemProgressionStageDefinitionDataAsset is a POD that reference information about an item representation at a given stage/level.
- *	This data asset can reference any information specific to your items and the overrides per-stages.
- *
- *	Example :
- *
- *		* Level 1: Skill Item A has Material A
- *		* Level 2: Skill Item A has Material B
- *		* etc...
+ *	UItemProgressionStageDefinitionDataAsset is a POD that reference a collection of effects to be applied at a given level.
  */
 UCLASS(BlueprintType, Blueprintable)
-class INVENTORYSAMPLE_API UItemProgressionStageDefinitionDataAsset : public UDataAsset
+class INVENTORYPROGRESSIONSAMPLE_API UItemProgressionStageDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -54,14 +49,11 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	const FSoftObjectPath& GetOverrideItemActorClass() const;
+	TArray<FSoftObjectPath> GetProgressionStackingEffectSoftObjectPaths() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesOverrideItemActorClass = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesOverrideItemActorClass"))
-	TSoftClassPtr<AActor> OverrideItemActorClass = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TArray<TSoftClassPtr<UGameplayEffect>/*Stacking GE*/> ProgressionGameplayEffects;
 };
 
 /**
@@ -70,7 +62,7 @@ protected:
  *	UItemProgressionDefinitionDataAsset is a singular item and it's progression information.
  */
 UCLASS(BlueprintType, NotBlueprintable)
-class INVENTORYSAMPLE_API UItemProgressionDefinitionDataAsset : public UDataAsset
+class INVENTORYPROGRESSIONSAMPLE_API UItemProgressionDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -80,17 +72,14 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	const FSoftObjectPath& GetDefaultItemActorClass() const;
-
-	UFUNCTION(BlueprintCallable)
-	FSoftObjectPath GetProgressionStageItemActorOverride(const int32 ProgressionStageIndex) const;
+	TArray<FSoftObjectPath> GetProgressionStages(const int32 ProgressionStageIndex) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<TSoftObjectPtr<const UItemProgressionStageDefinitionDataAsset>> ItemProgressionStageDataAssets;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	bool bDoesApplyProgressionEffects = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<AActor> DefaultItemActorClass = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesApplyProgressionEffects"))
+	TMap<int32 /*Stage Level*/, TSoftObjectPtr<const UItemProgressionStageDefinitionDataAsset>> ItemProgressionStageDataAssets;
 };
 
 /**
@@ -99,7 +88,7 @@ protected:
  *	FItemProgressionDefinitionDataTableRow is an entry in a DataTableRow for a unique item progression.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemProgressionDefinitionDataTableRow : public FAVVMDataTableRow
+struct INVENTORYPROGRESSIONSAMPLE_API FItemProgressionDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

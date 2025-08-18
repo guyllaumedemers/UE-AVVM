@@ -22,8 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
-#include "Engine/DataTable.h"
 #include "StructUtils/InstancedStruct.h"
 
 #if WITH_EDITOR
@@ -38,7 +38,7 @@
  *	FAVVMCheatData. Base Class for "stub" data. Expected to be derived and extended based on project requirements.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
+struct AVVMGAMEPLAY_API FAVVMCheatData : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 };
@@ -53,7 +53,7 @@ struct AVVM_API FAVVMCheatData : public FAVVMNotificationPayload
  *	provide Context specific inputs to parent properties.
  */
 UCLASS(BlueprintType, NotBlueprintable)
-class AVVM_API UAVVMCheatDataAsset : public UDataAsset
+class AVVMGAMEPLAY_API UAVVMCheatDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -77,13 +77,15 @@ protected:
  *	to be retrieved through UMetaDataRegistrySources_DataTable at Runtime.
  */
 USTRUCT(BlueprintType)
-struct AVVM_API FAVVMCheatDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMCheatDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	// @gdemers softptr to the resource asset that contain data specific to the payload
 	// we expect the CheatExtension to be provided with.

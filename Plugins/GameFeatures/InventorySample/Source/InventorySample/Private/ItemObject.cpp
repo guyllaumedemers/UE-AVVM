@@ -19,7 +19,10 @@
 //SOFTWARE.
 #include "ItemObject.h"
 
+#include "AVVMGameplayUtils.h"
+#include "InventorySample.h"
 #include "InventorySettings.h"
+#include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ItemProgressionDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
@@ -105,9 +108,14 @@ bool UItemObject::IsEmpty() const
 	return (false == !!RuntimeItemState.Counter);
 }
 
-const int32& UItemObject::GetRuntimeCount() const
+const int32 UItemObject::GetRuntimeCount() const
 {
 	return RuntimeItemState.Counter;
+}
+
+const FDataRegistryId& UItemObject::GetItemActorId() const
+{
+	return ItemActorId;
 }
 
 const FDataRegistryId& UItemObject::GetItemProgressionId() const
@@ -115,104 +123,74 @@ const FDataRegistryId& UItemObject::GetItemProgressionId() const
 	return ItemProgressionId;
 }
 
-void UItemObject::GetItemActorClassAsync(const UObject* NewProgressionDefinitionData,
-                                         const int32 NewProgressionStageIndex,
+void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
                                          const FOnRequestItemActorClassComplete& Callback)
 {
-	const auto* ProgressionDefinitionDataAsset = Cast<UItemProgressionDefinitionDataAsset>(NewProgressionDefinitionData);
-	if (!IsValid(ProgressionDefinitionDataAsset))
+	const auto* ActorDefinitionDataAsset = Cast<UAVVMActorDefinitionDataAsset>(NewActorDefinitionDataAsset);
+	if (!IsValid(ActorDefinitionDataAsset))
 	{
 		return;
 	}
 
 	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()}, {});
 
-	const FSoftObjectPath ProgressionStageSoftObjectPath = ProgressionDefinitionDataAsset->GetProgressionStageItemActorOverride(NewProgressionStageIndex);
-	if (ProgressionStageSoftObjectPath.IsValid())
-	{
-		FStreamableDelegate OnRequestItemActorClassComplete;
-		OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnProgressionStageAcquired, Callback);
-		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ProgressionStageSoftObjectPath}, OnRequestItemActorClassComplete);
-	}
-	else
-	{
-		FStreamableDelegate OnRequestItemActorClassComplete;
-		OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
-		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ProgressionDefinitionDataAsset->GetDefaultItemActorClass()}, OnRequestItemActorClassComplete);
-	}
+	FStreamableDelegate OnRequestItemActorClassComplete;
+	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
+	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
-void UItemObject::SpawnActorClass(AActor* NewAnchor,
-                                  UClass* NewActorClass)
+AActor* UItemObject::SpawnActorClass(AActor* NewAnchor,
+                                     UClass* NewActorClass)
 {
 	if (!IsValid(NewActorClass))
 	{
-		return;
+		return nullptr;
 	}
 
 	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
 
 	UWorld* World = GetWorld();
-	if (IsValid(World))
+	if (!IsValid(World))
 	{
-		FActorSpawnParameters Params;
-		Params.Owner = NewAnchor;
-
-		RuntimeItemActor = World->SpawnActor(NewActorClass, &FTransform::Identity, Params);
-		ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
+		return nullptr;
 	}
+
+	FActorSpawnParameters Params;
+	Params.Owner = NewAnchor;
+
+	RuntimeItemActor = World->SpawnActor(NewActorClass, &FTransform::Identity, Params);
+	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
+
+	UE_LOG(LogInventorySample,
+	       Log,
+	       TEXT("Executed from \"%s\". Adding New Visual Actor \"%s\" on Item \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(NewAnchor).GetData(),
+	       *RuntimeItemActor->GetName(),
+	       *GetName());
 
 	if (bShouldSpawnAndAttach && ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                                              TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
 		RuntimeItemActor->AttachToActor(NewAnchor, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 	}
+
+	return RuntimeItemActor;
 }
 
 void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback)
 {
-	if (!ItemProgressionStageHandle.IsValid())
+	if (!ItemActorHandle.IsValid())
 	{
 		Callback.ExecuteIfBound(nullptr, this);
 		return;
 	}
 
 	TArray<UObject*> OutStreamableAssets;
-	ItemProgressionStageHandle->GetLoadedAssets(OutStreamableAssets);
+	ItemActorHandle->GetLoadedAssets(OutStreamableAssets);
 
 	if (!OutStreamableAssets.IsEmpty())
 	{
 		Callback.ExecuteIfBound(Cast<UClass>(OutStreamableAssets[0]), this);
-	}
-	else
-	{
-		Callback.ExecuteIfBound(nullptr, this);
-	}
-}
-
-void UItemObject::OnProgressionStageAcquired(FOnRequestItemActorClassComplete Callback)
-{
-	if (!ItemProgressionStageHandle.IsValid())
-	{
-		Callback.ExecuteIfBound(nullptr, this);
-		return;
-	}
-
-	TArray<UObject*> OutStreamableAssets;
-	ItemProgressionStageHandle->GetLoadedAssets(OutStreamableAssets);
-
-	if (OutStreamableAssets.IsEmpty())
-	{
-		Callback.ExecuteIfBound(nullptr, this);
-		return;
-	}
-
-	const auto* ProgressionStageDefinitionDataAsset = Cast<UItemProgressionStageDefinitionDataAsset>(OutStreamableAssets[0]);
-	if (IsValid(ProgressionStageDefinitionDataAsset))
-	{
-		FStreamableDelegate OnRequestItemActorClassComplete;
-		OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback);
-		ItemProgressionStageHandle = UAssetManager::Get().LoadAssetList({ProgressionStageDefinitionDataAsset->GetOverrideItemActorClass()}, OnRequestItemActorClassComplete);
 	}
 	else
 	{

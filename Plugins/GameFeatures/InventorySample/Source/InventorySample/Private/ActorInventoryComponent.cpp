@@ -25,6 +25,7 @@
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
+#include "ActorItemProgressionComponent.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -86,6 +87,7 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	QueueingMechanism.Reset();
+	ItemHandleSystem.Reset();
 
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -218,10 +220,17 @@ void UActorInventoryComponent::SetupItems(const TArray<UObject*>& NewResources)
 	}
 }
 
-void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& NewResources)
+void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
+	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
+	                      *Outer->GetName()))
 	{
 		return;
 	}
@@ -233,7 +242,7 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& New
 
 	UItemObject* ItemObject = QueueingMechanism->PeekItem();
 	if (!IsValid(ItemObject) || !ensureAlwaysMsgf(!NewResources.IsEmpty(),
-	                                              TEXT("Attempting to load invalid Progression Definition on Item \"%s\"."),
+	                                              TEXT("Attempting to load invalid Actor Definition on Item \"%s\"."),
 	                                              *ItemObject->GetName()))
 	{
 		return;
@@ -241,9 +250,7 @@ void UActorInventoryComponent::SetupItemProgressions(const TArray<UObject*>& New
 
 	FOnRequestItemActorClassComplete Callback;
 	Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
-
-	const int32 ProgressionStageIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, ItemObject);
-	ItemObject->GetItemActorClassAsync(NewResources[0], ProgressionStageIndex, Callback);
+	ItemObject->GetItemActorClassAsync(NewResources[0], Callback);
 }
 
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
@@ -315,14 +322,22 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		return;
 	}
 
-	// @gdemers handle spawning default object that are currently equipped
-	for (UItemObject* Item : Items)
+	UItemObject* NewItem = nullptr;
+	if (!Items.IsEmpty())
 	{
-		const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, Item);
-		if (bIsItemEquipped)
-		{
-			SpawnEquipItem(ResourceManagerComponent, Item);
-		}
+		NewItem = Items.Last();
+	}
+
+	if (!IsValid(NewItem))
+	{
+		return;
+	}
+
+	// @gdemers handle spawning default object that are currently equipped
+	const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItem);
+	if (bIsItemEquipped)
+	{
+		SpawnEquipItem(ResourceManagerComponent, NewItem);
 	}
 }
 
@@ -397,7 +412,7 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 		       *ItemToSpawn->GetName(),
 		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
 
-		NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemProgressionId(), {});
+		NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemActorId(), {});
 	};
 
 	const auto NewRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
@@ -421,21 +436,51 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 void UActorInventoryComponent::OnItemActorClassRetrieved(UClass* NewActorClass,
                                                          UItemObject* NewItemObject)
 {
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	const auto ScopedSafety = [](TSharedPtr<FItemSpawnerQueuingMechanism> NewQueueingMechanism)
 	{
+		if (ensureAlwaysMsgf(NewQueueingMechanism.IsValid(),
+		                     TEXT("QueueingMechanism invalid!")))
+		{
+			NewQueueingMechanism->TryExecuteNextRequest(true);
+		}
+	};
+
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer),
+	                      TEXT("Invalid Outer!")))
+	{
+		ScopedSafety(QueueingMechanism);
 		return;
 	}
 
-	if (IsValid(NewItemObject))
+	if (!ensureAlwaysMsgf(IsValid(NewItemObject),
+	                      TEXT("Trying to access invalid UItemObject during initialization process.")))
 	{
-		NewItemObject->SpawnActorClass(const_cast<AActor*>(Outer), NewActorClass);
+		ScopedSafety(QueueingMechanism);
+		return;
 	}
 
-	if (ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	AActor* ItemActor = NewItemObject->SpawnActorClass(const_cast<AActor*>(Outer), NewActorClass);
+	if (!ensureAlwaysMsgf(IsValid(ItemActor),
+	                      TEXT("Failed to Spawn UItemObject Actor representation in World.")))
 	{
-		QueueingMechanism->TryExecuteNextRequest(true);
+		ScopedSafety(QueueingMechanism);
+		return;
 	}
+
+	auto* ItemProgressionComponent = Cast<UActorItemProgressionComponent>(ItemActor->AddComponentByClass(UActorItemProgressionComponent::StaticClass(),
+	                                                                                                     true,
+	                                                                                                     FTransform::Identity,
+	                                                                                                     false));
+	if (ensureAlwaysMsgf(IsValid(ItemProgressionComponent),
+	                     TEXT("Failed to Attach new Component for Progression handling.")))
+	{
+		const int32 NewProgressionIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, NewItemObject);
+		ItemProgressionComponent->SetProgressionIndex(NewProgressionIndex);
+		ItemProgressionComponent->RequestItemProgression(NewItemObject->GetItemProgressionId());
+	}
+
+	ScopedSafety(QueueingMechanism);
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()

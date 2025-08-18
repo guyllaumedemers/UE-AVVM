@@ -117,7 +117,7 @@ public:
 	const TArray<FDataRegistryId>& GetItemIds() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="ItemDefinitionDataTableRow"))
 	TArray<FDataRegistryId> ItemIds;
 };
 

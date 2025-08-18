@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,57 +17,37 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Resources/InventoryResourceHandlingImpl.h"
+#include "Resources/ItemProgressionResourceHandlingImpl.h"
 
-#include "ActorInventoryComponent.h"
+#include "ActorItemProgressionComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "Data/AVVMActorDefinitionDataAsset.h"
-#include "Data/ItemDefinitionDataAsset.h"
+#include "Data/ItemProgressionDefinitionDataAsset.h"
 
-TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
+TArray<FDataRegistryId> UItemProgressionResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent,
+                                                                               const TArray<UObject*>& Resources) const
 {
-	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (!IsValid(InventoryComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	auto* ItemProgressionComponent = Cast<UActorItemProgressionComponent>(ActorComponent);
+	if (!IsValid(ItemProgressionComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(ItemProgressionComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}
 
 	TArray<FDataRegistryId> OutResources;
-	TArray<UObject*> OutItems;
-	TArray<UObject*> OutItemActors;
+	TArray<UObject*> OutProgressionItems;
 
 	for (UObject* Resource : Resources)
 	{
-		const auto* ItemGroup = Cast<UItemGroupDefinitionDataAsset>(Resource);
-		if (IsValid(ItemGroup))
+		const auto* ItemProgression = Cast<UItemProgressionDefinitionDataAsset>(Resource);
+		if (IsValid(ItemProgression))
 		{
-			OutResources.Append(ItemGroup->GetItemIds());
-			continue;
-		}
-
-		const auto* Item = Cast<UItemDefinitionDataAsset>(Resource);
-		if (IsValid(Item))
-		{
-			OutItems.Add(Resource);
-			continue;
-		}
-
-		const auto* ItemActor = Cast<UAVVMActorDefinitionDataAsset>(Resource);
-		if (IsValid(ItemActor))
-		{
-			OutItemActors.Add(Resource);
+			OutProgressionItems.Add(Resource);
 			continue;
 		}
 	}
 
-	if (!OutItems.IsEmpty())
+	if (!OutProgressionItems.IsEmpty())
 	{
-		InventoryComponent->SetupItems(OutItems);
-	}
-
-	if (!OutItemActors.IsEmpty())
-	{
-		InventoryComponent->SetupItemActors(OutItemActors);
+		ItemProgressionComponent->SetupItemProgressionStages(OutProgressionItems);
 	}
 
 	return OutResources;

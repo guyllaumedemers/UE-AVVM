@@ -82,7 +82,7 @@ public:
 	void RequestItems(const AActor* Outer);
 
 	void SetupItems(const TArray<UObject*>& NewResources);
-	void SetupItemProgressions(const TArray<UObject*>& NewResources);
+	void SetupItemActors(const TArray<UObject*>& NewResources);
 
 	UFUNCTION(BlueprintCallable)
 	const TArray<UItemObject*>& GetItems() const;

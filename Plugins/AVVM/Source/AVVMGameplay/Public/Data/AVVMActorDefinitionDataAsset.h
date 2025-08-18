@@ -47,20 +47,31 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
+	const FSoftObjectPath& GetActorSoftObjectPath() const;
+
+	UFUNCTION(BlueprintCallable)
 	TArray<FDataRegistryId> GetActorTraitIds() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	bool bDoesSupportActorOverride = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActorOverride"))
+	TSoftClassPtr<AActor> OverrideActorClass = nullptr;
+
+	// TODO BEGIN @gdemers Refactor this -- I no longer believe it fits with how the inventory system handle progression. MOve this into a ActorTraitsDefinition
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportPassiveAbilities = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportPassiveAbilities"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportPassiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
 	TArray<FDataRegistryId> PassiveAbilityGroupIds;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportActiveAbilities = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActiveAbilities"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
 	TArray<FDataRegistryId> ActiveAbilityGroupIds;
+	// TODO END
 };
 
 /**

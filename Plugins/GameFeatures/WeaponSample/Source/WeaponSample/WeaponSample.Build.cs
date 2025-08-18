@@ -29,6 +29,7 @@ public class WeaponSample : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
 				"AVVMGameplay",
 				"Core",
 				"CoreUObject",

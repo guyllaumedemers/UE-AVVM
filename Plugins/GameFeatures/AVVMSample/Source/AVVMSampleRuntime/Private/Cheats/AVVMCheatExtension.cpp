@@ -26,7 +26,6 @@
 #include "GameplayTagsManager.h"
 #include "GameplayTagsModule.h"
 #include "GameplayTagsSettings.h"
-#include "Cheats/AVVMCheatData.h"
 #include "Engine/AssetManager.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
@@ -120,7 +119,8 @@ void UAVVMCheatExtension::NotifyChannelWithPayload(const FString& TagChannel,
 
 		FDataRegistryItemAcquiredCallback Callback;
 		Callback.BindUObject(this, &UAVVMCheatExtension::OnRegistryIdAcquired);
-		ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(SearchRegistryId, Callback), TEXT("Delegate couldn't be schedule."));
+		ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(SearchRegistryId, Callback),
+		                 TEXT("Delegate couldn't be schedule."));
 	}
 }
 
@@ -199,14 +199,14 @@ void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult&
 		return;
 	}
 
-	const auto* CheatDataTableRow = Result.GetItem<FAVVMCheatDataTableRow>();
-	check(CheatDataTableRow != nullptr /*unlikely to be invalid if we just loaded it, right!*/);
+	const auto* DataTableRow = Result.GetItem<FAVVMDataTableRow>();
+	check(DataTableRow != nullptr /*unlikely to be invalid if we just loaded it, right!*/);
 
 	FStreamableDelegate Callback;
 	Callback.BindUObject(this, &UAVVMCheatExtension::OnSoftObjectAcquired);
 
-	const auto LookupPaths = TArray<FSoftObjectPath>{CheatDataTableRow->CheatDataAsset.ToSoftObjectPath()};
-	TSharedPtr<FStreamableHandle> OutStreamableHandle = UAssetManager::Get().LoadAssetList(LookupPaths, Callback);
+	TSharedPtr<FStreamableHandle> OutStreamableHandle = UAssetManager::Get().LoadAssetList(
+		DataTableRow->GetResourcesPaths(), Callback);
 	AddStreamableHandle(Result.ItemId, OutStreamableHandle);
 }
 
@@ -232,7 +232,8 @@ void UAVVMCheatExtension::OnSoftObjectAcquired()
 			continue;
 		}
 
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *LookAtChannelTag.ToString());
+		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(),
+		       *LookAtChannelTag.ToString());
 		UE_AVVM_NOTIFY(this, LookAtChannelTag, nullptr, GetPayload(*StreamableHandle));
 
 		// @gdemers remove already broadcast request

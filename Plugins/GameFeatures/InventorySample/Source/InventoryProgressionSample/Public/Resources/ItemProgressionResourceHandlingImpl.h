@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,53 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class TransactionSample : ModuleRules
+#include "Resources/AVVMResourceHandlingImpl.h"
+
+#include "ItemProgressionResourceHandlingImpl.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class INVENTORYPROGRESSIONSAMPLE_API UItemProgressionResourceHandlingImpl : public UAVVMResourceHandlingImpl
 {
-	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore"
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit",
-				"Json"
-			}
-		);
-
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMDebugger",
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
-
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
-		}
-	}
-}
+public:
+	virtual TArray<FDataRegistryId> ProcessResources(UActorComponent* ActorComponent,
+	                                                 const TArray<UObject*>& Resources) const override;
+};

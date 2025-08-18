@@ -17,37 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Cheats/AVVMCheatData.h"
 
-#if WITH_EDITOR
-EDataValidationResult UAVVMCheatDataAsset::IsDataValid(class FDataValidationContext& Context) const
-{
-	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!CheatData.IsValid())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMCheatDataAsset", "", "No valid FInstancedStruct specified!"));
-	}
+#pragma once
 
-	return Result;
-}
-#endif
+#include "CoreMinimal.h"
+#include "Modules/ModuleManager.h"
 
-const TInstancedStruct<FAVVMCheatData>& UAVVMCheatDataAsset::GetData() const
-{
-	return CheatData;
-}
-
-#if WITH_EDITOR
-EDataValidationResult FAVVMCheatDataTableRow::IsDataValid(class FDataValidationContext& Context) const
-{
-	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (CheatDataAsset.IsNull())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMCheatDataTableRow", "", "No valid UDataAsset specified!"));
-	}
-
-	return Result;
-}
-#endif
+INVENTORYPROGRESSIONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogProgressionSample, Log, All);

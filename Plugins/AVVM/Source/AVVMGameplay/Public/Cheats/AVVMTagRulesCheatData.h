@@ -21,8 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMCheatData.h"
 #include "GameplayTagContainer.h"
-#include "Cheats/AVVMCheatData.h"
 
 #include "AVVMTagRulesCheatData.generated.h"
 

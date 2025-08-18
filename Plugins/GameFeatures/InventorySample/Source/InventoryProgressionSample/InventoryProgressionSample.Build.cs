@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -20,9 +20,9 @@
 
 using UnrealBuildTool;
 
-public class AVVMSampleRuntime : ModuleRules
+public class InventoryProgressionSample : ModuleRules
 {
-	public AVVMSampleRuntime(ReadOnlyTargetRules Target) : base(Target)
+	public InventoryProgressionSample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -31,46 +31,26 @@ public class AVVMSampleRuntime : ModuleRules
 			{
 				"AVVM",
 				"AVVMGameplay",
-				"AVVMOnline",
+				"AVVMToolkit",
+				"CommonUI",
 				"Core",
 				"CoreUObject",
+				"DataRegistry",
 				"DeveloperSettings",
 				"Engine",
+				"GameplayAbilities",
 				"GameplayTags",
-				"ModularGameplayActors",
+				"IrisCore",
 				"ModelViewViewModel",
-				"OnlineSubsystem",
-				"UIExtension",
-			});
-
+				"StructUtils",
+			}
+		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CommonUI",
-				"DataRegistry",
-			});
-
-		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
-		// is enabled. Set your project editor .target.cs to enable it!
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMDebugger",
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
-
-			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
-		}
+				"Json"
+			}
+		);
 	}
 }

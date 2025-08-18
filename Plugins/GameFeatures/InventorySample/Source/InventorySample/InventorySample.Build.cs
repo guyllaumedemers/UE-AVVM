@@ -41,14 +41,14 @@ public class InventorySample : ModuleRules
 				"GameplayAbilities",
 				"GameplayTags",
 				"IrisCore",
-				"ModelViewViewModel",
-				"StructUtils",
+				"ModelViewViewModel"
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"InventoryProgressionSample",
 				"Json"
 			}
 		);

@@ -23,43 +23,58 @@
 EDataValidationResult UItemProgressionStageDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (OverrideItemActorClass.IsNull())
+	if (ProgressionGameplayEffects.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UItemProgressionStageDefinitionDataAsset", "", "AActor Class missing. No valid TSoftClassPtr specified!"));
+		Context.AddError(NSLOCTEXT("UItemProgressionStageDefinitionDataAsset", "", "Progression Effects missing. No valid GameplayEffect specified!"));
 	}
 
 	return Result;
 }
 #endif
 
-const FSoftObjectPath& UItemProgressionStageDefinitionDataAsset::GetOverrideItemActorClass() const
+TArray<FSoftObjectPath> UItemProgressionStageDefinitionDataAsset::GetProgressionStackingEffectSoftObjectPaths() const
 {
-	return OverrideItemActorClass.ToSoftObjectPath();
+	TArray<FSoftObjectPath> OutResults;
+	for (const TSoftClassPtr<UGameplayEffect>& GameplayEffectClass : ProgressionGameplayEffects)
+	{
+		OutResults.Add(GameplayEffectClass.ToSoftObjectPath());
+	}
+
+	return OutResults;
 }
 
 #if WITH_EDITOR
 EDataValidationResult UItemProgressionDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (DefaultItemActorClass.IsNull())
+	if (bDoesApplyProgressionEffects && ItemProgressionStageDataAssets.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UItemProgressionDefinitionDataAsset", "", "AActor Class missing. No valid TSoftClassPtr specified!"));
+		Context.AddError(NSLOCTEXT("UItemProgressionDefinitionDataAsset", "", "Progression Stages missing. No valid entries specified!"));
 	}
 
 	return Result;
 }
 #endif
 
-const FSoftObjectPath& UItemProgressionDefinitionDataAsset::GetDefaultItemActorClass() const
+TArray<FSoftObjectPath> UItemProgressionDefinitionDataAsset::GetProgressionStages(const int32 ProgressionStageIndex) const
 {
-	return DefaultItemActorClass.ToSoftObjectPath();
-}
+	if (ProgressionStageIndex == INDEX_NONE)
+	{
+		return TArray<FSoftObjectPath>{};
+	}
 
-FSoftObjectPath UItemProgressionDefinitionDataAsset::GetProgressionStageItemActorOverride(const int32 ProgressionStageIndex) const
-{
-	return ItemProgressionStageDataAssets.IsValidIndex(ProgressionStageIndex) ? ItemProgressionStageDataAssets[ProgressionStageIndex].ToSoftObjectPath() : FSoftObjectPath();
+	TArray<FSoftObjectPath> OutResults;
+	for (const auto& [StageLevel, ProgressionSoftObjectPtr] : ItemProgressionStageDataAssets)
+	{
+		if (StageLevel <= ProgressionStageIndex)
+		{
+			OutResults.Add(ProgressionSoftObjectPtr.ToSoftObjectPath());
+		}
+	}
+
+	return bDoesApplyProgressionEffects ? OutResults : TArray<FSoftObjectPath>{};
 }
 
 #if WITH_EDITOR

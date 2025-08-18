@@ -46,7 +46,7 @@ void UAVVMComponent::BeginPlay()
 	// just make sure, your derived AActor class doesn't execute code BEFORE the call to the super::BeginPlay().
 	for (auto Iterator{PresenterClasses.CreateIterator()}; Iterator; ++Iterator)
 	{
-		if (Iterator)
+		if (IsValid(*Iterator))
 		{
 			auto* Presenter = NewObject<UAVVMPresenter>(this, Iterator->Get());
 			TransientPresenters.AddUnique(Presenter);

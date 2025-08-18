@@ -80,7 +80,8 @@ public:
 	virtual bool IsSupportedForNetworking() const override;
 
 #if UE_WITH_IRIS
-	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
+	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context,
+	                                          UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
 #endif // UE_WITH_IRIS
 
 	UFUNCTION(BlueprintCallable)
@@ -117,19 +118,21 @@ public:
 	bool IsEmpty() const;
 
 	UFUNCTION(BlueprintCallable)
-	const int32& GetRuntimeCount() const;
+	const int32 GetRuntimeCount() const;
+
+	UFUNCTION(BlueprintCallable)
+	const FDataRegistryId& GetItemActorId() const;
 
 	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& GetItemProgressionId() const;
 
 	UFUNCTION(BlueprintCallable)
-	void GetItemActorClassAsync(const UObject* NewProgressionDefinitionData,
-	                            const int32 NewProgressionStageIndex,
+	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnActorClass(AActor* NewAnchor,
-	                     UClass* NewActorClass);
+	AActor* SpawnActorClass(AActor* NewAnchor,
+	                        UClass* NewActorClass);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;
@@ -142,9 +145,6 @@ protected:
 	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback);
 
 	UFUNCTION()
-	void OnProgressionStageAcquired(FOnRequestItemActorClassComplete Callback);
-
-	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
@@ -153,8 +153,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
 	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	// @gdemers Item progression is referenced at this level to prevent hard references on Actor type defined in other GFP and
+	// applies progression effects to the loaded actor type.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="ItemProgressionDefinitionDataTableRow"))
 	FDataRegistryId ItemProgressionId = FDataRegistryId();
+
+	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
+	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
+	FDataRegistryId ItemActorId = FDataRegistryId();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName SocketName = NAME_None;
@@ -165,5 +172,5 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemStateModified")
 	FItemState RuntimeItemState = FItemState();
 
-	TSharedPtr<FStreamableHandle> ItemProgressionStageHandle;
+	TSharedPtr<FStreamableHandle> ItemActorHandle;
 };

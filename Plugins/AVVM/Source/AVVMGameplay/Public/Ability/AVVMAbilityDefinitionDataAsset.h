@@ -106,7 +106,7 @@ public:
 	const TArray<FDataRegistryId>& GetAbilityIds() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMAbilityDefinitionDataTableRow"))
 	TArray<FDataRegistryId> AbilityIds;
 };
 

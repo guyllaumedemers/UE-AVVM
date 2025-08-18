@@ -17,65 +17,42 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/AVVMActorDefinitionDataAsset.h"
+#include "Cheats/AVVMCheatData.h"
 
 #if WITH_EDITOR
-EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UAVVMCheatDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (bDoesSupportPassiveAbilities && PassiveAbilityGroupIds.IsEmpty())
+	if (!CheatData.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "PassiveAbilityGroupId invalid!"));
-	}
-
-	if (bDoesSupportActiveAbilities && ActiveAbilityGroupIds.IsEmpty())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActiveAbilityGroupId invalid!"));
+		Context.AddError(NSLOCTEXT("UAVVMCheatDataAsset", "", "No valid FInstancedStruct specified!"));
 	}
 
 	return Result;
 }
 #endif
 
-const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorSoftObjectPath() const
+const TInstancedStruct<FAVVMCheatData>& UAVVMCheatDataAsset::GetData() const
 {
-	return OverrideActorClass.ToSoftObjectPath();
-}
-
-TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
-{
-	TArray<FDataRegistryId> Result;
-
-	if (bDoesSupportPassiveAbilities)
-	{
-		Result.Append(PassiveAbilityGroupIds);
-	}
-
-	if (bDoesSupportActiveAbilities)
-	{
-		Result.Append(ActiveAbilityGroupIds);
-	}
-
-	return Result;
+	return CheatData;
 }
 
 #if WITH_EDITOR
-EDataValidationResult FAVVMActorDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FAVVMCheatDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ActorDefinition.IsNull())
+	if (CheatDataAsset.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMActorDefinitionDataTableRow", "", "UAVVMActorDefinitionDataAsset missing. No valid UDataAsset specified!"));
+		Context.AddError(NSLOCTEXT("FAVVMCheatDataTableRow", "", "No valid UDataAsset specified!"));
 	}
 
 	return Result;
 }
 #endif
 
-TArray<FSoftObjectPath> FAVVMActorDefinitionDataTableRow::GetResourcesPaths() const
+TArray<FSoftObjectPath> FAVVMCheatDataTableRow::GetResourcesPaths() const
 {
-	return {ActorDefinition.ToSoftObjectPath()};
+	return {CheatDataAsset.ToSoftObjectPath()};
 }
