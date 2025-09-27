@@ -59,6 +59,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnRegisterGameplayEffects();
 
+	UFUNCTION(BlueprintCallable)
+	const FDataRegistryId& GetAttachmentModifierDefinitionId() const; 
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();

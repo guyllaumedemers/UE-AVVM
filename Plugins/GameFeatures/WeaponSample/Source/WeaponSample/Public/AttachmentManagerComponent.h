@@ -33,23 +33,6 @@ class ATriggeringAttachmentActor;
 /**
  *	Class description:
  *
- *	FGetAttachmentDefinitionRequestArgs is a POD type to encapsulate signature function args.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FGetAttachmentModifierDefinitionRequestArgs
-{
-	GENERATED_BODY()
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = nullptr;
-};
-
-/**
- *	Class description:
- *
  *	FAttachmentSwapContextArgs is a POD type to encapsulate signature function args.
  */
 USTRUCT(BlueprintType)
@@ -88,6 +71,27 @@ struct WEAPONSAMPLE_API FAttachmentToken
 /**
  *	Class description:
  *
+ *	FAttachmentModifierToken describe a unique identifier that increments only when default construct. Can be safely
+ *	passed by copy around.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FAttachmentModifierToken
+{
+	GENERATED_BODY()
+
+	explicit FAttachmentModifierToken()
+	{
+		static uint32 GlobalUniqueId = 0;
+		UniqueId = ++GlobalUniqueId;
+	}
+
+	UPROPERTY()
+	uint32 UniqueId = 0;
+};
+
+/**
+ *	Class description:
+ *
  *	UAttachmentManagerComponent is a system handling attachment equip/unequiping behaviour and applying GameplayEffects owned by the active Attachments.
  */
 UCLASS(ClassGroup=("Weapon"), Blueprintable, meta=(BlueprintSpawnableComponent))
@@ -107,7 +111,7 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Swap(const FAttachmentSwapContextArgs& NewAttachmentSwapContext);
 
-	void GetAttachmentModifierDefinition(const FGetAttachmentModifierDefinitionRequestArgs& NewRequestArgs);
+	void GetAttachmentModifierDefinition(const FDataRegistryId& NewAttachmentModifierDefinitionId) const;
 	void SetupAttachments(const TArray<UObject*>& NewResources);
 	void SetupAttachmentModifiers(const TArray<UObject*>& NewResources);
 
@@ -116,20 +120,7 @@ protected:
 	void OnAttachmentActorRetrieved(FAttachmentToken AttachmentToken);
 
 	UFUNCTION()
-	void OnAttachmentModifiersRetrieved(FAttachmentToken AttachmentToken);
-
-	// @gdemers POD type that maps the attachment actor request to the Unique token id that identify
-	// a streamable handle.
-	struct FAttachmentStreamableContext
-	{
-		~FAttachmentStreamableContext() = default;
-
-		FAttachmentStreamableContext() = default;
-		FAttachmentStreamableContext(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment);
-
-		int32 StreamableContextId = INDEX_NONE;
-		TWeakObjectPtr<ATriggeringAttachmentActor> Attachment = nullptr;
-	};
+	void OnAttachmentModifiersRetrieved(FAttachmentModifierToken AttachmentModifierToken);
 
 	// @gdemers POD type that queue data registry request.
 	struct FAttachmentQueuingMechanism
@@ -137,12 +128,12 @@ protected:
 		FAttachmentQueuingMechanism() = default;
 		~FAttachmentQueuingMechanism();
 
-		void Push(const FAttachmentStreamableContext& NewContext);
+		void Push(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment);
 		TWeakObjectPtr<ATriggeringAttachmentActor> PeekAtIndex(const int32 NewIndex);
+		void TryExecuteNext(const UAttachmentManagerComponent* AttachmentManagerComponent);
+		bool IsEmpty() const;
 
-		void ModifyIndex(const int32 NewIndex);
-
-		TArray<TSharedPtr<FAttachmentStreamableContext>> QueuedRequest;
+		TArray<TWeakObjectPtr<ATriggeringAttachmentActor>> QueuedRequest;
 	};
 
 	// @gdemers POD type that aggregate actor to be destroyed. Actors should be kept, deactivated until batching happens so if a swap
@@ -168,6 +159,7 @@ protected:
 	TMap<FGameplayTag, TWeakObjectPtr<ATriggeringAttachmentActor>> EquippedAttachments;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentModifierHandleSystem;
 	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;
 	TSharedPtr<FAttachmentQueuingMechanism> QueueingMechanism;
 };

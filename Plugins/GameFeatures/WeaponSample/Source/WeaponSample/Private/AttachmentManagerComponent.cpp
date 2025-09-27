@@ -21,6 +21,7 @@
 
 #include "AbilitySystemGlobals.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMScopedDelegate.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
@@ -89,37 +90,34 @@ UAttachmentManagerComponent* UAttachmentManagerComponent::GetActorComponent(cons
 
 void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapContextArgs& NewAttachmentSwapContext)
 {
-	TWeakObjectPtr<ATriggeringAttachmentActor>* SearchResult = EquippedAttachments.Find(NewAttachmentSwapContext.TargetSlotTag);
-	if ((SearchResult == nullptr) || !SearchResult->IsValid())
+	TWeakObjectPtr<ATriggeringAttachmentActor>& SearchResult = EquippedAttachments.FindOrAdd(NewAttachmentSwapContext.TargetSlotTag);
+	if (SearchResult.IsValid())
 	{
-		EquippedAttachments.Add({NewAttachmentSwapContext.TargetSlotTag, NewAttachmentSwapContext.Attachment});
-		return;
+		// @gdemers detach old actor from parent.
+		SearchResult->Detach();
 	}
 
 	if (BatchingMechanism.IsValid())
 	{
-		// @gdemers add to batch destroy collection
-		BatchingMechanism->PushPendingDestroy(*SearchResult);
+		// @gdemers add old reference to batch destroy collection.
+		BatchingMechanism->PushPendingDestroy(SearchResult.Get());
 	}
 
-	// @gdemers detach old actor from parent 
-	(*SearchResult)->Detach();
-
-	// @gdemers update entry reference
-	*SearchResult = NewAttachmentSwapContext.Attachment;
+	// @gdemers update entry reference.
+	SearchResult = NewAttachmentSwapContext.Attachment;
+	if (SearchResult.IsValid())
+	{
+		// @gdemers attach new actor to parent.
+		SearchResult->Attach();
+	}
 }
 
-void UAttachmentManagerComponent::GetAttachmentModifierDefinition(const FGetAttachmentModifierDefinitionRequestArgs& NewRequestArgs)
+void UAttachmentManagerComponent::GetAttachmentModifierDefinition(const FDataRegistryId& NewAttachmentModifierDefinitionId) const
 {
-	if (QueueingMechanism.IsValid())
-	{
-		QueueingMechanism->Push(FAttachmentStreamableContext{NewRequestArgs.AttachmentActor.Get()});
-	}
-
 	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer doesn't return valid AVVMResourceManagerComponent!")))
 	{
-		ResourceManagerComponent->RequestAsyncLoading(NewRequestArgs.AttachmentModifierDefinitionId, {});
+		ResourceManagerComponent->RequestAsyncLoading(NewAttachmentModifierDefinitionId, {});
 	}
 }
 
@@ -217,11 +215,11 @@ void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*
 
 	if (!DeferredItems.IsEmpty())
 	{
-		FAttachmentToken Token;
+		FAttachmentModifierToken Token;
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentModifiersRetrieved, Token);
 
-		TSharedPtr<FStreamableHandle>& OutResult = AttachmentHandleSystem.FindOrAdd(Token.UniqueId);
+		TSharedPtr<FStreamableHandle>& OutResult = AttachmentModifierHandleSystem.FindOrAdd(Token.UniqueId);
 		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
 	}
 }
@@ -258,33 +256,53 @@ void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken At
 	Params.Owner = const_cast<AActor*>(Outer);
 
 	auto* NewAttachment = Cast<ATriggeringAttachmentActor>(World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &FTransform::Identity, Params));
-	if (ensureAlwaysMsgf(IsValid(NewAttachment), TEXT("Attachment Actor Class Failed to create an instance in World!")))
+	if (!ensureAlwaysMsgf(IsValid(NewAttachment), TEXT("Attachment Actor Class Failed to create an instance in World!")))
 	{
-		Swap(FAttachmentSwapContextArgs{NewAttachment, NewAttachment->SlotTag});
-		NewAttachment->Attach();
+		return;
+	}
+
+	Swap(FAttachmentSwapContextArgs{NewAttachment, NewAttachment->SlotTag});
+
+	if (!QueueingMechanism.IsValid())
+	{
+		return;
+	}
+
+	const bool bIsEmpty = QueueingMechanism->IsEmpty();
+
+	// @gdemers we should always push in order to queue subsequent request.
+	QueueingMechanism->Push(NewAttachment);
+
+	if (bIsEmpty)
+	{
+		// @gdemers async load attachment modifier for the actor that is first spawned in world.
+		GetAttachmentModifierDefinition(NewAttachment->GetAttachmentModifierDefinitionId());
 	}
 }
 
-void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToken AttachmentToken)
+void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentModifierToken AttachmentModifierToken)
 {
-	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentHandleSystem.Find(AttachmentToken.UniqueId);
+	// @gdemers our attachment is fully initialized, and we can move to the next request.
+	const auto OnNextRequestExecuted = [](const TSharedPtr<FAttachmentQueuingMechanism> NewQueueingMechanism,
+	                                      const UAttachmentManagerComponent* Component)
+	{
+		if (NewQueueingMechanism.IsValid())
+		{
+			NewQueueingMechanism->TryExecuteNext(Component);
+		}
+	};
+
+	// @gdemers for safety reason, our callback is using a scoped object.
+	const auto Callback = TDelegate<void()>::CreateWeakLambda(this, OnNextRequestExecuted, QueueingMechanism, this);
+	FAVVMScopedDelegate ScopedDelegate(Callback);
+
+	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentModifierHandleSystem.Find(AttachmentModifierToken.UniqueId);
 	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
 	{
 		return;
 	}
 
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
-	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
-	{
-		return;
-	}
-
-	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism->PeekAtIndex(AttachmentToken.UniqueId);
+	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism.IsValid() ? QueueingMechanism->PeekAtIndex(0) : nullptr;
 	if (!AttachmentActor.IsValid())
 	{
 		return;
@@ -304,49 +322,43 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentToke
 	}
 }
 
-UAttachmentManagerComponent::FAttachmentStreamableContext::FAttachmentStreamableContext(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
-	: StreamableContextId(INDEX_NONE)
-	, Attachment(NewAttachment)
-{
-}
-
 UAttachmentManagerComponent::FAttachmentQueuingMechanism::~FAttachmentQueuingMechanism()
 {
 	QueuedRequest.Empty();
 }
 
-void UAttachmentManagerComponent::FAttachmentQueuingMechanism::Push(const FAttachmentStreamableContext& NewContext)
+void UAttachmentManagerComponent::FAttachmentQueuingMechanism::Push(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
 {
-	QueuedRequest.Add(MakeShared<FAttachmentStreamableContext>(NewContext));
+	QueuedRequest.Add(NewAttachment);
 }
 
 TWeakObjectPtr<ATriggeringAttachmentActor> UAttachmentManagerComponent::FAttachmentQueuingMechanism::PeekAtIndex(const int32 NewIndex)
 {
-	const TSharedPtr<FAttachmentStreamableContext>* SearchResult = QueuedRequest.FindByPredicate([SearchIndex = NewIndex](TSharedPtr<FAttachmentStreamableContext> NewContext)
-	{
-		return NewContext.IsValid() && NewContext->StreamableContextId == SearchIndex;
-	});
-
-	TWeakObjectPtr<ATriggeringAttachmentActor> Out;
-	if (SearchResult != nullptr && SearchResult->IsValid())
-	{
-		Out = (*SearchResult)->Attachment;
-	}
-
-	return Out;
+	return QueuedRequest.IsValidIndex(NewIndex) ? QueuedRequest[NewIndex] : nullptr;
 }
 
-void UAttachmentManagerComponent::FAttachmentQueuingMechanism::ModifyIndex(const int32 NewIndex)
+void UAttachmentManagerComponent::FAttachmentQueuingMechanism::TryExecuteNext(const UAttachmentManagerComponent* AttachmentManagerComponent)
 {
-	const TSharedPtr<FAttachmentStreamableContext>* SearchResult = QueuedRequest.FindByPredicate([](TSharedPtr<FAttachmentStreamableContext> NewContext)
+	if (!IsValid(AttachmentManagerComponent))
 	{
-		return NewContext.IsValid() && NewContext->StreamableContextId == INDEX_NONE;
-	});
-
-	if (SearchResult != nullptr && SearchResult->IsValid())
-	{
-		(*SearchResult)->StreamableContextId = NewIndex;
+		return;
 	}
+
+	if (!QueuedRequest.IsEmpty())
+	{
+		QueuedRequest.RemoveAtSwap(0);
+	}
+
+	if (!QueuedRequest.IsEmpty())
+	{
+		const FDataRegistryId& AttachmentModifierRegistryId = QueuedRequest[0]->GetAttachmentModifierDefinitionId();
+		AttachmentManagerComponent->GetAttachmentModifierDefinition(AttachmentModifierRegistryId);
+	}
+}
+
+bool UAttachmentManagerComponent::FAttachmentQueuingMechanism::IsEmpty() const
+{
+	return QueuedRequest.IsEmpty();
 }
 
 UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingMechanism()
@@ -356,7 +368,10 @@ UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingM
 
 void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
 {
-	PendingDestroy.Add(NewAttachment);
+	if (NewAttachment.IsValid())
+	{
+		PendingDestroy.Add(NewAttachment);
+	}
 }
 
 void UAttachmentManagerComponent::FAttachmentBatchingMechanism::BatchDestroy()

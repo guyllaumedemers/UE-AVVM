@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,35 +17,28 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class WeaponSample : ModuleRules
+/**
+ *	Class description:
+ *
+ *	FAVVMScopedDelegate is a scoped object that execute a laten delegate during destruction.
+ */
+struct AVVMTOOLKIT_API FAVVMScopedDelegate
 {
-	public WeaponSample(ReadOnlyTargetRules Target) : base(Target)
+public:
+	FAVVMScopedDelegate(const TDelegate<void()>& Callback)
+		: OutOfScopeDelegate(Callback)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit"
-			}
-		);
 	}
-}
+
+	~FAVVMScopedDelegate()
+	{
+		OutOfScopeDelegate.ExecuteIfBound();
+	}
+
+private:
+	TDelegate<void()> OutOfScopeDelegate;
+};

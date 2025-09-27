@@ -22,12 +22,8 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-#include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "GameplayEffect.h"
 #include "WeaponSample.h"
-#include "Components/MeshComponent.h"
-#include "GameFramework/Actor.h"
 
 void ATriggeringAttachmentActor::BeginPlay()
 {
@@ -47,20 +43,6 @@ void ATriggeringAttachmentActor::BeginPlay()
 	       *Outer->GetName());
 
 	OwningOuter = Outer;
-
-#if WITH_SERVER_CODE
-	if (HasAuthority())
-	{
-		auto* AttachmentManagerComponent = UAttachmentManagerComponent::GetActorComponent(Outer);
-		if (IsValid(AttachmentManagerComponent))
-		{
-			FGetAttachmentModifierDefinitionRequestArgs Args;
-			Args.AttachmentActor = this;
-			Args.AttachmentModifierDefinitionId = AttachmentModifierDefinitionId;
-			AttachmentManagerComponent->GetAttachmentModifierDefinition(Args);
-		}
-	}
-#endif
 }
 
 void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -167,4 +149,9 @@ void ATriggeringAttachmentActor::UnRegisterGameplayEffects()
 	{
 		NewAbilitySystemComponent->RemoveActiveGameplayEffect(ActiveGameplayEffect);
 	}
+}
+
+const FDataRegistryId& ATriggeringAttachmentActor::GetAttachmentModifierDefinitionId() const
+{
+	return AttachmentModifierDefinitionId;
 }
