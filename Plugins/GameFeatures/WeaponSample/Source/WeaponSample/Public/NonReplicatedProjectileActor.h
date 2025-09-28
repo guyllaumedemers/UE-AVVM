@@ -48,7 +48,7 @@ struct FProjectileParams
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Speed = 0.f;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Mass = 0.f;
 
@@ -104,16 +104,6 @@ protected:
 	void UpdateLifetime(const float DeltaTime);
 	void Kill();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SpawnProjectileExplosion(const TSoftClassPtr<AActor>& ExplosionClass,
-	                                        const FVector& ImpactPoint,
-	                                        const FVector& ImpactNormal);
-
-	// @gdemers may require override interfacing with a pooling system of sort.
-	virtual void HandleProjectileExplosion(const TSoftClassPtr<AActor>& ExplosionClass,
-	                                       const FVector& ImpactPoint,
-	                                       const FVector& ImpactNormal) PURE_VIRTUAL(HandleProjectileExplosion, return;);
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FProjectileParams> ProjectileParams;
 
@@ -156,6 +146,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void HandleProjectileFx(const TInstancedStruct<FProjectileParams>& Params,
 	                               const FHitResult& HitResult);
+
+	UFUNCTION(BlueprintCallable)
+	static void HandleProjectileExplosion(const TSoftClassPtr<AActor>& ExplosionClass,
+	                                      const FVector& ImpactPoint,
+	                                      const FVector& ImpactNormal);
 
 	UFUNCTION(BlueprintCallable)
 	static void ApplyDamage(AActor* Instigator,

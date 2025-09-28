@@ -1,83 +1,87 @@
 {
-	"FileVersion": 3,
-	"EngineAssociation": "{B547D441-4153-6FB3-F7DE-48AB93CA32D5}",
-	"Category": "",
-	"Description": "",
-	"Modules": [
-		{
-			"Name": "UISample",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "AVVM",
-			"Enabled": true
-		},
-		{
-			"Name": "AVVMSample",
-			"Enabled": true
-		},
-		{
-			"Name": "CommonGame",
-			"Enabled": true
-		},
-		{
-			"Name": "CommonUI",
-			"Enabled": true
-		},
-		{
-			"Name": "CommonUser",
-			"Enabled": true
-		},
-		{
-			"Name": "DataRegistry",
-			"Enabled": true
-		},
-		{
-			"Name": "FencingSample",
-			"Enabled": true
-		},
-		{
-			"Name": "GameFeatures",
-			"Enabled": true
-		},
-		{
-			"Name": "InteractionSample",
-			"Enabled": true
-		},
-		{
-			"Name": "InventorySample",
-			"Enabled": true
-		},
-		{
-			"Name": "ModularGameplay",
-			"Enabled": true
-		},
-		{
-			"Name": "ModularGameplayActors",
-			"Enabled": true
-		},
-		{
-			"Name": "ModelViewViewModel",
-			"Enabled": true
-		},
-		{
-			"Name": "OnlineFramework",
-			"Enabled": true
-		},
-		{
-			"Name": "TransactionSample",
-			"Enabled": true
-		},
-		{
-			"Name": "UIExtension",
-			"Enabled": true
-		},
-		{
-			"Name": "WeaponSample",
-			"Enabled": true
-		}
-	]
+  "FileVersion": 3,
+  "EngineAssociation": "{B547D441-4153-6FB3-F7DE-48AB93CA32D5}",
+  "Category": "",
+  "Description": "",
+  "Modules": [
+    {
+      "Name": "UISample",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "AVVM",
+      "Enabled": true
+    },
+    {
+      "Name": "AVVMSample",
+      "Enabled": true
+    },
+    {
+      "Name": "CommonGame",
+      "Enabled": true
+    },
+    {
+      "Name": "CommonUI",
+      "Enabled": true
+    },
+    {
+      "Name": "CommonUser",
+      "Enabled": true
+    },
+    {
+      "Name": "DataRegistry",
+      "Enabled": true
+    },
+    {
+      "Name": "FencingSample",
+      "Enabled": true
+    },
+    {
+      "Name": "GameFeatures",
+      "Enabled": true
+    },
+    {
+      "Name": "InteractionSample",
+      "Enabled": true
+    },
+    {
+      "Name": "InventorySample",
+      "Enabled": true
+    },
+    {
+      "Name": "ModularGameplay",
+      "Enabled": true
+    },
+    {
+      "Name": "ModularGameplayActors",
+      "Enabled": true
+    },
+    {
+      "Name": "ModelViewViewModel",
+      "Enabled": true
+    },
+    {
+      "Name": "OnlineFramework",
+      "Enabled": true
+    },
+    {
+      "Name": "PoolingSample",
+      "Enabled": true
+    },
+    {
+      "Name": "TransactionSample",
+      "Enabled": true
+    },
+    {
+      "Name": "UIExtension",
+      "Enabled": true
+    },
+    {
+      "Name": "WeaponSample",
+      "Enabled": true
+    }
+  ]
 }

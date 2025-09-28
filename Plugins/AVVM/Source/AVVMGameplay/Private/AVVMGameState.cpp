@@ -31,3 +31,15 @@ void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
+
+void AAVVMGameState::AddPlayerState(APlayerState* PlayerState)
+{
+	Super::AddPlayerState(PlayerState);
+	OnPlayerStateAdded.Broadcast(PlayerState);
+}
+
+void AAVVMGameState::RemovePlayerState(APlayerState* PlayerState)
+{
+	Super::RemovePlayerState(PlayerState);
+	OnPlayerStateRemoved.Broadcast(PlayerState);
+}

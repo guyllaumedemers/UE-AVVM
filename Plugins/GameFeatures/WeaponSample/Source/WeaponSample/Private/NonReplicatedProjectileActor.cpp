@@ -52,6 +52,7 @@ ANonReplicatedProjectileActor::ANonReplicatedProjectileActor(const FObjectInitia
 	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.bAllowTickBatching = true;
+	bReplicates = false;
 }
 
 void ANonReplicatedProjectileActor::BeginPlay()
@@ -200,10 +201,10 @@ void ANonReplicatedProjectileActor::HandleHit(const FHitResult& HitResult)
 		const bool bDoesExplode = Params->DoesExplode();
 		if (bDoesExplode)
 		{
-			// @gdemers spawn simulated explosion actor.
-			Multicast_SpawnProjectileExplosion(Params->ExplosionActorClass,
-			                                   HitResult.ImpactPoint,
-			                                   HitResult.ImpactNormal);
+			// @gdemers spawn replicated explosion actor.
+			UProjectileFunctionLibrary::HandleProjectileExplosion(Params->ExplosionActorClass,
+			                                                      HitResult.ImpactPoint,
+			                                                      HitResult.ImpactNormal);
 		}
 		else
 		{
@@ -237,15 +238,6 @@ void ANonReplicatedProjectileActor::Kill()
 {
 	OnProjectilePoolingRequest.Broadcast(this);
 	RuntimeLifetime = 0.f;
-}
-
-void ANonReplicatedProjectileActor::Multicast_SpawnProjectileExplosion_Implementation(const TSoftClassPtr<AActor>& ExplosionClass,
-                                                                                      const FVector& ImpactPoint,
-                                                                                      const FVector& ImpactNormal)
-{
-	HandleProjectileExplosion(ExplosionClass,
-	                          ImpactPoint,
-	                          ImpactNormal);
 }
 
 FVector UProjectileFunctionLibrary::GetDeltaVelocity(const FVector& Velocity,
@@ -302,6 +294,14 @@ bool UProjectileFunctionLibrary::IsLocallyOwned(const ANonReplicatedProjectileAc
 void UProjectileFunctionLibrary::HandleProjectileFx(const TInstancedStruct<FProjectileParams>& Params,
                                                     const FHitResult& HitResult)
 {
+	// TODO @gdemers handle pooling and vfx
+}
+
+void UProjectileFunctionLibrary::HandleProjectileExplosion(const TSoftClassPtr<AActor>& ExplosionClass,
+                                                           const FVector& ImpactPoint,
+                                                           const FVector& ImpactNormal)
+{
+	// TODO @gdemers spawn, net init for replication or find a way to retrigger the BeginPlay process prior to pooling.
 }
 
 void UProjectileFunctionLibrary::ApplyDamage(AActor* Instigator,

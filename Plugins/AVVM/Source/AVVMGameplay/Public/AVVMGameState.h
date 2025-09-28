@@ -27,6 +27,9 @@
 
 #include "AVVMGameState.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateAddedDelegate, APlayerState*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateRemovedDelegate, APlayerState*);
+
 /**
  *	Class description:
  *
@@ -48,4 +51,10 @@ class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
 public:
 	AAVVMGameState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void AddPlayerState(APlayerState* PlayerState) override;
+	virtual void RemovePlayerState(APlayerState* PlayerState) override;
+
+	FOnPlayerStateRemovedDelegate OnPlayerStateRemoved;
+	FOnPlayerStateAddedDelegate OnPlayerStateAdded;
 };
