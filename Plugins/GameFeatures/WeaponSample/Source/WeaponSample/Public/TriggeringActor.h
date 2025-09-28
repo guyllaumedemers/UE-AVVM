@@ -32,6 +32,7 @@
 class ATriggeringAttachmentActor;
 class UAttachmentManagerComponent;
 class UAVVMResourceManagerComponent;
+class UProjectileManagerSubsystem;
 class USkeletalMeshComponent;
 class UTriggeringAbility;
 
@@ -55,7 +56,7 @@ struct WEAPONSAMPLE_API FWeaponTargetHitDataArgs
  *	ATriggeringActor is a triggering system that executes behaviour such as firing or
  *	targeting. It is invoked from the referenced ability and apply instancing actors such as Vfx for ability location src (Muzzle), Impacts and Decals.
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringActor : public AActor,
                                           public IAVVMResourceProvider
 {
@@ -75,11 +76,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, meta=(ToolTip="Apply markers to targeted actors."))
 	void Mark(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
 
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void SpawnAndSwapAttachment(const FDataRegistryId& NewAttachmentId);
-
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
+
+	UFUNCTION(BlueprintCallable)
+	UProjectileManagerSubsystem* GetProjectileManagerComponent() const;
 
 protected:
 	void RegisterAbility();
@@ -101,6 +102,9 @@ protected:
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UProjectileManagerSubsystem> ProjectileManagerComponent = nullptr;
+
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
@@ -112,5 +116,5 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
-	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle;
+	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
 };

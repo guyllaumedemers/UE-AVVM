@@ -21,4 +21,57 @@
 
 DEFINE_LOG_CATEGORY(LogWeaponSample);
 
+TSharedPtr<IConsoleVariable> FWeaponSampleModule::CVarWeaponDebugTrace = nullptr;
+TSharedPtr<IConsoleVariable> FWeaponSampleModule::CVarWeaponFriction = nullptr;
+TSharedPtr<IConsoleVariable> FWeaponSampleModule::CVarWeaponGravity = nullptr;
+
+void FWeaponSampleModule::StartupModule()
+{
+	IConsoleVariable* WeaponGravity = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("WeaponGravity"),
+			                         false,
+			                         TEXT("Flag enabling weapon gravity during velocity calculation."));
+
+	CVarWeaponGravity = MakeShareable<IConsoleVariable>(WeaponGravity);
+
+	IConsoleVariable* WeaponFriction = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("WeaponFriction"),
+			                         false,
+			                         TEXT("Flag enabling weapon friction during velocity calculation."));
+
+	CVarWeaponFriction = MakeShareable<IConsoleVariable>(WeaponFriction);
+
+	IConsoleVariable* WeaponDebugTrace = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("WeaponDebugTrace"),
+			                         false,
+			                         TEXT("Flag enabling weapon debug trace during Tick."));
+
+	CVarWeaponDebugTrace = MakeShareable<IConsoleVariable>(WeaponDebugTrace);
+}
+
+void FWeaponSampleModule::ShutdownModule()
+{
+	IConsoleManager::Get().UnregisterConsoleObject(CVarWeaponDebugTrace.Get());
+	IConsoleManager::Get().UnregisterConsoleObject(CVarWeaponFriction.Get());
+	IConsoleManager::Get().UnregisterConsoleObject(CVarWeaponGravity.Get());
+	CVarWeaponDebugTrace.Reset();
+	CVarWeaponFriction.Reset();
+	CVarWeaponGravity.Reset();
+}
+
+TSharedRef<IConsoleVariable> FWeaponSampleModule::GetCVarWeaponDebugTrace()
+{
+	return CVarWeaponDebugTrace.ToSharedRef();
+}
+
+TSharedRef<IConsoleVariable> FWeaponSampleModule::GetCVarWeaponGravity()
+{
+	return CVarWeaponGravity.ToSharedRef();
+}
+
+TSharedRef<IConsoleVariable> FWeaponSampleModule::GetCVarWeaponFriction()
+{
+	return CVarWeaponFriction.ToSharedRef();
+}
+
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, WeaponSample)

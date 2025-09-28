@@ -22,6 +22,10 @@
   ],
   "Plugins": [
     {
+      "Name": "AVVM",
+      "Enabled": true
+    },
+    {
       "Name": "DataRegistry",
       "Enabled": true
     },

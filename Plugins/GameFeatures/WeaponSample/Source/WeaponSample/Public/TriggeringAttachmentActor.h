@@ -37,7 +37,7 @@
  *	TODO @gdemers Currently doesn't have a way to prevent calling _AddComponent on an Actor that's not a ATriggeringActor
  *	but will add proper validation later for this case.
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AActor
 {
 	GENERATED_BODY()

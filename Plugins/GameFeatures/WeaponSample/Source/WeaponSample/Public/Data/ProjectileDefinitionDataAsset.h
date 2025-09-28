@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,8 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
-#include "DataRegistryId.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
@@ -30,15 +28,17 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "TriggeringDefinitionDataAsset.generated.h"
+#include "ProjectileDefinitionDataAsset.generated.h"
+
+class ANonReplicatedProjectileActor;
 
 /**
  *	Class description:
  *
- *	UTriggeringDefinitionDataAsset is a POD asset that defines the properties of a Triggering Actor.
+ *	UProjectileDefinitionDataAsset is a POD asset that defines the properties of a Projectile Actor.
  */
 UCLASS()
-class WEAPONSAMPLE_API UTriggeringDefinitionDataAsset : public UDataAsset
+class WEAPONSAMPLE_API UProjectileDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -47,31 +47,18 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	const TArray<FDataRegistryId>& GetDefaultAttachmentIds() const;
-
 protected:
-	// @gdemers attachments arent limited to add-ons to weapons, these represent any augmentations
-	// that can be added to the equipped 'triggering actor' (maybe fist, fishing rod, etc...)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportDefaultAttachments = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportDefaultAttachments"))
-	TArray<FDataRegistryId> DefaultAttachmentIds;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportProjectileBehaviour = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportProjectileBehaviour"))
-	FDataRegistryId ProjectileDefinitionId = FDataRegistryId();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
 };
 
 /**
  *	Class description:
  *
- *	FTriggeringDefinitionDataTableRow is an entry in a DataTableRow for a unique UTriggeringDefinitionDataAsset.
+ *	FProjectileDefinitionDataTableRow is an entry in a DataTableRow for a unique UProjectileDefinitionDataAsset.
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FTriggeringDefinitionDataTableRow : public FAVVMDataTableRow
+struct WEAPONSAMPLE_API FProjectileDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
@@ -82,5 +69,5 @@ struct WEAPONSAMPLE_API FTriggeringDefinitionDataTableRow : public FAVVMDataTabl
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UTriggeringDefinitionDataAsset> TriggeringDefinition = nullptr;
+	TSoftObjectPtr<UProjectileDefinitionDataAsset> ProjectileDefinition = nullptr;
 };

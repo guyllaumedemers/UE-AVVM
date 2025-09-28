@@ -34,6 +34,7 @@ public class WeaponSample : ModuleRules
 				"Core",
 				"CoreUObject",
 				"DataRegistry",
+				"DeveloperSettings",
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",

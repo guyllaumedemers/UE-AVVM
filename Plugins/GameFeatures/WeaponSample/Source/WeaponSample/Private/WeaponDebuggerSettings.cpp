@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,30 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "WeaponDebuggerSettings.h"
 
-#include "Modules/ModuleManager.h"
-
-WEAPONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogWeaponSample, Log, All);
-
-/**
- *	Plugin Description :
- *
- *	WeaponSample is a system that builds on top of the inventory system to offer 'Triggering' Ability to the owner of a triggerable ItemUObject
- *	using the referenced Actor Class type of the equipped item.
-*/
-class FWeaponSampleModule : public IModuleInterface
+UWeaponDebuggerSettings::UWeaponDebuggerSettings()
 {
-public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+	CategoryName = TEXT("Game");
+}
 
-	static WEAPONSAMPLE_API TSharedRef<IConsoleVariable> GetCVarWeaponDebugTrace();
-	static WEAPONSAMPLE_API TSharedRef<IConsoleVariable> GetCVarWeaponGravity();
-	static WEAPONSAMPLE_API TSharedRef<IConsoleVariable> GetCVarWeaponFriction();
+bool UWeaponDebuggerSettings::DoesDebugTraceShowPersistentLine()
+{
+	return GetDefault<UWeaponDebuggerSettings>()->bDoesDebugTraceShowPersistentLine;
+}
 
-private:
-	static WEAPONSAMPLE_API TSharedPtr<IConsoleVariable> CVarWeaponDebugTrace;
-	static WEAPONSAMPLE_API TSharedPtr<IConsoleVariable> CVarWeaponGravity;
-	static WEAPONSAMPLE_API TSharedPtr<IConsoleVariable> CVarWeaponFriction;
-};
+float UWeaponDebuggerSettings::GetDebugTraceLifetime()
+{
+	return GetDefault<UWeaponDebuggerSettings>()->DebugTraceLifetime;
+}
+
+float UWeaponDebuggerSettings::GetSquaredDistanceThreshold()
+{
+	return GetDefault<UWeaponDebuggerSettings>()->SquaredDistanceThreshold;
+}

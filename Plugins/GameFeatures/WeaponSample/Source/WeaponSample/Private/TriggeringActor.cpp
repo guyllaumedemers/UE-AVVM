@@ -106,24 +106,20 @@ void ATriggeringActor::Swap_Implementation(const bool bIsActive)
 	}
 }
 
-void ATriggeringActor::SpawnAndSwapAttachment_Implementation(const FDataRegistryId& NewAttachmentId)
-{
-	if (IsValid(ResourceManagerComponent))
-	{
-		ResourceManagerComponent->RequestAsyncLoading(NewAttachmentId, {});
-	}
-}
-
 UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const
 {
 	return ResourceManagerComponent;
 }
 
+UProjectileManagerSubsystem* ATriggeringActor::GetProjectileManagerComponent() const
+{
+	return ProjectileManagerComponent;
+}
+
 void ATriggeringActor::RegisterAbility()
 {
 	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
-	// Doing so would prevent caching of the Ability and removal of it upon destruction.
-	// the AVVMResourceManagerComponent also require passing in an UActorComponent during the recursive load request of resource
+	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
 	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnSoftObjectAcquired);
 	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({TriggeringAbilityClass.ToSoftObjectPath()});

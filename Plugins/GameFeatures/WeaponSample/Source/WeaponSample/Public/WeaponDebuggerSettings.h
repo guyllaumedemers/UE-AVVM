@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -19,28 +19,42 @@
 //SOFTWARE.
 #pragma once
 
-#include "Modules/ModuleManager.h"
+#include "CoreMinimal.h"
 
-WEAPONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogWeaponSample, Log, All);
+#include "Engine/DeveloperSettings.h"
+
+#include "WeaponDebuggerSettings.generated.h"
 
 /**
- *	Plugin Description :
+ *	Class description:
  *
- *	WeaponSample is a system that builds on top of the inventory system to offer 'Triggering' Ability to the owner of a triggerable ItemUObject
- *	using the referenced Actor Class type of the equipped item.
-*/
-class FWeaponSampleModule : public IModuleInterface
+ *	UWeaponDebuggerSettings is a developer settings that expose global properties
+ *	to the weapon sample plugin.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UWeaponDebuggerSettings"))
+class WEAPONSAMPLE_API UWeaponDebuggerSettings : public UDeveloperSettings
 {
+	GENERATED_BODY()
+
 public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+	UWeaponDebuggerSettings();
+	
+	UFUNCTION(BlueprintCallable)
+	static bool DoesDebugTraceShowPersistentLine();
 
-	static WEAPONSAMPLE_API TSharedRef<IConsoleVariable> GetCVarWeaponDebugTrace();
-	static WEAPONSAMPLE_API TSharedRef<IConsoleVariable> GetCVarWeaponGravity();
-	static WEAPONSAMPLE_API TSharedRef<IConsoleVariable> GetCVarWeaponFriction();
+	UFUNCTION(BlueprintCallable)
+	static float GetDebugTraceLifetime();
 
-private:
-	static WEAPONSAMPLE_API TSharedPtr<IConsoleVariable> CVarWeaponDebugTrace;
-	static WEAPONSAMPLE_API TSharedPtr<IConsoleVariable> CVarWeaponGravity;
-	static WEAPONSAMPLE_API TSharedPtr<IConsoleVariable> CVarWeaponFriction;
+	UFUNCTION(BlueprintCallable)
+	static float GetSquaredDistanceThreshold();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	bool bDoesDebugTraceShowPersistentLine = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	float DebugTraceLifetime = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config)
+	float SquaredDistanceThreshold = false;
 };
