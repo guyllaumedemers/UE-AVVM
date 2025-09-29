@@ -32,7 +32,6 @@
 class ATriggeringAttachmentActor;
 class UAttachmentManagerComponent;
 class UAVVMResourceManagerComponent;
-class UProjectileManagerSubsystem;
 class USkeletalMeshComponent;
 class UTriggeringAbility;
 
@@ -79,9 +78,6 @@ public:
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 
-	UFUNCTION(BlueprintCallable)
-	UProjectileManagerSubsystem* GetProjectileManagerComponent() const;
-
 protected:
 	void RegisterAbility();
 	void UnRegisterAbility();
@@ -100,9 +96,6 @@ protected:
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
-
-	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UProjectileManagerSubsystem> ProjectileManagerComponent = nullptr;
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;

@@ -111,11 +111,6 @@ UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Imp
 	return ResourceManagerComponent;
 }
 
-UProjectileManagerSubsystem* ATriggeringActor::GetProjectileManagerComponent() const
-{
-	return ProjectileManagerComponent;
-}
-
 void ATriggeringActor::RegisterAbility()
 {
 	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.

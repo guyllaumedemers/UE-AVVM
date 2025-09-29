@@ -41,8 +41,7 @@ public class InventoryProgressionSample : ModuleRules
 				"GameplayAbilities",
 				"GameplayTags",
 				"IrisCore",
-				"ModelViewViewModel",
-				"StructUtils",
+				"ModelViewViewModel"
 			}
 		);
 
