@@ -21,11 +21,7 @@
 
 #include "AVVMOnlineInterface.h"
 #include "Backend/AVVMOnlinePlayer.h"
-<<<<<<< HEAD
-#include "Serialization/JsonSerializer.h"
-=======
 #include "Backend/AVVMOnlinePlayerProxy.h"
->>>>>>> 356c75e2cdf70db6ce3560b4320fb2ff46d6c223
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerLoginContext& OutPlayerLoginContext) const
