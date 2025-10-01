@@ -21,6 +21,7 @@
 
 #include "AVVMOnlineInterface.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerLoginContext& OutPlayerLoginContext) const
@@ -408,7 +409,6 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerResource& NewPlayerResou
 	OutFormat = JsonOutput;
 }
 
-
 void UAVVMOnlineStringParser::FromString(const FAVVMStringPayload& NewPayload,
                                          TArray<FAVVMPlayerChallenge>& OutPlayerChallenges) const
 {
@@ -670,7 +670,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMPlayerConnection& NewPlayerCon
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerConnection.UniqueId);
 	JsonData->SetStringField(TEXT("UniqueNetId"), NewPlayerConnection.UniqueNetId);
-	JsonData->SetStringField(TEXT("PlayerStatus"), EnumToString(NewPlayerConnection.PlayerStatus));
+	JsonData->SetNumberField(TEXT("PlayerStatus"), StaticCast<int32>(NewPlayerConnection.PlayerStatus));
 	JsonData->SetNumberField(TEXT("ProfileId"), NewPlayerConnection.ProfileId);
 
 	FString JsonOutput;
@@ -725,89 +725,467 @@ void UAVVMOnlineStringParser::ToString(const FAVVMHostConfiguration& NewHostConf
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerAccountProxy& OutPlayerAccountProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPlayerAccountProxy NewPlayerAccountProxy;
+	NewPlayerAccountProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	NewPlayerAccountProxy.Login = JsonData->GetStringField(TEXT("Login"));
+	NewPlayerAccountProxy.Gamertag = JsonData->GetStringField(TEXT("Gamertag"));
+	NewPlayerAccountProxy.Wallet = JsonData->GetStringField(TEXT("Wallet"));
+
+	const TArray<TSharedPtr<FJsonValue>> Profiles = JsonData->GetArrayField(TEXT("Profiles"));
+	for (const auto& Profile : Profiles)
+	{
+		NewPlayerAccountProxy.Profiles.Add(Profile->AsString());
+	}
+
+	const TArray<TSharedPtr<FJsonValue>> Presets = JsonData->GetArrayField(TEXT("Presets"));
+	for (const auto& Preset : Presets)
+	{
+		NewPlayerAccountProxy.Presets.Add(Preset->AsString());
+	}
+
+	OutPlayerAccountProxy = NewPlayerAccountProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerAccountProxy& NewPlayerAccountProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerAccountProxy.UniqueId);
+	JsonData->SetStringField(TEXT("Login"), NewPlayerAccountProxy.Login);
+	JsonData->SetStringField(TEXT("Gamertag"), NewPlayerAccountProxy.Gamertag);
+	JsonData->SetStringField(TEXT("Wallet"), NewPlayerAccountProxy.Wallet);
+
+	TArray<TSharedPtr<FJsonValue>> Profiles;
+	for (const FString& Profile : NewPlayerAccountProxy.Profiles)
+	{
+		Profiles.Add(MakeShareable(new FJsonValueString(Profile)));
+	}
+
+	JsonData->SetArrayField(TEXT("Profiles"), Profiles);
+
+	TArray<TSharedPtr<FJsonValue>> Presets;
+	for (const FString& Preset : NewPlayerAccountProxy.Presets)
+	{
+		Presets.Add(MakeShareable(new FJsonValueString(Preset)));
+	}
+
+	JsonData->SetArrayField(TEXT("Presets"), Presets);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerWalletProxy& OutPlayerWalletProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPlayerWalletProxy PlayerWalletProxy;
+	PlayerWalletProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+
+	const TArray<TSharedPtr<FJsonValue>> IrlsMoneys = JsonData->GetArrayField(TEXT("IrlMoneys"));
+	for (const auto& IrlsMoney : IrlsMoneys)
+	{
+		PlayerWalletProxy.IrlMoneys.Add(IrlsMoney->AsString());
+	}
+
+	OutPlayerWalletProxy = PlayerWalletProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerWalletProxy& NewPlayerWalletProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerWalletProxy.UniqueId);
+
+	TArray<TSharedPtr<FJsonValue>> IrlMoneys;
+	for (const FString& IrlMoney : NewPlayerWalletProxy.IrlMoneys)
+	{
+		IrlMoneys.Add(MakeShareable(new FJsonValueString(IrlMoney)));
+	}
+
+	JsonData->SetArrayField(TEXT("IrlMoneys"), IrlMoneys);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerProfileProxy& OutPlayerProfileProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPlayerProfileProxy PlayerProfileProxy;
+	PlayerProfileProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	PlayerProfileProxy.ProfileId = JsonData->GetStringField(TEXT("ProfileId"));
+	PlayerProfileProxy.Progression = JsonData->GetStringField(TEXT("Progression"));
+	PlayerProfileProxy.EquippedPreset = JsonData->GetStringField(TEXT("EquippedPreset"));
+
+	const TArray<TSharedPtr<FJsonValue>> Inventories = JsonData->GetArrayField(TEXT("Inventories"));
+	for (const auto& Inventory : Inventories)
+	{
+		PlayerProfileProxy.Inventories.Add(Inventory->AsString());
+	}
+
+	const TArray<TSharedPtr<FJsonValue>> Challenges = JsonData->GetArrayField(TEXT("Challenges"));
+	for (const auto& Challenge : Challenges)
+	{
+		PlayerProfileProxy.Challenges.Add(Challenge->AsString());
+	}
+
+	OutPlayerProfileProxy = PlayerProfileProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerProfileProxy& NewPlayerProfileProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerProfileProxy.UniqueId);
+	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfileProxy.ProfileId);
+	JsonData->SetStringField(TEXT("Progression"), NewPlayerProfileProxy.Progression);
+	JsonData->SetStringField(TEXT("EquippedPreset"), NewPlayerProfileProxy.EquippedPreset);
+
+	TArray<TSharedPtr<FJsonValue>> Inventories;
+	for (const FString& Inventory : NewPlayerProfileProxy.Inventories)
+	{
+		Inventories.Add(MakeShareable(new FJsonValueString(Inventory)));
+	}
+
+	JsonData->SetArrayField(TEXT("Inventories"), Inventories);
+
+	TArray<TSharedPtr<FJsonValue>> Challenges;
+	for (const FString& Challenge : NewPlayerProfileProxy.Challenges)
+	{
+		Challenges.Add(MakeShareable(new FJsonValueString(Challenge)));
+	}
+
+	JsonData->SetArrayField(TEXT("Challenges"), Challenges);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerPresetProxy& OutPlayerPresetProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPlayerPresetProxy PlayerPresetProxy;
+	PlayerPresetProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	PlayerPresetProxy.PresetId = JsonData->GetStringField(TEXT("ProfileId"));
+
+	const TArray<TSharedPtr<FJsonValue>> EquippedItems = JsonData->GetArrayField(TEXT("EquippedItems"));
+	for (const auto& EquippedItem : EquippedItems)
+	{
+		PlayerPresetProxy.EquippedItems.Add(EquippedItem->AsString());
+	}
+
+	OutPlayerPresetProxy = PlayerPresetProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerPresetProxy& NewPlayerPresetProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerPresetProxy.UniqueId);
+	JsonData->SetStringField(TEXT("PresetId"), NewPlayerPresetProxy.PresetId);
+
+	TArray<TSharedPtr<FJsonValue>> JsonValues;
+	for (const FString& EquippedItem : NewPlayerPresetProxy.EquippedItems)
+	{
+		JsonValues.Add(MakeShareable(new FJsonValueString(EquippedItem)));
+	}
+
+	JsonData->SetArrayField(TEXT("EquippedItems"), JsonValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FAVVMStringPayload& NewPayload,
                                          TArray<FAVVMPartyProxy>& OutPartyProxies) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	OutPartyProxies.Reset();
+
+	const TArray<TSharedPtr<FJsonValue>> PartyProxies = JsonData->GetArrayField(TEXT("PartyProxies"));
+	for (const auto& PartyProxy : PartyProxies)
+	{
+		FAVVMPartyProxy OutPartyProxy;
+		FromString(PartyProxy->AsString(), OutPartyProxy);
+
+		OutPartyProxies.Add(OutPartyProxy);
+	}
 }
 
 void UAVVMOnlineStringParser::ToString(const TArray<FAVVMPartyProxy>& NewPartyProxies,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	TArray<TSharedPtr<FJsonValue>> JsonValues;
+	for (const FAVVMPartyProxy& PartyProxy : NewPartyProxies)
+	{
+		FString OutPartyProxy = FString();
+		ToString(PartyProxy, OutPartyProxy);
+
+		JsonValues.Add(MakeShareable(new FJsonValueString(OutPartyProxy)));
+	}
+
+	JsonData->SetArrayField(TEXT("PartyProxies"), JsonValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPartyProxy& OutPartyProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPartyProxy PartyProxy;
+	PartyProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	PartyProxy.PartyId = JsonData->GetStringField(TEXT("PartyId"));
+	PartyProxy.Region = JsonData->GetStringField(TEXT("Region"));
+	PartyProxy.District = JsonData->GetStringField(TEXT("District"));
+	PartyProxy.HostConfiguration = JsonData->GetStringField(TEXT("HostConfiguration"));
+
+	const TArray<TSharedPtr<FJsonValue>> PlayerConnections = JsonData->GetArrayField(TEXT("PlayerConnections"));
+	for (const auto& PlayerConnection : PlayerConnections)
+	{
+		PartyProxy.PlayerConnections.Add(PlayerConnection->AsString());
+	}
+
+	OutPartyProxy = PartyProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPartyProxy& NewPartyProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPartyProxy.UniqueId);
+	JsonData->SetStringField(TEXT("PartyId"), NewPartyProxy.PartyId);
+	JsonData->SetStringField(TEXT("Region"), NewPartyProxy.Region);
+	JsonData->SetStringField(TEXT("District"), NewPartyProxy.District);
+	JsonData->SetStringField(TEXT("HostConfiguration"), NewPartyProxy.HostConfiguration);
+
+	TArray<TSharedPtr<FJsonValue>> JsonValues;
+	for (const FString& PlayerConnection : NewPartyProxy.PlayerConnections)
+	{
+		JsonValues.Add(MakeShareable(new FJsonValueString(PlayerConnection)));
+	}
+
+	JsonData->SetArrayField(TEXT("PlayerConnections"), JsonValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FAVVMStringPayload& NewPayload,
                                          TArray<FAVVMPlayerConnectionProxy>& OutPlayerConnectionProxies) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	OutPlayerConnectionProxies.Reset();
+
+	const TArray<TSharedPtr<FJsonValue>> PlayerConnections = JsonData->GetArrayField(TEXT("PlayerConnections"));
+	for (const auto& PlayerConnection : PlayerConnections)
+	{
+		FAVVMPlayerConnectionProxy OutPlayerConnectionProxy;
+		FromString(PlayerConnection->AsString(), OutPlayerConnectionProxy);
+
+		OutPlayerConnectionProxies.Add(OutPlayerConnectionProxy);
+	}
 }
 
 void UAVVMOnlineStringParser::ToString(const TArray<FAVVMPlayerConnectionProxy>& NewPlayerConnectionProxies,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	TArray<TSharedPtr<FJsonValue>> JsonValues;
+	for (const FAVVMPlayerConnectionProxy& PlayerConnectionProxy : NewPlayerConnectionProxies)
+	{
+		FString OutPlayerConnectionProxy = FString();
+		ToString(PlayerConnectionProxy, OutPlayerConnectionProxy);
+
+		JsonValues.Add(MakeShareable(new FJsonValueString(OutPlayerConnectionProxy)));
+	}
+
+	JsonData->SetArrayField(TEXT("PlayerConnections"), JsonValues);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMPlayerConnectionProxy& OutPlayerConnectionProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMPlayerConnectionProxy PlayerConnectionProxy;
+	PlayerConnectionProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	PlayerConnectionProxy.UniqueNetId = JsonData->GetStringField(TEXT("UniqueNetId"));
+	PlayerConnectionProxy.PlayerStatus = StaticCast<EAVVMPlayerStatus>(JsonData->GetIntegerField(TEXT("PlayerStatus")));
+	PlayerConnectionProxy.Profile = JsonData->GetStringField(TEXT("District"));
+
+	OutPlayerConnectionProxy = PlayerConnectionProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMPlayerConnectionProxy& NewPlayerConnectionProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerConnectionProxy.UniqueId);
+	JsonData->SetStringField(TEXT("UniqueNetId"), NewPlayerConnectionProxy.UniqueNetId);
+	JsonData->SetNumberField(TEXT("PlayerStatus"), StaticCast<int32>(NewPlayerConnectionProxy.PlayerStatus));
+	JsonData->SetStringField(TEXT("Profile"), NewPlayerConnectionProxy.Profile);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
 
 void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
                                          FAVVMHostConfigurationProxy& OutHostConfigurationProxy) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return;
+	}
+
+	FAVVMHostConfigurationProxy HostConfigurationProxy;
+	HostConfigurationProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
+	HostConfigurationProxy.GameMode = JsonData->GetStringField(TEXT("GameMode"));
+	HostConfigurationProxy.Options = JsonData->GetStringField(TEXT("Options"));
+
+	OutHostConfigurationProxy = HostConfigurationProxy;
 }
 
 void UAVVMOnlineStringParser::ToString(const FAVVMHostConfigurationProxy& NewHostConfigurationProxy,
                                        FString& OutFormat) const
 {
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("UniqueId"), NewHostConfigurationProxy.UniqueId);
+	JsonData->SetStringField(TEXT("GameMode"), NewHostConfigurationProxy.GameMode);
+	JsonData->SetStringField(TEXT("Options"), NewHostConfigurationProxy.Options);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return;
+	}
+
+	OutFormat = JsonOutput;
 }
