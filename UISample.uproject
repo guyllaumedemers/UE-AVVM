@@ -68,10 +68,6 @@
       "Enabled": true
     },
     {
-      "Name": "PoolingSample",
-      "Enabled": true
-    },
-    {
       "Name": "TransactionSample",
       "Enabled": true
     },

@@ -18,3 +18,73 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMGameMode.h"
+
+#include "AVVMWorldSetting.h"
+#include "GameFramework/GameState.h"
+
+void AAVVMGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		World->GameStateSetEvent.AddUObject(this, &AAVVMGameMode::OnGameStateSet);
+		OnGameStateSet(GameState);
+	}
+}
+
+void AAVVMGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		World->GameStateSetEvent.RemoveAll(this);
+	}
+}
+
+bool AAVVMGameMode::IsMatchInProgress() const
+{
+	bool bIsInProgress = Super::IsMatchInProgress();
+	if (WorldSetting.IsValid())
+	{
+		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchProgress);
+		bIsInProgress |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+	}
+
+	return bIsInProgress;
+}
+
+bool AAVVMGameMode::HasMatchStarted() const
+{
+	bool bHasStarted = Super::HasMatchStarted();
+	if (WorldSetting.IsValid())
+	{
+		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchStart);
+		bHasStarted |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+	}
+
+	return bHasStarted;
+}
+
+bool AAVVMGameMode::HasMatchEnded() const
+{
+	bool bHasEnded = Super::HasMatchEnded();
+	if (WorldSetting.IsValid())
+	{
+		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchEnd);
+		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+	}
+
+	return bHasEnded;
+}
+
+void AAVVMGameMode::OnGameStateSet(AGameStateBase* NewGameState)
+{
+	if (IsValid(NewGameState))
+	{
+		WorldSetting = Cast<AAVVMWorldSetting>(NewGameState->GetWorldSettings());
+	}
+}

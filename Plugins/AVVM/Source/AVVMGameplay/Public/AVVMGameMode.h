@@ -26,6 +26,9 @@
 
 #include "AVVMGameMode.generated.h"
 
+class AAVVMWorldSetting;
+class AGameStateBase;
+
 /**
  *	Class description:
  *
@@ -48,4 +51,28 @@ class AVVMGAMEPLAY_API AAVVMGameMode : public AModularGameMode,
                                        public IAVVMOnlineStoreInterface
 {
 	GENERATED_BODY()
+
+public:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual bool IsMatchInProgress() const override;
+	virtual bool HasMatchStarted() const override;
+	virtual bool HasMatchEnded() const override;
+
+protected:
+	UFUNCTION()
+	void OnGameStateSet(AGameStateBase* NewGameState);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag RuleTag_MatchStart = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag RuleTag_MatchEnd = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag RuleTag_MatchProgress = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<AAVVMWorldSetting> WorldSetting = nullptr;
 };
