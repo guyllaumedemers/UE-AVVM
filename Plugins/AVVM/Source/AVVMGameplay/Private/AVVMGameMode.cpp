@@ -51,7 +51,7 @@ bool AAVVMGameMode::IsMatchInProgress() const
 	if (WorldSetting.IsValid())
 	{
 		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchProgress);
-		bIsInProgress |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+		bIsInProgress &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
 	}
 
 	return bIsInProgress;
@@ -63,7 +63,7 @@ bool AAVVMGameMode::HasMatchStarted() const
 	if (WorldSetting.IsValid())
 	{
 		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchStart);
-		bHasStarted |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+		bHasStarted &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
 	}
 
 	return bHasStarted;
@@ -75,7 +75,7 @@ bool AAVVMGameMode::HasMatchEnded() const
 	if (WorldSetting.IsValid())
 	{
 		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchEnd);
-		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+		bHasEnded &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
 	}
 
 	return bHasEnded;
