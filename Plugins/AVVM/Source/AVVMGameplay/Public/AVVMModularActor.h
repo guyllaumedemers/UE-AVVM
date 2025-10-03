@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "GameFramework/Info.h"
+#include "GameFramework/Actor.h"
 
 #include "AVVMModularActor.generated.h"
 
