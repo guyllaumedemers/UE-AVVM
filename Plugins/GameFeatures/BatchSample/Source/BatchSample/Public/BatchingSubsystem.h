@@ -30,7 +30,13 @@ class UBatchingRule;
 /**
  *	Class description:
  *
- *	
+ *	UBatchingSubsystem is a Server Authoritative Subsystem that gather Actors implementing the IBatchable interface,
+ *	and that destroy them in sequence.
+ *
+ *	Mostly used for candidates that require replication based on instantiation, and as such cannot be pooled easily. These
+ *	actors are usually expected to remain in world or for given laps of time which can be handled via this system.
+ *
+ *	Example : Pickups in Multiplayer game.
  */
 UCLASS()
 class BATCHSAMPLE_API UBatchingSubsystem : public UTickableWorldSubsystem

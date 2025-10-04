@@ -28,7 +28,7 @@ BATCHSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogBatch, Log, All);
 /**
  *	Plugin Description :
  *
- *	
+ *	FBatchSampleModule is a plugin offering batching capability for gameplay optimization purposes.
  */
 class FBatchSampleModule : public IModuleInterface
 {
