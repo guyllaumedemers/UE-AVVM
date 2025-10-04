@@ -161,6 +161,14 @@ ANonReplicatedProjectileActor* UProjectileManagerSubsystem::Factory(const UClass
 	return nullptr;
 }
 
+void UProjectileManagerSubsystem::Shutdown(ANonReplicatedProjectileActor* Projectile)
+{
+	if (IsValid(Projectile))
+	{
+		Projectile->Destroy();
+	}
+}
+
 void UProjectileManagerSubsystem::OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile)
 {
 	Shutdown(Projectile);

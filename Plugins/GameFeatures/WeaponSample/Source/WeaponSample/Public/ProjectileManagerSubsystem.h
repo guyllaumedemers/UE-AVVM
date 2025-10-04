@@ -76,7 +76,7 @@ protected:
 	// @gdemers factory method to support pooling or other instancing system specific to your project.
 	virtual ANonReplicatedProjectileActor* Factory(const UClass* ProjectileClass, const FTransform& AimTransform) const;
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
-	virtual void Shutdown(ANonReplicatedProjectileActor* Projectile) PURE_VIRTUAL(Shutdown, return;);
+	virtual void Shutdown(ANonReplicatedProjectileActor* Projectile);
 
 	void HandleClientPassByBullets();
 	
