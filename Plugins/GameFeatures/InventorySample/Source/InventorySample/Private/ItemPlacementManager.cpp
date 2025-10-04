@@ -27,21 +27,13 @@
 
 bool UItemPlacementManager::ShouldCreateSubsystem(UObject* Outer) const
 {
-	if (IsRunningDedicatedServer())
+	const auto* World = Cast<UWorld>(Outer);
+	if (IsValid(World))
 	{
-		return false;
+		return !World->IsNetMode(NM_DedicatedServer);
 	}
 
-	const UWorld* PieOrGameWorld = Cast<UWorld>(Outer);
-	if (IsValid(PieOrGameWorld))
-	{
-		const bool bIsGameClient = PieOrGameWorld->IsGameWorld();
-		return bIsGameClient;
-	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void UItemPlacementManager::Initialize(FSubsystemCollectionBase& Collection)

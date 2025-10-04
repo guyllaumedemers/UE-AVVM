@@ -23,13 +23,13 @@
 #include "AVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
 
-void UAVVMPresenter::SafeBeginPlay()
+void UAVVMPresenter::SafeBeginPlay(const UWorld* World)
 {
 	UE_LOG(LogUI, Log, TEXT("Adding UAVVMPresenter::%s"), *GetClass()->GetName());
 
 	{
 		FAVVMPresenterContextArgs ContextArgs;
-		ContextArgs.WorldContext = UAVVMPresenter::GetWorld();
+		ContextArgs.WorldContext = World;
 		ContextArgs.Presenter = this;
 		ViewModel = UAVVMSubsystem::Static_RegisterPresenter(ContextArgs);
 	}

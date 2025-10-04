@@ -35,9 +35,9 @@ AActor* UInteractionPresenter::GetOuterKey() const
 	return GetTypedOuter<AActor>();
 }
 
-void UInteractionPresenter::SafeBeginPlay()
+void UInteractionPresenter::SafeBeginPlay(const UWorld* World)
 {
-	Super::SafeBeginPlay();
+	Super::SafeBeginPlay(World);
 
 	const bool bDoesDisplayInWorld = (PreviewType == EWidgetPreviewType::InWorld);
 	if (bDoesDisplayInWorld)

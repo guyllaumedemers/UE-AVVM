@@ -31,11 +31,11 @@ AActor* UAVVMHUDPresenter::GetOuterKey() const
 	return GetTypedOuter<APlayerController>();
 }
 
-void UAVVMHUDPresenter::SafeBeginPlay()
+void UAVVMHUDPresenter::SafeBeginPlay(const UWorld* World)
 {
 	// @gdemers Order matters. Deferred notification will execute in Super::SafeBeginPlay().
 	OwningOuter = GetOuterKey();
-	Super::SafeBeginPlay();
+	Super::SafeBeginPlay(World);
 }
 
 void UAVVMHUDPresenter::SafeEndPlay()

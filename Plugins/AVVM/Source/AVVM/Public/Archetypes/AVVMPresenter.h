@@ -43,7 +43,7 @@ class AVVM_API UAVVMPresenter : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void SafeBeginPlay();
+	virtual void SafeBeginPlay(const UWorld* World);
 	virtual void SafeEndPlay();
 
 protected:

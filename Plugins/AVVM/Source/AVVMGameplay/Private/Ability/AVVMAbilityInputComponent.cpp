@@ -69,7 +69,7 @@ void UAVVMAbilityInputComponent::OnPawnChanged(APawn* NewPawn,
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMInputMappingProvider, UAVVMInputMappingProvider>(NewPawn);
+	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UAVVMInputMappingProvider>(NewPawn);
 	if (!bResult)
 	{
 		return;

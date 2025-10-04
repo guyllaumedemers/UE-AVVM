@@ -49,6 +49,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override;
 	
 	UFUNCTION(BlueprintCallable)
 	void Register(ANonReplicatedProjectileActor* Projectile);

@@ -131,8 +131,7 @@ FString UTransaction::GetUniqueId(const AActor* NewTarget)
 			}
 		}
 
-		const bool bImplements = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IDoesTransactionProviderSupportIdentifier,
-		                                                                                              UDoesTransactionProviderSupportIdentifier>(StatisticOwner);
+		const bool bImplements = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UDoesTransactionProviderSupportIdentifier>(StatisticOwner);
 		if (bImplements)
 		{
 			// @gdemers else, we care about statistics specific to inanimated world objects.

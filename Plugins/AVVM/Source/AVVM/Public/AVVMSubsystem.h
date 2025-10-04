@@ -39,7 +39,7 @@ struct AVVM_API FAVVMPresenterContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<UWorld> WorldContext = nullptr;
+	TWeakObjectPtr<const UWorld> WorldContext = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UAVVMPresenter> Presenter = nullptr;

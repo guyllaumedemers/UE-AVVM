@@ -53,9 +53,10 @@ void UAVVMComponent::BeginPlay()
 		}
 	}
 
+	const UWorld* World = Outer->GetWorld();
 	for (TObjectPtr<UAVVMPresenter>& Presenter : TransientPresenters)
 	{
-		Presenter->SafeBeginPlay();
+		Presenter->SafeBeginPlay(World);
 	}
 }
 

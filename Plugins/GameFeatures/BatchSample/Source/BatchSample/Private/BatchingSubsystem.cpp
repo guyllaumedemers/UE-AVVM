@@ -37,7 +37,7 @@ bool UBatchingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 		return false;
 	}
 
-	bool bHasAuthority = (World->IsNetMode(NM_DedicatedServer) || World->IsNetMode(NM_ListenServer));
+	bool bHasAuthority = !World->IsNetMode(NM_Client);
 
 	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
 	if (!IsValid(WorldSettings) || !WorldSettings->DoesRuleClassExist(UBatchingRule::StaticClass()))

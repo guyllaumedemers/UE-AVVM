@@ -58,7 +58,7 @@ class INTERACTIONSAMPLE_API UInteractionPresenter : public UAVVMPresenter,
 
 public:
 	virtual AActor* GetOuterKey() const override;
-	virtual void SafeBeginPlay() override;
+	virtual void SafeBeginPlay(const UWorld* World) override;
 	virtual void SafeEndPlay() override;
 
 protected:

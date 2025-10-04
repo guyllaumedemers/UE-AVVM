@@ -298,7 +298,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(Outer);
+	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
 	{
 		return;

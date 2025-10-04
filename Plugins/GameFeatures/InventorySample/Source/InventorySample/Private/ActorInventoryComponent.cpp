@@ -124,7 +124,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
+	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
 		return;
@@ -304,7 +304,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		Items.Add(NewItem);
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
+	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
 		return;

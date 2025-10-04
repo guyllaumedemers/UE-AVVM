@@ -76,6 +76,11 @@ void UProjectileManagerSubsystem::Tick(float DeltaTime)
 	}
 }
 
+TStatId UProjectileManagerSubsystem::GetStatId() const
+{
+	return TStatId();
+}
+
 void UProjectileManagerSubsystem::Register(ANonReplicatedProjectileActor* Projectile)
 {
 	if (IsValid(Projectile))

@@ -46,9 +46,6 @@ public:
 	template <typename U>
 	static bool IsBlueprintScriptInterfaceValid(const UObject* Target);
 
-	template <typename T, typename U>
-	static bool DoesImplementNativeOrBlueprintInterface(const UObject* Target);
-
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
@@ -75,12 +72,4 @@ bool UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid(const UObject*
 	const bool bDoesBPImplementInterface = IsValid(Target) ? Target->GetClass()->ImplementsInterface(U::StaticClass()) : false;
 	return ensureAlwaysMsgf(bDoesBPImplementInterface,
 	                        TEXT("UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<{%s}>::Failed"), *U::StaticClass()->GetName());
-}
-
-template <typename T, typename U>
-bool UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface(const UObject* Target)
-{
-	const bool bDoesSupportNativeInterface = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(TScriptInterface<const T>(Target));
-	const bool bDoesSupportBPInterface = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<U>(Target);
-	return (bDoesSupportNativeInterface || bDoesSupportBPInterface);
 }
