@@ -25,16 +25,6 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
-bool UProjectileManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
-{
-	if (IsRunningDedicatedServer())
-	{
-		return false;
-	}
-
-	return Super::ShouldCreateSubsystem(Outer);
-}
-
 void UProjectileManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -74,67 +64,32 @@ void UProjectileManagerSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!ClientPlayerController.IsValid())
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
 		return;
 	}
-
-	const APawn* Pawn = ClientPlayerController->GetPawn();
-	if (!IsValid(Pawn))
+	
+	if (World->IsNetMode(NM_DedicatedServer))
 	{
-		return;
-	}
-
-	for (auto Iterator = Projectiles.CreateIterator(); Iterator; ++Iterator)
-	{
-		if (!Iterator->IsValid())
-		{
-			Iterator.RemoveCurrentSwap();
-			continue;
-		}
-
-		const bool bIsWithinRange = UProjectileFunctionLibrary::CheckDistance(Iterator->Get(),
-		                                                                      Pawn,
-		                                                                      UWeaponDebuggerSettings::GetSquaredDistanceThreshold());
-		if (!bIsWithinRange)
-		{
-			continue;
-		}
-
-		const FTransform& ProjectileWorldTransform = Iterator->Get()->GetTransform();
-		OnProjectilePassBy.Broadcast(ProjectileWorldTransform.GetLocation());
-		Iterator.RemoveCurrentSwap();
+		HandleClientPassByBullets();
 	}
 }
 
 void UProjectileManagerSubsystem::Register(ANonReplicatedProjectileActor* Projectile)
 {
-	if (!IsValid(Projectile))
+	if (IsValid(Projectile))
 	{
-		return;
-	}
-
-	Projectile->OnProjectilePoolingRequest.AddUObject(this, &UProjectileManagerSubsystem::OnProjectileRequestPooling);
-
-	const bool bIsLocallyOwned = UProjectileFunctionLibrary::IsLocallyOwned(Projectile);
-	if (!bIsLocallyOwned)
-	{
+		Projectile->OnProjectilePoolingRequest.AddUObject(this, &UProjectileManagerSubsystem::OnProjectileRequestPooling);
 		Projectiles.Add(Projectile);
 	}
 }
 
 void UProjectileManagerSubsystem::Unregister(ANonReplicatedProjectileActor* Projectile)
 {
-	if (!IsValid(Projectile))
+	if (IsValid(Projectile))
 	{
-		return;
-	}
-
-	Projectile->OnProjectilePoolingRequest.RemoveAll(this);
-
-	const bool bIsLocallyOwned = UProjectileFunctionLibrary::IsLocallyOwned(Projectile);
-	if (!bIsLocallyOwned)
-	{
+		Projectile->OnProjectilePoolingRequest.RemoveAll(this);
 		Projectiles.RemoveSwap(Projectile);
 	}
 }
@@ -175,4 +130,39 @@ void UProjectileManagerSubsystem::OnPlayerStateAdded(APlayerState* PlayerState)
 void UProjectileManagerSubsystem::OnProjectileRequestPooling(ANonReplicatedProjectileActor* Projectile)
 {
 	// TODO @gdemers impl pooling system
+}
+
+void UProjectileManagerSubsystem::HandleClientPassByBullets()
+{
+	if (!ClientPlayerController.IsValid())
+	{
+		return;
+	}
+
+	const APawn* Pawn = ClientPlayerController->GetPawn();
+	if (!IsValid(Pawn))
+	{
+		return;
+	}
+
+	for (auto Iterator = Projectiles.CreateIterator(); Iterator; ++Iterator)
+	{
+		if (!Iterator->IsValid())
+		{
+			Iterator.RemoveCurrentSwap();
+			continue;
+		}
+
+		const bool bIsWithinRange = UProjectileFunctionLibrary::CheckDistance(Iterator->Get(),
+																			  Pawn,
+																			  UWeaponDebuggerSettings::GetSquaredDistanceThreshold());
+		if (!bIsWithinRange)
+		{
+			continue;
+		}
+
+		const FTransform& ProjectileWorldTransform = Iterator->Get()->GetTransform();
+		OnProjectilePassBy.Broadcast(ProjectileWorldTransform.GetLocation());
+		Iterator.RemoveCurrentSwap();
+	}
 }

@@ -21,6 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "Subsystems/WorldSubsystem.h"
+
 #include "ProjectileManagerSubsystem.generated.h"
 
 class ANonReplicatedProjectileActor;
@@ -38,13 +40,12 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectilePassByDelegate, const FVector& 
  *	External should bind to events on this system to react to projectile events
  *	that require conditional checks on Tick events.
  */
-UCLASS(ClassGroup=("Weapon"))
+UCLASS()
 class WEAPONSAMPLE_API UProjectileManagerSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
@@ -65,6 +66,8 @@ protected:
 	void OnPlayerStateAdded(APlayerState* PlayerState);
 
 	void OnProjectileRequestPooling(ANonReplicatedProjectileActor* Projectile);
+
+	void HandleClientPassByBullets();
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const APlayerController> ClientPlayerController = nullptr;
