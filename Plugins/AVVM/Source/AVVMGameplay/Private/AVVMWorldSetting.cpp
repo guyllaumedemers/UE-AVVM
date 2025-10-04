@@ -56,10 +56,28 @@ UAVVMWorldRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) const
 	}
 }
 
+bool AAVVMWorldSetting::DoesRuleClassExist(const UClass* BaseRuleClass) const
+{
+	if (!IsValid(BaseRuleClass))
+	{
+		return false;
+	}
+
+	bool bResult = false;
+	for (const auto& [Tag, DerivedRuleClass] : RuleClassPerTag)
+	{
+		// TODO @gdemers Its possible the TSoftClassPtr hasnt yet loaded the UClass in memory.
+		// This check may be invalid. Require Validation!
+		bResult |= (DerivedRuleClass.IsValid() ? DerivedRuleClass->IsChildOf(BaseRuleClass) : false);
+	}
+
+	return bResult;
+}
+
 TArray<FSoftObjectPath> AAVVMWorldSetting::GetRulePaths() const
 {
 	TArray<FSoftObjectPath> SoftObjectPaths;
-	for (const auto [Tag, RuleClass] : RuleClassPerTag)
+	for (const auto& [Tag, RuleClass] : RuleClassPerTag)
 	{
 		if (RuleClass.IsNull())
 		{

@@ -20,6 +20,10 @@
       "Enabled": true
     },
     {
+      "Name": "BatchSample",
+      "Enabled": true
+    },
+    {
       "Name": "CommonGame",
       "Enabled": true
     },

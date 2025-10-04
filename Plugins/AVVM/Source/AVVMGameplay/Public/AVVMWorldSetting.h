@@ -77,6 +77,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UAVVMWorldRule* GetRule(const FGameplayTag& RuleTag) const;
 	
+	UFUNCTION(BlueprintCallable)
+	bool DoesRuleClassExist(const UClass* RuleClass) const;
+
+	template<typename TRule>
+	TRule* CastRule(const FGameplayTag& RuleTag) const;
+	
 protected:
 	TArray<FSoftObjectPath> GetRulePaths() const;
 	void AsyncLoadWorldRules(const TArray<FSoftObjectPath>& SoftObjectPaths);
@@ -89,3 +95,9 @@ protected:
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };
+
+template <typename TRule>
+TRule* AAVVMWorldSetting::CastRule(const FGameplayTag& RuleTag) const
+{
+	return Cast<TRule>(GetRule(RuleTag));
+}
