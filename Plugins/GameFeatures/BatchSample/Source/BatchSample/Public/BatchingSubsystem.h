@@ -63,11 +63,11 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UBatchingRule> BatchingRule = nullptr;
 
-	struct FIBSFBatchContext
+	struct FBatchContext
 	{
 		// @gdemers default ctor called first, then we reserve size. imply double initialization
 		// of properties, but allow for preallocation of collection type to avoid resizing.
-		FIBSFBatchContext(AActor* Actors, const int32 MaxSize)
+		FBatchContext(AActor* Actors, const int32 MaxSize)
 		{
 			Candidates.Reserve(MaxSize);
 			Candidates.Add(Actors);
@@ -94,5 +94,5 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float Timestamp = 0.f;
 
-	TArray<FIBSFBatchContext> PendingDestroy;
+	TArray<FBatchContext> PendingDestroy;
 };

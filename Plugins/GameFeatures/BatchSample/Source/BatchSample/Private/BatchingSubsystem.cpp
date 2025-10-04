@@ -101,10 +101,10 @@ void UBatchingSubsystem::Tick(float DeltaTime)
 
 	bool bHasDestroyedBatched = false;
 
-	TArray<FIBSFBatchContext> ImmutableBatches = MoveTemp(PendingDestroy);
+	TArray<FBatchContext> ImmutableBatches = MoveTemp(PendingDestroy);
 	while (!ImmutableBatches.IsEmpty())
 	{
-		FIBSFBatchContext& BatchContext = ImmutableBatches[0];
+		FBatchContext& BatchContext = ImmutableBatches[0];
 
 		const bool bDoesSupportTrashingUndersizeBatch = (!FMath::IsNearlyZero(MaxLifetimeAllowedToUndersizeBatch) && (MaxLifetimeAllowedToUndersizeBatch >= Interval));
 		const bool bDoesElapseTimeQualify = (bDoesSupportTrashingUndersizeBatch && (Timestamp >= MaxLifetimeAllowedToUndersizeBatch));
@@ -174,14 +174,14 @@ void UBatchingSubsystem::Register(AActor* Actor)
 
 	if (PendingDestroy.IsEmpty())
 	{
-		PendingDestroy.Add(FIBSFBatchContext{Actor, MaxSizePerBatchDestroy});
+		PendingDestroy.Add(FBatchContext{Actor, MaxSizePerBatchDestroy});
 	}
 	else
 	{
-		FIBSFBatchContext& Top = PendingDestroy.Top();
+		FBatchContext& Top = PendingDestroy.Top();
 		if (Top.DoesQualifyForBatchDestroy(MaxSizePerBatchDestroy))
 		{
-			PendingDestroy.Add(FIBSFBatchContext{Actor, MaxSizePerBatchDestroy});
+			PendingDestroy.Add(FBatchContext{Actor, MaxSizePerBatchDestroy});
 		}
 		else
 		{
@@ -192,12 +192,12 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	Batchable->SetBatchIndex(PendingDestroy.Num());
 }
 
-bool UBatchingSubsystem::FIBSFBatchContext::DoesQualifyForBatchDestroy(const float MaxSize) const
+bool UBatchingSubsystem::FBatchContext::DoesQualifyForBatchDestroy(const float MaxSize) const
 {
 	return Candidates.Num() >= MaxSize;
 }
 
-void UBatchingSubsystem::FIBSFBatchContext::Obliterate()
+void UBatchingSubsystem::FBatchContext::Obliterate()
 {
 	for (auto Iterator = Candidates.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -213,12 +213,12 @@ void UBatchingSubsystem::FIBSFBatchContext::Obliterate()
 	}
 }
 
-void UBatchingSubsystem::FIBSFBatchContext::Push(AActor* Actor)
+void UBatchingSubsystem::FBatchContext::Push(AActor* Actor)
 {
 	Candidates.Add(Actor);
 }
 
-void UBatchingSubsystem::FIBSFBatchContext::ForceRemove(AActor* Actor)
+void UBatchingSubsystem::FBatchContext::ForceRemove(AActor* Actor)
 {
 	Candidates.Add(Actor);
 }
