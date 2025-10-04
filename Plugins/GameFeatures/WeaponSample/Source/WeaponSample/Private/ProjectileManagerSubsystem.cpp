@@ -69,8 +69,8 @@ void UProjectileManagerSubsystem::Tick(float DeltaTime)
 	{
 		return;
 	}
-	
-	if (World->IsNetMode(NM_DedicatedServer))
+
+	if (!World->IsNetMode(NM_DedicatedServer))
 	{
 		HandleClientPassByBullets();
 	}
