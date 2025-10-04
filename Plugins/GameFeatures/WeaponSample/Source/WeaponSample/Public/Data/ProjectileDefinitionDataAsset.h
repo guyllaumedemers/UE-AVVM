@@ -32,6 +32,7 @@
 
 #include "ProjectileDefinitionDataAsset.generated.h"
 
+class ANonReplicatedExplosionActor;
 class ANonReplicatedProjectileActor;
 
 /**
@@ -47,7 +48,9 @@ struct FProjectileParams
 
 	virtual ~FProjectileParams() = default;
 	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
-	virtual bool DoesExplode() const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Speed = 0.f;
@@ -57,12 +60,24 @@ struct FProjectileParams
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Lifetime = 0.f;
+};
+
+/**
+ *	Class description:
+ *
+*	FExplosionParams is a context struct that encapsulate properties specific to an explosion
+ *	and offer user extensibility through usage of TInstancedStruct<T>.
+ */
+USTRUCT(BlueprintType)
+struct FExplosionParams
+{
+	GENERATED_BODY()
+
+	virtual ~FExplosionParams() = default;
+	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSoftClassPtr<AActor> ExplosionClass = nullptr;
+	TSoftClassPtr<ANonReplicatedExplosionActor> ExplosionClass = nullptr;
 };
 
 /**
@@ -81,6 +96,7 @@ public:
 #endif
 
 	const TSoftClassPtr<ANonReplicatedProjectileActor> GetProjectileClass() const;
+	const TSoftClassPtr<ANonReplicatedExplosionActor> GetExplosionClass() const;
 	const TInstancedStruct<FProjectileParams>& GetProjectileParams() const;
 	const FGameplayTag& GetProjectileFiringModeTag() const;
 
@@ -90,6 +106,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FProjectileParams> ProjectileParams;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bDoesExplode = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesExplode"))
+	TInstancedStruct<FExplosionParams> ExplosionParams;
 };
 
 /**

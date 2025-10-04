@@ -37,10 +37,13 @@ void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile) const
 	Projectile->RuntimeVelocity = (NormalizedDirection * Speed);
 	Projectile->RuntimeMass = Mass;
 }
-
-bool FProjectileParams::DoesExplode() const
+void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const
 {
-	return !ExplosionClass.IsNull();
+	if (IsValid(Projectile))
+	{
+		// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
+		Projectile->ExplosionTemplate = TInstancedStruct<FExplosionParams>::Make(*this);
+	}
 }
 
 #if WITH_EDITOR
@@ -52,14 +55,26 @@ EDataValidationResult UProjectileDefinitionDataAsset::IsDataValid(class FDataVal
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UProjectileDefinitionDataAsset", "", "TInstancedStruct<FProjectileParams> is Null. No valid entries detected!"));
 	}
+	else if (bDoesExplode && !ExplosionParams.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UProjectileDefinitionDataAsset", "", "TInstancedStruct<FExplosionParams> is Null. No valid entries detected!"));
+	}
 
 	return Result;
 }
+#endif
 
 const TSoftClassPtr<ANonReplicatedProjectileActor> UProjectileDefinitionDataAsset::GetProjectileClass() const
 {
 	const auto* Params = ProjectileParams.GetPtr<FProjectileParams>();
 	return (Params != nullptr) ? Params->ProjectileClass : nullptr;
+}
+
+const TSoftClassPtr<ANonReplicatedExplosionActor> UProjectileDefinitionDataAsset::GetExplosionClass() const
+{
+	const auto* Params = ExplosionParams.GetPtr<FExplosionParams>();
+	return (Params != nullptr) ? Params->ExplosionClass : nullptr;
 }
 
 const TInstancedStruct<FProjectileParams>& UProjectileDefinitionDataAsset::GetProjectileParams() const
@@ -72,6 +87,7 @@ const FGameplayTag& UProjectileDefinitionDataAsset::GetProjectileFiringModeTag()
 	return ProjectileFiringMode;
 }
 
+#if WITH_EDITOR
 EDataValidationResult FProjectileDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);

@@ -167,16 +167,10 @@ void ANonReplicatedProjectileActor::HandleHit(const FHitResult& HitResult)
 {
 	if (HasAuthority())
 	{
-		const auto* Params = Template.GetPtr<FProjectileParams>();
-		if (Params == nullptr)
+		const auto* Params = ExplosionTemplate.GetPtr<FExplosionParams>();
+		if (Params != nullptr)
 		{
-			return;
-		}
-
-		const bool bDoesExplode = Params->DoesExplode();
-		if (bDoesExplode)
-		{
-			// @gdemers spawn replicated explosion actor.
+			// @gdemers spawn simulated explosion actor.
 			UProjectileFunctionLibrary::HandleProjectileExplosion(Params->ExplosionClass,
 			                                                      HitResult.ImpactPoint,
 			                                                      HitResult.ImpactNormal);
@@ -272,11 +266,11 @@ void UProjectileFunctionLibrary::HandleProjectileFx(const TInstancedStruct<FProj
 	// TODO @gdemers handle pooling and vfx
 }
 
-void UProjectileFunctionLibrary::HandleProjectileExplosion(const TSoftClassPtr<AActor>& ExplosionClass,
+void UProjectileFunctionLibrary::HandleProjectileExplosion(const TSoftClassPtr<ANonReplicatedExplosionActor>& ExplosionClass,
                                                            const FVector& ImpactPoint,
                                                            const FVector& ImpactNormal)
 {
-	// TODO @gdemers spawn, net init for replication or find a way to retrigger the BeginPlay process prior to pooling.
+	// TODO @gdemers query a subsystem handling the explosion
 }
 
 void UProjectileFunctionLibrary::ApplyDamage(AActor* Instigator,

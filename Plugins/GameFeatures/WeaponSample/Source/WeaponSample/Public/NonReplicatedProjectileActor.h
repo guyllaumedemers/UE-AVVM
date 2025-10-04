@@ -28,7 +28,9 @@
 
 #include "NonReplicatedProjectileActor.generated.h"
 
+class ANonReplicatedExplosionActor;
 class ANonReplicatedProjectileActor;
+struct FExplosionParams;
 struct FProjectileParams;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectilePoolingRequestDelegate, ANonReplicatedProjectileActor* Projectile);
@@ -85,6 +87,9 @@ protected:
 	TInstancedStruct<FProjectileParams> Template;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
+	TInstancedStruct<FExplosionParams> ExplosionTemplate;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	FVector RuntimeVelocity = FVector::ZeroVector;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -94,6 +99,7 @@ protected:
 	float RuntimeLifetime = 0.f;
 
 	friend struct FProjectileParams;
+	friend struct FExplosionParams;
 	friend class UProjectileComponent;
 };
 
@@ -126,7 +132,7 @@ public:
 	                               const FHitResult& HitResult);
 
 	UFUNCTION(BlueprintCallable)
-	static void HandleProjectileExplosion(const TSoftClassPtr<AActor>& ExplosionClass,
+	static void HandleProjectileExplosion(const TSoftClassPtr<ANonReplicatedExplosionActor>& ExplosionClass,
 	                                      const FVector& ImpactPoint,
 	                                      const FVector& ImpactNormal);
 
