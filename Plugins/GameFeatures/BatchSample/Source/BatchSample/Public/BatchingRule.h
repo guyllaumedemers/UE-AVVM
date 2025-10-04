@@ -29,7 +29,7 @@
 /**
  *	Class description:
  *
- *	UBatchingRule is a Rule referenced in AVVMWorldSettings. This system defines requirements, and
+ *	UBatchingRule is a Rule referenced in AVVMWorldSettings. This system defines requirements for batching, and
  *	configure the system Runtime behaviour.
  */
 UCLASS(Blueprintable)
@@ -40,38 +40,32 @@ class BATCHSAMPLE_API UBatchingRule : public UAVVMWorldRule
 public:
 	UFUNCTION(BlueprintCallable)
 	bool DoesQualifyForBatchDestroy(const AActor* Actor) const;
-	
+
 	UFUNCTION(BlueprintCallable)
 	int32 GetMaxSizePerBatchDestroy() const;
-	
+
 	UFUNCTION(BlueprintCallable)
 	float GetBatchInterval() const;
-	
+
 	UFUNCTION(BlueprintCallable)
 	float GetMaxLifetimeAllowedToUndersizeBatch() const;
-	
-	UFUNCTION(BlueprintCallable)
-	bool IsBatchDestroyEnabled() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bEnableBatchDestroy = false;
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Flag allowing user to define only the Base Class subject to Batch Destroy. Derived Classes with be automatically considered as acceptable for Batch Destroy."))
 	bool bAllowBatchDestroyChildClasses = false;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bEnableBatchDestroy", ToolTip="Base and Derived Classes subject to BatchDestroy."))
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Base and Derived Classes subject to BatchDestroy."))
 	TArray<TSubclassOf<AActor>> Classes;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bEnableBatchDestroy", ToolTip="Classes excluded from BatchDestroy."))
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Classes excluded from BatchDestroy."))
 	TArray<TSubclassOf<AActor>> IgnoredClasses;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bEnableBatchDestroy"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	int32 MaxSizePerBatchDestroy = INDEX_NONE;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bEnableBatchDestroy"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float IntervalBetweenBatchDestroy = 0.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bEnableBatchDestroy"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float MaxLifetimeAllowedToUndersizeBatch = 0.f;
 };

@@ -80,8 +80,3 @@ float UBatchingRule::GetMaxLifetimeAllowedToUndersizeBatch() const
 {
 	return MaxLifetimeAllowedToUndersizeBatch;
 }
-
-bool UBatchingRule::IsBatchDestroyEnabled() const
-{
-	return bEnableBatchDestroy;
-}

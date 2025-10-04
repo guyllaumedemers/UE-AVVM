@@ -27,7 +27,7 @@ TSharedPtr<IConsoleVariable> FBatchSampleModule::CVarBatchEnableSubsystem = null
 void FBatchSampleModule::StartupModule()
 {
 	IConsoleVariable* NewCVar = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("BatchEnableSubsystem"),
+			.RegisterConsoleVariable(TEXT("ToggleBatching"),
 			                         false,
 			                         TEXT("Toggle Batch Subsystem availability."));
 
