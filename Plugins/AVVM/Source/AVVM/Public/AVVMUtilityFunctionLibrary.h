@@ -64,23 +64,23 @@ public:
 template <typename T>
 bool UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target)
 {
-	return (Target.GetInterface() != nullptr && IsValid(Target.GetObject()));
+	const bool bIsValidInterfaceObject = (Target.GetInterface() != nullptr && IsValid(Target.GetObject()));
+	return ensureAlwaysMsgf(bIsValidInterfaceObject,
+	                        TEXT("UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid<{?}>::Failed"));
 }
 
 template <typename U>
 bool UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid(const UObject* Target)
 {
-	if (IsValid(Target))
-	{
-		return Target->GetClass()->ImplementsInterface(U::StaticClass());
-	}
-
-	return false;
+	const bool bDoesBPImplementInterface = IsValid(Target) ? Target->GetClass()->ImplementsInterface(U::StaticClass()) : false;
+	return ensureAlwaysMsgf(bDoesBPImplementInterface,
+	                        TEXT("UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<{%s}>::Failed"), *U::StaticClass()->GetName());
 }
 
 template <typename T, typename U>
 bool UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface(const UObject* Target)
 {
-	return UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(TScriptInterface<const T>(Target)) ||
-			UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<U>(Target);
+	const bool bDoesSupportNativeInterface = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(TScriptInterface<const T>(Target));
+	const bool bDoesSupportBPInterface = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<U>(Target);
+	return (bDoesSupportNativeInterface || bDoesSupportBPInterface);
 }

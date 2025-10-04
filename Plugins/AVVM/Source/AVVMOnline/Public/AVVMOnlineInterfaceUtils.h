@@ -162,7 +162,7 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 	OutInterface = TScriptInterface<IInterfaceClass>(Outer);
 
 	const bool bImplement = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(OutInterface);
-	if (!ensureAlways(bImplement))
+	if (!bImplement)
 	{
 		UE_LOG(LogOnline,
 		       Log,

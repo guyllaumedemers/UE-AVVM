@@ -70,7 +70,7 @@ void UAVVMAbilityInputComponent::OnPawnChanged(APawn* NewPawn,
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMInputMappingProvider, UAVVMInputMappingProvider>(NewPawn);
-	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IAVVMInputMappingProvider interface!")))
+	if (!bResult)
 	{
 		return;
 	}

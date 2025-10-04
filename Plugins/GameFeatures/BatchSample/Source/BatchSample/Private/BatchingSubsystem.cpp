@@ -202,7 +202,7 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 	for (auto Iterator = Candidates.CreateIterator(); Iterator; ++Iterator)
 	{
 		const auto Batchable = TScriptInterface<IBatchable>(Iterator->Get());
-		if (!IsValid(Batchable.GetObject()) || (Batchable.GetInterface() == nullptr) || Batchable->IsMarkIgnored())
+		if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsMarkIgnored())
 		{
 			Iterator.RemoveCurrentSwap();
 		}

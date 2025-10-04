@@ -299,7 +299,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IAVVMResourceProvider, UAVVMResourceProvider>(Outer);
-	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IAVVMResourceProvider interface!")))
+	if (!bResult)
 	{
 		return;
 	}

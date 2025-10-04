@@ -125,7 +125,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
-	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
+	if (!bResult)
 	{
 		return;
 	}
@@ -305,7 +305,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	}
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::DoesImplementNativeOrBlueprintInterface<IInventoryProvider, UInventoryProvider>(Outer);
-	if (!ensureAlwaysMsgf(bResult, TEXT("Outer doesn't implement the IInventoryProvider interface!")))
+	if (!bResult)
 	{
 		return;
 	}
