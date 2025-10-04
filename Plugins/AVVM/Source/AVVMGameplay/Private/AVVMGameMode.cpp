@@ -75,7 +75,7 @@ bool AAVVMGameMode::HasMatchEnded() const
 	if (WorldSetting.IsValid())
 	{
 		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTag_MatchEnd);
-		bHasEnded &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
+		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : false);
 	}
 
 	return bHasEnded;
