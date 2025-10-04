@@ -23,27 +23,8 @@
 #include "TriggeringActor.h"
 #include "WeaponDebuggerSettings.h"
 #include "WeaponSample.h"
+#include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/DamageEvents.h"
-
-void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile) const
-{
-	if (!IsValid(Projectile))
-	{
-		return;
-	}
-
-	// @gdemers initialize actor velocity based on direction assigned during construction.
-	const FTransform& ProjectileWorldTransform = Projectile->GetTransform();
-	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
-
-	Projectile->RuntimeVelocity = (NormalizedDirection * Speed);
-	Projectile->RuntimeMass = Mass;
-}
-
-bool FProjectileParams::DoesExplode() const
-{
-	return (false == ExplosionActorClass.IsNull());
-}
 
 ANonReplicatedProjectileActor::ANonReplicatedProjectileActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -58,12 +39,6 @@ ANonReplicatedProjectileActor::ANonReplicatedProjectileActor(const FObjectInitia
 void ANonReplicatedProjectileActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	const auto* Pimpl = ProjectileParams.GetPtr<FProjectileParams>();
-	if (Pimpl != nullptr)
-	{
-		Pimpl->Init(this);
-	}
 
 	const auto* World = GetWorld();
 	if (!IsValid(World))
@@ -192,7 +167,7 @@ void ANonReplicatedProjectileActor::HandleHit(const FHitResult& HitResult)
 {
 	if (HasAuthority())
 	{
-		const auto* Params = ProjectileParams.GetPtr<FProjectileParams>();
+		const auto* Params = Template.GetPtr<FProjectileParams>();
 		if (Params == nullptr)
 		{
 			return;
@@ -202,20 +177,20 @@ void ANonReplicatedProjectileActor::HandleHit(const FHitResult& HitResult)
 		if (bDoesExplode)
 		{
 			// @gdemers spawn replicated explosion actor.
-			UProjectileFunctionLibrary::HandleProjectileExplosion(Params->ExplosionActorClass,
+			UProjectileFunctionLibrary::HandleProjectileExplosion(Params->ExplosionClass,
 			                                                      HitResult.ImpactPoint,
 			                                                      HitResult.ImpactNormal);
 		}
 		else
 		{
 			// @gdemers apply replicated damage to target.
-			UProjectileFunctionLibrary::ApplyDamage(this, ProjectileParams, HitResult.GetActor());
+			UProjectileFunctionLibrary::ApplyDamage(this, Template, HitResult.GetActor());
 		}
 	}
 	else
 	{
 		// @gdemers spawn local vfx and sounds.
-		UProjectileFunctionLibrary::HandleProjectileFx(ProjectileParams, HitResult);
+		UProjectileFunctionLibrary::HandleProjectileFx(Template, HitResult);
 	}
 }
 

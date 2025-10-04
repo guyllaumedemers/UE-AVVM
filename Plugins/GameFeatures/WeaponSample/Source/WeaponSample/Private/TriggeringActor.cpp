@@ -23,7 +23,7 @@
 #include "AbilitySystemGlobals.h"
 #include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "TriggeringAttachmentActor.h"
+#include "ProjectileComponent.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -33,12 +33,10 @@
 ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ResourceManagerComponent = CreateDefaultSubobject<UAVVMResourceManagerComponent>(TEXT("ResourceManagerComponent"));
-	AttachmentManagerComponent = CreateDefaultSubobject<UAttachmentManagerComponent>(TEXT("AttachmentManagerComponent"));
-	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
-	// TODO @gdemers Would be nice if we could override the collision preset referenced on the skeletal mesh
-	// with something defined at 'this' level. This may provide better visibility during system config to small
-	// issue like setting bad collision preset.
+	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
+	AttachmentManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAttachmentManagerComponent>(this, TEXT("AttachmentManagerComponent"));
+	ProjectileComponent = ObjectInitializer.CreateDefaultSubobject<UProjectileComponent>(this, TEXT("ProjectileComponent"));
+	SkeletalMeshComponent = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("SkeletalMeshComponent"));
 }
 
 void ATriggeringActor::BeginPlay()

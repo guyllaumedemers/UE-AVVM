@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
@@ -28,36 +29,9 @@
 #include "NonReplicatedProjectileActor.generated.h"
 
 class ANonReplicatedProjectileActor;
+struct FProjectileParams;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectilePoolingRequestDelegate, ANonReplicatedProjectileActor* Projectile);
-
-/**
- *	Class description:
- *
- *	FProjectileParams is a context struct that encapsulate properties specific to a projectile
- *	and offer user extensibility through usage of TInstancedStruct<T>.
- */
-USTRUCT(BlueprintType)
-struct FProjectileParams
-{
-	GENERATED_BODY()
-
-	virtual ~FProjectileParams() = default;
-	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
-	virtual bool DoesExplode() const;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Speed = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Mass = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float Lifetime = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<AActor> ExplosionActorClass = nullptr;
-};
 
 /**
  *	Class description:
@@ -104,8 +78,11 @@ protected:
 	void UpdateLifetime(const float DeltaTime);
 	void Kill();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FProjectileParams> ProjectileParams;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag ProjectileFiringMode = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TInstancedStruct<FProjectileParams> Template;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FVector RuntimeVelocity = FVector::ZeroVector;
@@ -117,6 +94,7 @@ protected:
 	float RuntimeLifetime = 0.f;
 
 	friend struct FProjectileParams;
+	friend class UProjectileComponent;
 };
 
 /**

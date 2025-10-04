@@ -47,7 +47,7 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	const TArray<FDataRegistryId>& GetDefaultAttachmentIds() const;
+	const TArray<FDataRegistryId> GetDependentIds() const;
 
 protected:
 	// @gdemers attachments arent limited to add-ons to weapons, these represent any augmentations

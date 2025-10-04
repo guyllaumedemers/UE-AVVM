@@ -19,17 +19,57 @@
 //SOFTWARE.
 #include "Data/ProjectileDefinitionDataAsset.h"
 
+#include "NonReplicatedProjectileActor.h"
+
+void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile) const
+{
+	if (!IsValid(Projectile))
+	{
+		return;
+	}
+
+	// @gdemers initialize actor velocity based on direction assigned during construction.
+	const FTransform& ProjectileWorldTransform = Projectile->GetTransform();
+	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
+
+	// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
+	Projectile->Template = TInstancedStruct<FProjectileParams>::Make(*this);
+	Projectile->RuntimeVelocity = (NormalizedDirection * Speed);
+	Projectile->RuntimeMass = Mass;
+}
+
+bool FProjectileParams::DoesExplode() const
+{
+	return !ExplosionClass.IsNull();
+}
+
 #if WITH_EDITOR
 EDataValidationResult UProjectileDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ProjectileClass.IsNull())
+	if (!ProjectileParams.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UProjectileDefinitionDataAsset", "", "TSoftClassPtr is Null. No valid entries detected!"));
+		Context.AddError(NSLOCTEXT("UProjectileDefinitionDataAsset", "", "TInstancedStruct<FProjectileParams> is Null. No valid entries detected!"));
 	}
 
 	return Result;
+}
+
+const TSoftClassPtr<ANonReplicatedProjectileActor> UProjectileDefinitionDataAsset::GetProjectileClass() const
+{
+	const auto* Params = ProjectileParams.GetPtr<FProjectileParams>();
+	return (Params != nullptr) ? Params->ProjectileClass : nullptr;
+}
+
+const TInstancedStruct<FProjectileParams>& UProjectileDefinitionDataAsset::GetProjectileParams() const
+{
+	return ProjectileParams;
+}
+
+const FGameplayTag& UProjectileDefinitionDataAsset::GetProjectileFiringModeTag() const
+{
+	return ProjectileFiringMode;
 }
 
 EDataValidationResult FProjectileDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const

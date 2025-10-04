@@ -21,8 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
+#include "StructUtils/InstancedStruct.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -31,6 +33,37 @@
 #include "ProjectileDefinitionDataAsset.generated.h"
 
 class ANonReplicatedProjectileActor;
+
+/**
+ *	Class description:
+ *
+ *	FProjectileParams is a context struct that encapsulate properties specific to a projectile
+ *	and offer user extensibility through usage of TInstancedStruct<T>.
+ */
+USTRUCT(BlueprintType)
+struct FProjectileParams
+{
+	GENERATED_BODY()
+
+	virtual ~FProjectileParams() = default;
+	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
+	virtual bool DoesExplode() const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Speed = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Mass = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Lifetime = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftClassPtr<AActor> ExplosionClass = nullptr;
+};
 
 /**
  *	Class description:
@@ -47,9 +80,16 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	const TSoftClassPtr<ANonReplicatedProjectileActor> GetProjectileClass() const;
+	const TInstancedStruct<FProjectileParams>& GetProjectileParams() const;
+	const FGameplayTag& GetProjectileFiringModeTag() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
+	FGameplayTag ProjectileFiringMode = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TInstancedStruct<FProjectileParams> ProjectileParams;
 };
 
 /**
