@@ -37,7 +37,7 @@ const TArray<FDataRegistryId> UTriggeringDefinitionDataAsset::GetDependentIds() 
 {
 	TArray<FDataRegistryId> DependentIds;
 	DependentIds.Append(DefaultAttachmentIds);
-	DependentIds.Append({ProjectileDefinitionId});
+	DependentIds.Append(ProjectileDefinitionIds);
 	return DependentIds;
 }
 

@@ -62,7 +62,7 @@ protected:
 	bool bDoesSupportProjectileBehaviour = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportProjectileBehaviour"))
-	FDataRegistryId ProjectileDefinitionId = FDataRegistryId();
+	TArray<FDataRegistryId> ProjectileDefinitionIds;
 };
 
 /**
