@@ -21,6 +21,7 @@
 
 #include "AVVMGameplayUtils.h"
 #include "NonReplicatedProjectileActor.h"
+#include "ProjectileManagerSubsystem.h"
 #include "WeaponSample.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
@@ -30,14 +31,17 @@ void UProjectileComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwningOuter = GetTypedOuter<AActor>();
+	ProjectileManagerSubsystem = UProjectileManagerSubsystem::GetSubsystem(GetWorld());
 }
 
 void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
+	ProjectileManagerSubsystem.Reset();
 	ProjectileTemplates.Reset();
 	StreamableHandle.Reset();
+	OwningOuter.Reset();
 }
 
 void UProjectileComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -48,6 +52,24 @@ void UProjectileComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProp
 UProjectileComponent* UProjectileComponent::GetActorComponent(const AActor* NewActor)
 {
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UProjectileComponent>() : nullptr;
+}
+
+void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
+                                const FTransform& AimTransform) const
+{
+	const bool bDoesContains = ProjectileTemplates.Contains(FiringModeTag);
+	if (!bDoesContains)
+	{
+		return;
+	}
+
+	if (ProjectileManagerSubsystem.IsValid())
+	{
+		const FProjectileFiringMode& ProjectileMode = ProjectileTemplates[FiringModeTag];
+		ProjectileManagerSubsystem->CreateProjectile(ProjectileMode.ProjectileClass.Get(),
+		                                             ProjectileMode.ProjectileParams,
+		                                             AimTransform);
+	}
 }
 
 void UProjectileComponent::SetupProjectiles(const TArray<UObject*>& NewResources)

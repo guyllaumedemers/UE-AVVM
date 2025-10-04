@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
 
 #include "ProjectileManagerSubsystem.generated.h"
@@ -28,6 +29,7 @@
 class ANonReplicatedProjectileActor;
 class APlayerController;
 class APlayerState;
+struct FProjectileParams;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectilePassByDelegate, const FVector& Location)
 
@@ -52,21 +54,29 @@ public:
 	virtual TStatId GetStatId() const override;
 	
 	UFUNCTION(BlueprintCallable)
+	static UProjectileManagerSubsystem* GetSubsystem(const UWorld* World);
+	
+	UFUNCTION(BlueprintCallable)
 	void Register(ANonReplicatedProjectileActor* Projectile);
 	
 	UFUNCTION(BlueprintCallable)
 	void Unregister(ANonReplicatedProjectileActor* Projectile);
-	
-	UFUNCTION(BlueprintCallable)
-	static UProjectileManagerSubsystem* GetSubsystem(const UWorld* World);
+
+	void CreateProjectile(const UClass* ProjectileClass,
+	                      const TInstancedStruct<const FProjectileParams>& ProjectileParams,
+	                      const FTransform& AimTransform) const;
 
 	FOnProjectilePassByDelegate OnProjectilePassBy;
 
 protected:
 	void OnPlayerStateRemoved(APlayerState* PlayerState);
 	void OnPlayerStateAdded(APlayerState* PlayerState);
+	void OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile);
 
-	void OnProjectileRequestPooling(ANonReplicatedProjectileActor* Projectile);
+	// @gdemers factory method to support pooling or other instancing system specific to your project.
+	virtual ANonReplicatedProjectileActor* Factory(const UClass* ProjectileClass, const FTransform& AimTransform) const;
+	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
+	virtual void Shutdown(ANonReplicatedProjectileActor* Projectile) PURE_VIRTUAL(Shutdown, return;);
 
 	void HandleClientPassByBullets();
 	
@@ -74,5 +84,5 @@ protected:
 	TWeakObjectPtr<const APlayerController> ClientPlayerController = nullptr;
 	
 	UPROPERTY(Transient)
-	TArray<TWeakObjectPtr<ANonReplicatedProjectileActor>> Projectiles;
+	TArray<TObjectPtr<ANonReplicatedProjectileActor>> Projectiles;
 };

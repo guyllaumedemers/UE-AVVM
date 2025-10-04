@@ -22,6 +22,7 @@
 #include "AVVMGameState.h"
 #include "NonReplicatedProjectileActor.h"
 #include "WeaponDebuggerSettings.h"
+#include "Data/ProjectileDefinitionDataAsset.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -85,7 +86,7 @@ void UProjectileManagerSubsystem::Register(ANonReplicatedProjectileActor* Projec
 {
 	if (IsValid(Projectile))
 	{
-		Projectile->OnProjectilePoolingRequest.AddUObject(this, &UProjectileManagerSubsystem::OnProjectileRequestPooling);
+		Projectile->OnProjectileShutdown.AddUObject(this, &UProjectileManagerSubsystem::OnProjectileShutdownRequested);
 		Projectiles.Add(Projectile);
 	}
 }
@@ -94,8 +95,20 @@ void UProjectileManagerSubsystem::Unregister(ANonReplicatedProjectileActor* Proj
 {
 	if (IsValid(Projectile))
 	{
-		Projectile->OnProjectilePoolingRequest.RemoveAll(this);
+		Projectile->OnProjectileShutdown.RemoveAll(this);
 		Projectiles.RemoveSwap(Projectile);
+	}
+}
+
+void UProjectileManagerSubsystem::CreateProjectile(const UClass* ProjectileClass,
+                                                   const TInstancedStruct<const FProjectileParams>& ProjectileParams,
+                                                   const FTransform& AimTransform) const
+{
+	const auto* Params = ProjectileParams.GetPtr<FProjectileParams>();
+	if (Params != nullptr)
+	{
+		ANonReplicatedProjectileActor* Instance = Factory(ProjectileClass, AimTransform);
+		Params->Init(Instance);
 	}
 }
 
@@ -132,9 +145,25 @@ void UProjectileManagerSubsystem::OnPlayerStateAdded(APlayerState* PlayerState)
 	}
 }
 
-void UProjectileManagerSubsystem::OnProjectileRequestPooling(ANonReplicatedProjectileActor* Projectile)
+ANonReplicatedProjectileActor* UProjectileManagerSubsystem::Factory(const UClass* ProjectileClass, const FTransform& AimTransform) const
 {
-	// TODO @gdemers impl pooling system
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		const FVector Location = AimTransform.GetLocation();
+		const FRotator Rotator = AimTransform.Rotator();
+		// @gdemers another good example of const-ness issue in the engine. theres no point in violating bitwise const-ness or logical const-ness and yet
+		// the engine require a UClass* to be non-const.
+		AActor* Instance = World->SpawnActor(const_cast<UClass*>(ProjectileClass), &Location, &Rotator, FActorSpawnParameters());
+		return Cast<ANonReplicatedProjectileActor>(Instance);
+	}
+
+	return nullptr;
+}
+
+void UProjectileManagerSubsystem::OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile)
+{
+	Shutdown(Projectile);
 }
 
 void UProjectileManagerSubsystem::HandleClientPassByBullets()
@@ -152,7 +181,7 @@ void UProjectileManagerSubsystem::HandleClientPassByBullets()
 
 	for (auto Iterator = Projectiles.CreateIterator(); Iterator; ++Iterator)
 	{
-		if (!Iterator->IsValid())
+		if (!IsValid(*Iterator))
 		{
 			Iterator.RemoveCurrentSwap();
 			continue;

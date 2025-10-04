@@ -205,7 +205,7 @@ void ANonReplicatedProjectileActor::UpdateLifetime(const float DeltaTime)
 
 void ANonReplicatedProjectileActor::Kill()
 {
-	OnProjectilePoolingRequest.Broadcast(this);
+	OnProjectileShutdown.Broadcast(this);
 	RuntimeLifetime = 0.f;
 }
 

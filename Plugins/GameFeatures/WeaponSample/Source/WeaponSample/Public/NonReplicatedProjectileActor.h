@@ -33,7 +33,7 @@ class ANonReplicatedProjectileActor;
 struct FExplosionParams;
 struct FProjectileParams;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectilePoolingRequestDelegate, ANonReplicatedProjectileActor* Projectile);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectileShutdownRequestDelegate, ANonReplicatedProjectileActor* Projectile);
 
 /**
  *	Class description:
@@ -52,7 +52,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	FOnProjectilePoolingRequestDelegate OnProjectilePoolingRequest;
+	FOnProjectileShutdownRequestDelegate OnProjectileShutdown;
 
 protected:
 	void ApplyForce(const FVector& DeltaVelocity);

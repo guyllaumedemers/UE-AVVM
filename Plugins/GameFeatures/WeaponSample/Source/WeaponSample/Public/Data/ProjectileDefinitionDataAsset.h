@@ -97,6 +97,7 @@ public:
 
 	const TSoftClassPtr<ANonReplicatedProjectileActor> GetProjectileClass() const;
 	const TSoftClassPtr<ANonReplicatedExplosionActor> GetExplosionClass() const;
+	const TInstancedStruct<FExplosionParams>& GetExplosionParams() const;
 	const TInstancedStruct<FProjectileParams>& GetProjectileParams() const;
 	const FGameplayTag& GetProjectileFiringModeTag() const;
 

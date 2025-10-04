@@ -28,7 +28,9 @@
 
 #include "ProjectileComponent.generated.h"
 
+struct FExplosionParams;
 struct FProjectileParams;
+class UProjectileManagerSubsystem;
 
 /**
  *	Class description:
@@ -49,6 +51,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UProjectileComponent* GetActorComponent(const AActor* NewActor);
 
+	UFUNCTION(BlueprintCallable)
+	void Fire(const FGameplayTag& FiringModeTag,
+	          const FTransform& AimTransform) const;
+
 	void SetupProjectiles(const TArray<UObject*>& NewResources);
 
 protected:
@@ -64,6 +70,7 @@ protected:
 		TWeakObjectPtr<const UClass> ProjectileClass = nullptr;
 	};
 
+	TWeakObjectPtr<UProjectileManagerSubsystem> ProjectileManagerSubsystem = nullptr;
 	TMap<FGameplayTag, FProjectileFiringMode> ProjectileTemplates;
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

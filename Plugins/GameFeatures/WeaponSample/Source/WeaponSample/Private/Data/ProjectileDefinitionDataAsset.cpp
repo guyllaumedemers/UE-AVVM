@@ -37,6 +37,7 @@ void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile) const
 	Projectile->RuntimeVelocity = (NormalizedDirection * Speed);
 	Projectile->RuntimeMass = Mass;
 }
+
 void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const
 {
 	if (IsValid(Projectile))
@@ -75,6 +76,11 @@ const TSoftClassPtr<ANonReplicatedExplosionActor> UProjectileDefinitionDataAsset
 {
 	const auto* Params = ExplosionParams.GetPtr<FExplosionParams>();
 	return (Params != nullptr) ? Params->ExplosionClass : nullptr;
+}
+
+const TInstancedStruct<FExplosionParams>& UProjectileDefinitionDataAsset::GetExplosionParams() const
+{
+	return ExplosionParams;
 }
 
 const TInstancedStruct<FProjectileParams>& UProjectileDefinitionDataAsset::GetProjectileParams() const
