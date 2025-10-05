@@ -27,6 +27,7 @@
 #include "ItemObject.h"
 #include "ActorItemProgressionComponent.h"
 #include "AVVMScopedDelegate.h"
+#include "NonReplicatedLoadoutObject.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -39,6 +40,7 @@
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	SetIsReplicatedByDefault(true);
 	bReplicateUsingRegisteredSubObjectList = true;
@@ -81,6 +83,13 @@ void UActorInventoryComponent::BeginPlay()
 		RequestItems(Outer);
 	}
 #endif
+
+	if (!NonReplicatedLoadoutClass.IsNull())
+	{
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UActorInventoryComponent::OnLoadoutObjectRetrieved);
+		LoadoutHandle = UAssetManager::Get().LoadAssetList({NonReplicatedLoadoutClass.ToSoftObjectPath()}, Callback);
+	}
 }
 
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -292,6 +301,8 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	TArray<UObject*> OutStreamableAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
+	// @gdemers cache array before to invoke OnRep on server.
+	TArray<UItemObject*> OldItems = Items;
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
 		auto* ItemObjectClass = Cast<UClass>(StreamableAsset);
@@ -304,6 +315,9 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		AddReplicatedSubObject(NewItem);
 		Items.Add(NewItem);
 	}
+
+	// @gdemers allow initialization of loadout object based held items. 
+	OnRep_ItemCollectionChanged(OldItems);
 
 	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
@@ -373,6 +387,11 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       SV.GetData());
+
+	if (IsValid(NonReplicatedLoadout))
+	{
+		NonReplicatedLoadout->HandleItemCollectionChanged(Items, OldItemObjects);
+	}
 }
 
 void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
@@ -478,6 +497,30 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		const int32 NewProgressionIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, NewItemObject);
 		ItemProgressionComponent->SetProgressionIndex(NewProgressionIndex);
 		ItemProgressionComponent->RequestItemProgression(NewItemObject->GetItemProgressionId());
+	}
+}
+
+void UActorInventoryComponent::OnLoadoutObjectRetrieved()
+{
+	if (!LoadoutHandle.IsValid())
+	{
+		return;
+	}
+
+	TArray<UObject*> OutResources;
+	LoadoutHandle->GetLoadedAssets(OutResources);
+
+	for (const UObject* Resource : OutResources)
+	{
+		const auto* NewLoadoutClass = Cast<UClass>(Resource);
+		if (!IsValid(NewLoadoutClass))
+		{
+			continue;
+		}
+
+		NonReplicatedLoadout = NewObject<UNonReplicatedLoadoutObject>(this, NewLoadoutClass);
+		// @gdemers server initialize loadout based on latest state cache.
+		NonReplicatedLoadout->HandleItemCollectionChanged(Items, TArray<UItemObject*>());
 	}
 }
 

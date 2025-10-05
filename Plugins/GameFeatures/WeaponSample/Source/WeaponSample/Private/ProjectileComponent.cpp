@@ -44,11 +44,6 @@ void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
-void UProjectileComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}
-
 UProjectileComponent* UProjectileComponent::GetActorComponent(const AActor* NewActor)
 {
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UProjectileComponent>() : nullptr;

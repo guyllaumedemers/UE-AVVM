@@ -71,7 +71,12 @@ protected:
 		{
 			Candidates.Reserve(MaxSize);
 			Candidates.Add(Actors);
-		};
+		}
+
+		~FBatchContext()
+		{
+			Candidates.Reset();
+		}
 
 		bool DoesQualifyForBatchDestroy(const float MaxSize) const;
 		void Obliterate();

@@ -29,6 +29,7 @@
 
 class UAVVMResourceManagerComponent;
 class UItemObject;
+class UNonReplicatedLoadoutObject;
 
 /**
  *	Class description:
@@ -108,6 +109,9 @@ protected:
 
 	UFUNCTION()
 	void OnItemActorClassRetrieved(const UClass* NewActorClass, UItemObject* NewItemObject);
+	
+	UFUNCTION()
+	void OnLoadoutObjectRetrieved();
 
 	struct FItemSpawnerQueuingMechanism
 	{
@@ -124,6 +128,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadoutClass = nullptr;
+
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
 	TArray<TObjectPtr<UItemObject>> Items;
 
@@ -131,8 +138,12 @@ protected:
 	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadout = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
-	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism;
+	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism = nullptr;
+	TSharedPtr<FStreamableHandle> LoadoutHandle = nullptr;
 };

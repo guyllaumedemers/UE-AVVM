@@ -152,6 +152,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
 	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
+	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
+
 	// @gdemers Item progression is referenced at this level to prevent hard references on Actor type defined in other GFP and
 	// applies progression effects to the loaded actor type.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="ItemProgressionDefinitionDataTableRow"))

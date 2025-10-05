@@ -28,7 +28,7 @@ TArray<UObject*> UInventoryConversionFunction::GetStorageItems(const TArray<UObj
 	                                                             NewObjects);
 }
 
-TArray<UObject*> UInventoryConversionFunction::GetHeldItems(const TArray<UObject*>& NewObjects)
+TArray<UObject*> UInventoryConversionFunction:: GetHeldItems(const TArray<UObject*>& NewObjects)
 {
 	return UInventoryConversionFunction::GetArrayByFilterRuleset(UInventorySettings::GetHoldingRuleset(),
 	                                                             NewObjects);
