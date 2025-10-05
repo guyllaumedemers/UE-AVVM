@@ -26,6 +26,7 @@
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "ActorItemProgressionComponent.h"
+#include "AVVMScopedDelegate.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -433,8 +434,7 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 	}
 }
 
-void UActorInventoryComponent::OnItemActorClassRetrieved(UClass* NewActorClass,
-                                                         UItemObject* NewItemObject)
+void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorClass, UItemObject* NewItemObject)
 {
 	const auto ScopedSafety = [](TSharedPtr<FItemSpawnerQueuingMechanism> NewQueueingMechanism)
 	{
@@ -445,26 +445,26 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(UClass* NewActorClass,
 		}
 	};
 
+	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, ScopedSafety, QueueingMechanism);
+	FAVVMScopedDelegate ScopedDelegate(Callback);
+
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer),
 	                      TEXT("Invalid Outer!")))
 	{
-		ScopedSafety(QueueingMechanism);
 		return;
 	}
 
 	if (!ensureAlwaysMsgf(IsValid(NewItemObject),
 	                      TEXT("Trying to access invalid UItemObject during initialization process.")))
 	{
-		ScopedSafety(QueueingMechanism);
 		return;
 	}
 
-	AActor* ItemActor = NewItemObject->SpawnActorClass(const_cast<AActor*>(Outer), NewActorClass);
+	AActor* ItemActor = NewItemObject->SpawnActorClass(NewActorClass, const_cast<AActor*>(Outer));
 	if (!ensureAlwaysMsgf(IsValid(ItemActor),
 	                      TEXT("Failed to Spawn UItemObject Actor representation in World.")))
 	{
-		ScopedSafety(QueueingMechanism);
 		return;
 	}
 
@@ -479,8 +479,6 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(UClass* NewActorClass,
 		ItemProgressionComponent->SetProgressionIndex(NewProgressionIndex);
 		ItemProgressionComponent->RequestItemProgression(NewItemObject->GetItemProgressionId());
 	}
-
-	ScopedSafety(QueueingMechanism);
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()

@@ -27,7 +27,19 @@
 
 bool UItemPlacementManager::ShouldCreateSubsystem(UObject* Outer) const
 {
-	return !IsRunningDedicatedServer();
+	const auto* LocalPlayer = Cast<ULocalPlayer>(Outer);
+	if (!IsValid(LocalPlayer))
+	{
+		return false;
+	}
+
+	const UWorld* World = LocalPlayer->GetWorld();
+	if (IsValid(World))
+	{
+		return !World->IsNetMode(NM_DedicatedServer);
+	}
+
+	return false;
 }
 
 void UItemPlacementManager::Initialize(FSubsystemCollectionBase& Collection)

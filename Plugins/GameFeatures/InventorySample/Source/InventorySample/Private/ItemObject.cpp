@@ -20,6 +20,7 @@
 #include "ItemObject.h"
 
 #include "AVVMGameplayUtils.h"
+#include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
@@ -139,26 +140,23 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
-AActor* UItemObject::SpawnActorClass(AActor* NewAnchor,
-                                     UClass* NewActorClass)
+AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* NewAnchor)
 {
 	if (!IsValid(NewActorClass))
 	{
 		return nullptr;
 	}
 
-	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
-
-	UWorld* World = GetWorld();
-	if (!IsValid(World))
+	const auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(GetWorld());
+	if (IsValid(InventoryManagerSubsystem))
 	{
-		return nullptr;
+		FActorSpawnParameters Params;
+		Params.Owner = NewAnchor;
+
+		RuntimeItemActor = InventoryManagerSubsystem->CreateItemActor(NewActorClass, Params);
 	}
 
-	FActorSpawnParameters Params;
-	Params.Owner = NewAnchor;
-
-	RuntimeItemActor = World->SpawnActor(NewActorClass, &FTransform::Identity, Params);
+	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
 	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
 
 	UE_LOG(LogInventorySample,
