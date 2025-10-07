@@ -83,4 +83,17 @@ This GameFeature plugin is a sample plugin for supporting content gathering. Pla
 
 This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system leverage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
 
+### Batch Sample
+
+This GameFeature plugin is a sample plugin for supporting batch actions on content that are subject for registration with the managing system. Currently only supporting batching call to AActor::Destroy, the purpose this system is to allow generalizing
+batch actions, and execute process based on user-defined conditions.
+
+### Weapon Sample
+
+tbd
+
+### Damage Sample
+
+tbd
+
 **Notes : All plugins defined above are example cases that utilize the api from AVVM plugin.**
