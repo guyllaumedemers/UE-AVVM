@@ -63,7 +63,7 @@ public:
 	const FDataRegistryId& GetAttachmentModifierDefinitionId() const; 
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AttachmentModifierDefinitionDataTableRow"))
 	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")

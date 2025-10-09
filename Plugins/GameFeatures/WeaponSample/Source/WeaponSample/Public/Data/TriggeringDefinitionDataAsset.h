@@ -55,13 +55,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportDefaultAttachments = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportDefaultAttachments"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportDefaultAttachments", ItemStruct="AttachmentDefinitionDataTableRow"))
 	TArray<FDataRegistryId> DefaultAttachmentIds;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportProjectileBehaviour = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportProjectileBehaviour"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportProjectileBehaviour", ItemStruct="ProjectileDefinitionDataTableRow"))
 	TArray<FDataRegistryId> ProjectileDefinitionIds;
 };
 
