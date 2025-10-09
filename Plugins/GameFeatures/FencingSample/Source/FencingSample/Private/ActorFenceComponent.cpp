@@ -93,7 +93,7 @@ void UActorFenceComponent::TryRaise()
 	UAVVMReplicatedTagComponent* NewReplicatedTagComponent = ReplicatedTagComponent.Get();
 	if (!IsValid(NewReplicatedTagComponent))
 	{
-		NewReplicatedTagComponent = Outer->GetComponentByClass<UAVVMReplicatedTagComponent>();
+		NewReplicatedTagComponent = UAVVMReplicatedTagComponent::GetActorComponent(Outer);
 		ReplicatedTagComponent = NewReplicatedTagComponent;
 	}
 
