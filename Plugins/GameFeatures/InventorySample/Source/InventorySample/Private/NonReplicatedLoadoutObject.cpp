@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
+#include "ExecutionContextParams.h"
 #include "ExecutionContextRule.h"
 
 void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
