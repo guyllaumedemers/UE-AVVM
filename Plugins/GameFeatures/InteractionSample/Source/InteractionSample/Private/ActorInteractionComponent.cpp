@@ -76,7 +76,7 @@ void UActorInteractionComponent::BeginPlay()
 	}
 
 #if WITH_SERVER_CODE
-	if (GetOwnerRole() == ROLE_Authority)
+	if (Outer->HasAuthority())
 	{
 		auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
 		if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
@@ -115,7 +115,7 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	}
 
 #if WITH_SERVER_CODE
-	if (GetOwnerRole() == ROLE_Authority)
+	if (Outer->HasAuthority())
 	{
 		auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
 		if (IsValid(CollisionComponent))
