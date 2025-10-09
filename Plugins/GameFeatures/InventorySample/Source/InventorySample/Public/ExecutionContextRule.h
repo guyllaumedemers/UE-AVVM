@@ -17,34 +17,38 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "NonReplicatedLoadoutObject.h"
+#pragma once
 
-#include "ExecutionContextRule.h"
+#include "CoreMinimal.h"
 
-void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
-                                                              const TArray<UItemObject*>& OldItemObjects)
+#include "StructUtils/InstancedStruct.h"
+
+#include "ExecutionContextRule.generated.h"
+
+struct FExecutionContextParams;
+
+/**
+*	Class description:
+ *
+ *	FExecutionContextRule is a context struct that define the conditions required for executing an action.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FExecutionContextRule
 {
-	// TODO @gdemers Update collection entries
-}
+	GENERATED_BODY()
 
-void UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                          const TInstancedStruct<FExecutionContextRule>& Rule)
+	virtual ~FExecutionContextRule() = default;
+	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
+};
+
+/**
+ *	Class description:
+ *
+ *	FSwapRule is a context struct that define the parameters of a swapping action,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FSwapRule : public FExecutionContextRule
 {
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
-	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return;
-	}
-
-	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
-	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
-	{
-		return;
-	}
-
-	const bool bPredicate = ContextRule->Predicate(Params);
-	if (bPredicate)
-	{
-		ContextParams->Execute(this);
-	}
-}
+	GENERATED_BODY()
+};

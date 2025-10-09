@@ -17,34 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "NonReplicatedLoadoutObject.h"
-
 #include "ExecutionContextRule.h"
-
-void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
-                                                              const TArray<UItemObject*>& OldItemObjects)
-{
-	// TODO @gdemers Update collection entries
-}
-
-void UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                          const TInstancedStruct<FExecutionContextRule>& Rule)
-{
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
-	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return;
-	}
-
-	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
-	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
-	{
-		return;
-	}
-
-	const bool bPredicate = ContextRule->Predicate(Params);
-	if (bPredicate)
-	{
-		ContextParams->Execute(this);
-	}
-}

@@ -17,34 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "NonReplicatedLoadoutObject.h"
+#pragma once
 
-#include "ExecutionContextRule.h"
+#include "CoreMinimal.h"
 
-void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
-                                                              const TArray<UItemObject*>& OldItemObjects)
+#include "ExecutionContextParams.generated.h"
+
+class UNonReplicatedLoadoutObject;
+
+/**
+ *	Class description:
+ *
+ *	FExecutionContextParams is a context struct that defines the properties to be
+ *	involved in executing an action, as well as the execution implementation details itself.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FExecutionContextParams
 {
-	// TODO @gdemers Update collection entries
-}
+	GENERATED_BODY()
 
-void UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                          const TInstancedStruct<FExecutionContextRule>& Rule)
-{
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
-	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return;
-	}
-
-	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
-	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
-	{
-		return;
-	}
-
-	const bool bPredicate = ContextRule->Predicate(Params);
-	if (bPredicate)
-	{
-		ContextParams->Execute(this);
-	}
-}
+	virtual ~FExecutionContextParams() = default;
+	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const PURE_VIRTUAL(Execute, return;);
+};

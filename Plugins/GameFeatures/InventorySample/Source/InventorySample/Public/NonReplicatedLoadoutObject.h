@@ -22,10 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "NonReplicatedLoadoutObject.generated.h"
 
+struct FExecutionContextParams;
+struct FExecutionContextRule;
 class UItemObject;
 
 /**
@@ -52,7 +55,9 @@ public:
 	void HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
 	                                 const TArray<UItemObject*>& OldItemObjects);
 
-	// TODO @gdemers finish impl details for setting item slot active and simulating entries.
+	UFUNCTION(BlueprintCallable)
+	void Execute(const TInstancedStruct<FExecutionContextParams>& Params,
+	             const TInstancedStruct<FExecutionContextRule>& Rule);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the order in which mouse wheel scolling cycles through items."))
