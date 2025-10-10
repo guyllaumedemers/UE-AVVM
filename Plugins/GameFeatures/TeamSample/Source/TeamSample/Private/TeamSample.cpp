@@ -20,4 +20,4 @@
 
 #include "TeamSample.h"
 	
-IMPLEMENT_MODULE(FTeamSampleModule, TeamSample)
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, TeamSample)

@@ -23,6 +23,8 @@
 #include "AVVMGameplayUtils.h"
 #include "Net/UnrealNetwork.h"
 
+UPlayerStateTeamComponent::FOnTeamComponentInitializedDelegate UPlayerStateTeamComponent::OnTeamComponentInitialized;
+
 UPlayerStateTeamComponent::UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -89,6 +91,7 @@ void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag&
 
 void UPlayerStateTeamComponent::TryForfaiting_Implementation()
 {
+	// TODO @gdemers add impl
 }
 
 void UPlayerStateTeamComponent::SetTeam(const FGameplayTag& NewTeamTag)
@@ -98,4 +101,5 @@ void UPlayerStateTeamComponent::SetTeam(const FGameplayTag& NewTeamTag)
 
 void UPlayerStateTeamComponent::OnRep_OnTeamChanged(const FGameplayTag& OldTeamTag)
 {
+	// TODO @gdemers add impl
 }

@@ -19,3 +19,13 @@
 //SOFTWARE.
 
 #include "TeamRule.h"
+
+void UTeamRule::HandleTeamAssignment(UPlayerStateTeamComponent* Player,
+                                     TMap<FGameplayTag, TObjectPtr<UTeamObject>>& OutTeams) const
+{
+}
+
+void UTeamRule::HandleTeamRemoval(UPlayerStateTeamComponent* Player,
+                                  TMap<FGameplayTag, TObjectPtr<UTeamObject>>& OutTeams) const
+{
+}

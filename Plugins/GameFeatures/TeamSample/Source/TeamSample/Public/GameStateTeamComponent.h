@@ -64,6 +64,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
 
+	// TODO @gdemers may require replication. havent decided yet.
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TMap<FGameplayTag, TObjectPtr<UTeamObject>> Teams;
 
