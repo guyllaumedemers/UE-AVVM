@@ -39,6 +39,9 @@ bool UBatchingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 	bool bHasAuthority = !World->IsNetMode(NM_Client);
 
+	// TODO @gdemers This is problematic due to how GFP constraint prevent referencing of GFP
+	// content in /Game project. UBatchingRule is specific to the GFP. Find a workaround this issue. Maybe
+	// using RegistryId referencing. Or adding at runtime via Tag matching.
 	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
 	if (!IsValid(WorldSettings) || !WorldSettings->DoesRuleClassExist(UBatchingRule::StaticClass()))
 	{
