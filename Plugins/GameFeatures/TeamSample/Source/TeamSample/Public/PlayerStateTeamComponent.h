@@ -28,7 +28,7 @@
 #include "PlayerStateTeamComponent.generated.h"
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	UPlayerStateTeamComponent is a server-client component that identify APlayerState parenting to a remote Team. User
  *	requests for team actions should be piped through this component.

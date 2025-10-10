@@ -59,7 +59,7 @@ protected:
 };
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	UTeamRule is a Rule referenced in AVVMWorldSettings. This system defines requirements for building Teams.
  */
