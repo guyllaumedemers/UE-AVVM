@@ -28,14 +28,18 @@
 #include "GameStateTeamComponent.generated.h"
 
 class APlayerState;
+struct FAVVMPartyProxy;
 class UPlayerStateTeamComponent;
 class UTeamObject;
 class UTeamRule;
 
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBackendTeamRequestCompleteDelegate, const bool, bWasSuccess, const TArray<FAVVMPartyProxy>&, NewParties);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReplicatedTeamChangedDelegate, const TArray<UTeamObject*>& NewTeams, const TArray<UTeamObject*>& OldTeams);
+
 /**
  *	Class description:
  *
- *	UGameStateTeamComponent is a SERVER-ONLY component that manage the team CRUD process based on user-defined Ruleset
+ *	UGameStateTeamComponent is a server-client component that store the team information retrieved from backend, and expose features defined by user provided Ruleset
  *	referenced in AWorldSetting.
  */
 UCLASS(ClassGroup=("Team"), Blueprintable, meta=(BlueprintSpawnableComponent))
@@ -45,28 +49,42 @@ class TEAMSAMPLE_API UGameStateTeamComponent : public UActorComponent
 
 public:
 	UGameStateTeamComponent(const FObjectInitializer& ObjectInitializer);
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	FOnReplicatedTeamChangedDelegate OnReplicatedTeamChanged;
+
 protected:
 	UFUNCTION()
-	void OnPlayerStateAdded(APlayerState* PlayerState);
-	
-	UFUNCTION()
-	void OnPlayerStateRemoved(APlayerState* PlayerState);
-	
-	void UnAssignTeam(UPlayerStateTeamComponent* NewPlayer);
-	void AssignTeam(UPlayerStateTeamComponent* NewPlayer);
+	void OnPlayerStateAdded(APlayerState* NewPlayerState);
 
 	UFUNCTION()
-	void OnPlayerStateTeamComponentInitialized(UPlayerStateTeamComponent* NewPlayer);
+	void OnPlayerStateRemoved(APlayerState* NewPlayerState);
+
+	UFUNCTION()
+	void OnPlayerStateTeamComponentInitialized(APlayerState* NewPlayerState);
+
+	void GetTeamRuleOnAuthority();
+	void GetBackendTeams(const FOnBackendTeamRequestCompleteDelegate& Callback);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_RequestGameSesionParties(const FName SessionName, const FOnBackendTeamRequestCompleteDelegate& Callback);
+
+	UFUNCTION()
+	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
+
+	UFUNCTION()
+	void OnTeamReceived(const bool bWasSuccess, const TArray<FAVVMPartyProxy>& NewParties);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
 
-	// TODO @gdemers may require replication. havent decided yet.
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FGameplayTag, TObjectPtr<UTeamObject>> Teams;
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamChanged")
+	TArray<TObjectPtr<UTeamObject>> Teams;
+
+	UPROPERTY(Transient, meta=(ToolTip="Players waiting to be assigned to a team based on data from backend."))
+	TArray<TWeakObjectPtr<APlayerState>> PendingPlayers;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;

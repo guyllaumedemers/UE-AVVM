@@ -32,36 +32,8 @@ class UTeamObject;
 /**
  *	Class description:
  *
- *	UTeamBalancingCondition is a unique condition that define requirements for re-balancing a team.
- */
-UCLASS(BlueprintType, Blueprintable)
-class TEAMSAMPLE_API UTeamBalancingCondition : public UObject
-{
-	GENERATED_BODY()
-};
-
-/**
- *	Class description:
- *
- *	UTeamBalancingImpl is a system that oversee Team balancing at Runtime.
- */
-UCLASS(BlueprintType, Blueprintable)
-class TEAMSAMPLE_API UTeamBalancingImpl : public UObject
-{
-	GENERATED_BODY()
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<TSoftClassPtr<UTeamBalancingCondition>> BalancingConditionClasses;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UTeamBalancingCondition>> BalancingConditions;
-};
-
-/**
- *	Class description:
- *
- *	UTeamRule is a Rule referenced in AVVMWorldSettings. This system defines requirements for building Teams.
+ *	UTeamRule is a Rule referenced in AVVMWorldSettings. This system defines actions that are allowed
+ *	to be executed by a member of a team.
  */
 UCLASS()
 class TEAMSAMPLE_API UTeamRule : public UAVVMWorldRule
@@ -69,8 +41,8 @@ class TEAMSAMPLE_API UTeamRule : public UAVVMWorldRule
 	GENERATED_BODY()
 
 public:
-	void HandleTeamAssignment(UPlayerStateTeamComponent* Player, TMap<FGameplayTag, TObjectPtr<UTeamObject>>& OutTeams) const;
-	void HandleTeamRemoval(UPlayerStateTeamComponent* Player, TMap<FGameplayTag, TObjectPtr<UTeamObject>>& OutTeams) const;
+	UFUNCTION(BlueprintCallable)
+	const TArray<FGameplayTag>& GetTags() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -85,9 +57,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bDoesAllowSwitchingTeam = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<UTeamBalancingImpl> TeamBalancingImplClass = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TObjectPtr<UTeamBalancingImpl> TeamBalancingImpl = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Collection of tags to create teams from."))
+	TArray<FGameplayTag> TeamTags;
 };

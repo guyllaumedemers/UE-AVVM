@@ -27,6 +27,9 @@
 
 #include "PlayerStateTeamComponent.generated.h"
 
+class APlayerState;
+class UTeamObject;
+
 /**
  *	Class description:
  *
@@ -40,15 +43,14 @@ class TEAMSAMPLE_API UPlayerStateTeamComponent : public UActorComponent
 
 public:
 	UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer);
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
 	static UPlayerStateTeamComponent* GetActorComponent(const AActor* NewActor);
-
+	
 	UFUNCTION(BlueprintCallable)
-	void SetTeam(const FGameplayTag& NewTeamTag);
+	void SetTeam(const UTeamObject* NewTeam);
 
 	UFUNCTION(Server, Reliable)
 	void TrySwitchTeam(const FGameplayTag& NewTeamTag);
@@ -56,15 +58,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void TryForfaiting();
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTeamComponentInitializedDelegate, UPlayerStateTeamComponent*);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTeamComponentInitializedDelegate, APlayerState*);
 	static FOnTeamComponentInitializedDelegate OnTeamComponentInitialized;
 
 protected:
-	UFUNCTION()
-	void OnRep_OnTeamChanged(const FGameplayTag& OldTeamTag);
-
-	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamChanged")
-	FGameplayTag TeamTag = FGameplayTag::EmptyTag;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UTeamObject> OwningTeam = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

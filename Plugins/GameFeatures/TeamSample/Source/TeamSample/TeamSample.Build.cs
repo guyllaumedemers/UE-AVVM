@@ -34,6 +34,7 @@ public class TeamSample : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"IrisCore",
 				"GameplayTags"
 			}
 		);
@@ -42,6 +43,7 @@ public class TeamSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMOnline"
 			}
 		);
 	}

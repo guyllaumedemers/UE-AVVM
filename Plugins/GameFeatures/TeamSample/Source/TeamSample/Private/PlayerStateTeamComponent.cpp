@@ -21,6 +21,8 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "TeamObject.h"
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
 UPlayerStateTeamComponent::FOnTeamComponentInitializedDelegate UPlayerStateTeamComponent::OnTeamComponentInitialized;
@@ -28,24 +30,14 @@ UPlayerStateTeamComponent::FOnTeamComponentInitializedDelegate UPlayerStateTeamC
 UPlayerStateTeamComponent::UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	SetIsReplicatedByDefault(true);
-}
-
-void UPlayerStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UPlayerStateTeamComponent, TeamTag);
+	// TODO @gdemers confirm if replication is require for RPC request. typically, the requirements would
+	// be to have a UNetConnnection attached to the caller of the function. i.e Own a valid PC on the Client.
+	SetIsReplicatedByDefault(false);
 }
 
 void UPlayerStateTeamComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		OnTeamComponentInitialized.Broadcast(this);
-	}
 
 	auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -60,6 +52,11 @@ void UPlayerStateTeamComponent::BeginPlay()
 	       *Outer->GetName());
 
 	OwningOuter = Outer;
+
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		OnTeamComponentInitialized.Broadcast(Cast<APlayerState>(Outer));
+	}
 }
 
 void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -84,22 +81,17 @@ UPlayerStateTeamComponent* UPlayerStateTeamComponent::GetActorComponent(const AA
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UPlayerStateTeamComponent>() : nullptr;
 }
 
+void UPlayerStateTeamComponent::SetTeam(const UTeamObject* NewTeam)
+{
+	OwningTeam = NewTeam;
+}
+
 void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag& NewTeamTag)
 {
 	// TODO @gdemers add impl
 }
 
 void UPlayerStateTeamComponent::TryForfaiting_Implementation()
-{
-	// TODO @gdemers add impl
-}
-
-void UPlayerStateTeamComponent::SetTeam(const FGameplayTag& NewTeamTag)
-{
-	TeamTag = NewTeamTag;
-}
-
-void UPlayerStateTeamComponent::OnRep_OnTeamChanged(const FGameplayTag& OldTeamTag)
 {
 	// TODO @gdemers add impl
 }

@@ -23,9 +23,18 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMGameState.h"
 #include "AVVMWorldSetting.h"
+#include "NativeGameplayTags.h"
 #include "PlayerStateTeamComponent.h"
+#include "TeamObject.h"
 #include "TeamRule.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
+#include "GameFramework/GameMode.h"
+#include "GameFramework/GameSession.h"
 #include "GameFramework/PlayerState.h"
+#include "Net/UnrealNetwork.h"
+
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAM, "WorldRule.Team");
 
 UGameStateTeamComponent::UGameStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -34,17 +43,18 @@ UGameStateTeamComponent::UGameStateTeamComponent(const FObjectInitializer& Objec
 	bReplicateUsingRegisteredSubObjectList = false;
 }
 
+void UGameStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UGameStateTeamComponent, Teams);
+}
+
 void UGameStateTeamComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	UPlayerStateTeamComponent::OnTeamComponentInitialized.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateTeamComponentInitialized);
-
-	const UWorld* World = GetWorld();
-	if (IsValid(World))
-	{
-		const auto* WorldSetting = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	}
 
 	auto* Outer = GetTypedOuter<AAVVMGameState>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -58,8 +68,9 @@ void UGameStateTeamComponent::BeginPlay()
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
-	if (IsValid(Outer))
+	if (Outer->HasAuthority())
 	{
+		GetTeamRuleOnAuthority();
 		Outer->OnPlayerStateRemoved.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateRemoved);
 		Outer->OnPlayerStateAdded.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateAdded);
 	}
@@ -85,49 +96,109 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
-	Outer->OnPlayerStateRemoved.RemoveAll(this);
-	Outer->OnPlayerStateAdded.RemoveAll(this);
-}
-
-void UGameStateTeamComponent::OnPlayerStateAdded(APlayerState* PlayerState)
-{
-	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(PlayerState);
-	if (IsValid(TeamComponent))
+	if (Outer->HasAuthority())
 	{
-		AssignTeam(TeamComponent);
+		Outer->OnPlayerStateRemoved.RemoveAll(this);
+		Outer->OnPlayerStateAdded.RemoveAll(this);
 	}
 }
 
-void UGameStateTeamComponent::OnPlayerStateRemoved(APlayerState* PlayerState)
+void UGameStateTeamComponent::OnPlayerStateAdded(APlayerState* NewPlayerState)
 {
-	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(PlayerState);
-	if (IsValid(TeamComponent))
+	PendingPlayers.Add(NewPlayerState);
+}
+
+void UGameStateTeamComponent::OnPlayerStateRemoved(APlayerState* NewPlayerState)
+{
+	PendingPlayers.Remove(NewPlayerState);
+}
+
+void UGameStateTeamComponent::OnPlayerStateTeamComponentInitialized(APlayerState* NewPlayerState)
+{
+	PendingPlayers.Add(NewPlayerState);
+}
+
+void UGameStateTeamComponent::GetTeamRuleOnAuthority()
+{
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
-		UnAssignTeam(TeamComponent);
+		return;
+	}
+
+	const auto* WorldSetting = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	if (IsValid(WorldSetting))
+	{
+		TeamRule = WorldSetting->CastRule<UTeamRule>(TAG_WORLD_RULE_TEAM);
+	}
+
+	// @gdemers we expect your project to have some form of backend from which we can retrieve information
+	// based on GameSession information.
+	FOnBackendTeamRequestCompleteDelegate Callback;
+	Callback.BindDynamic(this, &UGameStateTeamComponent::OnTeamReceived);
+	GetBackendTeams(Callback);
+}
+
+void UGameStateTeamComponent::GetBackendTeams(const FOnBackendTeamRequestCompleteDelegate& Callback)
+{
+	const auto* GameState = Cast<AGameState>(OwningOuter.Get());
+	if (!IsValid(GameState))
+	{
+		return;
+	}
+
+	const AGameModeBase* GameMode = GameState->AuthorityGameMode;
+	if (!IsValid(GameMode))
+	{
+		return;
+	}
+
+	const AGameSession* GameSession = GameMode->GameSession;
+	if (IsValid(GameSession))
+	{
+		BP_RequestGameSesionParties(GameSession->SessionName, Callback);
 	}
 }
 
-void UGameStateTeamComponent::UnAssignTeam(UPlayerStateTeamComponent* NewPlayer)
+void UGameStateTeamComponent::OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams)
 {
-	const UTeamRule* NewTeamRule = TeamRule.Get();
-	if (IsValid(NewTeamRule))
-	{
-		NewTeamRule->HandleTeamRemoval(NewPlayer, Teams);
-	}
+	OnReplicatedTeamChanged.Broadcast(Teams, OldTeams);
 }
 
-void UGameStateTeamComponent::AssignTeam(UPlayerStateTeamComponent* NewPlayer)
+void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
+                                             const TArray<FAVVMPartyProxy>& NewParties)
 {
-	const UTeamRule* NewTeamRule = TeamRule.Get();
-	if (IsValid(NewTeamRule))
+	if (!ensureAlwaysMsgf(bWasSuccess,
+	                      TEXT("Backend couldnt retrieve involved parties.")))
 	{
-		NewTeamRule->HandleTeamAssignment(NewPlayer, Teams);
+		return;
 	}
-}
 
-void UGameStateTeamComponent::OnPlayerStateTeamComponentInitialized(UPlayerStateTeamComponent* NewPlayer)
-{
-	// @gdemers GFP will push dynamically the PlayerStateTeamComponent, as such, we may have to resolve to this
-	// globally accessible delegate to execute 'this' call.
-	AssignTeam(NewPlayer);
+	const UTeamRule* Rule = TeamRule.Get();
+	if (!IsValid(Rule))
+	{
+		return;
+	}
+
+	TArray<FGameplayTag> DuplicatedTags = Rule->GetTags();
+	Teams.Reset(NewParties.Num());
+
+	TArray<TWeakObjectPtr<APlayerState>> Players = MoveTemp(PendingPlayers);
+	for (const FAVVMPartyProxy& Party : NewParties)
+	{
+		auto* TeamObject = UTeamObject::Factory(OwningOuter.Get(), Party, Players);
+		if (!IsValid(TeamObject))
+		{
+			continue;
+		}
+
+		if (ensureAlwaysMsgf(!DuplicatedTags.IsEmpty(),
+		                     TEXT("TeamTags were not configured. Attempting assignment on Empty set.")))
+		{
+			const FGameplayTag TeamTag = DuplicatedTags.Pop();
+			TeamObject->SetTeam(TeamTag);
+		}
+
+		Teams.Add(TeamObject);
+	}
 }

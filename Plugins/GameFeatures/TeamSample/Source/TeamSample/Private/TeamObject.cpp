@@ -18,3 +18,88 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "TeamObject.h"
+
+#include "AVVMOnline.h"
+#include "AVVMOnlineStringParser.h"
+#include "PlayerStateTeamComponent.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
+#include "GameFramework/PlayerState.h"
+#include "Net/UnrealNetwork.h"
+
+void UTeamObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UTeamObject, PlayerUniqueNetIds);
+}
+
+bool UTeamObject::IsSupportedForNetworking() const
+{
+	return true;
+}
+
+#if UE_WITH_IRIS
+void UTeamObject::RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags)
+{
+	// Build descriptors and allocate PropertyReplicaitonFragments for this object
+	UE::Net::FReplicationFragmentUtil::CreateAndRegisterFragmentsForObject(this, Context, RegistrationFlags);
+}
+#endif // UE_WITH_IRIS
+
+void UTeamObject::SetTeam(const FGameplayTag& NewTeamTag)
+{
+	TeamTag = NewTeamTag;
+}
+
+UTeamObject* UTeamObject::Factory(UObject* Outer,
+                                  const FAVVMPartyProxy& PartyProxy,
+                                  const TArray<TWeakObjectPtr<APlayerState>>& Players)
+{
+	UTeamObject* NewTeam = NewObject<UTeamObject>(Outer);
+	if (!IsValid(NewTeam))
+	{
+		return nullptr;
+	}
+
+	UAVVMOnlineStringParser* OnlineStringParser = FAVVMOnlineModule::GetJsonParser();
+	if (!IsValid(OnlineStringParser))
+	{
+		return nullptr;
+	}
+
+	for (const FString& PlayerConnection : PartyProxy.PlayerConnections)
+	{
+		FAVVMPlayerConnectionProxy OutPlayerProxy;
+		OnlineStringParser->FromString(PlayerConnection, OutPlayerProxy);
+
+		// TODO @gdemers Warning. I am no longer certain that the UniqueNetId would be persistent from lobby to gameplay after the client has travels based on
+		// server configuration. TBD!
+		const auto* SearchResult = Players.FindByPredicate([SearchNetId = OutPlayerProxy.UniqueNetId](const TWeakObjectPtr<APlayerState>& Player)
+		{
+			if (!Player.IsValid())
+			{
+				return false;
+			}
+
+			FUniqueNetIdPtr NetId = Player->GetUniqueId().GetUniqueNetId();
+			if (NetId.IsValid())
+			{
+				return NetId->ToString().Equals(SearchNetId);
+			}
+
+			return false;
+		});
+
+		if (SearchResult != nullptr)
+		{
+			NewTeam->PlayerUniqueNetIds.Add(OutPlayerProxy.UniqueNetId);
+		}
+	}
+
+	return NewTeam;
+}
+
+void UTeamObject::OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds)
+{
+	// TODO @gdemers notify external system of state change.
+}

@@ -22,17 +22,52 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "UObject/Object.h"
 
 #include "TeamObject.generated.h"
 
+#if UE_WITH_IRIS
+#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
+#endif // UE_WITH_IRIS
+
+class APlayerState;
+struct FAVVMPartyProxy;
+
 /**
- * 
+ *	Class description:
+ *
+ *	UTeamObject is a replicated object that encapsulate information about the team composition, and
+ *	allow user actions to be executed on it based on the provided owning id.
  */
-UCLASS()
+UCLASS(BlueprintType, NotBlueprintable)
 class TEAMSAMPLE_API UTeamObject : public UObject
 {
 	GENERATED_BODY()
 
-	
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool IsSupportedForNetworking() const override;
+
+#if UE_WITH_IRIS
+	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context,
+	                                          UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
+#endif // UE_WITH_IRIS
+
+	UFUNCTION(BlueprintCallable)
+	void SetTeam(const FGameplayTag& NewTeamTag);
+
+	static UTeamObject* Factory(UObject* Outer,
+	                            const FAVVMPartyProxy& Party,
+	                            const TArray<TWeakObjectPtr<APlayerState>>& Players);
+
+protected:
+	UFUNCTION()
+	void OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds);
+
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamCompositionChanged")
+	TArray<FString> PlayerUniqueNetIds;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	FGameplayTag TeamTag = FGameplayTag::EmptyTag;
 };
