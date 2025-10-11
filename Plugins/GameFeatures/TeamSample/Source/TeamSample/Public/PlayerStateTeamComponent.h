@@ -50,7 +50,7 @@ public:
 	static UPlayerStateTeamComponent* GetActorComponent(const AActor* NewActor);
 	
 	UFUNCTION(BlueprintCallable)
-	void SetTeam(const UTeamObject* NewTeam);
+	void SetTeam(UTeamObject* NewTeam);
 
 	UFUNCTION(Server, Reliable)
 	void TrySwitchTeam(const FGameplayTag& NewTeamTag);

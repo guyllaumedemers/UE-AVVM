@@ -56,6 +56,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetTeam(const FGameplayTag& NewTeamTag);
+	
+	UFUNCTION(BlueprintCallable)
+	void RegisterPlayer(const APlayerState* NewPlayer, const FString& NewPlayerUniqueNetId);
 
 	static UTeamObject* Factory(UObject* Outer,
 	                            const FAVVMPartyProxy& Party,

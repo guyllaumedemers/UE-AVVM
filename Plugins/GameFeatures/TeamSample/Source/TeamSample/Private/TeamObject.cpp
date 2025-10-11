@@ -51,6 +51,17 @@ void UTeamObject::SetTeam(const FGameplayTag& NewTeamTag)
 	TeamTag = NewTeamTag;
 }
 
+void UTeamObject::RegisterPlayer(const APlayerState* NewPlayer, const FString& NewPlayerUniqueNetId)
+{
+	PlayerUniqueNetIds.AddUnique(NewPlayerUniqueNetId);
+	
+	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayer);
+	if (IsValid(TeamComponent))
+	{
+		TeamComponent->SetTeam(this);
+	}
+}
+
 UTeamObject* UTeamObject::Factory(UObject* Outer,
                                   const FAVVMPartyProxy& PartyProxy,
                                   const TArray<TWeakObjectPtr<APlayerState>>& Players)
@@ -92,7 +103,7 @@ UTeamObject* UTeamObject::Factory(UObject* Outer,
 
 		if (SearchResult != nullptr)
 		{
-			NewTeam->PlayerUniqueNetIds.Add(OutPlayerProxy.UniqueNetId);
+			NewTeam->RegisterPlayer(SearchResult->Get(), OutPlayerProxy.UniqueNetId);
 		}
 	}
 

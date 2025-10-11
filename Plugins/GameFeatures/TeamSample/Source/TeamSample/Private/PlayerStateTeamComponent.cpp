@@ -81,8 +81,10 @@ UPlayerStateTeamComponent* UPlayerStateTeamComponent::GetActorComponent(const AA
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UPlayerStateTeamComponent>() : nullptr;
 }
 
-void UPlayerStateTeamComponent::SetTeam(const UTeamObject* NewTeam)
+void UPlayerStateTeamComponent::SetTeam(UTeamObject* NewTeam)
 {
+	// TODO @gdemers add registration to delegate on the UTeamObject to respond to events such as
+	// votes, request to swap team, etc...
 	OwningTeam = NewTeam;
 }
 
