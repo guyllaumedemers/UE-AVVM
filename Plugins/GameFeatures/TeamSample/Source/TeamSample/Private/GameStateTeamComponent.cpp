@@ -160,11 +160,6 @@ void UGameStateTeamComponent::GetBackendTeams(const FOnBackendTeamRequestComplet
 	}
 }
 
-void UGameStateTeamComponent::OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams)
-{
-	OnReplicatedTeamChanged.Broadcast(Teams, OldTeams);
-}
-
 void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
                                              const TArray<FAVVMPartyProxy>& NewParties)
 {
@@ -201,4 +196,9 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 
 		Teams.Add(TeamObject);
 	}
+}
+
+void UGameStateTeamComponent::OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams)
+{
+	OnReplicatedTeamChanged.Broadcast(Teams, OldTeams);
 }

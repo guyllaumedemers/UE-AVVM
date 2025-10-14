@@ -72,10 +72,10 @@ protected:
 	void BP_RequestGameSesionParties(const FName SessionName, const FOnBackendTeamRequestCompleteDelegate& Callback);
 
 	UFUNCTION()
-	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
+	void OnTeamReceived(const bool bWasSuccess, const TArray<FAVVMPartyProxy>& NewParties);
 
 	UFUNCTION()
-	void OnTeamReceived(const bool bWasSuccess, const TArray<FAVVMPartyProxy>& NewParties);
+	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
