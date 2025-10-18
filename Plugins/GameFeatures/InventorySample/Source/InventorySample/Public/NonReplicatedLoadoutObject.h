@@ -34,7 +34,7 @@ class UItemObject;
 /**
  *	Class description:
  *
- *	UNonReplicatedLoadoutObject is a strategy UObject that define the behaviour of a user loadout, and manage
+ *	UNonReplicatedLoadoutObject is a system UObject that define the behaviour of a user loadout, and manage
  *	items 'equip' state.
  *
  *	Note : AI may extend this for more advance combat feature, so in-combat behaviour can change
