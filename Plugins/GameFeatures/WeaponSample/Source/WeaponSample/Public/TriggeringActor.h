@@ -79,6 +79,7 @@ public:
 
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 
 protected:
 	void RegisterAbility();

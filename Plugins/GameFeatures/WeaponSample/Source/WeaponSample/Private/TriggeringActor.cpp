@@ -64,11 +64,6 @@ void ATriggeringActor::BeginPlay()
 	if (bShouldAsyncLoadOnBeginPlay && HasAuthority())
 	{
 		Swap(true);
-
-		if (IsValid(ResourceManagerComponent))
-		{
-			ResourceManagerComponent->RequestAsyncLoading(TriggeringDefinitionId, {});
-		}
 	}
 #endif
 }
@@ -110,6 +105,11 @@ void ATriggeringActor::Swap_Implementation(const bool bIsActive)
 UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const
 {
 	return ResourceManagerComponent;
+}
+
+TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionResourceIds_Implementation() const
+{
+	return {TriggeringDefinitionId};
 }
 
 void ATriggeringActor::RegisterAbility()
