@@ -20,12 +20,14 @@
 #include "AVVMCharacter.h"
 
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Resources/AVVMResourceManagerComponent.h"
 
 AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
 	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("ASC"));
-
+	
 	bReplicates = true;
 }
 
@@ -47,4 +49,14 @@ void AAVVMCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionResourceIds_Implementation() const
+{
+	return {ActorDefinitionId};
+}
+
+UAVVMResourceManagerComponent* AAVVMCharacter::GetResourceManagerComponent_Implementation() const
+{
+	return ResourceManagerComponent;
 }

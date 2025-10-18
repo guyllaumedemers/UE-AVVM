@@ -24,6 +24,7 @@
 #include "AbilitySystemInterface.h"
 #include "DataRegistryId.h"
 #include "ModularCharacter.h"
+#include "Resources/AVVMResourceProvider.h"
 
 #include "AVVMCharacter.generated.h"
 
@@ -35,7 +36,8 @@ class UAVVMAbilitySystemComponent;
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
-                                        public IAbilitySystemInterface
+                                        public IAbilitySystemInterface,
+                                        public IAVVMResourceProvider
 {
 	GENERATED_BODY()
 
@@ -48,6 +50,10 @@ public:
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// IAVVMResourceProvider
+	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
+	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
+
 protected:
 	// @gdemers ActorDefinition allow Actor class overrides, so the ACharacter hierarchy could be
 	// replaced at runtime if setup correctly to support character swapping.
@@ -56,4 +62,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
+
+	// @gdemers Resource Component handle initialization of our Character.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 };
