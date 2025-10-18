@@ -19,11 +19,13 @@
 //SOFTWARE.
 #include "AVVMPlayerState.h"
 
-#include "AbilitySystemComponent.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 
 AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("ASC"));
+	
 	bReplicates = true;
 }
 
@@ -35,14 +37,11 @@ void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void AAVVMPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	AbilitySystemComponent = GetComponentByClass<UAbilitySystemComponent>();
 }
 
 void AAVVMPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	AbilitySystemComponent.Reset();
 }
 
 void AAVVMPlayerState::ClientInitialize(class AController* C)
@@ -60,5 +59,5 @@ void AAVVMPlayerState::ClientInitialize(class AController* C)
 
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
 {
-	return AbilitySystemComponent.Get();
+	return AbilitySystemComponent;
 }

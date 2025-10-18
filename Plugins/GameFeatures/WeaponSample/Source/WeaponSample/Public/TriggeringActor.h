@@ -111,7 +111,7 @@ protected:
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
 };

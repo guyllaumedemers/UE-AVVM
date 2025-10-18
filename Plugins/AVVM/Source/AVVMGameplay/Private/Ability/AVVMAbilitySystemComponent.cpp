@@ -58,6 +58,10 @@ void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	{
 		ClearAbility(AbilitySpecHandle);
 	}
+	
+	AbilityHandleSystem.Reset();
+	AttributeSetHandle.Reset();
+	AbilitySpecHandles.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -120,6 +124,40 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 		TSharedPtr<FStreamableHandle>& OutResult = AbilityHandleSystem.FindOrAdd(Token.UniqueId);
 		OutResult = UAssetManager::Get().LoadAssetList(DeferredGrantedAbilities, Callback);
 	}
+}
+
+void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath)
+{
+	const auto OnAsyncRequestComplete = [](const TWeakObjectPtr<UAVVMAbilitySystemComponent>& Caller)
+	{
+		UAVVMAbilitySystemComponent* ASC = Caller.Get();
+		if (!IsValid(ASC))
+		{
+			return;
+		}
+
+		TSharedPtr<FStreamableHandle> StreamableHandle = ASC->AttributeSetHandle;
+		if (!StreamableHandle.IsValid())
+		{
+			return;
+		}
+
+		TArray<UObject*> OutResources;
+		StreamableHandle->GetLoadedAssets(OutResources);
+
+		for (UObject* Resource : OutResources)
+		{
+			auto* AttributeSetClass = Cast<UClass>(Resource);
+			if (IsValid(AttributeSetClass))
+			{
+				ASC->GetOrCreateAttributeSubobject(AttributeSetClass);
+			}
+		}
+	};
+
+	FStreamableDelegate Callback;
+	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this));
+	AttributeSetHandle = UAssetManager::Get().LoadAssetList({AttributeSetSoftObjectPath}, Callback);
 }
 
 void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken AbilityToken)

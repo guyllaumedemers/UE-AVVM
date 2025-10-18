@@ -23,6 +23,7 @@
 #include "ActorInteractionComponent.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "GameFramework/PlayerController.h"
@@ -91,8 +92,8 @@ void UPlayerInteractionAbilityBase::PreActivate(const FGameplayAbilitySpecHandle
 {
 	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
 
-	const AActor* EffectCauser = UAVVMAbilityUtils::GetEffectCauser((ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr,
-	                                                                GEQueryTags);
+	const auto* ASC = (ActorInfo != nullptr) ? Cast<UAVVMAbilitySystemComponent>(ActorInfo->AbilitySystemComponent.Get()) : nullptr;
+	const AActor* EffectCauser = UAVVMAbilityUtils::GetEffectCauser(ASC, GEQueryTags);
 	if (IsValid(EffectCauser))
 	{
 		TargetComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();

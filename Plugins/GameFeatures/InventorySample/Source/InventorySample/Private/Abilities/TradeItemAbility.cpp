@@ -21,6 +21,7 @@
 
 #include "AVVMGameplayUtils.h"
 #include "InventorySample.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "GameFramework/PlayerController.h"
@@ -101,8 +102,9 @@ void UTradeItemAbility::PreActivate(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
 
-	const AActor* EffectCauser = UAVVMAbilityUtils::GetEffectCauser((ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr,
-	                                                                GEQueryTags);
+	// TODO @gdemers Unfinished. Complete though later!
+	const auto* ASC = (ActorInfo != nullptr) ? Cast<UAVVMAbilitySystemComponent>(ActorInfo->AbilitySystemComponent.Get()) : nullptr;
+	const AActor* EffectCauser = UAVVMAbilityUtils::GetEffectCauser(ASC, GEQueryTags);
 	// if (IsValid(EffectCauser))
 	// {
 	// 	TargetComponent = EffectCauser->GetComponentByClass<UActorInteractionComponent>();

@@ -27,6 +27,7 @@
 #include "AVVMAbilityUtils.generated.h"
 
 class UAbilitySystemComponent;
+class UAVVMAbilitySystemComponent;
 
 /**
  *	Class Description :
@@ -40,9 +41,9 @@ class AVVMGAMEPLAY_API UAVVMAbilityUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static const AActor* GetEffectCauser(const UAbilitySystemComponent* NewAbilitySystemComponent,
+	static const AActor* GetEffectCauser(const UAVVMAbilitySystemComponent* NewAbilitySystemComponent,
 	const FGameplayTagContainer& NewGEQueryTags);
 
 	UFUNCTION(BlueprintCallable)
-	static UAbilitySystemComponent* GetAbilitySystemComponent(const AActor* NewActor);
+	static UAVVMAbilitySystemComponent* GetAbilitySystemComponent(const AActor* NewActor);
 };

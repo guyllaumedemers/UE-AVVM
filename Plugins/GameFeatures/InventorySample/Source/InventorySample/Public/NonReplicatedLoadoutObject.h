@@ -21,14 +21,14 @@
 
 #include "CoreMinimal.h"
 
+#include "ExecutionContextParams.h"
+#include "ExecutionContextRule.h"
 #include "GameplayTagContainer.h"
 #include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "NonReplicatedLoadoutObject.generated.h"
 
-struct FExecutionContextParams;
-struct FExecutionContextRule;
 class UItemObject;
 
 /**

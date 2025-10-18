@@ -63,6 +63,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void SetupAbilities(const TArray<UObject*>& Resources);
+	void SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath);
 
 protected:
 	UFUNCTION()
@@ -77,4 +78,5 @@ protected:
 	TArray<FGameplayAbilitySpecHandle> AbilitySpecHandles;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
+	TSharedPtr<FStreamableHandle> AttributeSetHandle = nullptr;
 };

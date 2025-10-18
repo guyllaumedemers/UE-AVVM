@@ -108,7 +108,9 @@ protected:
 	                    UItemObject* NewItem);
 
 	UFUNCTION()
-	void OnItemActorClassRetrieved(const UClass* NewActorClass, UItemObject* NewItemObject);
+	void OnItemActorClassRetrieved(const UClass* NewActorClass,
+	                               const FSoftObjectPath& NewActorAttributeSetSoftObjectPath,
+	                               UItemObject* NewItemObject);
 	
 	UFUNCTION()
 	void OnLoadoutObjectRetrieved();

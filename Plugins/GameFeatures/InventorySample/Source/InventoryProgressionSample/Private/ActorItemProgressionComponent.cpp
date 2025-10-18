@@ -20,10 +20,10 @@
 #include "ActorItemProgressionComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
 #include "AVVMGameplayUtils.h"
 #include "InventoryProgressionSample.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Data/ItemProgressionDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "ProfilingDebugging/CountersTrace.h"
@@ -74,7 +74,7 @@ void UActorItemProgressionComponent::EndPlay(const EEndPlayReason::Type EndPlayR
 	       *UActorItemProgressionComponent::StaticClass()->GetName(),
 	       *Outer->GetName());
 
-	auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Outer);
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Outer);
 	if (IsValid(ASC))
 	{
 		for (auto Iterator = ActiveGameplayEffectHandles.CreateIterator(); Iterator; ++Iterator)
@@ -176,7 +176,7 @@ void UActorItemProgressionComponent::OnProgressionStackingEffectsRetrieved()
 	TArray<UObject*> OutStreamableAssets;
 	ItemProgressionEffectsHandle->GetLoadedAssets(OutStreamableAssets);
 
-	auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Outer);
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Outer);
 	if (!IsValid(ASC))
 	{
 		return;
