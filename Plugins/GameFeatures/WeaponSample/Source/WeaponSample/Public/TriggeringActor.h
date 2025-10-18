@@ -31,6 +31,7 @@
 
 class ATriggeringAttachmentActor;
 class UAttachmentManagerComponent;
+class UAVVMAbilitySystemComponent;
 class UAVVMResourceManagerComponent;
 class UProjectileComponent;
 class USkeletalMeshComponent;
@@ -103,6 +104,9 @@ protected:
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UProjectileComponent> ProjectileComponent = nullptr;
+
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
