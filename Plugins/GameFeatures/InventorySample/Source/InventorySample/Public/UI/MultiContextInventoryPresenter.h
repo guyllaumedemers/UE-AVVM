@@ -29,7 +29,7 @@
 
 #include "MultiContextInventoryPresenter.generated.h"
 
-class UAbilitySystemComponent;
+class UAVVMAbilitySystemComponent;
 
 /**
  *	Class description:
@@ -62,7 +62,7 @@ protected:
 	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<UAbilitySystemComponent> OwnerASC = nullptr;
+	TWeakObjectPtr<UAVVMAbilitySystemComponent> OwnerASC = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Target is whomever interacted with the Outer and request Start/Stop Presenting. Most-likely a Player."))
 	TWeakObjectPtr<const AActor> Target = nullptr;

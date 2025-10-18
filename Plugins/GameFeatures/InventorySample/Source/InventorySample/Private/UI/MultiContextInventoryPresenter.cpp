@@ -19,11 +19,11 @@
 //SOFTWARE.
 #include "UI/MultiContextInventoryPresenter.h"
 
-#include "AbilitySystemComponent.h"
 #include "AVVM.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "UI/MultiContextInventoryViewModel.h"
 

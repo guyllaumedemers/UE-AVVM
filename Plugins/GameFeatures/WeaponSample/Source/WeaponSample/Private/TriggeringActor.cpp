@@ -19,12 +19,12 @@
 //SOFTWARE.
 #include "TriggeringActor.h"
 
-#include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
 #include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "ProjectileComponent.h"
 #include "WeaponSample.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/AssetManager.h"
@@ -43,7 +43,7 @@ void ATriggeringActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const auto* Outer = GetTypedOuter<AActor>();
+	auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -125,7 +125,7 @@ void ATriggeringActor::UnRegisterAbility()
 		return;
 	}
 
-	auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningOuter.Get());
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
 	if (IsValid(ASC))
 	{
 		ASC->ClearAbility(TriggeringAbilitySpecHandle);
@@ -134,7 +134,7 @@ void ATriggeringActor::UnRegisterAbility()
 
 void ATriggeringActor::OnSoftObjectAcquired()
 {
-	auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningOuter.Get());
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
 	if (!TriggeringAbilityClassHandle.IsValid() || !ensureAlwaysMsgf(IsValid(ASC),
 	                                                                 TEXT("Owning Outer missing valid ASC.")))
 	{

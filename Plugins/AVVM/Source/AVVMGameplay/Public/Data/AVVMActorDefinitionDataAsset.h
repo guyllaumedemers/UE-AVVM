@@ -31,6 +31,8 @@
 
 #include "AVVMActorDefinitionDataAsset.generated.h"
 
+class UAttributeSet;
+
 /**
  *	Class description:
  *
@@ -50,6 +52,9 @@ public:
 	const FSoftObjectPath& GetActorSoftObjectPath() const;
 
 	UFUNCTION(BlueprintCallable)
+	const FSoftObjectPath& GetActorAttributeSetSoftObjectPath() const;
+
+	UFUNCTION(BlueprintCallable)
 	TArray<FDataRegistryId> GetActorTraitIds() const;
 
 protected:
@@ -59,7 +64,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActorOverride"))
 	TSoftClassPtr<AActor> OverrideActorClass = nullptr;
 
-	// TODO BEGIN @gdemers Refactor this -- I no longer believe it fits with how the inventory system handle progression. MOve this into a ActorTraitsDefinition
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportPassiveAbilities = true;
 
@@ -71,7 +75,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
 	TArray<FDataRegistryId> ActiveAbilityGroupIds;
-	// TODO END
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	bool bDoesSupportAttributeSet = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportAttributeSet"))
+	TSoftClassPtr<UAttributeSet> ActorAttributeSet = nullptr;
 };
 
 /**

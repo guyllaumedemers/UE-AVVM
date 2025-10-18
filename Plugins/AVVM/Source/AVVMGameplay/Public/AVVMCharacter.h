@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -22,44 +22,38 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
-#include "AVVMQuicktimeEventInterface.h"
-#include "ModularPlayerState.h"
+#include "DataRegistryId.h"
+#include "ModularCharacter.h"
 
-#include "AVVMPlayerState.generated.h"
+#include "AVVMCharacter.generated.h"
 
 class UAVVMAbilitySystemComponent;
 
 /**
  *	Class description:
  *
- *	AAVVMPlayerState is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
- *	
- *	IMPORTANT : Replicated systems SHOULD BE managed through a component added via GFP. Unreal's USubsystem derived classes CANNOT be replicated! Doing this approach makes for a more modular system
- *	due to component addition and removal no longer requiring hard references in the Actor derived class.
- *
- *	Note : for your UI systems. We expect to push an AVVMComponent with a pre-defined list of UAVVMPresenter class on it! Additionally, by implementing IAVVMQuicktimeEventPlayerStateInterface base
- *	api, you will be able to forward gameplay information without creating dependencies between modules. However, it comes with a price due to interface dispatch!
  */
 UCLASS()
-class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
-                                          public IAbilitySystemInterface,
-                                          public IAVVMQuicktimeEventPlayerStateInterface
+class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
+                                        public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
-	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
+	AAVVMCharacter(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	virtual void ClientInitialize(class AController* C) override;
-
-	// @gdemers PlayerState is the preferred place to host the ASC as OnPawnPosses can be used to modify the internal state of the
-	// ASC (good for state persistency between Pawn possession!).
+	
+	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
+	// @gdemers ActorDefinition allow Actor class overrides, so the ACharacter hierarchy could be
+	// replaced at runtime if setup correctly to support character swapping.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
+	FDataRegistryId ActorDefinitionId = FDataRegistryId();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
 };

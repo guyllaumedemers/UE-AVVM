@@ -23,7 +23,6 @@
 
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularGameState.h"
-#include "GameFramework/Info.h"
 
 #include "AVVMGameState.generated.h"
 

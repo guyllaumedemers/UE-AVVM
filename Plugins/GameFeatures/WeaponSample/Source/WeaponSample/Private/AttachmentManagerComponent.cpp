@@ -19,11 +19,12 @@
 //SOFTWARE.
 #include "AttachmentManagerComponent.h"
 
-#include "AbilitySystemGlobals.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMScopedDelegate.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
@@ -317,7 +318,7 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentModi
 	if (ensureAlwaysMsgf(IsValid(Controller), TEXT("GetTypedOuter doesn't refer to any Controller derived type!")))
 	{
 		auto* ASCHolder = IsValid(Controller->PlayerState) ? Cast<AActor>(Controller->PlayerState) : Cast<AActor>(Controller);
-		auto* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(ASCHolder);
+		auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ASCHolder);
 		AttachmentActor->RegisterGameplayEffects(ASC, OutStreamableAssets);
 	}
 }

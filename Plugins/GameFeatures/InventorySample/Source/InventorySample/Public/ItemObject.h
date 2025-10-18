@@ -34,10 +34,11 @@
 
 #include "ItemObject.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, class UItemObject*, NewItemObject);
+class UAttributeSet;
+class UItemObject;
 
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, const FSoftObjectPath&, NewActorAttributeSetSoftObjectPath, UItemObject*, NewItemObject);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeStateChanged, const FGameplayTagContainer&, NewState);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeCountChanged, const int32, NewState);
 
 /**
@@ -141,7 +142,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback);
+	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath);
 
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);

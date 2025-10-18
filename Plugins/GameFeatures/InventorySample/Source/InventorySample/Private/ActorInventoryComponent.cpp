@@ -19,15 +19,17 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 
+#include "ActorItemProgressionComponent.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMScopedDelegate.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "InventoryProvider.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
-#include "ActorItemProgressionComponent.h"
-#include "AVVMScopedDelegate.h"
 #include "NonReplicatedLoadoutObject.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -453,7 +455,9 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 	}
 }
 
-void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorClass, UItemObject* NewItemObject)
+void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorClass,
+                                                         const FSoftObjectPath& NewActorAttributeSetSoftObjectPath,
+                                                         UItemObject* NewItemObject)
 {
 	const auto ScopedSafety = [](TSharedPtr<FItemSpawnerQueuingMechanism> NewQueueingMechanism)
 	{
@@ -480,6 +484,7 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		return;
 	}
 
+	// @gdemers handle actor creation.
 	AActor* ItemActor = NewItemObject->SpawnActorClass(NewActorClass, const_cast<AActor*>(Outer));
 	if (!ensureAlwaysMsgf(IsValid(ItemActor),
 	                      TEXT("Failed to Spawn UItemObject Actor representation in World.")))
@@ -487,6 +492,23 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		return;
 	}
 
+	// @gdemers handle actor data initialization via AttributeSet. Note : In some cases, Actor type such as
+	// projectile will not be bound to an ASC and have data provided from DT or backend .csv file.
+	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ItemActor);
+	if (IsValid(ASC))
+	{
+		ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath);
+	}
+
+	// @gdemers early out if the owning actor isnt suppose to inject modifier based on progression, and rely solely on the
+	// AttributeSet configured.
+	const bool bDoesSupportProgression = IInventoryProvider::Execute_DoesSupportProgression(Outer, NewItemObject);
+	if (!bDoesSupportProgression)
+	{
+		return;
+	}
+
+	// @gdemers inject Progression component onto Actor to allow progression overrides of the AttributeSet via GameplayEffects.
 	auto* ItemProgressionComponent = Cast<UActorItemProgressionComponent>(ItemActor->AddComponentByClass(UActorItemProgressionComponent::StaticClass(),
 	                                                                                                     true,
 	                                                                                                     FTransform::Identity,

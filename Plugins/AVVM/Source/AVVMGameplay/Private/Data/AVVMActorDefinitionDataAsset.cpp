@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "Data/AVVMActorDefinitionDataAsset.h"
 
+namespace NSAVVMGlobals
+{
+	FSoftObjectPath EmptySOPath = FSoftObjectPath();
+}
+
 #if WITH_EDITOR
 EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
@@ -35,13 +40,30 @@ EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataVali
 		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActiveAbilityGroupId invalid!"));
 	}
 
+	if (bDoesSupportActorOverride && OverrideActorClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "OverrideActorClass invalid!"));
+	}
+
+	if (bDoesSupportAttributeSet && ActorAttributeSet.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMActorDefinitionDataAsset", "", "ActorAttributeSet invalid!"));
+	}
+
 	return Result;
 }
 #endif
 
 const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorSoftObjectPath() const
 {
-	return OverrideActorClass.ToSoftObjectPath();
+	return bDoesSupportActorOverride ? OverrideActorClass.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
+}
+
+const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorAttributeSetSoftObjectPath() const
+{
+	return bDoesSupportAttributeSet ? ActorAttributeSet.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
 }
 
 TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const

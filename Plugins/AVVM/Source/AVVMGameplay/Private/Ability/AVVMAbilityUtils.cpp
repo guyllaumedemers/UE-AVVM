@@ -20,11 +20,13 @@
 #include "Ability/AVVMAbilityUtils.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "AbilitySystemInterface.h"
 #include "AVVMUtilityFunctionLibrary.h"
 #include "GameplayEffect.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 
-const AActor* UAVVMAbilityUtils::GetEffectCauser(const UAbilitySystemComponent* NewAbilitySystemComponent,
+const AActor* UAVVMAbilityUtils::GetEffectCauser(const UAVVMAbilitySystemComponent* NewAbilitySystemComponent,
                                                  const FGameplayTagContainer& NewGEQueryTags)
 {
 	if (!IsValid(NewAbilitySystemComponent))
@@ -51,14 +53,14 @@ const AActor* UAVVMAbilityUtils::GetEffectCauser(const UAbilitySystemComponent* 
 	return GECtx.GetEffectCauser();
 }
 
-UAbilitySystemComponent* UAVVMAbilityUtils::GetAbilitySystemComponent(const AActor* NewActor)
+UAVVMAbilitySystemComponent* UAVVMAbilityUtils::GetAbilitySystemComponent(const AActor* NewActor)
 {
 	auto ASCInterface = TScriptInterface<const IAbilitySystemInterface>(NewActor);
 
 	const bool bDoesActorImplements = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(ASCInterface);
 	if (bDoesActorImplements)
 	{
-		return ASCInterface->GetAbilitySystemComponent();
+		return Cast<UAVVMAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(NewActor));
 	}
 
 	return nullptr;
