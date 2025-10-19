@@ -1127,7 +1127,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 	PlayerConnectionProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	PlayerConnectionProxy.UniqueNetId = JsonData->GetStringField(TEXT("UniqueNetId"));
 	PlayerConnectionProxy.PlayerStatus = StaticCast<EAVVMPlayerStatus>(JsonData->GetIntegerField(TEXT("PlayerStatus")));
-	PlayerConnectionProxy.Profile = JsonData->GetStringField(TEXT("District"));
+	PlayerConnectionProxy.Profile = JsonData->GetStringField(TEXT("Profile"));
 
 	OutPlayerConnectionProxy = PlayerConnectionProxy;
 }
