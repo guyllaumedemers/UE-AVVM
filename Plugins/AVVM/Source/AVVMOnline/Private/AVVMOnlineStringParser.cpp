@@ -583,7 +583,7 @@ void UAVVMOnlineStringParser::ToString(const FAVVMParty& NewParty,
 	JsonData->SetNumberField(TEXT("RegionId"), NewParty.RegionId);
 	JsonData->SetNumberField(TEXT("DistrictId"), NewParty.DistrictId);
 	JsonData->SetNumberField(TEXT("HostConfigurationId"), NewParty.HostConfigurationId);
-	JsonData->SetArrayField(TEXT("PlayerConnections"), PlayerConnectionIds);
+	JsonData->SetArrayField(TEXT("PlayerConnectionIds"), PlayerConnectionIds);
 
 	FString JsonOutput;
 
