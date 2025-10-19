@@ -68,12 +68,12 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 	const auto* ModifiedHostConfiguration = Payload.GetPtr<FAVVMHostConfigurationProxy>();
 	if (ModifiedHostConfiguration != nullptr)
 	{
-		UE_LOG(LogOnline, Log, TEXT("Commit Modified Host Configuration Request. In-Progress..."));
+		UE_LOG(LogAVVMOnline, Log, TEXT("Commit Modified Host Configuration Request. In-Progress..."));
 		OnlineInterface->CommitModifiedHostConfiguration(*ModifiedHostConfiguration, Callback);
 	}
 	else
 	{
-		UE_LOG(LogOnline, Log, TEXT("Commit Empty Host Configuration Request. In-Progress..."));
+		UE_LOG(LogAVVMOnline, Log, TEXT("Commit Empty Host Configuration Request. In-Progress..."));
 		OnlineInterface->CommitModifiedHostConfiguration(FAVVMHostConfigurationProxy{}, Callback);
 	}
 }
@@ -90,20 +90,20 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostCon
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMHostConfigurationPresenter::OnForcePullHostConfigurationCompleted);
 
-	UE_LOG(LogOnline, Log, TEXT("Force Pull Host Configuration Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Force Pull Host Configuration Request. In-Progress..."));
 	OnlineInterface->ForcePullHostConfiguration(Callback);
 }
 
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_RemoteRefreshHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Remote Refresh Host Configuration Request. Execute..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Remote Refresh Host Configuration Request. Execute..."));
 	SetHostConfiguration(Payload);
 }
 
 void UAVVMHostConfigurationPresenter::SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	// @gdemers additional data could be defined to properly log output here!
-	UE_LOG(LogOnline, Log, TEXT("Updating local Host Configuration!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Updating local Host Configuration!"));
 
 	auto* HostConfigurationViewModel = Cast<UAVVMHostConfigurationViewModel>(ViewModel.Get());
 	if (IsValid(HostConfigurationViewModel))
@@ -130,7 +130,7 @@ void UAVVMHostConfigurationPresenter::StopPresenting()
 void UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted(const bool bWasSuccess,
                                                                                  const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Commit Modified Host Configuration Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Commit Modified Host Configuration Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update host configuration onSuccess
@@ -148,7 +148,7 @@ void UAVVMHostConfigurationPresenter::OnCommitModifiedHostConfigurationCompleted
 void UAVVMHostConfigurationPresenter::OnForcePullHostConfigurationCompleted(const bool bWasSuccess,
                                                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Force Pull Host Configuration Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Force Pull Host Configuration Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update host configuration onSuccess

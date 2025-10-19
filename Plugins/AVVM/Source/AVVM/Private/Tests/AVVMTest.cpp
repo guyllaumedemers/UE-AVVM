@@ -17,6 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Misc/AutomationTest.h"
 
 #include "AVVMAutomatedTestActor.h"
 #include "AVVMAutomatedTestPresenter.h"
@@ -24,7 +25,6 @@
 #include "AVVMSubsystem.h"
 #include "NativeGameplayTags.h"
 #include "Archetypes/AVVMPresenter.h"
-#include "Misc/AutomationTest.h"
 
 #if WITH_EDITOR && WITH_AUTOMATION_TESTS
 #include "Tests/AutomationEditorCommon.h"

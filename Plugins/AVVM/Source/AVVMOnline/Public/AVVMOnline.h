@@ -29,7 +29,7 @@
 
 class UAVVMOnlineStringParser;
 
-AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogOnline, Log, All);
+AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogAVVMOnline, Log, All);
 
 /**
  *	Plugin Description :

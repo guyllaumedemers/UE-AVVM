@@ -49,7 +49,7 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RefreshAllPlayers(co
 	// @gdemers event received post-join of a party and where we expect to initialize all player representation
 	// and create player states which own a AVVMComponent/AVVMPlayerConfigurationPresenter.
 	BP_RefreshPlayers(Payload);
-	UE_LOG(LogOnline, Log, TEXT("[Local] Refreshing all Players Visual representation!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("[Local] Refreshing all Players Visual representation!"));
 	SetPlayerConnections(Payload);
 }
 
@@ -57,7 +57,7 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteConnectNewPlay
 {
 	// @gdemers call to external system which create a static representation of a player or does something similar.
 	BP_ConnectPlayer(Payload);
-	UE_LOG(LogOnline, Log, TEXT("[Remote] Adding new Player Connection!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("[Remote] Adding new Player Connection!"));
 	SetPlayerConnections(Payload);
 }
 
@@ -65,13 +65,13 @@ void UAVVMPlayerManagerPresenter::BP_OnNotificationReceived_RemoteDisconnectPlay
 {
 	// @gdemers call to external system which destroy a static representation of a player or does something similar.
 	BP_DisconnectPlayer(Payload);
-	UE_LOG(LogOnline, Log, TEXT("[Remote] Removing existing Player Connection!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("[Remote] Removing existing Player Connection!"));
 	SetPlayerConnections(Payload);
 }
 
 void UAVVMPlayerManagerPresenter::SetPlayerConnections(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Updating Player Connections!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Updating Player Connections!"));
 
 	auto* PlayerManagerViewModel = Cast<UAVVMPlayerManagerViewModel>(ViewModel.Get());
 	if (IsValid(PlayerManagerViewModel))

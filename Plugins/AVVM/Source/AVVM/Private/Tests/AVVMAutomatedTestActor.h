@@ -92,7 +92,9 @@ private:
 };
 
 /**
- * 
+ *	Class description:
+ *
+ *	UAVVMAutomatedTestUtils is a blueprint function library for Automated test.
  */
 UCLASS()
 class UAVVMAutomatedTestUtils : public UBlueprintFunctionLibrary

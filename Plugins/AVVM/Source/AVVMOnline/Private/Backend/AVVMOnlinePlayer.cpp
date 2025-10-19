@@ -26,6 +26,11 @@ bool FAVVMPlayerLoginContext::operator==(const FAVVMPlayerLoginContext& Rhs) con
 			&& (Password.Equals(Rhs.Password));
 }
 
+bool FAVVMPlayerLoginContext::operator!=(const FAVVMPlayerLoginContext& Rhs) const
+{
+	return !(*this == Rhs);
+}
+
 bool FAVVMPlayerAccount::operator==(const FAVVMPlayerAccount& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
@@ -36,16 +41,31 @@ bool FAVVMPlayerAccount::operator==(const FAVVMPlayerAccount& Rhs) const
 			&& (PresetIds == Rhs.PresetIds);
 }
 
+bool FAVVMPlayerAccount::operator!=(const FAVVMPlayerAccount& Rhs) const
+{
+	return !(*this == Rhs);
+}
+
 bool FAVVMPlayerWallet::operator==(const FAVVMPlayerWallet& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (IrlMoneys == Rhs.IrlMoneys);
 }
 
+bool FAVVMPlayerWallet::operator!=(const FAVVMPlayerWallet& Rhs) const
+{
+	return !(*this == Rhs);
+}
+
 bool FAVVMCurrency::operator==(const FAVVMCurrency& Rhs) const
 {
 	return (CurrencyId.Equals(Rhs.CurrencyId))
 			&& (TotalAmount == Rhs.TotalAmount);
+}
+
+bool FAVVMCurrency::operator!=(const FAVVMCurrency& Rhs) const
+{
+	return !(*this == Rhs);
 }
 
 bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
@@ -58,11 +78,21 @@ bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 			&& (EquippedPresetId == Rhs.EquippedPresetId);
 }
 
+bool FAVVMPlayerProfile::operator!=(const FAVVMPlayerProfile& Rhs) const
+{
+	return !(*this == Rhs);
+}
+
 bool FAVVMPlayerPreset::operator==(const FAVVMPlayerPreset& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (PresetId.Equals(Rhs.PresetId))
 			&& (EquippedItems == Rhs.EquippedItems);
+}
+
+bool FAVVMPlayerPreset::operator!=(const FAVVMPlayerPreset& Rhs) const
+{
+	return !(*this == Rhs);
 }
 
 bool FAVVMPlayerResource::operator==(const FAVVMPlayerResource& Rhs) const
@@ -71,10 +101,20 @@ bool FAVVMPlayerResource::operator==(const FAVVMPlayerResource& Rhs) const
 			&& (ResourceId.Equals(Rhs.ResourceId));
 }
 
+bool FAVVMPlayerResource::operator!=(const FAVVMPlayerResource& Rhs) const
+{
+	return !(*this == Rhs);
+}
+
 bool FAVVMPlayerChallenge::operator==(const FAVVMPlayerChallenge& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ChallengeId.Equals(Rhs.ChallengeId));
+}
+
+bool FAVVMPlayerChallenge::operator!=(const FAVVMPlayerChallenge& Rhs) const
+{
+	return !(*this == Rhs);
 }
 
 bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
@@ -87,12 +127,22 @@ bool FAVVMParty::operator==(const FAVVMParty& Rhs) const
 			&& (PlayerConnectionIds == Rhs.PlayerConnectionIds);
 }
 
+bool FAVVMParty::operator!=(const FAVVMParty& Rhs) const
+{
+	return !(*this == Rhs);
+}
+
 bool FAVVMPlayerConnection::operator==(const FAVVMPlayerConnection& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (UniqueNetId.Equals(Rhs.UniqueNetId))
 			&& (PlayerStatus == Rhs.PlayerStatus)
 			&& (ProfileId == Rhs.ProfileId);
+}
+
+bool FAVVMPlayerConnection::operator!=(const FAVVMPlayerConnection& Rhs) const
+{
+	return !(*this == Rhs);
 }
 
 bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const

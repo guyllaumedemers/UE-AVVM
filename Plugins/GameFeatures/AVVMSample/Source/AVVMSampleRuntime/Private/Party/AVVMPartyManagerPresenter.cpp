@@ -54,7 +54,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(cons
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted);
 
-	UE_LOG(LogOnline, Log, TEXT("Force Pull Parties Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Force Pull Parties Request. In-Progress..."));
 	OnlineInterface->ForcePullParties(Callback);
 }
 
@@ -73,14 +73,14 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 	const auto* Party = Payload.GetPtr<FAVVMPartyProxy>();
 	if (Party != nullptr)
 	{
-		UE_LOG(LogOnline, Log, TEXT("Join Party Request. In-Progress..."));
+		UE_LOG(LogAVVMOnline, Log, TEXT("Join Party Request. In-Progress..."));
 		OnlineInterface->JoinParty(*Party, Callback);
 	}
 	else
 	{
 		// @gdemers joining an empty party imply being in our default state, i.e post-login we make a request
 		// to create a new party.
-		UE_LOG(LogOnline, Log, TEXT("Join Empty Party Request. In-Progress..."));
+		UE_LOG(LogAVVMOnline, Log, TEXT("Join Empty Party Request. In-Progress..."));
 		OnlineInterface->JoinParty(FAVVMPartyProxy{}, Callback);
 	}
 }
@@ -102,12 +102,12 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInst
 	const auto* Party = Payload.GetPtr<FAVVMPartyProxy>();
 	if (Party != nullptr)
 	{
-		UE_LOG(LogOnline, Log, TEXT("Exit Party Request. In-Progress..."));
+		UE_LOG(LogAVVMOnline, Log, TEXT("Exit Party Request. In-Progress..."));
 		OnlineInterface->ExitParty(*Party, Callback);
 	}
 	else
 	{
-		UE_LOG(LogOnline, Log, TEXT("Exit Empty Party Request. In-Progress..."));
+		UE_LOG(LogAVVMOnline, Log, TEXT("Exit Empty Party Request. In-Progress..."));
 		OnlineInterface->ExitParty(FAVVMPartyProxy{}, Callback);
 	}
 }
@@ -121,7 +121,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 	}
 
 	const FString EventTypeString(EnumToString(PlayerRequest->RequestType));
-	UE_LOG(LogOnline,
+	UE_LOG(LogAVVMOnline,
 	       Log,
 	       TEXT("Processing Player Request. Type: %s, In-Progress..."),
 	       *EventTypeString);
@@ -150,7 +150,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ProcessPlayerRequest(
 
 void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Updating local Parties!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Updating local Parties!"));
 
 	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
 	if (IsValid(PartyManagerViewModel))
@@ -161,7 +161,7 @@ void UAVVMPartyManagerPresenter::SetParties(const TInstancedStruct<FAVVMNotifica
 
 void UAVVMPartyManagerPresenter::SetLocalParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Updating local Party!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Updating local Party!"));
 
 	auto* PartyManagerViewModel = Cast<UAVVMPartyManagerViewModel>(ViewModel.Get());
 	if (IsValid(PartyManagerViewModel))
@@ -203,7 +203,7 @@ void UAVVMPartyManagerPresenter::BindViewModel() const
 void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSuccess,
                                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Force Pull Parties Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Force Pull Parties Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update parties onSuccess
@@ -225,7 +225,7 @@ void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSucc
 void UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted(const bool bWasSuccess,
                                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Join Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Join Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update local party onSuccess
@@ -245,7 +245,7 @@ void UAVVMPartyManagerPresenter::OnPartyJoinRequestCompleted(const bool bWasSucc
 void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSuccess,
                                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Exit Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update local party onSuccess
@@ -282,14 +282,14 @@ void UAVVMPartyManagerPresenter::TryKickPlayer(const FAVVMPlayerRequest& PlayerR
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted);
-	UE_LOG(LogOnline, Log, TEXT("Kick Player from Party Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Kick Player from Party Request. In-Progress..."));
 	OnlineInterface->KickFromParty(PlayerRequest, Callback);
 }
 
 void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWasSuccess,
                                                                  const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Kick Player from Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Kick Player from Party Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update local party onSuccess
@@ -320,14 +320,14 @@ void UAVVMPartyManagerPresenter::TryMutePlayer(const FAVVMPlayerRequest& PlayerR
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnMutePlayerRequestCompleted);
-	UE_LOG(LogOnline, Log, TEXT("Mute Player Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Mute Player Request. In-Progress..."));
 	OnlineInterface->MutePlayer(PlayerRequest, Callback);
 }
 
 void UAVVMPartyManagerPresenter::OnMutePlayerRequestCompleted(const bool bWasSuccess,
                                                               const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Mute Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Mute Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers we should notify any messaging system presenter to add a visual feedback for muted player
@@ -350,14 +350,14 @@ void UAVVMPartyManagerPresenter::TryCensorPlayer(const FAVVMPlayerRequest& Playe
 
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMPartyManagerPresenter::OnCensorPlayerRequestCompleted);
-	UE_LOG(LogOnline, Log, TEXT("Censor Player Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Censor Player Request. In-Progress..."));
 	OnlineInterface->CensorPlayer(PlayerRequest, Callback);
 }
 
 void UAVVMPartyManagerPresenter::OnCensorPlayerRequestCompleted(const bool bWasSuccess,
                                                                 const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Censor Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Censor Player Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers we should notify any messaging system presenter to add a visual feedback for censored player

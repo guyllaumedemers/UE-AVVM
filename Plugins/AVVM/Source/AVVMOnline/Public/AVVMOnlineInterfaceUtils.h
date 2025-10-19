@@ -150,7 +150,7 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 	auto* Outer = Cast<UObject>(DerivedChild->GetImplementingOuterObject(UInterfaceClass::StaticClass()));
 	if (!ensureAlways(IsValid(Outer)))
 	{
-		UE_LOG(LogOnline,
+		UE_LOG(LogAVVMOnline,
 		       Log,
 		       TEXT("%s doesn't Implement %s"),
 		       *DerivedChild->GetName(),
@@ -164,7 +164,7 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 	const bool bImplement = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(OutInterface);
 	if (!bImplement)
 	{
-		UE_LOG(LogOnline,
+		UE_LOG(LogAVVMOnline,
 		       Log,
 		       TEXT("%s is Null. Does %s implement the interface in Blueprint? If so, Update to support the interface Natively!"),
 		       *UInterfaceClass::StaticClass()->GetName(),
@@ -180,7 +180,7 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
 	if (!IsValid(StringParser))
 	{
-		UE_LOG(LogOnline,
+		UE_LOG(LogAVVMOnline,
 		       Log,
 		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
 
@@ -190,7 +190,7 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 	const auto* Data = Payload.GetPtr<TPayload>();
 	if (!ensureAlways(Data != nullptr))
 	{
-		UE_LOG(LogOnline,
+		UE_LOG(LogAVVMOnline,
 		       Log,
 		       TEXT("TPayload isn't deriving from received type."))
 
@@ -208,7 +208,7 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::Deserializ
 	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
 	if (!IsValid(StringParser))
 	{
-		UE_LOG(LogOnline,
+		UE_LOG(LogAVVMOnline,
 		       Log,
 		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
 

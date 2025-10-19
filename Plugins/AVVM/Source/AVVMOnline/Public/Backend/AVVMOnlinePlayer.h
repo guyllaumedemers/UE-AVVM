@@ -39,6 +39,7 @@ struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerLoginContext& Rhs) const;
+	bool operator!=(const FAVVMPlayerLoginContext& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
@@ -62,6 +63,7 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerAccount& Rhs) const;
+	bool operator!=(const FAVVMPlayerAccount& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
@@ -99,6 +101,7 @@ struct AVVMONLINE_API FAVVMPlayerWallet
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
+	bool operator!=(const FAVVMPlayerWallet& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
@@ -119,6 +122,7 @@ struct AVVMONLINE_API FAVVMCurrency
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMCurrency& Rhs) const;
+	bool operator!=(const FAVVMCurrency& Rhs) const;
 
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -143,6 +147,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
+	bool operator!=(const FAVVMPlayerProfile& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
@@ -183,6 +188,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerPreset& Rhs) const;
+	bool operator!=(const FAVVMPlayerPreset& Rhs) const;
 
 	// @gdemers uniquely identified to allow access between profiles owned by player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -211,6 +217,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerResource& Rhs) const;
+	bool operator!=(const FAVVMPlayerResource& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -235,6 +242,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerChallenge& Rhs) const;
+	bool operator!=(const FAVVMPlayerChallenge& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -288,6 +296,7 @@ struct AVVMONLINE_API FAVVMParty
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMParty& Rhs) const;
+	bool operator!=(const FAVVMParty& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -326,6 +335,7 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 	GENERATED_BODY()
 
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
+	bool operator!=(const FAVVMPlayerConnection& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadOnly)

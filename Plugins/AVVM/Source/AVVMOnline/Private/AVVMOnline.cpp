@@ -24,7 +24,7 @@
 #include "AVVMOnlineStringParser.h"
 #include "Engine.h"
 
-DEFINE_LOG_CATEGORY(LogOnline);
+DEFINE_LOG_CATEGORY(LogAVVMOnline);
 
 TSharedPtr<IConsoleVariable> FAVVMOnlineModule::CVarOnlineRequestReturnedStatus = nullptr;
 TStrongObjectPtr<UAVVMOnlineStringParser> FAVVMOnlineModule::JsonParser = nullptr;

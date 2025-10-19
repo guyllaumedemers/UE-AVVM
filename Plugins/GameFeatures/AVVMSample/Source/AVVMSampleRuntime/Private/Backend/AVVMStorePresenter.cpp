@@ -56,7 +56,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_ForcePullShopContent(const T
 	FAVVMOnlineResquestDelegate Callback;
 	Callback.AddUObject(this, &UAVVMStorePresenter::OnForcePullShopContentCompleted);
 
-	UE_LOG(LogOnline, Log, TEXT("Force Pull Store Content Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Force Pull Store Content Request. In-Progress..."));
 	OnlineInterface->ForcePullShopContent(Callback);
 }
 
@@ -78,7 +78,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_SellItem(const TInstancedStr
 		return;
 	}
 
-	UE_LOG(LogOnline, Log, TEXT("Sell Item Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Sell Item Request. In-Progress..."));
 	OnlineInterface->SellItem(*Resource, Callback);
 }
 
@@ -100,13 +100,13 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_BuyItem(const TInstancedStru
 		return;
 	}
 
-	UE_LOG(LogOnline, Log, TEXT("Buy Item Request. In-Progress..."));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Buy Item Request. In-Progress..."));
 	OnlineInterface->BuyItem(*Resource, Callback);
 }
 
 void UAVVMStorePresenter::SetItems(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Updating local Items!"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Updating local Items!"));
 
 	auto* StoreViewModel = Cast<UAVVMStoreViewModel>(ViewModel.Get());
 	if (IsValid(StoreViewModel))
@@ -148,7 +148,7 @@ void UAVVMStorePresenter::BindViewModel() const
 void UAVVMStorePresenter::OnForcePullShopContentCompleted(const bool bWasSuccess,
                                                           const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Force Pull Store Content Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Force Pull Store Content Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update store items onSuccess
@@ -166,7 +166,7 @@ void UAVVMStorePresenter::OnForcePullShopContentCompleted(const bool bWasSuccess
 void UAVVMStorePresenter::OnSellItemCompleted(const bool bWasSuccess,
                                               const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Sell Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Sell Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update store items onSuccess
@@ -184,7 +184,7 @@ void UAVVMStorePresenter::OnSellItemCompleted(const bool bWasSuccess,
 void UAVVMStorePresenter::OnBuyItemCompleted(const bool bWasSuccess,
                                              const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	UE_LOG(LogOnline, Log, TEXT("Buy Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
+	UE_LOG(LogAVVMOnline, Log, TEXT("Buy Item Request Callback. Status: %s"), bWasSuccess ? TEXT("Success") : TEXT("Failure"));
 	if (bWasSuccess)
 	{
 		// @gdemers update store items onSuccess
