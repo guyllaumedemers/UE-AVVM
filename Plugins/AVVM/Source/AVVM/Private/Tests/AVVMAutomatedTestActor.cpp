@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,41 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AVVMAutomatedTestActor.h"
 
-using UnrealBuildTool;
+#include "AVVM.h"
 
-public class AVVM : ModuleRules
+void AAVVMAutomatedTestActor::GetSetDelegate(FScopedCounterNotify* NewScopedCounterNotify,
+                                             FAVVMOnChannelNotifiedSingleCastDelegate& OutDelegate)
 {
-	public AVVM(ReadOnlyTargetRules Target) : base(Target)
+	ScopedCounterNotify = NewScopedCounterNotify;
+
+	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
+	Callback.BindDynamic(this, &AAVVMAutomatedTestActor::OnInvokeCallback);
+	OutDelegate = Callback;
+}
+
+void AAVVMAutomatedTestActor::OnInvokeCallback(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
+{
+	UE_LOG(LogUI, VeryVerbose, TEXT("%hs line:%d {%s}."), __FUNCTION__, __LINE__, *GetName());
+	if (ScopedCounterNotify != nullptr)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		if (Target.bBuildEditor)
-		{
-			PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", });
-		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"DeveloperSettings",
-				"Engine",
-				"FieldNotification",
-				"GameplayTags",
-				"ModelViewViewModel",
-				"UIExtension"
-			});
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"CommonGame",
-				"CommonUI",
-				"UMG",
-			});
+		ScopedCounterNotify->Minus();
 	}
 }

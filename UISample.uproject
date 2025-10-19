@@ -72,6 +72,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "TeamSample",
+			"Enabled": true
+		},
+		{
 			"Name": "TransactionSample",
 			"Enabled": true
 		},
@@ -84,7 +88,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "TeamSample",
+			"Name": "RuntimeTests",
+			"Enabled": true
+		},
+		{
+			"Name": "FunctionalTestingEditor",
 			"Enabled": true
 		}
 	]

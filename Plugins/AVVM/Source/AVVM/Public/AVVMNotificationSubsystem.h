@@ -106,7 +106,7 @@ TInstancedStruct<FAVVMNotificationPayload> FAVVMNotificationPayload::Make(TArgs&
 }
 
 /**
-*	Class description:
+ *	Class description:
  *
  *	UAVVMNotificationSubsystem is a system that register/unregister Observers (i.e Presenter Objects) and notify them of a "Gameplay event" through Tag Channels. This system allow filtering
  *	of Actors so we can notify for a unique target or to all targets listening to the channel.
@@ -141,6 +141,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_ExecuteDeferredNotifications(const UObject* WorldContextObject);
 
+#if WITH_AUTOMATION_TESTS
+	static int32 Static_GetChannelCount(const UObject* WorldContextObject,
+	                                    const FGameplayTag& ChannelTag);
+
+	static int32 Static_GetChannelsCount(const UObject* WorldContextObject);
+#endif
+
 protected:
 	struct FAVVMObservers
 	{
@@ -149,6 +156,7 @@ protected:
 		void Register(const AActor* Target, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
 		void BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
 		void Broadcast(const AActor* Target, const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
+		bool IsEmpty() const;
 
 		TMap<TWeakObjectPtr<const AActor>, FAVVMOnChannelNotifiedSingleCastDelegate> Observers;
 	};
@@ -161,8 +169,8 @@ protected:
 		void Broadcast(const FAVVMNotificationContextArgs& NotificationContext);
 		void ExecuteDeferredNotifications();
 
-		TArray<FAVVMNotificationContextArgs> PendingRequests;
 		TMap<const FGameplayTag, FAVVMObservers> TagToObservers;
+		TArray<FAVVMNotificationContextArgs> PendingRequests;
 	};
 
 	FAVVObserversFilteringMechanism ObserversFilteringMechanism;

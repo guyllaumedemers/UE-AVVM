@@ -50,8 +50,7 @@ UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UObject* World
 	const UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
 	if (IsValid(World))
 	{
-		auto* Subsystem = UWorld::GetSubsystem<UAVVMNotificationSubsystem>(World);
-		return Subsystem;
+		return UWorld::GetSubsystem<UAVVMNotificationSubsystem>(World);
 	}
 	else
 	{
@@ -67,11 +66,23 @@ void UAVVMNotificationSubsystem::Static_UnregisterObserver(const UObject* WorldC
 		return;
 	}
 
+	const auto* OwningActor = Cast<AActor>(WorldContextObject);
+	if (!IsValid(OwningActor))
+	{
+		OwningActor = WorldContextObject->GetTypedOuter<const AActor>();
+	}
+
+	if (!ensureAlwaysMsgf(IsValid(OwningActor),
+	                      TEXT("UObject provided isnt owned by a valid AActor. This may not be the correct place to unbind to this subsystem.")))
+	{
+		return;
+	}
+
 	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
-		FilteringMechanism.Unregister(WorldContextObject->GetTypedOuter<const AActor>(), ObserverContext.ChannelTag);
+		FilteringMechanism.Unregister(OwningActor, ObserverContext.ChannelTag);
 	}
 }
 
@@ -83,11 +94,23 @@ void UAVVMNotificationSubsystem::Static_RegisterObserver(const UObject* WorldCon
 		return;
 	}
 
+	const auto* OwningActor = Cast<AActor>(WorldContextObject);
+	if (!IsValid(OwningActor))
+	{
+		OwningActor = WorldContextObject->GetTypedOuter<const AActor>();
+	}
+
+	if (!ensureAlwaysMsgf(IsValid(OwningActor),
+	                      TEXT("UObject provided isnt owned by a valid AActor. This may not be the correct place to bind to this subsystem.")))
+	{
+		return;
+	}
+
 	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
 	if (IsValid(AVVMNotificationSubsystem))
 	{
 		FAVVObserversFilteringMechanism& FilteringMechanism = AVVMNotificationSubsystem->ObserversFilteringMechanism;
-		FilteringMechanism.Register(WorldContextObject->GetTypedOuter<const AActor>(), ObserverContext.ChannelTag, ObserverContext.Callback);
+		FilteringMechanism.Register(OwningActor, ObserverContext.ChannelTag, ObserverContext.Callback);
 	}
 }
 
@@ -111,6 +134,40 @@ void UAVVMNotificationSubsystem::Static_ExecuteDeferredNotifications(const UObje
 		FilteringMechanism.ExecuteDeferredNotifications();
 	}
 }
+
+#if WITH_AUTOMATION_TESTS
+int32 UAVVMNotificationSubsystem::Static_GetChannelCount(const UObject* WorldContextObject,
+                                                         const FGameplayTag& ChannelTag)
+{
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
+	if (!IsValid(AVVMNotificationSubsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	const bool bDoesContains = AVVMNotificationSubsystem->ObserversFilteringMechanism.TagToObservers.Contains(ChannelTag);
+	if (!bDoesContains)
+	{
+		return INDEX_NONE;
+	}
+
+	const FAVVMObservers& Observers = AVVMNotificationSubsystem->ObserversFilteringMechanism.TagToObservers[ChannelTag];
+	return Observers.Observers.Num();
+}
+
+int32 UAVVMNotificationSubsystem::Static_GetChannelsCount(const UObject* WorldContextObject)
+{
+	auto* AVVMNotificationSubsystem = UAVVMNotificationSubsystem::Get(WorldContextObject);
+	if (IsValid(AVVMNotificationSubsystem))
+	{
+		return AVVMNotificationSubsystem->ObserversFilteringMechanism.TagToObservers.Num();
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+#endif
 
 UAVVMNotificationSubsystem::FAVVMObservers::~FAVVMObservers()
 {
@@ -147,8 +204,14 @@ void UAVVMNotificationSubsystem::FAVVMObservers::Broadcast(const AActor* Target,
 	}
 }
 
+bool UAVVMNotificationSubsystem::FAVVMObservers::IsEmpty() const
+{
+	return Observers.IsEmpty();
+}
+
 UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::~FAVVObserversFilteringMechanism()
 {
+	PendingRequests.Reset();
 	TagToObservers.Reset();
 }
 
@@ -156,9 +219,16 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Unregister(con
                                                                              const FGameplayTag& ChannelTag)
 {
 	FAVVMObservers* SearchResult = TagToObservers.Find(ChannelTag);
-	if (SearchResult != nullptr)
+	if (SearchResult == nullptr)
 	{
-		SearchResult->Unregister(Target);
+		return;
+	}
+
+	SearchResult->Unregister(Target);
+
+	if (SearchResult->IsEmpty())
+	{
+		TagToObservers.Remove(ChannelTag);
 	}
 }
 
