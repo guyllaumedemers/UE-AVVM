@@ -26,6 +26,9 @@
 
 #include "AVVMAutomatedTestActor.generated.h"
 
+class UAVVMComponent;
+class UAVVMPresenter;
+
 /**
  *	Class description:
  *	
@@ -43,7 +46,7 @@ struct FScopedCounterNotify
 		Counter = Default;
 	}
 
-	const int32 GetCount() const
+	int32 GetCount() const
 	{
 		return Counter;
 	}
@@ -69,13 +72,34 @@ class AVVM_API AAVVMAutomatedTestActor : public AActor
 	GENERATED_BODY()
 
 public:
+	AAVVMAutomatedTestActor(const FObjectInitializer& ObjectInitializer);
+	
 	void GetSetDelegate(FScopedCounterNotify* NewScopedCounterNotify,
 	                    FAVVMOnChannelNotifiedSingleCastDelegate& OutDelegate);
 
 	UFUNCTION(CallInEditor)
 	void OnInvokeCallback(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMComponent> AVVMComponent = nullptr;
+
 private:
 	// @gdemers pure lazyness here.
 	FScopedCounterNotify* ScopedCounterNotify;
+
+	friend class UAVVMAutomatedTestUtils;
+};
+
+/**
+ * 
+ */
+UCLASS()
+class UAVVMAutomatedTestUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	static UAVVMPresenter* GetSetPresenter(const TSubclassOf<UAVVMPresenter>& PresenterClass,
+	                                       AAVVMAutomatedTestActor* Actor);
 };

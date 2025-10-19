@@ -20,6 +20,14 @@
 #include "AVVMAutomatedTestActor.h"
 
 #include "AVVM.h"
+#include "AVVMComponent.h"
+#include "Archetypes/AVVMPresenter.h"
+
+AAVVMAutomatedTestActor::AAVVMAutomatedTestActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	AVVMComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMComponent>(this, TEXT("AVVMComponent"));
+}
 
 void AAVVMAutomatedTestActor::GetSetDelegate(FScopedCounterNotify* NewScopedCounterNotify,
                                              FAVVMOnChannelNotifiedSingleCastDelegate& OutDelegate)
@@ -33,9 +41,30 @@ void AAVVMAutomatedTestActor::GetSetDelegate(FScopedCounterNotify* NewScopedCoun
 
 void AAVVMAutomatedTestActor::OnInvokeCallback(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
-	UE_LOG(LogUI, VeryVerbose, TEXT("%hs line:%d {%s}."), __FUNCTION__, __LINE__, *GetName());
+	UE_LOG(LogUI, Log, TEXT("%hs line:%d {%s}."), __FUNCTION__, __LINE__, *GetName());
 	if (ScopedCounterNotify != nullptr)
 	{
 		ScopedCounterNotify->Minus();
 	}
+}
+
+UAVVMPresenter* UAVVMAutomatedTestUtils::GetSetPresenter(const TSubclassOf<UAVVMPresenter>& PresenterClass,
+                                                         AAVVMAutomatedTestActor* Actor)
+{
+#if WITH_EDITOR && WITH_AUTOMATION_TESTS
+	if (!IsValid(Actor))
+	{
+		return nullptr;
+	}
+
+	UAVVMComponent* Component = Actor->AVVMComponent;
+	if (IsValid(Component))
+	{
+		return Component->GetOrCreate(PresenterClass);
+	}
+
+	return nullptr;
+#else
+	return nullptr;
+#endif
 }

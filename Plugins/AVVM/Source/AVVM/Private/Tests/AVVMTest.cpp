@@ -19,14 +19,18 @@
 //SOFTWARE.
 
 #include "AVVMAutomatedTestActor.h"
+#include "AVVMAutomatedTestPresenter.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMSubsystem.h"
 #include "NativeGameplayTags.h"
+#include "Archetypes/AVVMPresenter.h"
 #include "Misc/AutomationTest.h"
 
 #if WITH_EDITOR && WITH_AUTOMATION_TESTS
 #include "Tests/AutomationEditorCommon.h"
 #endif
 
+// TODO @gdemers check if this conflict in server build and cause tag mismatch.
 UE_DEFINE_GAMEPLAY_TAG(TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG, "FunctionalTest.NotificationSubsystem.TestChannel");
 
 /**
@@ -35,14 +39,15 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG, "FunctionalTest.Noti
  *	AVVMNotificationSubsystemTest is an Automated Test running validation on system feature.
  */
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMNotificationSubsystemTest, "FunctionalTest.AVVMNotificationSubsystemTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
 bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 {
 #if WITH_EDITOR && WITH_AUTOMATION_TESTS
 	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
-	UTEST_NOT_NULL("[PtrCheck] UWorld.", World)
+	UTEST_NOT_NULL("UWorld.", World)
 
 	auto* TestSubsystem = UAVVMNotificationSubsystem::Get(World);
-	UTEST_NOT_NULL("[PtrCheck] UAVVMNotificationSubsystem.", TestSubsystem)
+	UTEST_NOT_NULL("UAVVMNotificationSubsystem.", TestSubsystem)
 
 	// @gdemers create test actors.
 	TArray<AAVVMAutomatedTestActor*> TestActors;
@@ -61,16 +66,16 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	}
 
 	// @gdemers test register.
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Count.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 1)
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Count.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), 2)
-	
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Registration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 1)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Registration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), 2)
+
 	FAVVMNotificationContextArgs NotifierContextArgs_WithoutTarget;
 	NotifierContextArgs_WithoutTarget.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
 	NotifierContextArgs_WithoutTarget.Payload = FAVVMNotificationPayload::Empty;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(World, NotifierContextArgs_WithoutTarget);
 
 	// @gdemers test broadcast.
-	UTEST_EQUAL("FScopedCounterNotify Count. Post-generic notify.", ScopedInstance.GetCount(), 0)
+	UTEST_EQUAL("FScopedCounterNotify Count Changed {Post-generic notify}.", ScopedInstance.GetCount(), 0)
 
 	ScopedInstance.Reset();
 
@@ -81,7 +86,7 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(World, NotifierContextArgs_WithTarget);
 
 	// @gdemers test broadcast.
-	UTEST_EQUAL("FScopedCounterNotify Count. Post-targeted notify.", ScopedInstance.GetCount(), TestActors.Num() - 1)
+	UTEST_EQUAL("FScopedCounterNotify Count {Post-targeted notify}.", ScopedInstance.GetCount(), TestActors.Num() - 1)
 
 	for (auto* TestActor : TestActors)
 	{
@@ -91,10 +96,59 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	}
 
 	// @gdemers test unregister.
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Count.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 0)
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Count.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), INDEX_NONE)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 0)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), INDEX_NONE)
 
 	TestActors.Reset();
+#endif
+	return true;
+}
+
+/**
+ *	Class description:
+ *
+ *	AVVMSubsystemTest is an Automated Test running validation on system feature.
+ */
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMSubsystemTest, "FunctionalTest.AVVMSubsystemTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool AVVMSubsystemTest::RunTest(const FString& Parameters)
+{
+#if WITH_EDITOR && WITH_AUTOMATION_TESTS
+	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+	UTEST_NOT_NULL("UWorld.", World)
+
+	auto* TestSubsystem = UAVVMSubsystem::Get(World);
+	UTEST_NOT_NULL("UAVVMSubsystem.", TestSubsystem)
+
+	// @gdemers create test actors.
+	TArray<AAVVMAutomatedTestActor*> TestActors;
+	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
+	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
+
+	for (auto* TestActor : TestActors)
+	{
+		FAVVMPresenterContextArgs PresenterContextArgs;
+		PresenterContextArgs.WorldContext = World;
+		PresenterContextArgs.Presenter = UAVVMAutomatedTestUtils::GetSetPresenter(UAVVMAutomatedTestPresenter::StaticClass(), TestActor);
+		UAVVMSubsystem::Static_RegisterPresenter(PresenterContextArgs);
+	}
+
+	// @gdemers test register.
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Registration}.", UAVVMSubsystem::Static_GetActorCount(World), 2)
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Registration}.", UAVVMSubsystem::Static_GetPresentersCount(World), 2)
+
+	for (auto* TestActor : TestActors)
+	{
+		FAVVMPresenterContextArgs PresenterContextArgs;
+		PresenterContextArgs.WorldContext = World;
+		PresenterContextArgs.Presenter = UAVVMAutomatedTestUtils::GetSetPresenter(UAVVMAutomatedTestPresenter::StaticClass(), TestActor);
+		UAVVMSubsystem::Static_UnregisterPresenter(PresenterContextArgs);
+	}
+
+	// @gdemers test unregister.
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetActorCount(World), 0)
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetPresentersCount(World), 0)
+
 #endif
 	return true;
 }

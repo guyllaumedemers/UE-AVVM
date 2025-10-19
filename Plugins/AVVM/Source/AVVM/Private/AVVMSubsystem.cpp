@@ -80,6 +80,36 @@ UMVVMViewModelBase* UAVVMSubsystem::Static_RegisterPresenter(const FAVVMPresente
 	return nullptr;
 }
 
+#if WITH_AUTOMATION_TESTS
+int32 UAVVMSubsystem::Static_GetPresentersCount(const UWorld* World)
+{
+	auto* AVVMSubsystem = UAVVMSubsystem::Get(World);
+	if (IsValid(AVVMSubsystem))
+	{
+		int32 Count = 0;
+		for (const auto& [Actor, ViewModelKVP] : AVVMSubsystem->ActorToViewModelCollection)
+		{
+			Count += ViewModelKVP.GetPresenterCount();
+		}
+
+		return Count;
+	}
+
+	return INDEX_NONE;
+}
+
+int32 UAVVMSubsystem::Static_GetActorCount(const UWorld* World)
+{
+	auto* AVVMSubsystem = UAVVMSubsystem::Get(World);
+	if (IsValid(AVVMSubsystem))
+	{
+		return AVVMSubsystem->ActorToViewModelCollection.Num();
+	}
+
+	return INDEX_NONE;
+}
+#endif
+
 UAVVMSubsystem::FAVVMViewModelKVP::~FAVVMViewModelKVP()
 {
 	ViewModelClassToViewModelInstance.Empty();
@@ -111,6 +141,13 @@ bool UAVVMSubsystem::FAVVMViewModelKVP::RemoveOrDestroy(const TSubclassOf<UMVVMV
 
 	return (false == !!RefCounter);
 }
+
+#if WITH_AUTOMATION_TESTS
+int32 UAVVMSubsystem::FAVVMViewModelKVP::GetPresenterCount() const
+{
+	return ViewModelClassToViewModelInstance.Num();
+}
+#endif
 
 UMVVMViewModelBase* UAVVMSubsystem::GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,
                                                 AActor* Outer)

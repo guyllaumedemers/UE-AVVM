@@ -69,6 +69,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static UMVVMViewModelBase* Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context);
 
+#if WITH_AUTOMATION_TESTS
+	static int32 Static_GetPresentersCount(const UWorld* World);
+	static int32 Static_GetActorCount(const UWorld* World);
+#endif
+
 protected:
 	struct FAVVMViewModelKVP
 	{
@@ -78,6 +83,10 @@ protected:
 		                                UObject* Outer);
 
 		bool RemoveOrDestroy(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass);
+		
+#if WITH_AUTOMATION_TESTS
+		int32 GetPresenterCount() const;
+#endif
 
 	private:
 		// @gdemers A given Actor can be referenced by multiple UAVVMPresenter and a ViewModel instance may have to be rebound

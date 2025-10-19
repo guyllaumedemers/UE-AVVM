@@ -83,3 +83,24 @@ void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	TransientPresenters.Empty();
 }
+
+#if WITH_AUTOMATION_TESTS
+UAVVMPresenter* UAVVMComponent::GetOrCreate(const TSubclassOf<UAVVMPresenter>& NewPresenterClass)
+{
+	if (TransientPresenters.IsEmpty())
+	{
+		auto* Presenter = NewObject<UAVVMPresenter>(GetTypedOuter<AActor>(), NewPresenterClass);
+		TransientPresenters.Add(Presenter);
+		return Presenter;
+	}
+	else
+	{
+		return TransientPresenters[0];
+	}
+}
+
+void UAVVMComponent::RemovePresenter(UAVVMPresenter* OldPresenter)
+{
+	TransientPresenters.Remove(OldPresenter);
+}
+#endif
