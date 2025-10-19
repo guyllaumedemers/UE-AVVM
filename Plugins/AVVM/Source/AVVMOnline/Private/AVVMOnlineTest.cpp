@@ -24,6 +24,7 @@
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineStringParser.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 
 #if WITH_EDITOR && WITH_AUTOMATION_TESTS
 #include "Tests/AutomationEditorCommon.h"
@@ -240,6 +241,138 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->FromString(OutPayload, B);
 
 		UTEST_EQUAL("FAVVMHostConfiguration", A, B);
+	}
+
+	{
+		FString OutPayload;
+
+		FAVVMPlayerAccountProxy A;
+		A.UniqueId = FMath::Rand32();
+		A.Login = TEXT("MyLogin");
+		A.Gamertag = TEXT("Steve");
+		A.Wallet = TEXT("Empty, cause steve is broke!");
+		A.Profiles = {TEXT("ProfileA"), TEXT("ProfileB")};
+		A.Presets = {TEXT("UniquePreset")};
+		Parser->ToString(A, OutPayload);
+
+		FAVVMPlayerAccountProxy B;
+		Parser->FromString(OutPayload, B);
+
+		UTEST_EQUAL("FAVVMPlayerAccountProxy", A, B);
+	}
+
+	{
+		FString OutPayload;
+
+		FAVVMPlayerWalletProxy A;
+		A.UniqueId = FMath::Rand32();
+		A.IrlMoneys = {TEXT("CAD"), TEXT("USD")};
+		Parser->ToString(A, OutPayload);
+
+		FAVVMPlayerWalletProxy B;
+		Parser->FromString(OutPayload, B);
+
+		UTEST_EQUAL("FAVVMPlayerWalletProxy", A, B);
+	}
+
+	{
+		FString OutPayload;
+
+		FAVVMPlayerProfileProxy A;
+		A.UniqueId = FMath::Rand32();
+		A.ProfileId = TEXT("ProfileA");
+		A.Progression = TEXT("ProfileProgression");
+		A.Inventories = {TEXT("CharacterInventoryA")};
+		A.Challenges = {TEXT("ChallengeA"), TEXT("ChallengeB")};
+		A.EquippedPreset = TEXT("GenericPreset");
+		Parser->ToString(A, OutPayload);
+
+		FAVVMPlayerProfileProxy B;
+		Parser->FromString(OutPayload, B);
+
+		UTEST_EQUAL("FAVVMPlayerProfileProxy", A, B);
+	}
+
+	{
+		FString OutPayload;
+
+		FAVVMPlayerPresetProxy A;
+		A.UniqueId = FMath::Rand32();
+		A.PresetId = TEXT("PresetA");
+		A.EquippedItems = {TEXT("ItemA"), TEXT("ItemB")};
+		Parser->ToString(A, OutPayload);
+
+		FAVVMPlayerPresetProxy B;
+		Parser->FromString(OutPayload, B);
+
+		UTEST_EQUAL("FAVVMPlayerPresetProxy", A, B);
+	}
+
+	{
+		FAVVMPartyProxy PartyProxy1;
+		PartyProxy1.UniqueId = FMath::Rand32();
+		PartyProxy1.PartyId = TEXT("MyParty1");
+		PartyProxy1.Region = TEXT("RegionD");
+		PartyProxy1.District = TEXT("DistrictF");
+		PartyProxy1.HostConfiguration = TEXT("ConfigC");
+		PartyProxy1.PlayerConnections = {TEXT("ConnectionA")};
+		
+		FAVVMPartyProxy PartyProxy2;
+		PartyProxy2.UniqueId = FMath::Rand32();
+		PartyProxy2.PartyId = TEXT("MyParty2");
+		PartyProxy2.Region = TEXT("RegionH");
+		PartyProxy2.District = TEXT("DistrictY");
+		PartyProxy2.HostConfiguration = TEXT("ConfigF");
+		PartyProxy2.PlayerConnections = {TEXT("ConnectionB")};
+
+		FString OutPayload;
+
+		TArray<FAVVMPartyProxy> A = {PartyProxy1, PartyProxy2};
+		Parser->ToString(A, OutPayload);
+
+		TArray<FAVVMPartyProxy> B;
+		Parser->FromString(FAVVMStringPayload{.Payload = OutPayload}, B);
+
+		UTEST_EQUAL("TArray<FAVVMPartyProxy>", A, B);
+	}
+
+	{
+		FAVVMPlayerConnectionProxy PlayerConnectionProxy1;
+		PlayerConnectionProxy1.UniqueId = FMath::Rand32();
+		PlayerConnectionProxy1.UniqueNetId = TEXT("UniqueNetIdA");
+		PlayerConnectionProxy1.PlayerStatus = EAVVMPlayerStatus::PendingAction;
+		PlayerConnectionProxy1.Profile = TEXT("ProfileP");
+
+		FAVVMPlayerConnectionProxy PlayerConnectionProxy2;
+		PlayerConnectionProxy2.UniqueId = FMath::Rand32();
+		PlayerConnectionProxy2.UniqueNetId = TEXT("UniqueNetIdB");
+		PlayerConnectionProxy2.PlayerStatus = EAVVMPlayerStatus::Ready;
+		PlayerConnectionProxy2.Profile = TEXT("ProfileP");
+		
+		FString OutPayload;
+
+		TArray<FAVVMPlayerConnectionProxy> A = {PlayerConnectionProxy1, PlayerConnectionProxy2};
+		Parser->ToString(A, OutPayload);
+
+		TArray<FAVVMPlayerConnectionProxy> B;
+		Parser->FromString(FAVVMStringPayload{.Payload = OutPayload}, B);
+
+		UTEST_EQUAL("TArray<FAVVMPlayerConnectionProxy>", A, B);
+	}
+
+	{
+		FString OutPayload;
+
+		FAVVMHostConfigurationProxy A;
+		A.UniqueId = FMath::Rand32();
+		A.GameMode = TEXT("MyGameMode");
+		A.Options = TEXT("Free-For-All");
+		Parser->ToString(A, OutPayload);
+
+		FAVVMHostConfigurationProxy B;
+		Parser->FromString(OutPayload, B);
+
+		UTEST_EQUAL("FAVVMHostConfigurationProxy", A, B);
 	}
 
 #endif

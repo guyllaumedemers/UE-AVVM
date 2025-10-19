@@ -919,7 +919,7 @@ void UAVVMOnlineStringParser::FromString(const FString& NewPayload,
 
 	FAVVMPlayerPresetProxy PlayerPresetProxy;
 	PlayerPresetProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
-	PlayerPresetProxy.PresetId = JsonData->GetStringField(TEXT("ProfileId"));
+	PlayerPresetProxy.PresetId = JsonData->GetStringField(TEXT("PresetId"));
 
 	const TArray<TSharedPtr<FJsonValue>> EquippedItems = JsonData->GetArrayField(TEXT("EquippedItems"));
 	for (const auto& EquippedItem : EquippedItems)
