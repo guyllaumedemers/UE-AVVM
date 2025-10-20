@@ -53,12 +53,13 @@ void AAVVMCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 UAVVMAbilitySystemComponent* AAVVMCharacter::BP_GetAbilitySystemComponent() const
 {
-	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningActor.Get());
+	return Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 }
 
 UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 {
-	return BP_GetAbilitySystemComponent();
+	// @gdemers Note : Override for AI derived class and provide ASC directly.
+	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningActor.Get());
 }
 
 TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionResourceIds_Implementation() const
