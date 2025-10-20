@@ -21,6 +21,7 @@
 
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
 AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)
