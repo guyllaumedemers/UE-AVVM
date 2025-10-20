@@ -28,11 +28,14 @@
 
 #include "AVVMCharacter.generated.h"
 
+class UAbilitySystemComponent;
 class UAVVMAbilitySystemComponent;
 
 /**
  *	Class description:
  *
+ *	AAVVMCharacter is a derived impl of the ACharacter class that manage resource loading request and forward ASC request to its owning
+ *	APlayerState.
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
@@ -46,7 +49,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
+	UFUNCTION(BlueprintCallable)
+	UAVVMAbilitySystemComponent* BP_GetAbilitySystemComponent() const;
+
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -60,10 +66,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
 	FDataRegistryId ActorDefinitionId = FDataRegistryId();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
-
 	// @gdemers Resource Component handle initialization of our Character.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const AActor> OwningActor = nullptr;
 };
