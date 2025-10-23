@@ -494,10 +494,13 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 
 	// @gdemers handle actor data initialization via AttributeSet. Note : In some cases, Actor type such as
 	// projectile will not be bound to an ASC and have data provided from DT or backend .csv file.
-	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ItemActor);
-	if (IsValid(ASC))
+	if (!NewActorAttributeSetSoftObjectPath.IsNull())
 	{
-		ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath);
+		UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ItemActor);
+		if (IsValid(ASC))
+		{
+			ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath);
+		}
 	}
 
 	// @gdemers early out if the owning actor isnt suppose to inject modifier based on progression, and rely solely on the

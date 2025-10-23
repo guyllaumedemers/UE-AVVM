@@ -30,8 +30,6 @@
 class UAVVMResourceManagerComponent;
 class UAVVMResourceHandlingImpl;
 
-DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(bool, FKeepProcessingResources, const TArray<FDataRegistryId>&, QueuedResourcesId);
-
 /**
  *	Class description:
  *
@@ -53,11 +51,8 @@ public:
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const PURE_VIRTUAL(GetResourceDefinitionResourceIds_Implementation, return TArray<FDataRegistryId>(););
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	bool CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources,
-	                                   const FKeepProcessingResources& Callback) const;
-
-	virtual bool CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources,
-	                                                          const FKeepProcessingResources& Callback) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return false;);
+	TArray<FDataRegistryId> CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources) const;
+	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return TArray<FDataRegistryId>{};);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	UAVVMResourceManagerComponent* GetResourceManagerComponent() const;
@@ -80,8 +75,4 @@ public:
 	static TArray<FDataRegistryId> CheckResources(TSubclassOf<UAVVMResourceHandlingImpl> ResourceHandlingImplClass,
 	                                              UActorComponent* ActorComponent,
 	                                              const TArray<UObject*>& Resources);
-
-	UFUNCTION(BlueprintCallable)
-	static bool ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,
-	                                            const FKeepProcessingResources& Callback);
 };

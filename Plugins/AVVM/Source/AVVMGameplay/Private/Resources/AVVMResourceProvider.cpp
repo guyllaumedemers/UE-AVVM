@@ -43,9 +43,3 @@ TArray<FDataRegistryId> UAVVMResourceHandlingBlueprintFunctionLibrary::CheckReso
 		return ResourceHandlingImpl->ProcessResources(ActorComponent, Resources);
 	}
 }
-
-bool UAVVMResourceHandlingBlueprintFunctionLibrary::ExecuteResourceProviderDelegate(const TArray<FDataRegistryId>& QueuedResourcesId,
-                                                                                    const FKeepProcessingResources& Callback)
-{
-	return ensureAlwaysMsgf(Callback.IsBound(), TEXT("Error: Previously bound Delegate invalid!")) ? Callback.Execute(QueuedResourcesId) : false;
-}

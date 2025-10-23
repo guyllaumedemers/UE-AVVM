@@ -193,7 +193,7 @@ void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& N
                                                         const FOnResourceAsyncLoadingComplete& OnRequestCompleteCallback)
 {
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(DataRegistrySubsystem))
+	if (!IsValid(DataRegistrySubsystem) || !NewRegistryId.IsValid())
 	{
 		OnRequestCompleteCallback.ExecuteIfBound();
 		return;
@@ -202,8 +202,7 @@ void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& N
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
 
 	const auto OnDataAcquiredCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, OnRequestCompleteCallback);
-	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(NewRegistryId, OnDataAcquiredCallback),
-	                 TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
+	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(NewRegistryId, OnDataAcquiredCallback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 }
 
 void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result,
@@ -226,11 +225,13 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		       *Result.ItemId.ToString(),
 		       *Outer->GetName());
 
+		OnRequestCompleteCallback.ExecuteIfBound();
 		return;
 	}
 
 	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
 	{
+		OnRequestCompleteCallback.ExecuteIfBound();
 		return;
 	}
 
@@ -246,6 +247,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		if (!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
 			!ensureAlwaysMsgf(NewQueuingMechanism.IsValid(), TEXT("SharedPtr to Queueing Mechanism Invalid!")))
 		{
+			MainRequestCompletionCallback.ExecuteIfBound();
 			return;
 		}
 
@@ -284,7 +286,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		       *Outer->GetName());
 	}
 }
-
+ 
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
 	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
@@ -308,10 +310,9 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	QueueingMechanism->GetLoadedAssets(OutStreamedAssets);
 	QueueingMechanism->ModifyStreamableHandle();
 
-	FKeepProcessingResources KeepProcessingRegistriesCallback;
-	KeepProcessingRegistriesCallback.BindDynamic(this, &UAVVMResourceManagerComponent::OnProcessAdditionalResources);
-
-	const bool bIsDoneAcquiringResources = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(Outer, OutStreamedAssets, KeepProcessingRegistriesCallback);
+	// @gdemers recurse on nested registry id until our object is fully loaded.
+	const TArray<FDataRegistryId> RecursiveResources = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(Outer, OutStreamedAssets);
+	const bool bIsDoneAcquiringResources = OnProcessAdditionalResources(RecursiveResources);
 	UE_LOG(LogGameplay,
 	       Log,
 	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Outer \"%s\"? %s"),
@@ -322,12 +323,6 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 
 bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
 {
-	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(DataRegistrySubsystem))
-	{
-		return false;
-	}
-
 	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
 	{
 		return false;
@@ -339,15 +334,9 @@ bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FD
 		return QueueingMechanism->TryExecuteNextRequest();
 	}
 
-	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
-
 	for (const FDataRegistryId& RegistryId : PendingRegistriesId)
 	{
-		if (RegistryId.IsValid())
-		{
-			const auto CompletionCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, QueueingMechanism->GetCompletionDelegate());
-			ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(RegistryId, CompletionCallback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
-		}
+		RequestAsyncLoading(RegistryId, QueueingMechanism->GetCompletionDelegate());
 	}
 
 	return false;
