@@ -58,9 +58,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void TryForfaiting();
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnTeamComponentInitializedDelegate, APlayerState*);
-	static FOnTeamComponentInitializedDelegate OnTeamComponentInitialized;
-
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamObject> OwningTeam = nullptr;

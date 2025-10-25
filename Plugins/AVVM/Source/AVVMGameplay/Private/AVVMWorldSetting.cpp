@@ -31,8 +31,8 @@ void AAVVMWorldSetting::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const TArray<FSoftObjectPath> RulePaths = GetRulePaths();
-	AsyncLoadWorldRules(RulePaths);
+	const TArray<FSoftObjectPath> RulePaths = GetProjectRulePaths();
+	AsyncLoadProjectRules(RulePaths);
 }
 
 void AAVVMWorldSetting::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -40,15 +40,34 @@ void AAVVMWorldSetting::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	StreamableHandle.Reset();
-	Rules.Reset();
+	RuntimeRules.Reset();
 }
 
-UAVVMWorldRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) const
+TSharedPtr<FStreamableHandle> AAVVMWorldSetting::AsyncLoadPluginRule(const TSoftClassPtr<UAVVMWorldRule>& RuleClass,
+                                                                     const FStreamableDelegate& Callback) const
 {
-	const bool bDoesContains = Rules.Contains(RuleTag);
+	return UAssetManager::Get().LoadAssetList({RuleClass.ToSoftObjectPath()}, Callback);
+}
+
+const UAVVMWorldRule* AAVVMWorldSetting::GetOrCreatePluginRule(const FGameplayTag& RuleTag,
+                                                               const UClass* RuleClass)
+{
+	const auto* Rule = NewObject<UAVVMWorldRule>(this, RuleClass);
+	if (IsValid(Rule))
+	{
+		TObjectPtr<const UAVVMWorldRule>& OutRule = RuntimeRules.FindOrAdd(RuleTag);
+		OutRule = Rule;
+	}
+
+	return Rule;
+}
+
+const UAVVMWorldRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) const
+{
+	const bool bDoesContains = RuntimeRules.Contains(RuleTag);
 	if (bDoesContains)
 	{
-		return Rules[RuleTag];
+		return RuntimeRules[RuleTag];
 	}
 	else
 	{
@@ -56,7 +75,12 @@ UAVVMWorldRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) const
 	}
 }
 
-bool AAVVMWorldSetting::DoesRuleClassExist(const UClass* BaseRuleClass) const
+bool AAVVMWorldSetting::ShouldCreateRule(const FGameplayTag& RuleTag) const
+{
+	return AllRuleTags.Contains(RuleTag);
+}
+
+bool AAVVMWorldSetting::DoesProjectRuleClassExist(const UClass* BaseRuleClass) const
 {
 	if (!IsValid(BaseRuleClass))
 	{
@@ -64,20 +88,18 @@ bool AAVVMWorldSetting::DoesRuleClassExist(const UClass* BaseRuleClass) const
 	}
 
 	bool bResult = false;
-	for (const auto& [Tag, DerivedRuleClass] : RuleClassPerTag)
+	for (const auto& [Tag, DerivedRuleClass] : ProjectRuleClassPerTag)
 	{
-		// TODO @gdemers Its possible the TSoftClassPtr hasnt yet loaded the UClass in memory.
-		// This check may be invalid. Require Validation!
 		bResult |= (DerivedRuleClass.IsValid() ? DerivedRuleClass->IsChildOf(BaseRuleClass) : false);
 	}
 
 	return bResult;
 }
 
-TArray<FSoftObjectPath> AAVVMWorldSetting::GetRulePaths() const
+TArray<FSoftObjectPath> AAVVMWorldSetting::GetProjectRulePaths() const
 {
 	TArray<FSoftObjectPath> SoftObjectPaths;
-	for (const auto& [Tag, RuleClass] : RuleClassPerTag)
+	for (const auto& [Tag, RuleClass] : ProjectRuleClassPerTag)
 	{
 		if (RuleClass.IsNull())
 		{
@@ -92,7 +114,7 @@ TArray<FSoftObjectPath> AAVVMWorldSetting::GetRulePaths() const
 	return SoftObjectPaths;
 }
 
-void AAVVMWorldSetting::AsyncLoadWorldRules(const TArray<FSoftObjectPath>& SoftObjectPaths)
+void AAVVMWorldSetting::AsyncLoadProjectRules(const TArray<FSoftObjectPath>& SoftObjectPaths)
 {
 	const auto CreateRules = [](const TWeakObjectPtr<AAVVMWorldSetting>& Caller)
 	{
@@ -124,7 +146,7 @@ void AAVVMWorldSetting::AsyncLoadWorldRules(const TArray<FSoftObjectPath>& SoftO
 				continue;
 			}
 
-			TObjectPtr<UAVVMWorldRule>& Out = Caller->Rules.FindOrAdd(Rule->GetRuleTag());
+			TObjectPtr<const UAVVMWorldRule>& Out = Caller->RuntimeRules.FindOrAdd(Rule->GetRuleTag());
 			Out = Rule;
 		}
 	};

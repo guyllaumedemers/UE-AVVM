@@ -25,6 +25,7 @@
 #include "BatchingRule.h"
 #include "BatchSample.h"
 #include "NativeGameplayTags.h"
+#include "Engine/StreamableManager.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_BATCHING, "WorldRule.Batching");
@@ -39,11 +40,8 @@ bool UBatchingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 	bool bHasAuthority = !World->IsNetMode(NM_Client);
 
-	// TODO @gdemers This is problematic due to how GFP constraint prevent referencing of GFP
-	// content in /Game project. UBatchingRule is specific to the GFP. Find a workaround this issue. Maybe
-	// using RegistryId referencing. Or adding at runtime via Tag matching.
 	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	if (!IsValid(WorldSettings) || !WorldSettings->DoesRuleClassExist(UBatchingRule::StaticClass()))
+	if (!IsValid(WorldSettings) || !WorldSettings->ShouldCreateRule(TAG_WORLD_RULE_BATCHING))
 	{
 		return false;
 	}
@@ -59,26 +57,7 @@ bool UBatchingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void UBatchingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-
-	const auto* World = GetTypedOuter<UWorld>();
-	if (!IsValid(World))
-	{
-		return;
-	}
-
-	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	if (!IsValid(WorldSettings))
-	{
-		return;
-	}
-
-	auto* BatchRule = WorldSettings->CastRule<UBatchingRule>(TAG_WORLD_RULE_BATCHING);
-	if (IsValid(BatchRule))
-	{
-		MaxLifetimeAllowedToUndersizeBatch = BatchRule->GetMaxLifetimeAllowedToUndersizeBatch();
-		MaxSizePerBatchDestroy = BatchRule->GetMaxSizePerBatchDestroy();
-		Interval = BatchRule->GetBatchInterval();
-	}
+	CreateBatchingRule();
 }
 
 void UBatchingSubsystem::Deinitialize()
@@ -143,7 +122,8 @@ UBatchingSubsystem* UBatchingSubsystem::Get(const UWorld* World)
 
 void UBatchingSubsystem::UnRegister(AActor* Actor)
 {
-	if (!BatchingRule.IsValid() || !BatchingRule->DoesQualifyForBatchDestroy(Actor))
+	const auto* Rule = Cast<UBatchingRule>(BatchingRule.Get());
+	if (!IsValid(Rule) || !Rule->DoesQualifyForBatchDestroy(Actor))
 	{
 		return;
 	}
@@ -164,7 +144,8 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 
 void UBatchingSubsystem::Register(AActor* Actor)
 {
-	if (!BatchingRule.IsValid() || !BatchingRule->DoesQualifyForBatchDestroy(Actor))
+	const auto* Rule = Cast<UBatchingRule>(BatchingRule.Get());
+	if (!IsValid(Rule) || !Rule->DoesQualifyForBatchDestroy(Actor))
 	{
 		return;
 	}
@@ -193,6 +174,57 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	}
 
 	Batchable->SetBatchIndex(PendingDestroy.Num());
+}
+
+void UBatchingSubsystem::CreateBatchingRule()
+{
+	const auto OnAsyncLoadComplete = [](const TWeakObjectPtr<UBatchingSubsystem>& NewBatchingSubsystem,
+	                                    const TWeakObjectPtr<AAVVMWorldSetting>& NewWorldSettings)
+	{
+		if (!NewBatchingSubsystem.IsValid() || !NewWorldSettings.IsValid())
+		{
+			return;
+		}
+
+		TSharedPtr<FStreamableHandle> Handle = NewBatchingSubsystem->StreamableHandle;
+		if (!Handle.IsValid())
+		{
+			return;
+		}
+
+		const auto* RuleClass = Cast<UClass>(Handle->GetLoadedAsset());
+		if (!IsValid(RuleClass))
+		{
+			return;
+		}
+
+		NewBatchingSubsystem->BatchingRule = Cast<UBatchingRule>(NewWorldSettings->GetOrCreatePluginRule(TAG_WORLD_RULE_BATCHING, RuleClass));
+		NewBatchingSubsystem->InitRule();
+	};
+
+	const auto* World = GetTypedOuter<UWorld>();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	if (IsValid(WorldSettings))
+	{
+		auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
+		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UBatchingRule::StaticClass(), Callback);
+	}
+}
+
+void UBatchingSubsystem::InitRule()
+{
+	const auto* Rule = Cast<UBatchingRule>(BatchingRule.Get());
+	if (IsValid(Rule))
+	{
+		MaxLifetimeAllowedToUndersizeBatch = Rule->GetMaxLifetimeAllowedToUndersizeBatch();
+		MaxSizePerBatchDestroy = Rule->GetMaxSizePerBatchDestroy();
+		Interval = Rule->GetBatchInterval();
+	}
 }
 
 bool UBatchingSubsystem::FBatchContext::DoesQualifyForBatchDestroy(const float MaxSize) const

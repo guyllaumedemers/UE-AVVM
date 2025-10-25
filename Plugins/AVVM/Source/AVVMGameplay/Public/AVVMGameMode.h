@@ -56,11 +56,11 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	virtual bool IsMatchInProgress() const override;
+protected:
 	virtual bool HasMatchStarted() const override;
 	virtual bool HasMatchEnded() const override;
-
-protected:
+	virtual bool IsMatchInProgress() const override;
+	
 	UFUNCTION()
 	void OnGameStateSet(AGameStateBase* NewGameState);
 

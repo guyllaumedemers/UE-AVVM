@@ -26,8 +26,7 @@
 
 #include "AVVMGameState.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateAddedDelegate, APlayerState*);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateRemovedDelegate, APlayerState*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateActionRecordedDelegate, APlayerState*);
 
 /**
  *	Class description:
@@ -54,6 +53,16 @@ public:
 	virtual void AddPlayerState(APlayerState* PlayerState) override;
 	virtual void RemovePlayerState(APlayerState* PlayerState) override;
 
-	FOnPlayerStateRemovedDelegate OnPlayerStateRemoved;
-	FOnPlayerStateAddedDelegate OnPlayerStateAdded;
+	// @gdemers those are replicated call.
+	virtual void HandleMatchIsWaitingToStart() override;
+	virtual void HandleMatchHasStarted() override;
+	virtual void HandleMatchHasEnded() override;
+	virtual void HandleLeavingMap() override;
+
+	FOnPlayerStateActionRecordedDelegate OnPlayerStateRemoved;
+	FOnPlayerStateActionRecordedDelegate OnPlayerStateAdded;
+	FSimpleDelegate OnMatchWaitingToStart;
+	FSimpleDelegate OnMatchStart;
+	FSimpleDelegate OnMatchEnd;
+	FSimpleDelegate OnLeavingMap;
 };

@@ -29,9 +29,10 @@
 
 class APlayerState;
 struct FAVVMPartyProxy;
+struct FStreamableHandle;
+class UAVVMWorldRule;
 class UPlayerStateTeamComponent;
 class UTeamObject;
-class UTeamRule;
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBackendTeamRequestCompleteDelegate, const bool, bWasSuccess, const TArray<FAVVMPartyProxy>&, NewParties);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReplicatedTeamChangedDelegate, const TArray<UTeamObject*>& NewTeams, const TArray<UTeamObject*>& OldTeams);
@@ -62,10 +63,8 @@ protected:
 	UFUNCTION()
 	void OnPlayerStateRemoved(APlayerState* NewPlayerState);
 
-	UFUNCTION()
-	void OnPlayerStateTeamComponentInitialized(APlayerState* NewPlayerState);
-
 	void GetTeamRuleOnAuthority();
+	void RequestTeams();
 	void GetBackendTeams(const FOnBackendTeamRequestCompleteDelegate& Callback);
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -78,7 +77,7 @@ protected:
 	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
+	TWeakObjectPtr<const UAVVMWorldRule> TeamRule = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamChanged")
 	TArray<TObjectPtr<UTeamObject>> Teams;
@@ -88,4 +87,6 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
+	
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

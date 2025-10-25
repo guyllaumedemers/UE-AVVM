@@ -22,6 +22,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+class UDataRegistry;
+
 AVVMGAMEPLAY_API DECLARE_LOG_CATEGORY_EXTERN(LogGameplay, Log, All);
 
 /**
@@ -58,4 +60,6 @@ class FAVVMGameplayModule : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+	
+	static UDataRegistry* GetSetAutomatedTestDataRegistry();
 };

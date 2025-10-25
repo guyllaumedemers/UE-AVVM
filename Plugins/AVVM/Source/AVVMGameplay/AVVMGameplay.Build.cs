@@ -26,6 +26,11 @@ public class AVVMGameplay : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", });
+		}
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

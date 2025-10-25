@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "Engine/AssetManager.h"
 #include "GameFramework/WorldSettings.h"
 
 #include "AVVMWorldSetting.generated.h"
@@ -73,31 +74,43 @@ class AVVMGAMEPLAY_API AAVVMWorldSetting : public AWorldSettings
 public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	TSharedPtr<FStreamableHandle> AsyncLoadPluginRule(const TSoftClassPtr<UAVVMWorldRule>& RuleClass,
+	                                                  const FStreamableDelegate& Callback) const;
+
+	const UAVVMWorldRule* GetOrCreatePluginRule(const FGameplayTag& RuleTag,
+	                                            const UClass* RuleClass);
 	
 	UFUNCTION(BlueprintCallable)
-	UAVVMWorldRule* GetRule(const FGameplayTag& RuleTag) const;
+	const UAVVMWorldRule* GetRule(const FGameplayTag& RuleTag) const;
 	
 	UFUNCTION(BlueprintCallable)
-	bool DoesRuleClassExist(const UClass* RuleClass) const;
+	bool ShouldCreateRule(const FGameplayTag& RuleTag) const;
+	
+	UFUNCTION(BlueprintCallable)
+	bool DoesProjectRuleClassExist(const UClass* BaseRuleClass) const;
 
 	template<typename TRule>
-	TRule* CastRule(const FGameplayTag& RuleTag) const;
+	const TRule* CastRule(const FGameplayTag& RuleTag) const;
 	
 protected:
-	TArray<FSoftObjectPath> GetRulePaths() const;
-	void AsyncLoadWorldRules(const TArray<FSoftObjectPath>& SoftObjectPaths);
+	TArray<FSoftObjectPath> GetProjectRulePaths() const;
+	void AsyncLoadProjectRules(const TArray<FSoftObjectPath>& SoftObjectPaths);
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="References Project and Plugins Rule tags."))
+	TSet<FGameplayTag> AllRuleTags;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<FGameplayTag, TSoftClassPtr<UAVVMWorldRule>> RuleClassPerTag;
+	TMap<FGameplayTag, TSoftClassPtr<UAVVMWorldRule>> ProjectRuleClassPerTag;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FGameplayTag, TObjectPtr<UAVVMWorldRule>> Rules;
+	TMap<FGameplayTag, TObjectPtr<const UAVVMWorldRule>> RuntimeRules;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };
 
 template <typename TRule>
-TRule* AAVVMWorldSetting::CastRule(const FGameplayTag& RuleTag) const
+const TRule* AAVVMWorldSetting::CastRule(const FGameplayTag& RuleTag) const
 {
 	return Cast<TRule>(GetRule(RuleTag));
 }

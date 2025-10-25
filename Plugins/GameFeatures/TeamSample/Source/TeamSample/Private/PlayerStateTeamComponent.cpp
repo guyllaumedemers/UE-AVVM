@@ -25,8 +25,6 @@
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
 
-UPlayerStateTeamComponent::FOnTeamComponentInitializedDelegate UPlayerStateTeamComponent::OnTeamComponentInitialized;
-
 UPlayerStateTeamComponent::UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -52,11 +50,6 @@ void UPlayerStateTeamComponent::BeginPlay()
 	       *Outer->GetName());
 
 	OwningOuter = Outer;
-
-	if (GetOwnerRole() == ROLE_Authority)
-	{
-		OnTeamComponentInitialized.Broadcast(Cast<APlayerState>(Outer));
-	}
 }
 
 void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

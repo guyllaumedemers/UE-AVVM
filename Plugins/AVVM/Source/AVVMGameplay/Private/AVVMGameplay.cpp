@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "AVVMGameplay.h"
 
+#include "DataRegistrySubsystem.h"
 #include "GameplayTagsModule.h"
+#include "Engine/AssetManager.h"
 #include "Misc/Paths.h"
 
 DEFINE_LOG_CATEGORY(LogGameplay);
@@ -28,8 +30,6 @@ static const FString TagPath = (FPaths::ProjectPluginsDir() / TEXT("AVVM/Config/
 
 void FAVVMGameplayModule::StartupModule()
 {
-	IModuleInterface::StartupModule();
-
 	const IGameplayTagsModule& GameplayTagModule = IGameplayTagsModule::Get();
 	if (GameplayTagModule.IsAvailable())
 	{
@@ -39,8 +39,6 @@ void FAVVMGameplayModule::StartupModule()
 
 void FAVVMGameplayModule::ShutdownModule()
 {
-	IModuleInterface::ShutdownModule();
-
 	const bool bIsAvailable = IGameplayTagsModule::IsAvailable();
 	if (!bIsAvailable)
 	{
@@ -52,6 +50,18 @@ void FAVVMGameplayModule::ShutdownModule()
 	{
 		GameplayTagManager->RemoveTagIniSearchPath(TagPath);
 	}
+}
+
+UDataRegistry* FAVVMGameplayModule::GetSetAutomatedTestDataRegistry()
+{
+	static TStrongObjectPtr<UDataRegistry> AutomatedTestDataRegistry = nullptr;
+	if (!AutomatedTestDataRegistry.IsValid())
+	{
+		// TODO @gdemers require fallback. we should always have our test case available,
+		// else we should create them.
+	}
+	
+	return AutomatedTestDataRegistry.Get();
 }
 
 IMPLEMENT_MODULE(FAVVMGameplayModule, AVVMGameplay)

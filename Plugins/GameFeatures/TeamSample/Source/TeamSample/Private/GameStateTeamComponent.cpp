@@ -24,10 +24,10 @@
 #include "AVVMGameState.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
-#include "PlayerStateTeamComponent.h"
 #include "TeamObject.h"
 #include "TeamRule.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
+#include "Engine/StreamableManager.h"
 #include "GameFramework/GameMode.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/PlayerState.h"
@@ -53,9 +53,7 @@ void UGameStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 void UGameStateTeamComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UPlayerStateTeamComponent::OnTeamComponentInitialized.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateTeamComponentInitialized);
-
+	
 	auto* Outer = GetTypedOuter<AAVVMGameState>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -81,8 +79,6 @@ void UGameStateTeamComponent::BeginPlay()
 void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	UPlayerStateTeamComponent::OnTeamComponentInitialized.RemoveAll(this);
 
 	auto* Outer = Cast<AAVVMGameState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -113,25 +109,48 @@ void UGameStateTeamComponent::OnPlayerStateRemoved(APlayerState* NewPlayerState)
 	PendingPlayers.Remove(NewPlayerState);
 }
 
-void UGameStateTeamComponent::OnPlayerStateTeamComponentInitialized(APlayerState* NewPlayerState)
-{
-	PendingPlayers.Add(NewPlayerState);
-}
-
 void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 {
+	const auto OnAsyncLoadComplete = [](const TWeakObjectPtr<UGameStateTeamComponent>& NewGameStateTeamComponent,
+	                                    const TWeakObjectPtr<AAVVMWorldSetting>& NewWorldSettings)
+	{
+		if (!NewGameStateTeamComponent.IsValid() || !NewWorldSettings.IsValid())
+		{
+			return;
+		}
+
+		TSharedPtr<FStreamableHandle> Handle = NewGameStateTeamComponent->StreamableHandle;
+		if (!Handle.IsValid())
+		{
+			return;
+		}
+
+		const auto* RuleClass = Cast<UClass>(Handle->GetLoadedAsset());
+		if (!IsValid(RuleClass))
+		{
+			return;
+		}
+
+		NewGameStateTeamComponent->TeamRule = NewWorldSettings->GetOrCreatePluginRule(TAG_WORLD_RULE_TEAM, RuleClass);
+		NewGameStateTeamComponent->RequestTeams();
+	};
+
 	const UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
 		return;
 	}
 
-	const auto* WorldSetting = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	if (IsValid(WorldSetting))
+	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	if (IsValid(WorldSettings))
 	{
-		TeamRule = WorldSetting->CastRule<UTeamRule>(TAG_WORLD_RULE_TEAM);
+		auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
+		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UTeamRule::StaticClass(), Callback);
 	}
+}
 
+void UGameStateTeamComponent::RequestTeams()
+{
 	// @gdemers we expect your project to have some form of backend from which we can retrieve information
 	// based on GameSession information.
 	FOnBackendTeamRequestCompleteDelegate Callback;
@@ -169,7 +188,7 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 		return;
 	}
 
-	const UTeamRule* Rule = TeamRule.Get();
+	const auto* Rule = Cast<UTeamRule>(TeamRule.Get());
 	if (!IsValid(Rule))
 	{
 		return;

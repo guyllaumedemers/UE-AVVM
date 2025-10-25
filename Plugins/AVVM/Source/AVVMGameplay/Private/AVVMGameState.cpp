@@ -43,3 +43,27 @@ void AAVVMGameState::RemovePlayerState(APlayerState* PlayerState)
 	Super::RemovePlayerState(PlayerState);
 	OnPlayerStateRemoved.Broadcast(PlayerState);
 }
+
+void AAVVMGameState::HandleMatchIsWaitingToStart()
+{
+	Super::HandleMatchIsWaitingToStart();
+	OnMatchWaitingToStart.ExecuteIfBound();
+}
+
+void AAVVMGameState::HandleMatchHasStarted()
+{
+	Super::HandleMatchHasStarted();
+	OnMatchStart.ExecuteIfBound();
+}
+
+void AAVVMGameState::HandleMatchHasEnded()
+{
+	Super::HandleMatchHasEnded();
+	OnMatchEnd.ExecuteIfBound();
+}
+
+void AAVVMGameState::HandleLeavingMap()
+{
+	Super::HandleLeavingMap();
+	OnLeavingMap.ExecuteIfBound();
+}
