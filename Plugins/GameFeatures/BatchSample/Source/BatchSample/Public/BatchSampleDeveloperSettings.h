@@ -21,21 +21,27 @@
 
 #include "CoreMinimal.h"
 
-#include "Batchable.h"
-#include "GameFramework/Actor.h"
+#include "Engine/DeveloperSettings.h"
 
-#include "AutomatedTestBatchableActor.generated.h"
+#include "BatchSampleDeveloperSettings.generated.h"
+
+class UBatchingRule;
 
 /**
  *	Class description:
  *
- *	AAutomatedTestBatchableActor is an Actor class to run behaviour during Automated Testing.
+ *	UBatchSampleDeveloperSettings is developer setting for global access of plugin specific content.
  */
-UCLASS()
-class BATCHSAMPLE_API AAutomatedTestBatchableActor : public AActor,
-                                                     public IBatchable
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UBatchSampleDeveloperSettings"))
+class BATCHSAMPLE_API UBatchSampleDeveloperSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	virtual const AActor* GetSelf() const override;
+public:
+	UFUNCTION(BlueprintCallable)
+	static const TSoftClassPtr<UBatchingRule>& GetBatchingRuleClass();
+
+protected:
+	UPROPERTY(Config, EditDefaultsOnly)
+	TSoftClassPtr<UBatchingRule> BatchingRuleClass = nullptr;
 };

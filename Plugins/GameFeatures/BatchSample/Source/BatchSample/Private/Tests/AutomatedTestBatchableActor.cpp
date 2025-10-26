@@ -19,3 +19,7 @@
 //SOFTWARE.
 #include "AutomatedTestBatchableActor.h"
 
+const AActor* AAutomatedTestBatchableActor::GetSelf() const
+{
+	return this;
+}

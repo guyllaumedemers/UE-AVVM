@@ -24,6 +24,7 @@
 #include "Batchable.h"
 #include "BatchingRule.h"
 #include "BatchSample.h"
+#include "BatchSampleDeveloperSettings.h"
 #include "NativeGameplayTags.h"
 #include "Engine/StreamableManager.h"
 
@@ -129,12 +130,12 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 	}
 
 	const auto Batchable = TScriptInterface<IBatchable>(Actor);
-	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsMarkIgnored())
+	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
 	{
 		return;
 	}
 
-	const int32 BatchIndex = Batchable->GetBatchIndex();
+	const int32 BatchIndex = Batchable->GetOwningBatchIndex();
 	const bool bIsValidIndex = PendingDestroy.IsValidIndex(BatchIndex);
 	if (bIsValidIndex)
 	{
@@ -151,7 +152,7 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	}
 
 	const auto Batchable = TScriptInterface<IBatchable>(Actor);
-	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsMarkIgnored())
+	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
 	{
 		return;
 	}
@@ -173,7 +174,7 @@ void UBatchingSubsystem::Register(AActor* Actor)
 		}
 	}
 
-	Batchable->SetBatchIndex(PendingDestroy.Num());
+	Batchable->SetOwningBatchIndex(PendingDestroy.Num());
 }
 
 void UBatchingSubsystem::Clear()
@@ -217,7 +218,7 @@ void UBatchingSubsystem::CreateBatchingRule()
 	if (IsValid(WorldSettings))
 	{
 		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
-		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UBatchingRule::StaticClass(), Callback);
+		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UBatchSampleDeveloperSettings::GetBatchingRuleClass(), Callback);
 	}
 }
 
@@ -242,7 +243,7 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 	for (auto Iterator = Candidates.CreateIterator(); Iterator; ++Iterator)
 	{
 		const auto Batchable = TScriptInterface<IBatchable>(Iterator->Get());
-		if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsMarkIgnored())
+		if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
 		{
 			Iterator.RemoveCurrentSwap();
 		}

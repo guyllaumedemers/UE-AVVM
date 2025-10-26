@@ -17,25 +17,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "BatchSampleDeveloperSettings.h"
 
-#include "CoreMinimal.h"
-
-#include "Batchable.h"
-#include "GameFramework/Actor.h"
-
-#include "AutomatedTestBatchableActor.generated.h"
-
-/**
- *	Class description:
- *
- *	AAutomatedTestBatchableActor is an Actor class to run behaviour during Automated Testing.
- */
-UCLASS()
-class BATCHSAMPLE_API AAutomatedTestBatchableActor : public AActor,
-                                                     public IBatchable
+const TSoftClassPtr<UBatchingRule>& UBatchSampleDeveloperSettings::GetBatchingRuleClass()
 {
-	GENERATED_BODY()
-
-	virtual const AActor* GetSelf() const override;
-};
+	return GetDefault<UBatchSampleDeveloperSettings>()->BatchingRuleClass;
+}

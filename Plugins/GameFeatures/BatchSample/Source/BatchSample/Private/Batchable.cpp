@@ -19,22 +19,18 @@
 //SOFTWARE.
 #include "Batchable.h"
 
-void IBatchable::SetBatchIndex(const int32 Index)
-{
-	BatchIndex = Index;
-}
-
-int32 IBatchable::GetBatchIndex() const
+int32 IBatchable::GetOwningBatchIndex() const
 {
 	return BatchIndex;
 }
 
-bool IBatchable::IsMarkIgnored() const
+void IBatchable::SetOwningBatchIndex(const int32 Index)
 {
-	return IgnoredInstance;
+	BatchIndex = Index;
 }
 
-void IBatchable::MarkIgnored()
+bool IBatchable::IsPlacedInEditor() const
 {
-	IgnoredInstance = true;
+	const AActor* Self = GetSelf();
+	return IsValid(Self) ? Self->HasAnyFlags(RF_Transient) : false;
 }

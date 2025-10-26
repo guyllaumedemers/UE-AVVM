@@ -32,11 +32,11 @@ void ABatchSampleTest::PrepareTest()
 {
 	Super::PrepareTest();
 
-	const UWorld* World = GetWorld();
-	AssertIsValid(this, TEXT("Expect UWorld to be valid."), World);
+	UWorld* World = GetWorld();
+	AssertIsValid(World, TEXT("Expect UWorld to be valid."), this);
 
 	auto* TestSetting = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	AssertIsValid(this, TEXT("Expect AAVVMWorldSetting to be valid."), TestSetting);
+	AssertIsValid(TestSetting, TEXT("Expect AAVVMWorldSetting to be valid."), this);
 
 	WorldSetting = TestSetting;
 
@@ -44,7 +44,7 @@ void ABatchSampleTest::PrepareTest()
 	AssertEqual_Bool(bShouldCreateRule, true, TEXT("Expect \"AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING\" to be referenced in World Settings."));
 
 	auto* TestSubsystem = UBatchingSubsystem::Get(World);
-	AssertIsValid(this, TEXT("Expect UBatchingSubsystem to be valid. Check UBatchingSubsystem::ShouldCreateSubsystem function definition."), TestSubsystem);
+	AssertIsValid(TestSubsystem, TEXT("Expect UBatchingSubsystem to be valid. Check UBatchingSubsystem::ShouldCreateSubsystem function definition."), this);
 
 	BatchSubsystem = TestSubsystem;
 }

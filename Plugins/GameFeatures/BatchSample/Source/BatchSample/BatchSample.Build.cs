@@ -37,6 +37,7 @@ public class BatchSample : ModuleRules
 				"AVVMGameplay",
 				"Core",
 				"CoreUObject",
+				"DeveloperSettings",
 				"Engine",
 			}
 		);

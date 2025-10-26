@@ -47,15 +47,12 @@ class BATCHSAMPLE_API IBatchable
 	GENERATED_BODY()
 
 public:
-	// @gdemers create mapping between user and its owning batch.
-	int32 GetBatchIndex() const;
-	void SetBatchIndex(const int32 Index);
+	int32 GetOwningBatchIndex() const;
+	void SetOwningBatchIndex(const int32 Index);
+	bool IsPlacedInEditor() const;
 
-	// @gdemers context in which items has been marked for persistency. i.e whenever placed in level
-	// or spawned in level based on actor manually placed in level.
-	bool IsMarkIgnored() const;
-	void MarkIgnored();
-	
+private:
+	// @demers can override but never call in derived type. good example of proper encapsulation.
+	virtual const AActor* GetSelf() const PURE_VIRTUAL(GetSelf, return nullptr;);
 	int32 BatchIndex = INDEX_NONE;
-	bool IgnoredInstance = false;
 };
