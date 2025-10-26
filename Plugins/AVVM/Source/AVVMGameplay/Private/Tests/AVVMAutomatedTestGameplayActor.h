@@ -17,16 +17,37 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Misc/AutomationTest.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "GameFramework/Actor.h"
+#include "Resources/AVVMResourceProvider.h"
+
+#include "AVVMAutomatedTestGameplayActor.generated.h"
+
+class UAVVMAutomatedTestResourceComponent;
 
 /**
  *	Class description:
  *
- *	AVVMResourceManagerComponentTest is an Automated Test running validation on resource loading process.
+ *	AAVVMAutomatedTestGameplayActor is an Actor class to run behaviour during Automated Testing
+ *	specific to testing the resource loading functionality.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, "FunctionalTest.AVVMResourceManagerComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-
-bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
+UCLASS()
+class AVVMGAMEPLAY_API AAVVMAutomatedTestGameplayActor : public AActor,
+                                                         public IAVVMResourceProvider
 {
-	return true;
-}
+	GENERATED_BODY()
+
+public:
+	AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer);
+	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
+
+	void Run() const;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMAutomatedTestResourceComponent> ResourceManagerComponent = nullptr;
+};

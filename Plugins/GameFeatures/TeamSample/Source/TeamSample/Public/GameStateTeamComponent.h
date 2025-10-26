@@ -30,9 +30,9 @@
 class APlayerState;
 struct FAVVMPartyProxy;
 struct FStreamableHandle;
-class UAVVMWorldRule;
 class UPlayerStateTeamComponent;
 class UTeamObject;
+class UTeamRule;
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBackendTeamRequestCompleteDelegate, const bool, bWasSuccess, const TArray<FAVVMPartyProxy>&, NewParties);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReplicatedTeamChangedDelegate, const TArray<UTeamObject*>& NewTeams, const TArray<UTeamObject*>& OldTeams);
@@ -77,7 +77,7 @@ protected:
 	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const UAVVMWorldRule> TeamRule = nullptr;
+	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamChanged")
 	TArray<TObjectPtr<UTeamObject>> Teams;

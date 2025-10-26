@@ -131,7 +131,7 @@ void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 			return;
 		}
 
-		NewGameStateTeamComponent->TeamRule = NewWorldSettings->GetOrCreatePluginRule(TAG_WORLD_RULE_TEAM, RuleClass);
+		NewGameStateTeamComponent->TeamRule = NewWorldSettings->GetOrCreatePluginRule<UTeamRule>(TAG_WORLD_RULE_TEAM, RuleClass);
 		NewGameStateTeamComponent->RequestTeams();
 	};
 
@@ -141,7 +141,7 @@ void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 		return;
 	}
 
-	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
 	if (IsValid(WorldSettings))
 	{
 		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
@@ -188,7 +188,7 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 		return;
 	}
 
-	const auto* Rule = Cast<UTeamRule>(TeamRule.Get());
+	const UTeamRule* Rule = TeamRule.Get();
 	if (!IsValid(Rule))
 	{
 		return;

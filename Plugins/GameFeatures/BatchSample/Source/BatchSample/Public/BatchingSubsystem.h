@@ -26,7 +26,7 @@
 #include "BatchingSubsystem.generated.h"
 
 struct FStreamableHandle;
-class UAVVMWorldRule;
+class UBatchingRule;
 
 /**
  *	Class description:
@@ -60,12 +60,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Register(AActor* Actor);
 
+	UFUNCTION(BlueprintCallable)
+	void Clear();
+
 protected:
 	void CreateBatchingRule();
 	void InitRule();
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const UAVVMWorldRule> BatchingRule = nullptr;
+	TWeakObjectPtr<const UBatchingRule> BatchingRule = nullptr;
 
 	struct FBatchContext
 	{

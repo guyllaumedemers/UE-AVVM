@@ -78,8 +78,12 @@ public:
 	TSharedPtr<FStreamableHandle> AsyncLoadPluginRule(const TSoftClassPtr<UAVVMWorldRule>& RuleClass,
 	                                                  const FStreamableDelegate& Callback) const;
 
-	const UAVVMWorldRule* GetOrCreatePluginRule(const FGameplayTag& RuleTag,
-	                                            const UClass* RuleClass);
+	template <typename TRule>
+	const TRule* GetOrCreatePluginRule(const FGameplayTag& RuleTag,
+	                                   const UClass* RuleClass);
+
+	template <typename TRule>
+	const TRule* GetRule(const FGameplayTag& RuleTag) const;
 	
 	UFUNCTION(BlueprintCallable)
 	const UAVVMWorldRule* GetRule(const FGameplayTag& RuleTag) const;
@@ -89,9 +93,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool DoesProjectRuleClassExist(const UClass* BaseRuleClass) const;
-
-	template<typename TRule>
-	const TRule* CastRule(const FGameplayTag& RuleTag) const;
 	
 protected:
 	TArray<FSoftObjectPath> GetProjectRulePaths() const;
@@ -110,7 +111,19 @@ protected:
 };
 
 template <typename TRule>
-const TRule* AAVVMWorldSetting::CastRule(const FGameplayTag& RuleTag) const
+const TRule* AAVVMWorldSetting::GetOrCreatePluginRule(const FGameplayTag& RuleTag, const UClass* RuleClass)
+{
+	TObjectPtr<const UAVVMWorldRule>& OutRule = RuntimeRules.FindOrAdd(RuleTag);
+	if (!IsValid(OutRule))
+	{
+		OutRule = NewObject<UAVVMWorldRule>(this, RuleClass);
+	}
+
+	return Cast<TRule>(OutRule);
+}
+
+template <typename TRule>
+const TRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) const
 {
 	return Cast<TRule>(GetRule(RuleTag));
 }

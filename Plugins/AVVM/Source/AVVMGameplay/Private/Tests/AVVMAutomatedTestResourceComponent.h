@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,37 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class BatchSample : ModuleRules
+#include "Resources/AVVMResourceManagerComponent.h"
+
+#include "AVVMAutomatedTestResourceComponent.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMAutomatedTestResourceComponent is an Actor component that allow manual request to resource
+ *	loading and offer hooks into the loading process for monitoring.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMAutomatedTestResourceComponent : public UAVVMResourceManagerComponent
 {
-	public BatchSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"Engine",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"GameplayTags"
-			}
-		);
-	}
-}
+public:
+	UAVVMAutomatedTestResourceComponent(const FObjectInitializer& ObjectInitializer);
+};

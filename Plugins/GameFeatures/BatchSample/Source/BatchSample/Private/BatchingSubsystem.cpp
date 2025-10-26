@@ -122,7 +122,7 @@ UBatchingSubsystem* UBatchingSubsystem::Get(const UWorld* World)
 
 void UBatchingSubsystem::UnRegister(AActor* Actor)
 {
-	const auto* Rule = Cast<UBatchingRule>(BatchingRule.Get());
+	const UBatchingRule* Rule = BatchingRule.Get();
 	if (!IsValid(Rule) || !Rule->DoesQualifyForBatchDestroy(Actor))
 	{
 		return;
@@ -144,7 +144,7 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 
 void UBatchingSubsystem::Register(AActor* Actor)
 {
-	const auto* Rule = Cast<UBatchingRule>(BatchingRule.Get());
+	const UBatchingRule* Rule = BatchingRule.Get();
 	if (!IsValid(Rule) || !Rule->DoesQualifyForBatchDestroy(Actor))
 	{
 		return;
@@ -176,6 +176,11 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	Batchable->SetBatchIndex(PendingDestroy.Num());
 }
 
+void UBatchingSubsystem::Clear()
+{
+	PendingDestroy.Empty();
+}
+
 void UBatchingSubsystem::CreateBatchingRule()
 {
 	const auto OnAsyncLoadComplete = [](const TWeakObjectPtr<UBatchingSubsystem>& NewBatchingSubsystem,
@@ -198,7 +203,7 @@ void UBatchingSubsystem::CreateBatchingRule()
 			return;
 		}
 
-		NewBatchingSubsystem->BatchingRule = Cast<UBatchingRule>(NewWorldSettings->GetOrCreatePluginRule(TAG_WORLD_RULE_BATCHING, RuleClass));
+		NewBatchingSubsystem->BatchingRule = NewWorldSettings->GetOrCreatePluginRule<UBatchingRule>(TAG_WORLD_RULE_BATCHING, RuleClass);
 		NewBatchingSubsystem->InitRule();
 	};
 
@@ -208,7 +213,7 @@ void UBatchingSubsystem::CreateBatchingRule()
 		return;
 	}
 
-	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
 	if (IsValid(WorldSettings))
 	{
 		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
@@ -218,7 +223,7 @@ void UBatchingSubsystem::CreateBatchingRule()
 
 void UBatchingSubsystem::InitRule()
 {
-	const auto* Rule = Cast<UBatchingRule>(BatchingRule.Get());
+	const UBatchingRule* Rule = BatchingRule.Get();
 	if (IsValid(Rule))
 	{
 		MaxLifetimeAllowedToUndersizeBatch = Rule->GetMaxLifetimeAllowedToUndersizeBatch();

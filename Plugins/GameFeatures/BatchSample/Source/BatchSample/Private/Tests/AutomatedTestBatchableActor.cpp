@@ -17,17 +17,5 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Misc/AutomationTest.h"
+#include "AutomatedTestBatchableActor.h"
 
-/**
- *	Class description:
- *
- *	AVVMAbilitySystemComponentTest is an Automated Test running validation on ability loading process and attribute initialization.
- */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, "FunctionalTest.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-
-bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
-{
-	// Make the test pass by returning true, or fail by returning false.
-	return true;
-}
