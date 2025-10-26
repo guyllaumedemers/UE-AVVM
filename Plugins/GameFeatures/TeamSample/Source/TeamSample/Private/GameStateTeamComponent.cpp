@@ -141,10 +141,10 @@ void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 		return;
 	}
 
-	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
 	if (IsValid(WorldSettings))
 	{
-		auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
+		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
 		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UTeamRule::StaticClass(), Callback);
 	}
 }

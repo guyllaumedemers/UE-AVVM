@@ -52,14 +52,13 @@ TSharedPtr<FStreamableHandle> AAVVMWorldSetting::AsyncLoadPluginRule(const TSoft
 const UAVVMWorldRule* AAVVMWorldSetting::GetOrCreatePluginRule(const FGameplayTag& RuleTag,
                                                                const UClass* RuleClass)
 {
-	const auto* Rule = NewObject<UAVVMWorldRule>(this, RuleClass);
-	if (IsValid(Rule))
+	TObjectPtr<const UAVVMWorldRule>& OutRule = RuntimeRules.FindOrAdd(RuleTag);
+	if (!IsValid(OutRule))
 	{
-		TObjectPtr<const UAVVMWorldRule>& OutRule = RuntimeRules.FindOrAdd(RuleTag);
-		OutRule = Rule;
+		OutRule = NewObject<UAVVMWorldRule>(this, RuleClass);
 	}
 
-	return Rule;
+	return OutRule;
 }
 
 const UAVVMWorldRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) const
