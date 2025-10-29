@@ -55,9 +55,25 @@ void AAVVMPlayerState::ClientInitialize(class AController* C)
 	{
 		ASC->InitAbilityActorInfo(this, this);
 	}
+
+	// @gdemers ensure proper initialization of UI specific to this entity.
+	const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(this);
+
+	FAVVMNotificationContextArgs Args;
+	Args.ChannelTag = RegisteredChannels.PostPlayerControllerClientInitializedTag;
+	Args.Payload = FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner);
+	// @gdemers enforce update only on local client.
+	Args.Target = this;
+
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, Args);
 }
 
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Implementation() const
+{
+	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }

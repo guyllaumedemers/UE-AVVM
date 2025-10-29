@@ -23,7 +23,9 @@
 
 #include "AbilitySystemInterface.h"
 #include "DataRegistryId.h"
+#include "GameplayTagContainer.h"
 #include "ModularCharacter.h"
+#include "Data/AVVMActorPayload.h"
 #include "Resources/AVVMResourceProvider.h"
 
 #include "AVVMCharacter.generated.h"
@@ -34,12 +36,31 @@ class UAVVMAbilitySystemComponent;
 /**
  *	Class description:
  *
+ *	FAVVMCharacterChannelAggregator is a context struct that aggregate channels relevant to ACharacter
+ *	and publish via the AVVMNotification subsystem to registered View Models.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMCharacterChannelAggregator
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PostPlayerControllerReplicationTag = FGameplayTag::EmptyTag;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PostPlayerStateReplicationTag = FGameplayTag::EmptyTag;
+};
+
+/**
+ *	Class description:
+ *
  *	AAVVMCharacter is a derived impl of the ACharacter class that manage resource loading request and forward ASC request to its owning
  *	APlayerState.
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
                                         public IAbilitySystemInterface,
+                                        public IAVVMCanExposeActorPayload,
                                         public IAVVMResourceProvider
 {
 	GENERATED_BODY()
@@ -56,14 +77,23 @@ public:
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// IAVVMCanExposeActorPayload
+	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
+
 	// IAVVMResourceProvider
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 
 protected:
+	virtual void OnRep_Controller() override;
+	virtual void OnRep_PlayerState() override;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FAVVMCharacterChannelAggregator RegisteredChannels = FAVVMCharacterChannelAggregator();
+	
 	// @gdemers ActorDefinition allow Actor class overrides, so the ACharacter hierarchy could be
 	// replaced at runtime if setup correctly to support character swapping.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
 	FDataRegistryId ActorDefinitionId = FDataRegistryId();
 
 	// @gdemers Resource Component handle initialization of our Character.

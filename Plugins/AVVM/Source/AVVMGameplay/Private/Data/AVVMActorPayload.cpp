@@ -17,4 +17,11 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/VVMActorPayload.h"
+#include "Data/AVVMActorPayload.h"
+
+TInstancedStruct<FAVVMActorContext> IAVVMCanExposeActorPayload::Empty;
+
+FAVVMActorPayload::FAVVMActorPayload(const TScriptInterface<const IAVVMCanExposeActorPayload>& NewPayloadOwner)
+	: PayloadOwner(NewPayloadOwner)
+{
+}

@@ -89,7 +89,7 @@ public:
 	const UAVVMWorldRule* GetRule(const FGameplayTag& RuleTag) const;
 	
 	UFUNCTION(BlueprintCallable)
-	bool ShouldCreateRule(const FGameplayTag& RuleTag) const;
+	bool ShouldCreatePluginRule(const FGameplayTag& RuleTag) const;
 	
 	UFUNCTION(BlueprintCallable)
 	bool DoesProjectRuleClassExist(const UClass* BaseRuleClass) const;
@@ -98,8 +98,8 @@ protected:
 	TArray<FSoftObjectPath> GetProjectRulePaths() const;
 	void AsyncLoadProjectRules(const TArray<FSoftObjectPath>& SoftObjectPaths);
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="References Project and Plugins Rule tags."))
-	TSet<FGameplayTag> AllRuleTags;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="References Plugins Rule tags."))
+	TSet<FGameplayTag> AllowedPluginRuleTags;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TMap<FGameplayTag, TSoftClassPtr<UAVVMWorldRule>> ProjectRuleClassPerTag;

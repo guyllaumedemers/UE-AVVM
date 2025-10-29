@@ -24,10 +24,26 @@
 #include "AbilitySystemInterface.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularPlayerState.h"
+#include "Data/AVVMActorPayload.h"
 
 #include "AVVMPlayerState.generated.h"
 
 class UAVVMAbilitySystemComponent;
+
+/**
+ *	Class description:
+ *
+ *	FAVVMPlayerStateChannelAggregator is a context struct that aggregate channels relevant to APlayerState
+ *	and publish via the AVVMNotification subsystem to registered View Models.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMPlayerStateChannelAggregator
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PostPlayerControllerClientInitializedTag = FGameplayTag::EmptyTag;
+};
 
 /**
  *	Class description:
@@ -43,6 +59,7 @@ class UAVVMAbilitySystemComponent;
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
                                           public IAbilitySystemInterface,
+                                          public IAVVMCanExposeActorPayload,
                                           public IAVVMQuicktimeEventPlayerStateInterface
 {
 	GENERATED_BODY()
@@ -59,7 +76,13 @@ public:
 	// ASC (good for state persistency between Pawn possession!).
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// IAVVMCanExposeActorPayload
+	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
+
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
 };
