@@ -57,7 +57,7 @@ public:
 	const FGameplayTag& GetRuleTag() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag RuleTag = FGameplayTag::EmptyTag;
 };
 
@@ -98,10 +98,10 @@ protected:
 	TArray<FSoftObjectPath> GetProjectRulePaths() const;
 	void AsyncLoadProjectRules(const TArray<FSoftObjectPath>& SoftObjectPaths);
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="References Plugins Rule tags."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="References Plugins Rule tags."))
 	TSet<FGameplayTag> AllowedPluginRuleTags;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TMap<FGameplayTag, TSoftClassPtr<UAVVMWorldRule>> ProjectRuleClassPerTag;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)

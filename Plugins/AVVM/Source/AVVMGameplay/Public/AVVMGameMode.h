@@ -32,6 +32,26 @@ class AGameStateBase;
 /**
  *	Class description:
  *
+ *	FAVVMGameModeRuleTagAggregator is a context struct that aggregate Rule tags relevant to AGameMode execution.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMGameModeRuleTagAggregator
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag MatchStartTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag MatchEndTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag MatchProgressTag = FGameplayTag::EmptyTag;
+};
+
+/**
+ *	Class description:
+ *
 *	AAVVMGameMode is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
  *	
  *	IMPORTANT : Replicated systems SHOULD BE managed through a component added via GFP. Unreal's USubsystem derived classes CANNOT be replicated! Doing this approach makes for a more modular system
@@ -63,15 +83,9 @@ protected:
 	
 	UFUNCTION()
 	void OnGameStateSet(AGameStateBase* NewGameState);
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag RuleTag_MatchStart = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag RuleTag_MatchEnd = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGameplayTag RuleTag_MatchProgress = FGameplayTag::EmptyTag;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AAVVMWorldSetting> WorldSetting = nullptr;

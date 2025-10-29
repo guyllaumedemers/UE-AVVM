@@ -66,7 +66,7 @@ public:
 	const TInstancedStruct<FAVVMCheatData>& GetData() const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FAVVMCheatData> CheatData;
 };
 
@@ -89,6 +89,6 @@ struct AVVMGAMEPLAY_API FAVVMCheatDataTableRow : public FAVVMDataTableRow
 
 	// @gdemers softptr to the resource asset that contain data specific to the payload
 	// we expect the CheatExtension to be provided with.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UAVVMCheatDataAsset> CheatDataAsset = nullptr;
 };
