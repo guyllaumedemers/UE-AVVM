@@ -84,10 +84,10 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UAVVMProgressBarWidget> ProgressBar = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UCommonLazyImage> InputImage = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UCommonTextBlock> PromptText = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

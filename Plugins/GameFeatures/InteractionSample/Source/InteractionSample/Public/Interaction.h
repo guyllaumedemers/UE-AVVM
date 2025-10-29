@@ -73,13 +73,13 @@ public:
 	const AActor* GetInstigator() const;
 
 protected:
-	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<const AActor> Target = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<const AActor> Instigator = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadWrite, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	bool bIsInteractable = true;
 
 private:

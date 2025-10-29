@@ -42,6 +42,6 @@ public:
 	static const TSoftClassPtr<UBatchingRule>& GetBatchingRuleClass();
 
 protected:
-	UPROPERTY(Config, EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UBatchingRule> BatchingRuleClass = nullptr;
 };
