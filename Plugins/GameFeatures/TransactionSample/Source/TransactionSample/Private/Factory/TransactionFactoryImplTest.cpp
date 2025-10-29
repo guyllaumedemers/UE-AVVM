@@ -26,22 +26,6 @@ FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
 {
 }
 
-TInstancedStruct<FTransactionPayload> FTransactionPayloadTest::Init(const FString& NewPayload)
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
-	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
-	{
-		return FTransactionPayload::Empty;
-	}
-
-	FTransactionPayloadTest Test;
-	Test.DummyProperty = JsonData->GetIntegerField(TEXT("DummyProperty"));
-
-	return FTransactionPayload::Make<FTransactionPayloadTest>(Test.DummyProperty);
-}
-
 FString FTransactionPayloadTest::ToString() const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
@@ -60,6 +44,16 @@ FString FTransactionPayloadTest::ToString() const
 
 TInstancedStruct<FTransactionPayload> UTransactionFactoryImplTest::CreatePayload(const FString& NewPayload) const
 {
-	auto Instanced = FTransactionPayloadTest();
-	return Instanced.Init(NewPayload);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return FTransactionPayload::Empty;
+	}
+
+	FTransactionPayloadTest Test;
+	Test.DummyProperty = JsonData->GetIntegerField(TEXT("DummyProperty"));
+
+	return FTransactionPayload::Make<FTransactionPayloadTest>(Test.DummyProperty);
 }

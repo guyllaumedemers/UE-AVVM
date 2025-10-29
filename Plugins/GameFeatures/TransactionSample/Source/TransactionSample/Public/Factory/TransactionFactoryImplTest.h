@@ -37,7 +37,6 @@ struct TRANSACTIONSAMPLE_API FTransactionPayloadTest : public FTransactionPayloa
 
 	FTransactionPayloadTest() = default;
 	explicit FTransactionPayloadTest(const int32 NewDummyProperty);
-	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) override;
 	virtual FString ToString() const override;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

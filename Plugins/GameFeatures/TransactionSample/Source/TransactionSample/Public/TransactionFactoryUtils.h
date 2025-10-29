@@ -48,7 +48,6 @@ struct TRANSACTIONSAMPLE_API FTransactionPayload
 
 	virtual ~FTransactionPayload() = default;
 	virtual FString ToString() const PURE_VIRTUAL(ToString, return FString(););
-	virtual TInstancedStruct<FTransactionPayload> Init(const FString& NewPayload) PURE_VIRTUAL(Init, return Empty;);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FTransactionPayload>::Make<T>
 	template <typename TChild, typename... TArgs>
