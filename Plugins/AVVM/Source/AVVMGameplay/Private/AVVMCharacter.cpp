@@ -20,6 +20,7 @@
 #include "AVVMCharacter.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMUtilityFunctionLibrary.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorPayload.h"
@@ -66,7 +67,8 @@ UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 
 TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Implementation() const
 {
-	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
+	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid<const IAVVMCanExposeActorPayload>(OwningActor.Get());
+	return bIsValid ? IAVVMCanExposeActorPayload::Execute_GetExposedActorContext(OwningActor.Get()) : IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 
 TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionResourceIds_Implementation() const
