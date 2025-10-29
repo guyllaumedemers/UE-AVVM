@@ -40,7 +40,7 @@ void ABatchSampleTest::PrepareTest()
 
 	WorldSetting = TestSetting;
 
-	const bool bShouldCreateRule = TestSetting->ShouldCreateRule(AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING);
+	const bool bShouldCreateRule = TestSetting->ShouldCreatePluginRule(AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING);
 	AssertEqual_Bool(bShouldCreateRule, true, TEXT("Expect \"AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING\" to be referenced in World Settings."));
 
 	auto* TestSubsystem = UBatchingSubsystem::Get(World);

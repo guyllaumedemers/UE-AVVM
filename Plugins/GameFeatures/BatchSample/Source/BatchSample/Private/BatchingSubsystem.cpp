@@ -42,7 +42,7 @@ bool UBatchingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	bool bHasAuthority = !World->IsNetMode(NM_Client);
 
 	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	if (!IsValid(WorldSettings) || !WorldSettings->ShouldCreateRule(TAG_WORLD_RULE_BATCHING))
+	if (!IsValid(WorldSettings) || !WorldSettings->ShouldCreatePluginRule(TAG_WORLD_RULE_BATCHING))
 	{
 		return false;
 	}

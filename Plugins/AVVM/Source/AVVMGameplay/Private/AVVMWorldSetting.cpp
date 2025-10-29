@@ -62,9 +62,9 @@ const UAVVMWorldRule* AAVVMWorldSetting::GetRule(const FGameplayTag& RuleTag) co
 	}
 }
 
-bool AAVVMWorldSetting::ShouldCreateRule(const FGameplayTag& RuleTag) const
+bool AAVVMWorldSetting::ShouldCreatePluginRule(const FGameplayTag& RuleTag) const
 {
-	return AllRuleTags.Contains(RuleTag);
+	return AllowedPluginRuleTags.Contains(RuleTag);
 }
 
 bool AAVVMWorldSetting::DoesProjectRuleClassExist(const UClass* BaseRuleClass) const
