@@ -63,6 +63,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Clear();
 
+#if WITH_AUTOMATION_TESTS
+	bool IsEmpty() const;
+#endif
+
 protected:
 	void CreateBatchingRule();
 	void InitRule();

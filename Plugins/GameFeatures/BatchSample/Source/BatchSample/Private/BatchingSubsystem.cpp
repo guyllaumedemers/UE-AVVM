@@ -64,7 +64,7 @@ void UBatchingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UBatchingSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
-	PendingDestroy.Empty();
+	Clear();
 }
 
 void UBatchingSubsystem::Tick(float DeltaTime)
@@ -179,8 +179,16 @@ void UBatchingSubsystem::Register(AActor* Actor)
 
 void UBatchingSubsystem::Clear()
 {
+	StreamableHandle.Reset();
 	PendingDestroy.Empty();
 }
+
+#if WITH_AUTOMATION_TESTS
+bool UBatchingSubsystem::IsEmpty() const
+{
+	return PendingDestroy.IsEmpty();
+}
+#endif
 
 void UBatchingSubsystem::CreateBatchingRule()
 {
