@@ -32,5 +32,5 @@ void IBatchable::SetOwningBatchIndex(const int32 Index)
 bool IBatchable::IsPlacedInEditor() const
 {
 	const AActor* Self = GetSelf();
-	return IsValid(Self) ? Self->HasAnyFlags(RF_Transient) : false;
+	return IsValid(Self) ? Self->bNetStartup : false;
 }

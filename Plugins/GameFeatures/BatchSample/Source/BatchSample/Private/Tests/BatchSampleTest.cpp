@@ -73,9 +73,10 @@ void ABatchSampleTest::Tick(float DeltaSeconds)
 
 	if (bDoesTestRun)
 	{
+		EvaluateTestPredicate();
 		return;
 	}
-	
+
 	RequestRuleUntilAvailable();
 	if (HasRule())
 	{
@@ -107,14 +108,14 @@ void ABatchSampleTest::RequestRuleUntilAvailable()
 void ABatchSampleTest::RunTest_Internal()
 {
 	bDoesTestRun = true;
-	
+
 	UBatchingSubsystem* TestSubsystem = BatchSubsystem.Get();
 	if (!IsValid(TestSubsystem))
 	{
 		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UBatchingSubsystem to be valid."));
 		return;
 	}
-	
+
 	const UBatchingRule* TestRule = BatchRule.Get();
 	if (!IsValid(TestRule))
 	{
@@ -135,17 +136,73 @@ void ABatchSampleTest::RunTest_Internal()
 	for (TActorIterator<AAutomatedTestBatchableActor> Iterator(World); Iterator; ++Iterator)
 	{
 		AAutomatedTestBatchableActor* TestActor = *Iterator;
-		IgnoredWorldActors.Add(TestActor);
+		if (!IsValid(TestActor))
+		{
+			continue;
+		}
+
 		TestSubsystem->Register(TestActor);
+		IgnoredWorldActors.Add(TestActor);
 	}
 
 	TArray<AAutomatedTestBatchableActor*> TestActors;
 	for (int32 i = 0; i < BatchRule->GetMaxSizePerBatchDestroy(); ++i)
 	{
-		auto* TestActor = World->SpawnActor<AAutomatedTestBatchableActor>();
-		TestActors.Add(TestActor);
+		auto* TestActor = World->SpawnActor<AAutomatedTestBatchableActor>(TestActorClass);
+		if (!IsValid(TestActor))
+		{
+			continue;
+		}
+
+		FVector Origin, BoxExtend;
+		TestActor->GetActorBounds(false, Origin, BoxExtend);
+
+		const FVector Displacement = (FMath::RandRange(0.f, 1500.f) * FVector::ForwardVector) + (FMath::RandRange(0.f, 1500.f) * FVector::RightVector) + (FVector::UpVector * BoxExtend.Z);
+		TestActor->SetActorLocation(Origin + Displacement);
+
 		TestSubsystem->Register(TestActor);
+		TestActors.Add(TestActor);
+	}
+}
+
+void ABatchSampleTest::EvaluateTestPredicate()
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UWorld to be valid."));
+		return;
 	}
 
-	// TODO @gdemers Finish this impl. Dont have much time today.
+	UBatchingSubsystem* TestSubsystem = BatchSubsystem.Get();
+	if (!IsValid(TestSubsystem))
+	{
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UBatchingSubsystem to be valid."));
+		return;
+	}
+
+#if WITH_AUTOMATION_TESTS
+	const bool bIsEmpty = TestSubsystem->IsEmpty();
+	if (!bIsEmpty)
+	{
+		return;
+	}
+
+	TArray<AAutomatedTestBatchableActor*> WorldActors;
+	for (TActorIterator<AAutomatedTestBatchableActor> Iterator(World); Iterator; ++Iterator)
+	{
+		AAutomatedTestBatchableActor* TestActor = *Iterator;
+		if (IsValid(TestActor))
+		{
+			WorldActors.Add(TestActor);
+		}
+	}
+
+	const bool bAreEqual = (WorldActors.Num() == IgnoredWorldActors.Num());
+	const EFunctionalTestResult TestResult = bAreEqual ? EFunctionalTestResult::Succeeded : EFunctionalTestResult::Failed;
+	const FString Msg = bAreEqual ? TEXT("Batch Destroy process behaved has expected.") : TEXT("Expected World actors to be ignored, and not destroyed. Or Actors from batch weren't fully destroyed.");
+	FinishTest(TestResult, Msg);
+#else
+	FinishTest(EFunctionalTestResult::Succeeded, TEXT("Batch Destroy process behaved has expected."));
+#endif
 }

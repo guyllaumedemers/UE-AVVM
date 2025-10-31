@@ -51,6 +51,10 @@ protected:
 	bool HasRule() const;
 	void RequestRuleUntilAvailable();
 	void RunTest_Internal();
+	void EvaluateTestPredicate();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AAutomatedTestBatchableActor> TestActorClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UBatchingSubsystem> BatchSubsystem = nullptr;
