@@ -46,9 +46,6 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
 	UTEST_NOT_NULL("UWorld.", World)
 
-	auto* TestSubsystem = UAVVMNotificationSubsystem::Get(World);
-	UTEST_NOT_NULL("UAVVMNotificationSubsystem.", TestSubsystem)
-
 	// @gdemers create test actors.
 	TArray<AAVVMAutomatedTestActor*> TestActors;
 	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
@@ -116,9 +113,6 @@ bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 #if WITH_EDITOR && WITH_AUTOMATION_TESTS
 	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
 	UTEST_NOT_NULL("UWorld.", World)
-
-	auto* TestSubsystem = UAVVMSubsystem::Get(World);
-	UTEST_NOT_NULL("UAVVMSubsystem.", TestSubsystem)
 
 	// @gdemers create test actors.
 	TArray<AAVVMAutomatedTestActor*> TestActors;

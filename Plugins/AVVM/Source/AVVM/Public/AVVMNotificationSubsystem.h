@@ -124,8 +124,6 @@ public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	static UAVVMNotificationSubsystem* Get(const UObject* WorldContextObject);
-
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_UnregisterObserver(const UObject* WorldContextObject,
 	                                      const FAVVMObserverContextArgs& ObserverContext);
@@ -149,6 +147,9 @@ public:
 #endif
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	static UAVVMNotificationSubsystem* Get(const UObject* WorldContextObject);
+	
 	struct FAVVMObservers
 	{
 		~FAVVMObservers();

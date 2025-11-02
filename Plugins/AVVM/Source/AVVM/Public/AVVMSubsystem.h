@@ -61,8 +61,6 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	static UAVVMSubsystem* Get(const UWorld* WorldContext);
-
 	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
 	static bool Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context);
 	
@@ -75,6 +73,9 @@ public:
 #endif
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	static UAVVMSubsystem* Get(const UWorld* WorldContext);
+	
 	struct FAVVMViewModelKVP
 	{
 		~FAVVMViewModelKVP();
