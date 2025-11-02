@@ -60,7 +60,7 @@ bool FAVVMRunResourceManagerTestCommand::Update()
  *
  *	AVVMResourceManagerComponentTest is an Automated Test running validation on resource loading process.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, "FunctionalTest.AVVMResourceManagerComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, "AutomatedTest.CustomGroup.AVVMResourceManagerComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 {
@@ -75,6 +75,8 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 	UTEST_VALID("TSharedPtr<FAVVMResourceManagerTestHelper>", TestHelper)
 
 	ADD_LATENT_AUTOMATION_COMMAND(FAVVMRunResourceManagerTestCommand(TestHelper));
+
+	World->DestroyWorld(true);
 #endif
 	return true;
 }
@@ -84,7 +86,7 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
  *
  *	AVVMAbilitySystemComponentTest is an Automated Test running validation on ability loading process and attribute initialization.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, "FunctionalTest.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, "AutomatedTest.CustomGroup.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
 {

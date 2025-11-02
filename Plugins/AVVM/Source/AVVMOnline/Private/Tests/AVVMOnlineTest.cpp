@@ -35,7 +35,7 @@
  *
  *	AVVMOnlineTest is an Automated Test running validation on the online api.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMOnlineTest, "FunctionalTest.AVVMOnlineTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMOnlineTest, "AutomatedTest.CustomGroup.AVVMOnlineTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool AVVMOnlineTest::RunTest(const FString& Parameters)
 {

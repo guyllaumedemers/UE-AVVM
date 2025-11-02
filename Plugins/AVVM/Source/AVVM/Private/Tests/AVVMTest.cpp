@@ -38,7 +38,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG, "FunctionalTest.Noti
  *
  *	AVVMNotificationSubsystemTest is an Automated Test running validation on system feature.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMNotificationSubsystemTest, "FunctionalTest.AVVMNotificationSubsystemTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMNotificationSubsystemTest, "AutomatedTest.CustomGroup.AVVMNotificationSubsystemTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 {
@@ -99,7 +99,7 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 0)
 	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), INDEX_NONE)
 
-	TestActors.Reset();
+	World->DestroyWorld(true);
 #endif
 	return true;
 }
@@ -109,7 +109,7 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
  *
  *	AVVMSubsystemTest is an Automated Test running validation on system feature.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMSubsystemTest, "FunctionalTest.AVVMSubsystemTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMSubsystemTest, "AutomatedTest.CustomGroup.AVVMSubsystemTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 {
@@ -149,6 +149,7 @@ bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetActorCount(World), 0)
 	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetPresentersCount(World), 0)
 
+	World->DestroyWorld(true);
 #endif
 	return true;
 }
