@@ -146,7 +146,7 @@ void ABatchSampleTest::RunTest_Internal()
 	}
 
 	TArray<AAutomatedTestBatchableActor*> TestActors;
-	for (int32 i = 0; i < BatchRule->GetMaxSizePerBatchDestroy(); ++i)
+	for (int32 i = 0; i < FMath::CeilToInt(BatchRule->GetMaxSizePerBatchDestroy() * 1.5f)/*allow a 2nd batch that's undersized*/; ++i)
 	{
 		auto* TestActor = World->SpawnActor<AAutomatedTestBatchableActor>(TestActorClass);
 		if (!IsValid(TestActor))
