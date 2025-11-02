@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,39 +17,5 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "AutomatedTestTeamActor.h"
 
-using UnrealBuildTool;
-
-public class TeamSample : ModuleRules
-{
-	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"IrisCore",
-				"GameplayTags"
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMOnline"
-			}
-		);
-	}
-}

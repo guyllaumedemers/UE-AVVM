@@ -96,7 +96,7 @@ public:
 	FOnTransactionRecorded TransactionRecordedDelegate;
 
 protected:
-	static UGameStateTransactionHistory* GetTransactionHistory(const UObject* WorldContextObject);
+	static UGameStateTransactionHistory* GetActorComponent(const UObject* WorldContextObject);
 	void CreateAndRecordTransaction(const FTransactionContextArgs& Args);
 	void RemoveAllTransactionOfType(const AActor* NewTarget, const ETransactionType NewTransactionType);
 	void RemoveAllTransactions(const AActor* NewTarget);

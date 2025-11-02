@@ -31,7 +31,10 @@
 #include "GameFramework/GameMode.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+
+TArray<FOnReplicatedTeamChangedDelegate::FDelegate> UGameStateTeamComponent::DeferredRegistrations;
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAM, "WorldRule.Team");
@@ -74,11 +77,21 @@ void UGameStateTeamComponent::BeginPlay()
 	}
 
 	OwningOuter = Outer;
+
+	for (const FOnReplicatedTeamChangedDelegate::FDelegate& DeferredContext : DeferredRegistrations)
+	{
+		if (DeferredContext.IsBound())
+		{
+			OnReplicatedTeamChanged.Add(DeferredContext);
+		}
+	}
 }
 
 void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	DeferredRegistrations.Reset();
 
 	auto* Outer = Cast<AAVVMGameState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -97,6 +110,37 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Outer->OnPlayerStateRemoved.RemoveAll(this);
 		Outer->OnPlayerStateAdded.RemoveAll(this);
 	}
+}
+
+void UGameStateTeamComponent::Static_BindOnReplicatedTeamChanged(const UObject* WorldContextObject,
+                                                                 const FOnReplicatedTeamChangedDelegate::FDelegate& Callback)
+{
+	UGameStateTeamComponent* TeamComponent = GetActorComponent(WorldContextObject);
+	if (IsValid(TeamComponent))
+	{
+		TeamComponent->OnReplicatedTeamChanged.Add(Callback);
+	}
+	else
+	{
+		DeferredRegistrations.Add(Callback);
+	}
+}
+
+UGameStateTeamComponent* UGameStateTeamComponent::GetActorComponent(const UObject* WorldContextObject)
+{
+	static TWeakObjectPtr<UGameStateTeamComponent> TeamComponent = nullptr;
+	if (TeamComponent.IsValid())
+	{
+		return TeamComponent.Get();
+	}
+
+	const AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
+	if (IsValid(GameState))
+	{
+		TeamComponent = GameState->GetComponentByClass<UGameStateTeamComponent>();
+	}
+
+	return TeamComponent.Get();
 }
 
 void UGameStateTeamComponent::OnPlayerStateAdded(APlayerState* NewPlayerState)
@@ -175,7 +219,7 @@ void UGameStateTeamComponent::GetBackendTeams(const FOnBackendTeamRequestComplet
 	const AGameSession* GameSession = GameMode->GameSession;
 	if (IsValid(GameSession))
 	{
-		BP_RequestGameSesionParties(GameSession->SessionName, Callback);
+		BP_RequestGameSessionParties(GameSession->SessionName, Callback);
 	}
 }
 

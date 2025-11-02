@@ -41,7 +41,7 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
 	UTEST_NOT_NULL("UWorld.", World)
 
-	AGameStateBase* GameState = World->SpawnActor<AGameStateBase>();
+	auto* GameState = World->SpawnActor<AGameStateBase>();
 	UTEST_NOT_NULL("AGameStateBase.", GameState)
 
 	// @gdemers required manual registration.

@@ -25,6 +25,10 @@
 
 #include "TeamSampleTest.generated.h"
 
+class AAutomatedTestTeamActor;
+class AAVVMWorldSetting;
+class UTeamRule;
+
 /**
  *	Class description:
  *
@@ -35,4 +39,28 @@ UCLASS()
 class TEAMSAMPLE_API ATeamSampleTest : public AFunctionalTest
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void PrepareTest() override;
+	virtual bool IsReady_Implementation() override;
+	virtual void StartTest() override;
+	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
+	virtual void Tick(float DeltaSeconds) override;
+
+	bool HasRule() const;
+	void RequestRuleUntilAvailable();
+	void RunTest_Internal();
+	void EvaluateTestPredicate();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AAutomatedTestTeamActor> TestActorClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const AAVVMWorldSetting> WorldSetting = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bDoesTestRun = false;
 };

@@ -54,9 +54,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	FOnReplicatedTeamChangedDelegate OnReplicatedTeamChanged;
+	static void Static_BindOnReplicatedTeamChanged(const UObject* WorldContextObject,
+	                                               const FOnReplicatedTeamChangedDelegate::FDelegate& Callback);
 
 protected:
+	static UGameStateTeamComponent* GetActorComponent(const UObject* WorldContextObject);
+	
 	UFUNCTION()
 	void OnPlayerStateAdded(APlayerState* NewPlayerState);
 
@@ -68,7 +71,7 @@ protected:
 	void GetBackendTeams(const FOnBackendTeamRequestCompleteDelegate& Callback);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_RequestGameSesionParties(const FName SessionName, const FOnBackendTeamRequestCompleteDelegate& Callback);
+	void BP_RequestGameSessionParties(const FName SessionName, const FOnBackendTeamRequestCompleteDelegate& Callback);
 
 	UFUNCTION()
 	void OnTeamReceived(const bool bWasSuccess, const TArray<FAVVMPartyProxy>& NewParties);
@@ -87,6 +90,8 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
-	
+
+	static TArray<FOnReplicatedTeamChangedDelegate::FDelegate> DeferredRegistrations;
+	FOnReplicatedTeamChangedDelegate OnReplicatedTeamChanged;
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

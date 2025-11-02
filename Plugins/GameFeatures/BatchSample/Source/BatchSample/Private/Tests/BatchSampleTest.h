@@ -28,7 +28,6 @@
 class AAutomatedTestBatchableActor;
 class AAVVMWorldSetting;
 class UBatchingRule;
-class UBatchingSubsystem;
 
 /**
  *	Class description:
