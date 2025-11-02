@@ -26,6 +26,11 @@ public class TransactionSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(new string[] { "UnrealEd", });
+		}
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

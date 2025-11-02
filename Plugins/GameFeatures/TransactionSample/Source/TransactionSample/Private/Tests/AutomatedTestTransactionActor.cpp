@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,31 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AutomatedTestTransactionActor.h"
 
-#include "CoreMinimal.h"
-
-#include "UObject/Interface.h"
-
-#include "DoesTransactionProviderSupportIdentifier.generated.h"
-
-/**
- *	Class description:
- *
- *	IDoesTransactionProviderSupportIdentifier is an interface to be implemented by AActor that require tracking of statistics. This can apply to animated and inanimated objects.
- */
-UINTERFACE(BlueprintType)
-class TRANSACTIONSAMPLE_API UDoesTransactionProviderSupportIdentifier : public UInterface
+FString AAutomatedTestTransactionActor::GetProviderIdentifier_Implementation() const
 {
-	GENERATED_BODY()
-};
-
-class TRANSACTIONSAMPLE_API IDoesTransactionProviderSupportIdentifier
-{
-	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, CallInEditor)
-	FString GetProviderIdentifier() const;
-	virtual FString GetProviderIdentifier_Implementation() const PURE_VIRTUAL(GetProviderIdentifier_Implementation, return FString::FromInt(INDEX_NONE););
-};
+	static constexpr TCHAR UniqueId[] = TEXT("1000");
+	return UniqueId;
+}

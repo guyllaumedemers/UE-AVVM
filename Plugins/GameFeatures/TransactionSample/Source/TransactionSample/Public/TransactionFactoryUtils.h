@@ -23,7 +23,6 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
-#include "Templates/SubclassOf.h"
 
 #include "TransactionFactoryUtils.generated.h"
 

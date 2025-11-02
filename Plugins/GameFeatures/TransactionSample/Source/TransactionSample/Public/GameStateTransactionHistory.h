@@ -20,8 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "GameFramework/Info.h"
+#include "Transaction.h"
 
 #include "GameStateTransactionHistory.generated.h"
 
@@ -30,6 +29,29 @@ enum class ETransactionType : uint8;
 class UTransaction;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTransaction*, Transaction);
+
+/**
+ *	Class description:
+ *
+ *	FTransactionContextArgs is a context struct that encapsulate function parameters arguments.
+ */
+USTRUCT(BlueprintType)
+struct TRANSACTIONSAMPLE_API FTransactionContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const AActor> Instigator = nullptr; /*Statistics Source - from which we generate*/
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const AActor> Target = nullptr; /*Statistics Owner - whom we aggregate for*/
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	ETransactionType TransactionType = ETransactionType::None;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString Payload = FString();
+};
 
 /**
  *	Class description:
@@ -48,32 +70,39 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintCallable)
-	static UGameStateTransactionHistory* GetTransactionHistory(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, Category="TransactionSample")
+	static void Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
+	                                              const FTransactionContextArgs& Args);
 
-	UFUNCTION(BlueprintCallable)
-	void CreateAndRecordTransaction(const AActor* NewInstigator /*Statistics Source - from which we generate*/,
-	                                const AActor* NewTarget /*Statistics Owner - whom we aggregate for*/,
-	                                const ETransactionType NewTransactionType,
-	                                const FString& NewPayload);
+	UFUNCTION(BlueprintCallable, Category="TransactionSample")
+	static void Static_RemoveAllTransactionOfType(const UObject* WorldContextObject,
+	                                              const AActor* NewTarget,
+	                                              const ETransactionType NewTransactionType);
 
-	UFUNCTION(BlueprintCallable)
-	void RemoveAllOfType(const AActor* NewTarget,
-	                     const ETransactionType NewTransactionType);
+	UFUNCTION(BlueprintCallable, Category="TransactionSample")
+	static void Static_RemoveAllTransactions(const UObject* WorldContextObject,
+	                                         const AActor* NewTarget);
 
-	UFUNCTION(BlueprintCallable)
-	void RemoveAll(const AActor* NewTarget);
+	// @gdemers TArray cannot cast from TArray<const UTransaction*> to TArray<UTransaction*> which is
+	// required for BP support. I prefer ensuring const-ness here.
+	static TArray<const UTransaction*> Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
+	                                                                   const FString& NewTargetId,
+	                                                                   const ETransactionType TransactionType);
 
-	// @gdemers no type conversion supported to return const TArray<const UTransaction*>, so we cant support UFUNCTION(BlueprintCallable)
-	TArray<TObjectPtr<const UTransaction>> GetAllTransactionsOfType(const FString& NewTargetId,
-	                                                                const ETransactionType TransactionType) const;
-
-	TArray<TObjectPtr<const UTransaction>> GetAllTransactions(const FString& NewTargetId) const;
+	static TArray<const UTransaction*> Static_GetAllTransactions(const UObject* WorldContextObject,
+	                                                             const FString& NewTargetId);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FOnTransactionRecorded TransactionRecordedDelegate;
 
 protected:
+	static UGameStateTransactionHistory* GetTransactionHistory(const UObject* WorldContextObject);
+	void CreateAndRecordTransaction(const FTransactionContextArgs& Args);
+	void RemoveAllTransactionOfType(const AActor* NewTarget, const ETransactionType NewTransactionType);
+	void RemoveAllTransactions(const AActor* NewTarget);
+	TArray<const UTransaction*> GetAllTransactionsOfType(const FString& NewTargetId, const ETransactionType TransactionType) const;
+	TArray<const UTransaction*> GetAllTransactions(const FString& NewTargetId) const;
+
 	UFUNCTION()
 	void OnRep_NewTransactionRecorded();
 

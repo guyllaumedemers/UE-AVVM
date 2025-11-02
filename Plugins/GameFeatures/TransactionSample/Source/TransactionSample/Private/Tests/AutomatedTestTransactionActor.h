@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,8 +17,27 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-// TODO @gdemers Impl Functional Test.
-// Test must work with multi-user session, i.e one Server and two clients.
-// End Goal : Test should be launch through Gauntlet Automation Framework and be executed from command line
-// either manually or via BuildGraph.
+#include "CoreMinimal.h"
+
+#include "DoesTransactionProviderSupportIdentifier.h"
+#include "GameFramework/Actor.h"
+
+#include "AutomatedTestTransactionActor.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	AAutomatedTestTransactionActor is an Actor class to run behaviour during Automated Testing.
+ */
+UCLASS()
+class TRANSACTIONSAMPLE_API AAutomatedTestTransactionActor : public AActor,
+                                                             public IDoesTransactionProviderSupportIdentifier
+{
+	GENERATED_BODY()
+
+public:
+	// IDoesTransactionProviderSupportIdentifier
+	virtual FString GetProviderIdentifier_Implementation() const override;
+};

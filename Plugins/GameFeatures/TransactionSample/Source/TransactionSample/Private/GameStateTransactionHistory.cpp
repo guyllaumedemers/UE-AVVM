@@ -83,6 +83,52 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 	       *Outer->GetName());
 }
 
+void UGameStateTransactionHistory::Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
+                                                                     const FTransactionContextArgs& Args)
+{
+	auto* TransactionHistory = UGameStateTransactionHistory::GetTransactionHistory(WorldContextObject);
+	if (IsValid(TransactionHistory))
+	{
+		TransactionHistory->CreateAndRecordTransaction(Args);
+	}
+}
+
+void UGameStateTransactionHistory::Static_RemoveAllTransactionOfType(const UObject* WorldContextObject,
+                                                                     const AActor* NewTarget,
+                                                                     const ETransactionType NewTransactionType)
+{
+	auto* TransactionHistory = UGameStateTransactionHistory::GetTransactionHistory(WorldContextObject);
+	if (IsValid(TransactionHistory))
+	{
+		TransactionHistory->RemoveAllTransactionOfType(NewTarget, NewTransactionType);
+	}
+}
+
+void UGameStateTransactionHistory::Static_RemoveAllTransactions(const UObject* WorldContextObject,
+                                                                const AActor* NewTarget)
+{
+	auto* TransactionHistory = UGameStateTransactionHistory::GetTransactionHistory(WorldContextObject);
+	if (IsValid(TransactionHistory))
+	{
+		TransactionHistory->RemoveAllTransactions(NewTarget);
+	}
+}
+
+TArray<const UTransaction*> UGameStateTransactionHistory::Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
+                                                                                          const FString& NewTargetId,
+                                                                                          const ETransactionType TransactionType)
+{
+	auto* TransactionHistory = UGameStateTransactionHistory::GetTransactionHistory(WorldContextObject);
+	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactionsOfType(NewTargetId, TransactionType) : TArray<const UTransaction*>{};
+}
+
+TArray<const UTransaction*> UGameStateTransactionHistory::Static_GetAllTransactions(const UObject* WorldContextObject,
+                                                                                    const FString& NewTargetId)
+{
+	auto* TransactionHistory = UGameStateTransactionHistory::GetTransactionHistory(WorldContextObject);
+	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactions(NewTargetId) : TArray<const UTransaction*>{};
+}
+
 UGameStateTransactionHistory* UGameStateTransactionHistory::GetTransactionHistory(const UObject* WorldContextObject)
 {
 	static TWeakObjectPtr<UGameStateTransactionHistory> TransactionHistory = nullptr;
@@ -91,7 +137,7 @@ UGameStateTransactionHistory* UGameStateTransactionHistory::GetTransactionHistor
 		return TransactionHistory.Get();
 	}
 
-	AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
+	const AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
 	if (IsValid(GameState))
 	{
 		TransactionHistory = GameState->GetComponentByClass<UGameStateTransactionHistory>();
@@ -100,74 +146,93 @@ UGameStateTransactionHistory* UGameStateTransactionHistory::GetTransactionHistor
 	return TransactionHistory.Get();
 }
 
-void UGameStateTransactionHistory::CreateAndRecordTransaction(const AActor* NewInstigator,
-                                                              const AActor* NewTarget,
-                                                              const ETransactionType NewTransactionType,
-                                                              const FString& NewPayload)
+void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransactionContextArgs& Args)
 {
 #if WITH_SERVER_CODE
-	if (IsValid(NewTarget) && NewTarget->HasAuthority())
+	if (!Args.Target.IsValid() || !Args.Target->HasAuthority())
 	{
-		UTransaction* Transaction = NewObject<UTransaction>(this);
-		Transaction->operator()(NewInstigator, NewTarget, NewTransactionType, NewPayload);
-		AddReplicatedSubObject(Transaction);
-		Transactions.Add(Transaction);
-
-		OnRep_NewTransactionRecorded();
+		return;
 	}
+
+	UTransaction* Transaction = NewObject<UTransaction>(this);
+	Transaction->operator()(Args.Instigator.Get(), Args.Target.Get(), Args.TransactionType, Args.Payload);
+	AddReplicatedSubObject(Transaction);
+	Transactions.Add(Transaction);
+
+	OnRep_NewTransactionRecorded();
 #endif
 }
 
-void UGameStateTransactionHistory::RemoveAllOfType(const AActor* NewTarget,
-                                                   const ETransactionType NewTransactionType)
+void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewTarget,
+                                                              const ETransactionType NewTransactionType)
 {
 #if WITH_SERVER_CODE
-	if (IsValid(NewTarget) && NewTarget->HasAuthority())
+	if (!IsValid(NewTarget) || !NewTarget->HasAuthority())
 	{
-		const TArray<const UTransaction*> SearchResult = GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType);
-		for (const UTransaction* Transaction : SearchResult)
-		{
-			RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
-			Transactions.Remove(Transaction);
-		}
-
-		OnRep_NewTransactionRecorded();
+		return;
 	}
+
+	const TArray<const UTransaction*> SearchResult = GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType);
+	for (const UTransaction* Transaction : SearchResult)
+	{
+		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
+		Transactions.Remove(Transaction);
+	}
+
+	OnRep_NewTransactionRecorded();
 #endif
 }
 
-void UGameStateTransactionHistory::RemoveAll(const AActor* NewTarget)
+void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget)
 {
 #if WITH_SERVER_CODE
-	if (IsValid(NewTarget) && NewTarget->HasAuthority())
+	if (!IsValid(NewTarget) || !NewTarget->HasAuthority())
 	{
-		const TArray<const UTransaction*> SearchResult = GetAllTransactions(UTransaction::GetUniqueId(NewTarget));
-		for (const UTransaction* Transaction : SearchResult)
-		{
-			RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
-			Transactions.Remove(Transaction);
-		}
-
-		OnRep_NewTransactionRecorded();
+		return;
 	}
+
+	const TArray<const UTransaction*> SearchResult = GetAllTransactions(UTransaction::GetUniqueId(NewTarget));
+	for (const UTransaction* Transaction : SearchResult)
+	{
+		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
+		Transactions.Remove(Transaction);
+	}
+
+	OnRep_NewTransactionRecorded();
 #endif
 }
 
-TArray<TObjectPtr<const UTransaction>> UGameStateTransactionHistory::GetAllTransactionsOfType(const FString& NewTargetId,
-                                                                                              const ETransactionType TransactionType) const
+TArray<const UTransaction*> UGameStateTransactionHistory::GetAllTransactionsOfType(const FString& NewTargetId,
+                                                                                   const ETransactionType TransactionType) const
 {
-	return Transactions.FilterByPredicate([NewTargetId, TransactionType](const TObjectPtr<const UTransaction>& Param)
+	TArray<TObjectPtr<const UTransaction>> SearchResult = Transactions.FilterByPredicate([NewTargetId, TransactionType](const TObjectPtr<const UTransaction>& Param)
 	{
 		return IsValid(Param) && Param->DoesExactMatch(NewTargetId, TransactionType);
 	});
+
+	TArray<const UTransaction*> Out;
+	for (const TObjectPtr<const UTransaction>& Transaction : SearchResult)
+	{
+		Out.Add(Transaction.Get());
+	}
+
+	return Out;
 }
 
-TArray<TObjectPtr<const UTransaction>> UGameStateTransactionHistory::GetAllTransactions(const FString& NewTargetId) const
+TArray<const UTransaction*> UGameStateTransactionHistory::GetAllTransactions(const FString& NewTargetId) const
 {
-	return Transactions.FilterByPredicate([NewTargetId](const TObjectPtr<const UTransaction>& Param)
+	TArray<TObjectPtr<const UTransaction>> SearchResult = Transactions.FilterByPredicate([NewTargetId](const TObjectPtr<const UTransaction>& Param)
 	{
 		return IsValid(Param) && Param->DoesPartialMatch(NewTargetId);
 	});
+
+	TArray<const UTransaction*> Out;
+	for (const TObjectPtr<const UTransaction>& Transaction : SearchResult)
+	{
+		Out.Add(Transaction.Get());
+	}
+
+	return Out;
 }
 
 void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
