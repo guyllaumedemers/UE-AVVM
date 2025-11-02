@@ -42,16 +42,11 @@ void ABatchSampleTest::PrepareTest()
 
 	const bool bShouldCreateRule = TestSetting->ShouldCreatePluginRule(AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING);
 	AssertEqual_Bool(bShouldCreateRule, true, TEXT("Expect \"AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING\" to be referenced in World Settings."));
-
-	auto* TestSubsystem = UBatchingSubsystem::Get(World);
-	AssertIsValid(TestSubsystem, TEXT("Expect UBatchingSubsystem to be valid. Check UBatchingSubsystem::ShouldCreateSubsystem function definition."), this);
-
-	BatchSubsystem = TestSubsystem;
 }
 
 bool ABatchSampleTest::IsReady_Implementation()
 {
-	return WorldSetting.IsValid() && BatchSubsystem.IsValid();
+	return WorldSetting.IsValid();
 }
 
 void ABatchSampleTest::StartTest()
@@ -63,7 +58,6 @@ void ABatchSampleTest::FinishTest(EFunctionalTestResult TestResult, const FStrin
 {
 	Super::FinishTest(TestResult, Message);
 	WorldSetting.Reset();
-	BatchSubsystem.Reset();
 	BatchRule.Reset();
 }
 
@@ -109,13 +103,6 @@ void ABatchSampleTest::RunTest_Internal()
 {
 	bDoesTestRun = true;
 
-	UBatchingSubsystem* TestSubsystem = BatchSubsystem.Get();
-	if (!IsValid(TestSubsystem))
-	{
-		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UBatchingSubsystem to be valid."));
-		return;
-	}
-
 	const UBatchingRule* TestRule = BatchRule.Get();
 	if (!IsValid(TestRule))
 	{
@@ -131,7 +118,7 @@ void ABatchSampleTest::RunTest_Internal()
 	}
 
 	IgnoredWorldActors.Reset();
-	TestSubsystem->Clear();
+	UBatchingSubsystem::Static_Clear(World);
 
 	for (TActorIterator<AAutomatedTestBatchableActor> Iterator(World); Iterator; ++Iterator)
 	{
@@ -141,7 +128,7 @@ void ABatchSampleTest::RunTest_Internal()
 			continue;
 		}
 
-		TestSubsystem->Register(TestActor);
+		UBatchingSubsystem::Static_Register(World, TestActor);
 		IgnoredWorldActors.Add(TestActor);
 	}
 
@@ -160,7 +147,7 @@ void ABatchSampleTest::RunTest_Internal()
 		const FVector Displacement = (FMath::RandRange(0.f, 1500.f) * FVector::ForwardVector) + (FMath::RandRange(0.f, 1500.f) * FVector::RightVector) + (FVector::UpVector * BoxExtend.Z);
 		TestActor->SetActorLocation(Origin + Displacement);
 
-		TestSubsystem->Register(TestActor);
+		UBatchingSubsystem::Static_Register(World, TestActor);
 		TestActors.Add(TestActor);
 	}
 }
@@ -174,15 +161,8 @@ void ABatchSampleTest::EvaluateTestPredicate()
 		return;
 	}
 
-	UBatchingSubsystem* TestSubsystem = BatchSubsystem.Get();
-	if (!IsValid(TestSubsystem))
-	{
-		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UBatchingSubsystem to be valid."));
-		return;
-	}
-
 #if WITH_AUTOMATION_TESTS
-	const bool bIsEmpty = TestSubsystem->IsEmpty();
+	const bool bIsEmpty = UBatchingSubsystem::Static_IsEmpty(World);
 	if (!bIsEmpty)
 	{
 		return;

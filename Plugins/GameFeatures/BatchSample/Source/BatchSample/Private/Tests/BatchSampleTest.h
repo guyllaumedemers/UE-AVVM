@@ -57,9 +57,6 @@ protected:
 	TSubclassOf<AAutomatedTestBatchableActor> TestActorClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<UBatchingSubsystem> BatchSubsystem = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UBatchingRule> BatchRule = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

@@ -116,6 +116,39 @@ TStatId UBatchingSubsystem::GetStatId() const
 	return TStatId();
 }
 
+void UBatchingSubsystem::Static_Unregister(const UWorld* World, AActor* Actor)
+{
+	auto* BatchingSubsystem = UBatchingSubsystem::Get(World);
+	if (IsValid(BatchingSubsystem))
+	{
+		BatchingSubsystem->UnRegister(Actor);
+	}
+}
+
+void UBatchingSubsystem::Static_Register(const UWorld* World, AActor* Actor)
+{
+	auto* BatchingSubsystem = UBatchingSubsystem::Get(World);
+	if (IsValid(BatchingSubsystem))
+	{
+		BatchingSubsystem->Register(Actor);
+	}
+}
+
+void UBatchingSubsystem::Static_Clear(const UWorld* World)
+{
+	auto* BatchingSubsystem = UBatchingSubsystem::Get(World);
+	if (IsValid(BatchingSubsystem))
+	{
+		BatchingSubsystem->Clear();
+	}
+}
+
+bool UBatchingSubsystem::Static_IsEmpty(const UWorld* World)
+{
+	auto* BatchingSubsystem = UBatchingSubsystem::Get(World);
+	return IsValid(BatchingSubsystem) ? BatchingSubsystem->IsEmpty() : true;
+}
+
 UBatchingSubsystem* UBatchingSubsystem::Get(const UWorld* World)
 {
 	return UWorld::GetSubsystem<UBatchingSubsystem>(World);

@@ -52,6 +52,19 @@ public:
 	virtual TStatId GetStatId() const override;
 
 	UFUNCTION(BlueprintCallable)
+	static void Static_Unregister(const UWorld* World, AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_Register(const UWorld* World, AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_Clear(const UWorld* World);
+
+	UFUNCTION(BlueprintCallable)
+	static bool Static_IsEmpty(const UWorld* World);
+
+protected:
+	UFUNCTION(BlueprintCallable)
 	static UBatchingSubsystem* Get(const UWorld* World);
 
 	UFUNCTION(BlueprintCallable)
@@ -66,8 +79,7 @@ public:
 #if WITH_AUTOMATION_TESTS
 	bool IsEmpty() const;
 #endif
-
-protected:
+	
 	void CreateBatchingRule();
 	void InitRule();
 	
