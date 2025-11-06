@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "BatchingSubsystem.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "AVVMWorldSetting.h"
 #include "Batchable.h"
 #include "BatchingRule.h"
@@ -84,30 +84,36 @@ void UBatchingSubsystem::Tick(float DeltaTime)
 
 	bool bHasDestroyedBatched = false;
 
-	TArray<FBatchContext> ImmutableBatches = MoveTemp(PendingDestroy);
-	while (!ImmutableBatches.IsEmpty())
+	TArray<FBatchContext> NewPendingDestroy = MoveTemp(PendingDestroy);
+	for (auto Iterator = NewPendingDestroy.CreateIterator(); Iterator; ++Iterator)
 	{
-		FBatchContext& BatchContext = ImmutableBatches[0];
-
 		const bool bDoesSupportTrashingUndersizeBatch = (!FMath::IsNearlyZero(MaxLifetimeAllowedToUndersizeBatch) && (MaxLifetimeAllowedToUndersizeBatch >= Interval));
 		const bool bDoesElapseTimeQualify = (bDoesSupportTrashingUndersizeBatch && (Timestamp >= MaxLifetimeAllowedToUndersizeBatch));
-		const bool bDoesQualify = (BatchContext.DoesQualifyForBatchDestroy(MaxSizePerBatchDestroy) || bDoesElapseTimeQualify);
+		const bool bDoesQualify = (Iterator->DoesQualifyForBatchDestroy(MaxSizePerBatchDestroy) || bDoesElapseTimeQualify);
 		if (bDoesQualify)
 		{
-			BatchContext.Obliterate();
+			Iterator->Invalidate();
 			bHasDestroyedBatched |= true;
 		}
 		else
 		{
-			PendingDestroy.Add(MoveTemp(BatchContext));
+			PendingDestroy.Add(MoveTemp(*Iterator));
+			Iterator.RemoveCurrentSwap();
 		}
-
-		ImmutableBatches.RemoveAtSwap(0);
 	}
 
 	if (bHasDestroyedBatched)
 	{
 		Timestamp = 0.f;
+	}
+
+	if (bShouldGarbageOnNextTick)
+	{
+		GarbageOnNextTick(NewPendingDestroy);
+	}
+	else
+	{
+		GarbageNow(NewPendingDestroy);
 	}
 }
 
@@ -163,7 +169,13 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 	}
 
 	const auto Batchable = TScriptInterface<IBatchable>(Actor);
-	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
+	if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(Batchable->HasValidBatchIndex(),
+	                      TEXT("IBatchable doesnt reference a valid Batch index. Actor may have been marked for Destroy on Next tick.")))
 	{
 		return;
 	}
@@ -172,7 +184,7 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 	const bool bIsValidIndex = PendingDestroy.IsValidIndex(BatchIndex);
 	if (bIsValidIndex)
 	{
-		PendingDestroy[BatchIndex].ForceRemove(Actor);
+		PendingDestroy[BatchIndex].Remove(Actor);
 	}
 }
 
@@ -185,7 +197,7 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	}
 
 	const auto Batchable = TScriptInterface<IBatchable>(Actor);
-	if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
+	if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
 	{
 		return;
 	}
@@ -203,7 +215,7 @@ void UBatchingSubsystem::Register(AActor* Actor)
 		}
 		else
 		{
-			Top.Push(Actor);
+			Top.Add(Actor);
 		}
 	}
 
@@ -219,7 +231,7 @@ void UBatchingSubsystem::Clear()
 #if WITH_AUTOMATION_TESTS
 bool UBatchingSubsystem::IsEmpty() const
 {
-	return PendingDestroy.IsEmpty();
+	return PendingDestroy.IsEmpty() && !NextTickHandle.IsValid();
 }
 #endif
 
@@ -271,6 +283,40 @@ void UBatchingSubsystem::InitRule()
 		MaxLifetimeAllowedToUndersizeBatch = Rule->GetMaxLifetimeAllowedToUndersizeBatch();
 		MaxSizePerBatchDestroy = Rule->GetMaxSizePerBatchDestroy();
 		Interval = Rule->GetBatchInterval();
+		bShouldGarbageOnNextTick = Rule->ShouldGarbageOnNextTick();
+	}
+}
+
+void UBatchingSubsystem::GarbageOnNextTick(TArray<FBatchContext>& NewPendingDestroy)
+{
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	const auto DeferredBatchAction = [](TArray<FBatchContext> NewPendingDestroy, FTimerHandle* TimerHandle)
+	{
+		for (int32 i = NewPendingDestroy.Num() - 1; i >= 0; --i)
+		{
+			NewPendingDestroy[i].Obliterate();
+		}
+
+		if (TimerHandle != nullptr)
+		{
+			TimerHandle->Invalidate();
+		}
+	};
+
+	const auto Callback = FTimerDelegate::CreateWeakLambda(this, DeferredBatchAction, NewPendingDestroy, &NextTickHandle);
+	NextTickHandle = World->GetTimerManager().SetTimerForNextTick(Callback);
+}
+
+void UBatchingSubsystem::GarbageNow(TArray<FBatchContext>& NewPendingDestroy) const
+{
+	for (int32 i = NewPendingDestroy.Num() - 1; i >= 0; --i)
+	{
+		NewPendingDestroy[i].Obliterate();
 	}
 }
 
@@ -284,7 +330,7 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 	for (auto Iterator = Candidates.CreateIterator(); Iterator; ++Iterator)
 	{
 		const auto Batchable = TScriptInterface<IBatchable>(Iterator->Get());
-		if (!UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
+		if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable))
 		{
 			Iterator.RemoveCurrentSwap();
 		}
@@ -295,12 +341,24 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 	}
 }
 
-void UBatchingSubsystem::FBatchContext::Push(AActor* Actor)
+void UBatchingSubsystem::FBatchContext::Add(AActor* Actor)
 {
 	Candidates.Add(Actor);
 }
 
-void UBatchingSubsystem::FBatchContext::ForceRemove(AActor* Actor)
+void UBatchingSubsystem::FBatchContext::Remove(AActor* Actor)
 {
-	Candidates.Add(Actor);
+	Candidates.Remove(Actor);
+}
+
+void UBatchingSubsystem::FBatchContext::Invalidate() const
+{
+	for (auto Iterator = Candidates.CreateConstIterator(); Iterator; ++Iterator)
+	{
+		const auto Batchable = TScriptInterface<IBatchable>(Iterator->Get());
+		if (UAVVMUtils::IsNativeScriptInterfaceValid(Batchable))
+		{
+			Batchable->SetOwningBatchIndex(INDEX_NONE);
+		}
+	}
 }

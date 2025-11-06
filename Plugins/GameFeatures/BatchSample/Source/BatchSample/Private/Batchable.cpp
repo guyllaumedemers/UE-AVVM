@@ -29,6 +29,11 @@ void IBatchable::SetOwningBatchIndex(const int32 Index)
 	BatchIndex = Index;
 }
 
+bool IBatchable::HasValidBatchIndex() const
+{
+	return BatchIndex != INDEX_NONE;
+}
+
 bool IBatchable::IsPlacedInEditor() const
 {
 	const AActor* Self = GetSelf();

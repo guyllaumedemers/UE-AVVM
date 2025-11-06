@@ -44,6 +44,31 @@ class BATCHSAMPLE_API UBatchingSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
+	struct FBatchContext
+	{
+		// @gdemers default ctor called first, then we reserve size. imply double initialization
+		// of properties, but allow for preallocation of collection type to avoid resizing.
+		FBatchContext(AActor* Actors, const int32 MaxSize)
+		{
+			Candidates.Reserve(MaxSize);
+			Candidates.Add(Actors);
+		}
+
+		~FBatchContext()
+		{
+			Candidates.Reset();
+		}
+
+		bool DoesQualifyForBatchDestroy(const float MaxSize) const;
+		void Obliterate();
+		void Add(AActor* Actor);
+		void Remove(AActor* Actor);
+		void Invalidate() const;
+
+	private:
+		TArray<TWeakObjectPtr<AActor>> Candidates;
+	};
+
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -82,33 +107,11 @@ protected:
 	
 	void CreateBatchingRule();
 	void InitRule();
+	void GarbageOnNextTick(TArray<FBatchContext>& NewPendingDestroy);
+	void GarbageNow(TArray<FBatchContext>& NewPendingDestroy) const;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UBatchingRule> BatchingRule = nullptr;
-
-	struct FBatchContext
-	{
-		// @gdemers default ctor called first, then we reserve size. imply double initialization
-		// of properties, but allow for preallocation of collection type to avoid resizing.
-		FBatchContext(AActor* Actors, const int32 MaxSize)
-		{
-			Candidates.Reserve(MaxSize);
-			Candidates.Add(Actors);
-		}
-
-		~FBatchContext()
-		{
-			Candidates.Reset();
-		}
-
-		bool DoesQualifyForBatchDestroy(const float MaxSize) const;
-		void Obliterate();
-		void Push(AActor* Actor);
-		void ForceRemove(AActor* Actor);
-
-	private:
-		TArray<TWeakObjectPtr<AActor>> Candidates;
-	};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float Interval = 0.f;
@@ -121,6 +124,12 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float Timestamp = 0.f;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bShouldGarbageOnNextTick = false;
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FTimerHandle NextTickHandle = FTimerHandle();
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	TArray<FBatchContext> PendingDestroy;

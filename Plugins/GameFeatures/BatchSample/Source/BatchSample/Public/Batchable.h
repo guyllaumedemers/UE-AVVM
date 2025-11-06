@@ -47,8 +47,9 @@ class BATCHSAMPLE_API IBatchable
 	GENERATED_BODY()
 
 public:
-	int32 GetOwningBatchIndex() const;
 	void SetOwningBatchIndex(const int32 Index);
+	int32 GetOwningBatchIndex() const;
+	bool HasValidBatchIndex() const;
 	bool IsPlacedInEditor() const;
 
 private:

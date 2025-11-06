@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetMaxLifetimeAllowedToUndersizeBatch() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool ShouldGarbageOnNextTick() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Flag allowing user to define only the Base Class subject to Batch Destroy. Derived Classes with be automatically considered as acceptable for Batch Destroy."))
 	bool bAllowBatchDestroyChildClasses = false;
@@ -68,4 +71,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float MaxLifetimeAllowedToUndersizeBatch = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldGarbageOnNextTick = true;
 };

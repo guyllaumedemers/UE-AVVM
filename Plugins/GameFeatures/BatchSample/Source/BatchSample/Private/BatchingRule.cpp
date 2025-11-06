@@ -80,3 +80,8 @@ float UBatchingRule::GetMaxLifetimeAllowedToUndersizeBatch() const
 {
 	return MaxLifetimeAllowedToUndersizeBatch;
 }
+
+bool UBatchingRule::ShouldGarbageOnNextTick() const
+{
+	return bShouldGarbageOnNextTick;
+}
