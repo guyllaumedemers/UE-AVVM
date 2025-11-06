@@ -22,7 +22,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -69,7 +69,7 @@ void UAVVMAbilityInputComponent::OnPawnChanged(APawn* NewPawn,
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UAVVMInputMappingProvider>(NewPawn);
+	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMInputMappingProvider>(NewPawn);
 	if (!bResult)
 	{
 		return;

@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,27 +21,39 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
+#include "Engine/DeveloperSettings.h"
 
-#include "AVVMHandshakePayload.generated.h"
+#include "WeaponSettings.generated.h"
 
 /**
  *	Class description:
  *
- *	FAVVMHandshakePayload is a payload context that forward information about an interaction between two users to UI system.
+ *	UWeaponSettings is a developer settings that expose global properties to the weapon sample plugin.
  */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMHandshakePayload : public FAVVMNotificationPayload
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UWeaponSettings"))
+class WEAPONSAMPLE_API UWeaponSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	FAVVMHandshakePayload() = default;
-	explicit FAVVMHandshakePayload(const AActor* NewInstigator,
-	                               const AActor* NewTarget);
+public:
+	UWeaponSettings();
+	
+	UFUNCTION(BlueprintCallable)
+	static bool DoesDebugTraceShowPersistentLine();
 
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const AActor> Instigator = nullptr;
+	UFUNCTION(BlueprintCallable)
+	static float GetDebugTraceLifetime();
 
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const AActor> Target = nullptr;
+	UFUNCTION(BlueprintCallable)
+	static float GetSquaredDistanceThreshold();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	bool bDoesDebugTraceShowPersistentLine = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	float DebugTraceLifetime = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	float SquaredDistanceThreshold = false;
 };

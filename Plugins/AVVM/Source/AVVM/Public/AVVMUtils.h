@@ -23,7 +23,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "AVVMUtilityFunctionLibrary.generated.h"
+#include "AVVMUtils.generated.h"
 
 struct FAVVMNotificationPayload;
 class IAVVMViewModelFNameHelper;
@@ -32,10 +32,10 @@ class UCommonUserWidget;
 /**
  *	Class description:
  *
- *	UAVVMUtilityFunctionLibrary define reusable Api for general use-case.
+ *	UAVVMUtils define reusable Api for general use-case.
  */
 UCLASS()
-class AVVM_API UAVVMUtilityFunctionLibrary : public UBlueprintFunctionLibrary
+class AVVM_API UAVVMUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -47,19 +47,19 @@ public:
 	static bool IsBlueprintScriptInterfaceValid(const UObject* Target);
 
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
+	UFUNCTION(BlueprintCallable, Category="AVVM|AVVM")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
 	                          UCommonUserWidget* Target);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
+	UFUNCTION(BlueprintCallable, Category="AVVM|AVVM")
 	static ULocalPlayer* GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utility")
+	UFUNCTION(BlueprintCallable, Category="AVVM|AVVM")
 	static ULocalPlayer* GetTargetLocalPlayer(const UObject* WorldContextObject);
 };
 
 template <typename T>
-bool UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target)
+bool UAVVMUtils::IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target)
 {
 	const bool bIsValidInterfaceObject = (Target.GetInterface() != nullptr && IsValid(Target.GetObject()));
 	return ensureAlwaysMsgf(bIsValidInterfaceObject,
@@ -67,7 +67,7 @@ bool UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(const TScriptInte
 }
 
 template <typename U>
-bool UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid(const UObject* Target)
+bool UAVVMUtils::IsBlueprintScriptInterfaceValid(const UObject* Target)
 {
 	const bool bDoesBPImplementInterface = IsValid(Target) ? Target->GetClass()->ImplementsInterface(U::StaticClass()) : false;
 	return ensureAlwaysMsgf(bDoesBPImplementInterface,

@@ -21,7 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
@@ -300,7 +300,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
 	{
 		return;

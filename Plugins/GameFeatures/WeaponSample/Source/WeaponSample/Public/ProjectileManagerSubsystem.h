@@ -31,8 +31,6 @@ class APlayerController;
 class APlayerState;
 struct FProjectileParams;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnProjectilePassByDelegate, const FVector& Location)
-
 /**
  *	Class description:
  *
@@ -65,8 +63,6 @@ public:
 	void CreateProjectile(const UClass* ProjectileClass,
 	                      const TInstancedStruct<const FProjectileParams>& ProjectileParams,
 	                      const FTransform& AimTransform) const;
-
-	FOnProjectilePassByDelegate OnProjectilePassBy;
 
 protected:
 	void OnPlayerStateRemoved(APlayerState* PlayerState);

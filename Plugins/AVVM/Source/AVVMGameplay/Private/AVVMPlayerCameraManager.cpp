@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,31 +17,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AVVMPlayerCameraManager.h"
 
-#include "CoreMinimal.h"
-
-#include "AVVMNotificationSubsystem.h"
-
-#include "AVVMHandshakePayload.generated.h"
-
-/**
- *	Class description:
- *
- *	FAVVMHandshakePayload is a payload context that forward information about an interaction between two users to UI system.
- */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMHandshakePayload : public FAVVMNotificationPayload
+void AAVVMPlayerCameraManager::ProcessViewRotation(float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot)
 {
-	GENERATED_BODY()
-
-	FAVVMHandshakePayload() = default;
-	explicit FAVVMHandshakePayload(const AActor* NewInstigator,
-	                               const AActor* NewTarget);
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const AActor> Instigator = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const AActor> Target = nullptr;
-};
+	Super::ProcessViewRotation(DeltaTime, OutViewRotation, OutDeltaRot);
+}

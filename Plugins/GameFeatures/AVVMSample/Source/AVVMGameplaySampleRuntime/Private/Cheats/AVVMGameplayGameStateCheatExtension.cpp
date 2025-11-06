@@ -21,7 +21,7 @@
 
 #include "AVVM.h"
 #include "AVVMQuicktimeEventInterface.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "GameFramework/GameState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -51,7 +51,7 @@ void UAVVMGameplayGameStateCheatExtension::RemovedFromCheatManager_Implementatio
 void UAVVMGameplayGameStateCheatExtension::Disconnect()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Disconnect();
 	}
@@ -60,7 +60,7 @@ void UAVVMGameplayGameStateCheatExtension::Disconnect()
 void UAVVMGameplayGameStateCheatExtension::Connect()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Connect();
 	}
@@ -69,7 +69,7 @@ void UAVVMGameplayGameStateCheatExtension::Connect()
 void UAVVMGameplayGameStateCheatExtension::Win()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Win();
 	}
@@ -78,7 +78,7 @@ void UAVVMGameplayGameStateCheatExtension::Win()
 void UAVVMGameplayGameStateCheatExtension::Lose()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Lose();
 	}
@@ -87,7 +87,7 @@ void UAVVMGameplayGameStateCheatExtension::Lose()
 void UAVVMGameplayGameStateCheatExtension::Kill()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Kill();
 	}
@@ -96,7 +96,7 @@ void UAVVMGameplayGameStateCheatExtension::Kill()
 void UAVVMGameplayGameStateCheatExtension::Killstreak()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Killstreak();
 	}
@@ -105,7 +105,7 @@ void UAVVMGameplayGameStateCheatExtension::Killstreak()
 void UAVVMGameplayGameStateCheatExtension::CaptureObjective()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->CaptureObjective();
 	}
@@ -114,7 +114,7 @@ void UAVVMGameplayGameStateCheatExtension::CaptureObjective()
 void UAVVMGameplayGameStateCheatExtension::DiscoverArea()
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->DiscoverArea();
 	}

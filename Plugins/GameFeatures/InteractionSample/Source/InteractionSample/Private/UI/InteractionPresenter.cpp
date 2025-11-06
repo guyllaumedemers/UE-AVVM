@@ -21,7 +21,7 @@
 
 #include "AVVM.h"
 #include "AVVMGameStateHandshakeComponent.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "CommonUserWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Blueprint/UserWidget.h"
@@ -188,7 +188,7 @@ void UInteractionPresenter::SetupWorldWidget()
 		Target->SetVisibility(ESlateVisibility::Collapsed);
 
 		const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-		UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, Target);
+		UAVVMUtils::BindViewModel(ViewModelFNameHelper, Target);
 	}
 
 	OwningOuter = Outer;

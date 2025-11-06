@@ -22,7 +22,7 @@
 #include "AVVM.h"
 #include "AVVMGameplaySampleSettings.h"
 #include "AVVMQuicktimeEventInterface.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -64,7 +64,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Damage(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Damage(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetHealthComponentClass()));
 	}
@@ -85,7 +85,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Heal(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Heal(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetHealthComponentClass()));
 	}
@@ -106,7 +106,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Die(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Die(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetHealthComponentClass()));
 	}
@@ -127,7 +127,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Raise(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler),
+	if (ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler),
 	                     TEXT("Player State doesn't implement IAVVMQuicktimeEventPlayerStateInterface!")))
 	{
 		QuickTimeEventHandler->Raise(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetHealthComponentClass()));
@@ -149,7 +149,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Stun(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Stun(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetStatusEffectComponentClass()));
 	}
@@ -170,7 +170,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Exhaust(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->Exhaust(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetStaminaComponentClass()));
 	}
@@ -191,7 +191,7 @@ void UAVVMGameplayPlayerStateCheatExtension::StartCasting(const int32 PlayerInde
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (ensureAlwaysMsgf(UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler),
+	if (ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler),
 	                     TEXT("Player State doesn't implement IAVVMQuicktimeEventPlayerStateInterface!")))
 	{
 		QuickTimeEventHandler->StartCasting(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetAbilityComponentClass()));
@@ -213,7 +213,7 @@ void UAVVMGameplayPlayerStateCheatExtension::StopCasting(const int32 PlayerIndex
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->StopCasting(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetAbilityComponentClass()));
 	}
@@ -234,7 +234,7 @@ void UAVVMGameplayPlayerStateCheatExtension::EarnMoney(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->EarnMoney(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetCurrencyComponentClass()));
 	}
@@ -255,7 +255,7 @@ void UAVVMGameplayPlayerStateCheatExtension::SpendMoney(const int32 PlayerIndex)
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->SpendMoney(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetCurrencyComponentClass()));
 	}
@@ -276,7 +276,7 @@ void UAVVMGameplayPlayerStateCheatExtension::StartInteractingWithWorld(const int
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->StartInteractingWithWorld(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetInteractionComponentClass()));
 	}
@@ -297,7 +297,7 @@ void UAVVMGameplayPlayerStateCheatExtension::StopInteractingWithWorld(const int3
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->StopInteractingWithWorld(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetInteractionComponentClass()));
 	}
@@ -318,7 +318,7 @@ void UAVVMGameplayPlayerStateCheatExtension::ConsumeItem(const int32 PlayerIndex
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->ConsumeItem(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetInteractionComponentClass()));
 	}
@@ -339,7 +339,7 @@ void UAVVMGameplayPlayerStateCheatExtension::StartTalkingToNpc(const int32 Playe
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->StartTalkingToNpc(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetInteractionComponentClass()));
 	}
@@ -360,7 +360,7 @@ void UAVVMGameplayPlayerStateCheatExtension::StopTalkingToNpc(const int32 Player
 	}
 
 	const auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>(PlayerState);
-	if (UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
+	if (UAVVMUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
 		QuickTimeEventHandler->StopTalkingToNpc(Pawn->GetComponentByClass(UAVVMGameplaySampleSettings::GetInteractionComponentClass()));
 	}

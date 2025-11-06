@@ -17,24 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "WeaponDebuggerSettings.h"
+#pragma once
 
-UWeaponDebuggerSettings::UWeaponDebuggerSettings()
-{
-	CategoryName = TEXT("Game");
-}
+#include "CoreMinimal.h"
 
-bool UWeaponDebuggerSettings::DoesDebugTraceShowPersistentLine()
-{
-	return GetDefault<UWeaponDebuggerSettings>()->bDoesDebugTraceShowPersistentLine;
-}
+#include "Camera/PlayerCameraManager.h"
 
-float UWeaponDebuggerSettings::GetDebugTraceLifetime()
-{
-	return GetDefault<UWeaponDebuggerSettings>()->DebugTraceLifetime;
-}
+#include "AVVMPlayerCameraManager.generated.h"
 
-float UWeaponDebuggerSettings::GetSquaredDistanceThreshold()
+/**
+ * 
+ */
+UCLASS()
+class AVVMGAMEPLAY_API AAVVMPlayerCameraManager : public APlayerCameraManager
 {
-	return GetDefault<UWeaponDebuggerSettings>()->SquaredDistanceThreshold;
-}
+	GENERATED_BODY()
+
+public:
+	// @gdemers modify the output of APlayerController::UpdateRotation
+	// Check to use CameraModifiers
+	virtual void ProcessViewRotation(float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot) override;
+};

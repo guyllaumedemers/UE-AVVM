@@ -22,7 +22,7 @@
 #include "AVVM.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMChallengeManagerViewModel.h"
@@ -98,7 +98,7 @@ void UAVVMChallengeManagerPresenter::SetChallenges(const TInstancedStruct<FAVVMN
 
 void UAVVMChallengeManagerPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UAVVMChallengeManagerPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -113,7 +113,7 @@ void UAVVMChallengeManagerPresenter::StartPresenting()
 
 void UAVVMChallengeManagerPresenter::StopPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
 	if (IsValid(LocalPlayer))
 	{
 		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -123,7 +123,7 @@ void UAVVMChallengeManagerPresenter::StopPresenting()
 void UAVVMChallengeManagerPresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }
 
 void UAVVMChallengeManagerPresenter::OnForcePullChallengesCompleted(const bool bWasSuccess,

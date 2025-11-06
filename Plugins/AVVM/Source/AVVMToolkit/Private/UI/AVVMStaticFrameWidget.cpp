@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMStaticFrameWidget.h"
 
-#include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
 #include "Components/DynamicEntryBox.h"
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWidgetPickerDataAsset.h"

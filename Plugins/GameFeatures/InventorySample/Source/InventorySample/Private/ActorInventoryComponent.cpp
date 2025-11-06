@@ -22,7 +22,7 @@
 #include "ActorItemProgressionComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMScopedDelegate.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "InventoryProvider.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
@@ -136,7 +136,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
+	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
 		return;
@@ -321,7 +321,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	// @gdemers allow initialization of loadout object based held items. 
 	OnRep_ItemCollectionChanged(OldItems);
 
-	const bool bResult = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
+	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
 		return;

@@ -21,7 +21,7 @@
 
 #include "ProjectileManagerSubsystem.h"
 #include "TriggeringActor.h"
-#include "WeaponDebuggerSettings.h"
+#include "WeaponSettings.h"
 #include "WeaponSample.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/DamageEvents.h"
@@ -89,8 +89,8 @@ void ANonReplicatedProjectileActor::Tick(float DeltaSeconds)
 	TraceArgs.TraceStart = ProjectileWorldTransform.GetLocation();
 	TraceArgs.TraceEnd = TraceArgs.TraceStart + DeltaVelocity;
 	TraceArgs.TraceColor = FColor::MakeRandomColor();
-	TraceArgs.bDoesTraceHavePersistentLines = UWeaponDebuggerSettings::DoesDebugTraceShowPersistentLine();
-	TraceArgs.TraceLifeTime = UWeaponDebuggerSettings::GetDebugTraceLifetime();
+	TraceArgs.bDoesTraceHavePersistentLines = UWeaponSettings::DoesDebugTraceShowPersistentLine();
+	TraceArgs.TraceLifeTime = UWeaponSettings::GetDebugTraceLifetime();
 	TraceArgs.CollisionChannel = GetCollisionChannel();
 	TraceArgs.CollisionQuery = GetCollisionParams();
 

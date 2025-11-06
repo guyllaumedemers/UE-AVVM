@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,27 +21,15 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
+#include "ModularPlayerController.h"
 
-#include "AVVMHandshakePayload.generated.h"
+#include "AVVMPlayerController.generated.h"
 
 /**
- *	Class description:
- *
- *	FAVVMHandshakePayload is a payload context that forward information about an interaction between two users to UI system.
+ * 
  */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMHandshakePayload : public FAVVMNotificationPayload
+UCLASS()
+class AVVMGAMEPLAY_API AAVVMPlayerController : public AModularPlayerController
 {
 	GENERATED_BODY()
-
-	FAVVMHandshakePayload() = default;
-	explicit FAVVMHandshakePayload(const AActor* NewInstigator,
-	                               const AActor* NewTarget);
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const AActor> Instigator = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const AActor> Target = nullptr;
 };

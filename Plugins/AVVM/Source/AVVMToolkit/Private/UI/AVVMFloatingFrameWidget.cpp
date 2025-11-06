@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMFloatingFrameWidget.h"
 
-#include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Engine/AssetManager.h"
 #include "UI/AVVMWidgetPickerDataAsset.h"

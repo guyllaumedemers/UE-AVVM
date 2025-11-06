@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Transaction.h"
 
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "DoesTransactionProviderSupportIdentifier.h"
 #include "TransactionSettings.h"
 #include "GameFramework/PlayerState.h"
@@ -131,7 +131,7 @@ FString UTransaction::GetUniqueId(const AActor* NewTarget)
 			}
 		}
 
-		const bool bImplements = UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<UDoesTransactionProviderSupportIdentifier>(StatisticOwner);
+		const bool bImplements = UAVVMUtils::IsBlueprintScriptInterfaceValid<UDoesTransactionProviderSupportIdentifier>(StatisticOwner);
 		if (bImplements)
 		{
 			// @gdemers else, we care about statistics specific to inanimated world objects.

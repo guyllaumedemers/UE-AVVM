@@ -19,8 +19,7 @@
 //SOFTWARE.
 #include "AVVMToolkit/Public/UI/AVVMFrameWidget.h"
 
-#include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
@@ -68,7 +67,7 @@ void UAVVMFrameWidget::SetParent(UAVVMFrameWidget* NewParent, UObject* NewViewMo
 
 	if (IsValid(NewViewModel))
 	{
-		UAVVMUtilityFunctionLibrary::BindViewModel(NewViewModel, NewParent);
+		UAVVMUtils::BindViewModel(NewViewModel, NewParent);
 		SafeAddBorder(NewViewModel);
 	}
 }

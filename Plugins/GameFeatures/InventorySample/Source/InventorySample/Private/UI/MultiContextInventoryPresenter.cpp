@@ -20,7 +20,7 @@
 #include "UI/MultiContextInventoryPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -68,7 +68,7 @@ void UMultiContextInventoryPresenter::BP_OnNotificationReceived_StopPresenter(co
 
 void UMultiContextInventoryPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(Target.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtils::GetTargetLocalPlayer(Target.Get());
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UMultiContextInventoryPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -96,7 +96,7 @@ void UMultiContextInventoryPresenter::StopPresenting()
 		OwnerASC.Reset();
 	}
 
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(Target.Get());
+	ULocalPlayer* LocalPlayer = UAVVMUtils::GetTargetLocalPlayer(Target.Get());
 	if (IsValid(LocalPlayer))
 	{
 		IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -107,5 +107,5 @@ void UMultiContextInventoryPresenter::StopPresenting()
 void UMultiContextInventoryPresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }

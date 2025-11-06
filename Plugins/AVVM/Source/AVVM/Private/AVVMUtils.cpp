@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 
 #include "AVVM.h"
 #include "CommonUserWidget.h"
@@ -26,10 +26,10 @@
 #include "GameFramework/PlayerState.h"
 #include "View/MVVMView.h"
 
-void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
-                                                UCommonUserWidget* Target)
+void UAVVMUtils::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
+                               UCommonUserWidget* Target)
 {
-	const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
+	const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
 	if (!bIsValid)
 	{
 		return;
@@ -44,14 +44,14 @@ void UAVVMUtilityFunctionLibrary::BindViewModel(const TScriptInterface<IAVVMView
 	}
 }
 
-ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject)
+ULocalPlayer* UAVVMUtils::GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject)
 {
 	if (!IsValid(WorldContextObject))
 	{
 		return nullptr;
 	}
 
-	ULocalPlayer* TargetLocalPlayer = UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(WorldContextObject);
+	ULocalPlayer* TargetLocalPlayer = UAVVMUtils::GetTargetLocalPlayer(WorldContextObject);
 	if (IsValid(TargetLocalPlayer))
 	{
 		return TargetLocalPlayer;
@@ -74,12 +74,12 @@ ULocalPlayer* UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(const UOb
 	}
 }
 
-ULocalPlayer* UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(const UObject* WorldContextObject)
+ULocalPlayer* UAVVMUtils::GetTargetLocalPlayer(const UObject* WorldContextObject)
 {
 	auto* PlayerState = Cast<APlayerState>(WorldContextObject);
 	if (IsValid(PlayerState))
 	{
-		return UAVVMUtilityFunctionLibrary::GetTargetLocalPlayer(PlayerState->GetPlayerController());
+		return UAVVMUtils::GetTargetLocalPlayer(PlayerState->GetPlayerController());
 	}
 
 	auto* PC = Cast<APlayerController>(WorldContextObject);

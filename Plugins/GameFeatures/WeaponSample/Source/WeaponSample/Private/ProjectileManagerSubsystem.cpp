@@ -19,9 +19,11 @@
 //SOFTWARE.
 #include "ProjectileManagerSubsystem.h"
 
+#include "AVVMAudioContext.h"
+#include "AVVMAudioUtils.h"
 #include "AVVMGameState.h"
 #include "NonReplicatedProjectileActor.h"
-#include "WeaponDebuggerSettings.h"
+#include "WeaponSettings.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -197,14 +199,12 @@ void UProjectileManagerSubsystem::HandleClientPassByBullets()
 
 		const bool bIsWithinRange = UProjectileFunctionLibrary::CheckDistance(Iterator->Get(),
 																			  Pawn,
-																			  UWeaponDebuggerSettings::GetSquaredDistanceThreshold());
-		if (!bIsWithinRange)
+																			  UWeaponSettings::GetSquaredDistanceThreshold());
+		if (bIsWithinRange)
 		{
-			continue;
+			const TInstancedStruct<FAVVMAudioContext> SpatialAudioContext = FAVVMAudioContext::Make<FAVVMSpatialAudioContext>(Iterator->Get(), Pawn, 1.f);
+			UAVVMAudioUtils::NotifyAudioCue(this, SpatialAudioContext);
+			Iterator.RemoveCurrentSwap();
 		}
-
-		const FTransform& ProjectileWorldTransform = Iterator->Get()->GetTransform();
-		OnProjectilePassBy.Broadcast(ProjectileWorldTransform.GetLocation());
-		Iterator.RemoveCurrentSwap();
 	}
 }

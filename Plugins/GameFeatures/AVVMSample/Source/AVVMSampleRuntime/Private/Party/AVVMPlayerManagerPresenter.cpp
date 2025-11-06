@@ -20,7 +20,7 @@
 #include "Party/AVVMPlayerManagerPresenter.h"
 
 #include "AVVMOnline.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "GameFramework/GameMode.h"
 #include "Party/AVVMPlayerManagerViewModel.h"
@@ -82,7 +82,7 @@ void UAVVMPlayerManagerPresenter::SetPlayerConnections(const TInstancedStruct<FA
 
 void UAVVMPlayerManagerPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UAVVMPlayerManagerPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -97,7 +97,7 @@ void UAVVMPlayerManagerPresenter::StartPresenting()
 
 void UAVVMPlayerManagerPresenter::StopPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtilityFunctionLibrary::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
 	if (IsValid(LocalPlayer))
 	{
 		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -107,5 +107,5 @@ void UAVVMPlayerManagerPresenter::StopPresenting()
 void UAVVMPlayerManagerPresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtilityFunctionLibrary::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }

@@ -45,7 +45,8 @@ public class WeaponSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMToolkit"
+				"AVVMAudio",
+				"AVVMToolkit",
 			}
 		);
 	}

@@ -20,7 +20,7 @@
 #include "AVVMPrimaryGameLayoutInterface.h"
 
 #include "AVVM.h"
-#include "AVVMUtilityFunctionLibrary.h"
+#include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "PrimaryGameLayout.h"
 
@@ -36,7 +36,7 @@ void IAVVMPrimaryGameLayoutInterface::PushContentToPrimaryGameLayout(UObject* Ou
 	const auto Callback = [Caller = TScriptInterface<IAVVMPrimaryGameLayoutInterface>(Outer)](EAsyncWidgetLayerState State,
 	                                                                                          UCommonActivatableWidget* ActivatableWidget)
 	{
-		const bool bIsValid = UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid(Caller);
+		const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid(Caller);
 		if (bIsValid)
 		{
 			Caller->OnPushActivatableWidgetCompleted(State, ActivatableWidget);

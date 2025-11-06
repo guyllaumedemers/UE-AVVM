@@ -17,44 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "WeaponSettings.h"
 
-#include "CoreMinimal.h"
-
-#include "Engine/DeveloperSettings.h"
-
-#include "WeaponDebuggerSettings.generated.h"
-
-/**
- *	Class description:
- *
- *	UWeaponDebuggerSettings is a developer settings that expose global properties
- *	to the weapon sample plugin.
- */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UWeaponDebuggerSettings"))
-class WEAPONSAMPLE_API UWeaponDebuggerSettings : public UDeveloperSettings
+UWeaponSettings::UWeaponSettings()
 {
-	GENERATED_BODY()
+	CategoryName = TEXT("Game");
+}
 
-public:
-	UWeaponDebuggerSettings();
-	
-	UFUNCTION(BlueprintCallable)
-	static bool DoesDebugTraceShowPersistentLine();
+bool UWeaponSettings::DoesDebugTraceShowPersistentLine()
+{
+	return GetDefault<UWeaponSettings>()->bDoesDebugTraceShowPersistentLine;
+}
 
-	UFUNCTION(BlueprintCallable)
-	static float GetDebugTraceLifetime();
+float UWeaponSettings::GetDebugTraceLifetime()
+{
+	return GetDefault<UWeaponSettings>()->DebugTraceLifetime;
+}
 
-	UFUNCTION(BlueprintCallable)
-	static float GetSquaredDistanceThreshold();
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	bool bDoesDebugTraceShowPersistentLine = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	float DebugTraceLifetime = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	float SquaredDistanceThreshold = false;
-};
+float UWeaponSettings::GetSquaredDistanceThreshold()
+{
+	return GetDefault<UWeaponSettings>()->SquaredDistanceThreshold;
+}
