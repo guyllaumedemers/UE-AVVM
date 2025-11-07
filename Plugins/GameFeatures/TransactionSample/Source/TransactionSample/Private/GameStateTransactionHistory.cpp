@@ -22,10 +22,14 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
+#include "NativeGameplayTags.h"
 #include "Transaction.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.Notification.Transaction");
 
 UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -247,7 +251,7 @@ void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 	if (IsValid(NewTransaction))
 	{
 		FAVVMNotificationContextArgs ContextArgs;
-		ContextArgs.ChannelTag = TransactionChannelTag;
+		ContextArgs.ChannelTag = TAG_TRANSACTION_NOTIFICATION;
 		ContextArgs.Payload = NewTransaction->GetValue();
 		ContextArgs.Target = nullptr;
 		UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);

@@ -40,7 +40,6 @@ public class TransactionSample : ModuleRules
 				"CoreUObject",
 				"DeveloperSettings",
 				"Engine",
-				"GameplayTags",
 				"IrisCore"
 			}
 		);
@@ -49,6 +48,7 @@ public class TransactionSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"GameplayTags",
 				"Json"
 			}
 		);

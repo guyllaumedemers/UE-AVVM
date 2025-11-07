@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
 #include "Transaction.h"
 #include "TransactionFactoryUtils.h"
 #include "StructUtils/InstancedStruct.h"
@@ -114,9 +113,6 @@ protected:
 
 	UFUNCTION()
 	void OnRep_NewTransactionRecorded();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag TransactionChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewTransactionRecorded")
 	TArray<TObjectPtr<const UTransaction>> Transactions;
