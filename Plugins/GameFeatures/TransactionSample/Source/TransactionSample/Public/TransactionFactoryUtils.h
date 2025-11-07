@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -40,12 +41,11 @@
  *	Note : When receiving gameplay events, the derived type can be constructed directly from the constructor, only post-replication does the factory function have to be invoked to convert
  *	from a string and back to an instanced type. (If data has to be red)
  */
-USTRUCT(BlueprintType)
-struct TRANSACTIONSAMPLE_API FTransactionPayload
+USTRUCT()
+struct TRANSACTIONSAMPLE_API FTransactionPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	virtual ~FTransactionPayload() = default;
 	virtual FString ToString() const PURE_VIRTUAL(ToString, return FString(););
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FTransactionPayload>::Make<T>

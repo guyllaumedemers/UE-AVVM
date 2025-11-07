@@ -133,6 +133,8 @@ struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMStringPayload() = default;
+	FAVVMStringPayload(const FString& NewPayload);
 	bool operator==(const FAVVMStringPayload& Rhs) const;
 
 	// @gdemers used to prevent creation of an explicit type wrapping a collection of user defined structs.

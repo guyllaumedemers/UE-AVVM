@@ -92,6 +92,8 @@ struct AVVM_API FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	virtual ~FAVVMNotificationPayload() = default;
+
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMNotificationPayload>::Make<T>
 	template <typename TChild, typename... TArgs>
 	static TInstancedStruct<FAVVMNotificationPayload> Make(TArgs&&... Args);

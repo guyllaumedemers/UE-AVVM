@@ -21,6 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMNotificationSubsystem.h"
 #include "Transaction.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -243,5 +244,12 @@ void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 	const TObjectPtr<const UTransaction> NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Top();
-	TransactionRecordedDelegate.Broadcast(NewTransaction);
+	if (IsValid(NewTransaction))
+	{
+		FAVVMNotificationContextArgs ContextArgs;
+		ContextArgs.ChannelTag = TransactionChannelTag;
+		ContextArgs.Payload = NewTransaction->GetValue();
+		ContextArgs.Target = nullptr;
+		UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
+	}
 }

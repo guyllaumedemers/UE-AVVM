@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Transaction.h"
 #include "TransactionFactoryUtils.h"
 #include "StructUtils/InstancedStruct.h"
@@ -29,8 +30,6 @@
 
 class AGameStateBase;
 enum class ETransactionType : uint8;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTransaction*, Transaction);
 
 /**
  *	Class description:
@@ -100,9 +99,6 @@ public:
 	static TArray<const UTransaction*> Static_GetAllTransactions(const UObject* WorldContextObject,
 	                                                             const FString& NewTargetId);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FOnTransactionRecorded TransactionRecordedDelegate;
-
 protected:
 	static UGameStateTransactionHistory* GetActorComponent(const UObject* WorldContextObject);
 	void CreateAndRecordTransaction(const FTransactionContextArgs& Args);
@@ -118,6 +114,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_NewTransactionRecorded();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag TransactionChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewTransactionRecorded")
 	TArray<TObjectPtr<const UTransaction>> Transactions;
@@ -144,9 +143,10 @@ void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetI
                                                        const ETransactionType TransactionType,
                                                        TValue& OutResult) const
 {
-	// @gdemers define two policies within this function template.
-	// A) TDerivedPayload derived from FTransactionPayload.
-	// B) TValue overload the operator+=().
+	// @gdemers define three policies within this function template.
+	// A) TDerivedPayload must derived from FTransactionPayload. *Can be enforced via metaprogramming or concepts later.
+	// B) TDerivedPayload must have a property named Value.
+	// C) TValue overload the operator+=().
 	TArray<const UTransaction*> SearchResult = GetAllTransactionsOfType(NewTargetId, TransactionType);
 	for (const auto* Transaction : SearchResult)
 	{

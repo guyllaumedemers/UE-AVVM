@@ -38,6 +38,11 @@ bool FAVVMPlayerRequest::operator==(const FAVVMPlayerRequest& Rhs) const
 			&& (Payload.Equals(Rhs.Payload));
 }
 
+FAVVMStringPayload::FAVVMStringPayload(const FString& NewPayload)
+	: Payload(NewPayload)
+{
+}
+
 bool FAVVMStringPayload::operator==(const FAVVMStringPayload& Rhs) const
 {
 	return Payload.Equals(Rhs.Payload);
