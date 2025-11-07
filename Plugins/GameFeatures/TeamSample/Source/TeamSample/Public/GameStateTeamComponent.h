@@ -30,12 +30,10 @@
 class APlayerState;
 struct FAVVMPartyProxy;
 struct FStreamableHandle;
-class UPlayerStateTeamComponent;
 class UTeamObject;
 class UTeamRule;
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBackendTeamRequestCompleteDelegate, const bool, bWasSuccess, const TArray<FAVVMPartyProxy>&, NewParties);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnReplicatedTeamChangedDelegate, const TArray<UTeamObject*>& NewTeams, const TArray<UTeamObject*>& OldTeams);
 
 /**
  *	Class description:
@@ -53,9 +51,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	static void Static_BindOnReplicatedTeamChanged(const UObject* WorldContextObject,
-	                                               const FOnReplicatedTeamChangedDelegate::FDelegate& Callback);
 
 protected:
 	static UGameStateTeamComponent* GetActorComponent(const UObject* WorldContextObject);
@@ -91,7 +86,5 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
-	static TArray<FOnReplicatedTeamChangedDelegate::FDelegate> DeferredRegistrations;
-	FOnReplicatedTeamChangedDelegate OnReplicatedTeamChanged;
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

@@ -21,10 +21,21 @@
 
 #include "AVVMOnline.h"
 #include "AVVMOnlineStringParser.h"
+#include "NativeGameplayTags.h"
 #include "PlayerStateTeamComponent.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_COMPOSITION_CHANGED_NOTIFICATION, "TeamSample.Notification.TeamCompositionChanged");
+
+FTeamPayload::FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
+                           const FGameplayTag& NewTeamTag)
+	: TeamTag(NewTeamTag),
+	  PlayerUniqueNetIds(NewPlayerUniqueNetIds)
+{
+}
 
 void UTeamObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -51,20 +62,14 @@ void UTeamObject::SetTeam(const FGameplayTag& NewTeamTag)
 	TeamTag = NewTeamTag;
 }
 
-void UTeamObject::RegisterPlayer(const APlayerState* NewPlayer, const FString& NewPlayerUniqueNetId)
+TInstancedStruct<FTeamPayload> UTeamObject::GetTeamPayload() const
 {
-	PlayerUniqueNetIds.AddUnique(NewPlayerUniqueNetId);
-	
-	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayer);
-	if (IsValid(TeamComponent))
-	{
-		TeamComponent->SetTeam(this);
-	}
+	return FTeamPayload::Make<FTeamPayload>(PlayerUniqueNetIds, TeamTag);
 }
 
 UTeamObject* UTeamObject::Factory(UObject* Outer,
-                                  const FAVVMPartyProxy& PartyProxy,
-                                  const TArray<TWeakObjectPtr<APlayerState>>& Players)
+                                  const TArray<TWeakObjectPtr<APlayerState>>& UnassignedPlayers,
+                                  const FAVVMPartyProxy& PartyProxy)
 {
 	UTeamObject* NewTeam = NewObject<UTeamObject>(Outer);
 	if (!IsValid(NewTeam))
@@ -85,7 +90,7 @@ UTeamObject* UTeamObject::Factory(UObject* Outer,
 
 		// TODO @gdemers Warning. I am no longer certain that the UniqueNetId would be persistent from lobby to gameplay after the client has travels based on
 		// server configuration. TBD!
-		const auto* SearchResult = Players.FindByPredicate([SearchNetId = OutPlayerProxy.UniqueNetId](const TWeakObjectPtr<APlayerState>& Player)
+		const auto* SearchResult = UnassignedPlayers.FindByPredicate([SearchNetId = OutPlayerProxy.UniqueNetId](const TWeakObjectPtr<APlayerState>& Player)
 		{
 			if (!Player.IsValid())
 			{
@@ -110,7 +115,22 @@ UTeamObject* UTeamObject::Factory(UObject* Outer,
 	return NewTeam;
 }
 
+void UTeamObject::RegisterPlayer(const APlayerState* NewPlayer, const FString& NewPlayerUniqueNetId)
+{
+	PlayerUniqueNetIds.AddUnique(NewPlayerUniqueNetId);
+	
+	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayer);
+	if (IsValid(TeamComponent))
+	{
+		TeamComponent->SetTeam(this);
+	}
+}
+
 void UTeamObject::OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds)
 {
-	// TODO @gdemers notify external system of state change.
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_TEAM_COMPOSITION_CHANGED_NOTIFICATION;
+	ContextArgs.Payload = GetTeamPayload();
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }

@@ -28,16 +28,15 @@
 #include "TeamRule.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/StreamableManager.h"
-#include "GameFramework/GameMode.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
-TArray<FOnReplicatedTeamChangedDelegate::FDelegate> UGameStateTeamComponent::DeferredRegistrations;
-
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAM, "WorldRule.Team");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_CREATED_NOTIFICATION, "TeamSample.Notification.TeamCreated");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_DESTROYED_NOTIFICATION, "TeamSample.Notification.TeamDestroyed");
 
 UGameStateTeamComponent::UGameStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -77,21 +76,11 @@ void UGameStateTeamComponent::BeginPlay()
 	}
 
 	OwningOuter = Outer;
-
-	for (const FOnReplicatedTeamChangedDelegate::FDelegate& DeferredContext : DeferredRegistrations)
-	{
-		if (DeferredContext.IsBound())
-		{
-			OnReplicatedTeamChanged.Add(DeferredContext);
-		}
-	}
 }
 
 void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	DeferredRegistrations.Reset();
 
 	auto* Outer = Cast<AAVVMGameState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -109,20 +98,6 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		Outer->OnPlayerStateRemoved.RemoveAll(this);
 		Outer->OnPlayerStateAdded.RemoveAll(this);
-	}
-}
-
-void UGameStateTeamComponent::Static_BindOnReplicatedTeamChanged(const UObject* WorldContextObject,
-                                                                 const FOnReplicatedTeamChangedDelegate::FDelegate& Callback)
-{
-	UGameStateTeamComponent* TeamComponent = GetActorComponent(WorldContextObject);
-	if (IsValid(TeamComponent))
-	{
-		TeamComponent->OnReplicatedTeamChanged.Add(Callback);
-	}
-	else
-	{
-		DeferredRegistrations.Add(Callback);
 	}
 }
 
@@ -146,11 +121,15 @@ UGameStateTeamComponent* UGameStateTeamComponent::GetActorComponent(const UObjec
 void UGameStateTeamComponent::OnPlayerStateAdded(APlayerState* NewPlayerState)
 {
 	PendingPlayers.Add(NewPlayerState);
+
+	// @gdemers if team were already assigned. we need to handle assignment here
 }
 
 void UGameStateTeamComponent::OnPlayerStateRemoved(APlayerState* NewPlayerState)
 {
 	PendingPlayers.Remove(NewPlayerState);
+
+	// @gdemers if team were already assigned. we need to handle removal here
 }
 
 void UGameStateTeamComponent::GetTeamRuleOnAuthority()
@@ -241,10 +220,10 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 	TArray<FGameplayTag> DuplicatedTags = Rule->GetTags();
 	Teams.Reset(NewParties.Num());
 
-	TArray<TWeakObjectPtr<APlayerState>> Players = MoveTemp(PendingPlayers);
+	TArray<TWeakObjectPtr<APlayerState>> UnassignedPlayers = MoveTemp(PendingPlayers);
 	for (const FAVVMPartyProxy& Party : NewParties)
 	{
-		auto* TeamObject = UTeamObject::Factory(OwningOuter.Get(), Party, Players);
+		auto* TeamObject = UTeamObject::Factory(OwningOuter.Get(), UnassignedPlayers, Party);
 		if (!IsValid(TeamObject))
 		{
 			continue;
@@ -263,5 +242,31 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 
 void UGameStateTeamComponent::OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams)
 {
-	OnReplicatedTeamChanged.Broadcast(Teams, OldTeams);
+	for (const UTeamObject* OldTeam : OldTeams)
+	{
+		if (!IsValid(OldTeam))
+		{
+			continue;
+		}
+
+		FAVVMNotificationContextArgs ContextArgs;
+		ContextArgs.ChannelTag = TAG_TEAM_DESTROYED_NOTIFICATION;
+		ContextArgs.Payload = OldTeam->GetTeamPayload();
+		ContextArgs.Target = nullptr;
+		UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
+	}
+
+	for (const UTeamObject* NewTeam : Teams)
+	{
+		if (!IsValid(NewTeam))
+		{
+			continue;
+		}
+
+		FAVVMNotificationContextArgs ContextArgs;
+		ContextArgs.ChannelTag = TAG_TEAM_CREATED_NOTIFICATION;
+		ContextArgs.Payload = NewTeam->GetTeamPayload();
+		ContextArgs.Target = nullptr;
+		UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
+	}
 }

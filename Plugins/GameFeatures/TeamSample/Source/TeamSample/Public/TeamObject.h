@@ -22,7 +22,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "GameplayTagContainer.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "TeamObject.generated.h"
@@ -33,6 +35,39 @@
 
 class APlayerState;
 struct FAVVMPartyProxy;
+
+/**
+ *	Class description:
+ *
+ *	FTeamPayload is the Payload base class for caching data specific to team composition.
+ */
+USTRUCT()
+struct TEAMSAMPLE_API FTeamPayload : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	FTeamPayload() = default;
+	FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
+	             const FGameplayTag& NewTeamTag);
+
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FTeamPayload>::Make<T>
+	template <typename TChild, typename... TArgs>
+	static TInstancedStruct<FTeamPayload> Make(TArgs&&... Args);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag TeamTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FString> PlayerUniqueNetIds;
+
+	static TInstancedStruct<FTeamPayload> Empty;
+};
+
+template <typename TChild, typename... TArgs>
+TInstancedStruct<FTeamPayload> FTeamPayload::Make(TArgs&&... Args)
+{
+	return TInstancedStruct<FTeamPayload>::Make<TChild>(Forward<TArgs>(Args)...);
+}
 
 /**
  *	Class description:
@@ -56,15 +91,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetTeam(const FGameplayTag& NewTeamTag);
-	
+
 	UFUNCTION(BlueprintCallable)
-	void RegisterPlayer(const APlayerState* NewPlayer, const FString& NewPlayerUniqueNetId);
+	TInstancedStruct<FTeamPayload> GetTeamPayload() const;
 
 	static UTeamObject* Factory(UObject* Outer,
-	                            const FAVVMPartyProxy& Party,
-	                            const TArray<TWeakObjectPtr<APlayerState>>& Players);
+	                            const TArray<TWeakObjectPtr<APlayerState>>& UnassignedPlayers,
+	                            const FAVVMPartyProxy& PartyProxy);
 
 protected:
+	UFUNCTION(BlueprintCallable)
+	void RegisterPlayer(const APlayerState* NewPlayer, const FString& NewPlayerUniqueNetId);
+	
 	UFUNCTION()
 	void OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds);
 
