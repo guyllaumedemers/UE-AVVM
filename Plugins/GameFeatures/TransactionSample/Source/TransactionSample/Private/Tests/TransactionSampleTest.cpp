@@ -78,7 +78,7 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 	UTEST_NOT_NULL("FTransactionPayload.", OtherPolymorphicPayload)
 
 	// @gdemers property comparison.
-	UTEST_EQUAL("Checking Payload property Equality.", PolymorphicPayload->DummyProperty, OtherPolymorphicPayload->DummyProperty)
+	UTEST_EQUAL("Checking Payload property Equality.", PolymorphicPayload->Value, OtherPolymorphicPayload->Value)
 
 	// @gdemers testing registration system.
 	FTransactionContextArgs Args_A;
@@ -95,11 +95,23 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 	Args_B.Payload = StringInput;
 	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(World, Args_B);
 
+	// @gdemers increment existing entry.
+	FTransactionContextArgs Args_C;
+	Args_C.Instigator = nullptr;
+	Args_C.Target = TestActor;
+	Args_C.TransactionType = ETransactionType::Kill;
+	Args_C.Payload = StringInput;
+	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(World, Args_C);
+
 	TArray<const UTransaction*> OutResult_A = UGameStateTransactionHistory::Static_GetAllTransactionsOfType(World, TestActorUniqueId, ETransactionType::Kill);
-	UTEST_EQUAL("Post-Addition, ETransactionType::Kill Count.", OutResult_A.Num(), 1)
+	UTEST_EQUAL("Post-Addition, ETransactionType::Kill Count.", OutResult_A.Num(), 2)
+
+	int32 OutResult = 0;
+	UGameStateTransactionHistory::Static_GetAggregatedValues<FTransactionPayloadTest, int32>(World, TestActorUniqueId, ETransactionType::Kill, OutResult);
+	UTEST_EQUAL("Aggregate values, ETransactionType::Kill Total Value.", OutResult, 2)
 
 	TArray<const UTransaction*> OutResult_B = UGameStateTransactionHistory::Static_GetAllTransactions(World, TestActorUniqueId);
-	UTEST_EQUAL("Post-Addition, All Transaction Count.", OutResult_B.Num(), 2)
+	UTEST_EQUAL("Post-Addition, All Transaction Count.", OutResult_B.Num(), 3)
 
 	UGameStateTransactionHistory::Static_RemoveAllTransactionOfType(World, TestActor, ETransactionType::Killstreak);
 

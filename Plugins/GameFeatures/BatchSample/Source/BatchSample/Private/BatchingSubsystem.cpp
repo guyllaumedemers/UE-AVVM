@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "BatchingSubsystem.h"
 
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
 #include "AVVMWorldSetting.h"
 #include "Batchable.h"
@@ -174,9 +176,14 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 		return;
 	}
 
-	if (!ensureAlwaysMsgf(Batchable->HasValidBatchIndex(),
-	                      TEXT("IBatchable doesnt reference a valid Batch index. Actor may have been marked for Destroy on Next tick.")))
+	if (!ensureAlways(Batchable->HasValidBatchIndex()))
 	{
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". IBatchable doesnt reference a valid Batch index. Actor \"%s\" may have been marked for Destroy on Next tick."),
+		       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
+		       *Actor->GetName())
+
 		return;
 	}
 

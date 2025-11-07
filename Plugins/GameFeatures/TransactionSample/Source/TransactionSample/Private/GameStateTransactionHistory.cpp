@@ -118,14 +118,14 @@ TArray<const UTransaction*> UGameStateTransactionHistory::Static_GetAllTransacti
                                                                                           const FString& NewTargetId,
                                                                                           const ETransactionType TransactionType)
 {
-	auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
 	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactionsOfType(NewTargetId, TransactionType) : TArray<const UTransaction*>{};
 }
 
 TArray<const UTransaction*> UGameStateTransactionHistory::Static_GetAllTransactions(const UObject* WorldContextObject,
                                                                                     const FString& NewTargetId)
 {
-	auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
 	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactions(NewTargetId) : TArray<const UTransaction*>{};
 }
 

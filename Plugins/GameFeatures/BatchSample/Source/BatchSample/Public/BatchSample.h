@@ -23,7 +23,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-BATCHSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogBatch, Log, All);
+BATCHSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogBatchSample, Log, All);
 
 /**
  *	Plugin Description :

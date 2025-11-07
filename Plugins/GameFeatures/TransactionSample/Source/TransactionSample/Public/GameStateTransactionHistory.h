@@ -20,13 +20,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Transaction.h"
+#include "TransactionFactoryUtils.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "GameStateTransactionHistory.generated.h"
 
 class AGameStateBase;
 enum class ETransactionType : uint8;
-class UTransaction;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTransactionRecorded, const UTransaction*, Transaction);
 
@@ -83,6 +85,12 @@ public:
 	static void Static_RemoveAllTransactions(const UObject* WorldContextObject,
 	                                         const AActor* NewTarget);
 
+	template <typename TDerivedPayload, typename TValue>
+	static void Static_GetAggregatedValues(const UObject* WorldContextObject,
+	                                       const FString& NewTargetId,
+	                                       const ETransactionType TransactionType,
+	                                       TValue& OutResult);
+
 	// @gdemers TArray cannot cast from TArray<const UTransaction*> to TArray<UTransaction*> which is
 	// required for BP support. I prefer ensuring const-ness here.
 	static TArray<const UTransaction*> Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
@@ -103,6 +111,11 @@ protected:
 	TArray<const UTransaction*> GetAllTransactionsOfType(const FString& NewTargetId, const ETransactionType TransactionType) const;
 	TArray<const UTransaction*> GetAllTransactions(const FString& NewTargetId) const;
 
+	template <typename TDerivedPayload, typename TValue>
+	void GetAggregatedValues(const FString& NewTargetId,
+	                         const ETransactionType TransactionType,
+	                         TValue& OutResult) const;
+
 	UFUNCTION()
 	void OnRep_NewTransactionRecorded();
 
@@ -112,3 +125,41 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AGameStateBase> OwningOuter = nullptr;
 };
+
+template <typename TDerivedPayload, typename TValue>
+void UGameStateTransactionHistory::Static_GetAggregatedValues(const UObject* WorldContextObject,
+                                                              const FString& NewTargetId,
+                                                              const ETransactionType TransactionType,
+                                                              TValue& OutResult)
+{
+	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	if (IsValid(TransactionHistory))
+	{
+		TransactionHistory->GetAggregatedValues<TDerivedPayload, TValue>(NewTargetId, TransactionType, OutResult);
+	}
+}
+
+template <typename TDerivedPayload, typename TValue>
+void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetId,
+                                                       const ETransactionType TransactionType,
+                                                       TValue& OutResult) const
+{
+	// @gdemers define two policies within this function template.
+	// A) TDerivedPayload derived from FTransactionPayload.
+	// B) TValue overload the operator+=().
+	TArray<const UTransaction*> SearchResult = GetAllTransactionsOfType(NewTargetId, TransactionType);
+	for (const auto* Transaction : SearchResult)
+	{
+		if (!IsValid(Transaction))
+		{
+			continue;
+		}
+
+		const TInstancedStruct<FTransactionPayload> InstancedPayload = Transaction->GetValue();
+		const auto* Payload = InstancedPayload.GetPtr<TDerivedPayload>();
+		if (Payload != nullptr)
+		{
+			OutResult += Payload->Value;
+		}
+	}
+}

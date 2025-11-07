@@ -20,7 +20,7 @@
 
 #include "BatchSample.h"
 
-DEFINE_LOG_CATEGORY(LogBatch);
+DEFINE_LOG_CATEGORY(LogBatchSample);
 
 TSharedPtr<IConsoleVariable> FBatchSampleModule::CVarBatchEnableSubsystem = nullptr;
 

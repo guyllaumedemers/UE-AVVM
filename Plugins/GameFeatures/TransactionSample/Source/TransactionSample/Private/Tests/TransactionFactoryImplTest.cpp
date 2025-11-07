@@ -21,15 +21,15 @@
 
 #include "Serialization/JsonSerializer.h"
 
-FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewDummyProperty)
-	: DummyProperty(NewDummyProperty)
+FTransactionPayloadTest::FTransactionPayloadTest(const int32 NewValue)
+	: Value(NewValue)
 {
 }
 
 FString FTransactionPayloadTest::ToString() const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetNumberField(TEXT("DummyProperty"), DummyProperty);
+	JsonData->SetNumberField(TEXT("Value"), Value);
 
 	FString JsonOutput;
 
@@ -53,7 +53,7 @@ TInstancedStruct<FTransactionPayload> UTransactionFactoryImplTest::CreatePayload
 	}
 
 	FTransactionPayloadTest Test;
-	Test.DummyProperty = JsonData->GetIntegerField(TEXT("DummyProperty"));
+	Test.Value = JsonData->GetIntegerField(TEXT("Value"));
 
-	return FTransactionPayload::Make<FTransactionPayloadTest>(Test.DummyProperty);
+	return FTransactionPayload::Make<FTransactionPayloadTest>(Test.Value);
 }

@@ -36,11 +36,11 @@ struct TRANSACTIONSAMPLE_API FTransactionPayloadTest : public FTransactionPayloa
 	GENERATED_BODY()
 
 	FTransactionPayloadTest() = default;
-	explicit FTransactionPayloadTest(const int32 NewDummyProperty);
+	explicit FTransactionPayloadTest(const int32 NewValue);
 	virtual FString ToString() const override;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 DummyProperty = INDEX_NONE;
+	int32 Value = INDEX_NONE;
 };
 
 /**
