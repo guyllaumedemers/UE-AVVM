@@ -55,7 +55,7 @@ void UGameStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 void UGameStateTeamComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	auto* Outer = GetTypedOuter<AAVVMGameState>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -68,12 +68,14 @@ void UGameStateTeamComponent::BeginPlay()
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
+#if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
 	{
 		GetTeamRuleOnAuthority();
 		Outer->OnPlayerStateRemoved.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateRemoved);
 		Outer->OnPlayerStateAdded.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateAdded);
 	}
+#endif
 
 	OwningOuter = Outer;
 }
@@ -94,11 +96,13 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
+#if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
 	{
 		Outer->OnPlayerStateRemoved.RemoveAll(this);
 		Outer->OnPlayerStateAdded.RemoveAll(this);
 	}
+#endif
 }
 
 UGameStateTeamComponent* UGameStateTeamComponent::GetActorComponent(const UObject* WorldContextObject)
