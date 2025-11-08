@@ -47,17 +47,22 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	static UProjectileComponent* GetActorComponent(const AActor* NewActor);
-
-	UFUNCTION(BlueprintCallable)
-	void Fire(const FGameplayTag& FiringModeTag,
-	          const FTransform& AimTransform) const;
+	void Static_Fire(const AActor* NewActor,
+	                 const FGameplayTag& FiringModeTag,
+	                 const FTransform& AimTransform);
 
 	void SetupProjectiles(const TArray<UObject*>& NewResources);
 
 protected:
 	UFUNCTION()
 	void OnSoftObjectAcquired();
+	
+	UFUNCTION(BlueprintCallable)
+	static UProjectileComponent* GetActorComponent(const AActor* NewActor);
+
+	UFUNCTION(BlueprintCallable)
+	void Fire(const FGameplayTag& FiringModeTag,
+			  const FTransform& AimTransform) const;
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

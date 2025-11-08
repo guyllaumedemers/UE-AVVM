@@ -24,6 +24,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
@@ -104,6 +105,23 @@ FUniqueNetIdPtr UAVVMOnlineInterfaceUtils::GetUniqueNetIdPtr(const ULocalPlayer*
 	}
 
 	return UniqueNetIdPtr;
+}
+
+FString UAVVMOnlineInterfaceUtils::GetUniqueNetId(const APlayerState* PlayerState)
+{
+	static constexpr FStringView Empty;
+	if (!IsValid(PlayerState))
+	{
+		return Empty.GetData();
+	}
+
+	FUniqueNetIdPtr UniqueNetIdPtr = PlayerState->GetUniqueId().GetV1();
+	if (!UniqueNetIdPtr.IsValid())
+	{
+		return Empty.GetData();
+	}
+
+	return UniqueNetIdPtr->ToString();
 }
 
 FString UAVVMOnlineInterfaceUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

@@ -21,7 +21,7 @@
 
 #include "ActorItemProgressionComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMScopedDelegate.h"
+#include "AVVMScopedUtils.h"
 #include "AVVMUtils.h"
 #include "InventoryProvider.h"
 #include "InventorySample.h"

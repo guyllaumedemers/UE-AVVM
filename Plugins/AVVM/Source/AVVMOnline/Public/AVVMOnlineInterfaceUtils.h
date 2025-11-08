@@ -85,6 +85,9 @@ public:
 	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString GetUniqueNetId(const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static FString SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")

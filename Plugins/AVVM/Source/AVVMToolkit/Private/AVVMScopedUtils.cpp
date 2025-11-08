@@ -17,28 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-/**
- *	Class description:
- *
- *	FAVVMScopedDelegate is a scoped object that execute a laten delegate during destruction.
- */
-struct AVVMTOOLKIT_API FAVVMScopedDelegate
-{
-public:
-	FAVVMScopedDelegate(const TDelegate<void()>& Callback)
-		: OutOfScopeDelegate(Callback)
-	{
-	}
-
-	~FAVVMScopedDelegate()
-	{
-		OutOfScopeDelegate.ExecuteIfBound();
-	}
-
-private:
-	TDelegate<void()> OutOfScopeDelegate;
-};
+#include "AVVMScopedUtils.h"

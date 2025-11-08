@@ -119,7 +119,7 @@ UProjectileManagerSubsystem* UProjectileManagerSubsystem::GetSubsystem(const UWo
 	return UWorld::GetSubsystem<UProjectileManagerSubsystem>(World);
 }
 
-void UProjectileManagerSubsystem::OnPlayerStateRemoved(APlayerState* PlayerState)
+void UProjectileManagerSubsystem::OnPlayerStateRemoved(const APlayerState* PlayerState)
 {
 	if (!IsValid(PlayerState))
 	{
@@ -133,7 +133,7 @@ void UProjectileManagerSubsystem::OnPlayerStateRemoved(APlayerState* PlayerState
 	}
 }
 
-void UProjectileManagerSubsystem::OnPlayerStateAdded(APlayerState* PlayerState)
+void UProjectileManagerSubsystem::OnPlayerStateAdded(const APlayerState* PlayerState)
 {
 	if (!IsValid(PlayerState))
 	{

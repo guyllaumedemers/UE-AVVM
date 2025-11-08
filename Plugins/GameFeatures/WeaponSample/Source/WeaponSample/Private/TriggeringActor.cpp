@@ -143,8 +143,7 @@ void ATriggeringActor::OnSoftObjectAcquired()
 	{
 		return;
 	}
-
-
+	
 	TArray<UObject*> OutStreamableAssets;
 	TriggeringAbilityClassHandle->GetLoadedAssets(OutStreamableAssets);
 

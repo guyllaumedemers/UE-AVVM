@@ -26,7 +26,7 @@
 
 #include "AVVMGameState.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateActionRecordedDelegate, APlayerState*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateActionRecordedDelegate, const APlayerState*);
 
 /**
  *	Class description:

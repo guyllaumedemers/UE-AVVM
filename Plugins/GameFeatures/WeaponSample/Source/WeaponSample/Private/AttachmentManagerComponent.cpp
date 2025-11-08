@@ -20,7 +20,7 @@
 #include "AttachmentManagerComponent.h"
 
 #include "AVVMGameplayUtils.h"
-#include "AVVMScopedDelegate.h"
+#include "AVVMScopedUtils.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -294,7 +294,7 @@ void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentModi
 	};
 
 	// @gdemers for safety reason, our callback is using a scoped object.
-	const auto Callback = TDelegate<void()>::CreateWeakLambda(this, OnNextRequestExecuted, QueueingMechanism, this);
+	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, OnNextRequestExecuted, QueueingMechanism, this);
 	FAVVMScopedDelegate ScopedDelegate(Callback);
 
 	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentModifierHandleSystem.Find(AttachmentModifierToken.UniqueId);

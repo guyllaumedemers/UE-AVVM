@@ -36,11 +36,12 @@ public class TeamSample : ModuleRules
 			{
 				"AVVM",
 				"AVVMGameplay",
+				"AVVMToolkit",
 				"Core",
 				"CoreUObject",
 				"Engine",
 				"IrisCore",
-				"GameplayTags"
+				"GameplayTags",
 			}
 		);
 

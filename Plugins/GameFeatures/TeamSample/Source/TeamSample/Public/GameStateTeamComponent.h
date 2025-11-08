@@ -22,6 +22,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMScopedUtils.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 
@@ -54,12 +55,12 @@ public:
 
 protected:
 	static UGameStateTeamComponent* GetActorComponent(const UObject* WorldContextObject);
-	
-	UFUNCTION()
-	void OnPlayerStateAdded(APlayerState* NewPlayerState);
 
 	UFUNCTION()
-	void OnPlayerStateRemoved(APlayerState* NewPlayerState);
+	void OnPlayerStateAdded(const APlayerState* NewPlayerState);
+
+	UFUNCTION()
+	void OnPlayerStateRemoved(const APlayerState* NewPlayerState);
 
 	void GetTeamRuleOnAuthority();
 	void RequestTeams();
@@ -81,10 +82,14 @@ protected:
 	TArray<TObjectPtr<UTeamObject>> Teams;
 
 	UPROPERTY(Transient, meta=(ToolTip="Players waiting to be assigned to a team based on data from backend."))
-	TArray<TWeakObjectPtr<APlayerState>> PendingPlayers;
+	TArray<TWeakObjectPtr<const APlayerState>> PendingPlayerStates;
+
+	UPROPERTY(Transient, meta=(ToolTip="Players waiting to be assigned to a team based on data from backend. But that came AFTER a backend request was sent."))
+	TArray<TWeakObjectPtr<const APlayerState>> ScopedLockedPlayerStates;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+	FAVVMGameThreadLock SynchronizationLock = FAVVMGameThreadLock();
 };

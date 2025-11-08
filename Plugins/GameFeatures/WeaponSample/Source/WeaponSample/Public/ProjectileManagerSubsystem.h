@@ -65,8 +65,8 @@ public:
 	                      const FTransform& AimTransform) const;
 
 protected:
-	void OnPlayerStateRemoved(APlayerState* PlayerState);
-	void OnPlayerStateAdded(APlayerState* PlayerState);
+	void OnPlayerStateRemoved(const APlayerState* PlayerState);
+	void OnPlayerStateAdded(const APlayerState* PlayerState);
 	void OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile);
 
 	// @gdemers factory method to support pooling or other instancing system specific to your project.

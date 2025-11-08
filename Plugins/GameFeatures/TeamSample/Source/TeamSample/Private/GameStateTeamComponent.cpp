@@ -118,18 +118,37 @@ UGameStateTeamComponent* UGameStateTeamComponent::GetActorComponent(const UObjec
 	return TeamComponent.Get();
 }
 
-void UGameStateTeamComponent::OnPlayerStateAdded(APlayerState* NewPlayerState)
+void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerState)
 {
-	PendingPlayers.Add(NewPlayerState);
+	// Problem : APlayerState is added by the game when a player attempt reaching the game, but
+	// we may have already requested from the backend receiving the parties composing the game.
+	// As such, our pending state may have been modified during the time we wait for the request to respond,
+	// and act on a modified collection which isnt accounted for in the party Context struct.
 
-	// @gdemers if team were already assigned. we need to handle assignment here
+	const bool bIsLocked = SynchronizationLock.IsLocked();
+	if (!bIsLocked)
+	{
+		PendingPlayerStates.Add(TWeakObjectPtr(NewPlayerState));
+		// @gdemers theres two cases here to cover :
+		// A) We have just entered a new game. we need to configure players team.
+		// B) A player joined during an on-going game, and we need to configure their team.
+		RequestTeams();
+	}
+	else
+	{
+		ScopedLockedPlayerStates.Add(TWeakObjectPtr(NewPlayerState));
+	}
 }
 
-void UGameStateTeamComponent::OnPlayerStateRemoved(APlayerState* NewPlayerState)
+void UGameStateTeamComponent::OnPlayerStateRemoved(const APlayerState* NewPlayerState)
 {
-	PendingPlayers.Remove(NewPlayerState);
-
-	// @gdemers if team were already assigned. we need to handle removal here
+	// @gdemers theres only one case here to cover :
+	// A) removal of a player who's already in game.
+	UTeamObject* Team = UTeamUtils::UTeamUtils::FindTeam(Teams, NewPlayerState);
+	if (IsValid(Team))
+	{
+		Team->UnRegisterPlayerState(NewPlayerState);
+	}
 }
 
 void UGameStateTeamComponent::GetTeamRuleOnAuthority()
@@ -174,6 +193,21 @@ void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 
 void UGameStateTeamComponent::RequestTeams()
 {
+	if (SynchronizationLock.IsLocked() || (PendingPlayerStates.IsEmpty() && ScopedLockedPlayerStates.IsEmpty()))
+	{
+		return;
+	}
+
+	if (!ScopedLockedPlayerStates.IsEmpty())
+	{
+		PendingPlayerStates.Append(ScopedLockedPlayerStates);
+		ScopedLockedPlayerStates.Reset();
+	}
+
+	// @gdemers can be locked from our async loading Rule process and subsequent events from an incoming player
+	// connections joining the game.
+	SynchronizationLock.Lock();
+
 	// @gdemers we expect your project to have some form of backend from which we can retrieve information
 	// based on GameSession information.
 	FOnBackendTeamRequestCompleteDelegate Callback;
@@ -205,39 +239,26 @@ void UGameStateTeamComponent::GetBackendTeams(const FOnBackendTeamRequestComplet
 void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
                                              const TArray<FAVVMPartyProxy>& NewParties)
 {
+	const auto OutOfScopeCallback = [](const TWeakObjectPtr<UGameStateTeamComponent>& Caller)
+	{
+		if (Caller.IsValid())
+		{
+			Caller->RequestTeams();
+		}
+	};
+
+	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, OutOfScopeCallback, TWeakObjectPtr<UGameStateTeamComponent>(this));
+	FAVVMGameThreadLock::FAVVMScopedLock ScopedLock = SynchronizationLock.Make(Callback);
+
 	if (!ensureAlwaysMsgf(bWasSuccess,
 	                      TEXT("Backend couldnt retrieve involved parties.")))
 	{
 		return;
 	}
 
-	const UTeamRule* Rule = TeamRule.Get();
-	if (!IsValid(Rule))
-	{
-		return;
-	}
-
-	TArray<FGameplayTag> DuplicatedTags = Rule->GetTags();
-	Teams.Reset(NewParties.Num());
-
-	TArray<TWeakObjectPtr<APlayerState>> UnassignedPlayers = MoveTemp(PendingPlayers);
-	for (const FAVVMPartyProxy& Party : NewParties)
-	{
-		auto* TeamObject = UTeamObject::Factory(OwningOuter.Get(), UnassignedPlayers, Party);
-		if (!IsValid(TeamObject))
-		{
-			continue;
-		}
-
-		if (ensureAlwaysMsgf(!DuplicatedTags.IsEmpty(),
-		                     TEXT("TeamTags were not configured. Attempting assignment on Empty set.")))
-		{
-			const FGameplayTag TeamTag = DuplicatedTags.Pop();
-			TeamObject->SetTeam(TeamTag);
-		}
-
-		Teams.Add(TeamObject);
-	}
+	TArray<UTeamObject*> OldTeam = MoveTemp(Teams);
+	UTeamUtils::CreateOrAppendTeams(this, MoveTemp(PendingPlayerStates), NewParties, TeamRule.Get(), OldTeam);
+	Teams.Append(OldTeam);
 }
 
 void UGameStateTeamComponent::OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams)
