@@ -19,12 +19,14 @@
 //SOFTWARE.
 #include "TeamObject.h"
 
+#include "AVVMGameplayUtils.h"
 #include "AVVMOnline.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMOnlineStringParser.h"
 #include "NativeGameplayTags.h"
 #include "PlayerStateTeamComponent.h"
 #include "TeamRule.h"
+#include "TeamSample.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
@@ -67,7 +69,18 @@ TInstancedStruct<FTeamPayload> UTeamObject::GetTeamPayload() const
 void UTeamObject::RegisterPlayerState(const APlayerState* NewPlayerState, const FString& NewPlayerUniqueNetId)
 {
 	PlayerUniqueNetIds.AddUnique(NewPlayerUniqueNetId);
-	
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (IsValid(Outer) && IsValid(NewPlayerState))
+	{
+		UE_LOG(LogTeamSample,
+		       Log,
+		       TEXT("Executed from \"%s\". RegisterPlayerState : \"%s\" with Team \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *NewPlayerState->GetName(),
+		       *GetName());
+	}
+
 	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayerState);
 	if (IsValid(TeamComponent))
 	{
@@ -77,8 +90,19 @@ void UTeamObject::RegisterPlayerState(const APlayerState* NewPlayerState, const 
 
 void UTeamObject::UnRegisterPlayerState(const APlayerState* OldPlayerState)
 {
-	const FString PlayerUniqueNetId = UAVVMOnlineInterfaceUtils::GetUniqueNetId(OldPlayerState);
+	const FString PlayerUniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(OldPlayerState);
 	PlayerUniqueNetIds.Remove(PlayerUniqueNetId);
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (IsValid(Outer) && IsValid(OldPlayerState))
+	{
+		UE_LOG(LogTeamSample,
+		       Log,
+		       TEXT("Executed from \"%s\". UnRegisterPlayerState : \"%s\" from Team \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(GetTypedOuter<AActor>()).GetData(),
+		       *OldPlayerState->GetName(),
+		       *GetName());
+	}
 }
 
 void UTeamObject::OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds)
@@ -141,6 +165,15 @@ UTeamObject* UTeamUtils::CreateTeam(UObject* Outer,
                                     const FAVVMPartyProxy& NewParty)
 {
 	UTeamObject* NewTeam = NewObject<UTeamObject>(Outer);
+	if (IsValid(NewTeam) && IsValid(Outer))
+	{
+		UE_LOG(LogTeamSample,
+		       Log,
+		       TEXT("Executed from \"%s\". Create new Team \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer->GetTypedOuter<AActor>()).GetData(),
+		       *NewTeam->GetName());
+	}
+
 	AppendTeam(UnassignedPlayerStates, NewParty.PlayerConnections, NewTeam);
 	return NewTeam;
 }
@@ -167,18 +200,8 @@ void UTeamUtils::AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& Un
 
 		const TWeakObjectPtr<const APlayerState>* SearchResult = UnassignedPlayerStates.FindByPredicate([SearchNetId = OutPlayerProxy.UniqueNetId](const TWeakObjectPtr<const APlayerState>& Player)
 		{
-			if (!Player.IsValid())
-			{
-				return false;
-			}
-
-			FUniqueNetIdPtr NetId = Player->GetUniqueId().GetUniqueNetId();
-			if (NetId.IsValid())
-			{
-				return NetId->ToString().Equals(SearchNetId);
-			}
-
-			return false;
+			const FString UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(Player.Get());
+			return !UniqueNetId.IsEmpty() && UniqueNetId.Equals(SearchNetId);
 		});
 
 		if (SearchResult != nullptr)
@@ -202,7 +225,7 @@ UTeamObject* UTeamUtils::FindTeam(const TArray<UTeamObject*>& NewTeams,
 UTeamObject* UTeamUtils::FindTeam(const TArray<UTeamObject*>& NewTeams,
                                   const APlayerState* NewPlayerState)
 {
-	UTeamObject* const* SearchResult = NewTeams.FindByPredicate([SearchNetId = UAVVMOnlineInterfaceUtils::GetUniqueNetId(NewPlayerState)](const UTeamObject* NewTeam)
+	UTeamObject* const* SearchResult = NewTeams.FindByPredicate([SearchNetId = UAVVMOnlineUtils::GetUniqueNetId(NewPlayerState)](const UTeamObject* NewTeam)
 	{
 		return IsValid(NewTeam) && (NewTeam->PlayerUniqueNetIds.Contains(SearchNetId));
 	});

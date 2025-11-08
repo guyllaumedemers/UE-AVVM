@@ -47,7 +47,7 @@ void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_StopPresenter(con
 void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ForcePullChallenges(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineChallengesInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineChallengesInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineChallengesInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -63,7 +63,7 @@ void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ForcePullChalleng
 void UAVVMChallengeManagerPresenter::BP_OnNotificationReceived_ClaimChallengeRewards(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineChallengesInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineChallengesInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineChallengesInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

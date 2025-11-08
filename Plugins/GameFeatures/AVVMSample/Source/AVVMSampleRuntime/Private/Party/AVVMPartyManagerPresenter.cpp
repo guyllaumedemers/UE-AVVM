@@ -45,7 +45,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_StopPresenter(const T
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -61,7 +61,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ForcePullParties(cons
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -88,7 +88,7 @@ void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_JoinParty(const TInst
 void UAVVMPartyManagerPresenter::BP_OnNotificationReceived_ExitParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -265,7 +265,7 @@ void UAVVMPartyManagerPresenter::OnPartyExitRequestCompleted(const bool bWasSucc
 void UAVVMPartyManagerPresenter::TryKickPlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 #if UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION
-	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, GetOuterKey());
+	const bool bIsFirstPlayerHosting = UAVVMOnlineUtils::IsFirstPlayerHosting(this, GetOuterKey());
 	if (!bIsFirstPlayerHosting)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Try Kick Player Request. Failure! Only the Owner of the Party can kick a player!"));
@@ -274,7 +274,7 @@ void UAVVMPartyManagerPresenter::TryKickPlayer(const FAVVMPlayerRequest& PlayerR
 #endif
 
 	TScriptInterface<IAVVMOnlinePartyInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlinePartyInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -312,7 +312,7 @@ void UAVVMPartyManagerPresenter::OnKickFromPartyRequestCompleted(const bool bWas
 void UAVVMPartyManagerPresenter::TryMutePlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineMessagingInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineMessagingInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineMessagingInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -342,7 +342,7 @@ void UAVVMPartyManagerPresenter::OnMutePlayerRequestCompleted(const bool bWasSuc
 void UAVVMPartyManagerPresenter::TryCensorPlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineMessagingInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineMessagingInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineMessagingInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

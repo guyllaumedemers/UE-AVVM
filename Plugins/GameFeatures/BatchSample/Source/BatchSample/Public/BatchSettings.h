@@ -23,17 +23,17 @@
 
 #include "Engine/DeveloperSettings.h"
 
-#include "BatchSampleDeveloperSettings.generated.h"
+#include "BatchSettings.generated.h"
 
 class UBatchingRule;
 
 /**
  *	Class description:
  *
- *	UBatchSampleDeveloperSettings is developer setting for global access of plugin specific content.
+ *	UBatchSettings is developer setting for global access of plugin specific content.
  */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UBatchSampleDeveloperSettings"))
-class BATCHSAMPLE_API UBatchSampleDeveloperSettings : public UDeveloperSettings
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UBatchSettings"))
+class BATCHSAMPLE_API UBatchSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 

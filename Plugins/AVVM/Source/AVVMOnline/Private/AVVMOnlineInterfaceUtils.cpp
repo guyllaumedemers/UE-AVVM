@@ -27,8 +27,8 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
-bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
-                                          const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
+bool UAVVMOnlineUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
+                                 const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
 	const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid(OnlineInterface);
 	if (bIsValid)
@@ -41,62 +41,62 @@ bool UAVVMOnlineInterfaceUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetI
 	}
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineIdentityInterface,
 	                    IAVVMOnlineIdentityInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlinePartyInterface(const UObject* DerivedChild,
-                                                             TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlinePartyInterface(const UObject* DerivedChild,
+                                                    TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlinePartyInterface,
 	                    IAVVMOnlinePartyInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineFriendInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlineFriendInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineFriendInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineFriendInterface,
 	                    IAVVMOnlineFriendInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineMessagingInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineMessagingInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlineMessagingInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineMessagingInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineMessagingInterface,
 	                    IAVVMOnlineMessagingInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
-                                                                  TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
+                                                         TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineChallengesInterface,
 	                    IAVVMOnlineChallengesInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
-                                                                  TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
+                                                         TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineBattlePassInterface,
 	                    IAVVMOnlineBattlePassInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(const UObject* DerivedChild,
-                                                             TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface)
+bool UAVVMOnlineUtils::GetOuterOnlineStoreInterface(const UObject* DerivedChild,
+                                                    TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineStoreInterface,
 	                    IAVVMOnlineStoreInterface>(DerivedChild, OutInterface);
 }
 
-bool UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(const UObject* WorldContextObject,
-                                                     const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
+bool UAVVMOnlineUtils::IsFirstPlayerHosting(const UObject* WorldContextObject,
+                                            const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
 	const UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 	const ULocalPlayer* Player = IsValid(GameInstance) ? GameInstance->GetFirstGamePlayer() : nullptr;
-	const FUniqueNetIdPtr UniqueNetIdPtr = UAVVMOnlineInterfaceUtils::GetUniqueNetIdPtr(Player);
+	const FUniqueNetIdPtr UniqueNetIdPtr = UAVVMOnlineUtils::GetUniqueNetIdPtr(Player);
 	return IsHosting(UniqueNetIdPtr, OnlineInterface);
 }
 
-FUniqueNetIdPtr UAVVMOnlineInterfaceUtils::GetUniqueNetIdPtr(const ULocalPlayer* Player)
+FUniqueNetIdPtr UAVVMOnlineUtils::GetUniqueNetIdPtr(const ULocalPlayer* Player)
 {
 	FUniqueNetIdPtr UniqueNetIdPtr;
 	if (IsValid(Player))
@@ -107,7 +107,7 @@ FUniqueNetIdPtr UAVVMOnlineInterfaceUtils::GetUniqueNetIdPtr(const ULocalPlayer*
 	return UniqueNetIdPtr;
 }
 
-FString UAVVMOnlineInterfaceUtils::GetUniqueNetId(const APlayerState* PlayerState)
+FString UAVVMOnlineUtils::GetUniqueNetId(const APlayerState* PlayerState)
 {
 	static constexpr FStringView Empty;
 	if (!IsValid(PlayerState))
@@ -124,72 +124,72 @@ FString UAVVMOnlineInterfaceUtils::GetUniqueNetId(const APlayerState* PlayerStat
 	return UniqueNetIdPtr->ToString();
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPlayerWalletProxy>(Payload);
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializePlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializePlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPlayerProfileProxy>(Payload);
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializeHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializeHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMHostConfigurationProxy>(Payload);
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializeParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializeParty(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPartyProxy>(Payload);
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializePlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializePlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPlayerConnectionProxy>(Payload);
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializePlayerChallenge(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializePlayerChallenge(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPlayerChallenge>(Payload);
 }
 
-FString UAVVMOnlineInterfaceUtils::SerializePlayerResource(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializePlayerResource(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	return SerializeToString<FAVVMPlayerResource>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerWallet(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetPlayerWallet(const FString& Payload)
 {
 	return DeserializeString<FAVVMPlayerWalletProxy>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerProfile(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetPlayerProfile(const FString& Payload)
 {
 	return DeserializeString<FAVVMPlayerProfileProxy>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetHostConfiguration(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetHostConfiguration(const FString& Payload)
 {
 	return DeserializeString<FAVVMHostConfigurationProxy>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetParty(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetParty(const FString& Payload)
 {
 	return DeserializeString<FAVVMPartyProxy>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerConnection(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetPlayerConnection(const FString& Payload)
 {
 	return DeserializeString<FAVVMPlayerConnectionProxy>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerChallenge(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetPlayerChallenge(const FString& Payload)
 {
 	return DeserializeString<FAVVMPlayerChallenge>(Payload);
 }
 
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::GetPlayerResource(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::GetPlayerResource(const FString& Payload)
 {
 	return DeserializeString<FAVVMPlayerResource>(Payload);
 }

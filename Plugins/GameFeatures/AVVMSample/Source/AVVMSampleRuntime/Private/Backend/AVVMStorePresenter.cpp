@@ -47,7 +47,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_StopPresenter(const TInstanc
 void UAVVMStorePresenter::BP_OnNotificationReceived_ForcePullShopContent(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -63,7 +63,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_ForcePullShopContent(const T
 void UAVVMStorePresenter::BP_OnNotificationReceived_SellItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -85,7 +85,7 @@ void UAVVMStorePresenter::BP_OnNotificationReceived_SellItem(const TInstancedStr
 void UAVVMStorePresenter::BP_OnNotificationReceived_BuyItem(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineStoreInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineStoreInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

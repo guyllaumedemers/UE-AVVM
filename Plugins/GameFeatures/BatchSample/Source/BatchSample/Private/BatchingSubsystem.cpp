@@ -26,7 +26,7 @@
 #include "Batchable.h"
 #include "BatchingRule.h"
 #include "BatchSample.h"
-#include "BatchSampleDeveloperSettings.h"
+#include "BatchSettings.h"
 #include "NativeGameplayTags.h"
 #include "Engine/StreamableManager.h"
 
@@ -178,14 +178,21 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 
 	if (!ensureAlways(Batchable->HasValidBatchIndex()))
 	{
-		UE_LOG(LogGameplay,
+		UE_LOG(LogBatchSample,
 		       Log,
-		       TEXT("Executed from \"%s\". IBatchable doesnt reference a valid Batch index. Actor \"%s\" may have been marked for Destroy on Next tick."),
+		       TEXT("Executed from \"%s\". Actor \"%s\" doesnt reference a valid Batch index. It may have been marked for Destroy on Next tick and attempt unregistering."),
 		       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
 		       *Actor->GetName())
 
 		return;
 	}
+
+	UE_LOG(LogBatchSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Actor \"%s\" has been unregistered from Batch Index \"%d\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
+	       *Actor->GetName(),
+	       Batchable->GetOwningBatchIndex())
 
 	const int32 BatchIndex = Batchable->GetOwningBatchIndex();
 	const bool bIsValidIndex = PendingDestroy.IsValidIndex(BatchIndex);
@@ -227,6 +234,16 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	}
 
 	Batchable->SetOwningBatchIndex(PendingDestroy.Num());
+
+	if (ensureAlways(Batchable->HasValidBatchIndex()))
+	{
+		UE_LOG(LogBatchSample,
+		       Log,
+		       TEXT("Executed from \"%s\". Actor \"%s\" has been registered with Batch Index \"%d\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
+		       *Actor->GetName(),
+		       Batchable->GetOwningBatchIndex())
+	}
 }
 
 void UBatchingSubsystem::Clear()
@@ -278,7 +295,7 @@ void UBatchingSubsystem::CreateBatchingRule()
 	if (IsValid(WorldSettings))
 	{
 		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
-		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UBatchSampleDeveloperSettings::GetBatchingRuleClass(), Callback);
+		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UBatchSettings::GetBatchingRuleClass(), Callback);
 	}
 }
 
@@ -340,11 +357,17 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 		if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable))
 		{
 			Iterator.RemoveCurrentSwap();
+			continue;
 		}
-		else
-		{
-			(*Iterator)->Destroy();
-		}
+
+		UE_LOG(LogBatchSample,
+		       Log,
+		       TEXT("Executed from \"%s\". Actor \"%s\" is being destroyed with Batch Index \"%d\"."),
+		       UAVVMGameplayUtils::PrintNetSource((*Iterator).Get()).GetData(),
+		       *(*Iterator)->GetName(),
+		       Batchable->GetOwningBatchIndex())
+
+		(*Iterator)->Destroy();
 	}
 }
 

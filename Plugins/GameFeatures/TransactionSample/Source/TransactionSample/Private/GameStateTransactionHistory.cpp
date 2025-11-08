@@ -24,6 +24,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "NativeGameplayTags.h"
 #include "Transaction.h"
+#include "TransactionSample.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -55,7 +56,7 @@ void UGameStateTransactionHistory::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTransactionSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UGameStateTransactionHistory to Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -81,7 +82,7 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTransactionSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -159,10 +160,20 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 		return;
 	}
 
-	UTransaction* Transaction = NewObject<UTransaction>(this);
+	auto* Transaction = NewObject<UTransaction>(this);
 	Transaction->operator()(Args.Instigator.Get(), Args.Target.Get(), Args.TransactionType, Args.Payload);
 	AddReplicatedSubObject(Transaction);
 	Transactions.Add(Transaction);
+
+	const auto* Outer = OwningOuter.Get();
+	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		UE_LOG(LogTransactionSample,
+		       Log,
+		       TEXT("Executed from \"%s\". Creating new Record \r\n \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *Transaction->ToString());
+	}
 
 	OnRep_NewTransactionRecorded();
 #endif
@@ -177,11 +188,21 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 		return;
 	}
 
-	const TArray<const UTransaction*> SearchResult = GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType);
-	for (const UTransaction* Transaction : SearchResult)
+	for (const auto* Transaction : GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType))
 	{
 		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
 		Transactions.Remove(Transaction);
+	}
+
+	const auto* Outer = OwningOuter.Get();
+	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		UE_LOG(LogTransactionSample,
+		       Log,
+		       TEXT("Executed from \"%s\". Remove All Transactions Of Type \"%s\" from \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       EnumToString(NewTransactionType),
+		       *NewTarget->GetName());
 	}
 
 	OnRep_NewTransactionRecorded();
@@ -196,11 +217,20 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 		return;
 	}
 
-	const TArray<const UTransaction*> SearchResult = GetAllTransactions(UTransaction::GetUniqueId(NewTarget));
-	for (const UTransaction* Transaction : SearchResult)
+	for (const auto* Transaction : GetAllTransactions(UTransaction::GetUniqueId(NewTarget)))
 	{
 		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
 		Transactions.Remove(Transaction);
+	}
+
+	const auto* Outer = OwningOuter.Get();
+	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		UE_LOG(LogTransactionSample,
+		       Log,
+		       TEXT("Executed from \"%s\". Remove All Transactions from \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *NewTarget->GetName());
 	}
 
 	OnRep_NewTransactionRecorded();
@@ -242,18 +272,23 @@ TArray<const UTransaction*> UGameStateTransactionHistory::GetAllTransactions(con
 
 void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". New Transaction Detected!"),
-	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
-
+	// TODO @gdemers Problem! Theres no way of handling removal due to TObjectPtr<const UTransaction> not being cast
+	// to a non-const version. Fix it!
 	const TObjectPtr<const UTransaction> NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Top();
-	if (IsValid(NewTransaction))
+	if (!IsValid(NewTransaction))
 	{
-		FAVVMNotificationContextArgs ContextArgs;
-		ContextArgs.ChannelTag = TAG_TRANSACTION_NOTIFICATION;
-		ContextArgs.Payload = NewTransaction->GetValue();
-		ContextArgs.Target = nullptr;
-		UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
+		return;
 	}
+
+	UE_LOG(LogTransactionSample,
+	       Log,
+	       TEXT("Executed from \"%s\". OnRep_NewTransactionRecorded New Transaction Detected! \r\n Value: \"%s\""),
+	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
+	       *NewTransaction->ToString());
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_TRANSACTION_NOTIFICATION;
+	ContextArgs.Payload = NewTransaction->GetValue();
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }

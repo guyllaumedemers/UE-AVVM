@@ -49,7 +49,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_StopPresenter(const 
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -76,7 +76,7 @@ void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_CommitModifiedPlayer
 void UAVVMPlayerProfilePresenter::BP_OnNotificationReceived_ForcePullPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -212,7 +212,7 @@ void UAVVMPlayerProfilePresenter::OnForcePullPlayerProfileCompleted(const bool b
 void UAVVMPlayerProfilePresenter::TryInvitePlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -252,7 +252,7 @@ void UAVVMPlayerProfilePresenter::OnInvitePlayerCompleted(const bool bWasSuccess
 void UAVVMPlayerProfilePresenter::TryBlockPlayer(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -284,7 +284,7 @@ void UAVVMPlayerProfilePresenter::OnBlockPlayerCompleted(const bool bWasSuccess,
 void UAVVMPlayerProfilePresenter::TryAddFriend(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -317,7 +317,7 @@ void UAVVMPlayerProfilePresenter::OnAddFriendCompleted(const bool bWasSuccess,
 void UAVVMPlayerProfilePresenter::TryRemoveFriend(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineFriendInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineFriendInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -349,7 +349,7 @@ void UAVVMPlayerProfilePresenter::OnRemoveFriendCompleted(const bool bWasSuccess
 void UAVVMPlayerProfilePresenter::TryTrade(const FAVVMPlayerRequest& PlayerRequest)
 {
 	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

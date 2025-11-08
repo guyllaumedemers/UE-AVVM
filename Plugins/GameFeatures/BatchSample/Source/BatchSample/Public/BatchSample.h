@@ -39,6 +39,5 @@ public:
 	static BATCHSAMPLE_API TSharedRef<IConsoleVariable> GetCVarBatchEnableSubsystem();
 
 private:
-	// cvar that allow user testing. returns the status of a stub request (true/false) without an actual backend hooked.
 	static BATCHSAMPLE_API TSharedPtr<IConsoleVariable> CVarBatchEnableSubsystem;
 };

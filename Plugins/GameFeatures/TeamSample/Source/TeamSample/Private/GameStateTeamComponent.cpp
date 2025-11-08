@@ -26,6 +26,7 @@
 #include "NativeGameplayTags.h"
 #include "TeamObject.h"
 #include "TeamRule.h"
+#include "TeamSample.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/GameSession.h"
@@ -62,7 +63,7 @@ void UGameStateTeamComponent::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTeamSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UGameStateTeamComponent to Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -98,7 +99,7 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTeamSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UGameStateTeamComponent from Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -132,8 +133,17 @@ UGameStateTeamComponent* UGameStateTeamComponent::GetActorComponent(const UObjec
 
 void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerState)
 {
+	if (IsValid(NewPlayerState))
+	{
+		UE_LOG(LogTeamSample,
+		       Log,
+		       TEXT("Executed from \"%s\". OnPlayerStateAdded : \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
+		       *NewPlayerState->GetName());
+	}
+	
 	// Problem : APlayerState is added by the game when a player attempt reaching the game, but
-	// we may have already requested from the backend receiving the parties composing the game.
+	// we may have already requested from the backend the parties composing the game.
 	// As such, our pending state may have been modified during the time we wait for the request to respond,
 	// and act on a modified collection which isnt accounted for in the party Context struct.
 
@@ -154,6 +164,15 @@ void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerSt
 
 void UGameStateTeamComponent::OnPlayerStateRemoved(const APlayerState* NewPlayerState)
 {
+	if (IsValid(NewPlayerState))
+	{
+		UE_LOG(LogTeamSample,
+		       Log,
+		       TEXT("Executed from \"%s\". OnPlayerStateRemoved : \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
+		       *NewPlayerState->GetName());
+	}
+	
 	// @gdemers theres only one case here to cover :
 	// A) removal of a player who's already in game.
 	UTeamObject* Team = UTeamUtils::UTeamUtils::FindTeam(Teams, NewPlayerState);
@@ -262,8 +281,7 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, OutOfScopeCallback, TWeakObjectPtr<UGameStateTeamComponent>(this));
 	FAVVMGameThreadLock::FAVVMScopedLock ScopedLock = SynchronizationLock.Make(Callback);
 
-	if (!ensureAlwaysMsgf(bWasSuccess,
-	                      TEXT("Backend couldnt retrieve involved parties.")))
+	if (!ensureAlways(bWasSuccess))
 	{
 		return;
 	}

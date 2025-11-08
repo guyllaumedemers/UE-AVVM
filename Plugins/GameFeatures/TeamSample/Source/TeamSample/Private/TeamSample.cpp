@@ -19,5 +19,7 @@
 //SOFTWARE.
 
 #include "TeamSample.h"
+
+DEFINE_LOG_CATEGORY(LogTeamSample);
 	
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, TeamSample)

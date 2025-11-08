@@ -47,7 +47,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_StopPresenter(co
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 #if UE_AVVM_CAN_HOST_ONLY_EXECUTE_ACTION
-	const bool bIsFirstPlayerHosting = UAVVMOnlineInterfaceUtils::IsFirstPlayerHosting(this, GetOuterKey());
+	const bool bIsFirstPlayerHosting = UAVVMOnlineUtils::IsFirstPlayerHosting(this, GetOuterKey());
 	if (!bIsFirstPlayerHosting)
 	{
 		UE_LOG(LogOnline, Log, TEXT("Commit Modified Host Configuration Request. Failure! Only the Owner of the Party can update the Host configuration!"));
@@ -56,7 +56,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 #endif
 
 	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;
@@ -81,7 +81,7 @@ void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_CommitModifiedHo
 void UAVVMHostConfigurationPresenter::BP_OnNotificationReceived_ForcePullHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	TScriptInterface<IAVVMOnlineIdentityInterface> OnlineInterface;
-	const bool bIsValid = UAVVMOnlineInterfaceUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
+	const bool bIsValid = UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(this, OnlineInterface);
 	if (!ensure(bIsValid))
 	{
 		return;

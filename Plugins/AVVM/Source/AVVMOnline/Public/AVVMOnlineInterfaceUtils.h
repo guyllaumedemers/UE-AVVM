@@ -42,7 +42,7 @@ class ULocalPlayer;
  *	UAVVMOnlineInterfaceUtils expose a set of utility function relevant for the online service.
  */
 UCLASS()
-class AVVMONLINE_API UAVVMOnlineInterfaceUtils : public UBlueprintFunctionLibrary
+class AVVMONLINE_API UAVVMOnlineUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -142,8 +142,8 @@ private:
 };
 
 template <typename UInterfaceClass, typename IInterfaceClass>
-bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
-                                             TScriptInterface<IInterfaceClass>& OutInterface)
+bool UAVVMOnlineUtils::GetInterface(const UObject* DerivedChild,
+                                    TScriptInterface<IInterfaceClass>& OutInterface)
 {
 	if (!IsValid(DerivedChild))
 	{
@@ -178,7 +178,7 @@ bool UAVVMOnlineInterfaceUtils::GetInterface(const UObject* DerivedChild,
 }
 
 template <typename TPayload>
-FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
+FString UAVVMOnlineUtils::SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
 	if (!IsValid(StringParser))
@@ -206,7 +206,7 @@ FString UAVVMOnlineInterfaceUtils::SerializeToString(const TInstancedStruct<FAVV
 }
 
 template <typename TPayload>
-TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::DeserializeString(const FString& Payload)
+TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::DeserializeString(const FString& Payload)
 {
 	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
 	if (!IsValid(StringParser))
@@ -215,7 +215,7 @@ TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineInterfaceUtils::Deserializ
 		       Log,
 		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
 
-		return TInstancedStruct<FAVVMNotificationPayload>();
+		return FAVVMNotificationPayload::Empty;
 	}
 
 	TPayload OutPayload;
