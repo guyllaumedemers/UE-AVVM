@@ -42,8 +42,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_DESTROYED_NOTIFICATION, "TeamSample.Notification
 UGameStateTeamComponent::UGameStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	SetIsReplicatedByDefault(false);
-	bReplicateUsingRegisteredSubObjectList = false;
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
 }
 
 void UGameStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

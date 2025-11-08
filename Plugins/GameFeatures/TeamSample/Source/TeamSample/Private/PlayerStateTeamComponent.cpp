@@ -28,9 +28,15 @@
 UPlayerStateTeamComponent::UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	// TODO @gdemers confirm if replication is require for RPC request. typically, the requirements would
-	// be to have a UNetConnnection attached to the caller of the function. i.e Own a valid PC on the Client.
-	SetIsReplicatedByDefault(false);
+	SetIsReplicatedByDefault(true);
+	bReplicateUsingRegisteredSubObjectList = true;
+}
+
+void UPlayerStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UPlayerStateTeamComponent, OwningTeam);
 }
 
 void UPlayerStateTeamComponent::BeginPlay()
@@ -55,6 +61,8 @@ void UPlayerStateTeamComponent::BeginPlay()
 void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	
+	RemoveReplicatedSubObject(const_cast<UTeamObject*>(OwningTeam.Get()));
 
 	auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -69,6 +77,24 @@ void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
 	       *Outer->GetName());
 }
 
+void UPlayerStateTeamComponent::Static_TrySwitchTeam(const APlayerState* NewPlayerState, const FGameplayTag& NewTeamTag)
+{
+	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayerState);
+	if (IsValid(TeamComponent))
+	{
+		TeamComponent->TrySwitchTeam(NewTeamTag);
+	}
+}
+
+void UPlayerStateTeamComponent::Static_TryForfaiting(const APlayerState* NewPlayerState)
+{
+	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayerState);
+	if (IsValid(TeamComponent))
+	{
+		TeamComponent->TryForfaiting();
+	}
+}
+
 UPlayerStateTeamComponent* UPlayerStateTeamComponent::GetActorComponent(const AActor* NewActor)
 {
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UPlayerStateTeamComponent>() : nullptr;
@@ -76,17 +102,65 @@ UPlayerStateTeamComponent* UPlayerStateTeamComponent::GetActorComponent(const AA
 
 void UPlayerStateTeamComponent::SetTeam(UTeamObject* NewTeam)
 {
-	// TODO @gdemers add registration to delegate on the UTeamObject to respond to events such as
-	// votes, request to swap team, etc...
-	OwningTeam = NewTeam;
+#if WITH_SERVER_CODE
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (Outer->HasAuthority())
+	{
+		// TODO @gdemers add registration to delegate on the UTeamObject to respond to events such as
+		// votes, request to swap team, etc...
+		RemoveReplicatedSubObject(const_cast<UTeamObject*>(OwningTeam.Get()));
+		AddReplicatedSubObject(NewTeam);
+		OwningTeam = NewTeam;
+	}
+#endif
 }
 
 void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag& NewTeamTag)
 {
-	// TODO @gdemers add impl
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	const UTeamObject* Team = OwningTeam.Get();
+	if (!IsValid(Team))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Actor \"%s\" TrySwitchTeam from Team \"%s\" to Team Tag \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName(),
+	       *Team->GetName(),
+	       *NewTeamTag.ToString());
 }
 
 void UPlayerStateTeamComponent::TryForfaiting_Implementation()
 {
-	// TODO @gdemers add impl
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	const UTeamObject* Team = OwningTeam.Get();
+	if (!IsValid(Team))
+	{
+		return;
+	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Actor \"%s\" TryForfaiting from Team \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName(),
+	       *Team->GetName());
 }

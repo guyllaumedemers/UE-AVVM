@@ -43,25 +43,34 @@ class TEAMSAMPLE_API UPlayerStateTeamComponent : public UActorComponent
 
 public:
 	UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer);
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UFUNCTION(BlueprintCallable)
+	static void Static_TrySwitchTeam(const APlayerState* NewPlayerState, const FGameplayTag& NewTeamTag);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_TryForfaiting(const APlayerState* NewPlayerState);
+
+protected:
 	UFUNCTION(BlueprintCallable)
 	static UPlayerStateTeamComponent* GetActorComponent(const AActor* NewActor);
 	
 	UFUNCTION(BlueprintCallable)
 	void SetTeam(UTeamObject* NewTeam);
-
+	
 	UFUNCTION(Server, Reliable)
 	void TrySwitchTeam(const FGameplayTag& NewTeamTag);
 
 	UFUNCTION(Server, Reliable)
 	void TryForfaiting();
 
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TWeakObjectPtr<const UTeamObject> OwningTeam = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+	friend class UTeamObject;
 };
