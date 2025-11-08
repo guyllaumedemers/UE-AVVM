@@ -84,6 +84,14 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
+	StreamableHandle.Reset();
+
+	for (auto Iterator = Teams.CreateIterator(); Iterator; ++Iterator)
+	{
+		RemoveReplicatedSubObject(Iterator->Get());
+		Iterator.RemoveCurrentSwap();
+	}
+
 	auto* Outer = Cast<AAVVMGameState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -260,9 +268,20 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 		return;
 	}
 
-	TArray<UTeamObject*> OldTeam = MoveTemp(Teams);
-	UTeamUtils::CreateOrAppendTeams(this, MoveTemp(PendingPlayerStates), NewParties, TeamRule.Get(), OldTeam);
-	Teams.Append(OldTeam);
+	for (auto Iterator = Teams.CreateIterator(); Iterator; ++Iterator)
+	{
+		RemoveReplicatedSubObject(Iterator->Get());
+	}
+
+	TArray<UTeamObject*> OutTeam = MoveTemp(Teams);
+	UTeamUtils::CreateOrAppendTeams(this, MoveTemp(PendingPlayerStates), NewParties, TeamRule.Get(), OutTeam);
+
+	Teams.Reset(OutTeam.Num());
+	for (UTeamObject* NewTeam : OutTeam)
+	{
+		AddReplicatedSubObject(NewTeam);
+		Teams.Add(NewTeam);
+	}
 }
 
 void UGameStateTeamComponent::OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams)
