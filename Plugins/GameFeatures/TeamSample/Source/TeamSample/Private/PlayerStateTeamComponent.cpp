@@ -54,7 +54,7 @@ void UPlayerStateTeamComponent::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTeamSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding UPlayerStateTeamComponent to Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -75,7 +75,7 @@ void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTeamSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Removing UPlayerStateTeamComponent from Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -177,7 +177,7 @@ void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag&
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTeamSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Actor \"%s\" TrySwitchTeam from Team \"%s\" to Team Tag \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
@@ -200,7 +200,7 @@ void UPlayerStateTeamComponent::TryForfaiting_Implementation()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
+	UE_LOG(LogTeamSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Actor \"%s\" TryForfaiting from Team \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
