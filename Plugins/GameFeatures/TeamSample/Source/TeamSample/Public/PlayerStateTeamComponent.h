@@ -65,8 +65,11 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void TryForfaiting();
+	
+	UFUNCTION()
+	void OnRep_OnTeamOwnershipChanged(const TWeakObjectPtr<UTeamObject>& OldTeam);
 
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamOwnershipChanged")
 	TWeakObjectPtr<const UTeamObject> OwningTeam = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

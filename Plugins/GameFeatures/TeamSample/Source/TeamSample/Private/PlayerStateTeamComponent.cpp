@@ -21,9 +21,14 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "NativeGameplayTags.h"
 #include "TeamObject.h"
+#include "TeamSample.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_OWNERSHIP_CHANGED_NOTIFICATION, "TeamSample.Notification.TeamOwnershipChanged");
 
 UPlayerStateTeamComponent::UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -111,13 +116,51 @@ void UPlayerStateTeamComponent::SetTeam(UTeamObject* NewTeam)
 
 	if (Outer->HasAuthority())
 	{
+		UTeamObject* OldTeam = const_cast<UTeamObject*>(OwningTeam.Get());
+		RemoveReplicatedSubObject(OldTeam);
+		AddReplicatedSubObject(NewTeam);
+
 		// TODO @gdemers add registration to delegate on the UTeamObject to respond to events such as
 		// votes, request to swap team, etc...
-		RemoveReplicatedSubObject(const_cast<UTeamObject*>(OwningTeam.Get()));
-		AddReplicatedSubObject(NewTeam);
 		OwningTeam = NewTeam;
+		OnRep_OnTeamOwnershipChanged(OldTeam);
 	}
 #endif
+}
+
+void UPlayerStateTeamComponent::OnRep_OnTeamOwnershipChanged(const TWeakObjectPtr<UTeamObject>& OldTeam)
+{
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	FStringView OldTeamName;
+	if (OldTeam.IsValid())
+	{
+		OldTeamName = OldTeam->GetName();
+	}
+
+	const UTeamObject* NewTeam = OwningTeam.Get();
+	if (!IsValid(NewTeam))
+	{
+		return;
+	}
+
+	UE_LOG(LogTeamSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Actor \"%s\" changed Team from \"%s\" to Team \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName(),
+	       OldTeamName.GetData(),
+	       *NewTeam->GetName());
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_TEAM_OWNERSHIP_CHANGED_NOTIFICATION;
+	ContextArgs.Payload = NewTeam->GetTeamPayload();
+	ContextArgs.Target = Outer;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag& NewTeamTag)
