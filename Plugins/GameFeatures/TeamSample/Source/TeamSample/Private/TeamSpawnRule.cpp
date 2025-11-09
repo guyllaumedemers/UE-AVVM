@@ -56,3 +56,13 @@ EDataValidationResult UTeamSpawnRule::IsDataValid(class FDataValidationContext& 
 	return Result;
 }
 #endif
+
+const TArray<TSoftClassPtr<UTeamSpawnCondition>>& UTeamSpawnRule::GetSpawnConditions() const
+{
+	return SpawnConditionClasses;
+}
+
+const TSoftClassPtr<UTeamSpawnWeightRule>& UTeamSpawnRule::GetSpawnWeightRule() const
+{
+	return SpawnWeightRuleClass;
+}

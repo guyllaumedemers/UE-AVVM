@@ -25,6 +25,12 @@
 
 #include "TeamSpawnSubsystem.generated.h"
 
+class APlayerState;
+struct FStreamableHandle;
+struct FWorldContextArgs;
+class UTeamSpawnCondition;
+class UTeamSpawnRule;
+class UTeamSpawnWeightRule;
 class UTeamStartComponent;
 
 /**
@@ -55,6 +61,11 @@ public:
 	static void Static_RegisterPlayerStart(const UWorld* World,
 	                                       const UTeamStartComponent* Component);
 
+	UFUNCTION(BlueprintCallable)
+	static const UTeamStartComponent* Static_TryGetPlayerStart(const UWorld* World,
+	                                                           const FWorldContextArgs& WorldContextArgs,
+	                                                           const APlayerState* OldPlayerState); 
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	static UTeamSpawnSubsystem* Get(const UWorld* World);
@@ -65,6 +76,44 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void Register(const UTeamStartComponent* Component);
 
+	UFUNCTION(BlueprintCallable)
+	const UTeamStartComponent* TryGetPlayerStart(const FWorldContextArgs& WorldContextArgs,
+	                                             const APlayerState* OldPlayerState) const;
+	
+	void CreateTeamSpawnRule();
+	void InitRule();
+	
+	void CreateTeamSpawnWeightRule();
+	void CreateSpawnConditions();
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UTeamSpawnRule> TeamSpawnRule = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UTeamSpawnWeightRule> SpawnWeightRule = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<TObjectPtr<const UTeamSpawnCondition>> TeamSpawnConditions;
+
 	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<const UTeamStartComponent>> PlayerStarts;
+	
+	TSharedPtr<FStreamableHandle> SpawnWeightRuleStreamableHandle = nullptr;
+	TSharedPtr<FStreamableHandle> TeamRuleStreamableHandle = nullptr;
+	TSharedPtr<FStreamableHandle> SpawnConditionStreamableHandle = nullptr;
+};
+
+/**
+ * 
+ */
+UCLASS()
+class TEAMSAMPLE_API UTeamSpawnUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static const UTeamStartComponent* WeightChoice(const UTeamSpawnWeightRule* WeightRule,
+	                                               const UTeamStartComponent* ChoiceA,
+	                                               const UTeamStartComponent* ChoiceB);
 };

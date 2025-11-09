@@ -25,6 +25,9 @@
 
 #include "TeamSettings.generated.h"
 
+class ULevel;
+class UTeamSpawnRule;
+
 /**
  *	Class description:
  *
@@ -37,9 +40,15 @@ class TEAMSAMPLE_API UTeamSettings : public UDeveloperSettings
 
 public:
 	UFUNCTION(BlueprintCallable)
+	static const TSoftClassPtr<UTeamSpawnRule>& GetTeamSpawnRuleClass();
+	
+	UFUNCTION(BlueprintCallable)
 	static bool DoesLevelOverrideSubsystemCreation(const ULevel* NewLevel);
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSoftClassPtr<UTeamSpawnRule> TeamSpawnRuleClass = nullptr;
+	
 	// @gdemers Perform TeamSubsystem override and allow its creation process to run on NM_Client
 	// for user-defined level such as Lobby/MainMenu, i.e whenever we are without server connection.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")

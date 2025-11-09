@@ -34,6 +34,29 @@ class UAnimInstance;
 class UCameraModifier;
 class UNiagaraSystem;
 class UTeamSpawnSubsystem;
+class UTeamStartComponent;
+
+/**
+ *	Class description:
+ *
+ *	FWorldContextArgs is a context struct that encapsulate world data to run validation on spawn point.
+ */
+USTRUCT(BlueprintType)
+struct FWorldContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag WinningTeam = FGameplayTag::EmptyTag;
+
+	// @gdemers could be multiple in a split screen coop.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FGameplayTag> LosingTeams;
+
+	// @gdemers AI or PC posses
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<const ACharacter*> Players;
+};
 
 /**
  *	Class description:
@@ -47,7 +70,23 @@ class TEAMSAMPLE_API UTeamSpawnCondition : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual bool Predicate() const PURE_VIRTUAL(Predicate, return false;);
+	virtual bool Predicate(const FWorldContextArgs& NewContextArgs,
+	                       const UTeamStartComponent* SpawnPoint,
+	                       const APlayerState* OldPlayerState/*Player To Respawn*/) const PURE_VIRTUAL(Predicate, return false;);
+};
+
+/**
+ *	Class description:
+ *
+ *	UTeamSpawnWeightRule is a UObject type that handle priority between two UTeamStartComponent
+ *	who's Predicate resolved as TRUE.
+ */
+UCLASS(BlueprintType, Blueprintable)
+class TEAMSAMPLE_API UTeamSpawnWeightRule : public UObject
+{
+	GENERATED_BODY()
+
+	// TODO @gdemers Add Impl!
 };
 
 /**
@@ -72,39 +111,51 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	UFUNCTION(BlueprintCallable)
+	const TArray<TSoftClassPtr<UTeamSpawnCondition>>& GetSpawnConditions() const;
+
+	UFUNCTION(BlueprintCallable)
+	const TSoftClassPtr<UTeamSpawnWeightRule>& GetSpawnWeightRule() const;
+
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="True in most case, certain lobbies require static players and run simple animation."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="True in most case, certain lobbies require static players and run simple animation."))
 	bool bShouldEnableMovement = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldOverridePlayerAnimation = false;
 
 	// @gdemers to play an ability during the spawn process on top of your output pose, as you would during character selection,
 	// we suggest using AnimNotify embedded in the anim sequences.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldOverridePlayerAnimation"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bShouldOverridePlayerAnimation"))
 	TSoftClassPtr<UAnimInstance> OverrideAnimationClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAttachVfxOnSpawn = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="To spawn vfx at anchor on a Skeleton Socket or other source type.", EditCondition="bShouldAttachVfxOnSpawn"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="To spawn vfx at anchor on a Skeleton Socket or other source type.", EditCondition="bShouldAttachVfxOnSpawn"))
 	TMap<FName/*Socket FName*/, TSoftClassPtr<UNiagaraSystem>> VfxClassesOnSpawn;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldPlayAudioCueOnSpawn = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldPlayAudioCueOnSpawn"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bShouldPlayAudioCueOnSpawn"))
 	TMap<FGameplayTag/*Src type*/, FGameplayTag/*Audio cue tag*/> AudioOnSpawn;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldApplyCameraModifier = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldApplyCameraModifier"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bShouldApplyCameraModifier"))
 	TSoftClassPtr<UCameraModifier> SpawnCameraModifierClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldCheckConditionsBeforeSpawn = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldCheckConditionsBeforeSpawn"))
 	TArray<TSoftClassPtr<UTeamSpawnCondition>> SpawnConditionClasses;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bDoesSupportSpawnWeight = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportSpawnWeight"))
+	TSoftClassPtr<UTeamSpawnWeightRule> SpawnWeightRuleClass = nullptr;
 };

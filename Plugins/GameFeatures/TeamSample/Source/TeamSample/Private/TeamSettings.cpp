@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "TeamSettings.h"
 
+const TSoftClassPtr<UTeamSpawnRule>& UTeamSettings::GetTeamSpawnRuleClass()
+{
+	return GetDefault<UTeamSettings>()->TeamSpawnRuleClass;
+}
+
 bool UTeamSettings::DoesLevelOverrideSubsystemCreation(const ULevel* NewLevel)
 {
 	if (!IsValid(NewLevel))
