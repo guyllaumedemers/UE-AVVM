@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,42 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "TeamSettings.h"
 
-using UnrealBuildTool;
-
-public class TeamSample : ModuleRules
+bool UTeamSettings::DoesLevelOverrideSubsystemCreation(const ULevel* NewLevel)
 {
-	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
+	if (!IsValid(NewLevel))
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMToolkit",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMOnline",
-				"Niagara"
-			}
-		);
+		return false;
 	}
+
+	return GetDefault<UTeamSettings>()->LevelOverrides.Contains(NewLevel->GetClass());
 }

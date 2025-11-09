@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,42 +17,31 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class TeamSample : ModuleRules
+#include "Subsystems/WorldSubsystem.h"
+
+#include "TeamSpawnSubsystem.generated.h"
+
+class AAVVMPlayerState;
+
+/**
+ *	Class description:
+ *
+ *	UTeamSpawnSubsystem is a world subsystem that run conditional branching on world state, and
+ *	aim at selecting a valid location to spawn a player.
+ *
+ *	Note : This can be used both for gameplay or menus, or after-action-report and should be
+ *	used to either spawn your players at a safe location or in a defined order, maybe based on scoring
+ *	etc...
+ */
+UCLASS()
+class TEAMSAMPLE_API UTeamSpawnSubsystem : public UWorldSubsystem
 {
-	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMToolkit",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMOnline",
-				"Niagara"
-			}
-		);
-	}
-}
+public:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+};

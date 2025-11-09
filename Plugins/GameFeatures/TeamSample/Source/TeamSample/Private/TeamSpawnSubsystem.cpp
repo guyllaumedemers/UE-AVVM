@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,42 +17,36 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "TeamSpawnSubsystem.h"
 
-using UnrealBuildTool;
+#include "AVVMGameplayUtils.h"
+#include "AVVMWorldSetting.h"
+#include "NativeGameplayTags.h"
+#include "TeamSample.h"
+#include "TeamSettings.h"
 
-public class TeamSample : ModuleRules
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAMSPAWNING, "WorldRule.TeamSpawning");
+
+bool UTeamSpawnSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
+	const auto* World = Cast<UWorld>(Outer);
+	if (!IsValid(World))
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMToolkit",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMOnline",
-				"Niagara"
-			}
-		);
+		return false;
 	}
+
+	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	if (!IsValid(WorldSettings) || !WorldSettings->ShouldCreatePluginRule(TAG_WORLD_RULE_TEAMSPAWNING))
+	{
+		return false;
+	}
+
+	const bool bDoesOverrideSubsystemCreation = UTeamSettings::DoesLevelOverrideSubsystemCreation(World->PersistentLevel);
+	if (bDoesOverrideSubsystemCreation)
+	{
+		return true;
+	}
+
+	return !World->IsNetMode(NM_Client);
 }

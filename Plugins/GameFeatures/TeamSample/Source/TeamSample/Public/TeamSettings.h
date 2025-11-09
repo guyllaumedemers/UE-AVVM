@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,42 +17,31 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class TeamSample : ModuleRules
+#include "Engine/DeveloperSettings.h"
+
+#include "TeamSettings.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UTeamSettings is a DeveloperSettings that expose global properties to run condition during Team selection/Spawn.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UTeamSettings"))
+class TEAMSAMPLE_API UTeamSettings : public UDeveloperSettings
 {
-	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+	GENERATED_BODY()
 
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool DoesLevelOverrideSubsystemCreation(const ULevel* NewLevel);
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMToolkit",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"IrisCore",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMOnline",
-				"Niagara"
-			}
-		);
-	}
-}
+protected:
+	// @gdemers Perform TeamSubsystem override and allow its creation process to run on NM_Client
+	// for user-defined level such as Lobby/MainMenu, i.e whenever we are without server connection.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TArray<TSoftClassPtr<ULevel>> LevelOverrides;
+};

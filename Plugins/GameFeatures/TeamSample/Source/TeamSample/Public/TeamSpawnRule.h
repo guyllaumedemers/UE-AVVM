@@ -33,9 +33,25 @@
 class UAnimInstance;
 class UCameraModifier;
 class UNiagaraSystem;
+class UTeamSpawnSubsystem;
 
 /**
-*	Class description:
+ *	Class description:
+ *
+ *	UTeamSpawnCondition is a UObject type that verify the world state, compare against internal conditions, and output
+ *	results for APlayerStart selection.
+ */
+UCLASS(BlueprintType, Blueprintable)
+class TEAMSAMPLE_API UTeamSpawnCondition : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual bool Predicate() const PURE_VIRTUAL(Predicate, return false;);
+};
+
+/**
+ *	Class description:
  *
  *	UTeamSpawnRule is a Rule referenced in AVVMWorldSettings. This system defines behaviour specific
  *	to level spawn locations.
@@ -66,13 +82,13 @@ protected:
 	// @gdemers to play an ability during the spawn process on top of your output pose, as you would during character selection,
 	// we suggest using AnimNotify embedded in the anim sequences.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldOverridePlayerAnimation"))
-	TSoftClassPtr<UAnimInstance> AnimationOverride = nullptr;
+	TSoftClassPtr<UAnimInstance> OverrideAnimationClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldAttachVfxOnSpawn = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="To spawn vfx at anchor on a Skeleton Socket or other source type.", EditCondition="bShouldAttachVfxOnSpawn"))
-	TMap<FName/*Socket FName*/, TSoftClassPtr<UNiagaraSystem>> VfxOnSpawn;
+	TMap<FName/*Socket FName*/, TSoftClassPtr<UNiagaraSystem>> VfxClassesOnSpawn;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldPlayAudioCueOnSpawn = false;
@@ -84,5 +100,11 @@ protected:
 	bool bShouldApplyCameraModifier = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldApplyCameraModifier"))
-	TSoftClassPtr<UCameraModifier> SpawnCameraModifier = nullptr;
+	TSoftClassPtr<UCameraModifier> SpawnCameraModifierClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldCheckConditionsBeforeSpawn = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldCheckConditionsBeforeSpawn"))
+	TArray<TSoftClassPtr<UTeamSpawnCondition>> SpawnConditionClasses;
 };
