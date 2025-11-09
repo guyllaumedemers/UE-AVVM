@@ -148,7 +148,7 @@ const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const FWorldCo
 
 	for (const TWeakObjectPtr<const UTeamStartComponent>& PlayerStart : PlayerStarts)
 	{
-		bool bPredicate = false;
+		bool bPredicate = true;
 
 		const UTeamStartComponent* SpawnPoint = PlayerStart.Get();
 		if (!IsValid(SpawnPoint))
