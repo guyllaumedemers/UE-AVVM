@@ -185,8 +185,6 @@ void ATeamSampleTest::RunTest_Internal()
 	FAVVMPartyProxy NewParty;
 	for (APlayerState* PlayerState : PlayerStates)
 	{
-		GameState->AddPlayerState(PlayerState);
-
 		// TODO @gdemers This wont work due to UAVVMOnlineUtils::GetUniqueNetId being invoked in UTeamUtils::AppendTeam.
 		// I have to convert this test to running multiple PIE instance instead.
 		FAVVMPlayerConnectionProxy NewPlayerConnection;
@@ -202,10 +200,9 @@ void ATeamSampleTest::RunTest_Internal()
 	// @gdemers defer the addition of a third player who's gonna be on another team to test racing condition handling
 	// and also having two teams.
 	const auto DeferredAddPlayerState = [](const TWeakObjectPtr<ATeamSampleTest>& TeamSampleTest,
-	                                       const TWeakObjectPtr<AGameStateBase>& NewGameState,
 	                                       const TWeakObjectPtr<UWorld>& NewWorld)
 	{
-		if (!TeamSampleTest.IsValid() || !NewGameState.IsValid() || !NewWorld.IsValid())
+		if (!TeamSampleTest.IsValid() || !NewWorld.IsValid())
 		{
 			return;
 		}
@@ -224,8 +221,6 @@ void ATeamSampleTest::RunTest_Internal()
 		const FString Json = UAVVMOnlineUtils::SerializePlayerConnection(FAVVMNotificationPayload::Make<FAVVMPlayerConnectionProxy>(NewPlayerConnection));
 		NewParty.PlayerConnections.Add(Json);
 
-		NewGameState->AddPlayerState(NewPlayerState);
-
 		// @gdemers cache new Party.
 		TeamSampleTest->TestParties.Add(NewParty);
 
@@ -234,7 +229,7 @@ void ATeamSampleTest::RunTest_Internal()
 	};
 
 	FTimerHandle OutTimerHandle;
-	const auto Callback = FTimerDelegate::CreateWeakLambda(this, DeferredAddPlayerState, TWeakObjectPtr(this), TWeakObjectPtr(GameState), TWeakObjectPtr(World));
+	const auto Callback = FTimerDelegate::CreateWeakLambda(this, DeferredAddPlayerState, TWeakObjectPtr(this), TWeakObjectPtr(World));
 	World->GetTimerManager().SetTimer(OutTimerHandle, Callback, 1.f, false, 3.f);
 }
 
