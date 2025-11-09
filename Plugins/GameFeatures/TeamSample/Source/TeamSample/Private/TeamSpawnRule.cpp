@@ -17,24 +17,36 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-
-#include "TeamRule.h"
+#include "TeamSpawnRule.h"
 
 #if WITH_EDITOR
-EDataValidationResult UTeamRule::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UTeamSpawnRule::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (TeamTags.IsEmpty())
+	if (bShouldOverridePlayerAnimation && AnimationOverride.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UTeamRule", "", "TeamTags is empty."));
+		Context.AddError(NSLOCTEXT("UTeamSpawnRule", "", "AnimationOverride missing. No valid TSoftClassPtr specified!"));
+	}
+
+	if (bShouldAttachVfxOnSpawn && VfxOnSpawn.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UTeamSpawnRule", "", "VfxOnSpawn is empty."));
+	}
+
+	if (bShouldPlayAudioCueOnSpawn && AudioOnSpawn.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UTeamSpawnRule", "", "AudioOnSpawn is empty."));
+	}
+
+	if (bShouldApplyCameraModifier && SpawnCameraModifier.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UTeamSpawnRule", "", "SpawnCameraModifier missing. No valid TSoftClassPtr specified!"));
 	}
 
 	return Result;
 }
 #endif
-
-const TArray<FGameplayTag>& UTeamRule::GetTags() const
-{
-	return TeamTags;
-}

@@ -20,6 +20,20 @@
 
 #include "BatchingRule.h"
 
+#if WITH_EDITOR
+EDataValidationResult UBatchingRule::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (Classes.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UBatchingRule", "", "Classes is empty. You should remove this Rule to prevent Subsystem creation."));
+	}
+
+	return Result;
+}
+#endif
+
 bool UBatchingRule::DoesQualifyForBatchDestroy(const AActor* Actor) const
 {
 	if (!IsValid(Actor))

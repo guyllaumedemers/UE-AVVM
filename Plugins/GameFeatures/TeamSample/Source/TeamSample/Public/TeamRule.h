@@ -24,6 +24,10 @@
 
 #include "AVVMWorldSetting.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include "TeamRule.generated.h"
 
 class UPlayerStateTeamComponent;
@@ -41,6 +45,10 @@ class TEAMSAMPLE_API UTeamRule : public UAVVMWorldRule
 	GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+	
 	UFUNCTION(BlueprintCallable)
 	const TArray<FGameplayTag>& GetTags() const;
 

@@ -24,6 +24,10 @@
 
 #include "AVVMWorldSetting.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include "BatchingRule.generated.h"
 
 /**
@@ -38,6 +42,10 @@ class BATCHSAMPLE_API UBatchingRule : public UAVVMWorldRule
 	GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+	
 	UFUNCTION(BlueprintCallable)
 	bool DoesQualifyForBatchDestroy(const AActor* Actor) const;
 

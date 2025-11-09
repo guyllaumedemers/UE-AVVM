@@ -49,7 +49,8 @@ public class TeamSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMOnline"
+				"AVVMOnline",
+				"Niagara"
 			}
 		);
 	}
