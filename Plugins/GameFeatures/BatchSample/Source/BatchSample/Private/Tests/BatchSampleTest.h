@@ -52,7 +52,7 @@ protected:
 	void RunTest_Internal();
 	void EvaluateTestPredicate();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<AAutomatedTestBatchableActor> TestActorClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

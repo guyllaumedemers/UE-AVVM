@@ -66,8 +66,12 @@ void UPlayerStateTeamComponent::BeginPlay()
 void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	
-	RemoveReplicatedSubObject(const_cast<UTeamObject*>(OwningTeam.Get()));
+
+	const UTeamObject* Team = OwningTeam.Get();
+	if (IsValid(Team))
+	{
+		RemoveReplicatedSubObject(const_cast<UTeamObject*>(Team));
+	}
 
 	auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))

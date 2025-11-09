@@ -26,3 +26,8 @@ AAutomatedTestPlayerStateTeamActor::AAutomatedTestPlayerStateTeamActor(const FOb
 {
 	TeamComponent = ObjectInitializer.CreateDefaultSubobject<UPlayerStateTeamComponent>(this, TEXT("TeamComponent"));
 }
+
+bool AAutomatedTestPlayerStateTeamActor::HasTeam() const
+{
+	return IsValid(TeamComponent) ? TeamComponent->OwningTeam.IsValid() : false;
+}

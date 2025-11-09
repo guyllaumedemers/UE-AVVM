@@ -76,4 +76,8 @@ protected:
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	friend class UTeamObject;
+
+#if WITH_AUTOMATION_TESTS
+	friend class AAutomatedTestPlayerStateTeamActor;
+#endif
 };

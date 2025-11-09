@@ -40,6 +40,7 @@ class TEAMSAMPLE_API AAutomatedTestPlayerStateTeamActor : public APlayerState
 
 public:
 	AAutomatedTestPlayerStateTeamActor(const FObjectInitializer& ObjectInitializer);
+	bool HasTeam() const;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

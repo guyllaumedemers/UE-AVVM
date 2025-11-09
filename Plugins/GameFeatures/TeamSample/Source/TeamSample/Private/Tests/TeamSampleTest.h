@@ -21,11 +21,14 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMOnlineInterface.h"
 #include "FunctionalTest.h"
+#include "Templates/SubclassOf.h"
 
 #include "TeamSampleTest.generated.h"
 
 class AAVVMWorldSetting;
+class UGameStateTeamComponent;
 class UTeamRule;
 
 /**
@@ -52,6 +55,12 @@ protected:
 	void RunTest_Internal();
 	void EvaluateTestPredicate();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSubclassOf<UGameStateTeamComponent> TestGameStateTeamComponentClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<FAVVMPartyProxy> TestParties;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
 
@@ -63,4 +72,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	bool bHasInitializedGameStateComponent = false;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bHasAddedAllPlayerStates = false;
 };

@@ -21,10 +21,13 @@
 
 #include "AutomatedTestTeamActor.h"
 #include "AVVMGameState.h"
+#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMWorldSetting.h"
+#include "EngineUtils.h"
 #include "GameStateTeamComponent.h"
 #include "NativeGameplayTags.h"
 #include "TeamRule.h"
+#include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Kismet/GameplayStatics.h"
 
 UE_DEFINE_GAMEPLAY_TAG(AUTOMATED_TEST_TAG_WORLD_RULE_TEAM, "WorldRule.Team");
@@ -112,7 +115,7 @@ bool ATeamSampleTest::RequestGameStateUntilAvailable()
 	auto* TestComponent = GameState->GetComponentByClass<UGameStateTeamComponent>();
 	if (!IsValid(TestComponent))
 	{
-		auto* NewComponent = AVVMGameState->AddComponentByClass(UGameStateTeamComponent::StaticClass(), false, FTransform::Identity, false);
+		auto* NewComponent = AVVMGameState->AddComponentByClass(TestGameStateTeamComponentClass, false, FTransform::Identity, false);
 		TestComponent = Cast<UGameStateTeamComponent>(NewComponent);
 	}
 
@@ -170,34 +173,100 @@ void ATeamSampleTest::RunTest_Internal()
 		FinishTest(EFunctionalTestResult::Error, TEXT("Expect AAVVMGameState to be valid."));
 		return;
 	}
-	
+
+	// @gdemers create placeholder APlayerState. Both will share the same team.
 	TArray<APlayerState*> PlayerStates;
 	PlayerStates.Add(World->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
 	PlayerStates.Add(World->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
-	PlayerStates.Add(World->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
 
+	TestParties.Reset();
+
+	// @gdemers create a fake 'backend' Party for both APlayerState.
+	FAVVMPartyProxy NewParty;
 	for (APlayerState* PlayerState : PlayerStates)
 	{
 		GameState->AddPlayerState(PlayerState);
+
+		// TODO @gdemers This wont work due to UAVVMOnlineUtils::GetUniqueNetId being invoked in UTeamUtils::AppendTeam.
+		// I have to convert this test to running multiple PIE instance instead.
+		FAVVMPlayerConnectionProxy NewPlayerConnection;
+		NewPlayerConnection.UniqueNetId = FString::FromInt(PlayerState->GetUniqueID()); /*Since they wont have UniqueNetId, lets just use the Unique Id. It will behave the same here!*/
+		
+		const FString Json = UAVVMOnlineUtils::SerializePlayerConnection(FAVVMNotificationPayload::Make<FAVVMPlayerConnectionProxy>(NewPlayerConnection));
+		NewParty.PlayerConnections.Add(Json);
 	}
 
-	const auto DeferredAddPlayerState = [](const TWeakObjectPtr<AGameStateBase>& NewGameState,
+	// @gdemers cache new Party.
+	TestParties.Add(NewParty);
+
+	// @gdemers defer the addition of a third player who's gonna be on another team to test racing condition handling
+	// and also having two teams.
+	const auto DeferredAddPlayerState = [](const TWeakObjectPtr<ATeamSampleTest>& TeamSampleTest,
+	                                       const TWeakObjectPtr<AGameStateBase>& NewGameState,
 	                                       const TWeakObjectPtr<UWorld>& NewWorld)
 	{
-		if (!NewGameState.IsValid() || !NewWorld.IsValid())
+		if (!TeamSampleTest.IsValid() || !NewGameState.IsValid() || !NewWorld.IsValid())
 		{
 			return;
 		}
 
-		NewGameState->AddPlayerState(NewWorld->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
+		APlayerState* NewPlayerState = NewWorld->SpawnActor<AAutomatedTestPlayerStateTeamActor>();
+		if (!IsValid(NewPlayerState))
+		{
+			return;
+		}
+
+		FAVVMPartyProxy NewParty;
+
+		FAVVMPlayerConnectionProxy NewPlayerConnection;
+		NewPlayerConnection.UniqueNetId = FString::FromInt(NewPlayerState->GetUniqueID());
+
+		const FString Json = UAVVMOnlineUtils::SerializePlayerConnection(FAVVMNotificationPayload::Make<FAVVMPlayerConnectionProxy>(NewPlayerConnection));
+		NewParty.PlayerConnections.Add(Json);
+
+		NewGameState->AddPlayerState(NewPlayerState);
+
+		// @gdemers cache new Party.
+		TeamSampleTest->TestParties.Add(NewParty);
+
+		// @gdemers update test state to execute next block.
+		TeamSampleTest->bHasAddedAllPlayerStates = true;
 	};
 
 	FTimerHandle OutTimerHandle;
-	const auto Callback = FTimerDelegate::CreateWeakLambda(this, DeferredAddPlayerState, TWeakObjectPtr(GameState), TWeakObjectPtr(World));
+	const auto Callback = FTimerDelegate::CreateWeakLambda(this, DeferredAddPlayerState, TWeakObjectPtr(this), TWeakObjectPtr(GameState), TWeakObjectPtr(World));
 	World->GetTimerManager().SetTimer(OutTimerHandle, Callback, 1.f, false, 3.f);
 }
 
 void ATeamSampleTest::EvaluateTestPredicate()
 {
-	// TODO @gdemers define how to evaluate this test!
+	if (!bHasAddedAllPlayerStates)
+	{
+		return;
+	}
+	
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UWorld to be valid."));
+		return;
+	}
+
+#if WITH_AUTOMATION_TESTS
+	bool bHasTeamAssigned = true;
+	for (TActorIterator<AAutomatedTestPlayerStateTeamActor> Iterator(World); Iterator; ++Iterator)
+	{
+		AAutomatedTestPlayerStateTeamActor* TestActor = *Iterator;
+		if (IsValid(TestActor))
+		{
+			bHasTeamAssigned &= TestActor->HasTeam();
+		}
+	}
+
+	const EFunctionalTestResult TestResult = bHasTeamAssigned ? EFunctionalTestResult::Succeeded : EFunctionalTestResult::Failed;
+	const FString Msg = bHasTeamAssigned ? TEXT("Team Assignment process behaved has expected.") : TEXT("Team Assignment process didn't complete for all APlayerState.");
+	FinishTest(TestResult, Msg);
+#else
+	FinishTest(EFunctionalTestResult::Succeeded, TEXT("Team Assignment process behaved has expected."));
+#endif
 }
