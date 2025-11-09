@@ -20,17 +20,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameStateTeamComponent.h"
 
-#include "GameFramework/Actor.h"
+#include "GameFramework/GameState.h"
+#include "GameFramework/PlayerState.h"
 
 #include "AutomatedTestTeamActor.generated.h"
 
+class UPlayerStateTeamComponent;
+
 /**
- * 
+ *	Class description:
+ *
+ *	AAutomatedTestPlayerStateTeamActor is an Actor class to run behaviour during Automated Testing.
  */
 UCLASS()
-class TEAMSAMPLE_API AAutomatedTestTeamActor : public AActor
+class TEAMSAMPLE_API AAutomatedTestPlayerStateTeamActor : public APlayerState
 {
 	GENERATED_BODY()
+
+public:
+	AAutomatedTestPlayerStateTeamActor(const FObjectInitializer& ObjectInitializer);
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UPlayerStateTeamComponent> TeamComponent = nullptr;
 };

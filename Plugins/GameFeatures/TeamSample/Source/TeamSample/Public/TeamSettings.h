@@ -40,12 +40,18 @@ class TEAMSAMPLE_API UTeamSettings : public UDeveloperSettings
 
 public:
 	UFUNCTION(BlueprintCallable)
+	static const TSoftClassPtr<UTeamRule>& GetTeamRuleClass();
+	
+	UFUNCTION(BlueprintCallable)
 	static const TSoftClassPtr<UTeamSpawnRule>& GetTeamSpawnRuleClass();
 	
 	UFUNCTION(BlueprintCallable)
 	static bool DoesLevelOverrideSubsystemCreation(const ULevel* NewLevel);
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSoftClassPtr<UTeamRule> TeamRuleClass = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UTeamSpawnRule> TeamSpawnRuleClass = nullptr;
 	

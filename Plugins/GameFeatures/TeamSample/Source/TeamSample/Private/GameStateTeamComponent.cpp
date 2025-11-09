@@ -27,6 +27,7 @@
 #include "TeamObject.h"
 #include "TeamRule.h"
 #include "TeamSample.h"
+#include "TeamSettings.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/GameSession.h"
@@ -36,8 +37,8 @@
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAM, "WorldRule.Team");
-UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_CREATED_NOTIFICATION, "TeamSample.Notification.TeamCreated");
 UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_DESTROYED_NOTIFICATION, "TeamSample.Notification.TeamDestroyed");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_CREATED_NOTIFICATION, "TeamSample.Notification.TeamCreated");
 
 UGameStateTeamComponent::UGameStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -69,16 +70,21 @@ void UGameStateTeamComponent::BeginPlay()
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
+	OwningOuter = Outer;
+
 #if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
 	{
 		GetTeamRuleOnAuthority();
 		Outer->OnPlayerStateRemoved.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateRemoved);
 		Outer->OnPlayerStateAdded.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateAdded);
+
+		for (const APlayerState* NewPlayerState : Outer->PlayerArray)
+		{
+			OnPlayerStateAdded(NewPlayerState);
+		}
 	}
 #endif
-
-	OwningOuter = Outer;
 }
 
 void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -218,7 +224,7 @@ void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 	if (IsValid(WorldSettings))
 	{
 		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
-		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UTeamRule::StaticClass(), Callback);
+		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UTeamSettings::GetTeamRuleClass(), Callback);
 	}
 }
 

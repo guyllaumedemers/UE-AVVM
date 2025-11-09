@@ -25,7 +25,6 @@
 
 #include "TeamSampleTest.generated.h"
 
-class AAutomatedTestTeamActor;
 class AAVVMWorldSetting;
 class UTeamRule;
 
@@ -47,13 +46,11 @@ protected:
 	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	bool RequestGameStateUntilAvailable();
 	bool HasRule() const;
 	void RequestRuleUntilAvailable();
 	void RunTest_Internal();
 	void EvaluateTestPredicate();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<AAutomatedTestTeamActor> TestActorClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
@@ -63,4 +60,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	bool bDoesTestRun = false;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bHasInitializedGameStateComponent = false;
 };

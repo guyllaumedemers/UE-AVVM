@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "TeamSettings.h"
 
+const TSoftClassPtr<UTeamRule>& UTeamSettings::GetTeamRuleClass()
+{
+	return GetDefault<UTeamSettings>()->TeamRuleClass;
+}
+
 const TSoftClassPtr<UTeamSpawnRule>& UTeamSettings::GetTeamSpawnRuleClass()
 {
 	return GetDefault<UTeamSettings>()->TeamSpawnRuleClass;

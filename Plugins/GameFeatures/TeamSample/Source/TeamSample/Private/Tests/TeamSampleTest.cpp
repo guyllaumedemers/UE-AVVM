@@ -19,12 +19,12 @@
 //SOFTWARE.
 #include "TeamSampleTest.h"
 
+#include "AutomatedTestTeamActor.h"
+#include "AVVMGameState.h"
 #include "AVVMWorldSetting.h"
 #include "GameStateTeamComponent.h"
 #include "NativeGameplayTags.h"
 #include "TeamRule.h"
-#include "GameFramework/GameStateBase.h"
-#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
 UE_DEFINE_GAMEPLAY_TAG(AUTOMATED_TEST_TAG_WORLD_RULE_TEAM, "WorldRule.Team");
@@ -77,6 +77,53 @@ void ATeamSampleTest::Tick(float DeltaSeconds)
 	{
 		RunTest_Internal();
 	}
+	else
+	{
+		if (!bHasInitializedGameStateComponent)
+		{
+			bHasInitializedGameStateComponent = RequestGameStateUntilAvailable();
+		}
+	}
+}
+
+bool ATeamSampleTest::RequestGameStateUntilAvailable()
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UWorld to be valid."));
+		return false;
+	}
+
+	AGameStateBase* GameState = UGameplayStatics::GetGameState(World);
+	if (!IsValid(GameState))
+	{
+		// @gdemers fine! We may be executing the functional test tick before the actor is created. 
+		return false;
+	}
+
+	auto* AVVMGameState = Cast<AAVVMGameState>(GameState);
+	if (!IsValid(AVVMGameState))
+	{
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect AAVVMGameState to be valid."));
+		return false;
+	}
+
+	auto* TestComponent = GameState->GetComponentByClass<UGameStateTeamComponent>();
+	if (!IsValid(TestComponent))
+	{
+		auto* NewComponent = AVVMGameState->AddComponentByClass(UGameStateTeamComponent::StaticClass(), false, FTransform::Identity, false);
+		TestComponent = Cast<UGameStateTeamComponent>(NewComponent);
+	}
+
+	if (!IsValid(TestComponent))
+	{
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UGameStateTeamComponent to be valid."));
+		return false;
+	}
+
+	TestComponent->BeginPlay();
+	return true;
 }
 
 bool ATeamSampleTest::HasRule() const
@@ -118,39 +165,40 @@ void ATeamSampleTest::RunTest_Internal()
 		return;
 	}
 
-	AGameStateBase* GameState = UGameplayStatics::GetGameState(World);
+	auto* GameState = Cast<AAVVMGameState>(UGameplayStatics::GetGameState(World));
 	if (!IsValid(GameState))
 	{
-		FinishTest(EFunctionalTestResult::Error, TEXT("Expect AGameStateBase to be valid."));
+		FinishTest(EFunctionalTestResult::Error, TEXT("Expect AAVVMGameState to be valid."));
 		return;
 	}
-
-	auto* TestComponent = GameState->GetComponentByClass<UGameStateTeamComponent>();
-	if (!IsValid(TestComponent))
-	{
-		auto* NewComponent = GameState->AddComponentByClass(UGameStateTeamComponent::StaticClass(), false, FTransform::Identity, false);
-		TestComponent = Cast<UGameStateTeamComponent>(NewComponent);
-	}
-
-	if (!IsValid(TestComponent))
-	{
-		FinishTest(EFunctionalTestResult::Error, TEXT("Expect UGameStateTeamComponent to be valid."));
-		return;
-	}
-
-	TestComponent->BeginPlay();
-
+	
 	TArray<APlayerState*> PlayerStates;
-	PlayerStates.Add(World->SpawnActor<APlayerState>());
-	PlayerStates.Add(World->SpawnActor<APlayerState>());
-	PlayerStates.Add(World->SpawnActor<APlayerState>());
+	PlayerStates.Add(World->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
+	PlayerStates.Add(World->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
+	PlayerStates.Add(World->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
 
 	for (APlayerState* PlayerState : PlayerStates)
 	{
 		GameState->AddPlayerState(PlayerState);
 	}
+
+	const auto DeferredAddPlayerState = [](const TWeakObjectPtr<AGameStateBase>& NewGameState,
+	                                       const TWeakObjectPtr<UWorld>& NewWorld)
+	{
+		if (!NewGameState.IsValid() || !NewWorld.IsValid())
+		{
+			return;
+		}
+
+		NewGameState->AddPlayerState(NewWorld->SpawnActor<AAutomatedTestPlayerStateTeamActor>());
+	};
+
+	FTimerHandle OutTimerHandle;
+	const auto Callback = FTimerDelegate::CreateWeakLambda(this, DeferredAddPlayerState, TWeakObjectPtr(GameState), TWeakObjectPtr(World));
+	World->GetTimerManager().SetTimer(OutTimerHandle, Callback, 1.f, false, 3.f);
 }
 
 void ATeamSampleTest::EvaluateTestPredicate()
 {
+	// TODO @gdemers define how to evaluate this test!
 }

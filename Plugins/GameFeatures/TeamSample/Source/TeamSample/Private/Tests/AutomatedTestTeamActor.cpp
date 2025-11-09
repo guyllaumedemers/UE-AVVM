@@ -19,3 +19,10 @@
 //SOFTWARE.
 #include "AutomatedTestTeamActor.h"
 
+#include "PlayerStateTeamComponent.h"
+
+AAutomatedTestPlayerStateTeamActor::AAutomatedTestPlayerStateTeamActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	TeamComponent = ObjectInitializer.CreateDefaultSubobject<UPlayerStateTeamComponent>(this, TEXT("TeamComponent"));
+}

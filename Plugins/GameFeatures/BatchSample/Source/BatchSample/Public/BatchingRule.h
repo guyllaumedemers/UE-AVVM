@@ -36,7 +36,7 @@
  *	UBatchingRule is a Rule referenced in AVVMWorldSettings. This system defines requirements for batching, and
  *	configure the system Runtime behaviour.
  */
-UCLASS(Blueprintable)
+UCLASS()
 class BATCHSAMPLE_API UBatchingRule : public UAVVMWorldRule
 {
 	GENERATED_BODY()
