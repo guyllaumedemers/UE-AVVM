@@ -93,13 +93,13 @@ protected:
 	TWeakObjectPtr<const UTeamSpawnWeightRule> SpawnWeightRule = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<TObjectPtr<const UTeamSpawnCondition>> TeamSpawnConditions;
+	TArray<TObjectPtr<const UTeamSpawnCondition>> SpawnConditions;
 
 	UPROPERTY(Transient)
 	TArray<TWeakObjectPtr<const UTeamStartComponent>> PlayerStarts;
 	
-	TSharedPtr<FStreamableHandle> SpawnWeightRuleStreamableHandle = nullptr;
 	TSharedPtr<FStreamableHandle> TeamRuleStreamableHandle = nullptr;
+	TSharedPtr<FStreamableHandle> SpawnWeightRuleStreamableHandle = nullptr;
 	TSharedPtr<FStreamableHandle> SpawnConditionStreamableHandle = nullptr;
 };
 

@@ -86,7 +86,9 @@ class TEAMSAMPLE_API UTeamSpawnWeightRule : public UObject
 {
 	GENERATED_BODY()
 
-	// TODO @gdemers Add Impl!
+public:
+	virtual const UTeamStartComponent* Weight(const UTeamStartComponent* ChoiceA,
+	                                          const UTeamStartComponent* ChoiceB) const PURE_VIRTUAL(Weight, return nullptr;);
 };
 
 /**

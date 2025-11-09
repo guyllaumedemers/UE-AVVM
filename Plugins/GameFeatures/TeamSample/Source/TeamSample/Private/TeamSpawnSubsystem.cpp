@@ -156,7 +156,7 @@ const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const FWorldCo
 			continue;
 		}
 
-		for (const UTeamSpawnCondition* SpawnCondition : TeamSpawnConditions)
+		for (const UTeamSpawnCondition* SpawnCondition : SpawnConditions)
 		{
 			if (!IsValid(SpawnCondition))
 			{
@@ -168,7 +168,7 @@ const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const FWorldCo
 
 		if (bPredicate)
 		{
-			Result = UTeamSpawnUtils::WeightChoice(nullptr, Result, SpawnPoint);
+			Result = UTeamSpawnUtils::WeightChoice(SpawnWeightRule.Get(), Result, SpawnPoint);
 		}
 	}
 
@@ -295,7 +295,7 @@ void UTeamSpawnSubsystem::CreateSpawnConditions()
 			}
 
 			const auto* NewSpawnCondition = NewObject<UTeamSpawnCondition>(TeamSpawnSubsystem, SpawnConditionClass);
-			TeamSpawnSubsystem->TeamSpawnConditions.Add(NewSpawnCondition);
+			TeamSpawnSubsystem->SpawnConditions.Add(NewSpawnCondition);
 		}
 	};
 
@@ -312,6 +312,5 @@ const UTeamStartComponent* UTeamSpawnUtils::WeightChoice(const UTeamSpawnWeightR
 		return IsValid(ChoiceA) ? ChoiceA : ChoiceB;
 	}
 
-	// TODO @gdemers Add Impl!
-	return nullptr;
+	return WeightRule->Weight(ChoiceA, ChoiceB);
 }
