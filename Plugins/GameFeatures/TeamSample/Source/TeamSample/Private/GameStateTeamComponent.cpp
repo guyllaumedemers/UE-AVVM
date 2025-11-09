@@ -224,6 +224,11 @@ void UGameStateTeamComponent::GetTeamRuleOnAuthority()
 
 void UGameStateTeamComponent::RequestTeams()
 {
+	if (!TeamRule.IsValid())
+	{
+		return;
+	}
+
 	if (SynchronizationLock.IsLocked() || (PendingPlayerStates.IsEmpty() && ScopedLockedPlayerStates.IsEmpty()))
 	{
 		return;

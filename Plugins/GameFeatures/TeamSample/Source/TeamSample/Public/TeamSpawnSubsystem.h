@@ -40,8 +40,7 @@ class UTeamStartComponent;
  *	aim at selecting a valid location to spawn a player.
  *
  *	Note : This can be used both for gameplay or menus, or after-action-report and should be
- *	used to either spawn your players at a safe location or in a defined order, maybe based on scoring
- *	etc...
+ *	used to either spawn your players at a safe location or in a defined order, maybe based on scoring, etc...
  */
 UCLASS()
 class TEAMSAMPLE_API UTeamSpawnSubsystem : public UWorldSubsystem
@@ -104,7 +103,9 @@ protected:
 };
 
 /**
- * 
+ *	Class description:
+ *
+ *	UTeamSpawnUtils define reusable Api for team spawning use-case.
  */
 UCLASS()
 class TEAMSAMPLE_API UTeamSpawnUtils : public UBlueprintFunctionLibrary
