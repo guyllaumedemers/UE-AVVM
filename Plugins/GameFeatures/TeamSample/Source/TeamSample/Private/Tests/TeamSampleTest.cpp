@@ -122,7 +122,6 @@ bool ATeamSampleTest::RequestGameStateUntilAvailable()
 		return false;
 	}
 
-	TestComponent->BeginPlay();
 	return true;
 }
 
