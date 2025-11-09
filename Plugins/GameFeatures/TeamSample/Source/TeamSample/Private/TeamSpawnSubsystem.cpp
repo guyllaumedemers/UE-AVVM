@@ -24,6 +24,7 @@
 #include "NativeGameplayTags.h"
 #include "TeamSample.h"
 #include "TeamSettings.h"
+#include "TeamStartComponent.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAMSPAWNING, "WorldRule.TeamSpawning");
@@ -49,4 +50,83 @@ bool UTeamSpawnSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	}
 
 	return !World->IsNetMode(NM_Client);
+}
+
+void UTeamSpawnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+}
+
+void UTeamSpawnSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+}
+
+void UTeamSpawnSubsystem::Static_UnRegisterPlayerStart(const UWorld* World,
+                                                       const UTeamStartComponent* Component)
+{
+	auto* TeamSpawnSubsystem = UTeamSpawnSubsystem::Get(World);
+	if (IsValid(TeamSpawnSubsystem))
+	{
+		TeamSpawnSubsystem->UnRegister(Component);
+	}
+}
+
+void UTeamSpawnSubsystem::Static_RegisterPlayerStart(const UWorld* World,
+                                                     const UTeamStartComponent* Component)
+{
+	auto* TeamSpawnSubsystem = UTeamSpawnSubsystem::Get(World);
+	if (IsValid(TeamSpawnSubsystem))
+	{
+		TeamSpawnSubsystem->Register(Component);
+	}
+}
+
+UTeamSpawnSubsystem* UTeamSpawnSubsystem::Get(const UWorld* World)
+{
+	return UWorld::GetSubsystem<UTeamSpawnSubsystem>(World);
+}
+
+void UTeamSpawnSubsystem::UnRegister(const UTeamStartComponent* Component)
+{
+	PlayerStarts.Remove(Component);
+
+	if (!IsValid(Component))
+	{
+		return;
+	}
+
+	const auto* Outer = Component->GetTypedOuter<AActor>();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	UE_LOG(LogTeamSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Actor \"%s\" unregistered."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName())
+}
+
+void UTeamSpawnSubsystem::Register(const UTeamStartComponent* Component)
+{
+	PlayerStarts.Add(Component);
+
+	if (!IsValid(Component))
+	{
+		return;
+	}
+
+	const auto* Outer = Component->GetTypedOuter<AActor>();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	UE_LOG(LogTeamSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Actor \"%s\" registered."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName())
 }

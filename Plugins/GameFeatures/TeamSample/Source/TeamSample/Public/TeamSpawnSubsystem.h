@@ -25,7 +25,7 @@
 
 #include "TeamSpawnSubsystem.generated.h"
 
-class AAVVMPlayerState;
+class UTeamStartComponent;
 
 /**
  *	Class description:
@@ -44,4 +44,27 @@ class TEAMSAMPLE_API UTeamSpawnSubsystem : public UWorldSubsystem
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_UnRegisterPlayerStart(const UWorld* World,
+	                                         const UTeamStartComponent* Component);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_RegisterPlayerStart(const UWorld* World,
+	                                       const UTeamStartComponent* Component);
+
+protected:
+	UFUNCTION(BlueprintCallable)
+	static UTeamSpawnSubsystem* Get(const UWorld* World);
+
+	UFUNCTION(BlueprintCallable)
+	void UnRegister(const UTeamStartComponent* Component);
+
+	UFUNCTION(BlueprintCallable)
+	void Register(const UTeamStartComponent* Component);
+
+	UPROPERTY(Transient)
+	TArray<TWeakObjectPtr<const UTeamStartComponent>> PlayerStarts;
 };

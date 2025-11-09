@@ -18,3 +18,17 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "TeamStartComponent.h"
+
+#include "TeamSpawnSubsystem.h"
+
+void UTeamStartComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	UTeamSpawnSubsystem::Static_RegisterPlayerStart(GetWorld(), this);
+}
+
+void UTeamStartComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	UTeamSpawnSubsystem::Static_UnRegisterPlayerStart(GetWorld(), this);
+}
