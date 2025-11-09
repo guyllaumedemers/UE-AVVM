@@ -190,7 +190,7 @@ void ATeamSampleTest::RunTest_Internal()
 		// TODO @gdemers This wont work due to UAVVMOnlineUtils::GetUniqueNetId being invoked in UTeamUtils::AppendTeam.
 		// I have to convert this test to running multiple PIE instance instead.
 		FAVVMPlayerConnectionProxy NewPlayerConnection;
-		NewPlayerConnection.UniqueNetId = FString::FromInt(PlayerState->GetUniqueID()); /*Since they wont have UniqueNetId, lets just use the Unique Id. It will behave the same here!*/
+		NewPlayerConnection.UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(PlayerState);
 		
 		const FString Json = UAVVMOnlineUtils::SerializePlayerConnection(FAVVMNotificationPayload::Make<FAVVMPlayerConnectionProxy>(NewPlayerConnection));
 		NewParty.PlayerConnections.Add(Json);
@@ -219,7 +219,7 @@ void ATeamSampleTest::RunTest_Internal()
 		FAVVMPartyProxy NewParty;
 
 		FAVVMPlayerConnectionProxy NewPlayerConnection;
-		NewPlayerConnection.UniqueNetId = FString::FromInt(NewPlayerState->GetUniqueID());
+		NewPlayerConnection.UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(NewPlayerState);
 
 		const FString Json = UAVVMOnlineUtils::SerializePlayerConnection(FAVVMNotificationPayload::Make<FAVVMPlayerConnectionProxy>(NewPlayerConnection));
 		NewParty.PlayerConnections.Add(Json);

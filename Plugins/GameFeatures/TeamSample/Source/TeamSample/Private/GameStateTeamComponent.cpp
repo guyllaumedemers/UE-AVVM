@@ -303,7 +303,8 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 	}
 
 	TArray<UTeamObject*> OutTeam = MoveTemp(Teams);
-	UTeamUtils::CreateOrAppendTeams(this, MoveTemp(PendingPlayerStates), NewParties, TeamRule.Get(), OutTeam);
+	TArray<TWeakObjectPtr<const APlayerState>> OldUnassignedPlayers = MoveTemp(PendingPlayerStates);
+	UTeamUtils::CreateOrAppendTeams(this, OldUnassignedPlayers, NewParties, TeamRule.Get(), OutTeam);
 
 	Teams.Reset(OutTeam.Num());
 	for (UTeamObject* NewTeam : OutTeam)
