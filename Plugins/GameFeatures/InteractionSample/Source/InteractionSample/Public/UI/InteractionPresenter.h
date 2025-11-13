@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
 #include "AVVMUIExtensionInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "Components/SlateWrapperTypes.h"
@@ -30,6 +29,7 @@
 #include "InteractionPresenter.generated.h"
 
 struct FAVVMHandshakePayload;
+struct FAVVMNotificationPayload;
 class UCommonUserWidget;
 
 /**

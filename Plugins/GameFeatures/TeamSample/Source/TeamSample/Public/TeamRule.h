@@ -48,8 +48,7 @@ public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
-	
-	UFUNCTION(BlueprintCallable)
+
 	const TArray<FGameplayTag>& GetTags() const;
 
 protected:

@@ -22,12 +22,10 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
-#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "GameFramework/WorldSettings.h"
 
 #include "AVVMWorldSetting.generated.h"
-
-struct FStreamableHandle;
 
 /**
  *	Class description:

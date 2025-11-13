@@ -21,11 +21,12 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMEmotePresenter.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
  *	Class description:

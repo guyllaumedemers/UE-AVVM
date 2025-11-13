@@ -48,6 +48,11 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 	                  const AActor* NewTarget) const PURE_VIRTUAL(Kill, return;);
 };
 
+template<> struct TBaseStructure<FInteractionExecutionContext> 
+{
+	static INTERACTIONSAMPLE_API UScriptStruct* Get(); 
+};
+
 /**
  *	Class description:
  *

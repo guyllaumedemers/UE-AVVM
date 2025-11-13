@@ -49,11 +49,9 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	bool CanGrantAbility(const FGameplayTagContainer& RequirementTags,
 	                     const FGameplayTagContainer& BlockingTags) const;
 
-	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;
 
 protected:
@@ -102,7 +100,6 @@ class AVVMGAMEPLAY_API UAVVMAbilityGroupDefinitionDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
 	const TArray<FDataRegistryId>& GetAbilityIds() const;
 
 protected:

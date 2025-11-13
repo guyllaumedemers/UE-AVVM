@@ -147,14 +147,7 @@ AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* NewAnc
 		return nullptr;
 	}
 
-	const auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(GetWorld());
-	if (IsValid(InventoryManagerSubsystem))
-	{
-		FActorSpawnParameters Params;
-		Params.Owner = NewAnchor;
-
-		RuntimeItemActor = InventoryManagerSubsystem->CreateItemActor(NewActorClass, Params);
-	}
+	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), NewActorClass, NewAnchor);
 
 	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
 	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});

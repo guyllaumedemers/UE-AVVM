@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Party/AVVMHostConfigurationPresenter.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMSampleRuntimeModule.h"

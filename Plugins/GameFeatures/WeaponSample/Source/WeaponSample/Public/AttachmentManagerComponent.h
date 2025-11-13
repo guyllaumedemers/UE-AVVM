@@ -105,9 +105,6 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION(BlueprintCallable)
-	static UAttachmentManagerComponent* GetActorComponent(const AActor* NewActor);
-
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Swap(const FAttachmentSwapContextArgs& NewAttachmentSwapContext);
 

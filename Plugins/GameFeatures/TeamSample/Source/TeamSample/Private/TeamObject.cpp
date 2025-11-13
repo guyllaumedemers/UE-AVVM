@@ -66,6 +66,11 @@ TInstancedStruct<FTeamPayload> UTeamObject::GetTeamPayload() const
 	return FTeamPayload::Make<FTeamPayload>(PlayerUniqueNetIds, TeamTag);
 }
 
+const FGameplayTag& UTeamObject::GetTeamTag() const
+{
+	return TeamTag;
+}
+
 void UTeamObject::RegisterPlayerState(const APlayerState* NewPlayerState, const FString& NewPlayerUniqueNetId)
 {
 	PlayerUniqueNetIds.AddUnique(NewPlayerUniqueNetId);

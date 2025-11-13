@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "DataRegistryId.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
 
@@ -48,7 +47,6 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	TArray<FSoftObjectPath> GetProgressionStackingEffectSoftObjectPaths() const;
 
 protected:
@@ -71,7 +69,6 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	TArray<FSoftObjectPath> GetProgressionStages(const int32 ProgressionStageIndex) const;
 
 protected:

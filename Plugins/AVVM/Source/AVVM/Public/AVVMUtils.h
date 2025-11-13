@@ -25,7 +25,6 @@
 
 #include "AVVMUtils.generated.h"
 
-struct FAVVMNotificationPayload;
 class IAVVMViewModelFNameHelper;
 class UCommonUserWidget;
 
@@ -47,14 +46,14 @@ public:
 	static bool IsBlueprintScriptInterfaceValid(const UObject* Target);
 
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
-	UFUNCTION(BlueprintCallable, Category="AVVM|AVVM")
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
 	                          UCommonUserWidget* Target);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|AVVM")
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static ULocalPlayer* GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|AVVM")
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static ULocalPlayer* GetTargetLocalPlayer(const UObject* WorldContextObject);
 };
 

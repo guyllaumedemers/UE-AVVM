@@ -70,16 +70,16 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintCallable, Category="TransactionSample")
+	UFUNCTION(BlueprintCallable)
 	static void Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
 	                                              const FTransactionContextArgs& Args);
 
-	UFUNCTION(BlueprintCallable, Category="TransactionSample")
+	UFUNCTION(BlueprintCallable)
 	static void Static_RemoveAllTransactionOfType(const UObject* WorldContextObject,
 	                                              const AActor* NewTarget,
 	                                              const ETransactionType NewTransactionType);
 
-	UFUNCTION(BlueprintCallable, Category="TransactionSample")
+	UFUNCTION(BlueprintCallable)
 	static void Static_RemoveAllTransactions(const UObject* WorldContextObject,
 	                                         const AActor* NewTarget);
 

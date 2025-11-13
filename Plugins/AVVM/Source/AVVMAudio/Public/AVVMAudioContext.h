@@ -52,10 +52,15 @@ TInstancedStruct<FAVVMAudioContext> FAVVMAudioContext::Make(TArgs&&... Args)
 	return TInstancedStruct<FAVVMAudioContext>::Make<TChild>(Forward<TArgs>(Args)...);
 }
 
+template<> struct TBaseStructure<FAVVMAudioContext> 
+{
+	static AVVMAUDIO_API UScriptStruct* Get(); 
+};
+
 /**
  *	Class description:
  *
- *	
+ *	FAVVMSpatialAudioContext is a context struct encapsulating spatial data for audio events.
  */
 USTRUCT(BlueprintType)
 struct AVVMAUDIO_API FAVVMSpatialAudioContext : public FAVVMAudioContext

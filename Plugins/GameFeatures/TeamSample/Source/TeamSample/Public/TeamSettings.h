@@ -26,6 +26,7 @@
 #include "TeamSettings.generated.h"
 
 class ULevel;
+class UTeamRule;
 class UTeamSpawnRule;
 
 /**
@@ -39,13 +40,13 @@ class TEAMSAMPLE_API UTeamSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static const TSoftClassPtr<UTeamRule>& GetTeamRuleClass();
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static const TSoftClassPtr<UTeamSpawnRule>& GetTeamSpawnRuleClass();
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static bool DoesLevelOverrideSubsystemCreation(const ULevel* NewLevel);
 
 protected:

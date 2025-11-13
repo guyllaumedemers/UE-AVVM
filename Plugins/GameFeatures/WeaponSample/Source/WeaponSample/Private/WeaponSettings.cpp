@@ -24,6 +24,11 @@ UWeaponSettings::UWeaponSettings()
 	CategoryName = TEXT("Game");
 }
 
+const FGameplayTag& UWeaponSettings::GetPlayerStateChannelTag()
+{
+	return GetDefault<UWeaponSettings>()->PlayerStateChannelTag;
+}
+
 bool UWeaponSettings::DoesDebugTraceShowPersistentLine()
 {
 	return GetDefault<UWeaponSettings>()->bDoesDebugTraceShowPersistentLine;

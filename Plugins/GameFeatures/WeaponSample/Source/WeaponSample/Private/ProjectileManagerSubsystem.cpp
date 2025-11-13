@@ -21,28 +21,46 @@
 
 #include "AVVMAudioContext.h"
 #include "AVVMAudioUtils.h"
-#include "AVVMGameState.h"
+#include "AVVMPlayerState.h"
 #include "NonReplicatedProjectileActor.h"
 #include "WeaponSettings.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
+#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+
+bool UProjectileManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+{
+	const auto* World = Cast<UWorld>(Outer);
+	if (!IsValid(World))
+	{
+		return false;
+	}
+
+	return World->IsGameWorld();
+}
 
 void UProjectileManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	auto* GameState = Cast<AAVVMGameState>(UGameplayStatics::GetGameState(this));
-	if (!IsValid(GameState))
+	ClientPlayerController.Reset();
+
+	auto* GameStateBase = UGameplayStatics::GetGameState(this);
+	if (!IsValid(GameStateBase))
 	{
 		return;
 	}
 
-	GameState->OnPlayerStateRemoved.AddUObject(this, &UProjectileManagerSubsystem::OnPlayerStateRemoved);
-	GameState->OnPlayerStateAdded.AddUObject(this, &UProjectileManagerSubsystem::OnPlayerStateAdded);
+	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
+	Callback.BindDynamic(this, &UProjectileManagerSubsystem::OnPlayerStateAddedOrRemoved);
 
-	ClientPlayerController.Reset();
-	for (const TObjectPtr<APlayerState>& PlayerState : GameState->PlayerArray)
+	FAVVMObserverContextArgs ContextArgs;
+	ContextArgs.ChannelTag = UWeaponSettings::GetPlayerStateChannelTag();
+	ContextArgs.Callback = Callback;
+	UAVVMNotificationSubsystem::Static_RegisterObserver(GameStateBase, ContextArgs);
+
+	for (const TObjectPtr<APlayerState>& PlayerState : GameStateBase->PlayerArray)
 	{
 		OnPlayerStateAdded(PlayerState);
 	}
@@ -55,11 +73,12 @@ void UProjectileManagerSubsystem::Deinitialize()
 	ClientPlayerController.Reset();
 	Projectiles.Reset();
 
-	auto* GameState = Cast<AAVVMGameState>(UGameplayStatics::GetGameState(this));
-	if (IsValid(GameState))
+	auto* GameStateBase = UGameplayStatics::GetGameState(this);
+	if (IsValid(GameStateBase))
 	{
-		GameState->OnPlayerStateRemoved.RemoveAll(this);
-		GameState->OnPlayerStateAdded.RemoveAll(this);
+		FAVVMObserverContextArgs ContextArgs;
+		ContextArgs.ChannelTag = UWeaponSettings::GetPlayerStateChannelTag();
+		UAVVMNotificationSubsystem::Static_UnregisterObserver(GameStateBase, ContextArgs);
 	}
 }
 
@@ -84,6 +103,36 @@ TStatId UProjectileManagerSubsystem::GetStatId() const
 	return TStatId();
 }
 
+void UProjectileManagerSubsystem::Static_Register(const UWorld* World,
+                                                  ANonReplicatedProjectileActor* Projectile)
+{
+	auto* ProjectileSubsystem = UProjectileManagerSubsystem::Get(World);
+	if (IsValid(ProjectileSubsystem))
+	{
+		ProjectileSubsystem->Register(Projectile);
+	}
+}
+
+void UProjectileManagerSubsystem::Static_Unregister(const UWorld* World,
+                                                    ANonReplicatedProjectileActor* Projectile)
+{
+	auto* ProjectileSubsystem = UProjectileManagerSubsystem::Get(World);
+	if (IsValid(ProjectileSubsystem))
+	{
+		ProjectileSubsystem->Unregister(Projectile);
+	}
+}
+
+void UProjectileManagerSubsystem::Static_CreateProjectile(const UWorld* World,
+                                                          const FProjectileContextArgs& ContextArgs)
+{
+	auto* ProjectileSubsystem = UProjectileManagerSubsystem::Get(World);
+	if (IsValid(ProjectileSubsystem))
+	{
+		ProjectileSubsystem->CreateProjectile(ContextArgs);
+	}
+}
+
 void UProjectileManagerSubsystem::Register(ANonReplicatedProjectileActor* Projectile)
 {
 	if (IsValid(Projectile))
@@ -102,19 +151,37 @@ void UProjectileManagerSubsystem::Unregister(ANonReplicatedProjectileActor* Proj
 	}
 }
 
-void UProjectileManagerSubsystem::CreateProjectile(const UClass* ProjectileClass,
-                                                   const TInstancedStruct<const FProjectileParams>& ProjectileParams,
-                                                   const FTransform& AimTransform) const
+void UProjectileManagerSubsystem::CreateProjectile(const FProjectileContextArgs& ContextArgs) const
 {
-	const auto* Params = ProjectileParams.GetPtr<FProjectileParams>();
+	const auto* Params = ContextArgs.ProjectileParams.GetPtr<FProjectileParams>();
 	if (Params != nullptr)
 	{
-		ANonReplicatedProjectileActor* Instance = Factory(ProjectileClass, AimTransform);
+		ANonReplicatedProjectileActor* Instance = Factory(ContextArgs.ProjectileClass, ContextArgs.AimTransform);
 		Params->Init(Instance);
 	}
 }
 
-UProjectileManagerSubsystem* UProjectileManagerSubsystem::GetSubsystem(const UWorld* World)
+void UProjectileManagerSubsystem::OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
+{
+	const auto* Payload = NewPayload.GetPtr<FAVVMPlayerStatePayload>();
+	if (!ensureAlwaysMsgf(Payload != nullptr,
+						  TEXT("Payload couldnt be casted to FAVVMPlayerStatePayload type")))
+	{
+		return;
+	}
+
+	const bool bWasAddedOrRemoved = Payload->bWasAddedOrRemoved;
+	if (bWasAddedOrRemoved)
+	{
+		OnPlayerStateAdded(Payload->PlayerState.Get());
+	}
+	else
+	{
+		OnPlayerStateRemoved(Payload->PlayerState.Get());
+	}
+}
+
+UProjectileManagerSubsystem* UProjectileManagerSubsystem::Get(const UWorld* World)
 {
 	return UWorld::GetSubsystem<UProjectileManagerSubsystem>(World);
 }

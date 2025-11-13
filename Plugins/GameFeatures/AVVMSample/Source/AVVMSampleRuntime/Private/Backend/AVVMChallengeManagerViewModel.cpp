@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMChallengeManagerViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineStringParser.h"
 

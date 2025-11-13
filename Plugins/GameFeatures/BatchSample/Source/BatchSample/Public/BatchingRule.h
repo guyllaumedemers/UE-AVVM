@@ -45,20 +45,11 @@ public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
-	
-	UFUNCTION(BlueprintCallable)
+
 	bool DoesQualifyForBatchDestroy(const AActor* Actor) const;
-
-	UFUNCTION(BlueprintCallable)
 	int32 GetMaxSizePerBatchDestroy() const;
-
-	UFUNCTION(BlueprintCallable)
 	float GetBatchInterval() const;
-
-	UFUNCTION(BlueprintCallable)
 	float GetMaxLifetimeAllowedToUndersizeBatch() const;
-
-	UFUNCTION(BlueprintCallable)
 	bool ShouldGarbageOnNextTick() const;
 
 protected:

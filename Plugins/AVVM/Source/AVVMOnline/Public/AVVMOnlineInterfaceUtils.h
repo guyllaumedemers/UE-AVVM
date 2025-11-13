@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnline.h"
 #include "AVVMOnlineStringParser.h"
 #include "AVVMUtils.h"

@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "NonReplicatedProjectileActor.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "ProjectileManagerSubsystem.h"
 #include "TriggeringActor.h"
 #include "WeaponSettings.h"
@@ -39,35 +40,13 @@ ANonReplicatedProjectileActor::ANonReplicatedProjectileActor(const FObjectInitia
 void ANonReplicatedProjectileActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	const auto* World = GetWorld();
-	if (!IsValid(World))
-	{
-		return;
-	}
-
-	auto* ProjectileManagerSubsystem = UProjectileManagerSubsystem::GetSubsystem(World);
-	if (IsValid(ProjectileManagerSubsystem))
-	{
-		ProjectileManagerSubsystem->Register(this);
-	}
+	UProjectileManagerSubsystem::Static_Register(GetWorld(), this);
 }
 
 void ANonReplicatedProjectileActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	const auto* World = GetWorld();
-	if (!IsValid(World))
-	{
-		return;
-	}
-
-	auto* ProjectileManagerSubsystem = UProjectileManagerSubsystem::GetSubsystem(World);
-	if (IsValid(ProjectileManagerSubsystem))
-	{
-		ProjectileManagerSubsystem->Unregister(this);
-	}
+	UProjectileManagerSubsystem::Static_Unregister(GetWorld(), this);
 }
 
 void ANonReplicatedProjectileActor::Tick(float DeltaSeconds)
@@ -178,13 +157,13 @@ void ANonReplicatedProjectileActor::HandleHit(const FHitResult& HitResult)
 		else
 		{
 			// @gdemers apply replicated damage to target.
-			UProjectileFunctionLibrary::ApplyDamage(this, Template, HitResult.GetActor());
+			UProjectileFunctionLibrary::ApplyDamage(this, ProjectileTemplate, HitResult.GetActor());
 		}
 	}
 	else
 	{
 		// @gdemers spawn local vfx and sounds.
-		UProjectileFunctionLibrary::HandleProjectileFx(Template, HitResult);
+		UProjectileFunctionLibrary::HandleProjectileFx(ProjectileTemplate, HitResult);
 	}
 }
 

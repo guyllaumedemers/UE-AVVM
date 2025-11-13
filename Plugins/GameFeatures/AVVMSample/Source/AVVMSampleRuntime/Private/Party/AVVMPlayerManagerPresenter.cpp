@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerPresenter.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnline.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"

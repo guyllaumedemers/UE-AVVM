@@ -22,7 +22,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Modules/ModuleManager.h"
 #include "ImGuiModuleProperties.h"
 #include "UObject/Interface.h"
 

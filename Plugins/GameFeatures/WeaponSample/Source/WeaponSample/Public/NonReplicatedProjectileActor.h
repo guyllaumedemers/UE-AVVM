@@ -80,11 +80,11 @@ protected:
 	void UpdateLifetime(const float DeltaTime);
 	void Kill();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag ProjectileFiringMode = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TInstancedStruct<FProjectileParams> Template;
+	TInstancedStruct<FProjectileParams> ProjectileTemplate;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TInstancedStruct<FExplosionParams> ExplosionTemplate;
@@ -114,29 +114,29 @@ class WEAPONSAMPLE_API UProjectileFunctionLibrary : public UBlueprintFunctionLib
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static FVector GetDeltaVelocity(const FVector& Velocity,
 	                                const float Mass,
 	                                const float DeltaTime);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static bool CheckDistance(const ANonReplicatedProjectileActor* Projectile,
 	                          const AActor* Target,
 	                          const float SquaredDistanceThreshold);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static bool IsLocallyOwned(const ANonReplicatedProjectileActor* Projectile);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static void HandleProjectileFx(const TInstancedStruct<FProjectileParams>& Params,
 	                               const FHitResult& HitResult);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static void HandleProjectileExplosion(const TSoftClassPtr<ANonReplicatedExplosionActor>& ExplosionClass,
 	                                      const FVector& ImpactPoint,
 	                                      const FVector& ImpactNormal);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static void ApplyDamage(AActor* Instigator,
 	                        const TInstancedStruct<FProjectileParams>& Params,
 	                        AActor* Target);

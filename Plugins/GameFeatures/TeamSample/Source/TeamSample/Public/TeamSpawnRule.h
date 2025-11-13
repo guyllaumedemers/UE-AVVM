@@ -42,7 +42,7 @@ class UTeamStartComponent;
  *	FWorldContextArgs is a context struct that encapsulate world data to run validation on spawn point.
  */
 USTRUCT(BlueprintType)
-struct FWorldContextArgs
+struct TEAMSAMPLE_API FWorldContextArgs
 {
 	GENERATED_BODY()
 
@@ -113,10 +113,7 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	const TArray<TSoftClassPtr<UTeamSpawnCondition>>& GetSpawnConditions() const;
-
-	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UTeamSpawnWeightRule>& GetSpawnWeightRule() const;
 
 protected:

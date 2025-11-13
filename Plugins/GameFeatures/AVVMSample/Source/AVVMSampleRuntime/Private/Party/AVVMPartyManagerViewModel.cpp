@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Party/AVVMPartyManagerViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineStringParser.h"
 
 void UAVVMPartyManagerViewModel::SetParties(const UAVVMOnlineStringParser* JsonParser,

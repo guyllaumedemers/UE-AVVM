@@ -22,13 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
-#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 
 #include "AVVMPlayerManagerViewModel.generated.h"
 
+struct FAVVMNotificationPayload;
 class UAVVMOnlineStringParser;
 
 /**

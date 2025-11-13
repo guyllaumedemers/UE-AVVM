@@ -25,16 +25,20 @@
 #include "AVVMScopedUtils.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "GameStateTeamComponent.generated.h"
 
 class APlayerState;
+struct FAVVMNotificationPayload;
 struct FAVVMPartyProxy;
 struct FStreamableHandle;
 class UTeamObject;
 class UTeamRule;
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBackendTeamRequestCompleteDelegate, const bool, bWasSuccess, const TArray<FAVVMPartyProxy>&, NewParties);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnBackendTeamRequestCompleteDelegate,
+                                   const bool, bWasSuccess,
+                                   const TArray<FAVVMPartyProxy>&, NewParties);
 
 /**
  *	Class description:
@@ -54,7 +58,8 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 protected:
-	static UGameStateTeamComponent* GetActorComponent(const UObject* WorldContextObject);
+	UFUNCTION(CallInEditor)
+	void OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
 
 	UFUNCTION()
 	void OnPlayerStateAdded(const APlayerState* NewPlayerState);
@@ -74,6 +79,9 @@ protected:
 
 	UFUNCTION()
 	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PlayerStateChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;

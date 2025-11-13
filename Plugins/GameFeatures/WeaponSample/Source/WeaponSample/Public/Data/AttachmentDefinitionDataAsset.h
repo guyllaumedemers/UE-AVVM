@@ -95,10 +95,8 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<ATriggeringAttachmentActor>& GetTriggeringAttachmentClass() const;
-
-	UFUNCTION(BlueprintCallable)
+	
 	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
 	                   const FGameplayTagContainer& BlockingTags) const;
 

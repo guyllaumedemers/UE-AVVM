@@ -22,12 +22,13 @@
 
 #include "CoreMinimal.h"
 
-#include "Modules/ModuleManager.h"
-#include "AVVMNotificationSubsystem.h"
 #include "HAL/IConsoleManager.h"
 #include "StructUtils/InstancedStruct.h"
 
+struct FAVVMNotificationPayload;
 class UAVVMOnlineStringParser;
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
 
 AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogAVVMOnline, Log, All);
 
@@ -84,8 +85,6 @@ private:
 	static AVVMONLINE_API TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
 	static AVVMONLINE_API TStrongObjectPtr<UAVVMOnlineStringParser> JsonParser;
 };
-
-DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
 
 #if !UE_BUILD_SHIPPING
 #define UE_AVVM_ONLINE_DEBUGGER_ENABLED 1

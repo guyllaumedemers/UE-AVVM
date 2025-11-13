@@ -20,6 +20,7 @@
 #include "Backend/AVVMPlayerProfilePresenter.h"
 
 #include "AVVM.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"

@@ -21,13 +21,14 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
 #include "AVVMPrimaryGameLayoutInterface.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "AVVMOnlineInterface.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerProfilePresenter.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
  *	Class description:

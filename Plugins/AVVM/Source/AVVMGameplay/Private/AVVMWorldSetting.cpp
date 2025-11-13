@@ -20,7 +20,6 @@
 #include "AVVMWorldSetting.h"
 
 #include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
 
 const FGameplayTag& UAVVMWorldRule::GetRuleTag() const
 {

@@ -21,6 +21,7 @@
 
 #include "AVVM.h"
 #include "AVVMGameStateHandshakeComponent.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMUtils.h"
 #include "CommonUserWidget.h"
 #include "MVVMViewModelBase.h"
@@ -94,14 +95,9 @@ void UInteractionPresenter::BP_OnNotificationReceived_Kill(const TInstancedStruc
 
 void UInteractionPresenter::BP_OnNotificationReceived_Execute(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* HandshakeComponent = UAVVMGameStateHandshakeComponent::GetActorComponent(this);
-	if (ensureAlwaysMsgf(IsValid(HandshakeComponent),
-	                     TEXT("Missing Handshake component on AGameStateBase!")))
-	{
-		FOnHandshakeRequestComplete Callback;
-		Callback.BindDynamic(this, &UInteractionPresenter::PostHandshakeValidation);
-		HandshakeComponent->ProcessHandshake(Payload, Callback);
-	}
+	FOnHandshakeRequestComplete Callback;
+	Callback.BindDynamic(this, &UInteractionPresenter::PostHandshakeValidation);
+	UAVVMGameStateHandshakeComponent::Static_ProcessHandshake(this, Payload, Callback);
 }
 
 void UInteractionPresenter::StartPresenting()

@@ -21,6 +21,7 @@
 
 #include "ActorInventoryComponent.h"
 #include "AVVMUtils.h"
+#include "Data/AVVMHandshakePayload.h"
 #include "Engine/LocalPlayer.h"
 #include "UI/SingleContextInventoryViewModel.h"
 

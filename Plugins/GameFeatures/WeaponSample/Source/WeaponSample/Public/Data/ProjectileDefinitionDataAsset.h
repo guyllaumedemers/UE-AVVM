@@ -42,42 +42,49 @@ class ANonReplicatedProjectileActor;
  *	and offer user extensibility through usage of TInstancedStruct<T>.
  */
 USTRUCT(BlueprintType)
-struct FProjectileParams
+struct WEAPONSAMPLE_API FProjectileParams
 {
 	GENERATED_BODY()
 
 	virtual ~FProjectileParams() = default;
 	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float Speed = 0.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float Mass = 0.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float Lifetime = 0.f;
+};
+
+template<> struct TBaseStructure<FProjectileParams> 
+{
+	static WEAPONSAMPLE_API UScriptStruct* Get(); 
 };
 
 /**
  *	Class description:
  *
-*	FExplosionParams is a context struct that encapsulate properties specific to an explosion
+ *	FExplosionParams is a context struct that encapsulate properties specific to an explosion
  *	and offer user extensibility through usage of TInstancedStruct<T>.
  */
 USTRUCT(BlueprintType)
-struct FExplosionParams
+struct WEAPONSAMPLE_API FExplosionParams
 {
 	GENERATED_BODY()
 
 	virtual ~FExplosionParams() = default;
 	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<ANonReplicatedExplosionActor> ExplosionClass = nullptr;
+};
+
+template<> struct TBaseStructure<FExplosionParams> 
+{
+	static WEAPONSAMPLE_API UScriptStruct* Get(); 
 };
 
 /**
@@ -104,6 +111,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag ProjectileFiringMode = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FProjectileParams> ProjectileParams;

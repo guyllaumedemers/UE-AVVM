@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
 #include "DataRegistryId.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"

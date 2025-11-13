@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameStateHandshakeComponent.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "GameFramework/GameStateBase.h"
@@ -67,6 +68,18 @@ void UAVVMGameStateHandshakeComponent::EndPlay(const EEndPlayReason::Type EndPla
 	       *Outer->GetName())
 
 	OwningOuter.Reset();
+}
+
+void UAVVMGameStateHandshakeComponent::Static_ProcessHandshake(const UObject* WorldContextObject,
+                                                               const TInstancedStruct<FAVVMNotificationPayload>& NewHandshakePayload,
+                                                               const FOnHandshakeRequestComplete& NewCallback)
+{
+	const auto* HandshakeComponent = UAVVMGameStateHandshakeComponent::GetActorComponent(WorldContextObject);
+	if (ensureAlwaysMsgf(IsValid(HandshakeComponent),
+	                     TEXT("Missing Handshake component on AGameStateBase!")))
+	{
+		HandshakeComponent->ProcessHandshake(NewHandshakePayload, NewCallback);
+	}
 }
 
 UAVVMGameStateHandshakeComponent* UAVVMGameStateHandshakeComponent::GetActorComponent(const UObject* WorldContextObject)

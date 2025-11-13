@@ -20,8 +20,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "Engine/StreamableManager.h"
 #include "StructUtils/InstancedStruct.h"
@@ -30,7 +30,6 @@
 
 struct FExplosionParams;
 struct FProjectileParams;
-class UProjectileManagerSubsystem;
 
 /**
  *	Class description:
@@ -54,15 +53,13 @@ public:
 	void SetupProjectiles(const TArray<UObject*>& NewResources);
 
 protected:
-	UFUNCTION()
-	void OnSoftObjectAcquired();
-	
-	UFUNCTION(BlueprintCallable)
 	static UProjectileComponent* GetActorComponent(const AActor* NewActor);
 
-	UFUNCTION(BlueprintCallable)
 	void Fire(const FGameplayTag& FiringModeTag,
-			  const FTransform& AimTransform) const;
+	          const FTransform& AimTransform) const;
+
+	UFUNCTION()
+	void OnSoftObjectAcquired();
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
@@ -73,7 +70,6 @@ protected:
 		TWeakObjectPtr<const UClass> ProjectileClass = nullptr;
 	};
 
-	TWeakObjectPtr<UProjectileManagerSubsystem> ProjectileManagerSubsystem = nullptr;
 	TMap<FGameplayTag, FProjectileFiringMode> ProjectileTemplates;
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

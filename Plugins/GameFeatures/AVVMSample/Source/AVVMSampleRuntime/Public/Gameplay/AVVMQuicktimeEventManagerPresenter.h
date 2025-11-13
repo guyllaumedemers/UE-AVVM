@@ -21,13 +21,14 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
 #include "AVVMUIExtensionInterface.h"
 #include "UIExtensionSystem.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMQuicktimeEventManagerPresenter.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
  *	Class description:

@@ -84,11 +84,6 @@ void UAttachmentManagerComponent::GetLifetimeReplicatedProps(TArray<class FLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
-UAttachmentManagerComponent* UAttachmentManagerComponent::GetActorComponent(const AActor* NewActor)
-{
-	return IsValid(NewActor) ? NewActor->GetComponentByClass<UAttachmentManagerComponent>() : nullptr;
-}
-
 void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapContextArgs& NewAttachmentSwapContext)
 {
 	TWeakObjectPtr<ATriggeringAttachmentActor>& SearchResult = EquippedAttachments.FindOrAdd(NewAttachmentSwapContext.TargetSlotTag);

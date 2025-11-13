@@ -21,6 +21,5 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
 INVENTORYPROGRESSIONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogProgressionSample, Log, All);

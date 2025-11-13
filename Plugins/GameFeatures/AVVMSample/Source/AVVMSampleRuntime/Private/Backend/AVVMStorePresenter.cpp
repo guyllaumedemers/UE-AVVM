@@ -20,6 +20,7 @@
 #include "Backend/AVVMStorePresenter.h"
 
 #include "AVVM.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtils.h"

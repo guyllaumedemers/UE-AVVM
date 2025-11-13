@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Backend/AVVMPlayerProfileViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
+
 void UAVVMPlayerProfileViewModel::SetPlayerProfile(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const auto* NewPlayerProfile = Payload.GetPtr<FAVVMPlayerProfileProxy>();

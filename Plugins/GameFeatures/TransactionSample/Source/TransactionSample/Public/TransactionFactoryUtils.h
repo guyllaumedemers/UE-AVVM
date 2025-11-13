@@ -88,10 +88,10 @@ class TRANSACTIONSAMPLE_API UTransactionFactoryUtils : public UBlueprintFunction
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Transaction|Utils")
 	static TInstancedStruct<FTransactionPayload> CreatePayloadFromString(const TSubclassOf<UTransactionFactoryImpl>& NewFactoryImpl,
 	                                                                     const FString& NewPayload);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Transaction|Utils")
 	static FString CreateStringPayload(const TInstancedStruct<FTransactionPayload>& NewPayload);
 };

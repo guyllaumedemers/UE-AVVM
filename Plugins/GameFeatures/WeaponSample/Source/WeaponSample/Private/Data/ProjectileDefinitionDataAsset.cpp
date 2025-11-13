@@ -33,9 +33,14 @@ void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile) const
 	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
 
 	// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
-	Projectile->Template = TInstancedStruct<FProjectileParams>::Make(*this);
+	Projectile->ProjectileTemplate = TInstancedStruct<FProjectileParams>::Make(*this);
 	Projectile->RuntimeVelocity = (NormalizedDirection * Speed);
 	Projectile->RuntimeMass = Mass;
+}
+
+UScriptStruct* TBaseStructure<FProjectileParams>::Get()
+{
+	return FProjectileParams::StaticStruct();
 }
 
 void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const
@@ -45,6 +50,11 @@ void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const
 		// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
 		Projectile->ExplosionTemplate = TInstancedStruct<FExplosionParams>::Make(*this);
 	}
+}
+
+UScriptStruct* TBaseStructure<FExplosionParams>::Get()
+{
+	return FExplosionParams::StaticStruct();
 }
 
 #if WITH_EDITOR
@@ -68,8 +78,7 @@ EDataValidationResult UProjectileDefinitionDataAsset::IsDataValid(class FDataVal
 
 const TSoftClassPtr<ANonReplicatedProjectileActor> UProjectileDefinitionDataAsset::GetProjectileClass() const
 {
-	const auto* Params = ProjectileParams.GetPtr<FProjectileParams>();
-	return (Params != nullptr) ? Params->ProjectileClass : nullptr;
+	return ProjectileClass;
 }
 
 const TSoftClassPtr<ANonReplicatedExplosionActor> UProjectileDefinitionDataAsset::GetExplosionClass() const

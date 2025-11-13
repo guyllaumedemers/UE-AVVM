@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,33 +21,15 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
-#include "MVVMViewModelBase.h"
-#include "Backend/AVVMOnlinePlayer.h"
+#include "FunctionalTest.h"
 
-#include "AVVMStoreViewModel.generated.h"
-
-struct FAVVMNotificationPayload;
-class UAVVMOnlineStringParser;
+#include "FencingSampleTest.generated.h"
 
 /**
-*	Class description:
- *
- *	UAVVMStoreViewModel. View Model class that display backend representation of the store (specific to the local player).
+ * 
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMStoreViewModel : public UMVVMViewModelBase,
-                                                  public IAVVMViewModelFNameHelper
+class FENCINGSAMPLE_API AFencingSampleTest : public AFunctionalTest
 {
 	GENERATED_BODY()
-
-public:
-	virtual FName GetViewModelFName() const override { return TEXT("UAVVMStoreViewModel"); };
-
-	void SetStoreItems(const UAVVMOnlineStringParser* JsonParser,
-	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
-
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMPlayerResource> StoreItems;
 };

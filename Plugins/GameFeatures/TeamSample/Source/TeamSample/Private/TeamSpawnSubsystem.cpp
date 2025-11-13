@@ -26,6 +26,7 @@
 #include "TeamSettings.h"
 #include "TeamSpawnRule.h"
 #include "TeamStartComponent.h"
+#include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.

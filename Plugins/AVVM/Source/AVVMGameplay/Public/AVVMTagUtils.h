@@ -39,7 +39,7 @@ class AVVMGAMEPLAY_API UAVVMTagUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="AVVM|Tags")
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static bool DoesMeetRequirements(const UAVVMReplicatedTagComponent* NewTagComponent,
 	                                 const FGameplayTagContainer& NewRequiredTags,
 	                                 const FGameplayTagContainer& NewBlockingTags);

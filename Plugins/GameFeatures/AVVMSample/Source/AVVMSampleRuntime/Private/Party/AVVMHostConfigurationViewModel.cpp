@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Party/AVVMHostConfigurationViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
+
 void UAVVMHostConfigurationViewModel::SetHostConfiguration(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const auto* NewHostConfiguration = Payload.GetPtr<FAVVMHostConfigurationProxy>();

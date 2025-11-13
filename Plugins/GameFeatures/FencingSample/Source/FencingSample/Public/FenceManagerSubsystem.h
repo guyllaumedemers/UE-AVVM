@@ -45,13 +45,11 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	static UFenceManagerSubsystem* Get(const UObject* WorldContextObject);
-
-	UFUNCTION(BlueprintCallable, Category="Fence", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_UnregisterFence(const UObject* WorldContextObject,
 	                                   const UActorFenceComponent* NewActorFenceComponent);
 
-	UFUNCTION(BlueprintCallable, Category="Fence", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_RegisterFence(const UObject* WorldContextObject,
 	                                 const UActorFenceComponent* NewActorFenceComponent);
 
@@ -62,6 +60,7 @@ public:
 	FOnFencesCountModified OnFencesCountModified;
 
 protected:
+	static UFenceManagerSubsystem* Get(const UObject* WorldContextObject);
 	void Raise(const UActorFenceComponent* NewActorFenceComponent);
 	void Lower(const UActorFenceComponent* NewActorFenceComponent);
 

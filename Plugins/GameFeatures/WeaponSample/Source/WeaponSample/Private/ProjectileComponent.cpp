@@ -20,6 +20,7 @@
 #include "ProjectileComponent.h"
 
 #include "AVVMGameplayUtils.h"
+#include "AVVMNotificationSubsystem.h"
 #include "NonReplicatedProjectileActor.h"
 #include "ProjectileManagerSubsystem.h"
 #include "WeaponSample.h"
@@ -29,16 +30,12 @@
 void UProjectileComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OwningOuter = GetTypedOuter<AActor>();
-	ProjectileManagerSubsystem = UProjectileManagerSubsystem::GetSubsystem(GetWorld());
 }
 
 void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	ProjectileManagerSubsystem.Reset();
 	ProjectileTemplates.Reset();
 	StreamableHandle.Reset();
 	OwningOuter.Reset();
@@ -69,13 +66,14 @@ void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
 		return;
 	}
 
-	if (ProjectileManagerSubsystem.IsValid())
-	{
-		const FProjectileFiringMode& ProjectileMode = ProjectileTemplates[FiringModeTag];
-		ProjectileManagerSubsystem->CreateProjectile(ProjectileMode.ProjectileClass.Get(),
-		                                             ProjectileMode.ProjectileParams,
-		                                             AimTransform);
-	}
+	const FProjectileFiringMode& ProjectileMode = ProjectileTemplates[FiringModeTag];
+	
+	FProjectileContextArgs ContextArgs;
+	ContextArgs.ProjectileClass = ProjectileMode.ProjectileClass.Get();
+	ContextArgs.ProjectileParams = ProjectileMode.ProjectileParams;
+	ContextArgs.AimTransform = AimTransform;
+	
+	UProjectileManagerSubsystem::Static_CreateProjectile(GetWorld(), ContextArgs);
 }
 
 void UProjectileComponent::SetupProjectiles(const TArray<UObject*>& NewResources)

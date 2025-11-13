@@ -71,10 +71,10 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Swap(const bool bIsActive);
 
-	UFUNCTION(BlueprintImplementableEvent, meta=(ToolTip="Apply relevant vfx to available target datas."))
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(ToolTip="Apply relevant vfx to available target datas."))
 	void Trigger(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
 
-	UFUNCTION(BlueprintImplementableEvent, meta=(ToolTip="Apply markers to targeted actors."))
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(ToolTip="Apply markers to targeted actors."))
 	void Mark(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
 
 	// @gdemers IAVVMResourceProvider

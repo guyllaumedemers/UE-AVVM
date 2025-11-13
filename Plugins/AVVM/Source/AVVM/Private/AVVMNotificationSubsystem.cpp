@@ -28,6 +28,11 @@ extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
 
 TInstancedStruct<FAVVMNotificationPayload> FAVVMNotificationPayload::Empty = TInstancedStruct<FAVVMNotificationPayload>();
 
+UScriptStruct* TBaseStructure<FAVVMNotificationPayload>::Get()
+{
+	return FAVVMNotificationPayload::StaticStruct();
+}
+
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);

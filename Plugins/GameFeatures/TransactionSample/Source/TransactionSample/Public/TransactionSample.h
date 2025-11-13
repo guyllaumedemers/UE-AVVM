@@ -20,7 +20,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
 TRANSACTIONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogTransactionSample, Log, All);
 

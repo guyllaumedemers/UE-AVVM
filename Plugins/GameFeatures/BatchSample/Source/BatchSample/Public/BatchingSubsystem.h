@@ -85,23 +85,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void Static_Clear(const UWorld* World);
 
-	UFUNCTION(BlueprintCallable)
-	static bool Static_IsEmpty(const UWorld* World);
-
 protected:
-	UFUNCTION(BlueprintCallable)
 	static UBatchingSubsystem* Get(const UWorld* World);
-
-	UFUNCTION(BlueprintCallable)
 	void UnRegister(AActor* Actor);
-
-	UFUNCTION(BlueprintCallable)
 	void Register(AActor* Actor);
-
-	UFUNCTION(BlueprintCallable)
 	void Clear();
 
 #if WITH_AUTOMATION_TESTS
+	static bool Static_IsEmpty(const UWorld* World);
 	bool IsEmpty() const;
 #endif
 	
@@ -133,4 +124,8 @@ protected:
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	TArray<FBatchContext> PendingDestroy;
+	
+#if WITH_AUTOMATION_TESTS
+	friend class ABatchSampleTest;
+#endif
 };

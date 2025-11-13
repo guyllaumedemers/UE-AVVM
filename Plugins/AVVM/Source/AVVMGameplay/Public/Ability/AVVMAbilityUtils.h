@@ -40,10 +40,10 @@ class AVVMGAMEPLAY_API UAVVMAbilityUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static const AActor* GetEffectCauser(const UAVVMAbilitySystemComponent* NewAbilitySystemComponent,
 	                                     const FGameplayTagContainer& NewGEQueryTags);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static UAVVMAbilitySystemComponent* GetAbilitySystemComponent(const AActor* NewActor);
 };

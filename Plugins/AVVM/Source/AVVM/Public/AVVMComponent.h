@@ -42,13 +42,13 @@ class AVVM_API UAVVMComponent : public UActorComponent
 public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
+protected:
 #if WITH_AUTOMATION_TESTS
 	UAVVMPresenter* GetOrCreate(const TSubclassOf<UAVVMPresenter>& NewPresenter);
 	void RemovePresenter(UAVVMPresenter* OldPresenter);
 #endif
 
-protected:
 	// @gdemers A collection of Presenter Classes to be added to a given Actor.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TArray<TSubclassOf<UAVVMPresenter>> PresenterClasses;
@@ -56,4 +56,8 @@ protected:
 	// @gdemers A collection of Presenters owned by the Component Outer.
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<TObjectPtr<UAVVMPresenter>> TransientPresenters;
+
+#if WITH_AUTOMATION_TESTS
+	friend class UAVVMAutomatedTestUtils;
+#endif
 };

@@ -41,7 +41,7 @@ class AVVMONLINE_API UAVVMOnlineSettings : public UDeveloperSettings
 public:
 	UAVVMOnlineSettings();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Settings")
 	static TSubclassOf<UAVVMOnlineStringParser> GetJsonParserClass();
 
 protected:

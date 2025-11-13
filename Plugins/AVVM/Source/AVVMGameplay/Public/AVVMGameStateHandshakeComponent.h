@@ -21,11 +21,12 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h"
 #include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMGameStateHandshakeComponent.generated.h"
+
+struct FAVVMNotificationPayload;
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnHandshakeRequestComplete, const bool, bWasSuccess, const TInstancedStruct<FAVVMNotificationPayload>&, NewHandshakePayload);
 
@@ -44,15 +45,18 @@ class AVVMGAMEPLAY_API UAVVMGameStateHandshakeComponent : public UActorComponent
 public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	
 	UFUNCTION(BlueprintCallable)
-	static UAVVMGameStateHandshakeComponent* GetActorComponent(const UObject* WorldContextObject);
-
-	UFUNCTION(BlueprintCallable)
-	void ProcessHandshake(const TInstancedStruct<FAVVMNotificationPayload>& NewHandshakePayload,
-	                      const FOnHandshakeRequestComplete& NewCallback) const;
+	static void Static_ProcessHandshake(const UObject* WorldContextObject,
+	                                    const TInstancedStruct<FAVVMNotificationPayload>& NewHandshakePayload,
+	                                    const FOnHandshakeRequestComplete& NewCallback);
 
 protected:
+	static UAVVMGameStateHandshakeComponent* GetActorComponent(const UObject* WorldContextObject);
+	
+	void ProcessHandshake(const TInstancedStruct<FAVVMNotificationPayload>& NewHandshakePayload,
+						  const FOnHandshakeRequestComplete& NewCallback) const;
+	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 };

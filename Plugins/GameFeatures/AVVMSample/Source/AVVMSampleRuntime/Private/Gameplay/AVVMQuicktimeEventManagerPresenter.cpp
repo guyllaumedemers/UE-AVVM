@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Gameplay/AVVMQuicktimeEventManagerPresenter.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "GameFramework/GameStateBase.h"
 
 AActor* UAVVMQuicktimeEventManagerPresenter::GetOuterKey() const

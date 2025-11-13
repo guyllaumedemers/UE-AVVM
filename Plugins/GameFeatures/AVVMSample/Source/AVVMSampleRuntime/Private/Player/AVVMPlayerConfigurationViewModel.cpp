@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Player/AVVMPlayerConfigurationViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
+
 void UAVVMPlayerConfigurationViewModel::SetPlayerConnection(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const auto* NewPlayerConnnection = Payload.GetPtr<FAVVMPlayerConnectionProxy>();

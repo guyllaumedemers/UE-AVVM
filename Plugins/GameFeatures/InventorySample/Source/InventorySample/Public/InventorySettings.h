@@ -40,40 +40,40 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static TSubclassOf<UInventoryStringParser> GetJsonParserClass();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTag& GetPendingSpawnTag();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTag& GetInstancedTag();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTag& GetEquippedTag();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTag& GetDroppedTag();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetStorageRuleset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetHoldingRuleset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetEquippedRuleset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetPassiveRuleset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetOffensiveRuleset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetDefensiveRuleset();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetConsumableRuleset();
 
 protected:

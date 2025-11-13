@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMStoreViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineStringParser.h"
 

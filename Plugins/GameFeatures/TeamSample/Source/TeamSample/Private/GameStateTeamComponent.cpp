@@ -21,7 +21,8 @@
 #include "GameStateTeamComponent.h"
 
 #include "AVVMGameplayUtils.h"
-#include "AVVMGameState.h"
+#include "AVVMNotificationSubsystem.h"
+#include "AVVMPlayerState.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
 #include "TeamObject.h"
@@ -31,7 +32,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/GameSession.h"
-#include "GameFramework/PlayerState.h"
+#include "GameFramework/GameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
@@ -58,7 +59,7 @@ void UGameStateTeamComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto* Outer = GetTypedOuter<AAVVMGameState>();
+	auto* Outer = GetTypedOuter<AGameState>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -76,8 +77,14 @@ void UGameStateTeamComponent::BeginPlay()
 	if (Outer->HasAuthority())
 	{
 		GetTeamRuleOnAuthority();
-		Outer->OnPlayerStateRemoved.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateRemoved);
-		Outer->OnPlayerStateAdded.AddUObject(this, &UGameStateTeamComponent::OnPlayerStateAdded);
+
+		FAVVMOnChannelNotifiedSingleCastDelegate Callback;
+		Callback.BindDynamic(this, &UGameStateTeamComponent::OnPlayerStateAddedOrRemoved);
+
+		FAVVMObserverContextArgs ContextArgs;
+		ContextArgs.ChannelTag = PlayerStateChannelTag;
+		ContextArgs.Callback = Callback;
+		UAVVMNotificationSubsystem::Static_RegisterObserver(this, ContextArgs);
 
 		for (const APlayerState* NewPlayerState : Outer->PlayerArray)
 		{
@@ -99,7 +106,7 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		Iterator.RemoveCurrentSwap();
 	}
 
-	auto* Outer = Cast<AAVVMGameState>(OwningOuter.Get());
+	auto* Outer = Cast<AGameState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -114,27 +121,31 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
 	{
-		Outer->OnPlayerStateRemoved.RemoveAll(this);
-		Outer->OnPlayerStateAdded.RemoveAll(this);
+		FAVVMObserverContextArgs ContextArgs;
+		ContextArgs.ChannelTag = PlayerStateChannelTag;
+		UAVVMNotificationSubsystem::Static_UnregisterObserver(this, ContextArgs);
 	}
 #endif
 }
 
-UGameStateTeamComponent* UGameStateTeamComponent::GetActorComponent(const UObject* WorldContextObject)
+void UGameStateTeamComponent::OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
-	static TWeakObjectPtr<UGameStateTeamComponent> TeamComponent = nullptr;
-	if (TeamComponent.IsValid())
+	const auto* Payload = NewPayload.GetPtr<FAVVMPlayerStatePayload>();
+	if (!ensureAlwaysMsgf(Payload != nullptr,
+	                      TEXT("Payload couldnt be casted to FAVVMPlayerStatePayload type")))
 	{
-		return TeamComponent.Get();
+		return;
 	}
 
-	const AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
-	if (IsValid(GameState))
+	const bool bWasAddedOrRemoved = Payload->bWasAddedOrRemoved;
+	if (bWasAddedOrRemoved)
 	{
-		TeamComponent = GameState->GetComponentByClass<UGameStateTeamComponent>();
+		OnPlayerStateAdded(Payload->PlayerState.Get());
 	}
-
-	return TeamComponent.Get();
+	else
+	{
+		OnPlayerStateRemoved(Payload->PlayerState.Get());
+	}
 }
 
 void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerState)

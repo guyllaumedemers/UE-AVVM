@@ -23,10 +23,10 @@
 
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "Engine/StreamableManager.h"
 
 #include "ActorInventoryComponent.generated.h"
 
+struct FStreamableHandle;
 class UAVVMResourceManagerComponent;
 class UItemObject;
 class UNonReplicatedLoadoutObject;

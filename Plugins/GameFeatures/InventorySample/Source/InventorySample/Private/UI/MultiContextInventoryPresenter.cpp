@@ -20,11 +20,13 @@
 #include "UI/MultiContextInventoryPresenter.h"
 
 #include "AVVM.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Data/AVVMHandshakePayload.h"
 #include "UI/MultiContextInventoryViewModel.h"
 
 AActor* UMultiContextInventoryPresenter::GetOuterKey() const

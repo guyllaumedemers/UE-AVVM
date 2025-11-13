@@ -30,6 +30,21 @@ bool UInventoryManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return false;
 }
 
+AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
+                                                           const UClass* ItemActorClass,
+                                                           AActor* Owner)
+{
+	const auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(World);
+	if (IsValid(InventoryManagerSubsystem))
+	{
+		FActorSpawnParameters Params;
+		Params.Owner = Owner;
+		return InventoryManagerSubsystem->CreateItemActor(ItemActorClass, Params);
+	}
+
+	return nullptr;
+}
+
 UInventoryManagerSubsystem* UInventoryManagerSubsystem::GetSubsystem(const UWorld* World)
 {
 	return UWorld::GetSubsystem<UInventoryManagerSubsystem>(World);

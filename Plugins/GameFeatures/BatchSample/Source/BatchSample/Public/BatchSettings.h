@@ -38,7 +38,7 @@ class BATCHSAMPLE_API UBatchSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Batch|Settings")
 	static const TSoftClassPtr<UBatchingRule>& GetBatchingRuleClass();
 
 protected:

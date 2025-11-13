@@ -66,16 +66,10 @@ public:
 	                                                           const APlayerState* OldPlayerState); 
 
 protected:
-	UFUNCTION(BlueprintCallable)
 	static UTeamSpawnSubsystem* Get(const UWorld* World);
-
-	UFUNCTION(BlueprintCallable)
 	void UnRegister(const UTeamStartComponent* Component);
-
-	UFUNCTION(BlueprintCallable)
 	void Register(const UTeamStartComponent* Component);
-
-	UFUNCTION(BlueprintCallable)
+	
 	const UTeamStartComponent* TryGetPlayerStart(const FWorldContextArgs& WorldContextArgs,
 	                                             const APlayerState* OldPlayerState) const;
 	

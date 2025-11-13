@@ -61,10 +61,10 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
+	UFUNCTION(BlueprintCallable, Category="AVVM|ViewModel")
 	static bool Static_UnregisterPresenter(const FAVVMPresenterContextArgs& Context);
 	
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem")
+	UFUNCTION(BlueprintCallable, Category="AVVM|ViewModel")
 	static UMVVMViewModelBase* Static_RegisterPresenter(const FAVVMPresenterContextArgs& Context);
 
 #if WITH_AUTOMATION_TESTS

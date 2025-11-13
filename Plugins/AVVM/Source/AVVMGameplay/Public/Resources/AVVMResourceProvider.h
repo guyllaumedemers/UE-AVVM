@@ -71,7 +71,7 @@ class AVVMGAMEPLAY_API UAVVMResourceHandlingBlueprintFunctionLibrary : public UB
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static TArray<FDataRegistryId> CheckResources(TSubclassOf<UAVVMResourceHandlingImpl> ResourceHandlingImplClass,
 	                                              UActorComponent* ActorComponent,
 	                                              const TArray<UObject*>& Resources);

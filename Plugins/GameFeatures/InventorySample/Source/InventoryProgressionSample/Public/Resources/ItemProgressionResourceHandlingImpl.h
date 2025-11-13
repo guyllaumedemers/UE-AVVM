@@ -26,7 +26,9 @@
 #include "ItemProgressionResourceHandlingImpl.generated.h"
 
 /**
- * 
+ *	Class description:
+ *
+ *	UItemProgressionResourceHandlingImpl is a resource parsing impl for loading content specific to progression.
  */
 UCLASS()
 class INVENTORYPROGRESSIONSAMPLE_API UItemProgressionResourceHandlingImpl : public UAVVMResourceHandlingImpl

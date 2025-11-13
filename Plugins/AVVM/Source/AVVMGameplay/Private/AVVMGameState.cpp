@@ -19,7 +19,16 @@
 //SOFTWARE.
 #include "AVVMGameState.h"
 
+#include "AVVMNotificationSubsystem.h"
+#include "AVVMPlayerState.h"
+#include "NativeGameplayTags.h"
 #include "Net/UnrealNetwork.h"
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED, "GameState.OnPlayerState.AddedOrRemoved");
+UE_DEFINE_GAMEPLAY_TAG(TAG_GAMESTATE_MATCH_WAITING, "GameState.Match.Waiting");
+UE_DEFINE_GAMEPLAY_TAG(TAG_GAMESTATE_MATCH_STARTED, "GameState.Match.Started");
+UE_DEFINE_GAMEPLAY_TAG(TAG_GAMESTATE_MATCH_ENDED, "GameState.Match.Ended");
+UE_DEFINE_GAMEPLAY_TAG(TAG_GAMESTATE_MATCH_LEAVINGMAP, "GameState.Match.LeavingMap");
 
 AAVVMGameState::AAVVMGameState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -35,35 +44,65 @@ void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void AAVVMGameState::AddPlayerState(APlayerState* PlayerState)
 {
 	Super::AddPlayerState(PlayerState);
-	OnPlayerStateAdded.Broadcast(PlayerState);
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
+	ContextArgs.Payload = FAVVMNotificationPayload::Make<FAVVMPlayerStatePayload>(PlayerState, true);
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void AAVVMGameState::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
-	OnPlayerStateRemoved.Broadcast(PlayerState);
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
+	ContextArgs.Payload = FAVVMNotificationPayload::Make<FAVVMPlayerStatePayload>(PlayerState, false);
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void AAVVMGameState::HandleMatchIsWaitingToStart()
 {
 	Super::HandleMatchIsWaitingToStart();
-	OnMatchWaitingToStart.ExecuteIfBound();
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_WAITING;
+	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void AAVVMGameState::HandleMatchHasStarted()
 {
 	Super::HandleMatchHasStarted();
-	OnMatchStart.ExecuteIfBound();
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_STARTED;
+	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void AAVVMGameState::HandleMatchHasEnded()
 {
 	Super::HandleMatchHasEnded();
-	OnMatchEnd.ExecuteIfBound();
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_ENDED;
+	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void AAVVMGameState::HandleLeavingMap()
 {
 	Super::HandleLeavingMap();
-	OnLeavingMap.ExecuteIfBound();
+
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_LEAVINGMAP;
+	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
+	ContextArgs.Target = nullptr;
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }

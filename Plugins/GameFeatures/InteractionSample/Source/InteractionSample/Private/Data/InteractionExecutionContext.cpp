@@ -25,6 +25,11 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 
+UScriptStruct* TBaseStructure<FInteractionExecutionContext>::Get()
+{
+	return FInteractionExecutionContext::StaticStruct();
+}
+
 void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);

@@ -58,10 +58,7 @@ public:
 	void SetupItemProgressionStages(const TArray<UObject*>& NewResources);
 
 protected:
-	UFUNCTION(BlueprintCallable)
 	void OnItemProgressionStagesRetrieved();
-
-	UFUNCTION(BlueprintCallable)
 	void OnProgressionStackingEffectsRetrieved();
 
 	UPROPERTY(Transient, BlueprintReadOnly)

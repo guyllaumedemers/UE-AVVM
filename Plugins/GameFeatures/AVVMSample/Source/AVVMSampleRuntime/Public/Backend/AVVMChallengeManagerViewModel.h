@@ -22,12 +22,12 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
-#include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlinePlayer.h"
 
 #include "AVVMChallengeManagerViewModel.generated.h"
 
+struct FAVVMNotificationPayload;
 class UAVVMOnlineStringParser;
 
 /**

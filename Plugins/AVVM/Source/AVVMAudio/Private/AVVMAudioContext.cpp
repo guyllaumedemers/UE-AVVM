@@ -21,6 +21,11 @@
 
 #include "AVVMAudioUtils.h"
 
+UScriptStruct* TBaseStructure<FAVVMAudioContext>::Get()
+{
+	return FAVVMAudioContext::StaticStruct();
+}
+
 FAVVMSpatialAudioContext::FAVVMSpatialAudioContext(const AActor* NewInstigator,
                                                    const AActor* NewTarget,
                                                    const float NewWeight)

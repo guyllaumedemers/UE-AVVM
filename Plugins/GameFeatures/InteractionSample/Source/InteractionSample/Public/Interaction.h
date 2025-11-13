@@ -21,10 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "UObject/Object.h"
+
 #if UE_WITH_IRIS
 #include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
 #endif // UE_WITH_IRIS
-#include "UObject/Object.h"
 
 #include "Interaction.generated.h"
 

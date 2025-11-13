@@ -26,8 +26,6 @@
 
 #include "AVVMGameState.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateActionRecordedDelegate, const APlayerState*);
-
 /**
  *	Class description:
  *
@@ -58,11 +56,4 @@ public:
 	virtual void HandleMatchHasStarted() override;
 	virtual void HandleMatchHasEnded() override;
 	virtual void HandleLeavingMap() override;
-
-	FOnPlayerStateActionRecordedDelegate OnPlayerStateRemoved;
-	FOnPlayerStateActionRecordedDelegate OnPlayerStateAdded;
-	FSimpleDelegate OnMatchWaitingToStart;
-	FSimpleDelegate OnMatchStart;
-	FSimpleDelegate OnMatchEnd;
-	FSimpleDelegate OnLeavingMap;
 };

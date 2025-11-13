@@ -23,10 +23,11 @@
 
 #include "AVVM.h"
 #include "MVVMViewModelBase.h"
-#include "Data/AVVMHandshakePayload.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "MultiContextInventoryViewModel.generated.h"
 
+struct FAVVMNotificationPayload;
 class USingleContextInventoryViewModel;
 
 /**

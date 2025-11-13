@@ -22,10 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
+#include "GameplayTagContainer.h"
 #include "MVVMViewModelBase.h"
-#include "Data/AVVMHandshakePayload.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMHUDViewModel.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
 *	Class description:

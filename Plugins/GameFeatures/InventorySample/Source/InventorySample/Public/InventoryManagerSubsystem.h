@@ -41,18 +41,21 @@ class INVENTORYSAMPLE_API UInventoryManagerSubsystem : public UWorldSubsystem
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
-	
+
 	UFUNCTION(BlueprintCallable)
+	static AActor* Static_CreateItemActor(const UWorld* World,
+	                                      const UClass* ItemActorClass,
+	                                      AActor* Owner);
+
+protected:
 	static UInventoryManagerSubsystem* GetSubsystem(const UWorld* World);
 
 	AActor* CreateItemActor(const UClass* ItemActorClass,
-	                        const FActorSpawnParameters& SpawnParams) const;
-
-	// TODO @gdemers add support for the above mentioned interactions between two Authoritative ActorInventoryComponents.
-
-protected:
+							const FActorSpawnParameters& SpawnParams) const;
+	
 	// @gdemers factory method to support pooling or other instancing system specific to your project.
 	virtual AActor* Factory(const UClass* ItemActorClass, const FActorSpawnParameters& SpawnParams) const;
+	
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(AActor* ItemActor);
 };

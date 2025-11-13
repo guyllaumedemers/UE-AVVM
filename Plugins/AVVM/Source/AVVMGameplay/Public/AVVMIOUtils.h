@@ -43,12 +43,12 @@ public:
 	                               const bool bShouldOverride,
 	                               const FOnGetSetFileFromDiskComplete& Callback);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static FString GetDirFromFile(const FString& NewFileName);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static void GetFile(const FString& NewFileName, FString& OutValue);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static void ModifyFile(const FString& NewFileName, const FString& NewValue);
 };

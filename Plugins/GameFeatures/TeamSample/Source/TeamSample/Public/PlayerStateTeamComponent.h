@@ -54,12 +54,9 @@ public:
 	static void Static_TryForfaiting(const APlayerState* NewPlayerState);
 
 protected:
-	UFUNCTION(BlueprintCallable)
 	static UPlayerStateTeamComponent* GetActorComponent(const AActor* NewActor);
-	
-	UFUNCTION(BlueprintCallable)
 	void SetTeam(UTeamObject* NewTeam);
-	
+
 	UFUNCTION(Server, Reliable)
 	void TrySwitchTeam(const FGameplayTag& NewTeamTag);
 

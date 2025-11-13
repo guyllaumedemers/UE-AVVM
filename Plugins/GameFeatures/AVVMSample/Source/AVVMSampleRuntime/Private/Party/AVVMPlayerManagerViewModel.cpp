@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Party/AVVMPlayerManagerViewModel.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineStringParser.h"
 
 void UAVVMPlayerManagerViewModel::SetPlayerConnections(const UAVVMOnlineStringParser* JsonParser,

@@ -39,3 +39,8 @@ struct INVENTORYSAMPLE_API FExecutionContextParams
 	virtual ~FExecutionContextParams() = default;
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const PURE_VIRTUAL(Execute, return;);
 };
+
+template<> struct TBaseStructure<FExecutionContextParams> 
+{
+	static INVENTORYSAMPLE_API UScriptStruct* Get(); 
+};

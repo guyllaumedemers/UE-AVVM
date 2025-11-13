@@ -48,13 +48,8 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	const FSoftObjectPath& GetActorSoftObjectPath() const;
-
-	UFUNCTION(BlueprintCallable)
 	const FSoftObjectPath& GetActorAttributeSetSoftObjectPath() const;
-
-	UFUNCTION(BlueprintCallable)
 	TArray<FDataRegistryId> GetActorTraitIds() const;
 
 protected:

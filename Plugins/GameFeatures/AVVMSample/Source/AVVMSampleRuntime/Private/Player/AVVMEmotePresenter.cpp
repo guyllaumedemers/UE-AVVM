@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Player/AVVMEmotePresenter.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "GameFramework/PlayerState.h"
 
 AActor* UAVVMEmotePresenter::GetOuterKey() const

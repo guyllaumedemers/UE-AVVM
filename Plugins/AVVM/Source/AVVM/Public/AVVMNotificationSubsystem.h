@@ -30,19 +30,7 @@
 struct FAVVMNotificationPayload;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAVVMOnChannelNotifiedMulticastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
-
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAVVMOnChannelNotifiedSingleCastDelegate, const TInstancedStruct<FAVVMNotificationPayload>&, Payload);
-
-// @gdemers allow stripping symbols when building server target for dedicated server
-#ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
-#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
-#define UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(WorldContextObject, ChannelTag, LocallyControlledActor, ActorBoundToChannel, Payload)
-#else
-#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, ActorBoundToChannel, Payload)\
-	UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload});
-#define UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(WorldContextObject, ChannelTag, PC, ActorBoundToChannel, Payload)\
-	if(IsValid(PC) && PC->IsLocalPlayerController()) { UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload}); }
-#endif
 
 /**
  *	Class description:
@@ -71,11 +59,11 @@ struct AVVM_API FAVVMNotificationContextArgs
 {
 	GENERATED_BODY()
 
-	UPROPERTY(Transient, BlueprintReadWrite, meta=(ToolTip="Target Channel. May have multiple Presenters listening."))
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
 	// @gdemers if no target is provided, we broadcast to all observers of the channel tag.
-	UPROPERTY(Transient, BlueprintReadWrite, meta=(ToolTip="Unique Owner of the Presenter we are targeting."))
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const AActor> Target = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -107,6 +95,11 @@ TInstancedStruct<FAVVMNotificationPayload> FAVVMNotificationPayload::Make(TArgs&
 	return TInstancedStruct<FAVVMNotificationPayload>::Make<TChild>(Forward<TArgs>(Args)...);
 }
 
+template<> struct TBaseStructure<FAVVMNotificationPayload> 
+{
+	static AVVM_API UScriptStruct* Get(); 
+};
+
 /**
  *	Class description:
  *
@@ -126,19 +119,19 @@ public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category="AVVM|Events", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_UnregisterObserver(const UObject* WorldContextObject,
 	                                      const FAVVMObserverContextArgs& ObserverContext);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category="AVVM|Events", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_RegisterObserver(const UObject* WorldContextObject,
 	                                    const FAVVMObserverContextArgs& ObserverContext);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category="AVVM|Events", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_BroadcastChannel(const UObject* WorldContextObject,
 	                                    const FAVVMNotificationContextArgs& NotificationContext);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Subsytem", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category="AVVM|Events", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_ExecuteDeferredNotifications(const UObject* WorldContextObject);
 
 #if WITH_AUTOMATION_TESTS
@@ -149,7 +142,6 @@ public:
 #endif
 
 protected:
-	UFUNCTION(BlueprintCallable)
 	static UAVVMNotificationSubsystem* Get(const UObject* WorldContextObject);
 	
 	struct FAVVMObservers
@@ -178,3 +170,14 @@ protected:
 
 	FAVVObserversFilteringMechanism ObserversFilteringMechanism;
 };
+
+// @gdemers allow stripping symbols when building server target for dedicated server
+#ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
+#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
+#define UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(WorldContextObject, ChannelTag, LocallyControlledActor, ActorBoundToChannel, Payload)
+#else
+#define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, ActorBoundToChannel, Payload)\
+UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload});
+#define UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(WorldContextObject, ChannelTag, PC, ActorBoundToChannel, Payload)\
+if(IsValid(PC) && PC->IsLocalPlayerController()) { UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload}); }
+#endif

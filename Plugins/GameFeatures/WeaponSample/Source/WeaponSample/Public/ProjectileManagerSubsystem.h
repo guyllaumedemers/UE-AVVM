@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h" // @gdemers fwd not supported, required due to UFUNCTION() / unreal reflection.
 #include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
 
@@ -30,6 +31,26 @@ class ANonReplicatedProjectileActor;
 class APlayerController;
 class APlayerState;
 struct FProjectileParams;
+
+/**
+ *	Class description:
+ *
+ *	FProjectileContextArgs is a context struct that encapsulate data required for projectile creation.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FProjectileContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	const UClass* ProjectileClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TInstancedStruct<FProjectileParams> ProjectileParams;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FTransform AimTransform = FTransform::Identity;
+};
 
 /**
  *	Class description:
@@ -46,25 +67,33 @@ class WEAPONSAMPLE_API UProjectileManagerSubsystem : public UTickableWorldSubsys
 	GENERATED_BODY()
 
 public:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
-	
-	UFUNCTION(BlueprintCallable)
-	static UProjectileManagerSubsystem* GetSubsystem(const UWorld* World);
-	
-	UFUNCTION(BlueprintCallable)
-	void Register(ANonReplicatedProjectileActor* Projectile);
-	
-	UFUNCTION(BlueprintCallable)
-	void Unregister(ANonReplicatedProjectileActor* Projectile);
 
-	void CreateProjectile(const UClass* ProjectileClass,
-	                      const TInstancedStruct<const FProjectileParams>& ProjectileParams,
-	                      const FTransform& AimTransform) const;
+	UFUNCTION(BlueprintCallable)
+	static void Static_Register(const UWorld* World,
+	                            ANonReplicatedProjectileActor* Projectile);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_Unregister(const UWorld* World,
+	                              ANonReplicatedProjectileActor* Projectile);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_CreateProjectile(const UWorld* World,
+	                                    const FProjectileContextArgs& ContextArgs);
 
 protected:
+	static UProjectileManagerSubsystem* Get(const UWorld* World);
+	void Register(ANonReplicatedProjectileActor* Projectile);
+	void Unregister(ANonReplicatedProjectileActor* Projectile);
+	void CreateProjectile(const FProjectileContextArgs& ContextArgs) const;
+
+	UFUNCTION(CallInEditor)
+	void OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+	
 	void OnPlayerStateRemoved(const APlayerState* PlayerState);
 	void OnPlayerStateAdded(const APlayerState* PlayerState);
 	void OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile);

@@ -21,6 +21,12 @@
 
 #include "Ability/AVVMAbilitySystemComponent.h"
 
+FAVVMPlayerStatePayload::FAVVMPlayerStatePayload(const APlayerState* NewPlayerState,
+                                                 const bool bNewAddOrRemove)
+	: PlayerState(NewPlayerState), bWasAddedOrRemoved(bNewAddOrRemove)
+{
+}
+
 AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

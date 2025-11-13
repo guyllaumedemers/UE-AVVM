@@ -19,12 +19,14 @@
 //SOFTWARE.
 #include "PlayerStateTeamComponent.h"
 
-#include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "DoesTeamProviderSupportExecution.h"
 #include "NativeGameplayTags.h"
 #include "TeamObject.h"
 #include "TeamSample.h"
+#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
@@ -169,7 +171,7 @@ void UPlayerStateTeamComponent::OnRep_OnTeamOwnershipChanged(const TWeakObjectPt
 
 void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag& NewTeamTag)
 {
-	auto* Outer = OwningOuter.Get();
+	const auto* Outer = Cast<APlayerState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -188,11 +190,19 @@ void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag&
 	       *Outer->GetName(),
 	       *Team->GetName(),
 	       *NewTeamTag.ToString());
+
+	FSwitchTeamContext Context;
+	Context.OldTeamTag = Team->GetTeamTag();
+	Context.NewTeamTag = NewTeamTag;
+	Context.PlayerState = Outer;
+
+	auto* GameStateBase = UGameplayStatics::GetGameState(Outer);
+	IDoesTeamProviderSupportExecution::Execute_SwitchTeam(GameStateBase, Context);
 }
 
 void UPlayerStateTeamComponent::TryForfaiting_Implementation()
 {
-	auto* Outer = OwningOuter.Get();
+	const auto* Outer = Cast<APlayerState>(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -210,4 +220,7 @@ void UPlayerStateTeamComponent::TryForfaiting_Implementation()
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName(),
 	       *Team->GetName());
+
+	auto* GameStateBase = UGameplayStatics::GetGameState(Outer);
+	IDoesTeamProviderSupportExecution::Execute_Forfait(GameStateBase, Outer);
 }

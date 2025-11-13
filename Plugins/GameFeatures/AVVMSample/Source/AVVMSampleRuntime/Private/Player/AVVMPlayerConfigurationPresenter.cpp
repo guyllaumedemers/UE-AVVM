@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Player/AVVMPlayerConfigurationPresenter.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/AVVMPlayerConfigurationViewModel.h"

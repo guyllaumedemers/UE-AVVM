@@ -48,8 +48,8 @@ struct TEAMSAMPLE_API FTeamPayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FTeamPayload() = default;
-	FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
-	             const FGameplayTag& NewTeamTag);
+	explicit FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
+	                      const FGameplayTag& NewTeamTag);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FTeamPayload>::Make<T>
 	template <typename TChild, typename... TArgs>
@@ -60,8 +60,6 @@ struct TEAMSAMPLE_API FTeamPayload : public FAVVMNotificationPayload
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> PlayerUniqueNetIds;
-
-	static TInstancedStruct<FTeamPayload> Empty;
 };
 
 template <typename TChild, typename... TArgs>
@@ -99,6 +97,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TInstancedStruct<FTeamPayload> GetTeamPayload() const;
 
+	UFUNCTION(BlueprintCallable)
+	const FGameplayTag& GetTeamTag() const;
+
 protected:
 	UFUNCTION()
 	void OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds);
@@ -116,7 +117,9 @@ protected:
 };
 
 /**
- * 
+ *	Class description:
+ *
+ *	UTeamUtils expose reusable functional api. 
  */
 UCLASS()
 class TEAMSAMPLE_API UTeamUtils : public UBlueprintFunctionLibrary

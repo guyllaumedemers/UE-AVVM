@@ -22,12 +22,13 @@
 #include "CoreMinimal.h"
 
 #include "AVVM.h"
-#include "AVVMNotificationSubsystem.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMPlayerProfileViewModel.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
  *	Class description:

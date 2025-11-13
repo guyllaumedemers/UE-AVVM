@@ -57,10 +57,8 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UFUNCTION(BlueprintCallable)
 	const TSoftClassPtr<UItemObject>& GetItemObjectClass() const;
 
-	UFUNCTION(BlueprintCallable)
 	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
 	                   const FGameplayTagContainer& BlockingTags) const;
 

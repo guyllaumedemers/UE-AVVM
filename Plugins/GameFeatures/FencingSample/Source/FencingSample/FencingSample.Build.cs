@@ -26,6 +26,11 @@ public class FencingSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
+		}
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

@@ -41,7 +41,7 @@ class AVVMDEBUGGER_API UAVVMDebuggerSettings : public UDeveloperSettings
 public:
 	UAVVMDebuggerSettings();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Debugger")
 	static TSubclassOf<UAVVMDebuggerInputHandler> GetInputHandlerClass();
 
 protected:

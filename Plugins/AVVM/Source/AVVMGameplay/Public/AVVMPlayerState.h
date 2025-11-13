@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularPlayerState.h"
 #include "Data/AVVMActorPayload.h"
@@ -43,6 +44,28 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStateChannelAggregator
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag PostPlayerControllerClientInitializedTag = FGameplayTag::EmptyTag;
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMPlayerStatePayload is a context payload that forward player state being added or removed
+ *	from the game.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMPlayerStatePayload : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	FAVVMPlayerStatePayload() = default;
+	explicit FAVVMPlayerStatePayload(const APlayerState* NewPlayerState,
+	                                 const bool bNewAddOrRemove);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const APlayerState> PlayerState = nullptr;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bWasAddedOrRemoved = false;
 };
 
 /**

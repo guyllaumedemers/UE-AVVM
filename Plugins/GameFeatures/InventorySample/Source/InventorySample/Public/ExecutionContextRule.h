@@ -41,6 +41,11 @@ struct INVENTORYSAMPLE_API FExecutionContextRule
 	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
 };
 
+template<> struct TBaseStructure<FExecutionContextRule> 
+{
+	static INVENTORYSAMPLE_API UScriptStruct* Get(); 
+};
+
 /**
  *	Class description:
  *

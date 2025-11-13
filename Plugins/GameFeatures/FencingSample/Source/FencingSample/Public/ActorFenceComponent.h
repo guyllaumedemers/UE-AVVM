@@ -45,13 +45,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintCallable)
-	void TryRaise();
-
-	UFUNCTION(BlueprintCallable)
-	void TryLower();
-
 protected:
+	void TryRaise();
+	void TryLower();
+	
 	UFUNCTION()
 	void OnReplicatedTagChanged(const FGameplayTagContainer& NewTags);
 

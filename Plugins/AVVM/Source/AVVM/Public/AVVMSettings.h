@@ -39,7 +39,7 @@ class AVVM_API UAVVMSettings : public UDeveloperSettings
 public:
 	UAVVMSettings();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Settings")
 	static FDataRegistryType GetCheatRegistryType();
 
 protected:

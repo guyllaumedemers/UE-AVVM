@@ -43,7 +43,7 @@ class TRANSACTIONSAMPLE_API UTransactionSettings : public UDeveloperSettings
 public:
 	UTransactionSettings();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Transaction|Settings")
 	static TSubclassOf<UTransactionFactoryImpl> GetFactoryImpl(const ETransactionType NewType);
 
 protected:
