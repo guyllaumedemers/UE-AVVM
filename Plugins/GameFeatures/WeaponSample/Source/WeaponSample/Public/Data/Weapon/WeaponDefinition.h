@@ -130,12 +130,6 @@ struct WEAPONSAMPLE_API FSpreadProperties
 	float Rate = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float RateModifier_ADS = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float RateModifier_Hip = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FSpreadCeiling Ceiling = FSpreadCeiling();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
@@ -146,7 +140,7 @@ struct WEAPONSAMPLE_API FSpreadProperties
 
 	// @gdemers sample a point during tick on the curve based on properties here
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UCurveFloat> Curve;
+	TSoftObjectPtr<UCurveFloat> Curve = nullptr;
 };
 
 /**
@@ -169,10 +163,16 @@ struct WEAPONSAMPLE_API FRecoilProperties
 	FGameplayModifier ModifiersWhenUnderCondition = FGameplayModifier();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FVector2D Velocity = FVector2D();
+	FVector2D Rate_XY = FVector2D::ZeroVector;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FVector2D Ceiling = FVector2D();
+	float RateModifier_ADS = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	float RateModifier_Hip = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FVector2D Ceiling = FVector2D::ZeroVector;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float DelayBeforeDecreaseRate = 0.f;
@@ -184,10 +184,10 @@ struct WEAPONSAMPLE_API FRecoilProperties
 	float DecreaseRate = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UCurveFloat> Curve_X;
+	TSoftObjectPtr<UCurveFloat> Curve_X = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UCurveFloat> Curve_Y;
+	TSoftObjectPtr<UCurveFloat> Curve_Y = nullptr;
 };
 
 /**
@@ -212,10 +212,10 @@ struct WEAPONSAMPLE_API FAmmunitionProperties
 /**
  *	Class description:
  *	
- *	FWeaponProperties is a context struct that encapsulate properties of a weapon.
+ *	FWeaponRange_Properties is a context struct that encapsulate properties of a range weapon.
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FWeaponProperties : public FTriggeringProperties
+struct WEAPONSAMPLE_API FWeaponRange_Properties : public FTriggeringProperties
 {
 	GENERATED_BODY()
 
@@ -253,6 +253,19 @@ struct WEAPONSAMPLE_API FWeaponProperties : public FTriggeringProperties
 /**
  *	Class description:
  *	
+ *	FWeaponMelee_Properties is a context struct that encapsulate properties of a melee weapon.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FWeaponMelee_Properties : public FTriggeringProperties
+{
+	GENERATED_BODY()
+	
+	// TODO @gdemers define!
+};
+
+/**
+ *	Class description:
+ *	
  *	UWeaponUtils is a utility class for reusable calculation. 
  */
 UCLASS()
@@ -277,5 +290,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
 	static float GetNormalizedSpread(const FSpreadProperties& SpreadProperties,
-	                                 const FVector2D& AccumulatedSpread);
+	                                 const float AccumulatedSpread);
 };

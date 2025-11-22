@@ -38,7 +38,7 @@ FVector2D UWeaponUtils::GetNormalizedRecoil(const FRecoilProperties& RecoilPrope
 }
 
 float UWeaponUtils::GetNormalizedSpread(const FSpreadProperties& SpreadProperties,
-                                        const FVector2D& AccumulatedSpread)
+                                        const float AccumulatedSpread)
 {
 	return 0.f;
 }

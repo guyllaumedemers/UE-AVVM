@@ -46,6 +46,9 @@ struct WEAPONSAMPLE_API FWeaponRange_RuntimeProperties
 	FGameplayTag CurrentMode = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
+	float AimRatio = 0.f;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	FVector2D AccumulatedRecoil = FVector2D::ZeroVector;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -56,6 +59,19 @@ struct WEAPONSAMPLE_API FWeaponRange_RuntimeProperties
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 RemainingClip = INDEX_NONE;
+};
+
+/**
+ *	Class description:
+ *	
+ *	FWeaponMelee_RuntimeProperties is a context struct that encapsulate runtime values.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FWeaponMelee_RuntimeProperties
+{
+	GENERATED_BODY()
+	
+	// TODO @gdemers define!
 };
 
 /**
@@ -73,6 +89,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Init(const TInstancedStruct<FTriggeringProperties>& NewProperties) override;
 	
 	virtual void Trigger_Implementation() const override;
 
@@ -99,7 +116,7 @@ protected:
 	FWeaponRange_RuntimeProperties RuntimeProperties = FWeaponRange_RuntimeProperties();
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="User should never modify the internal of these properties."))
-	FWeaponProperties DefaultProperties = FWeaponProperties();
+	FWeaponRange_Properties DefaultProperties = FWeaponRange_Properties();
 };
 
 /**
@@ -116,10 +133,17 @@ public:
 	AWeaponActor_Melee(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Init(const TInstancedStruct<FTriggeringProperties>& NewProperties) override;
 	
 	virtual void Trigger_Implementation() const override;
 
 protected:
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="User should never modify the internal of these properties."))
+	FWeaponMelee_RuntimeProperties RuntimeProperties = FWeaponMelee_RuntimeProperties();
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="User should never modify the internal of these properties."))
+	FWeaponMelee_Properties DefaultProperties = FWeaponMelee_Properties();
 };

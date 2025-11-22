@@ -57,6 +57,16 @@ void AWeaponActor_Range::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+void AWeaponActor_Range::Init(const TInstancedStruct<FTriggeringProperties>& NewProperties)
+{
+	const auto* Properties = NewProperties.GetPtr<FWeaponRange_Properties>();
+	if (ensureAlwaysMsgf(Properties != nullptr,
+	                     TEXT("NewProperties doesn't derive from FWeaponProperties.")))
+	{
+		DefaultProperties = *Properties;
+	}
+}
+
 void AWeaponActor_Range::Trigger_Implementation() const
 {
 	const UArrowComponent* ProxyComponent = WeaponProxyComponent.Get();
@@ -92,6 +102,16 @@ void AWeaponActor_Melee::BeginPlay()
 void AWeaponActor_Melee::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+}
+
+void AWeaponActor_Melee::Init(const TInstancedStruct<FTriggeringProperties>& NewProperties)
+{
+	const auto* Properties = NewProperties.GetPtr<FWeaponMelee_Properties>();
+	if (ensureAlwaysMsgf(Properties != nullptr,
+	                     TEXT("NewProperties doesn't derive from FWeaponProperties.")))
+	{
+		DefaultProperties = *Properties;
+	}
 }
 
 void AWeaponActor_Melee::Trigger_Implementation() const
