@@ -48,9 +48,9 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	TArray<FDataRegistryId> GetActorTraitIds() const;
 	const FSoftObjectPath& GetActorSoftObjectPath() const;
 	const FSoftObjectPath& GetActorAttributeSetSoftObjectPath() const;
-	TArray<FDataRegistryId> GetActorTraitIds() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))

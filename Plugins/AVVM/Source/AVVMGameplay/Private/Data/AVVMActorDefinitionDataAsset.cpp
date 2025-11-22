@@ -56,16 +56,6 @@ EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataVali
 }
 #endif
 
-const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorSoftObjectPath() const
-{
-	return bDoesSupportActorOverride ? OverrideActorClass.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
-}
-
-const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorAttributeSetSoftObjectPath() const
-{
-	return bDoesSupportAttributeSet ? ActorAttributeSet.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
-}
-
 TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
 {
 	TArray<FDataRegistryId> Result;
@@ -81,6 +71,16 @@ TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
 	}
 
 	return Result;
+}
+
+const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorSoftObjectPath() const
+{
+	return bDoesSupportActorOverride ? OverrideActorClass.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
+}
+
+const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorAttributeSetSoftObjectPath() const
+{
+	return bDoesSupportAttributeSet ? ActorAttributeSet.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
 }
 
 #if WITH_EDITOR
