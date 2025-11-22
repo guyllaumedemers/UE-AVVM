@@ -45,22 +45,15 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintCallable)
-	void Static_Fire(const AActor* NewActor,
-	                 const FGameplayTag& FiringModeTag,
-	                 const FTransform& AimTransform);
-
 	void SetupProjectiles(const TArray<UObject*>& NewResources);
 
 protected:
-	static UProjectileComponent* GetActorComponent(const AActor* NewActor);
-
 	void Fire(const FGameplayTag& FiringModeTag,
 	          const FTransform& AimTransform) const;
 
 	UFUNCTION()
 	void OnSoftObjectAcquired();
-	
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
@@ -72,4 +65,6 @@ protected:
 
 	TMap<FGameplayTag, FProjectileFiringMode> ProjectileTemplates;
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
+
+	friend class AWeaponActor_Range;
 };

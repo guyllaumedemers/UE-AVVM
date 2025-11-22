@@ -45,11 +45,10 @@ class AVVM_API UAVVMPresenter : public UObject
 public:
 	virtual void SafeBeginPlay(const UWorld* World);
 	virtual void SafeEndPlay();
-
-protected:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
 	virtual AActor* GetOuterKey() const { return GetTypedOuter<AActor>(); }
 
+protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_RegisterNotificationChannels();
 
@@ -79,7 +78,4 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;
-
-	friend class UAVVMComponent;
-	friend class UAVVMSubsystem;
 };

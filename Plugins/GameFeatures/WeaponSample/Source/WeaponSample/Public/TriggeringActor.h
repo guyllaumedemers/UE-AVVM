@@ -26,30 +26,14 @@
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "TriggeringActor.generated.h"
 
-class ATriggeringAttachmentActor;
-class UAttachmentManagerComponent;
+struct FTriggeringProperties;
 class UAVVMAbilitySystemComponent;
 class UAVVMResourceManagerComponent;
-class UProjectileComponent;
-class USkeletalMeshComponent;
 class UTriggeringAbility;
-
-/**
- *	Class description:
- *
- *	FWeaponTargetHitDataArgs is a POD struct that encapsulate relevant data to be forwarded to BP
- *	based on received targeting calculation ran by the Triggering Ability.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FWeaponTargetHitDataArgs
-{
-	GENERATED_BODY()
-
-	// TODO @gdemers Define properties
-};
 
 /**
  *	Class description:
@@ -67,50 +51,40 @@ public:
 	ATriggeringActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Init(const TInstancedStruct<FTriggeringProperties>& NewProperties) PURE_VIRTUAL(Init, return;);
 
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void Swap(const bool bIsActive);
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(ToolTip="Apply relevant vfx to available target datas."))
-	void Trigger(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, meta=(ToolTip="Apply markers to targeted actors."))
-	void Mark(const FWeaponTargetHitDataArgs& NewTargetHitDataArgs);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Trigger() const;
+	virtual void Trigger_Implementation() const PURE_VIRTUAL(Trigger_Implementation, return;);
 
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 
 protected:
+	UFUNCTION(Server, Reliable)
+	void Server_SwapAbility(const bool bIsActive);
+	
 	void RegisterAbility();
 	void UnRegisterAbility();
 
 	UFUNCTION()
 	void OnSoftObjectAcquired();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UTriggeringAbility> TriggeringAbilityClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
-
-	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UProjectileComponent> ProjectileComponent = nullptr;
-
-	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
-
-	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
@@ -119,4 +93,22 @@ protected:
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
+	
+	friend class UTriggeringUtils;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UTriggeringUtils is a utility class for reusable actions. 
+ */
+UCLASS()
+class WEAPONSAMPLE_API UTriggeringUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
+	static void Swap(ATriggeringActor* UnEquip,
+	                 ATriggeringActor* Equip);
 };

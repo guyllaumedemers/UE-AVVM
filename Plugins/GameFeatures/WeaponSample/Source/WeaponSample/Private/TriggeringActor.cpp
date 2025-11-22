@@ -19,14 +19,11 @@
 //SOFTWARE.
 #include "TriggeringActor.h"
 
-#include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "ProjectileComponent.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
@@ -35,9 +32,6 @@ ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
 {
 	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("MAbilitySystemComponent"));
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
-	AttachmentManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAttachmentManagerComponent>(this, TEXT("AttachmentManagerComponent"));
-	ProjectileComponent = ObjectInitializer.CreateDefaultSubobject<UProjectileComponent>(this, TEXT("ProjectileComponent"));
-	SkeletalMeshComponent = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("SkeletalMeshComponent"));
 
 	bReplicates = true;
 }
@@ -63,7 +57,7 @@ void ATriggeringActor::BeginPlay()
 #if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay && HasAuthority())
 	{
-		Swap(true);
+		Server_SwapAbility(true);
 	}
 #endif
 }
@@ -87,12 +81,12 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
-		Swap(false);
+		Server_SwapAbility(false);
 	}
 #endif
 }
 
-void ATriggeringActor::Swap_Implementation(const bool bIsActive)
+void ATriggeringActor::Server_SwapAbility_Implementation(const bool bIsActive)
 {
 	UnRegisterAbility();
 
@@ -163,4 +157,18 @@ void ATriggeringActor::OnSoftObjectAcquired()
 		1,
 		GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
 	});
+}
+
+void UTriggeringUtils::Swap(ATriggeringActor* UnEquip,
+                            ATriggeringActor* Equip)
+{
+	if (IsValid(UnEquip))
+	{
+		UnEquip->Server_SwapAbility(false);
+	}
+
+	if (IsValid(Equip))
+	{
+		Equip->Server_SwapAbility(true);
+	}
 }

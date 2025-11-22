@@ -41,22 +41,6 @@ void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
-void UProjectileComponent::Static_Fire(const AActor* NewActor,
-                                       const FGameplayTag& FiringModeTag,
-                                       const FTransform& AimTransform)
-{
-	auto* ProjectileComponent = UProjectileComponent::GetActorComponent(NewActor);
-	if (IsValid(ProjectileComponent))
-	{
-		ProjectileComponent->Fire(FiringModeTag, AimTransform);
-	}
-}
-
-UProjectileComponent* UProjectileComponent::GetActorComponent(const AActor* NewActor)
-{
-	return IsValid(NewActor) ? NewActor->GetComponentByClass<UProjectileComponent>() : nullptr;
-}
-
 void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
                                 const FTransform& AimTransform) const
 {

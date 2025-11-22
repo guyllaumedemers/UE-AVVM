@@ -63,16 +63,16 @@ public:
 	const FDataRegistryId& GetAttachmentModifierDefinitionId() const; 
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AttachmentModifierDefinitionDataTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AttachmentModifierDefinitionDataTableRow"))
 	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName SocketName = NAME_None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)

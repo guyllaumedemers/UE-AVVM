@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,21 +21,36 @@
 
 #include "CoreMinimal.h"
 
-#include "Resources/AVVMResourceHandlingImpl.h"
+#include "Archetypes/AVVMPresenter.h"
 
-#include "TriggeringResourceImpl.generated.h"
+#include "WeaponPresenter.generated.h"
 
 /**
  *	Class description:
- *
- *	UTriggeringResourceImpl implement resource loading for Triggering Actor and nested Attachment resources.
+ *	
+ *	UWeaponRangePresenter is a presenter object that respond to property change from its Weapon Owner.
+ *	It notifies UI of properties specific to range weapons.
  */
 UCLASS()
-class WEAPONSAMPLE_API UTriggeringResourceImpl : public UAVVMResourceHandlingImpl
+class WEAPONSAMPLE_API UWeaponRangePresenter : public UAVVMPresenter
 {
 	GENERATED_BODY()
 
-public:
-	virtual TArray<FDataRegistryId> ProcessResources(UActorComponent* ActorComponent,
-	                                                 const TArray<UObject*>& Resources) const override;
+protected:
+	virtual AActor* GetOuterKey() const override;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UWeaponMeleePresenter is a presenter object that respond to property change from its Weapon Owner.
+ *	It notifies UI of properties specific to melee weapons.
+ */
+UCLASS()
+class WEAPONSAMPLE_API UWeaponMeleePresenter : public UAVVMPresenter
+{
+	GENERATED_BODY()
+
+protected:
+	virtual AActor* GetOuterKey() const override;
 };

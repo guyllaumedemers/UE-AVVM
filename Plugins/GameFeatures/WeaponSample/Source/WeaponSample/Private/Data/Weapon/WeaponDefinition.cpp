@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,25 +17,28 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Data/Weapon/WeaponDefinition.h"
 
-#include "CoreMinimal.h"
-
-#include "Resources/AVVMResourceHandlingImpl.h"
-
-#include "TriggeringResourceImpl.generated.h"
-
-/**
- *	Class description:
- *
- *	UTriggeringResourceImpl implement resource loading for Triggering Actor and nested Attachment resources.
- */
-UCLASS()
-class WEAPONSAMPLE_API UTriggeringResourceImpl : public UAVVMResourceHandlingImpl
+void UWeaponUtils::GetAccumulatedRecoil(const ACharacter* Character,
+                                        const float DeltaTime,
+                                        FVector2D& OutResult)
 {
-	GENERATED_BODY()
+}
 
-public:
-	virtual TArray<FDataRegistryId> ProcessResources(UActorComponent* ActorComponent,
-	                                                 const TArray<UObject*>& Resources) const override;
-};
+void UWeaponUtils::GetAccumulatedSpread(const ACharacter* Character,
+                                        const float DeltaTime,
+                                        float& OutResult)
+{
+}
+
+FVector2D UWeaponUtils::GetNormalizedRecoil(const FRecoilProperties& RecoilProperties,
+                                            const FVector2D& AccumulatedRecoil)
+{
+	return FVector2D::ZeroVector;
+}
+
+float UWeaponUtils::GetNormalizedSpread(const FSpreadProperties& SpreadProperties,
+                                        const FVector2D& AccumulatedSpread)
+{
+	return 0.f;
+}

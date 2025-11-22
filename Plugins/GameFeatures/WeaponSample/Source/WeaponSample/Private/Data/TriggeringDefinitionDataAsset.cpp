@@ -19,6 +19,13 @@
 //SOFTWARE.
 #include "Data/TriggeringDefinitionDataAsset.h"
 
+#include "TriggeringActor.h"
+
+UScriptStruct* TBaseStructure<FTriggeringProperties>::Get()
+{
+	return FTriggeringProperties::StaticStruct();
+}
+
 #if WITH_EDITOR
 EDataValidationResult UTriggeringDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
@@ -33,12 +40,22 @@ EDataValidationResult UTriggeringDefinitionDataAsset::IsDataValid(class FDataVal
 }
 #endif
 
-const TArray<FDataRegistryId> UTriggeringDefinitionDataAsset::GetDependentIds() const
+TArray<FDataRegistryId> UTriggeringDefinitionDataAsset::GetDependentIds() const
 {
 	TArray<FDataRegistryId> DependentIds;
 	DependentIds.Append(DefaultAttachmentIds);
 	DependentIds.Append(ProjectileDefinitionIds);
 	return DependentIds;
+}
+
+void UTriggeringDefinitionDataAsset::Init(AActor* NewActor) const
+{
+	auto* TriggeringActor = Cast<ATriggeringActor>(NewActor);
+	if (ensureAlwaysMsgf(IsValid(TriggeringActor),
+	                     TEXT("NewActor doesn't derive from ATriggeringActor.")))
+	{
+		TriggeringActor->Init(TriggeringProperties);
+	}
 }
 
 #if WITH_EDITOR
