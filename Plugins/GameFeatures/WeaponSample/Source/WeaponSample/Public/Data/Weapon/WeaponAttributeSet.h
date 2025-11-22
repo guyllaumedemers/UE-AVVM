@@ -40,6 +40,8 @@ class WEAPONSAMPLE_API UWeaponRange_AttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponRange_AttributeSet, TimeUntilFirstShotReset);
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponRange_AttributeSet, RateOfFire);
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponRange_AttributeSet, ReloadCeiling);
@@ -69,11 +71,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FAttributeSetProperties")
 	TSoftObjectPtr<UDataTable> AttributeMetaDataTable = nullptr;
 
-	// ------------------- FSpreadProperties ------------------- //
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FFiringProperties")
+	// ------------------- FFiringProperties ------------------- //
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FFiringProperties")
 	FGameplayAttributeData TimeUntilFirstShotReset = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FFiringProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FFiringProperties")
 	FGameplayAttributeData RateOfFire = FGameplayAttributeData();
 
 	// ------------------- FiringMode ------------------- //
@@ -93,48 +95,48 @@ protected:
 	const FGameplayTag& GetSecondaryFiringMode() const { return bDoesSupportAlternateFiringMode ? SecondaryFiringMode : FGameplayTag::EmptyTag; }
 
 	// ------------------- FAmmunitionProperties ------------------- //
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FAmmunitionProperties", meta=(ToolTip="Maximum amount of ammunition allowed in Clip or Chamber."))
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAmmunitionProperties", meta=(ToolTip="Maximum amount of ammunition allowed in Clip or Chamber."))
 	FGameplayAttributeData ReloadCeiling = FGameplayAttributeData();
 
 	// @gdemers if shell insertion, reload time will be for single shell, and the total would
 	// be defined by : MaxCapacity * ShellOrClipReloadTime;
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FAmmunitionProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAmmunitionProperties")
 	FGameplayAttributeData ShellOrClipReloadTime = FGameplayAttributeData();
 
 	// ------------------- FRecoilProperties ------------------- //
 	// @gdemers If you want to modify recoil during free fall or other movement state.
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_MovementPenalityModifier = FGameplayAttributeData();
 
 	// @gdemers If you want to modify recoil based on owner gameplay state.
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_GameplayPenalityModifier = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_RateX = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_RateY = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_RateModifier_ADS = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_RateModifier_Hip = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_CeilingX = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_CeilingY = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_DelayBeforeDecreasing = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_DecreaseCancellationThreshold = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FRecoilProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FRecoilProperties")
 	FGameplayAttributeData Recoil_DecreaseRate = FGameplayAttributeData();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FRecoilProperties")
@@ -145,27 +147,27 @@ protected:
 
 	// ------------------- FSpreadProperties ------------------- //
 	// @gdemers If you want to modify spread during free fall or other movement state.
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties")
 	FGameplayAttributeData Spread_MovementPenalityModifier = FGameplayAttributeData();
 
 	// @gdemers If you want to modify spread based on owner gameplay state.
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties")
 	FGameplayAttributeData Spread_GameplayPenalityModifier = FGameplayAttributeData();
 
 	// @gdemers to modify the spread speed based on 3c, run calculation such as : Rate * ModifiersWhenMoving.Walk
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties", meta=(ToolTip="Increment by which we scale over time."))
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties", meta=(ToolTip="Increment by which we scale over time."))
 	FGameplayAttributeData Spread_Rate = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties")
 	FGameplayAttributeData Spread_MovementCeil = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties")
 	FGameplayAttributeData Spread_FiringCeil = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties")
 	FGameplayAttributeData Spread_DelayBeforeDecreaseRate = FGameplayAttributeData();
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Designers|FSpreadProperties")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FSpreadProperties")
 	FGameplayAttributeData Spread_DecreaseRate = FGameplayAttributeData();
 
 	// @gdemers sample a point during tick on the curve based on properties here
