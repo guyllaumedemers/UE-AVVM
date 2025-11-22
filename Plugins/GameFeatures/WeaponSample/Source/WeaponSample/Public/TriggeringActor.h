@@ -21,28 +21,27 @@
 
 #include "CoreMinimal.h"
 
+#include "AbilitySystemInterface.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "GameplayTagContainer.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
-#include "StructUtils/InstancedStruct.h"
 
 #include "TriggeringActor.generated.h"
 
 struct FTriggeringProperties;
 class UAVVMAbilitySystemComponent;
-class UAVVMResourceManagerComponent;
 class UTriggeringAbility;
 
 /**
  *	Class description:
  *
- *	ATriggeringActor is a triggering system that executes behaviour such as firing or
- *	targeting. It is invoked from the referenced ability and apply instancing actors such as Vfx for ability location src (Muzzle), Impacts and Decals.
+ *	ATriggeringActor is a triggering system that executes behaviour such as triggering or targeting.
  */
 UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringActor : public AActor,
+                                          public IAbilitySystemInterface,
                                           public IAVVMResourceProvider
 {
 	GENERATED_BODY()
@@ -51,11 +50,13 @@ public:
 	ATriggeringActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void Init(const TInstancedStruct<FTriggeringProperties>& NewProperties) PURE_VIRTUAL(Init, return;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void Trigger() const;
 	virtual void Trigger_Implementation() const PURE_VIRTUAL(Trigger_Implementation, return;);
+	
+	// @gdemers IAbilitySystemInterface
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
@@ -77,7 +78,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UTriggeringAbility> TriggeringAbilityClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="TriggeringDefinitionDataTableRow"))
 	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)

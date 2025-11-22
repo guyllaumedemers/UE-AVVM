@@ -96,6 +96,11 @@ void ATriggeringActor::Server_SwapAbility_Implementation(const bool bIsActive)
 	}
 }
 
+UAbilitySystemComponent* ATriggeringActor::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const
 {
 	return ResourceManagerComponent;

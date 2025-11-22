@@ -17,28 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/Weapon/WeaponDefinition.h"
-
-void UWeaponUtils::GetAccumulatedRecoil(const ACharacter* Character,
-                                        const float DeltaTime,
-                                        FVector2D& OutResult)
-{
-}
-
-void UWeaponUtils::GetAccumulatedSpread(const ACharacter* Character,
-                                        const float DeltaTime,
-                                        float& OutResult)
-{
-}
-
-FVector2D UWeaponUtils::GetNormalizedRecoil(const FRecoilProperties& RecoilProperties,
-                                            const FVector2D& AccumulatedRecoil)
-{
-	return FVector2D::ZeroVector;
-}
-
-float UWeaponUtils::GetNormalizedSpread(const FSpreadProperties& SpreadProperties,
-                                        const float AccumulatedSpread)
-{
-	return 0.f;
-}
+#include "Data/Weapon/WeaponAttributeSet.h"

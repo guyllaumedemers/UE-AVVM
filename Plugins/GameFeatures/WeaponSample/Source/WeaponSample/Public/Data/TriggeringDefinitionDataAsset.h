@@ -34,22 +34,6 @@
 
 /**
  *	Class description:
- *	
- *	FTriggeringProperties is a context struct to be inherited from, and define properties for runtime calculation.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FTriggeringProperties
-{
-	GENERATED_BODY()
-};
-
-template<> struct TBaseStructure<FTriggeringProperties> 
-{
-	static WEAPONSAMPLE_API UScriptStruct* Get(); 
-};
-
-/**
- *	Class description:
  *
  *	UTriggeringDefinitionDataAsset is a POD asset that defines the properties of a Triggering Actor.
  */
@@ -64,12 +48,8 @@ public:
 #endif
 
 	TArray<FDataRegistryId> GetDependentIds() const;
-	void Init(AActor* NewActor) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FTriggeringProperties> TriggeringProperties;
-	
 	// @gdemers attachments arent limited to add-ons to weapons, these represent any augmentations
 	// that can be added to the equipped 'triggering actor' (maybe fist, fishing rod, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))

@@ -44,7 +44,6 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 		const auto* TriggeringDefinition = Cast<UTriggeringDefinitionDataAsset>(Resource);
 		if (IsValid(TriggeringDefinition))
 		{
-			TriggeringDefinition->Init(ActorComponent->GetTypedOuter<AActor>());
 			OutResources.Append(TriggeringDefinition->GetDependentIds());
 			continue;
 		}
