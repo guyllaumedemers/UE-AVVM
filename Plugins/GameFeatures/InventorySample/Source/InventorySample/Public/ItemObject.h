@@ -119,7 +119,7 @@ public:
 	bool IsEmpty() const;
 
 	UFUNCTION(BlueprintCallable)
-	const int32 GetRuntimeCount() const;
+	int32 GetRuntimeCount() const;
 
 	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& GetItemActorId() const;

@@ -24,11 +24,9 @@
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
-#include "Data/ItemProgressionDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
-#include "Resources/AVVMResourceManagerComponent.h"
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -109,7 +107,7 @@ bool UItemObject::IsEmpty() const
 	return (false == !!RuntimeItemState.Counter);
 }
 
-const int32 UItemObject::GetRuntimeCount() const
+int32 UItemObject::GetRuntimeCount() const
 {
 	return RuntimeItemState.Counter;
 }

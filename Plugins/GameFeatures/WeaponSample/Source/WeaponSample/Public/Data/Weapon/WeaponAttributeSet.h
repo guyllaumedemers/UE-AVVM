@@ -75,10 +75,6 @@ protected:
 	FGameplayAttributeData RateOfFire = FGameplayAttributeData();
 
 	// ------------------- FiringMode ------------------- //
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FiringMode", meta=(ToolTip="Slots referenced in the loadout system."))
-	FGameplayTagContainer SlotTags = FGameplayTagContainer::EmptyContainer;
-	const FGameplayTagContainer& GetSlotTags() const { return SlotTags; }
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FiringMode")
 	FGameplayTag PrimaryFiringMode = FGameplayTag::EmptyTag;
 	const FGameplayTag& GetPrimaryFiringMode() const { return PrimaryFiringMode; }
