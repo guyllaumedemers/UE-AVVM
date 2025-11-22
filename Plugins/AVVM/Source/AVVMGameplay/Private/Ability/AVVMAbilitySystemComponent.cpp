@@ -22,6 +22,7 @@
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
+#include "Ability/AVVMAttributeSet.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Engine/AssetManager.h"
 #include "ProfilingDebugging/CountersTrace.h"
@@ -148,9 +149,15 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 		for (UObject* Resource : OutResources)
 		{
 			auto* AttributeSetClass = Cast<UClass>(Resource);
-			if (IsValid(AttributeSetClass))
+			if (!IsValid(AttributeSetClass))
 			{
-				ASC->GetOrCreateAttributeSubobject(AttributeSetClass);
+				continue;
+			}
+
+			const auto* AttributeSet = Cast<UAVVMAttributeSet>(ASC->GetOrCreateAttributeSubobject(AttributeSetClass));
+			if (IsValid(AttributeSet))
+			{
+				const_cast<UAVVMAttributeSet*>(AttributeSet)->Init();
 			}
 		}
 	};

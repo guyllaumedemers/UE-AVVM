@@ -63,7 +63,7 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
 
 	// @gdemers Arrow held by Outer Actor that is aligned with the ACharacter expected World FTransform
-	// when holding this Weapon. Using remove dependency on Animation state being set on the Server.
+	// when holding this Weapon. Using proxy remove dependency on Animation state being set on the Server.
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UArrowComponent> WeaponProxyComponent = nullptr;
 

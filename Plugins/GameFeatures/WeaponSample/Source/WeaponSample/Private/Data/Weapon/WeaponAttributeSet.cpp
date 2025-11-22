@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Data/Weapon/WeaponAttributeSet.h"
 
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
 
 void UWeaponRange_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -47,4 +49,18 @@ void UWeaponRange_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetim
 	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_FiringCeil);
 	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_DelayBeforeDecreaseRate);
 	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_DecreaseRate);
+}
+
+void UWeaponRange_AttributeSet::Init()
+{
+	// @gdemers IMPORTANT : initialize all properties based on FAttributeMetaDataTable.
+	Super::Init();
+
+	// @gdemers Curve access can be executed from SoftObjectPtr, and return valid object. We cache our handle in any case which
+	// should prevent gc.
+	TArray<FSoftObjectPath> CurveTableSoftObjectPaths;
+	CurveTableSoftObjectPaths.Add(Recoil_CurveX.ToSoftObjectPath());
+	CurveTableSoftObjectPaths.Add(Recoil_CurveY.ToSoftObjectPath());
+	CurveTableSoftObjectPaths.Add(Spread_Curve.ToSoftObjectPath());
+	CurveTableHandle = UAssetManager::Get().LoadAssetList(CurveTableSoftObjectPaths, FStreamableDelegate{});
 }

@@ -22,8 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemComponent.h"
-#include "AttributeSet.h"
 #include "GameplayTagContainer.h"
+#include "Ability/AVVMAttributeSet.h"
 
 #include "WeaponAttributeSet.generated.h"
 
@@ -35,12 +35,13 @@ class UCurveFloat;
  *	UWeaponRange_AttributeSet is a data type that initialize properties on an Actor ASC for range weapons.
  */
 UCLASS(BlueprintType)
-class WEAPONSAMPLE_API UWeaponRange_AttributeSet : public UAttributeSet
+class WEAPONSAMPLE_API UWeaponRange_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Init() override;
 	
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponRange_AttributeSet, TimeUntilFirstShotReset);
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponRange_AttributeSet, RateOfFire);
@@ -66,11 +67,6 @@ public:
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponRange_AttributeSet, Spread_DecreaseRate);
 
 protected:
-	// ------------------- FAttributeSetProperties ------------------- //
-	// @gdemers IMPORTANT : How we initialize our properties 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FAttributeSetProperties")
-	TSoftObjectPtr<UDataTable> AttributeMetaDataTable = nullptr;
-
 	// ------------------- FFiringProperties ------------------- //
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FFiringProperties")
 	FGameplayAttributeData TimeUntilFirstShotReset = FGameplayAttributeData();
@@ -173,6 +169,8 @@ protected:
 	// @gdemers sample a point during tick on the curve based on properties here
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FSpreadProperties")
 	TSoftObjectPtr<UCurveFloat> Spread_Curve = nullptr;
+
+	TSharedPtr<FStreamableHandle> CurveTableHandle = nullptr;
 };
 
 /**
@@ -181,7 +179,7 @@ protected:
  *	UWeaponMelee_AttributeSet is a data type that initialize properties on an Actor ASC for melee weapons.
  */
 UCLASS(BlueprintType)
-class WEAPONSAMPLE_API UWeaponMelee_AttributeSet : public UAttributeSet
+class WEAPONSAMPLE_API UWeaponMelee_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
 };
