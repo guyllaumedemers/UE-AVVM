@@ -67,6 +67,18 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime**, **InteractionSample**, **FencingSample**, **InventorySample**, etc... Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type, under AVVMGameplay module. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
 
+### AVVMGameplay
+
+tbd 
+
+#### PlayerTrace (FPS, and TPS)
+
+**Notes** : Math explanation coming soon! 
+
+#### Preview
+
+![TPS](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_PlayerTrace_TPS.png)
+
 ### Interaction Sample
 
 This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
@@ -91,6 +103,10 @@ batch actions, and execute process based on user-defined conditions.
 ### Weapon Sample
 
 This GameFeature plugin is a sample plugin that define reusable construct for **Triggering** abilities tied to an Actor our player may reference during gameplay. This system, build a-top the InventorySample plugin, allow creation of **Triggering** items, and their initialization based on AttributeSet reference. Implementation details are still under development. Notes : It's suggested that the data scheme be first reviewed to better understand the constraint within which this system exist.
+
+#### Preview
+
+![DataScheme](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_DataScheme(Short).jpg)
 
 ### Snapshot Sample
 
