@@ -499,7 +499,7 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ItemActor);
 		if (IsValid(ASC))
 		{
-			ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath);
+			ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath, ItemActor);
 		}
 	}
 

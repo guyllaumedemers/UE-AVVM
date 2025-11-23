@@ -50,3 +50,27 @@ protected:
 
 	TSharedPtr<FStreamableHandle> AttributeMetaDataTableHandle = nullptr;
 };
+
+/**
+ *	Class description:
+ *	
+ *	IAVVMDoesOwnAttributeSet is an interface class that allow caching of AttributeSet on Actor class
+ *	that instance an AttributeSet based on its AVVMActorDefinitionAsset representation.
+ */
+UINTERFACE(BlueprintType)
+class AVVMGAMEPLAY_API UAVVMDoesOwnAttributeSet : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMGAMEPLAY_API IAVVMDoesOwnAttributeSet
+{
+	GENERATED_BODY()
+
+public:
+	void SetAttributeSet(const UAttributeSet* NewAttributeSet);
+	const UAttributeSet* GetAttributeSet() const;
+
+protected:
+	TWeakObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
+};

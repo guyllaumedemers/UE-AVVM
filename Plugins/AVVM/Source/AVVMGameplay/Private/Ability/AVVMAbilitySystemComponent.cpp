@@ -21,6 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "Ability/AVVMGameplayAbility.h"
@@ -127,10 +128,18 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	}
 }
 
-void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath)
+void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath,
+                                                    AActor* AttributeSetOwner)
 {
-	const auto OnAsyncRequestComplete = [](const TWeakObjectPtr<UAVVMAbilitySystemComponent>& Caller)
+	const auto OnAsyncRequestComplete = [](const TWeakObjectPtr<UAVVMAbilitySystemComponent>& Caller,
+	                                       const TWeakObjectPtr<AActor>& NewAttributeSetOwner)
 	{
+		AActor* AttributeSetOwner = NewAttributeSetOwner.Get();
+		if (!IsValid(AttributeSetOwner))
+		{
+			return;
+		}
+		
 		UAVVMAbilitySystemComponent* ASC = Caller.Get();
 		if (!IsValid(ASC))
 		{
@@ -157,14 +166,40 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 			const auto* AttributeSet = Cast<UAVVMAttributeSet>(ASC->GetOrCreateAttributeSubobject(AttributeSetClass));
 			if (IsValid(AttributeSet))
 			{
+				Caller->RegisterAttributeSet(AttributeSet, AttributeSetOwner);
 				const_cast<UAVVMAttributeSet*>(AttributeSet)->Init();
 			}
 		}
 	};
 
 	FStreamableDelegate Callback;
-	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this));
+	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this), TWeakObjectPtr(AttributeSetOwner));
 	AttributeSetHandle = UAssetManager::Get().LoadAssetList({AttributeSetSoftObjectPath}, Callback);
+}
+
+void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner)
+{
+	const TObjectPtr<const UAttributeSet>& OutResult = OwnerToAttributeSet.FindOrAdd(AttributeSetOwner, AttributeSet);
+	AddSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
+
+	auto AttributeOwnerInterface = TScriptInterface<IAVVMDoesOwnAttributeSet>(AttributeSetOwner);
+	if (ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid(AttributeOwnerInterface),
+	                     TEXT("AttributeSetOwner should inherit from the IAVVMDoesOwnAttributeSet interface.")))
+	{
+		AttributeOwnerInterface->SetAttributeSet(AttributeSet);
+	}
+}
+
+void UAVVMAbilitySystemComponent::UnRegisterAttributeSet(const AActor* AttributeSetOwner)
+{
+	TObjectPtr<const UAttributeSet> OutResult = nullptr;
+	OwnerToAttributeSet.RemoveAndCopyValue(AttributeSetOwner, OutResult);
+
+	if (ensureAlwaysMsgf(IsValid(OutResult), TEXT("AttributeSet Owner not found")))
+	{
+		RemoveSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
+		OwnerToAttributeSet.Remove(AttributeSetOwner);
+	}
 }
 
 void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken AbilityToken)
@@ -201,12 +236,14 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 		       *GameplayAbilityClass->GetName(),
 		       *Outer->GetName());
 
-		const FGameplayAbilitySpecHandle NewAbilitySpecHandle = GiveAbility(FGameplayAbilitySpec{
-			GameplayAbilityClass,
-			1,
-			GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
-		});
+		const auto GameplayAbilitySpec = FGameplayAbilitySpec
+		{
+				GameplayAbilityClass,
+				1,
+				GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
+		};
 
+		const FGameplayAbilitySpecHandle NewAbilitySpecHandle = GiveAbility(GameplayAbilitySpec);
 		AbilitySpecHandles.Add(NewAbilitySpecHandle);
 	}
 }

@@ -20,31 +20,24 @@
 #include "AttachmentManagerComponent.h"
 
 #include "AVVMGameplayUtils.h"
-#include "AVVMScopedUtils.h"
 #include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
-#include "Data/AttachmentDefinitionDataAsset.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
-#include "GameFramework/Controller.h"
-#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "Resources/AVVMResourceManagerComponent.h"
-#include "Resources/AVVMResourceProvider.h"
 
 void UAttachmentManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	BatchingMechanism = MakeShared<FAttachmentBatchingMechanism>();
-	QueueingMechanism = MakeShared<FAttachmentQueuingMechanism>();
 
-	const auto* Outer = GetTypedOuter<AActor>();
+	auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -65,7 +58,6 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	Super::EndPlay(EndPlayReason);
 
 	BatchingMechanism.Reset();
-	QueueingMechanism.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -101,16 +93,7 @@ void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapConte
 	if (SearchResult.IsValid())
 	{
 		// @gdemers attach new actor to parent.
-		SearchResult->Attach();
-	}
-}
-
-void UAttachmentManagerComponent::GetAttachmentModifierDefinition(const FDataRegistryId& NewAttachmentModifierDefinitionId) const
-{
-	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(OwningOuter.Get());
-	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer doesn't return valid AVVMResourceManagerComponent!")))
-	{
-		ResourceManagerComponent->RequestAsyncLoading(NewAttachmentModifierDefinitionId, {});
+		SearchResult->Attach(Cast<AActor>(OwningOuter.Get()));
 	}
 }
 
@@ -163,52 +146,6 @@ void UAttachmentManagerComponent::SetupAttachments(const TArray<UObject*>& NewRe
 	}
 }
 
-void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*>& NewResources)
-{
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
-	                      TEXT("Attempting to load invalid Attachment Modifier set on Outer \"%s\"."),
-	                      *Outer->GetName()))
-	{
-		return;
-	}
-
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
-
-	TArray<FSoftObjectPath> DeferredItems;
-	for (const UObject* Resource : NewResources)
-	{
-		const auto* AttachmentModifierAsset = Cast<UAttachmentModifierDefinitionDataAsset>(Resource);
-		if (!IsValid(AttachmentModifierAsset))
-		{
-			continue;
-		}
-
-		UE_LOG(LogWeaponSample,
-		       Log,
-		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
-		       IsServerOrClientString,
-		       *AttachmentModifierAsset->GetName());
-
-		DeferredItems.Append(AttachmentModifierAsset->GetModifiersClassSoftObjectPaths());
-	}
-
-	if (!DeferredItems.IsEmpty())
-	{
-		FAttachmentModifierToken Token;
-		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentModifiersClassRetrieved, Token);
-
-		TSharedPtr<FStreamableHandle>& OutResult = AttachmentModifierHandleSystem.FindOrAdd(Token.UniqueId);
-		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
-	}
-}
-
 void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentToken AttachmentToken, TArray<FSoftObjectPath> AttributeSoftObjectPaths)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentHandleSystem.Find(AttachmentToken.UniqueId);
@@ -252,107 +189,10 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(NewAttachment);
 	if (IsValid(ASC) && !AttributeSoftObjectPaths.IsEmpty())
 	{
-		ASC->SetupAttributeSet(AttributeSoftObjectPaths[0]);
+		ASC->SetupAttributeSet(AttributeSoftObjectPaths[0], NewAttachment);
 	}
 
 	Swap(FAttachmentSwapContextArgs{NewAttachment, NewAttachment->SlotTag});
-
-	if (!QueueingMechanism.IsValid())
-	{
-		return;
-	}
-
-	const bool bIsEmpty = QueueingMechanism->IsEmpty();
-
-	// @gdemers we should always push in order to queue subsequent request.
-	QueueingMechanism->Push(NewAttachment);
-
-	if (bIsEmpty)
-	{
-		// @gdemers async load attachment modifier for the actor that is first spawned in world.
-		GetAttachmentModifierDefinition(NewAttachment->GetAttachmentModifierDefinitionId());
-	}
-}
-
-void UAttachmentManagerComponent::OnAttachmentModifiersClassRetrieved(FAttachmentModifierToken AttachmentModifierToken)
-{
-	// @gdemers our attachment is fully initialized, and we can move to the next request.
-	const auto OnNextRequestExecuted = [](const TSharedPtr<FAttachmentQueuingMechanism> NewQueueingMechanism,
-	                                      const UAttachmentManagerComponent* Component)
-	{
-		if (NewQueueingMechanism.IsValid())
-		{
-			NewQueueingMechanism->TryExecuteNext(Component);
-		}
-	};
-
-	// @gdemers for safety reason, our callback is using a scoped object.
-	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, OnNextRequestExecuted, QueueingMechanism, this);
-	FAVVMScopedDelegate ScopedDelegate(Callback);
-
-	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentModifierHandleSystem.Find(AttachmentModifierToken.UniqueId);
-	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
-	{
-		return;
-	}
-
-	TWeakObjectPtr<ATriggeringAttachmentActor> AttachmentActor = QueueingMechanism.IsValid() ? QueueingMechanism->PeekAtIndex(0) : nullptr;
-	if (!AttachmentActor.IsValid())
-	{
-		return;
-	}
-
-	TArray<UObject*> OutStreamableAssets;
-	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
-
-	// @gdemers our Outer actor refers to the TriggeringActor which doesn't hold an ASC. It is expected that the user adds an ASC
-	// to a Controller when using this system with AI and on the PlayerState for local player behaviour. 
-	auto* Controller = GetTypedOuter<AController>();
-	if (ensureAlwaysMsgf(IsValid(Controller), TEXT("GetTypedOuter doesn't refer to any Controller derived type!")))
-	{
-		auto* ASCHolder = IsValid(Controller->PlayerState) ? Cast<AActor>(Controller->PlayerState) : Cast<AActor>(Controller);
-		auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ASCHolder);
-		AttachmentActor->RegisterGameplayEffects(ASC, OutStreamableAssets);
-	}
-}
-
-UAttachmentManagerComponent::FAttachmentQueuingMechanism::~FAttachmentQueuingMechanism()
-{
-	QueuedRequest.Empty();
-}
-
-void UAttachmentManagerComponent::FAttachmentQueuingMechanism::Push(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
-{
-	QueuedRequest.Add(NewAttachment);
-}
-
-TWeakObjectPtr<ATriggeringAttachmentActor> UAttachmentManagerComponent::FAttachmentQueuingMechanism::PeekAtIndex(const int32 NewIndex)
-{
-	return QueuedRequest.IsValidIndex(NewIndex) ? QueuedRequest[NewIndex] : nullptr;
-}
-
-void UAttachmentManagerComponent::FAttachmentQueuingMechanism::TryExecuteNext(const UAttachmentManagerComponent* AttachmentManagerComponent)
-{
-	if (!IsValid(AttachmentManagerComponent))
-	{
-		return;
-	}
-
-	if (!QueuedRequest.IsEmpty())
-	{
-		QueuedRequest.RemoveAtSwap(0);
-	}
-
-	if (!QueuedRequest.IsEmpty())
-	{
-		const FDataRegistryId& AttachmentModifierRegistryId = QueuedRequest[0]->GetAttachmentModifierDefinitionId();
-		AttachmentManagerComponent->GetAttachmentModifierDefinition(AttachmentModifierRegistryId);
-	}
-}
-
-bool UAttachmentManagerComponent::FAttachmentQueuingMechanism::IsEmpty() const
-{
-	return QueuedRequest.IsEmpty();
 }
 
 UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingMechanism()

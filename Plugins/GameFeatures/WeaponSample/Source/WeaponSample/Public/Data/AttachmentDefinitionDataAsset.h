@@ -32,54 +32,6 @@
 
 #include "AttachmentDefinitionDataAsset.generated.h"
 
-class UGameplayEffect;
-
-/**
- *	Class description:
- *
- *	UAttachmentModifierDefinitionDataAsset is a POD asset that defines the properties of an attachment.
- */
-UCLASS(BlueprintType, NotBlueprintable)
-class WEAPONSAMPLE_API UAttachmentModifierDefinitionDataAsset : public UDataAsset
-{
-	GENERATED_BODY()
-
-public:
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	UFUNCTION(BlueprintCallable)
-	TArray<FSoftObjectPath> GetModifiersClassSoftObjectPaths() const;
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportModifiers = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportModifiers"))
-	TArray<TSoftClassPtr<UGameplayEffect>> ModifierEffectClasses;
-};
-
-/**
- *	Class description:
- *
- *	FAttachmentModifierDefinitionDataTableRow is an entry in a DataTableRow for a unique UAttachmentModifierDefinitionDataAsset.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FAttachmentModifierDefinitionDataTableRow : public FAVVMDataTableRow
-{
-	GENERATED_BODY()
-
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UAttachmentModifierDefinitionDataAsset> AttachmentModifierDefinition = nullptr;
-};
-
 /**
  *	Class description:
  *

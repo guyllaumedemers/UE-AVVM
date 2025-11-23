@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 
@@ -71,27 +70,6 @@ struct WEAPONSAMPLE_API FAttachmentToken
 /**
  *	Class description:
  *
- *	FAttachmentModifierToken describe a unique identifier that increments only when default construct. Can be safely
- *	passed by copy around.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FAttachmentModifierToken
-{
-	GENERATED_BODY()
-
-	explicit FAttachmentModifierToken()
-	{
-		static uint32 GlobalUniqueId = 0;
-		UniqueId = ++GlobalUniqueId;
-	}
-
-	UPROPERTY()
-	uint32 UniqueId = 0;
-};
-
-/**
- *	Class description:
- *
  *	UAttachmentManagerComponent is a system handling attachment equip/unequiping behaviour and applying GameplayEffects owned by the active Attachments.
  */
 UCLASS(ClassGroup=("Weapon"), Blueprintable, meta=(BlueprintSpawnableComponent))
@@ -106,30 +84,11 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Swap(const FAttachmentSwapContextArgs& NewAttachmentSwapContext);
 
-	void GetAttachmentModifierDefinition(const FDataRegistryId& NewAttachmentModifierDefinitionId) const;
 	void SetupAttachments(const TArray<UObject*>& NewResources);
-	void SetupAttachmentModifiers(const TArray<UObject*>& NewResources);
 
 protected:
 	UFUNCTION()
 	void OnAttachmentActorClassRetrieved(FAttachmentToken AttachmentToken, TArray<FSoftObjectPath> AttributeSoftObjectPaths);
-
-	UFUNCTION()
-	void OnAttachmentModifiersClassRetrieved(FAttachmentModifierToken AttachmentModifierToken);
-
-	// @gdemers POD type that queue data registry request.
-	struct FAttachmentQueuingMechanism
-	{
-		FAttachmentQueuingMechanism() = default;
-		~FAttachmentQueuingMechanism();
-
-		void Push(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment);
-		TWeakObjectPtr<ATriggeringAttachmentActor> PeekAtIndex(const int32 NewIndex);
-		void TryExecuteNext(const UAttachmentManagerComponent* AttachmentManagerComponent);
-		bool IsEmpty() const;
-
-		TArray<TWeakObjectPtr<ATriggeringAttachmentActor>> QueuedRequest;
-	};
 
 	// @gdemers POD type that aggregate actor to be destroyed. Actors should be kept, deactivated until batching happens so if a swap
 	// action occurs, we can pull out the actor and prevent allocation in world of a new actor.
@@ -144,13 +103,11 @@ protected:
 	};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)
 	TMap<FGameplayTag, TWeakObjectPtr<ATriggeringAttachmentActor>> EquippedAttachments;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
-	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentModifierHandleSystem;
 	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;
-	TSharedPtr<FAttachmentQueuingMechanism> QueueingMechanism;
 };

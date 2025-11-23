@@ -26,6 +26,8 @@
 
 #include "AVVMAbilitySystemComponent.generated.h"
 
+class UAttributeSet;
+
 /**
  *	Class description:
  *
@@ -63,7 +65,10 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	void SetupAbilities(const TArray<UObject*>& Resources);
-	void SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath);
+	void SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath, AActor* AttributeSetOwner);
+
+	void RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner);
+	void UnRegisterAttributeSet(const AActor* AttributeSetOwner);
 
 protected:
 	UFUNCTION()
@@ -76,6 +81,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<FGameplayAbilitySpecHandle> AbilitySpecHandles;
+
+	UPROPERTY(Transient)
+	TMap<TWeakObjectPtr<const AActor>, TObjectPtr<const UAttributeSet>> OwnerToAttributeSet;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 	TSharedPtr<FStreamableHandle> AttributeSetHandle = nullptr;

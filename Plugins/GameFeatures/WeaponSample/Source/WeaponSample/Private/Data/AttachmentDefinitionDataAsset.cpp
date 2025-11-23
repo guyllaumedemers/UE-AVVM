@@ -19,50 +19,6 @@
 //SOFTWARE.
 #include "Data/AttachmentDefinitionDataAsset.h"
 
-#if WITH_EDITOR
-EDataValidationResult UAttachmentModifierDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
-{
-	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (bDoesSupportModifiers && ModifierEffectClasses.IsEmpty())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAttachmentModifierDefinitionDataAsset", "", "ModifierEffectClasses Empty!"));
-	}
-
-	return Result;
-}
-#endif
-
-TArray<FSoftObjectPath> UAttachmentModifierDefinitionDataAsset::GetModifiersClassSoftObjectPaths() const
-{
-	TArray<FSoftObjectPath> OutResults;
-	for (const auto& ModifierEffectClass : ModifierEffectClasses)
-	{
-		OutResults.Add(ModifierEffectClass.ToSoftObjectPath());
-	}
-
-	return OutResults;
-}
-
-#if WITH_EDITOR
-EDataValidationResult FAttachmentModifierDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
-{
-	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (AttachmentModifierDefinition.IsNull())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAttachmentModifierDefinitionDataTableRow", "", "UAttachmentModifierDefinitionDataAsset missing. No valid UDataAsset specified!"));
-	}
-
-	return Result;
-}
-#endif
-
-TArray<FSoftObjectPath> FAttachmentModifierDefinitionDataTableRow::GetResourcesPaths() const
-{
-	return {AttachmentModifierDefinition.ToSoftObjectPath()};
-}
-
 const FDataRegistryId& UAttachmentDefinitionDataAsset::GetTriggeringAttachmentActorId() const
 {
 	return TriggeringAttachmentId;

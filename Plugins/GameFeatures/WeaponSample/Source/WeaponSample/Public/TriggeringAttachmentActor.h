@@ -22,14 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
-#include "ActiveGameplayEffectHandle.h"
-#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
 
 #include "TriggeringAttachmentActor.generated.h"
-
-class UAVVMAbilitySystemComponent;
 
 /**
  *	Class description:
@@ -39,7 +36,8 @@ class UAVVMAbilitySystemComponent;
  */
 UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AActor,
-                                                    public IAbilitySystemInterface
+                                                    public IAbilitySystemInterface,
+                                                    public IAVVMDoesOwnAttributeSet
 {
 	GENERATED_BODY()
 
@@ -48,45 +46,23 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void Attach();
+	void Attach(AActor* NewParent);
 
 	UFUNCTION(BlueprintCallable)
 	void Detach();
-
-	UFUNCTION(BlueprintCallable)
-	void RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
-	                             const TArray<UObject*>& NewResources);
-
-	UFUNCTION(BlueprintCallable)
-	void UnRegisterGameplayEffects();
-
-	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& GetAttachmentModifierDefinitionId() const;
 
 	// @gdemers IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
-	// @gdemers IMPORTANT : Attachment modifier impact the weapon or player (example : adds weight),
-	// which is what this registry id handle. While the AttributeSet referenced from its AVVMActorDefinition representation
-	// handle properties specific to the attachment itself.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AttachmentModifierDefinitionDataTableRow"))
-	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName SocketName = NAME_None;
 
-	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
-
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-
-	UPROPERTY(Transient)
-	TArray<FActiveGameplayEffectHandle> GameplayEffectSpecHandles;
 
 	friend class UAttachmentManagerComponent;
 };

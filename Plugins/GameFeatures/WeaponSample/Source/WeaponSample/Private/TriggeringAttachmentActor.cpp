@@ -19,11 +19,10 @@
 //SOFTWARE.
 #include "TriggeringAttachmentActor.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemGlobals.h"
 #include "AVVMGameplayUtils.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 
 void ATriggeringAttachmentActor::BeginPlay()
 {
@@ -61,19 +60,13 @@ void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName());
-
-#if WITH_SERVER_CODE
-	if (HasAuthority())
-	{
-		UnRegisterGameplayEffects();
-	}
-#endif
+	
+	Detach();
 }
 
-void ATriggeringAttachmentActor::Attach()
+void ATriggeringAttachmentActor::Attach(AActor* Parent)
 {
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	if (!ensureAlwaysMsgf(IsValid(Parent), TEXT("Invalid Parent!")))
 	{
 		return;
 	}
@@ -81,21 +74,30 @@ void ATriggeringAttachmentActor::Attach()
 	UE_LOG(LogWeaponSample,
 	       Log,
 	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Parent).GetData(),
 	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
-	       *Outer->GetName(),
+	       *Parent->GetName(),
 	       *SocketName.ToString());
 
-	// @gdemers exception case in which I violate const-ness on purpose. theres no reason why the attachment should modify
-	// the owning type other than during attach/detach behaviour or when adding itself as children to the Owner child list for replication.
-	// In my opinion, the engine didnt set properly their access specifier. We modify the parent RootComponent, not the actor.
-	AttachToActor(const_cast<AActor*>(Outer), FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+	// @gdemers detach actor + remove AttributeSet registered
+	Detach();
+
+	// @gdemers attach actor + add AttributeSet
+	AttachToActor(Parent, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+	OwningOuter = Parent;
+
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		const UAttributeSet* NewOwnedAttributeSet = GetAttributeSet();
+		ASC->RegisterAttributeSet(NewOwnedAttributeSet, this);
+	}
 }
 
 void ATriggeringAttachmentActor::Detach()
 {
 	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	if (!IsValid(Outer))
 	{
 		return;
 	}
@@ -109,54 +111,17 @@ void ATriggeringAttachmentActor::Detach()
 	       *SocketName.ToString());
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-	// TODO @gdemers verify that theres no overlap with Active GameplayEffect. we dont want to be firing, swap attachment and apply bonus damage or other stats
-	// due to GE stacking for the duration of a frame or more.
-	UnRegisterGameplayEffects();
-}
 
-void ATriggeringAttachmentActor::RegisterGameplayEffects(UAbilitySystemComponent* NewAbilitySystemComponent,
-                                                         const TArray<UObject*>& NewResources)
-{
-	if (!ensureAlwaysMsgf(IsValid(NewAbilitySystemComponent), TEXT("Outer didn't return a valid Ability System Component!")))
+	// @gdemers clear AttributeSet provided by this attachment.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
 	{
-		return;
+		// @gdemers violating const_ness to ensure user dont do weird shit on cached item elsewhere.
+		ASC->UnRegisterAttributeSet(this);
 	}
-
-	UnRegisterGameplayEffects();
-
-	GameplayEffectSpecHandles.Reset(NewResources.Num());
-	for (UObject* Resource : NewResources)
-	{
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(Cast<UClass>(Resource), this, const_cast<AActor*>(OwningOuter.Get()));
-		GameplayEffectSpecHandles.Add(NewAbilitySystemComponent->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle));
-	}
-}
-
-void ATriggeringAttachmentActor::UnRegisterGameplayEffects()
-{
-	if (GameplayEffectSpecHandles.IsEmpty())
-	{
-		return;
-	}
-
-	auto* NewAbilitySystemComponent = GameplayEffectSpecHandles[0].GetOwningAbilitySystemComponent();
-	if (!ensureAlwaysMsgf(IsValid(NewAbilitySystemComponent), TEXT("The GameplayEffectSpecHandle didn't reference a valid Ability System Component!")))
-	{
-		return;
-	}
-
-	for (const FActiveGameplayEffectHandle& ActiveGameplayEffect : GameplayEffectSpecHandles)
-	{
-		NewAbilitySystemComponent->RemoveActiveGameplayEffect(ActiveGameplayEffect);
-	}
-}
-
-const FDataRegistryId& ATriggeringAttachmentActor::GetAttachmentModifierDefinitionId() const
-{
-	return AttachmentModifierDefinitionId;
 }
 
 UAbilitySystemComponent* ATriggeringAttachmentActor::GetAbilitySystemComponent() const
 {
-	return AbilitySystemComponent;
+	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
 }
