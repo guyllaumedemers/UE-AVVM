@@ -25,6 +25,7 @@
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
 ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)

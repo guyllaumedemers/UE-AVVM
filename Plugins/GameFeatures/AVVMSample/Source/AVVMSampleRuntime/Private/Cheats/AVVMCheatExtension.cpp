@@ -27,6 +27,7 @@
 #include "GameplayTagsModule.h"
 #include "GameplayTagsSettings.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 #if WITH_AVVM_DEBUGGER

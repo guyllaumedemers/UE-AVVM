@@ -27,6 +27,7 @@
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Controller.h"

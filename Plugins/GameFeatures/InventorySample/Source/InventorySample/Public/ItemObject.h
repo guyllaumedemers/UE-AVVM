@@ -25,7 +25,6 @@
 
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
-#include "Engine/StreamableManager.h"
 #include "UObject/Object.h"
 
 #if UE_WITH_IRIS
@@ -34,6 +33,7 @@
 
 #include "ItemObject.generated.h"
 
+struct FStreamableHandle;
 class UAttributeSet;
 class UItemObject;
 

@@ -50,8 +50,9 @@ public:
 	TArray<FDataRegistryId> GetDependentIds() const;
 
 protected:
-	// @gdemers attachments arent limited to add-ons to weapons, these represent any augmentations
-	// that can be added to the equipped 'triggering actor' (maybe fist, fishing rod, etc...)
+	// @gdemers IMPORTANT : If the Attachment is composing the actor such as a weapon, and cannot be detached
+	// from the owner, then use this! OTHERWISE, the inventory system will handle creation of the attachment actor as the attachment
+	// information is likely to come from external src such as backend inventory loadout (example : as a list of registry id).
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportDefaultAttachments = true;
 

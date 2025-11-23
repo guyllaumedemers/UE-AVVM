@@ -25,6 +25,7 @@
 #include "InventorySettings.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 

@@ -36,8 +36,12 @@ EDataValidationResult UTriggeringDefinitionDataAsset::IsDataValid(class FDataVal
 TArray<FDataRegistryId> UTriggeringDefinitionDataAsset::GetDependentIds() const
 {
 	TArray<FDataRegistryId> DependentIds;
-	DependentIds.Append(DefaultAttachmentIds);
-	DependentIds.Append(ProjectileDefinitionIds);
+	if (bDoesSupportDefaultAttachments)
+	{
+		DependentIds.Append(DefaultAttachmentIds);
+		DependentIds.Append(ProjectileDefinitionIds);
+	}
+
 	return DependentIds;
 }
 

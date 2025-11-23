@@ -24,12 +24,12 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "GameplayTagContainer.h"
-#include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
 
 #include "TriggeringActor.generated.h"
 
+struct FStreamableHandle;
 struct FTriggeringProperties;
 class UAVVMAbilitySystemComponent;
 class UTriggeringAbility;

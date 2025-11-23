@@ -25,9 +25,10 @@
 #include "DataRegistryTypes.h"
 #include "Components/ActorComponent.h"
 #include "Containers/Queue.h"
-#include "Engine/StreamableManager.h"
 
 #include "AVVMResourceManagerComponent.generated.h"
+
+struct FStreamableHandle;
 
 DECLARE_DYNAMIC_DELEGATE(FOnResourceAsyncLoadingComplete);
 

@@ -24,11 +24,11 @@
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "Engine/StreamableManager.h"
 
 #include "AttachmentManagerComponent.generated.h"
 
 class ATriggeringAttachmentActor;
+struct FStreamableHandle;
 
 /**
  *	Class description:

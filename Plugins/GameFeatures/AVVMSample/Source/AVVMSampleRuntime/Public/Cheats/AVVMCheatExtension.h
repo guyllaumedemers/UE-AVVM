@@ -23,7 +23,6 @@
 
 #include "DataRegistryTypes.h"
 #include "Cheats/AVVMCheatData.h"
-#include "Engine/StreamableManager.h"
 #include "GameFramework/CheatManager.h"
 
 #ifdef UE_ENABLE_AVVM_DEBUGGER
@@ -31,6 +30,8 @@
 #endif
 
 #include "AVVMCheatExtension.generated.h"
+
+struct FStreamableHandle;
 
 /**
  *	Class description:
