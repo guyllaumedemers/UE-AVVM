@@ -179,23 +179,27 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 
 void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner)
 {
-	const TObjectPtr<const UAttributeSet>& OutResult = OwnerToAttributeSet.FindOrAdd(AttributeSetOwner, AttributeSet);
+	const bool bResult = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMDoesOwnAttributeSet>(AttributeSetOwner);
+	if (!ensureAlwaysMsgf(bResult,
+	                      TEXT("AttributeSetOwner should inherit from the IAVVMDoesOwnAttributeSet interface.")))
+	{
+		return;
+	}
+
+	// @gdemers register AttributeSet with 'this' ASC.
+	const TWeakObjectPtr<const UAttributeSet>& OutResult = OwnerToAttributeSet.FindOrAdd(AttributeSetOwner, AttributeSet);
 	AddSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
 
-	auto AttributeOwnerInterface = TScriptInterface<IAVVMDoesOwnAttributeSet>(AttributeSetOwner);
-	if (ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid(AttributeOwnerInterface),
-	                     TEXT("AttributeSetOwner should inherit from the IAVVMDoesOwnAttributeSet interface.")))
-	{
-		AttributeOwnerInterface->SetAttributeSet(AttributeSet);
-	}
+	// @gdemers cache AttributeSet on Owner for possible runtime swap. (Stored as TObjectPtr to prevent gc on the Outer)
+	IAVVMDoesOwnAttributeSet::Execute_SetAttributeSet(AttributeSetOwner, AttributeSet);
 }
 
 void UAVVMAbilitySystemComponent::UnRegisterAttributeSet(const AActor* AttributeSetOwner)
 {
-	TObjectPtr<const UAttributeSet> OutResult = nullptr;
+	TWeakObjectPtr<const UAttributeSet> OutResult = nullptr;
 	OwnerToAttributeSet.RemoveAndCopyValue(AttributeSetOwner, OutResult);
 
-	if (ensureAlwaysMsgf(IsValid(OutResult), TEXT("AttributeSet Owner not found")))
+	if (ensureAlwaysMsgf(OutResult.IsValid(), TEXT("AttributeSet Owner not found")))
 	{
 		RemoveSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
 		OwnerToAttributeSet.Remove(AttributeSetOwner);

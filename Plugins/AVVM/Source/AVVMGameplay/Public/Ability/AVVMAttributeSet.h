@@ -68,9 +68,7 @@ class AVVMGAMEPLAY_API IAVVMDoesOwnAttributeSet
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetAttributeSet(const UAttributeSet* NewAttributeSet);
-	const UAttributeSet* GetAttributeSet() const;
-
-protected:
-	TWeakObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
+	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) PURE_VIRTUAL(SetAttributeSet_Implementation, return;);
 };

@@ -54,12 +54,18 @@ public:
 	// @gdemers IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// @gdemers IAVVMDoesOwnAttributeSet
+	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName SocketName = NAME_None;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

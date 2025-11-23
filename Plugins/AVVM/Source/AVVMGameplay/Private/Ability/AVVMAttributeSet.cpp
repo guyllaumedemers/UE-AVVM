@@ -55,13 +55,3 @@ void UAVVMAttributeSet::Init()
 	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this));
 	AttributeMetaDataTableHandle = UAssetManager::Get().LoadAssetList({AttributeMetaDataTable.ToSoftObjectPath()}, Callback);
 }
-
-void IAVVMDoesOwnAttributeSet::SetAttributeSet(const UAttributeSet* NewAttributeSet)
-{
-	OwnedAttributeSet = NewAttributeSet;
-}
-
-const UAttributeSet* IAVVMDoesOwnAttributeSet::GetAttributeSet() const
-{
-	return OwnedAttributeSet.Get();
-}

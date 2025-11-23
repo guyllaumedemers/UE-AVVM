@@ -83,7 +83,7 @@ protected:
 	TArray<FGameplayAbilitySpecHandle> AbilitySpecHandles;
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const AActor>, TObjectPtr<const UAttributeSet>> OwnerToAttributeSet;
+	TMap<TWeakObjectPtr<const AActor>, TWeakObjectPtr<const UAttributeSet>> OwnerToAttributeSet;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 	TSharedPtr<FStreamableHandle> AttributeSetHandle = nullptr;

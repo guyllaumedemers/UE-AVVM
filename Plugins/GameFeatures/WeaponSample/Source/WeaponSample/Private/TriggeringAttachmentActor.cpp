@@ -60,7 +60,7 @@ void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName());
-	
+
 	Detach();
 }
 
@@ -89,8 +89,7 @@ void ATriggeringAttachmentActor::Attach(AActor* Parent)
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 	if (IsValid(ASC))
 	{
-		const UAttributeSet* NewOwnedAttributeSet = GetAttributeSet();
-		ASC->RegisterAttributeSet(NewOwnedAttributeSet, this);
+		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
 	}
 }
 
@@ -124,4 +123,9 @@ void ATriggeringAttachmentActor::Detach()
 UAbilitySystemComponent* ATriggeringAttachmentActor::GetAbilitySystemComponent() const
 {
 	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
+}
+
+void ATriggeringAttachmentActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
+{
+	OwnedAttributeSet = NewAttributeSet;
 }
