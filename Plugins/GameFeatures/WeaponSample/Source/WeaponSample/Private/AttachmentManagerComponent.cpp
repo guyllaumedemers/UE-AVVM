@@ -26,6 +26,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
+#include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/World.h"
@@ -131,22 +132,13 @@ void UAttachmentManagerComponent::SetupAttachments(const TArray<UObject*>& NewRe
 	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredItems;
+	TArray<FSoftObjectPath> DeferredItemsAttributeSet;
+	
 	for (const UObject* Resource : NewResources)
 	{
-		const auto* AttachmentAsset = Cast<UAttachmentDefinitionDataAsset>(Resource);
-		if (!IsValid(AttachmentAsset))
+		const auto* ActorDefinitionAsset = Cast<UAVVMActorDefinitionDataAsset>(Resource);
+		if (!IsValid(ActorDefinitionAsset))
 		{
-			continue;
-		}
-
-		if (!AttachmentAsset->CanAccessItem(ComponentStateTags, ComponentStateTags))
-		{
-			UE_LOG(LogWeaponSample,
-			       Log,
-			       TEXT("Executed from \"%s\". Failed to Meet \"%s\" Requirements."),
-			       IsServerOrClientString,
-			       *AttachmentAsset->GetName());
-
 			continue;
 		}
 
@@ -154,16 +146,17 @@ void UAttachmentManagerComponent::SetupAttachments(const TArray<UObject*>& NewRe
 		       Log,
 		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
 		       IsServerOrClientString,
-		       *AttachmentAsset->GetName());
+		       *ActorDefinitionAsset->GetName());
 
-		DeferredItems.Add(AttachmentAsset->GetTriggeringAttachmentClass().ToSoftObjectPath());
+		DeferredItems.Add(ActorDefinitionAsset->GetActorClassSoftObjectPath());
+		DeferredItemsAttributeSet.Add(ActorDefinitionAsset->GetActorAttributeSetClassSoftObjectPath());
 	}
 
 	if (!DeferredItems.IsEmpty())
 	{
 		FAttachmentToken Token;
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentActorRetrieved, Token);
+		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentActorClassRetrieved, Token, DeferredItemsAttributeSet);
 
 		TSharedPtr<FStreamableHandle>& OutResult = AttachmentHandleSystem.FindOrAdd(Token.UniqueId);
 		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
@@ -202,21 +195,21 @@ void UAttachmentManagerComponent::SetupAttachmentModifiers(const TArray<UObject*
 		       IsServerOrClientString,
 		       *AttachmentModifierAsset->GetName());
 
-		DeferredItems.Append(AttachmentModifierAsset->GetModifiersSoftObjectPaths());
+		DeferredItems.Append(AttachmentModifierAsset->GetModifiersClassSoftObjectPaths());
 	}
 
 	if (!DeferredItems.IsEmpty())
 	{
 		FAttachmentModifierToken Token;
 		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentModifiersRetrieved, Token);
+		Callback.BindUObject(this, &UAttachmentManagerComponent::OnAttachmentModifiersClassRetrieved, Token);
 
 		TSharedPtr<FStreamableHandle>& OutResult = AttachmentModifierHandleSystem.FindOrAdd(Token.UniqueId);
 		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
 	}
 }
 
-void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken AttachmentToken)
+void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentToken AttachmentToken, TArray<FSoftObjectPath> AttributeSoftObjectPaths)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = AttachmentHandleSystem.Find(AttachmentToken.UniqueId);
 	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
@@ -253,6 +246,15 @@ void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken At
 		return;
 	}
 
+	// @gdemers adding attachment AttributeSet initialization based on owning actor creation process.
+	// other alternative for this initialization is based on the inventory system, and would imply we consider the attachment
+	// a unique element in the inventory system.
+	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(NewAttachment);
+	if (IsValid(ASC) && !AttributeSoftObjectPaths.IsEmpty())
+	{
+		ASC->SetupAttributeSet(AttributeSoftObjectPaths[0]);
+	}
+
 	Swap(FAttachmentSwapContextArgs{NewAttachment, NewAttachment->SlotTag});
 
 	if (!QueueingMechanism.IsValid())
@@ -272,7 +274,7 @@ void UAttachmentManagerComponent::OnAttachmentActorRetrieved(FAttachmentToken At
 	}
 }
 
-void UAttachmentManagerComponent::OnAttachmentModifiersRetrieved(FAttachmentModifierToken AttachmentModifierToken)
+void UAttachmentManagerComponent::OnAttachmentModifiersClassRetrieved(FAttachmentModifierToken AttachmentModifierToken)
 {
 	// @gdemers our attachment is fully initialized, and we can move to the next request.
 	const auto OnNextRequestExecuted = [](const TSharedPtr<FAttachmentQueuingMechanism> NewQueueingMechanism,

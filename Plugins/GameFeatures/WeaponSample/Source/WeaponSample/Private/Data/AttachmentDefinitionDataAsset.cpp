@@ -33,7 +33,7 @@ EDataValidationResult UAttachmentModifierDefinitionDataAsset::IsDataValid(class 
 }
 #endif
 
-TArray<FSoftObjectPath> UAttachmentModifierDefinitionDataAsset::GetModifiersSoftObjectPaths() const
+TArray<FSoftObjectPath> UAttachmentModifierDefinitionDataAsset::GetModifiersClassSoftObjectPaths() const
 {
 	TArray<FSoftObjectPath> OutResults;
 	for (const auto& ModifierEffectClass : ModifierEffectClasses)
@@ -63,23 +63,9 @@ TArray<FSoftObjectPath> FAttachmentModifierDefinitionDataTableRow::GetResourcesP
 	return {AttachmentModifierDefinition.ToSoftObjectPath()};
 }
 
-#if WITH_EDITOR
-EDataValidationResult UAttachmentDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
+const FDataRegistryId& UAttachmentDefinitionDataAsset::GetTriggeringAttachmentActorId() const
 {
-	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (TriggeringAttachmentClass.IsNull())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAttachmentDefinitionDataAsset", "", "AttachmentActorClasses Empty!"));
-	}
-
-	return Result;
-}
-#endif
-
-const TSoftClassPtr<ATriggeringAttachmentActor>& UAttachmentDefinitionDataAsset::GetTriggeringAttachmentClass() const
-{
-	return TriggeringAttachmentClass;
+	return TriggeringAttachmentId;
 }
 
 bool UAttachmentDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,

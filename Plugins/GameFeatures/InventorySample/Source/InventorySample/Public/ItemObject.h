@@ -142,7 +142,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath);
+	void OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath);
 
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);

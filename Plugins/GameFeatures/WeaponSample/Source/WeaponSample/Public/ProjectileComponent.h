@@ -52,7 +52,7 @@ protected:
 	          const FTransform& AimTransform) const;
 
 	UFUNCTION()
-	void OnSoftObjectAcquired();
+	void OnProjectileClassAcquired();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

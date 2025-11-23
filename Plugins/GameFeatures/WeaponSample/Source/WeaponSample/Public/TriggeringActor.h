@@ -30,7 +30,6 @@
 #include "TriggeringActor.generated.h"
 
 struct FStreamableHandle;
-struct FTriggeringProperties;
 class UAVVMAbilitySystemComponent;
 class UTriggeringAbility;
 
@@ -70,7 +69,7 @@ protected:
 	void UnRegisterAbility();
 
 	UFUNCTION()
-	void OnSoftObjectAcquired();
+	void OnTriggeringAbilityClassAcquired();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
 	bool bShouldAsyncLoadOnBeginPlay = true;
@@ -91,7 +90,7 @@ protected:
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<AActor> OwningOuter = nullptr;
+	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
 	

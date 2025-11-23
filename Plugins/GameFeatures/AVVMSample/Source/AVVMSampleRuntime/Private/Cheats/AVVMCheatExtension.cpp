@@ -206,8 +206,7 @@ void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult&
 	FStreamableDelegate Callback;
 	Callback.BindUObject(this, &UAVVMCheatExtension::OnSoftObjectAcquired);
 
-	TSharedPtr<FStreamableHandle> OutStreamableHandle = UAssetManager::Get().LoadAssetList(
-		DataTableRow->GetResourcesPaths(), Callback);
+	TSharedPtr<FStreamableHandle> OutStreamableHandle = UAssetManager::Get().LoadAssetList(DataTableRow->GetResourcesPaths(), Callback);
 	AddStreamableHandle(Result.ItemId, OutStreamableHandle);
 }
 

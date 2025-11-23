@@ -41,7 +41,7 @@ void ATriggeringActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto* Outer = GetTypedOuter<AActor>();
+	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -117,7 +117,7 @@ void ATriggeringActor::RegisterAbility()
 	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
 	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
-	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnSoftObjectAcquired);
+	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
 	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({TriggeringAbilityClass.ToSoftObjectPath()});
 }
 
@@ -135,7 +135,7 @@ void ATriggeringActor::UnRegisterAbility()
 	}
 }
 
-void ATriggeringActor::OnSoftObjectAcquired()
+void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 {
 	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
 	if (!TriggeringAbilityClassHandle.IsValid() || !ensureAlwaysMsgf(IsValid(ASC),

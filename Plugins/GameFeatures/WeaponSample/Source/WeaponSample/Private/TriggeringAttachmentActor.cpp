@@ -20,10 +20,10 @@
 #include "TriggeringAttachmentActor.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "AVVMGameplayUtils.h"
 #include "WeaponSample.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 
 void ATriggeringAttachmentActor::BeginPlay()
 {
@@ -154,4 +154,9 @@ void ATriggeringAttachmentActor::UnRegisterGameplayEffects()
 const FDataRegistryId& ATriggeringAttachmentActor::GetAttachmentModifierDefinitionId() const
 {
 	return AttachmentModifierDefinitionId;
+}
+
+UAbilitySystemComponent* ATriggeringAttachmentActor::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }

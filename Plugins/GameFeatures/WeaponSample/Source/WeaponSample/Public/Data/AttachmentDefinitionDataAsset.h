@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
@@ -31,7 +32,6 @@
 
 #include "AttachmentDefinitionDataAsset.generated.h"
 
-class ATriggeringAttachmentActor;
 class UGameplayEffect;
 
 /**
@@ -50,7 +50,7 @@ public:
 #endif
 
 	UFUNCTION(BlueprintCallable)
-	TArray<FSoftObjectPath> GetModifiersSoftObjectPaths() const;
+	TArray<FSoftObjectPath> GetModifiersClassSoftObjectPaths() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
@@ -91,18 +91,15 @@ class WEAPONSAMPLE_API UAttachmentDefinitionDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	const TSoftClassPtr<ATriggeringAttachmentActor>& GetTriggeringAttachmentClass() const;
+	const FDataRegistryId& GetTriggeringAttachmentActorId() const;
 	
 	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
 	                   const FGameplayTagContainer& BlockingTags) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<ATriggeringAttachmentActor> TriggeringAttachmentClass = nullptr;
+	// @gdemers required for supporting AttributeSet initialization of our actor.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
+	FDataRegistryId TriggeringAttachmentId = FDataRegistryId();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;

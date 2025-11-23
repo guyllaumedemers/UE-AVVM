@@ -82,7 +82,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestItems(const AActor* Outer);
 
-	void SetupItems(const TArray<UObject*>& NewResources);
+	void SetupItemObjects(const TArray<UObject*>& NewResources);
 	void SetupItemActors(const TArray<UObject*>& NewResources);
 
 	UFUNCTION(BlueprintCallable)

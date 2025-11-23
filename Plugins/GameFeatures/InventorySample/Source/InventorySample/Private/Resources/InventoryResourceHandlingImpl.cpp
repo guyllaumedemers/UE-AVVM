@@ -62,7 +62,7 @@ TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorC
 
 	if (!OutItems.IsEmpty())
 	{
-		InventoryComponent->SetupItems(OutItems);
+		InventoryComponent->SetupItemObjects(OutItems);
 	}
 
 	if (!OutItemActors.IsEmpty())

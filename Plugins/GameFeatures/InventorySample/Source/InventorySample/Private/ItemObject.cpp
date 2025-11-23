@@ -135,8 +135,8 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()}, {});
 
 	FStreamableDelegate OnRequestItemActorClassComplete;
-	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnSoftObjectAcquired, Callback, ActorDefinitionDataAsset->GetActorAttributeSetSoftObjectPath());
-	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorSoftObjectPath()}, OnRequestItemActorClassComplete);
+	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnItemActorClassAcquired, Callback, ActorDefinitionDataAsset->GetActorAttributeSetClassSoftObjectPath());
+	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorClassSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
 AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* NewAnchor)
@@ -167,7 +167,7 @@ AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* NewAnc
 	return RuntimeItemActor;
 }
 
-void UItemObject::OnSoftObjectAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath)
+void UItemObject::OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath)
 {
 	if (!ItemActorHandle.IsValid())
 	{

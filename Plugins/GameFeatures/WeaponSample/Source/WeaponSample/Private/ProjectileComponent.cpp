@@ -101,12 +101,12 @@ void UProjectileComponent::SetupProjectiles(const TArray<UObject*>& NewResources
 
 	if (!DeferredItems.IsEmpty())
 	{
-		const auto Callback = FStreamableDelegate::CreateUObject(this, &UProjectileComponent::OnSoftObjectAcquired);
+		const auto Callback = FStreamableDelegate::CreateUObject(this, &UProjectileComponent::OnProjectileClassAcquired);
 		StreamableHandle = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
 	}
 }
 
-void UProjectileComponent::OnSoftObjectAcquired()
+void UProjectileComponent::OnProjectileClassAcquired()
 {
 	if (!StreamableHandle.IsValid())
 	{

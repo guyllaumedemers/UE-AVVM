@@ -73,12 +73,12 @@ TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
 	return Result;
 }
 
-const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorSoftObjectPath() const
+const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorClassSoftObjectPath() const
 {
 	return bDoesSupportActorOverride ? OverrideActorClass.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
 }
 
-const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorAttributeSetSoftObjectPath() const
+const FSoftObjectPath& UAVVMActorDefinitionDataAsset::GetActorAttributeSetClassSoftObjectPath() const
 {
 	return bDoesSupportAttributeSet ? ActorAttributeSet.ToSoftObjectPath() : NSAVVMGlobals::EmptySOPath;
 }

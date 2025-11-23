@@ -175,7 +175,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	}
 }
 
-void UActorInventoryComponent::SetupItems(const TArray<UObject*>& NewResources)
+void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))

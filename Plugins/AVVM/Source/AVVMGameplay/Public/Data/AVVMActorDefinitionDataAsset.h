@@ -49,8 +49,8 @@ public:
 #endif
 
 	TArray<FDataRegistryId> GetActorTraitIds() const;
-	const FSoftObjectPath& GetActorSoftObjectPath() const;
-	const FSoftObjectPath& GetActorAttributeSetSoftObjectPath() const;
+	const FSoftObjectPath& GetActorClassSoftObjectPath() const;
+	const FSoftObjectPath& GetActorAttributeSetClassSoftObjectPath() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))

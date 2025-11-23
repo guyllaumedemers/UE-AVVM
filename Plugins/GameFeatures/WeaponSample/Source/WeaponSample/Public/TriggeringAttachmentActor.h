@@ -21,24 +21,25 @@
 
 #include "CoreMinimal.h"
 
+#include "AbilitySystemInterface.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "DataRegistryId.h"
-#include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 
 #include "TriggeringAttachmentActor.generated.h"
+
+class UAVVMAbilitySystemComponent;
 
 /**
  *	Class description:
  *
  *	UTriggeringAttachmentComponent is an attachment system that extends the Outer Actor and can be invalidated
  *	during Unequip phase if required (since they are children of the actor with Authoritative state).
- *
- *	TODO @gdemers Currently doesn't have a way to prevent calling _AddComponent on an Actor that's not a ATriggeringActor
- *	but will add proper validation later for this case.
  */
 UCLASS(BlueprintType, Blueprintable)
-class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AActor
+class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AActor,
+                                                    public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -60,9 +61,15 @@ public:
 	void UnRegisterGameplayEffects();
 
 	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& GetAttachmentModifierDefinitionId() const; 
+	const FDataRegistryId& GetAttachmentModifierDefinitionId() const;
+
+	// @gdemers IAbilitySystemInterface
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
+	// @gdemers IMPORTANT : Attachment modifier impact the weapon or player (example : adds weight),
+	// which is what this registry id handle. While the AttributeSet referenced from its AVVMActorDefinition representation
+	// handle properties specific to the attachment itself.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AttachmentModifierDefinitionDataTableRow"))
 	FDataRegistryId AttachmentModifierDefinitionId = FDataRegistryId();
 
@@ -72,7 +79,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName SocketName = NAME_None;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)

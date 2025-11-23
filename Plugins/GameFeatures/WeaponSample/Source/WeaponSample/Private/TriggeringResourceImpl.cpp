@@ -23,6 +23,7 @@
 #include "AVVMGameplayUtils.h"
 #include "ProjectileComponent.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
+#include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Data/TriggeringDefinitionDataAsset.h"
 
@@ -50,6 +51,13 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 
 		const auto* AttachmentDefinition = Cast<UAttachmentDefinitionDataAsset>(Resource);
 		if (IsValid(AttachmentDefinition))
+		{
+			OutResources.Add(AttachmentDefinition->GetTriggeringAttachmentActorId());
+			continue;
+		}
+
+		const auto* AttachmentActorDefinition = Cast<UAVVMActorDefinitionDataAsset>(Resource);
+		if (IsValid(AttachmentActorDefinition))
 		{
 			OutAttachmentDefinition.Add(Resource);
 			continue;
