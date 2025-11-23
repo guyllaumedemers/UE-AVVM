@@ -37,7 +37,6 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutAttachmentDefinition;
-	TArray<UObject*> OutAttachmentModifierDefinition;
 	TArray<UObject*> OutProjectileDefinition;
 
 	for (UObject* Resource : Resources)
