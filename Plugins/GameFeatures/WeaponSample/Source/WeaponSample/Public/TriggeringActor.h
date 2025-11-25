@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMModularActor.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
@@ -39,7 +40,7 @@ class UTriggeringAbility;
  *	ATriggeringActor is a triggering system that executes behaviour such as triggering or targeting.
  */
 UCLASS(BlueprintType, Blueprintable)
-class WEAPONSAMPLE_API ATriggeringActor : public AActor,
+class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMResourceProvider
 {

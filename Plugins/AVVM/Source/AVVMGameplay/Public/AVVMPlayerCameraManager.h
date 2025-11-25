@@ -34,6 +34,7 @@ class AVVMGAMEPLAY_API AAVVMPlayerCameraManager : public APlayerCameraManager
 	GENERATED_BODY()
 
 public:
+	AAVVMPlayerCameraManager(const FObjectInitializer& ObjectInitializer);
 	// @gdemers modify the output of APlayerController::UpdateRotation
 	// Check to use CameraModifiers
 	virtual void ProcessViewRotation(float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot) override;

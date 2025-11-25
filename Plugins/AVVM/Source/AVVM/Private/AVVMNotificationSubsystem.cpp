@@ -274,7 +274,10 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(cons
 
 void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::ExecuteDeferredNotifications()
 {
-	for (auto Iterator = PendingRequests.CreateIterator(); Iterator; ++Iterator)
+	TArray<FAVVMNotificationContextArgs> OldPendingRequests = PendingRequests;
+	PendingRequests.Reset();
+
+	for (auto Iterator = OldPendingRequests.CreateIterator(); Iterator; ++Iterator)
 	{
 		const FAVVMNotificationContextArgs OldCtxArgs = *Iterator;
 		Iterator.RemoveCurrentSwap();

@@ -30,10 +30,12 @@
 ANonReplicatedProjectileActor::ANonReplicatedProjectileActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	// @gdemers Our current solution involve projectile simulation on both server, and client. (separate, later with validation)
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.bAllowTickBatching = true;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
+	SetReplicateMovement(false);
 	bReplicates = false;
 }
 

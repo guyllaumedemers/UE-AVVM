@@ -57,6 +57,7 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent
 	};
 
 public:
+	UAVVMAbilityInputComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

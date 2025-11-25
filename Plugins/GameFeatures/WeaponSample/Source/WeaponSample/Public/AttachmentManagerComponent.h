@@ -78,6 +78,7 @@ class WEAPONSAMPLE_API UAttachmentManagerComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UAttachmentManagerComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

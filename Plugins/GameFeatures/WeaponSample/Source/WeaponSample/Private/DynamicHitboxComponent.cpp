@@ -28,7 +28,9 @@ UDynamicHitboxComponent::UDynamicHitboxComponent(const FObjectInitializer& Objec
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
+	PrimaryComponentTick.bAllowTickBatching = true;
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = true;
+	SetIsReplicatedByDefault(true);
 }
 
 void UDynamicHitboxComponent::BeginPlay()

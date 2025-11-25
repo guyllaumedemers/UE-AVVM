@@ -35,4 +35,7 @@ UCLASS()
 class WEAPONSAMPLE_API ANonReplicatedExplosionActor : public AActor
 {
 	GENERATED_BODY()
+	
+public:
+	ANonReplicatedExplosionActor(const FObjectInitializer& ObjectInitializer);
 };

@@ -31,6 +31,16 @@
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 
+UAttachmentManagerComponent::UAttachmentManagerComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bAllowTickBatching = false;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+	SetIsReplicatedByDefault(false);
+}
+
 void UAttachmentManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();

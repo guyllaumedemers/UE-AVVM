@@ -73,6 +73,7 @@ class AVVMGAMEPLAY_API AAVVMGameMode : public AModularGameMode,
 	GENERATED_BODY()
 
 public:
+	AAVVMGameMode(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

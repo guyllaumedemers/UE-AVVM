@@ -30,6 +30,16 @@
 
 TRACE_DECLARE_INT_COUNTER(UAVVMAbilitySystemComponent_InstanceCounter, TEXT("Ability System Component Instance Counter"));
 
+UAVVMAbilitySystemComponent::UAVVMAbilitySystemComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = true;
+	PrimaryComponentTick.bAllowTickBatching = true;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = true;
+	SetIsReplicatedByDefault(true);
+}
+
 void UAVVMAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();

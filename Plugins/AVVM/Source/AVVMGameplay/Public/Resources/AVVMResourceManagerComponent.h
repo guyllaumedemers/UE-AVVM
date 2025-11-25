@@ -54,6 +54,7 @@ class AVVMGAMEPLAY_API UAVVMResourceManagerComponent : public UActorComponent
 	DECLARE_DELEGATE(FOnAsyncLoadingRequestDeferred);
 
 public:
+	UAVVMResourceManagerComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

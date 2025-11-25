@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMModularActor.h"
 #include "GameplayTagContainer.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
@@ -35,13 +36,14 @@
  *	during Unequip phase if required (since they are children of the actor with Authoritative state).
  */
 UCLASS(BlueprintType, Blueprintable)
-class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AActor,
+class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AAVVMModularActor,
                                                     public IAbilitySystemInterface,
                                                     public IAVVMDoesOwnAttributeSet
 {
 	GENERATED_BODY()
 
 public:
+	ATriggeringAttachmentActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

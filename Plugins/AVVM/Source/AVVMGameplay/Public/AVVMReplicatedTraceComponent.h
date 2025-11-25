@@ -17,28 +17,49 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-
 #pragma once
 
 #include "CoreMinimal.h"
 
 #include "Components/ActorComponent.h"
 
-#include "TeamStartComponent.generated.h"
+#include "AVVMReplicatedTraceComponent.generated.h"
 
 /**
  *	Class description:
- *
- *	UTeamStartComponent is a AAVVMModularPlayerStart component thats added via GFP, and act
- *	on spawn request based on GameMode Start point lookup in AGameModeBase::FindPlayerStart and AGameModeBase::ChoosePlayerStart.
+ *	
+ *	FAVVMReplicatedTrace is a context struct that encapsulate trace information.
  */
-UCLASS()
-class TEAMSAMPLE_API UTeamStartComponent : public UActorComponent
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMReplicatedTrace
 {
 	GENERATED_BODY()
+};
 
+/**
+ *	Class description:
+ *	
+ *	UAVVMReplicatedTraceComponent is a general purpose component for tracing in world based on requirements
+ *	defined by the owning Outer.
+ */
+UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class AVVMGAMEPLAY_API UAVVMReplicatedTraceComponent : public UActorComponent
+{
+	GENERATED_BODY()
+	
 public:
-	UTeamStartComponent(const FObjectInitializer& ObjectInitializer);
+	UAVVMReplicatedTraceComponent(const FObjectInitializer& ObjectInitializer);
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+protected:
+	// @gdemers trace generated onTick
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	TArray<FAVVMReplicatedTrace> TickTraces;
+
+	// @gdemers trace generated via input
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	TArray<FAVVMReplicatedTrace> BurstTraces;
 };

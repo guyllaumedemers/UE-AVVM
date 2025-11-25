@@ -22,6 +22,17 @@
 #include "AVVMWorldSetting.h"
 #include "GameFramework/GameState.h"
 
+AAVVMGameMode::AAVVMGameMode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bAllowTickBatching = true;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
+	SetReplicateMovement(false);
+	bReplicates = false;
+}
+
 void AAVVMGameMode::BeginPlay()
 {
 	Super::BeginPlay();

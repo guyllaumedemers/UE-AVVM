@@ -43,6 +43,7 @@ class AVVMGAMEPLAY_API UAVVMGameStateHandshakeComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UAVVMGameStateHandshakeComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	

@@ -32,6 +32,11 @@ AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)
 {
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
 
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bAllowTickBatching = true;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
+	SetReplicateMovement(true);
 	bReplicates = true;
 }
 

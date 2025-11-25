@@ -32,6 +32,12 @@ AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
 {
 	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("ASC"));
 	
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickBatching = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
+	// TODO @gdemers PC movement are replicated, but disabling this may cause issue later. be aware!
+	SetReplicateMovement(false);
 	bReplicates = true;
 }
 

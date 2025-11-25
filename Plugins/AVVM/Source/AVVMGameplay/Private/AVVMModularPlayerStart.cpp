@@ -21,6 +21,17 @@
 
 #include "Components/GameFrameworkComponentManager.h"
 
+AAVVMModularPlayerStart::AAVVMModularPlayerStart(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickBatching = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
+	SetReplicateMovement(false);
+	bReplicates = false;
+}
+
 void AAVVMModularPlayerStart::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();

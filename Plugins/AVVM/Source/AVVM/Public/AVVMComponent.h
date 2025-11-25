@@ -40,6 +40,7 @@ class AVVM_API UAVVMComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UAVVMComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

@@ -32,4 +32,7 @@ UCLASS()
 class AVVMGAMEPLAY_API AAVVMPlayerController : public AModularPlayerController
 {
 	GENERATED_BODY()
+	
+public:
+	AAVVMPlayerController(const FObjectInitializer& ObjectInitializer);
 };

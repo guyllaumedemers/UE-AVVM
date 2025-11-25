@@ -33,6 +33,11 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_GAMESTATE_MATCH_LEAVINGMAP, "GameState.Match.LeavingM
 AAVVMGameState::AAVVMGameState(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickBatching = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
+	SetReplicateMovement(false);
 	bReplicates = true;
 }
 
@@ -48,7 +53,7 @@ void AAVVMGameState::AddPlayerState(APlayerState* PlayerState)
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
 	ContextArgs.Payload = FAVVMNotificationPayload::Make<FAVVMPlayerStatePayload>(PlayerState, true);
-	ContextArgs.Target = nullptr;
+	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
@@ -59,7 +64,7 @@ void AAVVMGameState::RemovePlayerState(APlayerState* PlayerState)
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
 	ContextArgs.Payload = FAVVMNotificationPayload::Make<FAVVMPlayerStatePayload>(PlayerState, false);
-	ContextArgs.Target = nullptr;
+	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
@@ -70,7 +75,7 @@ void AAVVMGameState::HandleMatchIsWaitingToStart()
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_WAITING;
 	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
-	ContextArgs.Target = nullptr;
+	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
@@ -81,7 +86,7 @@ void AAVVMGameState::HandleMatchHasStarted()
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_STARTED;
 	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
-	ContextArgs.Target = nullptr;
+	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
@@ -92,7 +97,7 @@ void AAVVMGameState::HandleMatchHasEnded()
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_ENDED;
 	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
-	ContextArgs.Target = nullptr;
+	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
@@ -103,6 +108,6 @@ void AAVVMGameState::HandleLeavingMap()
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_GAMESTATE_MATCH_LEAVINGMAP;
 	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
-	ContextArgs.Target = nullptr;
+	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }

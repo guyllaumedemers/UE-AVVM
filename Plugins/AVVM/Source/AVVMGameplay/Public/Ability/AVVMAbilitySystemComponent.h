@@ -61,6 +61,7 @@ class AVVMGAMEPLAY_API UAVVMAbilitySystemComponent : public UAbilitySystemCompon
 	GENERATED_BODY()
 
 public:
+	UAVVMAbilitySystemComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

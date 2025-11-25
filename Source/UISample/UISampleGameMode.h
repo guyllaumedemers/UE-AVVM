@@ -31,5 +31,5 @@ class UISAMPLE_API AUISampleGameMode : public AAVVMGameMode
 	GENERATED_BODY()
 
 public:
-	AUISampleGameMode();
+	AUISampleGameMode(const FObjectInitializer& ObjectInitializer);
 };

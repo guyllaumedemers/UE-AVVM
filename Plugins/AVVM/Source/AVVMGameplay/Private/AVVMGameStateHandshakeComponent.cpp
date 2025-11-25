@@ -28,6 +28,16 @@
 
 TRACE_DECLARE_INT_COUNTER(UAVVMGameStateHandshakeComponent_InstanceCounter, TEXT("GameState Handshake Component Instance Counter"));
 
+UAVVMGameStateHandshakeComponent::UAVVMGameStateHandshakeComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bAllowTickBatching = false;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+	SetIsReplicatedByDefault(false);
+}
+
 void UAVVMGameStateHandshakeComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -92,5 +102,6 @@ void UAVVMGameStateHandshakeComponent::ProcessHandshake(const TInstancedStruct<F
                                                         const FOnHandshakeRequestComplete& NewCallback) const
 {
 	// TODO @gdemers Add validtion impl details here!
+	// This is really incomplete! Finish it!
 	NewCallback.ExecuteIfBound(true, NewHandshakePayload);
 }

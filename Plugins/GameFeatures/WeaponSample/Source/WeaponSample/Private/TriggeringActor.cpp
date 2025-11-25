@@ -34,6 +34,12 @@ ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
 	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("MAbilitySystemComponent"));
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
 
+	// @gdemers if tick is required, start an AbilityTask_Tick, and kill the process on completion.
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickBatching = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
+	SetReplicateMovement(true);
 	bReplicates = true;
 }
 

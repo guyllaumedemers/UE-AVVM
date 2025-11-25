@@ -18,3 +18,14 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMPlayerController.h"
+
+AAVVMPlayerController::AAVVMPlayerController(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bAllowTickBatching = true;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
+	SetReplicateMovement(true);
+	bReplicates = true;
+}

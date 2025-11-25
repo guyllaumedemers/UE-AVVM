@@ -42,6 +42,7 @@ class WEAPONSAMPLE_API UProjectileComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UProjectileComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

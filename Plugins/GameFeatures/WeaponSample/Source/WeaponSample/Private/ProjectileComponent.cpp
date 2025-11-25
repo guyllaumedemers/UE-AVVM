@@ -27,6 +27,16 @@
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 
+UProjectileComponent::UProjectileComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bAllowTickBatching = false;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+	SetIsReplicatedByDefault(false);
+}
+
 void UProjectileComponent::BeginPlay()
 {
 	Super::BeginPlay();

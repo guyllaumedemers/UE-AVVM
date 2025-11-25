@@ -42,6 +42,7 @@ class FENCINGSAMPLE_API UActorFenceComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UActorFenceComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

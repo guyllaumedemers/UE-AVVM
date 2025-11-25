@@ -26,6 +26,16 @@
 // @gdemers extern symbol for global access to custom LLM_tag
 extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
 
+UAVVMComponent::UAVVMComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bAllowTickBatching = false;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+	SetIsReplicatedByDefault(false);
+}
+
 void UAVVMComponent::BeginPlay()
 {
 	Super::BeginPlay();

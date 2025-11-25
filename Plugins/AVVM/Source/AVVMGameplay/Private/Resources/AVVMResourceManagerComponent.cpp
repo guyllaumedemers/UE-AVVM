@@ -123,6 +123,16 @@ const FOnResourceAsyncLoadingComplete& UAVVMResourceManagerComponent::FResourceQ
 	return CompletionDelegate;
 }
 
+UAVVMResourceManagerComponent::UAVVMResourceManagerComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bAllowTickBatching = false;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+	SetIsReplicatedByDefault(false);
+}
+
 void UAVVMResourceManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();

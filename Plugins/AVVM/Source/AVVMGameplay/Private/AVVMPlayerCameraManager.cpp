@@ -19,6 +19,17 @@
 //SOFTWARE.
 #include "AVVMPlayerCameraManager.h"
 
+AAVVMPlayerCameraManager::AAVVMPlayerCameraManager(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bAllowTickBatching = true;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
+	SetReplicateMovement(true);
+	bReplicates = true;
+}
+
 void AAVVMPlayerCameraManager::ProcessViewRotation(float DeltaTime, FRotator& OutViewRotation, FRotator& OutDeltaRot)
 {
 	Super::ProcessViewRotation(DeltaTime, OutViewRotation, OutDeltaRot);

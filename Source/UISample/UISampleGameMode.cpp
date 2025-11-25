@@ -21,7 +21,8 @@
 
 #include "UObject/ConstructorHelpers.h"
 
-AUISampleGameMode::AUISampleGameMode()
+AUISampleGameMode::AUISampleGameMode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));

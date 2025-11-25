@@ -37,6 +37,7 @@ class AVVMGAMEPLAY_API AAVVMModularPlayerStart : public APlayerStart
 	GENERATED_BODY()
 
 public:
+	AAVVMModularPlayerStart(const FObjectInitializer& ObjectInitializer);
 	//~ Begin AActor interface
 	virtual void PreInitializeComponents() override;
 	virtual void BeginPlay() override;

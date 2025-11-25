@@ -17,29 +17,39 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "TeamStartComponent.h"
+#include "AVVMReplicatedTraceComponent.h"
 
-#include "TeamSpawnSubsystem.h"
+#include "Net/UnrealNetwork.h"
 
-UTeamStartComponent::UTeamStartComponent(const FObjectInitializer& ObjectInitializer)
+UAVVMReplicatedTraceComponent::UAVVMReplicatedTraceComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-	PrimaryComponentTick.bAllowTickBatching = false;
-	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
-	// @gdemers server only. if you change this, you are doing it wrong.
-	SetIsReplicatedByDefault(false);
+	PrimaryComponentTick.bAllowTickBatching = true;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = true;
+	SetIsReplicatedByDefault(true);
 }
 
-void UTeamStartComponent::BeginPlay()
+void UAVVMReplicatedTraceComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UAVVMReplicatedTraceComponent, TickTraces);
+	DOREPLIFETIME(UAVVMReplicatedTraceComponent, BurstTraces);
+}
+
+void UAVVMReplicatedTraceComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	UTeamSpawnSubsystem::Static_RegisterPlayerStart(GetWorld(), this);
 }
 
-void UTeamStartComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UAVVMReplicatedTraceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	UTeamSpawnSubsystem::Static_UnRegisterPlayerStart(GetWorld(), this);
+}
+
+void UAVVMReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }

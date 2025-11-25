@@ -19,3 +19,13 @@
 //SOFTWARE.
 #include "NonReplicatedExplosionActor.h"
 
+ANonReplicatedExplosionActor::ANonReplicatedExplosionActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickBatching = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
+	SetReplicateMovement(false);
+	bReplicates = false;
+}

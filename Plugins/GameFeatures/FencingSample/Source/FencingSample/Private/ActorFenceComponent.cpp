@@ -25,6 +25,16 @@
 #include "FenceManagerSubsystem.h"
 #include "GameFramework/Actor.h"
 
+UActorFenceComponent::UActorFenceComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+	PrimaryComponentTick.bAllowTickBatching = false;
+	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+	SetIsReplicatedByDefault(false);
+}
+
 void UActorFenceComponent::BeginPlay()
 {
 	Super::BeginPlay();

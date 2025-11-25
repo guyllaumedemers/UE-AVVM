@@ -24,6 +24,18 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 
+ATriggeringAttachmentActor::ATriggeringAttachmentActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	// @gdemers if tick is required, start an AbilityTask_Tick, and kill the process on completion.
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickBatching = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
+	SetReplicateMovement(true);
+	bReplicates = true;
+}
+
 void ATriggeringAttachmentActor::BeginPlay()
 {
 	Super::BeginPlay();
