@@ -18,9 +18,3 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "InventoryProvider.h"
-
-int32 UInventoryHandlingBlueprintFunctionLibrary::GetItemProgressionStageIndex(const UItemObject* NewItem)
-{
-	// TODO @gdemers Implement behaviour for fetching progression index
-	return INDEX_NONE;
-}

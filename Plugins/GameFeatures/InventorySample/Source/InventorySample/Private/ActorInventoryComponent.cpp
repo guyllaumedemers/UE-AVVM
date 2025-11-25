@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 
-#include "ActorItemProgressionComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMUtils.h"
@@ -501,27 +500,6 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		{
 			ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath, ItemActor);
 		}
-	}
-
-	// @gdemers early out if the owning actor isnt suppose to inject modifier based on progression, and rely solely on the
-	// AttributeSet configured.
-	const bool bDoesSupportProgression = IInventoryProvider::Execute_DoesSupportProgression(Outer, NewItemObject);
-	if (!bDoesSupportProgression)
-	{
-		return;
-	}
-
-	// @gdemers inject Progression component onto Actor to allow progression overrides of the AttributeSet via GameplayEffects.
-	auto* ItemProgressionComponent = Cast<UActorItemProgressionComponent>(ItemActor->AddComponentByClass(UActorItemProgressionComponent::StaticClass(),
-	                                                                                                     true,
-	                                                                                                     FTransform::Identity,
-	                                                                                                     false));
-	if (ensureAlwaysMsgf(IsValid(ItemProgressionComponent),
-	                     TEXT("Failed to Attach new Component for Progression handling.")))
-	{
-		const int32 NewProgressionIndex = IInventoryProvider::Execute_GetProgressionStageIndex(Outer, NewItemObject);
-		ItemProgressionComponent->SetProgressionIndex(NewProgressionIndex);
-		ItemProgressionComponent->RequestItemProgression(NewItemObject->GetItemProgressionId());
 	}
 }
 

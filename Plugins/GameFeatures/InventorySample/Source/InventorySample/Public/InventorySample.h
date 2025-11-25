@@ -49,6 +49,10 @@ INVENTORYSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogInventorySample, Log, All);
  *			* or just displaying UPlayer 1 inventory in a singular window context.
  *
  *	Note : This system expect to make direct calls to the HandshakeSample GFP for running validations!
+ *	
+ *			IMPORTANT : DO NOT IMPLEMENT AN ITEM PROGRESSION SYSTEM! (This case is handled for you.)
+ *	
+ *	Note : Item Progression are managed via the Item AttributeSet, and the reference Data Table it's initialized from!
  */
 class FInventorySampleModule : public IModuleInterface
 {

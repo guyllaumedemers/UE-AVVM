@@ -29,11 +29,6 @@
       "LoadingPhase": "Default"
     },
     {
-      "Name": "InventoryProgressionSample",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
       "Name": "InventoryStorageSample",
       "Type": "Runtime",
       "LoadingPhase": "Default"

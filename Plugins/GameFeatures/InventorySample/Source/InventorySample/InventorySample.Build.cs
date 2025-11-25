@@ -48,7 +48,6 @@ public class InventorySample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"InventoryProgressionSample",
 				"Json",
 			}
 		);
