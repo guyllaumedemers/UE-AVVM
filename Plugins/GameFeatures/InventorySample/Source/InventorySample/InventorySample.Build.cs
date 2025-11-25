@@ -25,6 +25,7 @@ public class InventorySample : ModuleRules
 	public InventorySample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -40,7 +41,6 @@ public class InventorySample : ModuleRules
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",
-				"IrisCore",
 				"ModelViewViewModel"
 			}
 		);

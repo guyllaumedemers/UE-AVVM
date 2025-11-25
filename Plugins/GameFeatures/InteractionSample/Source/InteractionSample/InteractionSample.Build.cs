@@ -25,6 +25,7 @@ public class InteractionSample : ModuleRules
 	public InteractionSample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -39,7 +40,6 @@ public class InteractionSample : ModuleRules
 				"GameplayAbilities",
 				"GameplayTags",
 				"GameplayTasks",
-				"IrisCore",
 				"ModelViewViewModel",
 				"UIExtension",
 				"UMG"

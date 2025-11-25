@@ -28,10 +28,6 @@
     {
       "Name": "AVVM",
       "Enabled": true
-    },
-    {
-      "Name": "Iris",
-      "Enabled": true
     }
   ]
 }

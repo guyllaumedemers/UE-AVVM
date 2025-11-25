@@ -25,6 +25,7 @@ public class TeamSample : ModuleRules
 	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		SetupIrisSupport(Target);
 
 		if (Target.bBuildEditor)
 		{
@@ -41,7 +42,6 @@ public class TeamSample : ModuleRules
 				"CoreUObject",
 				"DeveloperSettings",
 				"Engine",
-				"IrisCore",
 				"GameplayTags",
 			}
 		);

@@ -25,6 +25,7 @@ public class TransactionSample : ModuleRules
 	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		SetupIrisSupport(Target);
 
 		if (Target.bBuildEditor)
 		{
@@ -40,7 +41,6 @@ public class TransactionSample : ModuleRules
 				"CoreUObject",
 				"DeveloperSettings",
 				"Engine",
-				"IrisCore"
 			}
 		);
 
