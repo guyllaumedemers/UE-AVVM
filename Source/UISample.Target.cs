@@ -30,6 +30,7 @@ public class UISampleTarget : TargetRules
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
 		ExtraModuleNames.Add("UISample");
 
+		bUseIris = true;
 		bBuildDeveloperTools = false;
 		RegisterModulesCreatedByRider();
 	}
