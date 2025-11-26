@@ -65,9 +65,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	void SetupAbilities(const TArray<UObject*>& Resources);
 	void SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath, AActor* AttributeSetOwner);
-
 	void RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner);
 	void UnRegisterAttributeSet(const AActor* AttributeSetOwner);
 
@@ -88,4 +86,9 @@ protected:
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
 	TSharedPtr<FStreamableHandle> AttributeSetHandle = nullptr;
+
+private:
+	void SetupAbilities(const TArray<UObject*>& Resources);
+
+	friend class UAVVMAbilityResourceHandlingImpl;
 };

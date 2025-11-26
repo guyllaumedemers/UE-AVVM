@@ -85,8 +85,6 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Swap(const FAttachmentSwapContextArgs& NewAttachmentSwapContext);
 
-	void SetupAttachments(const TArray<UObject*>& NewResources);
-
 protected:
 	UFUNCTION()
 	void OnAttachmentActorClassRetrieved(FAttachmentToken AttachmentToken, TArray<FSoftObjectPath> AttributeSoftObjectPaths);
@@ -111,4 +109,9 @@ protected:
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
 	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;
+	
+private:
+	void SetupAttachments(const TArray<UObject*>& NewResources);
+	
+	friend class UTriggeringResourceImpl;
 };

@@ -82,9 +82,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestItems(const AActor* Outer);
 
-	void SetupItemObjects(const TArray<UObject*>& NewResources);
-	void SetupItemActors(const TArray<UObject*>& NewResources);
-
 	UFUNCTION(BlueprintCallable)
 	const TArray<UItemObject*>& GetItems() const;
 
@@ -148,4 +145,10 @@ protected:
 	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
 	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism = nullptr;
 	TSharedPtr<FStreamableHandle> LoadoutHandle = nullptr;
+
+private:
+	void SetupItemObjects(const TArray<UObject*>& NewResources);
+	void SetupItemActors(const TArray<UObject*>& NewResources);
+
+	friend class UInventoryResourceHandlingImpl;
 };

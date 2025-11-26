@@ -46,12 +46,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	void SetupProjectiles(const TArray<UObject*>& NewResources);
-
-protected:
 	void Fire(const FGameplayTag& FiringModeTag,
 	          const FTransform& AimTransform) const;
 
+protected:
 	UFUNCTION()
 	void OnProjectileClassAcquired();
 
@@ -67,5 +65,8 @@ protected:
 	TMap<FGameplayTag, FProjectileFiringMode> ProjectileTemplates;
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 
-	friend class AWeaponActor_Range;
+private:
+	void SetupProjectiles(const TArray<UObject*>& NewResources);
+
+	friend class UTriggeringResourceImpl;
 };
