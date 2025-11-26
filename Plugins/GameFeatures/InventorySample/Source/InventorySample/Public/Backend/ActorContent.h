@@ -87,10 +87,6 @@ struct INVENTORYSAMPLE_API FItemHolder
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FAVVMPlayerResource.UniqueId}.
-	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 ResourceId = INDEX_NONE;
-
 	// @gdemers {FItem.UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<int32> ItemIds;

@@ -32,8 +32,7 @@ bool FItemProxy::operator==(const FItemProxy& Rhs) const
 
 bool FItemHolderProxy::operator==(const FItemHolderProxy& Rhs) const
 {
-	return (ResourceId.Equals(Rhs.ResourceId))
-			&& (ItemValues == Rhs.ItemValues);
+	return (ItemValues == Rhs.ItemValues);
 }
 
 bool FActorContentProxy::operator==(const FActorContentProxy& Rhs) const

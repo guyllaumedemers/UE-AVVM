@@ -35,8 +35,7 @@ bool FItem::operator==(const FItem& Rhs) const
 bool FItemHolder::operator==(const FItemHolder& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
-			&& (ItemIds == Rhs.ItemIds)
-			&& (ResourceId == Rhs.ResourceId);
+			&& (ItemIds == Rhs.ItemIds);
 }
 
 bool FActorContent::operator==(const FActorContent& Rhs) const

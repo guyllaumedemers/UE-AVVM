@@ -223,7 +223,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistryId}, {Any information about a Resource}, i.e {Price}, {ResellPrice}, {Stats}, {MaxCapacity}, etc...
+	// @gdemers {FDataRegistryId}, {Any information about a Resource}, i.e {Price}, {ResellPrice}, {Stats}, {MaxCapacity}, {CanStack}, etc...
 	// Note : Live Services may have an actual POD that defines the properties from an excel sheet or something instead
 	// of RegistryId.
 	UPROPERTY(Transient, BlueprintReadWrite)

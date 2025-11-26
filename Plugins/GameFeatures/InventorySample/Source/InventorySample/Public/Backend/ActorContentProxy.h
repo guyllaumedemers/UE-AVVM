@@ -85,10 +85,6 @@ struct INVENTORYSAMPLE_API FItemHolderProxy
 	UPROPERTY(Transient, BlueprintType)
 	int32 UniqueId = INDEX_NONE;
 
-	// @gdemers {FDataRegistryId}
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FString ResourceId = FString();
-
 	// @gdemers {FItemProxy}
 	UPROPERTY(Transient, BlueprintType)
 	TArray<FString> ItemValues;
