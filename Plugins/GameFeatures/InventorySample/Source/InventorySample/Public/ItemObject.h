@@ -132,7 +132,7 @@ public:
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
 	UFUNCTION(BlueprintCallable)
-	AActor* SpawnActorClass(const UClass* NewActorClass, AActor* NewAnchor);
+	AActor* SpawnActorClass(const UClass* NewActorClass, AActor* Outer);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;

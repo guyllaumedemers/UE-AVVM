@@ -23,11 +23,26 @@
 
 #include "AbilitySystemInterface.h"
 #include "AVVMModularActor.h"
+#include "AVVMSocketTargetingHelper.h"
 #include "GameplayTagContainer.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
 
 #include "TriggeringAttachmentActor.generated.h"
+
+/**
+ *	Class description:
+ *	
+ *	FModSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
+ *	on the known root actor (i.e ACharacter).
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FModSocketTargetingHelper : public FAVVMSocketTargetingHelper
+{
+	GENERATED_BODY()
+
+	virtual AActor* GetDesiredTypedOuter(AActor* Src) const override;
+};
 
 /**
  *	Class description:
@@ -38,7 +53,8 @@
 UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AAVVMModularActor,
                                                     public IAbilitySystemInterface,
-                                                    public IAVVMDoesOwnAttributeSet
+                                                    public IAVVMDoesOwnAttributeSet,
+                                                    public IDoesSupportSocketTargeting
 {
 	GENERATED_BODY()
 
@@ -58,6 +74,9 @@ public:
 
 	// @gdemers IAVVMDoesOwnAttributeSet
 	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
+	
+	// @gdemers IDoesSupportSocketTargeting
+	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")

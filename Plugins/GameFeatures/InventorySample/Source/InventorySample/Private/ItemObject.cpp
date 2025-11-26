@@ -20,6 +20,7 @@
 #include "ItemObject.h"
 
 #include "AVVMGameplayUtils.h"
+#include "AVVMSocketTargetingHelper.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
@@ -139,14 +140,14 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorClassSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
-AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* NewAnchor)
+AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* Outer)
 {
 	if (!IsValid(NewActorClass))
 	{
 		return nullptr;
 	}
 
-	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), NewActorClass, NewAnchor);
+	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), NewActorClass, Outer);
 
 	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
 	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
@@ -154,14 +155,16 @@ AActor* UItemObject::SpawnActorClass(const UClass* NewActorClass, AActor* NewAnc
 	UE_LOG(LogInventorySample,
 	       Log,
 	       TEXT("Executed from \"%s\". Adding New Visual Actor \"%s\" on Item \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(NewAnchor).GetData(),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *RuntimeItemActor->GetName(),
 	       *GetName());
 
 	if (bShouldSpawnAndAttach && ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                                              TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
-		RuntimeItemActor->AttachToActor(NewAnchor, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		// @gdemers We use this so we can handle more complex case that require traversal of our root actor
+		// to find attached actors, and used them as targets.
+		FAVVMSocketTargetingHelper::AttachToActor(RuntimeItemActor, Outer, SocketName);
 	}
 
 	return RuntimeItemActor;

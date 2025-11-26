@@ -20,9 +20,30 @@
 #include "TriggeringAttachmentActor.h"
 
 #include "AVVMGameplayUtils.h"
+#include "TriggeringActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+
+AActor* FModSocketTargetingHelper::GetDesiredTypedOuter(AActor* Src) const
+{
+	if (!IsValid(Src))
+	{
+		return Src;
+	}
+
+	TArray<AActor*> Children;
+	Src->GetAttachedActors(Children);
+
+	AActor** SearchResult = Children.FindByPredicate([](const AActor* Actor)
+	{
+		// @gdemers We can further define this later so to narrow the search with more granular constraint.
+		const auto* TriggeringActor = Cast<ATriggeringActor>(Actor);
+		return IsValid(TriggeringActor);
+	});
+
+	return (SearchResult != nullptr) ? *SearchResult : Src;
+}
 
 ATriggeringAttachmentActor::ATriggeringAttachmentActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -140,4 +161,9 @@ UAbilitySystemComponent* ATriggeringAttachmentActor::GetAbilitySystemComponent()
 void ATriggeringAttachmentActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
 {
 	OwnedAttributeSet = NewAttributeSet;
+}
+
+TInstancedStruct<FAVVMSocketTargetingHelper> ATriggeringAttachmentActor::GetSocketHelper_Implementation() const
+{
+	return FAVVMSocketTargetingHelper::Make<FModSocketTargetingHelper>();
 }

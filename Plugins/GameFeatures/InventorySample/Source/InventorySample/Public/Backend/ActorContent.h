@@ -86,6 +86,9 @@ struct INVENTORYSAMPLE_API FItemHolder
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
+	
+	// TODO @gdemers may want to revert latest change to allow bags (i.e ItemHolder) to reference their
+	// resource definition. i.e How many items can they hold, etc...
 
 	// @gdemers {FItem.UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
