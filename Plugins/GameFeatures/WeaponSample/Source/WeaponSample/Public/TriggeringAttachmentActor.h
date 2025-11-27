@@ -33,15 +33,15 @@
 /**
  *	Class description:
  *	
- *	FModSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
+ *	FTriggeringAttachmentSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
  *	on the known root actor (i.e ACharacter).
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FModSocketTargetingHelper : public FAVVMSocketTargetingHelper
+struct WEAPONSAMPLE_API FTriggeringAttachmentSocketTargetingHelper : public FAVVMSocketTargetingHelper
 {
 	GENERATED_BODY()
 
-	virtual AActor* GetDesiredTypedOuter(AActor* Src) const override;
+	virtual AActor* GetDesiredTypedInner(AActor* Src) const override;
 };
 
 /**
@@ -54,7 +54,7 @@ UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AAVVMModularActor,
                                                     public IAbilitySystemInterface,
                                                     public IAVVMDoesOwnAttributeSet,
-                                                    public IDoesSupportSocketTargeting
+                                                    public IAVVMDoesSupportInnerSocketTargeting
 {
 	GENERATED_BODY()
 
@@ -77,8 +77,12 @@ public:
 	
 	// @gdemers IDoesSupportSocketTargeting
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
+	virtual void DeferredSocketParenting_Implementation(AActor* Dest) override;
 
 protected:
+	UFUNCTION()
+	void OnSocketParentingDeferred(AActor* Parent);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
@@ -90,6 +94,8 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	
+	FDelegateHandle DeferredSocketParentingDelegateHandle;
 
 	friend class UAttachmentManagerComponent;
 };

@@ -20,12 +20,13 @@
 #include "TriggeringAttachmentActor.h"
 
 #include "AVVMGameplayUtils.h"
+#include "AVVMUtils.h"
 #include "TriggeringActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 
-AActor* FModSocketTargetingHelper::GetDesiredTypedOuter(AActor* Src) const
+AActor* FTriggeringAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) const
 {
 	if (!IsValid(Src))
 	{
@@ -165,5 +166,36 @@ void ATriggeringAttachmentActor::SetAttributeSet_Implementation(const UAttribute
 
 TInstancedStruct<FAVVMSocketTargetingHelper> ATriggeringAttachmentActor::GetSocketHelper_Implementation() const
 {
-	return FAVVMSocketTargetingHelper::Make<FModSocketTargetingHelper>();
+	return FAVVMSocketTargetingHelper::Make<FTriggeringAttachmentSocketTargetingHelper>();
+}
+
+void ATriggeringAttachmentActor::DeferredSocketParenting_Implementation(AActor* Dest)
+{
+	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Dest);
+
+	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
+	if (!ensureAlwaysMsgf(bDoesImplement,
+	                      TEXT("Dest actor doesn't implement the required interface")))
+	{
+		return;
+	}
+
+	IAVVMDoesSupportSocketDeferral::FOnParentSocketAvailableDelegate::FDelegate Callback;
+	Callback.BindUObject(this, &ATriggeringAttachmentActor::OnSocketParentingDeferred);
+	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
+}
+
+void ATriggeringAttachmentActor::OnSocketParentingDeferred(AActor* Parent)
+{
+	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+
+	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
+	if (!ensureAlwaysMsgf(bDoesImplement,
+	                      TEXT("Dest actor doesn't implement the required interface")))
+	{
+		return;
+	}
+
+	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
+	AttachToActor(Parent, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 }

@@ -23,8 +23,8 @@
 
 #include "AbilitySystemInterface.h"
 #include "AVVMModularActor.h"
+#include "AVVMSocketTargetingHelper.h"
 #include "GameplayAbilitySpecHandle.h"
-#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
 
@@ -42,6 +42,7 @@ class UTriggeringAbility;
 UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
+                                          public IAVVMDoesSupportSocketDeferral,
                                           public IAVVMResourceProvider
 {
 	GENERATED_BODY()

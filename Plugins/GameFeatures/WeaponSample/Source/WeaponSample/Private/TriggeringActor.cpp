@@ -62,9 +62,15 @@ void ATriggeringActor::BeginPlay()
 	       *ATriggeringActor::StaticClass()->GetName());
 
 #if WITH_SERVER_CODE
-	if (bShouldAsyncLoadOnBeginPlay && HasAuthority())
+	const bool bHasAuthority = HasAuthority();
+	if (bShouldAsyncLoadOnBeginPlay && bHasAuthority)
 	{
 		Server_SwapAbility(true);
+	}
+
+	if (bHasAuthority)
+	{
+		NotifyAvailableSocketParent(this);
 	}
 #endif
 }

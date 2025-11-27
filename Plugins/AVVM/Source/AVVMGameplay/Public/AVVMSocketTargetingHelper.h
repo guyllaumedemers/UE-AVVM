@@ -35,7 +35,7 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingHelper
 	GENERATED_BODY()
 	
 	~FAVVMSocketTargetingHelper() = default;
-	virtual AActor* GetDesiredTypedOuter(AActor* Src) const PURE_VIRTUAL(GetTypedOuterInChain, return nullptr;);
+	virtual AActor* GetDesiredTypedInner(AActor* Src) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
 	
 	static void AttachToActor(AActor* Src, AActor* Dest, const FName& SocketName);
 	
@@ -60,16 +60,16 @@ template<> struct TBaseStructure<FAVVMSocketTargetingHelper>
 /**
  *	Class description:
  *	
- *	IDoesSupportSocketTargeting is an interface to be impl in actor classes that require attachment from an actor thats lives as child of a root actor. example : Attachment Actor that require
+ *	IAVVMDoesSupportSocketInnerTargeting is an interface to be impl in actor classes that require attachment from an actor thats lives as child of a root actor. example : Attachment Actor that require
  *	socketing in Weapons (which itself is rooted under the ACharacter).
  */
 UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UDoesSupportSocketTargeting : public UInterface
+class AVVMGAMEPLAY_API UAVVMDoesSupportInnerSocketTargeting : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMGAMEPLAY_API IDoesSupportSocketTargeting
+class AVVMGAMEPLAY_API IAVVMDoesSupportInnerSocketTargeting
 {
 	GENERATED_BODY()
 
@@ -77,4 +77,35 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper() const;
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const PURE_VIRTUAL(GetSocketHelper_Implementation, return FAVVMSocketTargetingHelper::Empty;);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void DeferredSocketParenting(AActor* Dest);
+	virtual void DeferredSocketParenting_Implementation(AActor* Dest) PURE_VIRTUAL(DefferSocketParenting_Implementation, return;);
+};
+
+/**
+ *	Class description:
+ *	
+ *	IAVVMDoesSupportSocketDeferral is an interface to be impl in actor classes that require deferred attachment to parent actor that arent
+ *	yet available via the inventory system.
+ */
+UINTERFACE(BlueprintType)
+class AVVMGAMEPLAY_API UAVVMDoesSupportSocketDeferral : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMGAMEPLAY_API IAVVMDoesSupportSocketDeferral
+{
+	GENERATED_BODY()
+
+public:
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnParentSocketAvailableDelegate, AActor* Parent);
+
+	FDelegateHandle OnSocketParentAvailableDelegate_Add(const FOnParentSocketAvailableDelegate::FDelegate& Callback);
+	void OnSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle);
+	void NotifyAvailableSocketParent(AActor* Parent) const;
+
+private:
+	FOnParentSocketAvailableDelegate OnParentSocketAvailable;
 };
