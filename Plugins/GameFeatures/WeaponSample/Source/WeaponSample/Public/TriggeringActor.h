@@ -42,7 +42,6 @@ class UTriggeringAbility;
 UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
-                                          public IAVVMDoesSupportSocketDeferral,
                                           public IAVVMResourceProvider
 {
 	GENERATED_BODY()

@@ -100,12 +100,12 @@ class AVVMGAMEPLAY_API IAVVMDoesSupportSocketDeferral
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnParentSocketAvailableDelegate, AActor* Parent);
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnParentSocketAvailableDelegate, AActor* Parent, AActor* Target);
 
 	FDelegateHandle OnSocketParentAvailableDelegate_Add(const FOnParentSocketAvailableDelegate::FDelegate& Callback);
 	void OnSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle);
-	void NotifyAvailableSocketParent(AActor* Parent) const;
+	virtual void NotifyAvailableSocketParent(AActor* SocketTarget) PURE_VIRTUAL(NotifyAvailableSocketParent, return;);
 
-private:
+protected:
 	FOnParentSocketAvailableDelegate OnParentSocketAvailable;
 };

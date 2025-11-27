@@ -81,7 +81,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnSocketParentingDeferred(AActor* Parent);
+	void OnSocketParentingDeferred(AActor* Parent, AActor* Target);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;

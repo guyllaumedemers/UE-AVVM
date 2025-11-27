@@ -39,11 +39,6 @@ void IAVVMDoesSupportSocketDeferral::OnSocketParentAvailableDelegate_Remove(cons
 	OnParentSocketAvailable.Remove(Handle);
 }
 
-void IAVVMDoesSupportSocketDeferral::NotifyAvailableSocketParent(AActor* Parent) const
-{
-	OnParentSocketAvailable.Broadcast(Parent);
-}
-
 void FAVVMSocketTargetingHelper::AttachToActor(AActor* Src, AActor* Dest, const FName& SocketName)
 {
 	if (!IsValid(Src) || !IsValid(Dest))

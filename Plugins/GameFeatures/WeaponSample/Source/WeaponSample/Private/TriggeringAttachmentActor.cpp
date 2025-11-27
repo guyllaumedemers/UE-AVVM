@@ -185,7 +185,7 @@ void ATriggeringAttachmentActor::DeferredSocketParenting_Implementation(AActor* 
 	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
 }
 
-void ATriggeringAttachmentActor::OnSocketParentingDeferred(AActor* Parent)
+void ATriggeringAttachmentActor::OnSocketParentingDeferred(AActor* Parent, AActor* Target)
 {
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
 
@@ -197,5 +197,5 @@ void ATriggeringAttachmentActor::OnSocketParentingDeferred(AActor* Parent)
 	}
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	AttachToActor(Parent, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+	FAVVMSocketTargetingHelper::AttachToActor(this, Target, SocketName);
 }

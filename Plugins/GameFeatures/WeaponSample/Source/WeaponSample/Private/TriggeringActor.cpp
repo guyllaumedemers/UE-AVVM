@@ -20,6 +20,7 @@
 #include "TriggeringActor.h"
 
 #include "AVVMGameplayUtils.h"
+#include "AVVMUtils.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -47,7 +48,7 @@ void ATriggeringActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const auto* Outer = GetTypedOuter<AActor>();
+	auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -62,15 +63,19 @@ void ATriggeringActor::BeginPlay()
 	       *ATriggeringActor::StaticClass()->GetName());
 
 #if WITH_SERVER_CODE
-	const bool bHasAuthority = HasAuthority();
-	if (bShouldAsyncLoadOnBeginPlay && bHasAuthority)
+	if (HasAuthority())
 	{
-		Server_SwapAbility(true);
-	}
+		auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Outer);
+		if (ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral),
+		                     TEXT("Outer doesn't implement required interface.")))
+		{
+			SocketDeferral->NotifyAvailableSocketParent(this);
+		}
 
-	if (bHasAuthority)
-	{
-		NotifyAvailableSocketParent(this);
+		if (bShouldAsyncLoadOnBeginPlay)
+		{
+			Server_SwapAbility(true);
+		}
 	}
 #endif
 }

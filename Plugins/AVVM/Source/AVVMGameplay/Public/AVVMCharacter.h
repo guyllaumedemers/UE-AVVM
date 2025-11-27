@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMSocketTargetingHelper.h"
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "ModularCharacter.h"
@@ -61,6 +62,7 @@ UCLASS()
 class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
                                         public IAbilitySystemInterface,
                                         public IAVVMCanExposeActorPayload,
+                                        public IAVVMDoesSupportSocketDeferral,
                                         public IAVVMResourceProvider
 {
 	GENERATED_BODY()
@@ -79,6 +81,9 @@ public:
 
 	// IAVVMCanExposeActorPayload
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
+	
+	// IAVVMDoesSupportSocketDeferral
+	virtual void NotifyAvailableSocketParent(AActor* SocketTarget) override;
 
 	// IAVVMResourceProvider
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
