@@ -26,7 +26,7 @@
 
 #include "AttachmentManagerComponent.generated.h"
 
-class ATriggeringAttachmentActor;
+class AAttachmentActor;
 struct FStreamableHandle;
 
 /**
@@ -40,7 +40,7 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<ATriggeringAttachmentActor> Attachment = nullptr;
+	TWeakObjectPtr<AAttachmentActor> Attachment = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayTag TargetSlotTag = FGameplayTag::EmptyTag;
@@ -95,17 +95,17 @@ protected:
 	{
 		~FAttachmentBatchingMechanism();
 
-		void PushPendingDestroy(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment);
+		void PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment);
 		void BatchDestroy();
 
-		TArray<TWeakObjectPtr<ATriggeringAttachmentActor>> PendingDestroy;
+		TArray<TWeakObjectPtr<AAttachmentActor>> PendingDestroy;
 	};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, TWeakObjectPtr<ATriggeringAttachmentActor>> EquippedAttachments;
+	TMap<FGameplayTag, TWeakObjectPtr<AAttachmentActor>> EquippedAttachments;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
 	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;

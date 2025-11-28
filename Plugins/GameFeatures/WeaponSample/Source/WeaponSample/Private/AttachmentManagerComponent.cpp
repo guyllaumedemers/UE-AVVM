@@ -85,7 +85,7 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 
 void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapContextArgs& NewAttachmentSwapContext)
 {
-	TWeakObjectPtr<ATriggeringAttachmentActor>& SearchResult = EquippedAttachments.FindOrAdd(NewAttachmentSwapContext.TargetSlotTag);
+	TWeakObjectPtr<AAttachmentActor>& SearchResult = EquippedAttachments.FindOrAdd(NewAttachmentSwapContext.TargetSlotTag);
 	if (SearchResult.IsValid())
 	{
 		// @gdemers detach old actor from parent.
@@ -187,7 +187,7 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 	FActorSpawnParameters Params;
 	Params.Owner = const_cast<AActor*>(Outer);
 
-	auto* NewAttachment = Cast<ATriggeringAttachmentActor>(World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &FTransform::Identity, Params));
+	auto* NewAttachment = Cast<AAttachmentActor>(World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &FTransform::Identity, Params));
 	if (!ensureAlwaysMsgf(IsValid(NewAttachment), TEXT("Attachment Actor Class Failed to create an instance in World!")))
 	{
 		return;
@@ -210,7 +210,7 @@ UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingM
 	PendingDestroy.Reset();
 }
 
-void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<ATriggeringAttachmentActor>& NewAttachment)
+void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment)
 {
 	if (NewAttachment.IsValid())
 	{

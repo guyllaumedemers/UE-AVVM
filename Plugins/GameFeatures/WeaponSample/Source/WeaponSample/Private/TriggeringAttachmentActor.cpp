@@ -26,7 +26,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 
-AActor* FTriggeringAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) const
+AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) const
 {
 	if (!IsValid(Src))
 	{
@@ -46,7 +46,7 @@ AActor* FTriggeringAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor*
 	return (SearchResult != nullptr) ? *SearchResult : Src;
 }
 
-ATriggeringAttachmentActor::ATriggeringAttachmentActor(const FObjectInitializer& ObjectInitializer)
+AAttachmentActor::AAttachmentActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	// @gdemers if tick is required, start an AbilityTask_Tick, and kill the process on completion.
@@ -58,7 +58,7 @@ ATriggeringAttachmentActor::ATriggeringAttachmentActor(const FObjectInitializer&
 	bReplicates = true;
 }
 
-void ATriggeringAttachmentActor::BeginPlay()
+void AAttachmentActor::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -72,13 +72,13 @@ void ATriggeringAttachmentActor::BeginPlay()
 	       Log,
 	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
+	       *AAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName());
 
 	OwningOuter = Outer;
 }
 
-void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -92,13 +92,13 @@ void ATriggeringAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	       Log,
 	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
+	       *AAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName());
 
 	Detach();
 }
 
-void ATriggeringAttachmentActor::Attach(AActor* Parent)
+void AAttachmentActor::Attach(AActor* Parent)
 {
 	if (!ensureAlwaysMsgf(IsValid(Parent), TEXT("Invalid Parent!")))
 	{
@@ -109,7 +109,7 @@ void ATriggeringAttachmentActor::Attach(AActor* Parent)
 	       Log,
 	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Parent).GetData(),
-	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
+	       *AAttachmentActor::StaticClass()->GetName(),
 	       *Parent->GetName(),
 	       *SocketName.ToString());
 
@@ -127,7 +127,7 @@ void ATriggeringAttachmentActor::Attach(AActor* Parent)
 	}
 }
 
-void ATriggeringAttachmentActor::Detach()
+void AAttachmentActor::Detach()
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!IsValid(Outer))
@@ -139,7 +139,7 @@ void ATriggeringAttachmentActor::Detach()
 	       Log,
 	       TEXT("Executed from \"%s\". Detaching \"%s\" from Outer \"%s\" at SocketName \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *ATriggeringAttachmentActor::StaticClass()->GetName(),
+	       *AAttachmentActor::StaticClass()->GetName(),
 	       *Outer->GetName(),
 	       *SocketName.ToString());
 
@@ -154,22 +154,22 @@ void ATriggeringAttachmentActor::Detach()
 	}
 }
 
-UAbilitySystemComponent* ATriggeringAttachmentActor::GetAbilitySystemComponent() const
+UAbilitySystemComponent* AAttachmentActor::GetAbilitySystemComponent() const
 {
 	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
 }
 
-void ATriggeringAttachmentActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
+void AAttachmentActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
 {
 	OwnedAttributeSet = NewAttributeSet;
 }
 
-TInstancedStruct<FAVVMSocketTargetingHelper> ATriggeringAttachmentActor::GetSocketHelper_Implementation() const
+TInstancedStruct<FAVVMSocketTargetingHelper> AAttachmentActor::GetSocketHelper_Implementation() const
 {
-	return FAVVMSocketTargetingHelper::Make<FTriggeringAttachmentSocketTargetingHelper>();
+	return FAVVMSocketTargetingHelper::Make<FAttachmentSocketTargetingHelper>();
 }
 
-void ATriggeringAttachmentActor::DeferredSocketParenting_Implementation(AActor* Dest)
+void AAttachmentActor::DeferredSocketParenting_Implementation(AActor* Dest)
 {
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Dest);
 
@@ -181,11 +181,11 @@ void ATriggeringAttachmentActor::DeferredSocketParenting_Implementation(AActor* 
 	}
 
 	IAVVMDoesSupportSocketDeferral::FOnParentSocketAvailableDelegate::FDelegate Callback;
-	Callback.BindUObject(this, &ATriggeringAttachmentActor::OnSocketParentingDeferred);
+	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred);
 	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
 }
 
-void ATriggeringAttachmentActor::OnSocketParentingDeferred(AActor* Parent, AActor* Target)
+void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent, AActor* Target)
 {
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
 

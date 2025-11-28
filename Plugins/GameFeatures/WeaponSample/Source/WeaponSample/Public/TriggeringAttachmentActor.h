@@ -33,11 +33,11 @@
 /**
  *	Class description:
  *	
- *	FTriggeringAttachmentSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
+ *	FAttachmentSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
  *	on the known root actor (i.e ACharacter).
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FTriggeringAttachmentSocketTargetingHelper : public FAVVMSocketTargetingHelper
+struct WEAPONSAMPLE_API FAttachmentSocketTargetingHelper : public FAVVMSocketTargetingHelper
 {
 	GENERATED_BODY()
 
@@ -47,19 +47,19 @@ struct WEAPONSAMPLE_API FTriggeringAttachmentSocketTargetingHelper : public FAVV
 /**
  *	Class description:
  *
- *	UTriggeringAttachmentComponent is an attachment system that extends the Outer Actor and can be invalidated
+ *	AAttachmentActor is an attachment system that extends the Outer Actor and can be invalidated
  *	during Unequip phase if required (since they are children of the actor with Authoritative state).
  */
 UCLASS(BlueprintType, Blueprintable)
-class WEAPONSAMPLE_API ATriggeringAttachmentActor : public AAVVMModularActor,
-                                                    public IAbilitySystemInterface,
-                                                    public IAVVMDoesOwnAttributeSet,
-                                                    public IAVVMDoesSupportInnerSocketTargeting
+class WEAPONSAMPLE_API AAttachmentActor : public AAVVMModularActor,
+                                          public IAbilitySystemInterface,
+                                          public IAVVMDoesOwnAttributeSet,
+                                          public IAVVMDoesSupportInnerSocketTargeting
 {
 	GENERATED_BODY()
 
 public:
-	ATriggeringAttachmentActor(const FObjectInitializer& ObjectInitializer);
+	AAttachmentActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -74,7 +74,7 @@ public:
 
 	// @gdemers IAVVMDoesOwnAttributeSet
 	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
-	
+
 	// @gdemers IDoesSupportSocketTargeting
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
 	virtual void DeferredSocketParenting_Implementation(AActor* Dest) override;
@@ -82,7 +82,7 @@ public:
 protected:
 	UFUNCTION()
 	void OnSocketParentingDeferred(AActor* Parent, AActor* Target);
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
 
@@ -94,7 +94,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-	
+
 	FDelegateHandle DeferredSocketParentingDelegateHandle;
 
 	friend class UAttachmentManagerComponent;
