@@ -95,6 +95,8 @@ This GameFeature plugin is a sample plugin for caching statistics captured durin
 
 This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished. Abilities for consuming, equipping and/or dropping items are yet to be put in place. **Edit** : This system has recently been cleanup to allow backend information to populate player representation, and support initialization of ItemActors via GAS AttributeSet.
 
+Notes : **Network optimization** may become a bottleneck over time depending on your project size. As such, creating Replicated proxy representation of the internal state of your UItemObject during Inventory replication should be considered. Keep in mind that such system would require a central place handling updates, and data forwarding. **Build around the existing api!** 
+
 ### Fencing Sample
 
 This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system leverage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
@@ -107,6 +109,8 @@ batch actions, and execute process based on user-defined conditions.
 ### Weapon Sample
 
 This GameFeature plugin is a sample plugin that define reusable construct for **Triggering** abilities tied to an Actor our player may reference during gameplay. This system, build a-top the InventorySample plugin, allow creation of **Triggering** items, and their initialization based on AttributeSet reference. Implementation details are still under development. Notes : It's suggested that the data scheme be first reviewed to better understand the constraint within which this system exist.
+
+* Notes : Weapon systems, Armor, equippable items, etc... can really start bloating your codebase when derived classes are created for every iteration that exist. As such, it's suggested to use the existing base classes (example : Attachment), create derived BP class from them, and iterate on implementation details such as : What ability is this Actor granting, or set of Attrbiutes, etc... **Make your project Data-Oriented, not Class-Oriented!**
 
 #### Preview
 
