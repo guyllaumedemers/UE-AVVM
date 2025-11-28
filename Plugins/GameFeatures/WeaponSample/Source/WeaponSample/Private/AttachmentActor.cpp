@@ -43,7 +43,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) cons
 		return IsValid(TriggeringActor);
 	});
 
-	return (SearchResult != nullptr) ? *SearchResult : Src;
+	return (SearchResult != nullptr) ? *SearchResult : nullptr;
 }
 
 AAttachmentActor::AAttachmentActor(const FObjectInitializer& ObjectInitializer)
@@ -149,7 +149,6 @@ void AAttachmentActor::Detach()
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 	if (IsValid(ASC))
 	{
-		// @gdemers violating const_ness to ensure user dont do weird shit on cached item elsewhere.
 		ASC->UnRegisterAttributeSet(this);
 	}
 }
