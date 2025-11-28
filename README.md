@@ -95,7 +95,7 @@ This GameFeature plugin is a sample plugin for caching statistics captured durin
 
 This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished. Abilities for consuming, equipping and/or dropping items are yet to be put in place. **Edit** : This system has recently been cleanup to allow backend information to populate player representation, and support initialization of ItemActors via GAS AttributeSet.
 
-Notes : **Network optimization** may become a bottleneck over time depending on your project size. As such, creating Replicated proxy representation of the internal state of your UItemObject during Inventory replication should be considered. Keep in mind that such system would require a central place handling updates, and data forwarding. **Build around the existing api!** 
+* Notes : **Network optimization** may become a bottleneck over time depending on your project size. As such, creating Replicated proxy representation of the internal state of your UItemObject during Inventory replication should be considered. Keep in mind that such system would require a central place handling updates, and data forwarding. **Build around the existing api!** 
 
 ### Fencing Sample
 
