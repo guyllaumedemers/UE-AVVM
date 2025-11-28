@@ -28,7 +28,7 @@
 #include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
 
-#include "TriggeringAttachmentActor.generated.h"
+#include "AttachmentActor.generated.h"
 
 /**
  *	Class description:

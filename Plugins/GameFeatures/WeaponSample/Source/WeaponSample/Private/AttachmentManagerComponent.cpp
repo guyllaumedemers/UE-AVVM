@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "AttachmentManagerComponent.h"
 
+#include "AttachmentActor.h"
 #include "AVVMGameplayUtils.h"
-#include "TriggeringAttachmentActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
