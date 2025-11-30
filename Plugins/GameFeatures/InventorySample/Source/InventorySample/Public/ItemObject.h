@@ -62,6 +62,27 @@ struct INVENTORYSAMPLE_API FItemState
 /**
  *	Class description:
  *	
+ *	FItemActorSpawnContextArgs is a context struct that encapsulate information required for Spawning an Actor class
+ *	in the inventory system.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItemActorSpawnContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	const UClass* ActorClass = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FSoftObjectPath AttributeSetSoftObjectPath = FSoftObjectPath();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<AActor> Outer = nullptr;
+};
+
+/**
+ *	Class description:
+ *	
  *	UItemObject is any object that exist in your project LORE. It may be loaded via a FDataRegistryId (targeting: UItemDefinitionDataAsset),
  *	instanced, and tracks the state of the object based on user actions.
  *
@@ -132,7 +153,7 @@ public:
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
 	UFUNCTION(BlueprintCallable)
-	AActor* SpawnActorClass(const UClass* NewActorClass, AActor* Outer);
+	AActor* SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;

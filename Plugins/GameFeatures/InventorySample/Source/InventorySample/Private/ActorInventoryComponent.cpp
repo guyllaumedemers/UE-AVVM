@@ -27,8 +27,6 @@
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "NonReplicatedLoadoutObject.h"
-#include "Ability/AVVMAbilitySystemComponent.h"
-#include "Ability/AVVMAbilityUtils.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -488,24 +486,13 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		return;
 	}
 
-	// @gdemers handle actor creation.
-	AActor* ItemActor = NewItemObject->SpawnActorClass(NewActorClass, const_cast<AActor*>(Outer));
-	if (!ensureAlwaysMsgf(IsValid(ItemActor),
-	                      TEXT("Failed to Spawn UItemObject Actor representation in World.")))
-	{
-		return;
-	}
+	FItemActorSpawnContextArgs Params;
+	Params.ActorClass = NewActorClass;
+	Params.AttributeSetSoftObjectPath = NewActorAttributeSetSoftObjectPath;
+	Params.Outer = const_cast<AActor*>(Outer);
 
-	// @gdemers handle actor data initialization via AttributeSet. Note : In some cases, Actor type such as
-	// projectile will not be bound to an ASC and have data provided from DT or backend .csv file.
-	if (!NewActorAttributeSetSoftObjectPath.IsNull())
-	{
-		UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(ItemActor);
-		if (IsValid(ASC))
-		{
-			ASC->SetupAttributeSet(NewActorAttributeSetSoftObjectPath, ItemActor);
-		}
-	}
+	// @gdemers handle actor creation.
+	NewItemObject->SpawnActor(Params);
 }
 
 void UActorInventoryComponent::OnLoadoutObjectRetrieved()

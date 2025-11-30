@@ -168,8 +168,14 @@ TInstancedStruct<FAVVMSocketTargetingHelper> AAttachmentActor::GetSocketHelper_I
 	return FAVVMSocketTargetingHelper::Make<FAttachmentSocketTargetingHelper>();
 }
 
-void AAttachmentActor::DeferredSocketParenting_Implementation(AActor* Dest)
+void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
+	AActor* Dest = ContextArgs.Dest.Get();
+	if (!IsValid(Dest))
+	{
+		return;
+	}
+
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Dest);
 
 	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
@@ -180,11 +186,13 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(AActor* Dest)
 	}
 
 	IAVVMDoesSupportSocketDeferral::FOnParentSocketAvailableDelegate::FDelegate Callback;
-	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred);
+	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred, ContextArgs.SrcAttributeSetSoftObjectPath);
 	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
 }
 
-void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent, AActor* Target)
+void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
+                                                 AActor* Target,
+                                                 FSoftObjectPath AttributeSetSoftObjectPath)
 {
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
 
@@ -196,5 +204,19 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent, AActor* Target)
 	}
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	FAVVMSocketTargetingHelper::AttachToActor(this, Target, SocketName);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, Target, SocketName, AttributeSetSoftObjectPath);
+	if (!bIsRooted)
+	{
+		return;
+	}
+
+	// @gdemers Update our Owning outer for future ASC retrieval from the AbilitySystem interface api.
+	OwningOuter = Target;
+
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (ensureAlwaysMsgf(IsValid(ASC),
+	                     TEXT("New OwningOuter doesn't own a valid ASC.")))
+	{
+		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, Target);
+	}
 }

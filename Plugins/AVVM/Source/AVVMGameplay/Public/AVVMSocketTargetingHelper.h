@@ -36,8 +36,11 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingHelper
 	
 	~FAVVMSocketTargetingHelper() = default;
 	virtual AActor* GetDesiredTypedInner(AActor* Src) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
-	
-	static void AttachToActor(AActor* Src, AActor* Dest, const FName& SocketName);
+
+	static bool Static_AttachToActor(AActor* Src,
+	                                 AActor* Dest,
+	                                 const FName& SocketName,
+	                                 const FSoftObjectPath& AttributeSetSoftObjectPath);
 	
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMSocketTargetingHelper>::Make<T>
 	template <typename TChild, typename... TArgs>
@@ -55,6 +58,24 @@ TInstancedStruct<FAVVMSocketTargetingHelper> FAVVMSocketTargetingHelper::Make(TA
 template<> struct TBaseStructure<FAVVMSocketTargetingHelper> 
 {
 	static AVVMGAMEPLAY_API UScriptStruct* Get(); 
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMSocketTargetingDeferralContextArgs is a context struct that encapsulate information about
+ *	socket targeting behaviour.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<AActor> Dest = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
 };
 
 /**
@@ -79,8 +100,8 @@ public:
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const PURE_VIRTUAL(GetSocketHelper_Implementation, return FAVVMSocketTargetingHelper::Empty;);
 
 	UFUNCTION(BlueprintNativeEvent)
-	void DeferredSocketParenting(AActor* Dest);
-	virtual void DeferredSocketParenting_Implementation(AActor* Dest) PURE_VIRTUAL(DefferSocketParenting_Implementation, return;);
+	void DeferredSocketParenting(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
+	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) PURE_VIRTUAL(DefferSocketParenting_Implementation, return;);
 };
 
 /**

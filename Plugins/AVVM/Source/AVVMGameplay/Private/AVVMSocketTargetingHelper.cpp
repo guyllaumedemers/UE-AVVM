@@ -39,11 +39,14 @@ void IAVVMDoesSupportSocketDeferral::OnSocketParentAvailableDelegate_Remove(cons
 	OnParentSocketAvailable.Remove(Handle);
 }
 
-void FAVVMSocketTargetingHelper::AttachToActor(AActor* Src, AActor* Dest, const FName& SocketName)
+bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src,
+                                                      AActor* Dest,
+                                                      const FName& SocketName,
+                                                      const FSoftObjectPath& AttributeSetSoftObjectPath)
 {
 	if (!IsValid(Src) || !IsValid(Dest))
 	{
-		return;
+		return false;
 	}
 
 	AActor* SocketOwner = Dest;
@@ -54,7 +57,7 @@ void FAVVMSocketTargetingHelper::AttachToActor(AActor* Src, AActor* Dest, const 
 	{
 		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
 		Src->AttachToActor(SocketOwner, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
-		return;
+		return true;
 	}
 
 	const TInstancedStruct<FAVVMSocketTargetingHelper> SocketHelper = IAVVMDoesSupportInnerSocketTargeting::Execute_GetSocketHelper(Src);
@@ -62,7 +65,7 @@ void FAVVMSocketTargetingHelper::AttachToActor(AActor* Src, AActor* Dest, const 
 	const auto* Helper = SocketHelper.GetPtr<FAVVMSocketTargetingHelper>();
 	if (!ensureAlwaysMsgf(Helper != nullptr, TEXT("Invalid Socket Helper impl.")))
 	{
-		return;
+		return false;
 	}
 
 	SocketOwner = Helper->GetDesiredTypedInner(Dest);
@@ -74,11 +77,17 @@ void FAVVMSocketTargetingHelper::AttachToActor(AActor* Src, AActor* Dest, const 
 		       UAVVMGameplayUtils::PrintNetSource(Src).GetData(),
 		       *Src->GetName());
 
-		IAVVMDoesSupportInnerSocketTargeting::Execute_DeferredSocketParenting(Src, Dest);
+		FAVVMSocketTargetingDeferralContextArgs Params;
+		Params.Dest = Dest;
+		Params.SrcAttributeSetSoftObjectPath = AttributeSetSoftObjectPath;
+
+		IAVVMDoesSupportInnerSocketTargeting::Execute_DeferredSocketParenting(Src, Params);
+		return false;
 	}
 	else
 	{
 		// @gdemers our character rooted actor is available when we are created, we can hook ourself now.
 		Src->AttachToActor(SocketOwner, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		return true;
 	}
 }

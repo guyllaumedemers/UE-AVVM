@@ -77,11 +77,13 @@ public:
 
 	// @gdemers IDoesSupportSocketTargeting
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
-	virtual void DeferredSocketParenting_Implementation(AActor* Dest) override;
+	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
 
 protected:
 	UFUNCTION()
-	void OnSocketParentingDeferred(AActor* Parent, AActor* Target);
+	void OnSocketParentingDeferred(AActor* Parent,
+	                               AActor* Target,
+	                               FSoftObjectPath AttributeSetSoftObjectPath);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
