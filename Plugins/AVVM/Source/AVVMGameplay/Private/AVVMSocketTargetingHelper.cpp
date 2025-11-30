@@ -88,3 +88,13 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSo
 		return true;
 	}
 }
+
+bool FAVVMSocketTargetingHelper::Static_Detach(AActor* Src)
+{
+	if (!IsValid(Src) || !Src->Implements<UAVVMDoesSupportInnerSocketTargeting>())
+	{
+		return false;
+	}
+
+	IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(Src);
+}

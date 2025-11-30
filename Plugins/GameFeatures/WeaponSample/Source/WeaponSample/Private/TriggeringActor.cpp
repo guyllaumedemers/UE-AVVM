@@ -185,7 +185,7 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FName NewSock
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
 	OwningOuter = Target;
 
-	// @gdemers Unregister ability from owner.
+	// @gdemers Unregister/Register ability from owner.
 	Server_SwapAbility(true);
 
 	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
@@ -320,15 +320,6 @@ void UTriggeringUtils::Swap(AActor* UnEquip,
                             AActor* Equip,
                             const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
-	const bool bDoesAImplementInterface = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMDoesSupportInnerSocketTargeting>(UnEquip);
-	if (bDoesAImplementInterface)
-	{
-		IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(UnEquip);
-	}
-
-	const bool bDoesBImplementInterface = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMDoesSupportInnerSocketTargeting>(Equip);
-	if (bDoesBImplementInterface)
-	{
-		FAVVMSocketTargetingHelper::Static_AttachToActor(Equip, ContextArgs);
-	}
+	FAVVMSocketTargetingHelper::Static_Detach(UnEquip);
+	FAVVMSocketTargetingHelper::Static_AttachToActor(Equip, ContextArgs);
 }

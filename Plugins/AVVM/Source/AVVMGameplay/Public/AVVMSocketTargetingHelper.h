@@ -39,6 +39,7 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingHelper
 	virtual AActor* GetDesiredTypedInner(AActor* Src) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
 
 	static bool Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
+	static bool Static_Detach(AActor* Src);
 	
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMSocketTargetingHelper>::Make<T>
 	template <typename TChild, typename... TArgs>
