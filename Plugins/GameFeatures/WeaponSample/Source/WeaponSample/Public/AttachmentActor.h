@@ -24,7 +24,6 @@
 #include "AbilitySystemInterface.h"
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
-#include "GameplayTagContainer.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
 
@@ -63,12 +62,6 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintCallable)
-	void Attach(AActor* NewParent);
-
-	UFUNCTION(BlueprintCallable)
-	void Detach();
-
 	// @gdemers IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -78,18 +71,14 @@ public:
 	// @gdemers IDoesSupportSocketTargeting
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
+	virtual void Attach_Implementation(AActor* Target, const FName NewSocketName) override;
+	virtual void Detach_Implementation() override;
 
 protected:
 	UFUNCTION()
 	void OnSocketParentingDeferred(AActor* Parent,
 	                               AActor* Target,
-	                               FSoftObjectPath AttributeSetSoftObjectPath);
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FName SocketName = NAME_None;
+	                               const FAVVMSocketTargetingDeferralContextArgs ContextArgs);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
@@ -98,6 +87,12 @@ protected:
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	FDelegateHandle DeferredSocketParentingDelegateHandle;
+
+private:
+	// @gdemers This property handles the attachment to a socket when the element is built-in the owning triggering actors.
+	// This imply that the attachment arent part of the inventory system. They are baked into the representation of its owning actor, and attached at runtime (like a Gun blueprint).
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
+	FName SocketName = NAME_None;
 
 	friend class UAttachmentManagerComponent;
 };

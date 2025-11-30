@@ -25,6 +25,7 @@
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "GameplayAbilitySpecHandle.h"
+#include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
 
@@ -36,12 +37,28 @@ class UTriggeringAbility;
 
 /**
  *	Class description:
+ *	
+ *	FTriggeringSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
+ *	on the known root actor (i.e ACharacter).
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FTriggeringSocketTargetingHelper : public FAVVMSocketTargetingHelper
+{
+	GENERATED_BODY()
+
+	virtual AActor* GetDesiredTypedInner(AActor* Src) const override;
+};
+
+/**
+ *	Class description:
  *
  *	ATriggeringActor is a triggering system that executes behaviour such as triggering or targeting.
  */
 UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
+                                          public IAVVMDoesOwnAttributeSet,
+                                          public IAVVMDoesSupportInnerSocketTargeting,
                                           public IAVVMResourceProvider
 {
 	GENERATED_BODY()
@@ -58,11 +75,25 @@ public:
 	// @gdemers IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	// @gdemers IAVVMDoesOwnAttributeSet
+	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
+
+	// @gdemers IDoesSupportSocketTargeting
+	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
+	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
+	virtual void Attach_Implementation(AActor* Target, const FName NewSocketName) override;
+	virtual void Detach_Implementation() override;
+
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 
 protected:
+	UFUNCTION()
+	void OnSocketParentingDeferred(AActor* Parent,
+	                               AActor* Target,
+	                               const FAVVMSocketTargetingDeferralContextArgs ContextArgs);
+	
 	UFUNCTION(Server, Reliable)
 	void Server_SwapAbility(const bool bIsActive);
 	
@@ -91,9 +122,13 @@ protected:
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
+	FDelegateHandle DeferredSocketParentingDelegateHandle;
 	
 	friend class UTriggeringUtils;
 };
@@ -110,6 +145,7 @@ class WEAPONSAMPLE_API UTriggeringUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Weapon|Utils")
-	static void Swap(ATriggeringActor* UnEquip,
-	                 ATriggeringActor* Equip);
+	static void Swap(AActor* UnEquip,
+	                 AActor* Equip,
+	                 const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
 };

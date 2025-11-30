@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMSocketTargetingHelper.generated.h"
@@ -37,10 +38,7 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingHelper
 	~FAVVMSocketTargetingHelper() = default;
 	virtual AActor* GetDesiredTypedInner(AActor* Src) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
 
-	static bool Static_AttachToActor(AActor* Src,
-	                                 AActor* Dest,
-	                                 const FName& SocketName,
-	                                 const FSoftObjectPath& AttributeSetSoftObjectPath);
+	static bool Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
 	
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMSocketTargetingHelper>::Make<T>
 	template <typename TChild, typename... TArgs>
@@ -72,7 +70,10 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<AActor> Dest = nullptr;
+	TWeakObjectPtr<AActor> Parent = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FName SocketName = NAME_None;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
@@ -102,6 +103,14 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void DeferredSocketParenting(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) PURE_VIRTUAL(DefferSocketParenting_Implementation, return;);
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void Attach(AActor* Target, const FName SocketName);
+	virtual void Attach_Implementation(AActor* Target, const FName NewSocketName) PURE_VIRTUAL(Attach_Implementation, return;);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void Detach();
+	virtual void Detach_Implementation() PURE_VIRTUAL(Detach_Implementation, return;);
 };
 
 /**

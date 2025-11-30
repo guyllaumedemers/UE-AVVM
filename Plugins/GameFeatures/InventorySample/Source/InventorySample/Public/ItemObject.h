@@ -142,18 +142,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
-	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& GetItemActorId() const;
 
-	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& GetItemProgressionId() const;
-
-	UFUNCTION(BlueprintCallable)
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
-	UFUNCTION(BlueprintCallable)
-	AActor* SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
+	void SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;
@@ -176,11 +170,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
 	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
-
-	// @gdemers Item progression is referenced at this level to prevent hard references on Actor type defined in other GFP and
-	// applies progression effects to the loaded actor type.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="ItemProgressionDefinitionDataTableRow"))
-	FDataRegistryId ItemProgressionId = FDataRegistryId();
 
 	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
 	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.

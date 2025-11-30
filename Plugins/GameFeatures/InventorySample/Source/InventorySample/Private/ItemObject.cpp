@@ -121,11 +121,6 @@ const FDataRegistryId& UItemObject::GetItemActorId() const
 	return ItemActorId;
 }
 
-const FDataRegistryId& UItemObject::GetItemProgressionId() const
-{
-	return ItemProgressionId;
-}
-
 void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
                                          const FOnRequestItemActorClassComplete& Callback)
 {
@@ -142,21 +137,21 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorClassSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
-AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
+void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 {
 	const UClass* ActorClass = ContextArgs.ActorClass;
 	AActor* Outer = ContextArgs.Outer.Get();
 
 	if (!IsValid(ActorClass) || !IsValid(Outer))
 	{
-		return nullptr;
+		return;
 	}
 
 	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), ActorClass, Outer);
 	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                      TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
-		return nullptr;
+		return;
 	}
 
 	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
@@ -172,16 +167,18 @@ AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	bool bCanRegisterAttributeSet = true;
 	if (bShouldSpawnAndAttach)
 	{
+		FAVVMSocketTargetingDeferralContextArgs Params;
+		Params.Parent = Outer;
+		Params.SocketName = SocketName;
+		Params.SrcAttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
+		
 		// @gdemers We use this so we can handle more complex case that require traversal of our root actor
 		// to find attached actors, and used them as targets.
-		bCanRegisterAttributeSet = FAVVMSocketTargetingHelper::Static_AttachToActor(RuntimeItemActor,
-		                                                                            Outer,
-		                                                                            SocketName,
-		                                                                            ContextArgs.AttributeSetSoftObjectPath);
+		bCanRegisterAttributeSet = FAVVMSocketTargetingHelper::Static_AttachToActor(RuntimeItemActor, Params);
 	}
 
 	// @gdemers IMPORTANT : Keep in mind that deferred actor being attached, may or may not own an ASC. As such,
-	// handling the initialization of the Attribute set for the delayed case has to be accounted for the implementer
+	// handling the initialization of the Attribute set for the delayed case has to be accounted for in the implementer
 	// of the IAVVMDoesSupportInnerSocketTargeting interface. This is why we are forwarding above. Below is the case for
 	// an actor that has a valid socket at creation time.
 	const FSoftObjectPath& AttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
@@ -193,8 +190,6 @@ AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 			ASC->SetupAttributeSet(AttributeSetSoftObjectPath, RuntimeItemActor);
 		}
 	}
-
-	return RuntimeItemActor;
 }
 
 void UItemObject::OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath)

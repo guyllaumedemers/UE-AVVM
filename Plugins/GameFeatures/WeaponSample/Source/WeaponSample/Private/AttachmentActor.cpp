@@ -98,61 +98,6 @@ void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Detach();
 }
 
-void AAttachmentActor::Attach(AActor* Parent)
-{
-	if (!ensureAlwaysMsgf(IsValid(Parent), TEXT("Invalid Parent!")))
-	{
-		return;
-	}
-
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Parent).GetData(),
-	       *AAttachmentActor::StaticClass()->GetName(),
-	       *Parent->GetName(),
-	       *SocketName.ToString());
-
-	// @gdemers detach actor + remove AttributeSet registered
-	Detach();
-
-	// @gdemers attach actor + add AttributeSet
-	AttachToActor(Parent, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
-	OwningOuter = Parent;
-
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
-	{
-		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
-	}
-}
-
-void AAttachmentActor::Detach()
-{
-	const AActor* Outer = OwningOuter.Get();
-	if (!IsValid(Outer))
-	{
-		return;
-	}
-
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Detaching \"%s\" from Outer \"%s\" at SocketName \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *AAttachmentActor::StaticClass()->GetName(),
-	       *Outer->GetName(),
-	       *SocketName.ToString());
-
-	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-
-	// @gdemers clear AttributeSet provided by this attachment.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
-	{
-		ASC->UnRegisterAttributeSet(this);
-	}
-}
-
 UAbilitySystemComponent* AAttachmentActor::GetAbilitySystemComponent() const
 {
 	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
@@ -170,13 +115,13 @@ TInstancedStruct<FAVVMSocketTargetingHelper> AAttachmentActor::GetSocketHelper_I
 
 void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
-	AActor* Dest = ContextArgs.Dest.Get();
-	if (!IsValid(Dest))
+	AActor* Parent = ContextArgs.Parent.Get();
+	if (!IsValid(Parent))
 	{
 		return;
 	}
 
-	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Dest);
+	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
 
 	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
@@ -186,13 +131,68 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 	}
 
 	IAVVMDoesSupportSocketDeferral::FOnParentSocketAvailableDelegate::FDelegate Callback;
-	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred, ContextArgs.SrcAttributeSetSoftObjectPath);
+	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred, ContextArgs);
 	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
+}
+
+void AAttachmentActor::Attach_Implementation(AActor* Target, const FName NewSocketName)
+{
+	if (!ensureAlwaysMsgf(IsValid(Target), TEXT("Invalid Parent!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogWeaponSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Target).GetData(),
+	       *AAttachmentActor::StaticClass()->GetName(),
+	       *Target->GetName(),
+	       *NewSocketName.ToString());
+
+	// @gdemers detach actor + remove AttributeSet registered
+	Detach();
+
+	// @gdemers attach actor + add AttributeSet
+	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
+	OwningOuter = Target;
+
+	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+	}
+}
+
+void AAttachmentActor::Detach_Implementation()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	UE_LOG(LogWeaponSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Detaching \"%s\" from Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *AAttachmentActor::StaticClass()->GetName(),
+	       *Outer->GetName());
+
+	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+
+	// @gdemers clear AttributeSet provided by this attachment.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		ASC->UnRegisterAttributeSet(this);
+	}
 }
 
 void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
                                                  AActor* Target,
-                                                 FSoftObjectPath AttributeSetSoftObjectPath)
+                                                 const FAVVMSocketTargetingDeferralContextArgs ContextArgs)
 {
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
 
@@ -204,19 +204,17 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	}
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, Target, SocketName, AttributeSetSoftObjectPath);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, ContextArgs);
 	if (!bIsRooted)
 	{
 		return;
 	}
 
-	// @gdemers Update our Owning outer for future ASC retrieval from the AbilitySystem interface api.
-	OwningOuter = Target;
-
+	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 	if (ensureAlwaysMsgf(IsValid(ASC),
 	                     TEXT("New OwningOuter doesn't own a valid ASC.")))
 	{
-		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, Target);
+		ASC->SetupAttributeSet(ContextArgs.SrcAttributeSetSoftObjectPath, Target);
 	}
 }

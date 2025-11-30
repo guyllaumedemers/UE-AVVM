@@ -42,8 +42,11 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AAttachmentActor> Attachment = nullptr;
 
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
+
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTag TargetSlotTag = FGameplayTag::EmptyTag;
+	FName SocketName = NAME_None;
 };
 
 /**
@@ -105,7 +108,7 @@ protected:
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, TWeakObjectPtr<AAttachmentActor>> EquippedAttachments;
+	TMap<FName, TWeakObjectPtr<AAttachmentActor>> EquippedAttachments;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
 	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;

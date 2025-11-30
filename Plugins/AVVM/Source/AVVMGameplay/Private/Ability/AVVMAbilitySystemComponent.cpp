@@ -207,7 +207,11 @@ void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* Attr
 void UAVVMAbilitySystemComponent::UnRegisterAttributeSet(const AActor* AttributeSetOwner)
 {
 	TWeakObjectPtr<const UAttributeSet> OutResult = nullptr;
-	OwnerToAttributeSet.RemoveAndCopyValue(AttributeSetOwner, OutResult);
+	const bool bDoesExist = OwnerToAttributeSet.RemoveAndCopyValue(AttributeSetOwner, OutResult);
+	if (!bDoesExist)
+	{
+		return;
+	}
 
 	if (ensureAlwaysMsgf(OutResult.IsValid(), TEXT("AttributeSet Owner not found")))
 	{

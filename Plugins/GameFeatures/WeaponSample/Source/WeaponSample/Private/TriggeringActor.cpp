@@ -27,7 +27,19 @@
 #include "Ability/AVVMGameplayAbility.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "GameFramework/Character.h"
 #include "Resources/AVVMResourceManagerComponent.h"
+
+AActor* FTriggeringSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) const
+{
+	if (!IsValid(Src))
+	{
+		return Src;
+	}
+
+	auto* Pawn = Cast<ACharacter>(Src);
+	return IsValid(Pawn) ? Pawn : nullptr;
+}
 
 ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -99,7 +111,7 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
-		Server_SwapAbility(false);
+		IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(this);
 	}
 #endif
 }
@@ -119,6 +131,99 @@ UAbilitySystemComponent* ATriggeringActor::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+void ATriggeringActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
+{
+	OwnedAttributeSet = NewAttributeSet;
+}
+
+TInstancedStruct<FAVVMSocketTargetingHelper> ATriggeringActor::GetSocketHelper_Implementation() const
+{
+	return FAVVMSocketTargetingHelper::Make<FTriggeringSocketTargetingHelper>();
+}
+
+void ATriggeringActor::DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
+{
+	AActor* Parent = ContextArgs.Parent.Get();
+	if (!IsValid(Parent))
+	{
+		return;
+	}
+
+	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+
+	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
+	if (!ensureAlwaysMsgf(bDoesImplement,
+						  TEXT("Dest actor doesn't implement the required interface")))
+	{
+		return;
+	}
+
+	IAVVMDoesSupportSocketDeferral::FOnParentSocketAvailableDelegate::FDelegate Callback;
+	Callback.BindUObject(this, &ATriggeringActor::OnSocketParentingDeferred, ContextArgs);
+	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
+}
+
+void ATriggeringActor::Attach_Implementation(AActor* Target, const FName NewSocketName)
+{
+	if (!ensureAlwaysMsgf(IsValid(Target), TEXT("Invalid Parent!")))
+	{
+		return;
+	}
+
+	UE_LOG(LogWeaponSample,
+		   Log,
+		   TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
+		   UAVVMGameplayUtils::PrintNetSource(Target).GetData(),
+		   *ATriggeringActor::StaticClass()->GetName(),
+		   *Target->GetName(),
+		   *NewSocketName.ToString());
+
+	// @gdemers detach actor + remove AttributeSet registered
+	IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(this);
+
+	// @gdemers attach actor + add AttributeSet
+	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
+	OwningOuter = Target;
+
+	// @gdemers Unregister ability from owner.
+	Server_SwapAbility(true);
+
+	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+	}
+}
+
+void ATriggeringActor::Detach_Implementation()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	UE_LOG(LogWeaponSample,
+	       Log,
+	       TEXT("Executed from \"%s\". Detaching \"%s\" from Outer \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *ATriggeringActor::StaticClass()->GetName(),
+	       *Outer->GetName());
+
+	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+
+	// @gdemers Unregister ability from owner.
+	Server_SwapAbility(false);
+
+	// @gdemers clear AttributeSet provided by this attachment.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		ASC->UnRegisterAttributeSet(this);
+	}
+}
+
 UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const
 {
 	return ResourceManagerComponent;
@@ -127,6 +232,35 @@ UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Imp
 TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionResourceIds_Implementation() const
 {
 	return {TriggeringDefinitionId};
+}
+
+void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
+                                                 AActor* Target,
+                                                 const FAVVMSocketTargetingDeferralContextArgs ContextArgs)
+{
+	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+
+	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
+	if (!ensureAlwaysMsgf(bDoesImplement,
+	                      TEXT("Dest actor doesn't implement the required interface")))
+	{
+		return;
+	}
+
+	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, ContextArgs);
+	if (!bIsRooted)
+	{
+		return;
+	}
+
+	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (ensureAlwaysMsgf(IsValid(ASC),
+	                     TEXT("New OwningOuter doesn't own a valid ASC.")))
+	{
+		ASC->SetupAttributeSet(ContextArgs.SrcAttributeSetSoftObjectPath, Target);
+	}
 }
 
 void ATriggeringActor::RegisterAbility()
@@ -182,16 +316,19 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 	});
 }
 
-void UTriggeringUtils::Swap(ATriggeringActor* UnEquip,
-                            ATriggeringActor* Equip)
+void UTriggeringUtils::Swap(AActor* UnEquip,
+                            AActor* Equip,
+                            const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
-	if (IsValid(UnEquip))
+	const bool bDoesAImplementInterface = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMDoesSupportInnerSocketTargeting>(UnEquip);
+	if (bDoesAImplementInterface)
 	{
-		UnEquip->Server_SwapAbility(false);
+		IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(UnEquip);
 	}
 
-	if (IsValid(Equip))
+	const bool bDoesBImplementInterface = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMDoesSupportInnerSocketTargeting>(Equip);
+	if (bDoesBImplementInterface)
 	{
-		Equip->Server_SwapAbility(true);
+		FAVVMSocketTargetingHelper::Static_AttachToActor(Equip, ContextArgs);
 	}
 }

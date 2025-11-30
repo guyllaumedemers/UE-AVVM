@@ -43,7 +43,7 @@ class WEAPONSAMPLE_API UAttachmentDefinitionDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	const FDataRegistryId& GetTriggeringAttachmentActorId() const;
+	const FDataRegistryId& GetAttachmentActorId() const;
 	
 	bool CanAccessItem(const FGameplayTagContainer& RequirementTags,
 	                   const FGameplayTagContainer& BlockingTags) const;
@@ -51,7 +51,7 @@ public:
 protected:
 	// @gdemers required for supporting AttributeSet initialization of our actor.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
-	FDataRegistryId TriggeringAttachmentId = FDataRegistryId();
+	FDataRegistryId AttachmentActorId = FDataRegistryId();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;

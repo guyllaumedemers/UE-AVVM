@@ -39,24 +39,25 @@ void IAVVMDoesSupportSocketDeferral::OnSocketParentAvailableDelegate_Remove(cons
 	OnParentSocketAvailable.Remove(Handle);
 }
 
-bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src,
-                                                      AActor* Dest,
-                                                      const FName& SocketName,
-                                                      const FSoftObjectPath& AttributeSetSoftObjectPath)
+bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
-	if (!IsValid(Src) || !IsValid(Dest))
+	const FName SocketName = ContextArgs.SocketName;
+	AActor* Parent = ContextArgs.Parent.Get();
+
+	if (!IsValid(Src) || !IsValid(Parent))
 	{
 		return false;
 	}
 
-	AActor* SocketOwner = Dest;
+	// @gdemers actor we traverse, and search socket on.
+	AActor* SocketTarget = Parent;
 
 	// @gdemers in some cases, this will fail which is expected!
 	const bool bDoesImplement = Src->Implements<UAVVMDoesSupportInnerSocketTargeting>();
 	if (!bDoesImplement)
 	{
 		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
-		Src->AttachToActor(SocketOwner, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		Src->AttachToActor(SocketTarget, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
 		return true;
 	}
 
@@ -68,8 +69,8 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src,
 		return false;
 	}
 
-	SocketOwner = Helper->GetDesiredTypedInner(Dest);
-	if (!IsValid(SocketOwner))
+	SocketTarget = Helper->GetDesiredTypedInner(Parent);
+	if (!IsValid(SocketTarget))
 	{
 		UE_LOG(LogGameplay,
 		       Log,
@@ -77,17 +78,13 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src,
 		       UAVVMGameplayUtils::PrintNetSource(Src).GetData(),
 		       *Src->GetName());
 
-		FAVVMSocketTargetingDeferralContextArgs Params;
-		Params.Dest = Dest;
-		Params.SrcAttributeSetSoftObjectPath = AttributeSetSoftObjectPath;
-
-		IAVVMDoesSupportInnerSocketTargeting::Execute_DeferredSocketParenting(Src, Params);
+		IAVVMDoesSupportInnerSocketTargeting::Execute_DeferredSocketParenting(Src, ContextArgs);
 		return false;
 	}
 	else
 	{
-		// @gdemers our character rooted actor is available when we are created, we can hook ourself now.
-		Src->AttachToActor(SocketOwner, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		// @gdemers Update our Owning outer for future ASC retrieval from the AbilitySystem interface api.
+		IAVVMDoesSupportInnerSocketTargeting::Execute_Attach(Src, SocketTarget, SocketName);
 		return true;
 	}
 }

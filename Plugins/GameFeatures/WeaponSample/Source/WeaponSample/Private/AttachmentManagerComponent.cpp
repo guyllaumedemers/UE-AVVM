@@ -21,6 +21,7 @@
 
 #include "AttachmentActor.h"
 #include "AVVMGameplayUtils.h"
+#include "TriggeringActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -85,25 +86,31 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 
 void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapContextArgs& NewAttachmentSwapContext)
 {
-	TWeakObjectPtr<AAttachmentActor>& SearchResult = EquippedAttachments.FindOrAdd(NewAttachmentSwapContext.TargetSlotTag);
+	TWeakObjectPtr<AAttachmentActor> OldAttachment = nullptr;
+
+	TWeakObjectPtr<AAttachmentActor>& SearchResult = EquippedAttachments.FindOrAdd(NewAttachmentSwapContext.SocketName);
 	if (SearchResult.IsValid())
 	{
 		// @gdemers detach old actor from parent.
-		SearchResult->Detach();
-	}
-
-	if (BatchingMechanism.IsValid())
-	{
-		// @gdemers add old reference to batch destroy collection.
-		BatchingMechanism->PushPendingDestroy(SearchResult.Get());
+		OldAttachment = SearchResult;
 	}
 
 	// @gdemers update entry reference.
 	SearchResult = NewAttachmentSwapContext.Attachment;
-	if (SearchResult.IsValid())
+
+	// @gdemers create a context for handling socketing, and initialization of the attachment created.
+	FAVVMSocketTargetingDeferralContextArgs ContextArgs;
+	ContextArgs.Parent = Cast<AActor>(OwningOuter.Get());
+	ContextArgs.SocketName = NewAttachmentSwapContext.SocketName;
+	ContextArgs.SrcAttributeSetSoftObjectPath = NewAttachmentSwapContext.SrcAttributeSetSoftObjectPath;
+
+	// @gdemers attach new actor to parent.
+	UTriggeringUtils::Swap(OldAttachment.Get(), SearchResult.Get(), ContextArgs);
+
+	if (BatchingMechanism.IsValid())
 	{
-		// @gdemers attach new actor to parent.
-		SearchResult->Attach(Cast<AActor>(OwningOuter.Get()));
+		// @gdemers add old reference to batch destroy collection.
+		BatchingMechanism->PushPendingDestroy(OldAttachment);
 	}
 }
 
@@ -193,16 +200,17 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 		return;
 	}
 
+	// @gdemers handle attachment process
+	const FSoftObjectPath AttributeSetSoftObjectPath = !AttributeSoftObjectPaths.IsEmpty() ? AttributeSoftObjectPaths[0] : FSoftObjectPath();
+	Swap(FAttachmentSwapContextArgs{NewAttachment, AttributeSetSoftObjectPath, NewAttachment->SocketName});
+
 	// @gdemers adding attachment AttributeSet initialization based on owning actor creation process.
-	// other alternative for this initialization is based on the inventory system, and would imply we consider the attachment
-	// a unique element in the inventory system.
+	// other alternative for this initialization is based on the inventory system, and would imply we consider the attachment a unique element in the inventory system.
 	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(NewAttachment);
 	if (IsValid(ASC) && !AttributeSoftObjectPaths.IsEmpty())
 	{
 		ASC->SetupAttributeSet(AttributeSoftObjectPaths[0], NewAttachment);
 	}
-
-	Swap(FAttachmentSwapContextArgs{NewAttachment, NewAttachment->SlotTag});
 }
 
 UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingMechanism()

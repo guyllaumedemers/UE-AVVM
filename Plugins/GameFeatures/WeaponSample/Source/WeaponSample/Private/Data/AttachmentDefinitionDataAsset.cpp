@@ -19,9 +19,9 @@
 //SOFTWARE.
 #include "Data/AttachmentDefinitionDataAsset.h"
 
-const FDataRegistryId& UAttachmentDefinitionDataAsset::GetTriggeringAttachmentActorId() const
+const FDataRegistryId& UAttachmentDefinitionDataAsset::GetAttachmentActorId() const
 {
-	return TriggeringAttachmentId;
+	return AttachmentActorId;
 }
 
 bool UAttachmentDefinitionDataAsset::CanAccessItem(const FGameplayTagContainer& RequirementTags,

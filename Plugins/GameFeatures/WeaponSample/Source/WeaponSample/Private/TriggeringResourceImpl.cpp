@@ -51,7 +51,7 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 		const auto* AttachmentDefinition = Cast<UAttachmentDefinitionDataAsset>(Resource);
 		if (IsValid(AttachmentDefinition))
 		{
-			OutResources.Add(AttachmentDefinition->GetTriggeringAttachmentActorId());
+			OutResources.Add(AttachmentDefinition->GetAttachmentActorId());
 			continue;
 		}
 
