@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "AbilitySystemComponent.h"
 #include "GameplayTagContainer.h"
 #include "Ability/AVVMAttributeSet.h"
 
@@ -34,7 +33,7 @@ class UCurveFloat;
  *	
  *	UWeaponRange_AttributeSet is a data type that initialize properties on an Actor ASC for range weapons.
  */
-UCLASS(BlueprintType)
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UWeaponRange_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
@@ -174,7 +173,7 @@ protected:
  *	
  *	UWeaponMelee_AttributeSet is a data type that initialize properties on an Actor ASC for melee weapons.
  */
-UCLASS(BlueprintType)
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UWeaponMelee_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()

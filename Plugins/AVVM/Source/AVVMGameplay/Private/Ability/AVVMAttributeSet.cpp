@@ -21,6 +21,15 @@
 
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "Net/UnrealNetwork.h"
+
+void UAVVMAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UAVVMAttributeSet, Durability);
+	DOREPLIFETIME(UAVVMAttributeSet, Weight);
+}
 
 void UAVVMAttributeSet::Init()
 {

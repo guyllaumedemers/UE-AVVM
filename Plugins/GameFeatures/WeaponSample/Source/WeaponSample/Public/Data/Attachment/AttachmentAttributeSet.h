@@ -34,7 +34,7 @@
  *		* Optic Sight
  *		* Whatever else there is ?
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UAttachmentSight_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
@@ -55,7 +55,7 @@ public:
 UCLASS()
 class WEAPONSAMPLE_API UAttachmentMagazine_AttributeSet : public UAVVMAttributeSet
 {
-	GENERATED_BODY()
+	GENERATED_BODY(Blueprintable)
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -71,7 +71,7 @@ public:
  *		* Silencer
  *		* Whatever else there is ?
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UAttachmentBarrel_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
@@ -89,7 +89,7 @@ public:
  *		* Rocket launcher
  *		* Foregrip
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UAttachmentHandGuard_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
@@ -104,7 +104,7 @@ public:
  *	
  *	UAttachmentGrip_AttributeSet is a data type that initialize properties on an Actor ASC for an attachment.
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UAttachmentGrip_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()
@@ -121,7 +121,7 @@ public:
  *	
  *		* Stock
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API UAttachmentButtstock_AttributeSet : public UAVVMAttributeSet
 {
 	GENERATED_BODY()

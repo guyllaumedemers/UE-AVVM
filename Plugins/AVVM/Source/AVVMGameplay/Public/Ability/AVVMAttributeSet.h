@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AbilitySystemComponent.h"
 #include "AttributeSet.h"
 
 #include "AVVMAttributeSet.generated.h"
@@ -40,13 +41,23 @@ class AVVMGAMEPLAY_API UAVVMAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Init();
+	
+	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Durability);
+	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Weight);
 
 protected:
 	// ------------------- FAttributeSetProperties ------------------- //
 	// @gdemers IMPORTANT : How we initialize our properties.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers|FAttributeSetProperties")
 	TSoftObjectPtr<UDataTable> AttributeMetaDataTable = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
+	FGameplayAttributeData Durability = FGameplayAttributeData();
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
+	FGameplayAttributeData Weight = FGameplayAttributeData();
 
 	TSharedPtr<FStreamableHandle> AttributeMetaDataTableHandle = nullptr;
 };
