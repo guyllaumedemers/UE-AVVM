@@ -228,12 +228,12 @@ void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestr
 
 void UAttachmentManagerComponent::FAttachmentBatchingMechanism::BatchDestroy()
 {
-	for (auto Iterator = PendingDestroy.CreateIterator(); Iterator; ++Iterator)
+	TArray<TWeakObjectPtr<AAttachmentActor>> OldAttachments = MoveTemp(PendingDestroy);
+	for (auto Iterator = OldAttachments.CreateIterator(); Iterator; ++Iterator)
 	{
 		if (Iterator->IsValid())
 		{
 			Iterator->Get()->Destroy();
-			Iterator.RemoveCurrentSwap();
 		}
 	}
 }
