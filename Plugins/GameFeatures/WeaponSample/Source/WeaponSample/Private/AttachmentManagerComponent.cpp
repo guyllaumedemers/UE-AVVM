@@ -209,7 +209,7 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(NewAttachment);
 	if (IsValid(ASC) && !AttributeSoftObjectPaths.IsEmpty())
 	{
-		ASC->SetupAttributeSet(AttributeSoftObjectPaths[0], NewAttachment);
+		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, NewAttachment);
 	}
 }
 
