@@ -23,3 +23,18 @@ UScriptStruct* TBaseStructure<FExecutionContextParams>::Get()
 {
 	return FExecutionContextParams::StaticStruct();
 }
+
+void FSwapContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
+{
+	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
+}
+
+void FPickupContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
+{
+	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
+}
+
+void FDropContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
+{
+	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
+}

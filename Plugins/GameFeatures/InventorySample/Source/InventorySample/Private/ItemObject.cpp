@@ -171,7 +171,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		Params.Parent = Outer;
 		Params.SocketName = SocketName;
 		Params.SrcAttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
-		
+
 		// @gdemers We use this so we can handle more complex case that require traversal of our root actor
 		// to find attached actors, and used them as targets.
 		bCanRegisterAttributeSet = FAVVMSocketTargetingHelper::Static_AttachToActor(RuntimeItemActor, Params);
@@ -181,14 +181,15 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	// handling the initialization of the Attribute set for the delayed case has to be accounted for in the implementer
 	// of the IAVVMDoesSupportInnerSocketTargeting interface. This is why we are forwarding above. Below is the case for
 	// an actor that has a valid socket at creation time.
-	const FSoftObjectPath& AttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
-	if (bCanRegisterAttributeSet && !AttributeSetSoftObjectPath.IsNull())
+	if (!bCanRegisterAttributeSet)
 	{
-		UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(RuntimeItemActor);
-		if (IsValid(ASC))
-		{
-			ASC->SetupAttributeSet(AttributeSetSoftObjectPath, RuntimeItemActor);
-		}
+		return;
+	}
+
+	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(RuntimeItemActor);
+	if (IsValid(ASC))
+	{
+		ASC->SetupAttributeSet(ContextArgs.AttributeSetSoftObjectPath, RuntimeItemActor);
 	}
 }
 

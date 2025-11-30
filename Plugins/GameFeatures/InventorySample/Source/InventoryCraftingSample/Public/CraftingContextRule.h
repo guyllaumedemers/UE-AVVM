@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,35 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class InventoryCraftingSample : ModuleRules
+#include "ExecutionContextRule.h"
+
+#include "CraftingContextRule.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
 {
-	public InventoryCraftingSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		SetupIrisSupport(Target);
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"InventorySample"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
-}
+	GENERATED_BODY()
+	
+	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const override;
+};

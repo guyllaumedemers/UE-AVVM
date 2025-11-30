@@ -56,4 +56,34 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FSwapRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
+	
+	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const override;
+};
+
+/**
+ *	Class description:
+ *
+ *	FPickupRule is a context struct that define the parameters of a pickup content action,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FPickupRule : public FExecutionContextRule
+{
+	GENERATED_BODY()
+	
+	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const override;
+};
+
+/**
+ *	Class description:
+ *
+ *	FDropRule is a context struct that define the parameters of a dropping content action,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FDropRule : public FExecutionContextRule
+{
+	GENERATED_BODY()
+	
+	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

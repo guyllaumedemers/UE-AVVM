@@ -182,6 +182,23 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 		}
 	};
 
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (AttributeSetSoftObjectPath.IsNull())
+	{
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Attempt to load invalid AttributeSet from Outer \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *Outer->GetName());
+
+		return;
+	}
+
 	FStreamableDelegate Callback;
 	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this), TWeakObjectPtr(AttributeSetOwner));
 	AttributeSetHandle = UAssetManager::Get().LoadAssetList({AttributeSetSoftObjectPath}, Callback);

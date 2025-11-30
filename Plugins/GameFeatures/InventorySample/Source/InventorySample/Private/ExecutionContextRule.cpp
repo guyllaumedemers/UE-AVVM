@@ -23,3 +23,18 @@ UScriptStruct* TBaseStructure<FExecutionContextRule>::Get()
 {
 	return FExecutionContextRule::StaticStruct();
 }
+
+bool FSwapRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+{
+	return FExecutionContextRule::Predicate(Params);
+}
+
+bool FPickupRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+{
+	return FExecutionContextRule::Predicate(Params);
+}
+
+bool FDropRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+{
+	return FExecutionContextRule::Predicate(Params);
+}

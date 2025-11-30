@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,35 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class InventoryCraftingSample : ModuleRules
+#include "ExecutionContextParams.h"
+
+#include "CraftingContextParams.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FCraftingContextParams is a context struct that defines the properties to be
+ *	involved in executing a crafting action.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextParams : public FExecutionContextParams
 {
-	public InventoryCraftingSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		SetupIrisSupport(Target);
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"InventorySample"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
-	}
-}
+	GENERATED_BODY()
+	
+	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+};

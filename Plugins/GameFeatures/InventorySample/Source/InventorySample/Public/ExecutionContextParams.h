@@ -44,3 +44,45 @@ template<> struct TBaseStructure<FExecutionContextParams>
 {
 	static INVENTORYSAMPLE_API UScriptStruct* Get(); 
 };
+
+/**
+ *	Class description:
+ *
+ *	FSwapContextParams is a context struct that defines the properties to be
+ *	involved in executing a swap action.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
+{
+	GENERATED_BODY()
+	
+	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+};
+
+/**
+ *	Class description:
+ *
+ *	FPickupContextParams is a context struct that defines the properties to be
+ *	involved in executing a pickup action.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FPickupContextParams : public FExecutionContextParams
+{
+	GENERATED_BODY()
+	
+	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+};
+
+/**
+ *	Class description:
+ *
+ *	FDropContextParams is a context struct that defines the properties to be
+ *	involved in executing a drop action.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
+{
+	GENERATED_BODY()
+	
+	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+};

@@ -195,7 +195,8 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 	Params.Owner = const_cast<AActor*>(Outer);
 
 	auto* NewAttachment = Cast<AAttachmentActor>(World->SpawnActor(Cast<UClass>(OutStreamableAssets[0]), &FTransform::Identity, Params));
-	if (!ensureAlwaysMsgf(IsValid(NewAttachment), TEXT("Attachment Actor Class Failed to create an instance in World!")))
+	if (!ensureAlwaysMsgf(IsValid(NewAttachment),
+	                      TEXT("Attachment Actor Class Failed to create an instance in World!")))
 	{
 		return;
 	}
@@ -207,7 +208,7 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 	// @gdemers adding attachment AttributeSet initialization based on owning actor creation process.
 	// other alternative for this initialization is based on the inventory system, and would imply we consider the attachment a unique element in the inventory system.
 	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(NewAttachment);
-	if (IsValid(ASC) && !AttributeSoftObjectPaths.IsEmpty())
+	if (IsValid(ASC))
 	{
 		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, NewAttachment);
 	}

@@ -97,4 +97,5 @@ bool FAVVMSocketTargetingHelper::Static_Detach(AActor* Src)
 	}
 
 	IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(Src);
+	return true;
 }
