@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "AVVM",
 	"Description": "Actor View ViewModel",
-	"Category": "Other",
+	"Category": "Plugin",
 	"CreatedBy": "@gdemers",
 	"CreatedByURL": "",
 	"DocsURL": "",

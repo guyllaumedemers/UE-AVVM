@@ -20,9 +20,9 @@
 
 using UnrealBuildTool;
 
-public class SnapshotSample : ModuleRules
+public class DamageSample : ModuleRules
 {
-	public SnapshotSample(ReadOnlyTargetRules Target) : base(Target)
+	public DamageSample(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -34,7 +34,6 @@ public class SnapshotSample : ModuleRules
 				"Engine",
 			}
 		);
-
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]

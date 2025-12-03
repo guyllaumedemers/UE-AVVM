@@ -4,8 +4,8 @@
   "VersionName": "1.0",
   "FriendlyName": "TeamSample",
   "Description": "",
-  "Category": "Other",
-  "CreatedBy": "gdemers",
+  "Category": "Game Features",
+  "CreatedBy": "@gdemers",
   "CreatedByURL": "",
   "DocsURL": "",
   "MarketplaceURL": "",
@@ -13,6 +13,7 @@
   "IsBetaVersion": false,
   "IsExperimentalVersion": false,
   "Installed": false,
+  "BuiltInInitialFeatureState": "Active",
   "Modules": [
     {
       "Name": "TeamSample",
@@ -23,6 +24,10 @@
   "Plugins": [
     {
       "Name": "AVVM",
+      "Enabled": true
+    },
+    {
+      "Name": "Iris",
       "Enabled": true
     },
     {
