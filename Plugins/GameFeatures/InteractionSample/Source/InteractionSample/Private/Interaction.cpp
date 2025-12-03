@@ -21,14 +21,18 @@
 
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 
 void UInteraction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UInteraction, Target);
-	DOREPLIFETIME(UInteraction, Instigator);
-	DOREPLIFETIME(UInteraction, bIsInteractable);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, Target, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, Instigator, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, bIsInteractable, Params);
 }
 
 bool UInteraction::IsSupportedForNetworking() const
@@ -68,11 +72,13 @@ bool UInteraction::CanInteract() const
 void UInteraction::Lock()
 {
 	bIsInteractable = false;
+	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsInteractable, this)
 }
 
 void UInteraction::Unlock()
 {
 	bIsInteractable = true;
+	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsInteractable, this)
 }
 
 const AActor* UInteraction::GetTarget() const
@@ -90,4 +96,6 @@ void UInteraction::operator()(const AActor* NewInstigator,
 {
 	Instigator = NewInstigator;
 	Target = NewTarget;
+	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, Instigator, this)
+	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, Target, this)
 }
