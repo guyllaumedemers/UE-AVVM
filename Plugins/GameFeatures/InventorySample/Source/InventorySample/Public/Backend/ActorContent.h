@@ -38,11 +38,11 @@ struct INVENTORYSAMPLE_API FItemModifier
 
 	bool operator==(const FItemModifier& Rhs) const;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FAVVMPlayerResource.UniqueId}.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 ResourceId = INDEX_NONE;
 };
 
@@ -59,15 +59,15 @@ struct INVENTORYSAMPLE_API FItem
 
 	bool operator==(const FItem& Rhs) const;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FAVVMPlayerResource.UniqueId}.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 ResourceId = INDEX_NONE;
 
 	// @gdemers {FItemModifier.UniqueId} the POD applied by the player profile to this item. may be null.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ModIds;
 };
 
@@ -84,14 +84,14 @@ struct INVENTORYSAMPLE_API FItemHolder
 
 	bool operator==(const FItemHolder& Rhs) const;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 	
 	// TODO @gdemers may want to revert latest change to allow bags (i.e ItemHolder) to reference their
 	// resource definition. i.e How many items can they hold, etc...
 
 	// @gdemers {FItem.UniqueId}
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ItemIds;
 };
 
@@ -111,10 +111,10 @@ struct INVENTORYSAMPLE_API FActorContent
 	// @gdemers the unique identifier of the actor content. For cases like storage actors from which we buy/sell/trade with, the content
 	// may be shared across instances in a level using a share unique id that can be used to reference the actor type.
 	// Note : int32 can be converted to an enum if required by your project. Prob. what I would do for shared id.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FItemHolder.UniqueId}
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ItemHolderIds;
 };

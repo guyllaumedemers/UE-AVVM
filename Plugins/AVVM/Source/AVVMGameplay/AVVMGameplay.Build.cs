@@ -54,6 +54,7 @@ public class AVVMGameplay : ModuleRules
 			new string[]
 			{
 				"ModularGameplay",
+				"NetCore",
 				"UIExtension",
 				"UMG"
 			}

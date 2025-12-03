@@ -49,7 +49,8 @@ public class TransactionSample : ModuleRules
 			new string[]
 			{
 				"GameplayTags",
-				"Json"
+				"Json",
+				"NetCore"
 			}
 		);
 

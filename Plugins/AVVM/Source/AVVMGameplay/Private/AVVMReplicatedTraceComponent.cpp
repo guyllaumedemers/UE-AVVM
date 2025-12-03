@@ -35,8 +35,11 @@ void UAVVMReplicatedTraceComponent::GetLifetimeReplicatedProps(TArray<class FLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(UAVVMReplicatedTraceComponent, TickTraces);
-	DOREPLIFETIME(UAVVMReplicatedTraceComponent, BurstTraces);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMReplicatedTraceComponent, TickTraces, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMReplicatedTraceComponent, BurstTraces, Params);
 }
 
 void UAVVMReplicatedTraceComponent::BeginPlay()

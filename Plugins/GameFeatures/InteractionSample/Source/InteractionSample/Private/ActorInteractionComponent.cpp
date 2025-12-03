@@ -31,6 +31,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInteractionComponent_InstanceCounter, TEXT("Actor Interaction Component Instance Counter"));
@@ -51,7 +52,10 @@ void UActorInteractionComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UActorInteractionComponent, Records);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInteractionComponent, Records, Params);
 }
 
 void UActorInteractionComponent::BeginPlay()
@@ -315,6 +319,7 @@ void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
 	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	AddReplicatedSubObject(Transaction);
 	Records.Add(Transaction);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 
 	OnRep_RecordModified(OldRecords);
 }
@@ -334,6 +339,7 @@ void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator
 		UInteraction* Transaction = SearchResult->Get();
 		RemoveReplicatedSubObject(Transaction);
 		Records.Remove(Transaction);
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 
 		OnRep_RecordModified(OldRecords);
 	}

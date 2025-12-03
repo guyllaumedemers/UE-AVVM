@@ -95,32 +95,20 @@ void AAVVMCharacter::OnRep_Controller()
 {
 	Super::OnRep_Controller();
 
-	// @gdemers ensure proper initialization of UI specific to this entity.
-	const auto* ClientPlayerController = Cast<APlayerController>(GetController());
-	const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(ClientPlayerController);
-
-	FAVVMNotificationContextArgs Args;
-	Args.ChannelTag = RegisteredChannels.PostPlayerControllerReplicationTag;
-	Args.Payload = FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner);
-	// @gdemers enforce update only on local client.
-	Args.Target = ClientPlayerController;
-
-	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, Args);
+	if (!IsNetMode(NM_DedicatedServer))
+	{
+		const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(this);
+		UE_AVVM_NOTIFY(this, RegisteredChannels.PostPlayerControllerReplicationTag, this, FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner));
+	}
 }
 
 void AAVVMCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	// @gdemers ensure proper initialization of UI specific to this entity.
-	const APlayerState* ClientPlayerState = GetPlayerState();
-	const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(ClientPlayerState);
-
-	FAVVMNotificationContextArgs Args;
-	Args.ChannelTag = RegisteredChannels.PostPlayerStateReplicationTag;
-	Args.Payload = FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner);
-	// @gdemers enforce update for clients.
-	Args.Target = nullptr;
-
-	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, Args);
+	if (!IsNetMode(NM_DedicatedServer))
+	{
+		const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(this);
+		UE_AVVM_NOTIFY(this, RegisteredChannels.PostPlayerStateReplicationTag, this, FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner));
+	}
 }

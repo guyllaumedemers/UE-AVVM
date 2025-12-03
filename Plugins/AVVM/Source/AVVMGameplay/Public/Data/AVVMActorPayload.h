@@ -82,6 +82,6 @@ struct AVVMGAMEPLAY_API FAVVMActorPayload : public FAVVMNotificationPayload
 	FAVVMActorPayload() = default;
 	explicit FAVVMActorPayload(const TScriptInterface<const IAVVMCanExposeActorPayload>& NewPayloadOwner);
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TScriptInterface<const IAVVMCanExposeActorPayload> PayloadOwner = nullptr;
 };

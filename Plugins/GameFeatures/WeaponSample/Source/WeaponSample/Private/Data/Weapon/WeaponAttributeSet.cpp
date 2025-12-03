@@ -27,28 +27,31 @@ void UWeaponRange_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UWeaponRange_AttributeSet, TimeUntilFirstShotReset);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, RateOfFire);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, ReloadCeiling);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, ShellOrClipReloadTime);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_MovementPenalityModifier);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_GameplayPenalityModifier);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_RateX);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_RateY);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_RateModifier_ADS);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_RateModifier_Hip);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_CeilingX);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_CeilingY);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_DelayBeforeDecreasing);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_DecreaseRate);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Recoil_DecreaseCancellationThreshold);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_MovementPenalityModifier);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_GameplayPenalityModifier);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_Rate);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_MovementCeil);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_FiringCeil);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_DelayBeforeDecreaseRate);
-	DOREPLIFETIME(UWeaponRange_AttributeSet, Spread_DecreaseRate);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, TimeUntilFirstShotReset, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, RateOfFire, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, ReloadCeiling, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, ShellOrClipReloadTime, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_MovementPenalityModifier, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_GameplayPenalityModifier, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_RateX, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_RateY, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_RateModifier_ADS, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_RateModifier_Hip, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_CeilingX, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_CeilingY, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_DelayBeforeDecreasing, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_DecreaseRate, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Recoil_DecreaseCancellationThreshold, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_MovementPenalityModifier, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_GameplayPenalityModifier, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_Rate, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_MovementCeil, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_FiringCeil, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_DelayBeforeDecreaseRate, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, Spread_DecreaseRate, Params);
 }
 
 void UWeaponRange_AttributeSet::Init()

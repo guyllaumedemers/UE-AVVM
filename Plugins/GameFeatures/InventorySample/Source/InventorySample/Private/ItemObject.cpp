@@ -36,8 +36,11 @@ void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UItemObject, RuntimeItemActor);
-	DOREPLIFETIME(UItemObject, RuntimeItemState);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UItemObject, RuntimeItemActor, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UItemObject, RuntimeItemState, Params);
 }
 
 bool UItemObject::IsSupportedForNetworking() const
@@ -57,12 +60,16 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 {
 	RuntimeItemState.StateTags.RemoveTags(RemovedTags);
 	RuntimeItemState.StateTags.AppendTags(AddedTags);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
+	
 	OnRep_ItemStateModified(RuntimeItemState);
 }
 
 void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 {
 	RuntimeItemState.Counter = FMath::Clamp<int32>((RuntimeItemState.Counter + NewCountModifier), 0, 999);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
+	
 	OnRep_ItemStateModified(RuntimeItemState);
 }
 
@@ -148,6 +155,8 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	}
 
 	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), ActorClass, Outer);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemActor, this);
+	
 	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                      TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
@@ -177,11 +186,12 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		bCanRegisterAttributeSet = FAVVMSocketTargetingHelper::Static_AttachToActor(RuntimeItemActor, Params);
 	}
 
+	const FSoftObjectPath& AttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
 	// @gdemers IMPORTANT : Keep in mind that deferred actor being attached, may or may not own an ASC. As such,
 	// handling the initialization of the Attribute set for the delayed case has to be accounted for in the implementer
 	// of the IAVVMDoesSupportInnerSocketTargeting interface. This is why we are forwarding above. Below is the case for
 	// an actor that has a valid socket at creation time.
-	if (!bCanRegisterAttributeSet)
+	if (!bCanRegisterAttributeSet || AttributeSetSoftObjectPath.IsNull())
 	{
 		return;
 	}

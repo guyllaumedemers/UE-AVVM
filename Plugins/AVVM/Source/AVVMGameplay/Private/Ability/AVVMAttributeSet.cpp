@@ -27,8 +27,11 @@ void UAVVMAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UAVVMAttributeSet, Durability);
-	DOREPLIFETIME(UAVVMAttributeSet, Weight);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMAttributeSet, Durability, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMAttributeSet, Weight, Params);
 }
 
 void UAVVMAttributeSet::Init()

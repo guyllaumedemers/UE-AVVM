@@ -25,12 +25,15 @@ void UAVVMCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UAVVMCharacterAttributeSet, Movement_JumpHeight);
-	DOREPLIFETIME(UAVVMCharacterAttributeSet, Movement_WalkSpeed);
-	DOREPLIFETIME(UAVVMCharacterAttributeSet, Movement_SprintSpeed);
-	DOREPLIFETIME(UAVVMCharacterAttributeSet, Movement_DashDistance);
-	DOREPLIFETIME(UAVVMCharacterAttributeSet, Movement_RollDistance);
-	DOREPLIFETIME(UAVVMCharacterAttributeSet, Movement_SlideDistance);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_JumpHeight, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_WalkSpeed, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_SprintSpeed, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_DashDistance, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_RollDistance, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_SlideDistance, Params);
 }
 
 void UAVVMCharacterAttributeSet::Init()

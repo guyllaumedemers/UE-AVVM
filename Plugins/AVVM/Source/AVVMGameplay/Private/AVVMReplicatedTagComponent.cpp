@@ -23,6 +23,7 @@
 #include "AVVMGameplayUtils.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 
 UAVVMReplicatedTagComponent::UAVVMReplicatedTagComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -38,7 +39,10 @@ void UAVVMReplicatedTagComponent::GetLifetimeReplicatedProps(TArray<class FLifet
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UAVVMReplicatedTagComponent, Flags);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMReplicatedTagComponent, Flags, Params);
 }
 
 void UAVVMReplicatedTagComponent::BeginPlay()
@@ -98,6 +102,7 @@ void UAVVMReplicatedTagComponent::Append(const FGameplayTagContainer& NewTags)
 
 	const FGameplayTagContainer OldTags = Flags;
 	Flags.AppendTags(NewTags);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, Flags, this);
 
 	UE_LOG(LogGameplay,
 	       Log,
@@ -113,6 +118,7 @@ void UAVVMReplicatedTagComponent::Remove(const FGameplayTagContainer& NewTags)
 {
 	const FGameplayTagContainer OldTags = Flags;
 	Flags.RemoveTags(NewTags);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, Flags, this);
 
 	UE_LOG(LogGameplay,
 	       Log,

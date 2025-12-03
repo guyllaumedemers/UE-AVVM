@@ -32,6 +32,7 @@
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -54,8 +55,11 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UActorInventoryComponent, Items);
-	DOREPLIFETIME(UActorInventoryComponent, ComponentStateTags);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, Items, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, ComponentStateTags, Params);
 }
 
 void UActorInventoryComponent::BeginPlay()
@@ -144,6 +148,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
 		RemoveReplicatedSubObject(Iterator->Get());
@@ -276,6 +281,8 @@ void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& A
 {
 	ComponentStateTags.RemoveTags(RemovedTags);
 	ComponentStateTags.AppendTags(AddedTags);
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, ComponentStateTags, this);
 }
 
 bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Compare) const
@@ -305,6 +312,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	TArray<UObject*> OutStreamableAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 	// @gdemers cache array before to invoke OnRep on server.
 	TArray<UItemObject*> OldItems = Items;
 	for (UObject* StreamableAsset : OutStreamableAssets)

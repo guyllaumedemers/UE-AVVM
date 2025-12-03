@@ -220,7 +220,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	bool operator!=(const FAVVMPlayerResource& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FDataRegistryId}, {Any information about a Resource}, i.e {Price}, {ResellPrice}, {Stats}, {MaxCapacity}, {CanStack}, etc...
@@ -245,7 +245,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 	bool operator!=(const FAVVMPlayerChallenge& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FDataRegistryId}. {Goal}, TArray{Rewards}
@@ -299,7 +299,7 @@ struct AVVMONLINE_API FAVVMParty
 	bool operator!=(const FAVVMParty& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers may represent a party name.
@@ -307,11 +307,11 @@ struct AVVMONLINE_API FAVVMParty
 	FString PartyId = FString();
 
 	// @gdemers NA, China, Russia, etc...
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 RegionId = INDEX_NONE;
 
 	// @gdemers sub-identifier to the region.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 DistrictId = INDEX_NONE;
 
 	// @gdemers {FAVVMHostConfiguration.UniqueId}
@@ -338,7 +338,7 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 	bool operator!=(const FAVVMPlayerConnection& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers convert using FUniqueNetIdString::Create()

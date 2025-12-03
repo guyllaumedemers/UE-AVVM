@@ -49,6 +49,7 @@ public class InventorySample : ModuleRules
 			new string[]
 			{
 				"Json",
+				"NetCore"
 			}
 		);
 	}

@@ -28,6 +28,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.Notification.Transaction");
@@ -48,7 +49,10 @@ void UGameStateTransactionHistory::GetLifetimeReplicatedProps(TArray<class FLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UGameStateTransactionHistory, Transactions);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UGameStateTransactionHistory, Transactions, Params);
 }
 
 void UGameStateTransactionHistory::BeginPlay()
@@ -165,6 +169,8 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 		return;
 	}
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTransactionHistory, Transactions, this);
+	
 	auto* Transaction = NewObject<UTransaction>(this);
 	Transaction->operator()(Args.Instigator.Get(), Args.Target.Get(), Args.TransactionType, Args.Payload);
 	AddReplicatedSubObject(Transaction);
@@ -193,6 +199,7 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 		return;
 	}
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTransactionHistory, Transactions, this);
 	for (const auto* Transaction : GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType))
 	{
 		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
@@ -222,6 +229,7 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 		return;
 	}
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTransactionHistory, Transactions, this);
 	for (const auto* Transaction : GetAllTransactions(UTransaction::GetUniqueId(NewTarget)))
 	{
 		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);

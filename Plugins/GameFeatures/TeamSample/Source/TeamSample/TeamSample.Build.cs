@@ -51,6 +51,7 @@ public class TeamSample : ModuleRules
 			new string[]
 			{
 				"AVVMOnline",
+				"NetCore",
 				"Niagara"
 			}
 		);

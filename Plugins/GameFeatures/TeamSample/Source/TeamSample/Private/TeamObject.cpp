@@ -30,6 +30,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_COMPOSITION_CHANGED_NOTIFICATION, "TeamSample.Notification.TeamCompositionChanged");
@@ -44,8 +45,13 @@ FTeamPayload::FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
 void UTeamObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
 
-	DOREPLIFETIME(UTeamObject, PlayerUniqueNetIds);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UTeamObject, PlayerUniqueNetIds, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UTeamObject, TeamTag, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UTeamObject, PartyUniqueId, Params);
 }
 
 bool UTeamObject::IsSupportedForNetworking() const
@@ -74,6 +80,7 @@ const FGameplayTag& UTeamObject::GetTeamTag() const
 void UTeamObject::RegisterPlayerState(const APlayerState* NewPlayerState, const FString& NewPlayerUniqueNetId)
 {
 	PlayerUniqueNetIds.AddUnique(NewPlayerUniqueNetId);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UTeamObject, PlayerUniqueNetIds, this);
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (IsValid(Outer) && IsValid(NewPlayerState))
@@ -97,6 +104,7 @@ void UTeamObject::UnRegisterPlayerState(const APlayerState* OldPlayerState)
 {
 	const FString PlayerUniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(OldPlayerState);
 	PlayerUniqueNetIds.Remove(PlayerUniqueNetId);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UTeamObject, PlayerUniqueNetIds, this);
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (IsValid(Outer) && IsValid(OldPlayerState))
@@ -154,6 +162,9 @@ void UTeamUtils::CreateOrAppendTeams(UObject* Outer,
 			{
 				NewTeam->TeamTag = DuplicatedTags.Pop();
 				NewTeam->PartyUniqueId = Party.UniqueId;
+				MARK_PROPERTY_DIRTY_FROM_NAME(UTeamObject, TeamTag, NewTeam);
+				MARK_PROPERTY_DIRTY_FROM_NAME(UTeamObject, PartyUniqueId, NewTeam);
+				
 				OutTeams.Add(NewTeam);
 			}
 		}

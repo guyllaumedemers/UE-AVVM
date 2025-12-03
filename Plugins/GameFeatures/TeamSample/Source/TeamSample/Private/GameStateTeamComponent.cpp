@@ -35,6 +35,7 @@
 #include "GameFramework/GameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAM, "WorldRule.Team");
@@ -57,7 +58,10 @@ void UGameStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UGameStateTeamComponent, Teams);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UGameStateTeamComponent, Teams, Params);
 }
 
 void UGameStateTeamComponent::BeginPlay()
@@ -313,6 +317,7 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 		return;
 	}
 
+	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTeamComponent, Teams, this);
 	for (auto Iterator = Teams.CreateIterator(); Iterator; ++Iterator)
 	{
 		RemoveReplicatedSubObject(Iterator->Get());

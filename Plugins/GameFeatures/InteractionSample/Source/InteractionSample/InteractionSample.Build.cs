@@ -52,6 +52,7 @@ public class InteractionSample : ModuleRules
 				"AVVMToolkit",
 				"CommonInput",
 				"EnhancedInput",
+				"NetCore",
 				"SlateCore",
 			}
 		);

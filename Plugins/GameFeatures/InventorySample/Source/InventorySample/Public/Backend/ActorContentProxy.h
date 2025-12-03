@@ -36,11 +36,11 @@ struct INVENTORYSAMPLE_API FItemModifierProxy
 	bool operator==(const FItemModifierProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FDataRegistryId}
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ResourceId = FString();
 };
 
@@ -57,15 +57,15 @@ struct INVENTORYSAMPLE_API FItemProxy
 	bool operator==(const FItemProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FDataRegistryId}
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ResourceId = FString();
 
 	// @gdemers {FItemModifierProxy}
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> ModValues;
 };
 
@@ -82,11 +82,11 @@ struct INVENTORYSAMPLE_API FItemHolderProxy
 	bool operator==(const FItemHolderProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FItemProxy}
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> ItemValues;
 };
 
@@ -103,10 +103,10 @@ struct INVENTORYSAMPLE_API FActorContentProxy
 	bool operator==(const FActorContentProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend and apply ordering changes to children based on local array ordering.
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers {FItemHolderProxy}
-	UPROPERTY(Transient, BlueprintType)
+	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> ItemHolderValues;
 };

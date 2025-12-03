@@ -28,6 +28,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_OWNERSHIP_CHANGED_NOTIFICATION, "TeamSample.Notification.TeamOwnershipChanged");
@@ -48,7 +49,10 @@ void UPlayerStateTeamComponent::GetLifetimeReplicatedProps(TArray<class FLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UPlayerStateTeamComponent, OwningTeam);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UPlayerStateTeamComponent, OwningTeam, Params);
 }
 
 void UPlayerStateTeamComponent::BeginPlay()
@@ -134,6 +138,8 @@ void UPlayerStateTeamComponent::SetTeam(UTeamObject* NewTeam)
 		// TODO @gdemers add registration to delegate on the UTeamObject to respond to events such as
 		// votes, request to swap team, etc...
 		OwningTeam = NewTeam;
+		MARK_PROPERTY_DIRTY_FROM_NAME(UPlayerStateTeamComponent, OwningTeam, this);
+		
 		OnRep_OnTeamOwnershipChanged(OldTeam);
 	}
 #endif
