@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "UI/SingleContextInventoryViewModel.h"
 
-#include "ItemPlacementManager.h"
 #include "UI/ItemObjectViewModel.h"
 
 USingleContextInventoryViewModel* USingleContextInventoryViewModel::Make(const TArray<UItemObject*>& NewItems,
@@ -54,11 +53,6 @@ void USingleContextInventoryViewModel::Init(const TArray<UItemObject*>& NewItems
 	// TODO @gdemers object placement would only be configured for outer referencing a local player. in the case of a shop displaying
 	// content, the current default state would be to display items based on ordering defined in it's data asset. May require Fix later!
 	const auto* OwningLocalPlayer = GetTypedOuter<ULocalPlayer>();
-	auto* Subsystem = UItemPlacementManager::GetSubsystem(OwningLocalPlayer);
-	if (IsValid(Subsystem))
-	{
-		Subsystem->SetupItemPlacements(ItemViewModels);
-	}
 }
 
 void USingleContextInventoryViewModel::Process(const UItemObjectViewModel* NewModifiedItem)
