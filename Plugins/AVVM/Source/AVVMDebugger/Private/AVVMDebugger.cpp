@@ -103,13 +103,18 @@ void FAVVMImGuiDebugContext::ToggleDebugger()
 
 void FAVVMDebuggerModule::StartupModule()
 {
+#if !WITH_SERVER_CODE || WITH_EDITOR
+	if (IsRunningDedicatedServer())
+	{
+		return;
+	}
+	
 	// @gdemers I really don't like this approach. I feel like the ImGui plugin shouldn't hide the FImGuiModuleManager in the private access modifier.
 	// Doing so prevent any third party plugin from being made aware of the FImGuiContextProxy tied to a given ContextIndex/World
 	// and prevent directly binding to the FImGuiContextProxy::OnDraw delegate. (which is really the only thing I care about being hooked to here!)
 	// Even if they exposed a set of Delegates to their api, it cannot be bound to in the Startup function due to the call to Utilities::GetWorldContextIndex
 	// returning INVALID_INDEX and FImGuiDelegatesContainer::WorldDebugDelegates.FindOrAdd failing to find a valid Key. (all due to the World not being yet created!)
 	GameInstanceDelegateHandle = FWorldDelegates::OnStartGameInstance.AddRaw(this, &FAVVMDebuggerModule::OnStartGameInstance);
-#if WITH_EDITOR
 	PIEStartDelegateHandle = FWorldDelegates::OnPIEStarted.AddRaw(this, &FAVVMDebuggerModule::OnPIEStart);
 	PIEEndDelegateHandle = FWorldDelegates::OnPIEEnded.AddRaw(this, &FAVVMDebuggerModule::OnPIEEnd);
 #endif
@@ -117,13 +122,18 @@ void FAVVMDebuggerModule::StartupModule()
 
 void FAVVMDebuggerModule::ShutdownModule()
 {
+#if !WITH_SERVER_CODE || WITH_EDITOR
+	if (IsRunningDedicatedServer())
+	{
+		return;
+	}
+
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceDelegateHandle);
-#if WITH_EDITOR
 	FWorldDelegates::OnPIEStarted.Remove(PIEStartDelegateHandle);
 	FWorldDelegates::OnPIEEnded.Remove(PIEEndDelegateHandle);
-#endif
 	ClearImGuiDelegates();
 	ClearInputHandler();
+#endif
 }
 
 FAVVMDebuggerModule& FAVVMDebuggerModule::Get()

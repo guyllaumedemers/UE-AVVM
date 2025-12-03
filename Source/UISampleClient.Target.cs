@@ -21,11 +21,11 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class UISampleEditorTarget : TargetRules
+public class UISampleClientTarget : TargetRules
 {
-	public UISampleEditorTarget(TargetInfo Target) : base(Target)
+	public UISampleClientTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Editor;
+		Type = TargetType.Client;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
 		ExtraModuleNames.Add("UISample");

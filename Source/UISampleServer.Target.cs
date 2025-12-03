@@ -21,11 +21,11 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class UISampleTarget : TargetRules
+public class UISampleServerTarget : TargetRules
 {
-	public UISampleTarget(TargetInfo Target) : base(Target)
+	public UISampleServerTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Game;
+		Type = TargetType.Server;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
 		ExtraModuleNames.Add("UISample");
