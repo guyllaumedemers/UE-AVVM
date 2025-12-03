@@ -35,13 +35,8 @@ UScriptStruct* TBaseStructure<FAVVMNotificationPayload>::Get()
 
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-	const auto* World = Cast<UWorld>(Outer);
-	if (IsValid(World))
-	{
-		return !World->IsNetMode(NM_DedicatedServer);
-	}
-
-	return false;
+	// @gdemers channels should be conditionally registered based on Authority.
+	return true;
 }
 
 void UAVVMNotificationSubsystem::Initialize(FSubsystemCollectionBase& Collection)
