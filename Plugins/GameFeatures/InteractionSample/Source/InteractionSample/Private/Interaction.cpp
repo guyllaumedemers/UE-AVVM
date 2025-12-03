@@ -61,7 +61,7 @@ bool UInteraction::DoesExactMatch(const AActor* NewInstigator,
 
 bool UInteraction::IsEqual(const UInteraction* Other) const
 {
-	return (Instigator == Other->Instigator) && (Target == Other->Target);
+	return IsValid(Instigator) && IsValid(Target) && (this == Other);
 }
 
 bool UInteraction::CanInteract() const
@@ -98,4 +98,9 @@ void UInteraction::operator()(const AActor* NewInstigator,
 	Target = NewTarget;
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, Instigator, this)
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, Target, this)
+}
+
+bool UInteraction::operator==(const UInteraction* Rhs) const
+{
+	return IsValid(Rhs) && (Instigator == Rhs->Instigator) && (Target == Rhs->Target);
 }

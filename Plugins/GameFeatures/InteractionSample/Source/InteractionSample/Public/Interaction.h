@@ -87,5 +87,7 @@ private:
 	void operator()(const AActor* NewInstigator,
 	                const AActor* NewTarget);
 
+	bool operator==(const UInteraction* Rhs) const;
+
 	friend class UActorInteractionComponent;
 };
