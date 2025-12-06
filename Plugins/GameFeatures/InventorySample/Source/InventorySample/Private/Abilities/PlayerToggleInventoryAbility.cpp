@@ -124,11 +124,16 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 	       *GetName(),
 	       *PC->GetName());
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-	                                        ChannelTag,
-	                                        PC,
-	                                        PC->PlayerState,
-	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, PC->PlayerState));
+#if WITH_EDITOR
+	if (!PC->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        ChannelTag,
+		                                        PC,
+		                                        PC->PlayerState,
+		                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, PC->PlayerState));
+	}
 }
 
 void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

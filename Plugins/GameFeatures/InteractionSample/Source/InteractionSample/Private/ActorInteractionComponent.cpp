@@ -313,13 +313,13 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
                                                   const AActor* NewTarget)
 {
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 	TArray<UInteraction*> OldRecords = Records;
 
 	auto* Transaction = NewObject<UInteraction>(this);
 	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	AddReplicatedSubObject(Transaction);
 	Records.Add(Transaction);
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 
 	OnRep_RecordModified(OldRecords);
 }
@@ -334,12 +334,12 @@ void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator
 
 	if (SearchResult != nullptr)
 	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 		TArray<UInteraction*> OldRecords = Records;
 
 		UInteraction* Transaction = SearchResult->Get();
 		RemoveReplicatedSubObject(Transaction);
 		Records.Remove(Transaction);
-		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 
 		OnRep_RecordModified(OldRecords);
 	}

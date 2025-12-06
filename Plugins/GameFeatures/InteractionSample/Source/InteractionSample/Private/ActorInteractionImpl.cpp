@@ -322,11 +322,16 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 #endif
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-	                                        StartPromptInteractionChannel,
-	                                        Controller,
-	                                        Instigator,
-	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(Instigator, Controller));
+#if WITH_EDITOR
+	if (!Controller->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        StartPromptInteractionChannel,
+		                                        Controller,
+		                                        Instigator,
+		                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(Instigator, Controller));
+	}
 }
 
 void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewRecords,
@@ -357,9 +362,9 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 			continue;
 		}
 
-		const UInteraction* const* SearchResult = NewRecords.FindByPredicate([&](const UInteraction* Param)
+		const UInteraction* const * SearchResult = NewRecords.FindByPredicate([Record = OldRecord](const UInteraction* Param)
 		{
-			return IsValid(Param) && Param->DoesExactMatch(OldRecord->GetInstigator() /*World Actor*/, OldRecord->GetTarget() /*AController*/);
+			return IsValid(Param) && IsValid(Record) && Param->DoesExactMatch(Record->GetInstigator() /*World Actor*/, Record->GetTarget() /*AController*/);
 		});
 
 		if (SearchResult == nullptr)
@@ -393,11 +398,16 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	}
 #endif
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-	                                        StopPromptInteractionChannel,
-	                                        Controller,
-	                                        Instigator,
-	                                        FAVVMNotificationPayload::Empty);
+#if WITH_EDITOR
+	if (!Controller->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        StopPromptInteractionChannel,
+		                                        Controller,
+		                                        Instigator,
+		                                        FAVVMNotificationPayload::Empty);
+	}
 }
 
 void UActorInteractionImpl::HandleModifiedRecord(const TArray<UInteraction*>& NewRecords,

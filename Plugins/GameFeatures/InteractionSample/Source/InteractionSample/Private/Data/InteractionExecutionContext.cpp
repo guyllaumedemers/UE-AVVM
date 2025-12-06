@@ -38,11 +38,16 @@ void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInst
 		return;
 	}
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        PumpHeartbeatChannelTag,
-	                                        PC,
-	                                        NewInstigator,
-	                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(NewDelta));
+#if WITH_EDITOR
+	if (!PC->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+		                                        PumpHeartbeatChannelTag,
+		                                        PC,
+		                                        NewInstigator,
+		                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(NewDelta));
+	}
 }
 
 void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
@@ -53,11 +58,16 @@ void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator
 		return;
 	}
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        ExecuteChannelTag,
-	                                        PC,
-	                                        NewInstigator,
-	                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(NewInstigator, PC->PlayerState));
+#if WITH_EDITOR
+	if (!PC->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+		                                        ExecuteChannelTag,
+		                                        PC,
+		                                        NewInstigator,
+		                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(NewInstigator, PC->PlayerState));
+	}
 }
 
 void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
@@ -69,9 +79,14 @@ void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
 		return;
 	}
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
-	                                        KillChannelTag,
-	                                        PC,
-	                                        NewInstigator,
-	                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE)));
+#if WITH_EDITOR
+	if (!PC->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(NewTarget,
+		                                        KillChannelTag,
+		                                        PC,
+		                                        NewInstigator,
+		                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE)));
+	}
 }
