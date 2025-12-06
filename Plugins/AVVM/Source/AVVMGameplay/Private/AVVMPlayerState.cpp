@@ -20,6 +20,8 @@
 #include "AVVMPlayerState.h"
 
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Net/AVVMDoesImplNetSynchronization.h"
+#include "Net/AVVMNetSynchronizationManager.h"
 
 FAVVMPlayerStatePayload::FAVVMPlayerStatePayload(const APlayerState* NewPlayerState,
                                                  const bool bNewAddOrRemove)
@@ -77,6 +79,10 @@ void AAVVMPlayerState::ClientInitialize(class AController* C)
 		               this,
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
+
+	// @gdemers Notify Server that our local client has received a valid PC
+	// and is Ready to finalize any system visuals required for gameplay.
+	Server_OnClientPlayerControllerReceived();
 }
 
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
@@ -89,4 +95,19 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 	// @gdemers Define the PlayerState representation for it's Actor Context.
 	// example : GamerTag, level, ranking, etc... (such as Nameplate information).
 	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
+}
+
+void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized)
+{
+	for (const auto& Net : NetFinalized)
+	{
+		IAVVMDoesImplNetSynchronization::Execute_ClientRefresh(Net.GetObject(), this);
+	}
+}
+
+void AAVVMPlayerState::Server_OnClientPlayerControllerReceived_Implementation()
+{
+	const UWorld* World = GetWorld();
+	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized = UAVVMNetSynchronizationManager::Static_GetAllNetFinalized(World);
+	Client_OnNetFinalized(NetFinalized);
 }

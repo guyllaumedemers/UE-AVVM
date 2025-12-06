@@ -29,6 +29,7 @@
 
 #include "AVVMPlayerState.generated.h"
 
+class IAVVMDoesImplNetSynchronization;
 class UAVVMAbilitySystemComponent;
 
 /**
@@ -103,6 +104,12 @@ public:
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
 
 protected:
+	UFUNCTION(Server, Reliable)
+	void Server_OnClientPlayerControllerReceived();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_OnNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
 	
