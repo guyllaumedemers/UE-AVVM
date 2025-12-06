@@ -95,10 +95,14 @@ void AAVVMCharacter::OnRep_Controller()
 {
 	Super::OnRep_Controller();
 
+#if WITH_EDITOR
 	if (!IsNetMode(NM_DedicatedServer))
+#endif
 	{
-		const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(this);
-		UE_AVVM_NOTIFY(this, RegisteredChannels.PostPlayerControllerReplicationTag, this, FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner));
+		UE_AVVM_NOTIFY(this,
+		               RegisteredChannels.PostPlayerControllerReplicationTag,
+		               this,
+		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
 }
 
@@ -106,9 +110,13 @@ void AAVVMCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
+#if WITH_EDITOR
 	if (!IsNetMode(NM_DedicatedServer))
+#endif
 	{
-		const auto PayloadOwner = TScriptInterface<const IAVVMCanExposeActorPayload>(this);
-		UE_AVVM_NOTIFY(this, RegisteredChannels.PostPlayerStateReplicationTag, this, FAVVMNotificationPayload::Make<FAVVMActorPayload>(PayloadOwner));
+		UE_AVVM_NOTIFY(this,
+		               RegisteredChannels.PostPlayerStateReplicationTag,
+		               this,
+		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
 }
