@@ -260,7 +260,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Executed from \"%s\". Attempt Executing Server_AddRecord..."),
+		       TEXT("Executed from \"%s\". OnPrimitiveComponentBeginOverlap"),
 		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 		Server_AddRecord(Instigator, Target);
@@ -306,7 +306,7 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	{
 		UE_LOG(LogGameplay,
 		       Log,
-		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RemoveRecord..."),
+		       TEXT("Executed from \"%s\". OnPrimitiveComponentEndOverlap"),
 		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 		Server_SetPendingKill(Instigator, Target);
@@ -323,6 +323,11 @@ void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
 	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	AddReplicatedSubObject(Transaction);
 	Records.Add(Transaction);
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Server_AddRecord"),
+	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 	OnRep_RecordModified(OldRecords);
 }
@@ -342,6 +347,11 @@ void UActorInteractionComponent::Server_SetPendingKill(const AActor* NewInstigat
 		UInteraction* Transaction = SearchResult->Get();
 		Transaction->SetPendingKill();
 
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". Server_SetPendingKill"),
+		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
+
 		OnRep_RecordModified(Records);
 	}
 }
@@ -358,6 +368,11 @@ void UActorInteractionComponent::Server_ClearPendingKill()
 	{
 		return;
 	}
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Server_ClearPendingKill"),
+	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
 	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 	for (int32 i = Records.Num() - 1; i >= 0; --i)

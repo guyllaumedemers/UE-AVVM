@@ -54,9 +54,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool DoesExactMatch(const AActor* NewInstigator,
 	                    const AActor* NewTarget) const;
-
-	UFUNCTION(BlueprintCallable)
-	bool IsEqual(const UInteraction* Other) const;
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsPendingKill() const;

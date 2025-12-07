@@ -51,18 +51,13 @@ void UInteraction::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCo
 
 bool UInteraction::DoesPartialMatch(const AActor* NewInstigator) const
 {
-	return IsValid(NewInstigator) && (Instigator == NewInstigator);
+	return !IsPendingKill() && IsValid(NewInstigator) && (Instigator == NewInstigator);
 }
 
 bool UInteraction::DoesExactMatch(const AActor* NewInstigator,
                                   const AActor* NewTarget) const
 {
-	return IsValid(NewTarget) && IsValid(NewInstigator) && (Target == NewTarget) && (Instigator == NewInstigator);
-}
-
-bool UInteraction::IsEqual(const UInteraction* Other) const
-{
-	return IsValid(Instigator) && IsValid(Target) && (this == Other);
+	return !IsPendingKill() && IsValid(NewTarget) && IsValid(NewInstigator) && (Target == NewTarget) && (Instigator == NewInstigator);
 }
 
 bool UInteraction::IsPendingKill() const
@@ -77,14 +72,14 @@ bool UInteraction::CanInteract() const
 
 void UInteraction::Lock()
 {
-	bIsInteractable = false;
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsInteractable, this)
+	bIsInteractable = false;
 }
 
 void UInteraction::Unlock()
 {
-	bIsInteractable = true;
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsInteractable, this)
+	bIsInteractable = true;
 }
 
 const AActor* UInteraction::GetTarget() const
