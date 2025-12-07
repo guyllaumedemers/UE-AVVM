@@ -90,12 +90,7 @@ protected:
 	                               const AActor* NewTarget);
 
 	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
-
-	void HandleOldRecord(const TArray<UInteraction*>& NewRecords,
-	                     const TArray<UInteraction*>& OldRecords);
-
-	void HandleModifiedRecord(const TArray<UInteraction*>& NewRecords,
-	                          const TArray<UInteraction*>& OldRecords);
+	void HandlePendingKillRecords(const TArray<UInteraction*>& PendingKillRecords);
 
 	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
 	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);

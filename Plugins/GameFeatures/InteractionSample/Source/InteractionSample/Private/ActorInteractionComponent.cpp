@@ -44,7 +44,7 @@ UActorInteractionComponent::UActorInteractionComponent(const FObjectInitializer&
 	PrimaryComponentTick.bAllowTickBatching = false;
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 	SetIsReplicatedByDefault(true);
-	
+
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
@@ -61,6 +61,9 @@ void UActorInteractionComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 void UActorInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// @gdemers allow control over collection size based on user-defined requirements.
+	Records.Reset(DefaultAllocationSize);
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -306,7 +309,7 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 		       TEXT("Executed from \"%s\". Attempt Executing ServerRPC_RemoveRecord..."),
 		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
 
-		Server_RemoveRecord(Instigator, Target);
+		Server_SetPendingKill(Instigator, Target);
 	}
 }
 
@@ -324,8 +327,8 @@ void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
 	OnRep_RecordModified(OldRecords);
 }
 
-void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator,
-                                                     const AActor* NewTarget)
+void UActorInteractionComponent::Server_SetPendingKill(const AActor* NewInstigator,
+                                                       const AActor* NewTarget)
 {
 	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Param)
 	{
@@ -335,13 +338,35 @@ void UActorInteractionComponent::Server_RemoveRecord(const AActor* NewInstigator
 	if (SearchResult != nullptr)
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
-		TArray<UInteraction*> OldRecords = Records;
 
 		UInteraction* Transaction = SearchResult->Get();
-		RemoveReplicatedSubObject(Transaction);
-		Records.Remove(Transaction);
+		Transaction->SetPendingKill();
 
-		OnRep_RecordModified(OldRecords);
+		OnRep_RecordModified(Records);
+	}
+}
+
+void UActorInteractionComponent::Server_ClearPendingKill()
+{
+	const auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!OwningOuter->HasAuthority())
+	{
+		return;
+	}
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
+	for (int32 i = Records.Num() - 1; i >= 0; --i)
+	{
+		const bool bIsPendingKill = Records[i]->IsPendingKill();
+		if (bIsPendingKill)
+		{
+			Records.RemoveSingleSwap(Records[i]);
+		}
 	}
 }
 
@@ -352,4 +377,6 @@ void UActorInteractionComponent::OnRep_RecordModified(TArray<UInteraction*> OldR
 	{
 		Impl->HandleRecordModified(OldRecords, Records);
 	}
+	
+	Server_ClearPendingKill();
 }

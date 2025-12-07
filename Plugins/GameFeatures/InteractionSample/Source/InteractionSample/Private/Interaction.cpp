@@ -33,6 +33,7 @@ void UInteraction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, Target, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, Instigator, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, bIsInteractable, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UInteraction, bIsPendingKill, Params);
 }
 
 bool UInteraction::IsSupportedForNetworking() const
@@ -64,6 +65,11 @@ bool UInteraction::IsEqual(const UInteraction* Other) const
 	return IsValid(Instigator) && IsValid(Target) && (this == Other);
 }
 
+bool UInteraction::IsPendingKill() const
+{
+	return bIsPendingKill;
+}
+
 bool UInteraction::CanInteract() const
 {
 	return bIsInteractable;
@@ -91,13 +97,19 @@ const AActor* UInteraction::GetInstigator() const
 	return Instigator.Get();
 }
 
+void UInteraction::SetPendingKill()
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsPendingKill, this)
+	bIsPendingKill = true;
+}
+
 void UInteraction::operator()(const AActor* NewInstigator,
                               const AActor* NewTarget)
 {
-	Instigator = NewInstigator;
-	Target = NewTarget;
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, Instigator, this)
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, Target, this)
+	Instigator = NewInstigator;
+	Target = NewTarget;
 }
 
 bool UInteraction::operator==(const UInteraction* Rhs) const

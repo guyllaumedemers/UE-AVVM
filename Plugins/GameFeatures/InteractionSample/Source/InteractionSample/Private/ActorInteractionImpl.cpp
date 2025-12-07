@@ -142,13 +142,9 @@ void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& Ol
 	{
 		HandleNewRecord(NewRecords);
 	}
-	else if (OldNum > NewNum)
-	{
-		HandleOldRecord(NewRecords, OldRecords);
-	}
 	else
 	{
-		HandleModifiedRecord(NewRecords, OldRecords);
+		HandlePendingKillRecords(OldRecords);
 	}
 }
 
@@ -334,8 +330,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 }
 
-void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewRecords,
-                                            const TArray<UInteraction*>& OldRecords)
+void UActorInteractionImpl::HandlePendingKillRecords(const TArray<UInteraction*>& PendingKillRecords)
 {
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -349,81 +344,46 @@ void UActorInteractionImpl::HandleOldRecord(const TArray<UInteraction*>& NewReco
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *Outer->GetName());
 
-	if (OldRecords.IsEmpty())
+	if (PendingKillRecords.IsEmpty())
 	{
 		return;
 	}
 
-	const UInteraction* FoundMatch = nullptr;
-	for (const UInteraction* OldRecord : OldRecords)
+	for (const UInteraction* PendingKillRecord : PendingKillRecords)
 	{
-		if (!IsValid(OldRecord))
+		if (!IsValid(PendingKillRecord) || !PendingKillRecord->IsPendingKill())
 		{
 			continue;
 		}
 
-		const UInteraction* const * SearchResult = NewRecords.FindByPredicate([Record = OldRecord](const UInteraction* Param)
-		{
-			return IsValid(Param) && IsValid(Record) && Param->DoesExactMatch(Record->GetInstigator() /*World Actor*/, Record->GetTarget() /*AController*/);
-		});
+		const AActor* Instigator = PendingKillRecord->GetInstigator();
+		const AActor* Target = PendingKillRecord->GetTarget();
 
-		if (SearchResult == nullptr)
+		const auto* Controller = Cast<AController>(Target);
+		if (!IsValid(Controller))
 		{
-			// @gdemers rip. no longer with us!
-			FoundMatch = OldRecord;
-			break;
+			return;
 		}
-	}
-
-	if (!ensureAlwaysMsgf(IsValid(FoundMatch),
-	                      TEXT("HandleOldRecord didnt find a match for removal!")))
-	{
-		return;
-	}
-
-	const AActor* Instigator = FoundMatch->GetInstigator();
-	const AActor* Target = FoundMatch->GetTarget();
-
-	const auto* Controller = Cast<AController>(Target);
-	if (!IsValid(Controller))
-	{
-		return;
-	}
 
 #if WITH_SERVER_CODE
-	if (Controller->HasAuthority())
-	{
-		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
-		RemoveGameplayEffectHandle(ASC);
-	}
+		if (Controller->HasAuthority())
+		{
+			auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
+			RemoveGameplayEffectHandle(ASC);
+		}
 #endif
 
 #if WITH_EDITOR
-	if (!Controller->IsNetMode(NM_DedicatedServer))
+		if (!Controller->IsNetMode(NM_DedicatedServer))
 #endif
-	{
-		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        StopPromptInteractionChannel,
-		                                        Controller,
-		                                        Instigator,
-		                                        FAVVMNotificationPayload::Empty);
+		{
+			UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+			                                        StopPromptInteractionChannel,
+			                                        Controller,
+			                                        Instigator,
+			                                        FAVVMNotificationPayload::Empty);
+		}
 	}
-}
-
-void UActorInteractionImpl::HandleModifiedRecord(const TArray<UInteraction*>& NewRecords,
-                                                 const TArray<UInteraction*>& OldRecords)
-{
-	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Record Collection modified on Outer \"%s\". Updating locking State!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
 }
 
 void UActorInteractionImpl::AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle)

@@ -84,8 +84,10 @@ protected:
 	void Server_AddRecord(const AActor* NewInstigator,
 	                      const AActor* NewTarget);
 
-	void Server_RemoveRecord(const AActor* NewInstigator,
-	                         const AActor* NewTarget);
+	void Server_SetPendingKill(const AActor* NewInstigator,
+	                           const AActor* NewTarget);
+
+	void Server_ClearPendingKill();
 
 	UFUNCTION()
 	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
@@ -98,6 +100,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldPreventContingency = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Set the default size of our collection type."))
+	int32 DefaultAllocationSize = 6;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;

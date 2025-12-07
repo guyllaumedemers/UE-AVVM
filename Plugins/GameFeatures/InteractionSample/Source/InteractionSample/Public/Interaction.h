@@ -57,6 +57,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsEqual(const UInteraction* Other) const;
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsPendingKill() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool CanInteract() const;
@@ -72,6 +75,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta=(ToolTip="Actor that entered/exited the collision range."))
 	const AActor* GetInstigator() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void SetPendingKill();
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
@@ -82,6 +88,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	bool bIsInteractable = true;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	bool bIsPendingKill = false;
 
 private:
 	void operator()(const AActor* NewInstigator,
