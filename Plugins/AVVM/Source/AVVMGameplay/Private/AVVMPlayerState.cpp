@@ -20,6 +20,8 @@
 #include "AVVMPlayerState.h"
 
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "GameFramework/GameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"
 #include "Net/AVVMNetSynchronizationManager.h"
 
@@ -99,9 +101,28 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 
 void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized)
 {
+	AGameStateBase* GameStateBase = UGameplayStatics::GetGameState(this);
+	if (!IsValid(GameStateBase))
+	{
+		return;
+	}
+
+	TArray<APlayerState*> PlayerStates = GameStateBase->PlayerArray;
 	for (const auto& Net : NetFinalized)
 	{
-		IAVVMDoesImplNetSynchronization::Execute_ClientRefresh(Net.GetObject(), this);
+		UObject* NetSystem = Net.GetObject();
+		const bool bIsClientRelevantOnly = IAVVMDoesImplNetSynchronization::Execute_IsNetRelevantForLocalClientOnly(NetSystem);
+		if (bIsClientRelevantOnly)
+		{
+			IAVVMDoesImplNetSynchronization::Execute_ClientRefresh(NetSystem, this);
+		}
+		else
+		{
+			for (APlayerState* PlayerState : PlayerStates)
+			{
+				IAVVMDoesImplNetSynchronization::Execute_ClientRefresh(NetSystem, Cast<AAVVMPlayerState>(PlayerState));
+			}
+		}
 	}
 }
 

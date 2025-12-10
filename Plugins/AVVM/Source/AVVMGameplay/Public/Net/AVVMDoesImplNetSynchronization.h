@@ -59,4 +59,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void ClientRefresh(const AAVVMPlayerState* PlayerState) const;
 	void ClientRefresh_Implementation(const AAVVMPlayerState* PlayerState) const PURE_VIRTUAL(ClientRefresh_Implementation, return;);
+	
+	UFUNCTION(BlueprintNativeEvent)
+	bool IsNetRelevantForLocalClientOnly() const;
+	bool IsNetRelevantForLocalClientOnly_Implementation() const PURE_VIRTUAL(IsNetRelevantForLocalClientOnly_Implementation, return false;);
 };
