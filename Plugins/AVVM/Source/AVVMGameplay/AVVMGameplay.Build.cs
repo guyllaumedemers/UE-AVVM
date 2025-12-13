@@ -42,6 +42,7 @@ public class AVVMGameplay : ModuleRules
 				"DataRegistry",
 				"Engine",
 				"EnhancedInput",
+				"GameFeatures",
 				"GameplayAbilities",
 				"GameplayTags",
 				"GameplayTasks",

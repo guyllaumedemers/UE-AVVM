@@ -203,7 +203,7 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 	for (const auto* Transaction : GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType))
 	{
 		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
-		Transactions.Remove(Transaction);
+		Transactions.RemoveSingleSwap(Transaction);
 	}
 
 	const auto* Outer = OwningOuter.Get();
@@ -233,7 +233,7 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 	for (const auto* Transaction : GetAllTransactions(UTransaction::GetUniqueId(NewTarget)))
 	{
 		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
-		Transactions.Remove(Transaction);
+		Transactions.RemoveSingleSwap(Transaction);
 	}
 
 	const auto* Outer = OwningOuter.Get();

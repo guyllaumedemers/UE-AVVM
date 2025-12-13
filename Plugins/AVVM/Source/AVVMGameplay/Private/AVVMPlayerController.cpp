@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMPlayerController.h"
 
+#include "Inputs/AVVMGameFrameworkInputMappingContextManager.h"
+
 AAVVMPlayerController::AAVVMPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -28,4 +30,23 @@ AAVVMPlayerController::AAVVMPlayerController(const FObjectInitializer& ObjectIni
 	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
 	SetReplicateMovement(true);
 	bReplicates = true;
+}
+
+void AAVVMPlayerController::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(this);
+}
+
+void AAVVMPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AAVVMPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UAVVMGameFrameworkInputMappingContextManager::RemoveGameFrameworkInputMappingContextReceiver(this);
+	
+	Super::EndPlay(EndPlayReason);
 }

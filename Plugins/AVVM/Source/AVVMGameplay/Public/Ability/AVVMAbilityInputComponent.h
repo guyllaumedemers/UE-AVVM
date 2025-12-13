@@ -29,6 +29,7 @@
 
 class APlayerController;
 class UEnhancedInputComponent;
+class UEnhancedInputLocalPlayerSubsystem;
 class UInputAction;
 class UInputMappingContext;
 class ULocalPlayer;
@@ -47,8 +48,9 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent
 	struct FAVVMInputActionCallbackContext
 	{
 		explicit FAVVMInputActionCallbackContext(const UInputAction* NewInputAction,
-		                                         const ETriggerEvent NewTriggerEvent): InputAction(NewInputAction)
-		                                                                             , TriggerEvent(NewTriggerEvent)
+		                                         const ETriggerEvent NewTriggerEvent)
+			: InputAction(NewInputAction),
+			  TriggerEvent(NewTriggerEvent)
 		{
 		}
 
@@ -70,7 +72,15 @@ protected:
 	                             const APawn* NewPawn,
 	                             const APawn* OldPawn) const;
 
-	void BindInputActions(UEnhancedInputComponent* EnhancedInputComponent, const UInputMappingContext* InputMappingContext);
+	void UnRegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
+	                                   const UInputMappingContext* InputMappingContext) const;
+
+	void RegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
+	                                 const UInputMappingContext* InputMappingContext) const;
+
+	void BindInputActions(UEnhancedInputComponent* EnhancedInputComponent,
+	                      const UInputMappingContext* InputMappingContext);
+
 	void OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext);
 
 	UPROPERTY(Transient)
@@ -78,4 +88,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<APlayerController> OwningOuter = nullptr;
+
+private:
+	void UnRegisterGameFrameworkIMCs(TSharedPtr<FStreamableHandle> StreamableHandle) const;
+	TSharedPtr<FStreamableHandle> RegisterGameFrameworkIMCs(const TArray<FSoftObjectPath>& IMCSoftObjectPaths) const;
+	friend class UAVVMGameFrameworkInputMappingContextManager;
 };

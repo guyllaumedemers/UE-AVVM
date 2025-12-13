@@ -258,11 +258,6 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 
 	if (bResult)
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". OnPrimitiveComponentBeginOverlap"),
-		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
-
 		Server_AddRecord(Instigator, Target);
 	}
 }
@@ -304,11 +299,6 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 
 	if (bResult)
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". OnPrimitiveComponentEndOverlap"),
-		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
-
 		Server_SetPendingKill(Instigator, Target);
 	}
 }
@@ -319,15 +309,10 @@ void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
 	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 	TArray<UInteraction*> OldRecords = Records;
 
-	auto* Transaction = NewObject<UInteraction>(this);
-	Transaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	AddReplicatedSubObject(Transaction);
-	Records.Add(Transaction);
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Server_AddRecord"),
-	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
+	auto* Interaction = NewObject<UInteraction>(this);
+	Interaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+	AddReplicatedSubObject(Interaction);
+	Records.Add(Interaction);
 
 	OnRep_RecordModified(OldRecords);
 }
@@ -347,11 +332,6 @@ void UActorInteractionComponent::Server_SetPendingKill(const AActor* NewInstigat
 		UInteraction* Transaction = SearchResult->Get();
 		Transaction->SetPendingKill();
 
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Server_SetPendingKill"),
-		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
-
 		OnRep_RecordModified(Records);
 	}
 }
@@ -364,24 +344,21 @@ void UActorInteractionComponent::Server_ClearPendingKill()
 		return;
 	}
 
-	if (!OwningOuter->HasAuthority())
+	if (!Outer->HasAuthority() || Records.IsEmpty())
 	{
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Server_ClearPendingKill"),
-	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData());
-
 	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
 	for (int32 i = Records.Num() - 1; i >= 0; --i)
 	{
-		const bool bIsPendingKill = Records[i]->IsPendingKill();
-		if (bIsPendingKill)
+		const UInteraction* Record = Records[i];
+		if (!IsValid(Record) || !Record->IsPendingKill())
 		{
-			Records.RemoveSingleSwap(Records[i]);
+			continue;
 		}
+
+		Records.RemoveSingleSwap(Records[i]);
 	}
 }
 

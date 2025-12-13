@@ -26,7 +26,10 @@
 #include "AVVMPlayerController.generated.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	AAVVMPlayerController is a derived impl of the AModularPlayerController class that manage dynamic registration of Input Mapping Context
+ *	as well as implement support for relevant RPC request.
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMPlayerController : public AModularPlayerController
@@ -35,4 +38,7 @@ class AVVMGAMEPLAY_API AAVVMPlayerController : public AModularPlayerController
 	
 public:
 	AAVVMPlayerController(const FObjectInitializer& ObjectInitializer);
+	virtual void PostInitializeComponents() override;
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

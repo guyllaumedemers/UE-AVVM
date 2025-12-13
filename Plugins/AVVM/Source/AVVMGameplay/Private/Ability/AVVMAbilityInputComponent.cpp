@@ -27,6 +27,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Engine/AssetManager.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -101,6 +102,17 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
                                                          const APawn* OldPawn) const
 {
 	auto* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+
+	const UInputMappingContext* OldInputMappingContext = IsValid(OldPawn) ? IAVVMInputMappingProvider::Execute_GetInputMappingContext(OldPawn) : nullptr;
+	UnRegisterInputMappingContext(EnhancedInputSubsystem, OldInputMappingContext);
+
+	const UInputMappingContext* NewInputMappingContext = IsValid(NewPawn) ? IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn) : nullptr;
+	RegisterInputMappingContext(EnhancedInputSubsystem, NewInputMappingContext);
+}
+
+void UAVVMAbilityInputComponent::UnRegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
+                                                               const UInputMappingContext* InputMappingContext) const
+{
 	if (!IsValid(EnhancedInputSubsystem))
 	{
 		return;
@@ -112,30 +124,43 @@ void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* Loc
 		return;
 	}
 
-	const UInputMappingContext* OldInputMappingContext = IsValid(OldPawn) ? IAVVMInputMappingProvider::Execute_GetInputMappingContext(OldPawn) : nullptr;
-	if (IsValid(OldInputMappingContext))
+	if (IsValid(InputMappingContext))
 	{
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Removing Input Mapping Context \"%s\" on Outer \"%s\"."),
 		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *OldInputMappingContext->GetName(),
+		       *InputMappingContext->GetName(),
 		       *Outer->GetName());
 
-		EnhancedInputSubsystem->RemoveMappingContext(OldInputMappingContext);
+		EnhancedInputSubsystem->RemoveMappingContext(InputMappingContext);
+	}
+}
+
+void UAVVMAbilityInputComponent::RegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
+                                                             const UInputMappingContext* InputMappingContext) const
+{
+	if (!IsValid(EnhancedInputSubsystem))
+	{
+		return;
 	}
 
-	const UInputMappingContext* NewInputMappingContext = IsValid(NewPawn) ? IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn) : nullptr;
-	if (IsValid(NewInputMappingContext))
+	const APlayerController* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (IsValid(InputMappingContext))
 	{
 		UE_LOG(LogGameplay,
 		       Log,
 		       TEXT("Executed from \"%s\". Adding Input Mapping Context \"%s\" on Outer \"%s\"."),
 		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *NewInputMappingContext->GetName(),
+		       *InputMappingContext->GetName(),
 		       *Outer->GetName());
 
-		EnhancedInputSubsystem->AddMappingContext(NewInputMappingContext, 0);
+		EnhancedInputSubsystem->AddMappingContext(InputMappingContext, 0);
 	}
 }
 
@@ -241,4 +266,14 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 		AbilitySystemComponent->PressInputID(InputAction->GetInputId());
 		return;
 	}
+}
+
+void UAVVMAbilityInputComponent::UnRegisterGameFrameworkIMCs(TSharedPtr<FStreamableHandle> StreamableHandle) const
+{
+}
+
+TSharedPtr<FStreamableHandle> UAVVMAbilityInputComponent::RegisterGameFrameworkIMCs(const TArray<FSoftObjectPath>& IMCSoftObjectPaths) const
+{
+	FStreamableDelegate Callback;
+	return UAssetManager::Get().LoadAssetList(IMCSoftObjectPaths, Callback);
 }

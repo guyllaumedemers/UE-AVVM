@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Interaction.h"
 
+#include "AVVMGameplay.h"
+#include "AVVMGameplayUtils.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
@@ -74,12 +76,32 @@ void UInteraction::Lock()
 {
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsInteractable, this)
 	bIsInteractable = false;
+
+	const AActor* Outer = GetTypedOuter<AActor>();
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Locking Interaction \"%s\", instigator \"%s\", target \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *GetName(),
+	       IsValid(Instigator) ? *Instigator->GetName() : TEXT("Invalid"),
+	       IsValid(Target) ? *Target->GetName() : TEXT("Invalid"));
 }
 
 void UInteraction::Unlock()
 {
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsInteractable, this)
 	bIsInteractable = true;
+
+	const AActor* Outer = GetTypedOuter<AActor>();
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". Unlocking Interaction \"%s\", instigator \"%s\", target \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *GetName(),
+	       IsValid(Instigator) ? *Instigator->GetName() : TEXT("Invalid"),
+	       IsValid(Target) ? *Target->GetName() : TEXT("Invalid"));
 }
 
 const AActor* UInteraction::GetTarget() const
@@ -96,6 +118,16 @@ void UInteraction::SetPendingKill()
 {
 	MARK_PROPERTY_DIRTY_FROM_NAME(UInteraction, bIsPendingKill, this)
 	bIsPendingKill = true;
+
+	const AActor* Outer = GetTypedOuter<AActor>();
+
+	UE_LOG(LogGameplay,
+	       Log,
+	       TEXT("Executed from \"%s\". SetPendingKill on Interaction \"%s\", instigator \"%s\", target \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *GetName(),
+	       IsValid(Instigator) ? *Instigator->GetName() : TEXT("Invalid"),
+	       IsValid(Target) ? *Target->GetName() : TEXT("Invalid"));
 }
 
 void UInteraction::operator()(const AActor* NewInstigator,
