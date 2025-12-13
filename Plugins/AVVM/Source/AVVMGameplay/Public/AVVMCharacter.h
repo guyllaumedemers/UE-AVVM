@@ -50,6 +50,12 @@ struct AVVMGAMEPLAY_API FAVVMCharacterChannelAggregator
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag PostPlayerStateReplicationTag = FGameplayTag::EmptyTag;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PostCharacterBeginTag = FGameplayTag::EmptyTag;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PostCharacterEndTag = FGameplayTag::EmptyTag;
 };
 
 /**

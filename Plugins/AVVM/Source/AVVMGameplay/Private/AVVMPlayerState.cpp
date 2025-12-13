@@ -99,6 +99,13 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 
+void AAVVMPlayerState::Server_OnClientPlayerControllerReceived_Implementation()
+{
+	const UWorld* World = GetWorld();
+	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized = UAVVMNetSynchronizationManager::Static_GetAllNetFinalized(World);
+	Client_OnNetFinalized(NetFinalized);
+}
+
 void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized)
 {
 	AGameStateBase* GameStateBase = UGameplayStatics::GetGameState(this);
@@ -124,11 +131,8 @@ void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScript
 			}
 		}
 	}
-}
 
-void AAVVMPlayerState::Server_OnClientPlayerControllerReceived_Implementation()
-{
-	const UWorld* World = GetWorld();
-	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized = UAVVMNetSynchronizationManager::Static_GetAllNetFinalized(World);
-	Client_OnNetFinalized(NetFinalized);
+	// @gdemers event acting as a fence system, and notify ui of initialization phase
+	// being completed. allow for proper presentation to never display intermediate state.
+	OnPostNetClientSynchronizationComplete.Broadcast(this);
 }

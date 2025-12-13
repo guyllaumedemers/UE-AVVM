@@ -87,6 +87,9 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
                                           public IAVVMQuicktimeEventPlayerStateInterface
 {
 	GENERATED_BODY()
+	
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostNetClientSynchronizationCompleteDelegate, const AAVVMPlayerState* PlayerState);
+	FOnPostNetClientSynchronizationCompleteDelegate OnPostNetClientSynchronizationComplete;
 
 public:
 	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
@@ -102,6 +105,9 @@ public:
 
 	// IAVVMCanExposeActorPayload
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
+	
+	// @gdemers 
+	FOnPostNetClientSynchronizationCompleteDelegate& GetOnPostNetClientSynchronizationComplete();
 
 protected:
 	UFUNCTION(Server, Reliable)

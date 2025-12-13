@@ -50,6 +50,16 @@ void AAVVMCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	OwningActor = GetPlayerState();
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY(this,
+		               RegisteredChannels.PostCharacterBeginTag,
+		               this,
+		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
+	}
 }
 
 void AAVVMCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -57,6 +67,16 @@ void AAVVMCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	OwningActor.Reset();
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY(this,
+		               RegisteredChannels.PostCharacterEndTag,
+		               this,
+		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
+	}
 }
 
 UAVVMAbilitySystemComponent* AAVVMCharacter::BP_GetAbilitySystemComponent() const
