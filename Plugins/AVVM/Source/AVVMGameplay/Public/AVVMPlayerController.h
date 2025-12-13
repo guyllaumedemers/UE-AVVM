@@ -21,24 +21,34 @@
 
 #include "CoreMinimal.h"
 
-#include "ModularPlayerController.h"
+#include "CommonPlayerController.h"
 
 #include "AVVMPlayerController.generated.h"
+
+class UAVVMAbilityInputComponent;
+class UAVVMReplicatedTagComponent;
 
 /**
  *	Class description:
  *	
- *	AAVVMPlayerController is a derived impl of the AModularPlayerController class that manage dynamic registration of Input Mapping Context
+ *	AAVVMPlayerController is a derived impl of the ACommonPlayerController class that manage dynamic registration of Input Mapping Context
  *	as well as implement support for relevant RPC request.
  */
 UCLASS()
-class AVVMGAMEPLAY_API AAVVMPlayerController : public AModularPlayerController
+class AVVMGAMEPLAY_API AAVVMPlayerController : public ACommonPlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
 	AAVVMPlayerController(const FObjectInitializer& ObjectInitializer);
-	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void ReceivedPlayer() override;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMAbilityInputComponent> AbilityInputComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
 };

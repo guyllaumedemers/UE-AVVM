@@ -26,27 +26,17 @@
 
 #include "AVVMGameFrameworkInputMappingContextManager.generated.h"
 
-class UAVVMGameFrameworkInputMappingContextManager;
 class UInputMappingContext;
 class ULocalPlayer;
 
-/** 
- * 
- */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMIMCRequestHandle
-{
-	GENERATED_BODY()
-
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UAVVMGameFrameworkInputMappingContextManager> OwningManager = nullptr;
-
-	UPROPERTY(Transient)
-	TWeakObjectPtr<const ULocalPlayer> LocalPlayer = nullptr;
-};
-
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMGameFrameworkInputMappingContextManager is a locally controlled subsystem that tracks IMCs
+ *	registration through the GameFeatureAction system.
+ *	
+ *	This system allow GameFeature plugin to register/bind with the underline input system piped through the AVVMAbilityInputComponent,
+ *	and Unreal EnhancedInputSystem.
  */
 UCLASS()
 class AVVMGAMEPLAY_API UAVVMGameFrameworkInputMappingContextManager : public ULocalPlayerSubsystem
@@ -61,25 +51,25 @@ protected:
 	static UAVVMGameFrameworkInputMappingContextManager* Get(const ULocalPlayer* LocalPlayer);
 	void AddReceiver(const APlayerController* Receiver, const bool bAddOnlyInGameWorlds = true);
 	void RemoveReceiver(const APlayerController* Receiver);
-	
-	TSharedPtr<FAVVMIMCRequestHandle> AddIMCRequest(const UWorld* World,
-												const ULocalPlayer* LocalPlayer,
-												const TSoftObjectPtr<UInputMappingContext>& IMCSoftObjectPtr);
-	
+
+	void AddIMCRequest(const UWorld* World,
+	                   const ULocalPlayer* LocalPlayer,
+	                   const TSoftObjectPtr<UInputMappingContext>& IMCSoftObjectPtr);
+
 	void UnRegisterInputMappingContext(const APlayerController* NewPC);
 	void RegisterInputMappingContext(const APlayerController* NewPC);
-	
+
 	/**
-	 * 
+	 *	Class description:
+	 *	
+	 *	FAVVMRegisteredInputMappingContexts is a context struct to cached IMCs resources allocated during GameFeature activation.
 	 */
 	struct FAVVMRegisteredInputMappingContexts
 	{
-		void Add(const FSoftObjectPath& IMCSoftObjectPath);
-		
 		TSharedPtr<FStreamableHandle> StreamableHandle;
 		TArray<FSoftObjectPath> IMCSoftObjectPaths;
 	};
-	
+
 	TMap<TWeakObjectPtr<const ULocalPlayer>, FAVVMRegisteredInputMappingContexts> RegisteredInputMappingContexts;
 	friend class UAVVMGameFeatureAction_AddInputMappingContext;
 };

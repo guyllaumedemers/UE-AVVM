@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "Inputs/AVVMGameFrameworkInputMappingContextManager.h"
 
+#include "InputMappingContext.h"
 #include "Ability/AVVMAbilityInputComponent.h"
+#include "Engine/AssetManager.h"
 
 void UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(const APlayerController* Receiver, bool bAddOnlyInGameWorlds)
 {
@@ -86,22 +88,20 @@ void UAVVMGameFrameworkInputMappingContextManager::RemoveReceiver(const APlayerC
 	UnRegisterInputMappingContext(Receiver);
 }
 
-TSharedPtr<FAVVMIMCRequestHandle> UAVVMGameFrameworkInputMappingContextManager::AddIMCRequest(const UWorld* World,
-                                                                                              const ULocalPlayer* LocalPlayer,
-                                                                                              const TSoftObjectPtr<UInputMappingContext>& IMCSoftObjectPtr)
+void UAVVMGameFrameworkInputMappingContextManager::AddIMCRequest(const UWorld* World,
+                                                                 const ULocalPlayer* LocalPlayer,
+                                                                 const TSoftObjectPtr<UInputMappingContext>& IMCSoftObjectPtr)
 {
 	if (!IsValid(LocalPlayer))
 	{
-		return nullptr;
+		return;
 	}
-	
+
 	FAVVMRegisteredInputMappingContexts& OutResult = RegisteredInputMappingContexts.FindOrAdd(LocalPlayer);
-	OutResult.Add(IMCSoftObjectPtr.ToSoftObjectPath());
-	
+	OutResult.IMCSoftObjectPaths.Add(IMCSoftObjectPtr.ToSoftObjectPath());
+
 	const APlayerController* PC = LocalPlayer->GetPlayerController(World);
 	RegisterInputMappingContext(PC);
-
-	return MakeShared<FAVVMIMCRequestHandle>(this, LocalPlayer);
 }
 
 void UAVVMGameFrameworkInputMappingContextManager::UnRegisterInputMappingContext(const APlayerController* NewPC)
@@ -112,11 +112,35 @@ void UAVVMGameFrameworkInputMappingContextManager::UnRegisterInputMappingContext
 	}
 
 	auto* AbilityInputComponent = NewPC->GetComponentByClass<UAVVMAbilityInputComponent>();
-	if (IsValid(AbilityInputComponent))
+	if (!IsValid(AbilityInputComponent))
 	{
-		FAVVMRegisteredInputMappingContexts& OutResult = RegisteredInputMappingContexts.FindOrAdd(NewPC->GetLocalPlayer());
-		AbilityInputComponent->UnRegisterGameFrameworkIMCs(OutResult.StreamableHandle);
+		return;
 	}
+
+	FAVVMRegisteredInputMappingContexts& OutResult = RegisteredInputMappingContexts.FindOrAdd(NewPC->GetLocalPlayer());
+	if (OutResult.IMCSoftObjectPaths.IsEmpty())
+	{
+		return;
+	}
+
+	TSharedPtr<FStreamableHandle> Handle = OutResult.StreamableHandle;
+	if (!Handle.IsValid())
+	{
+		return;
+	}
+
+	TArray<UObject*> OutResources;
+	Handle->GetLoadedAssets(OutResources);
+
+	TArray<const UInputMappingContext*> IMCs;
+	for (const UObject* OutResource : OutResources)
+	{
+		const auto* IMC = Cast<UInputMappingContext>(OutResource);
+		IMCs.Add(IMC);
+	}
+
+	AbilityInputComponent->UnRegisterGameFrameworkIMCs(IMCs);
+	OutResult.StreamableHandle.Reset();
 }
 
 void UAVVMGameFrameworkInputMappingContextManager::RegisterInputMappingContext(const APlayerController* NewPC)
@@ -126,14 +150,58 @@ void UAVVMGameFrameworkInputMappingContextManager::RegisterInputMappingContext(c
 		return;
 	}
 
-	auto* AbilityInputComponent = NewPC->GetComponentByClass<UAVVMAbilityInputComponent>();
-	if (IsValid(AbilityInputComponent))
+	FAVVMRegisteredInputMappingContexts& OutResult = RegisteredInputMappingContexts.FindOrAdd(NewPC->GetLocalPlayer());
+	if (OutResult.IMCSoftObjectPaths.IsEmpty())
 	{
-		FAVVMRegisteredInputMappingContexts& OutResult = RegisteredInputMappingContexts.FindOrAdd(NewPC->GetLocalPlayer());
-		OutResult.StreamableHandle = AbilityInputComponent->RegisterGameFrameworkIMCs(OutResult.IMCSoftObjectPaths);
+		return;
 	}
-}
 
-void UAVVMGameFrameworkInputMappingContextManager::FAVVMRegisteredInputMappingContexts::Add(const FSoftObjectPath& IMCSoftObjectPath)
-{
+	const auto OnAsyncRequestComplete = [](const TWeakObjectPtr<const UAVVMGameFrameworkInputMappingContextManager>& Caller,
+	                                       const TWeakObjectPtr<const APlayerController>& PC)
+	{
+		const UAVVMGameFrameworkInputMappingContextManager* InputContextManager = Caller.Get();
+		if (!IsValid(InputContextManager))
+		{
+			return;
+		}
+
+		const APlayerController* Target = PC.Get();
+		if (!IsValid(Target))
+		{
+			return;
+		}
+
+		auto* AbilityInputComponent = Target->GetComponentByClass<UAVVMAbilityInputComponent>();
+		if (!IsValid(AbilityInputComponent))
+		{
+			return;
+		}
+
+		const FAVVMRegisteredInputMappingContexts* OutResult = InputContextManager->RegisteredInputMappingContexts.Find(Target->GetLocalPlayer());
+		if (!ensureAlwaysMsgf(OutResult != nullptr, TEXT("Invalid Search result.")))
+		{
+			return;
+		}
+
+		TSharedPtr<FStreamableHandle> Handle = OutResult->StreamableHandle;
+		if (!Handle.IsValid())
+		{
+			return;
+		}
+
+		TArray<UObject*> OutResources;
+		Handle->GetLoadedAssets(OutResources);
+
+		TArray<const UInputMappingContext*> IMCs;
+		for (const UObject* OutResource : OutResources)
+		{
+			const auto* IMC = Cast<UInputMappingContext>(OutResource);
+			IMCs.Add(IMC);
+		}
+
+		AbilityInputComponent->RegisterGameFrameworkIMCs(IMCs);
+	};
+
+	const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this), TWeakObjectPtr(NewPC));
+	OutResult.StreamableHandle = UAssetManager::Get().LoadAssetList(OutResult.IMCSoftObjectPaths, Callback);
 }

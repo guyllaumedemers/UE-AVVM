@@ -19,24 +19,22 @@
 //SOFTWARE.
 #include "AVVMPlayerController.h"
 
+#include "AVVMReplicatedTagComponent.h"
+#include "Ability/AVVMAbilityInputComponent.h"
 #include "Inputs/AVVMGameFrameworkInputMappingContextManager.h"
 
 AAVVMPlayerController::AAVVMPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	AbilityInputComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilityInputComponent>(this, TEXT("AbilityInputComponent"));
+	ReplicatedTagComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMReplicatedTagComponent>(this, TEXT("ReplicatedTagComponent"));
+	
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.bAllowTickBatching = true;
 	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
 	SetReplicateMovement(true);
 	bReplicates = true;
-}
-
-void AAVVMPlayerController::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(this);
 }
 
 void AAVVMPlayerController::BeginPlay()
@@ -49,4 +47,11 @@ void AAVVMPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	UAVVMGameFrameworkInputMappingContextManager::RemoveGameFrameworkInputMappingContextReceiver(this);
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+void AAVVMPlayerController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+	UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(this);
 }

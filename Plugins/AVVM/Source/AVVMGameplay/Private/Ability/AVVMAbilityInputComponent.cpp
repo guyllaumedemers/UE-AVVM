@@ -27,7 +27,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
-#include "Engine/AssetManager.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -67,8 +66,9 @@ void UAVVMAbilityInputComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	{
 		Outer->OnPossessedPawnChanged.RemoveAll(this);
 
-		OwningOuter.Reset();
 		AbilityTriggerTags.Reset();
+		BindingHandles.Reset();
+		OwningOuter.Reset();
 	}
 }
 
@@ -92,22 +92,28 @@ void UAVVMAbilityInputComponent::OnPawnChanged(APawn* NewPawn,
 		auto* InputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
 		const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
 
-		SwapInputMappingContext(LocalPlayer, NewPawn, OldPawn);
-		BindInputActions(InputComponent, IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn));
+		SwapInputMappingContext(LocalPlayer, NewPawn, OldPawn, InputComponent);
 	}
 }
 
 void UAVVMAbilityInputComponent::SwapInputMappingContext(const ULocalPlayer* LocalPlayer,
                                                          const APawn* NewPawn,
-                                                         const APawn* OldPawn) const
+                                                         const APawn* OldPawn,
+                                                         UEnhancedInputComponent* EnhancedInputComponent)
 {
 	auto* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
 
+	// @gdemers remove old bindings, and imc
 	const UInputMappingContext* OldInputMappingContext = IsValid(OldPawn) ? IAVVMInputMappingProvider::Execute_GetInputMappingContext(OldPawn) : nullptr;
+	
+	UnBindInputActions(EnhancedInputComponent, OldInputMappingContext);
 	UnRegisterInputMappingContext(EnhancedInputSubsystem, OldInputMappingContext);
 
+	// @gdemers add new bindings, and imc
 	const UInputMappingContext* NewInputMappingContext = IsValid(NewPawn) ? IAVVMInputMappingProvider::Execute_GetInputMappingContext(NewPawn) : nullptr;
+	
 	RegisterInputMappingContext(EnhancedInputSubsystem, NewInputMappingContext);
+	BindInputActions(EnhancedInputComponent, NewInputMappingContext);
 }
 
 void UAVVMAbilityInputComponent::UnRegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
@@ -160,11 +166,13 @@ void UAVVMAbilityInputComponent::RegisterInputMappingContext(UEnhancedInputLocal
 		       *InputMappingContext->GetName(),
 		       *Outer->GetName());
 
-		EnhancedInputSubsystem->AddMappingContext(InputMappingContext, 0);
+		static int32 Priority = 0;
+		EnhancedInputSubsystem->AddMappingContext(InputMappingContext, Priority++);
 	}
 }
 
-void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* EnhancedInputComponent, const UInputMappingContext* InputMappingContext)
+void UAVVMAbilityInputComponent::UnBindInputActions(UEnhancedInputComponent* EnhancedInputComponent,
+                                                    const UInputMappingContext* InputMappingContext)
 {
 	if (!IsValid(EnhancedInputComponent) || !IsValid(InputMappingContext))
 	{
@@ -177,14 +185,45 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Clearing Input Action Bindings on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	for (const FEnhancedActionKeyMapping& ActionKeyMapping : InputMappingContext->GetMappings())
+	{
+		const auto* InputAction = Cast<UAVVMAbilityInputAction>(ActionKeyMapping.Action);
+		if (!IsValid(InputAction))
+		{
+			continue;
+		}
 
-	EnhancedInputComponent->ClearBindingsForObject(this);
-	AbilityTriggerTags.Reset();
+		AbilityTriggerTags.Remove(InputAction);
+
+		UE_LOG(LogGameplay,
+		       Log,
+		       TEXT("Executed from \"%s\". UnRegistering Old Input Action \"%s\" and Tag \"%s\" from Outer \"%s\"."),
+		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+		       *InputAction->GetName(),
+		       *InputAction->AbilityTriggerTag.ToString(),
+		       *Outer->GetName());
+
+		FAVVMEnhancedInputEventBindingHandles& OutResult = BindingHandles.FindOrAdd(InputAction);
+		for (const uint32 Handle : OutResult.Handles)
+		{
+			EnhancedInputComponent->RemoveBindingByHandle(Handle);
+		}
+	}
+}
+
+void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* EnhancedInputComponent,
+                                                  const UInputMappingContext* InputMappingContext)
+{
+	if (!IsValid(EnhancedInputComponent) || !IsValid(InputMappingContext))
+	{
+		return;
+	}
+
+	const APlayerController* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
 
 	for (const FEnhancedActionKeyMapping& ActionKeyMapping : InputMappingContext->GetMappings())
 	{
@@ -205,23 +244,28 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 		       *OutTag.ToString(),
 		       *Outer->GetName());
 
-		EnhancedInputComponent->BindAction(InputAction,
-		                                   ETriggerEvent::Started,
-		                                   this,
-		                                   &UAVVMAbilityInputComponent::OnInputActionReceived,
-		                                   FAVVMInputActionCallbackContext{InputAction, ETriggerEvent::Started});
+		FEnhancedInputActionEventBinding& BindingHandle_Started = EnhancedInputComponent->BindAction(InputAction,
+		                                                                                             ETriggerEvent::Started,
+		                                                                                             this,
+		                                                                                             &UAVVMAbilityInputComponent::OnInputActionReceived,
+		                                                                                             FAVVMInputActionCallbackContext{InputAction, ETriggerEvent::Started});
 
-		EnhancedInputComponent->BindAction(InputAction,
-		                                   ETriggerEvent::Canceled,
-		                                   this,
-		                                   &UAVVMAbilityInputComponent::OnInputActionReceived,
-		                                   FAVVMInputActionCallbackContext{InputAction, ETriggerEvent::Canceled});
+		FEnhancedInputActionEventBinding& BindingHandle_Canceled = EnhancedInputComponent->BindAction(InputAction,
+		                                                                                              ETriggerEvent::Canceled,
+		                                                                                              this,
+		                                                                                              &UAVVMAbilityInputComponent::OnInputActionReceived,
+		                                                                                              FAVVMInputActionCallbackContext{InputAction, ETriggerEvent::Canceled});
 
-		EnhancedInputComponent->BindAction(InputAction,
-		                                   ETriggerEvent::Completed,
-		                                   this,
-		                                   &UAVVMAbilityInputComponent::OnInputActionReceived,
-		                                   FAVVMInputActionCallbackContext{InputAction, ETriggerEvent::Completed});
+		FEnhancedInputActionEventBinding& BindingHandle_Completed = EnhancedInputComponent->BindAction(InputAction,
+		                                                                                               ETriggerEvent::Completed,
+		                                                                                               this,
+		                                                                                               &UAVVMAbilityInputComponent::OnInputActionReceived,
+		                                                                                               FAVVMInputActionCallbackContext{InputAction, ETriggerEvent::Completed});
+		
+		FAVVMEnhancedInputEventBindingHandles& OutResult = BindingHandles.FindOrAdd(InputAction);
+		OutResult.Handles.Add(BindingHandle_Started.GetHandle());
+		OutResult.Handles.Add(BindingHandle_Canceled.GetHandle());
+		OutResult.Handles.Add(BindingHandle_Completed.GetHandle());
 	}
 }
 
@@ -268,12 +312,45 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 	}
 }
 
-void UAVVMAbilityInputComponent::UnRegisterGameFrameworkIMCs(TSharedPtr<FStreamableHandle> StreamableHandle) const
+void UAVVMAbilityInputComponent::UnRegisterGameFrameworkIMCs(const TArray<const UInputMappingContext*>& IMCs)
 {
+	auto* PC = Cast<APlayerController>(OwningOuter.Get());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+
+	auto* InputComponent = Cast<UEnhancedInputComponent>(PC->InputComponent);
+	if (!IsValid(InputComponent))
+	{
+		return;
+	}
+
+	auto* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+	for (const UInputMappingContext* IMC : IMCs)
+	{
+		UnRegisterInputMappingContext(EnhancedInputSubsystem, IMC);
+	}
 }
 
-TSharedPtr<FStreamableHandle> UAVVMAbilityInputComponent::RegisterGameFrameworkIMCs(const TArray<FSoftObjectPath>& IMCSoftObjectPaths) const
+void UAVVMAbilityInputComponent::RegisterGameFrameworkIMCs(const TArray<const UInputMappingContext*>& IMCs)
 {
-	FStreamableDelegate Callback;
-	return UAssetManager::Get().LoadAssetList(IMCSoftObjectPaths, Callback);
+	auto* PC = Cast<APlayerController>(OwningOuter.Get());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+
+	auto* InputComponent = Cast<UEnhancedInputComponent>(PC->InputComponent);
+	if (!IsValid(InputComponent))
+	{
+		return;
+	}
+
+	auto* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+	for (const UInputMappingContext* IMC : IMCs)
+	{
+		RegisterInputMappingContext(EnhancedInputSubsystem, IMC);
+		BindInputActions(InputComponent, IMC);
+	}
 }

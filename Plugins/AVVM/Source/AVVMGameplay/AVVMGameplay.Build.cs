@@ -36,6 +36,7 @@ public class AVVMGameplay : ModuleRules
 			{
 				"AVVM",
 				"AVVMOnline",
+				"CommonGame",
 				"CommonUI",
 				"Core",
 				"CoreUObject",

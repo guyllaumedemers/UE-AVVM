@@ -45,6 +45,11 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	/**
+	 *	Class description:
+	 *	
+	 *	FAVVMInputActionCallbackContext is a context struct that forward input data to delegate callback.
+	 */
 	struct FAVVMInputActionCallbackContext
 	{
 		explicit FAVVMInputActionCallbackContext(const UInputAction* NewInputAction,
@@ -70,13 +75,17 @@ protected:
 
 	void SwapInputMappingContext(const ULocalPlayer* LocalPlayer,
 	                             const APawn* NewPawn,
-	                             const APawn* OldPawn) const;
+	                             const APawn* OldPawn,
+	                             UEnhancedInputComponent* EnhancedInputComponent);
 
 	void UnRegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
 	                                   const UInputMappingContext* InputMappingContext) const;
 
 	void RegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
 	                                 const UInputMappingContext* InputMappingContext) const;
+
+	void UnBindInputActions(UEnhancedInputComponent* EnhancedInputComponent,
+	                        const UInputMappingContext* InputMappingContext);
 
 	void BindInputActions(UEnhancedInputComponent* EnhancedInputComponent,
 	                      const UInputMappingContext* InputMappingContext);
@@ -89,8 +98,21 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<APlayerController> OwningOuter = nullptr;
 
+	/**
+	*	Class description:
+	 *	
+	 *	FAVVMEnhancedInputEventBindingHandles is a context struct that store binding information about registered
+	 *	UInputAction.
+	 */
+	struct FAVVMEnhancedInputEventBindingHandles
+	{
+		TArray<uint32> Handles;
+	};
+
+	TMap<TWeakObjectPtr<const UInputAction>, FAVVMEnhancedInputEventBindingHandles> BindingHandles;
+
 private:
-	void UnRegisterGameFrameworkIMCs(TSharedPtr<FStreamableHandle> StreamableHandle) const;
-	TSharedPtr<FStreamableHandle> RegisterGameFrameworkIMCs(const TArray<FSoftObjectPath>& IMCSoftObjectPaths) const;
+	void UnRegisterGameFrameworkIMCs(const TArray<const UInputMappingContext*>& IMCs);
+	void RegisterGameFrameworkIMCs(const TArray<const UInputMappingContext*>& IMCs);
 	friend class UAVVMGameFrameworkInputMappingContextManager;
 };

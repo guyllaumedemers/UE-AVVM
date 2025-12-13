@@ -34,7 +34,9 @@
 class UInputMappingContext;
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMGameFeatureAction_AddInputMappingContext is a GameFeatureAction that push IMCs context onto locally controlled PC.
  */
 UCLASS(meta=(DisplayName="Add Input Mapping Context"))
 class AVVMGAMEPLAY_API UAVVMGameFeatureAction_AddInputMappingContext : public UGameFeatureAction
@@ -42,11 +44,12 @@ class AVVMGAMEPLAY_API UAVVMGameFeatureAction_AddInputMappingContext : public UG
 	GENERATED_BODY()
 
 	/**
+	 *	Class description:
 	 *	
+	 *	FContextHandles is a context struct that cache Delegate Handle for GameInstance Started.
 	 */
 	struct FContextHandles
 	{
-		TArray<TSharedPtr<FAVVMIMCRequestHandle>> IMCRequestHandles;
 		FDelegateHandle GameInstanceStartHandle;
 	};
 

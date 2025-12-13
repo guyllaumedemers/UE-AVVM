@@ -45,8 +45,6 @@ void UAVVMGameFeatureAction_AddInputMappingContext::OnGameFeatureDeactivating(FG
 {
 	FContextHandles& Handles = ContextHandles.FindOrAdd(Context);
 	FWorldDelegates::OnStartGameInstance.Remove(Handles.GameInstanceStartHandle);
-	
-	Handles.IMCRequestHandles.Empty();
 }
 
 #if WITH_EDITOR
@@ -113,8 +111,7 @@ void UAVVMGameFeatureAction_AddInputMappingContext::AddToWorld(const FWorldConte
 		// that can be blocked per-world.
 		for (const TSoftObjectPtr<UInputMappingContext>& IMC : IMCs)
 		{
-			TSharedPtr<FAVVMIMCRequestHandle> IMCHandle = GFIMCM->AddIMCRequest(World, *Iterator, IMC);
-			Handles.IMCRequestHandles.Add(IMCHandle);
+			GFIMCM->AddIMCRequest(World, *Iterator, IMC);
 		}
 	}
 }
