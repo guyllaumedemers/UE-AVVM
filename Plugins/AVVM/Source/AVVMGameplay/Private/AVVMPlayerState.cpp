@@ -156,7 +156,7 @@ void AAVVMPlayerState::HandleSimulatedPlayerBackfilling()
 
 	// @gdemers we expect to update the simulated actors ONLY after our local PlayerState has received a Controller. Other cases being already
 	// handled during our local PlayerState synchronization.
-	if (LocalPlayerState->GetPlayerController())
+	if (IsValid(LocalPlayerState->GetPlayerController()))
 	{
 		LocalPlayerState->Server_OnPlayerBackfillingReceived(this);
 	}
