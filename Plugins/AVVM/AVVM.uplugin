@@ -20,6 +20,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "AVVMAudio",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "AVVMDebugger",
 			"Type": "DeveloperTool",
 			"LoadingPhase": "Default"
@@ -41,11 +46,6 @@
 		},
 		{
 			"Name": "AVVMToolkit",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "AVVMAudio",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

@@ -111,6 +111,13 @@ UAVVMResourceManagerComponent* AAVVMCharacter::GetResourceManagerComponent_Imple
 	return ResourceManagerComponent;
 }
 
+void AAVVMCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)
+{
+	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
+	
+	// TODO @gdemers if ever server need to configure something based on PlayerState assignment.
+}
+
 void AAVVMCharacter::OnRep_Controller()
 {
 	Super::OnRep_Controller();

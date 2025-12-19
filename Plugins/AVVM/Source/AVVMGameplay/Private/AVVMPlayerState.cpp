@@ -27,7 +27,8 @@
 
 FAVVMPlayerStatePayload::FAVVMPlayerStatePayload(const APlayerState* NewPlayerState,
                                                  const bool bNewAddOrRemove)
-	: PlayerState(NewPlayerState), bWasAddedOrRemoved(bNewAddOrRemove)
+	: PlayerState(NewPlayerState),
+	  bWasAddedOrRemoved(bNewAddOrRemove)
 {
 }
 
@@ -53,6 +54,13 @@ void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void AAVVMPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// @gdemers Backfilling players that arrive after your local player initialized wont correctly initialize. They require
+	// manually synchronization of their visual representation.
+	if (GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		HandleSimulatedPlayerBackfilling();
+	}
 }
 
 void AAVVMPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -118,8 +126,8 @@ void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScript
 	for (const auto& Net : NetFinalized)
 	{
 		UObject* NetSystem = Net.GetObject();
-		const bool bIsClientRelevantOnly = IAVVMDoesImplNetSynchronization::Execute_IsNetRelevantForLocalClientOnly(NetSystem);
-		if (bIsClientRelevantOnly)
+		const bool bIsNetRelevantForLocalClientOnly = IAVVMDoesImplNetSynchronization::Execute_IsNetRelevantForLocalClientOnly(NetSystem);
+		if (bIsNetRelevantForLocalClientOnly)
 		{
 			IAVVMDoesImplNetSynchronization::Execute_ClientRefresh(NetSystem, this);
 		}
@@ -135,4 +143,42 @@ void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScript
 	// @gdemers event acting as a fence system, and notify ui of initialization phase
 	// being completed. allow for proper presentation to never display intermediate state.
 	OnPostNetClientSynchronizationComplete.Broadcast(this);
+}
+
+void AAVVMPlayerState::HandleSimulatedPlayerBackfilling()
+{
+	// @gdemers limit our system to one local player which wouldnt be great in splitscreen scenario.
+	auto* LocalPlayerState = Cast<AAVVMPlayerState>(UGameplayStatics::GetPlayerState(this, 0));
+	if (!IsValid(LocalPlayerState))
+	{
+		return;
+	}
+
+	// @gdemers we expect to update the simulated actors ONLY after our local PlayerState has received a Controller. Other cases being already
+	// handled during our local PlayerState synchronization.
+	if (LocalPlayerState->GetPlayerController())
+	{
+		LocalPlayerState->Server_OnPlayerBackfillingReceived(this);
+	}
+}
+
+void AAVVMPlayerState::Server_OnPlayerBackfillingReceived_Implementation(AAVVMPlayerState* SimulatedPlayerState)
+{
+	const UWorld* World = GetWorld();
+	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized = UAVVMNetSynchronizationManager::Static_GetAllNetFinalized(World);
+	Client_OnSimulatedClientNetFinalized(NetFinalized, SimulatedPlayerState);
+}
+
+void AAVVMPlayerState::Client_OnSimulatedClientNetFinalized_Implementation(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized,
+                                                                           AAVVMPlayerState* SimulatedPlayerState)
+{
+	for (const auto& Net : NetFinalized)
+	{
+		UObject* NetSystem = Net.GetObject();
+		const bool bIsNetRelevantForLocalClientOnly = IAVVMDoesImplNetSynchronization::Execute_IsNetRelevantForLocalClientOnly(NetSystem);
+		if (!bIsNetRelevantForLocalClientOnly)
+		{
+			IAVVMDoesImplNetSynchronization::Execute_ClientRefresh(NetSystem, SimulatedPlayerState);
+		}
+	}
 }

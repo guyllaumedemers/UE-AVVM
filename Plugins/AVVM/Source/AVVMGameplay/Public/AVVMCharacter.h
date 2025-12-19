@@ -96,6 +96,7 @@ public:
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 
 protected:
+	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;
 	virtual void OnRep_Controller() override;
 	virtual void OnRep_PlayerState() override;
 	

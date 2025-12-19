@@ -116,6 +116,15 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void Client_OnNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized);
 	
+	void HandleSimulatedPlayerBackfilling();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_OnPlayerBackfillingReceived(AAVVMPlayerState* SimulatedPlayerState);
+
+	UFUNCTION(Client, Reliable)
+	void Client_OnSimulatedClientNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized,
+	                                          AAVVMPlayerState* SimulatedPlayerState);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
 	
