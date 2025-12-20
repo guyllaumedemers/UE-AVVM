@@ -142,6 +142,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetItemUniqueId() const;
+
 	const FDataRegistryId& GetItemActorId() const;
 
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
@@ -161,6 +164,10 @@ protected:
 
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
+
+	// @gdemers Make sure to match this property value with your FItemIdentifierDataTableRow entry.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FName ItemIdentifierTableRowName = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
 	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
