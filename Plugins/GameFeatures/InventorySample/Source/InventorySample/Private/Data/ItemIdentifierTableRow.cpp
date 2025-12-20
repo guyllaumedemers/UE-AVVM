@@ -18,3 +18,17 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Data/ItemIdentifierTableRow.h"
+
+#if WITH_EDITOR
+EDataValidationResult FItemIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (ItemObjectClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FItemIdentifierDataTableRow", "", "UItemObject missing. No valid TSoftClassPtr specified!"));
+	}
+
+	return Result;
+}
+#endif

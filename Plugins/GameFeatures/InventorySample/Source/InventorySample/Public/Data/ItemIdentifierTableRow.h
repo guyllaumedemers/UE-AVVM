@@ -23,6 +23,10 @@
 
 #include "Engine/DataTable.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include "ItemIdentifierTableRow.generated.h"
 
 class UItemObject;
@@ -42,6 +46,10 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemIdentifierDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<UItemObject> ItemObjectClass = nullptr;
