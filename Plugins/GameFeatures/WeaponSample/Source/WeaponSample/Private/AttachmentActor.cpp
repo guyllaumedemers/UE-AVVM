@@ -121,7 +121,15 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 		return;
 	}
 
+	// @gdemers retrieve socket deferral interface from current parent.
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+	if (!(SocketDeferral.GetInterface() != nullptr && IsValid(SocketDeferral.GetObject())))
+	{
+		// @gdemers IMPORTANT : During our first attempt, the received context will reference the AVVMCharacter, but on subsequent attempts, reference
+		// the ATriggeringActor which may NOT be the correct target for this attachment (i.e right type, maybe wrong instance). As such, retrieving the interface based on the outer chain
+		// is the logic approach to allowing proper recursion until the proper match is found.
+		SocketDeferral = Cast<UObject>(Parent->GetImplementingOuterObject(UAVVMDoesSupportSocketDeferral::StaticClass()));
+	}
 
 	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
