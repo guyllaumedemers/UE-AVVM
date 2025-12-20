@@ -203,6 +203,10 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 		return;
 	}
 
+	// @gdemers we have to update our target from the old context.
+	FAVVMSocketTargetingDeferralContextArgs RecursiveContextArgs = ContextArgs;
+	RecursiveContextArgs.Parent = Target;
+
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
 	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, ContextArgs);
 	if (!bIsRooted)
