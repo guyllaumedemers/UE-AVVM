@@ -178,6 +178,7 @@ protected:
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
 	// @gdemers Make sure to match this property value with your FItemIdentifierDataTableRow entry.
+	// TODO convert this to be set based on Package name at editor time or something.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName ItemIdentifierTableRowName = NAME_None;
 

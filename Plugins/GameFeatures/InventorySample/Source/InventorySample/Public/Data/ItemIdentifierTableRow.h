@@ -29,12 +29,10 @@
 
 #include "ItemIdentifierTableRow.generated.h"
 
-class UItemObject;
-
 /**
  *	Class description:
  *	
- *	FItemIdentifierDataTableRow is a table row entry that pair a UItemObject derived BP
+ *	FItemIdentifierDataTableRow is a table row entry that pair a UItemObject::ItemActorClass derived BP
  *	to a unique identifier.
  *	
  *	This mapping allow user to access the dependent objects referenced in backend representation
@@ -52,7 +50,7 @@ struct INVENTORYSAMPLE_API FItemIdentifierDataTableRow : public FTableRowBase
 #endif
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<UItemObject> ItemObjectClass = nullptr;
+	TSoftClassPtr<AActor> ItemActorClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;

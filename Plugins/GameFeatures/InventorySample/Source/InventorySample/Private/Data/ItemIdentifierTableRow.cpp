@@ -23,10 +23,10 @@
 EDataValidationResult FItemIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemObjectClass.IsNull())
+	if (ItemActorClass.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FItemIdentifierDataTableRow", "", "UItemObject missing. No valid TSoftClassPtr specified!"));
+		Context.AddError(NSLOCTEXT("FItemIdentifierDataTableRow", "", "UItemObject::ItemActorClass missing. No valid TSoftClassPtr specified!"));
 	}
 
 	return Result;
