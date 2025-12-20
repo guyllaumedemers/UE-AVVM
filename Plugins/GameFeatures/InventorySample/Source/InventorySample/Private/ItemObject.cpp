@@ -135,7 +135,7 @@ int32 UItemObject::GetItemUniqueId() const
 
 	// @gdemers since entries are TSoftClassPtr themselves, this should be fairly quick to load
 	// and not create any hitches during gameplay.
-	UDataTable* DataTable = ItemIdentifierDataTable.LoadSynchronous();
+	const UDataTable* DataTable = ItemIdentifierDataTable.LoadSynchronous();
 	if (!IsValid(DataTable))
 	{
 		return INDEX_NONE;
