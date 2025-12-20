@@ -178,6 +178,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	{
 		// @gdemers using the Outer UniqueId, request the associated entry on backend {FActorContent.UniqueId}.
 		// https://miro.com/app/board/uXjVJYdFx2Y=/?share_link_id=345226885183
+		// Note : see UInventoryUtils::GetAllRegistryIds(FActorContextProxy) to retrieve relevant Ids from Outer.
 		IInventoryProvider::Execute_RequestItemsFromMicroService(Outer);
 	}
 }

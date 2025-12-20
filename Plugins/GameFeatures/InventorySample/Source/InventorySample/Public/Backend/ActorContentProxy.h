@@ -21,6 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
+
 #include "ActorContentProxy.generated.h"
 
 /**
@@ -109,4 +111,19 @@ struct INVENTORYSAMPLE_API FActorContentProxy
 	// @gdemers {FItemHolderProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> ItemHolderValues;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UInventoryUtils is a utility blueprint library that expose reusable api.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetAllRegistryIds(const FActorContentProxy& ContentProxy);
 };

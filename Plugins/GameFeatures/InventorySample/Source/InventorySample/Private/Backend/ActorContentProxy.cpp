@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "Backend/ActorContentProxy.h"
 
+#include "InventorySample.h"
+#include "InventoryStringParser.h"
+
 bool FItemModifierProxy::operator==(const FItemModifierProxy& Rhs) const
 {
 	return (ResourceId.Equals(Rhs.ResourceId));
@@ -38,4 +41,46 @@ bool FItemHolderProxy::operator==(const FItemHolderProxy& Rhs) const
 bool FActorContentProxy::operator==(const FActorContentProxy& Rhs) const
 {
 	return (ItemHolderValues == Rhs.ItemHolderValues);
+}
+
+TArray<FDataRegistryId> UInventoryUtils::GetAllRegistryIds(const FActorContentProxy& ContentProxy)
+{
+	TArray<FDataRegistryId> OutResult;
+
+	const UInventoryStringParser* InventoryParser = FInventorySampleModule::GetJsonParser();
+	if (!IsValid(InventoryParser))
+	{
+		return OutResult;
+	}
+
+	for (const FString& HolderPayload : ContentProxy.ItemHolderValues)
+	{
+		FItemHolderProxy OutHolderProxy;
+		InventoryParser->FromString(HolderPayload, OutHolderProxy);
+
+		// TODO @gdemers we could have a registry id that define the ItemHolder at this level.
+		// To be considered later!
+
+		for (const FString& ItemPayload : OutHolderProxy.ItemValues)
+		{
+			FItemProxy OutItemProxy;
+			InventoryParser->FromString(ItemPayload, OutItemProxy);
+
+			// @gdemers Add our Item RegistryId to be considered set for spawning.
+			const FDataRegistryId Item_RegistryId = FDataRegistryId::ParseTypeAndName(OutItemProxy.ResourceId);
+			OutResult.Add(Item_RegistryId);
+
+			for (const FString& ItemModPayload : OutItemProxy.ModValues)
+			{
+				FItemModifierProxy OutItemModifierProxy;
+				InventoryParser->FromString(ItemModPayload, OutItemModifierProxy);
+
+				// @gdemers Add our Item Attachments/Mod RegistryId to be considered set for spawning.
+				const FDataRegistryId ItemMod_RegistryId = FDataRegistryId::ParseTypeAndName(OutItemModifierProxy.ResourceId);
+				OutResult.Add(ItemMod_RegistryId);
+			}
+		}
+	}
+
+	return OutResult;
 }
