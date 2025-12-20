@@ -31,6 +31,7 @@
 
 #include "AVVMOnlineInterfaceUtils.generated.h"
 
+class AGameSession;
 class IAVVMOnlineBattlePassInterface;
 class IAVVMOnlineChallengesInterface;
 class IAVVMOnlineIdentityInterface;
@@ -87,6 +88,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static FString GetUniqueNetId(const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static AGameSession* GetGameSession(const UWorld* World);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static FString SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload);

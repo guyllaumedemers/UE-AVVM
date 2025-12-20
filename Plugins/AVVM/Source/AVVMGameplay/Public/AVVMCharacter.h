@@ -92,6 +92,7 @@ public:
 	virtual void NotifyAvailableSocketParent(AActor* SocketTarget) override;
 
 	// IAVVMResourceProvider
+	virtual int32 GetProviderUniqueId_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 

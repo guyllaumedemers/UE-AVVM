@@ -23,6 +23,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -121,6 +122,12 @@ FString UAVVMOnlineUtils::GetUniqueNetId(const APlayerState* PlayerState)
 	}
 
 	return UniqueNetIdPtr->ToString();
+}
+
+AGameSession* UAVVMOnlineUtils::GetGameSession(const UWorld* World)
+{
+	const AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(World);
+	return IsValid(GameModeBase) ? GameModeBase->GameSession : nullptr;
 }
 
 FString UAVVMOnlineUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

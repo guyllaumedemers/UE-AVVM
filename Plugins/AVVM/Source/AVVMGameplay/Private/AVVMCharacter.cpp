@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "AVVMCharacter.h"
 
+#include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -99,6 +101,21 @@ TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Imple
 void AAVVMCharacter::NotifyAvailableSocketParent(AActor* SocketTarget)
 {
 	OnParentSocketAvailable.Broadcast(this, SocketTarget);
+}
+
+int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
+{
+#if WITH_SERVER_CODE
+	if (HasAuthority())
+	{
+		const APlayerState* NewPlayerState = GetPlayerState();
+		return AAVVMGameSession::GetUserUniqueId(GetWorld(), NewPlayerState);
+	}
+	else
+#endif
+	{
+		return INDEX_NONE;
+	}
 }
 
 TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionResourceIds_Implementation() const
