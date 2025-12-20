@@ -56,28 +56,14 @@ void AAVVMGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-bool AAVVMGameMode::HasMatchStarted() const
+void AAVVMGameMode::Tick(float DeltaSeconds)
 {
-	bool bHasStarted = Super::HasMatchStarted();
-	if (WorldSetting.IsValid())
+	Super::Tick(DeltaSeconds);
+
+	if (HasMatchEnded())
 	{
-		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTagAggregator.MatchStartTag);
-		bHasStarted &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasStarted);
+		Terminate();
 	}
-
-	return bHasStarted;
-}
-
-bool AAVVMGameMode::HasMatchEnded() const
-{
-	bool bHasEnded = Super::HasMatchEnded();
-	if (WorldSetting.IsValid())
-	{
-		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTagAggregator.MatchEndTag);
-		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasEnded);
-	}
-
-	return bHasEnded;
 }
 
 bool AAVVMGameMode::IsMatchInProgress() const
@@ -92,10 +78,83 @@ bool AAVVMGameMode::IsMatchInProgress() const
 	return bIsInProgress;
 }
 
+bool AAVVMGameMode::ReadyToStartMatch_Implementation()
+{
+	bool bHasStarted = Super::ReadyToStartMatch_Implementation();
+	if (WorldSetting.IsValid())
+	{
+		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTagAggregator.MatchStartTag);
+		bHasStarted &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasStarted);
+	}
+
+	return bHasStarted;
+}
+
+bool AAVVMGameMode::ReadyToEndMatch_Implementation()
+{
+	bool bHasEnded = Super::ReadyToEndMatch_Implementation();
+	if (WorldSetting.IsValid())
+	{
+		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTagAggregator.MatchEndTag);
+		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasEnded);
+	}
+
+	return bHasEnded;
+}
+
+bool AAVVMGameMode::HasMatchEnded() const
+{
+	bool bHasEnded = Super::HasMatchEnded();
+	if (WorldSetting.IsValid())
+	{
+		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTagAggregator.MatchPostEndTag);
+		bHasEnded &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasEnded);
+	}
+
+	return bHasEnded;
+}
+
 void AAVVMGameMode::OnGameStateSet(AGameStateBase* NewGameState)
 {
 	if (IsValid(NewGameState))
 	{
 		WorldSetting = Cast<AAVVMWorldSetting>(NewGameState->GetWorldSettings());
 	}
+}
+
+void AAVVMGameMode::Terminate()
+{
+	if (IsNetMode(NM_DedicatedServer))
+	{
+		TerminateDedicatedServer();
+	}
+	else
+	{
+		TerminateListenServer();
+	}
+}
+
+void AAVVMGameMode::TerminateDedicatedServer()
+{
+	if (bAllowServerProcessExit)
+	{
+		// @gdemers By Killing the server process, the Engine::Tick will trigger a ClientTravel for
+		// all players back to the Default map defined in your .ini file.
+		FPlatformMisc::RequestExit(true);
+	}
+	else
+	{
+		// TODO @gdemers handle PC seamless travel back to lobby.
+		RecycleProcess();
+	}
+}
+
+void AAVVMGameMode::TerminateListenServer()
+{
+	// TODO @gdemers handle PC seamless travel back to lobby.
+	RecycleProcess();
+}
+
+void AAVVMGameMode::RecycleProcess()
+{
 }

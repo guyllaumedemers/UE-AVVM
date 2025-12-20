@@ -46,6 +46,9 @@ struct AVVMGAMEPLAY_API FAVVMGameModeRuleTagAggregator
 	FGameplayTag MatchEndTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag MatchPostEndTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag MatchProgressTag = FGameplayTag::EmptyTag;
 };
 
@@ -78,9 +81,11 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 protected:
-	virtual bool HasMatchStarted() const override;
-	virtual bool HasMatchEnded() const override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual bool IsMatchInProgress() const override;
+	virtual bool ReadyToStartMatch_Implementation() override;
+	virtual bool ReadyToEndMatch_Implementation() override;
+	virtual bool HasMatchEnded() const override;
 	
 	UFUNCTION()
 	void OnGameStateSet(AGameStateBase* NewGameState);
@@ -88,6 +93,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bAllowServerProcessExit = false;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AAVVMWorldSetting> WorldSetting = nullptr;
+
+private:
+	void Terminate();
+	virtual void TerminateDedicatedServer();
+	virtual void TerminateListenServer();
+	virtual void RecycleProcess();
 };
