@@ -100,6 +100,26 @@ bool UItemObject::DoesBehaviourHasExactMatch(const FGameplayTagContainer& Compar
 	return Compare.HasAllExact(ItemBehaviourTypeTags);
 }
 
+bool UItemObject::DoesModSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
+{
+	return Compare.HasAnyExact(ItemModSlotTags);
+}
+
+bool UItemObject::DoesModSlotHasExactMatch(const FGameplayTagContainer& Compare) const
+{
+	return Compare.HasAllExact(ItemModSlotTags);
+}
+
+bool UItemObject::DoesSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
+{
+	return Compare.HasAnyExact(ItemSlotTags);
+}
+
+bool UItemObject::DoesSlotHasExactMatch(const FGameplayTagContainer& Compare) const
+{
+	return Compare.HasAllExact(ItemSlotTags);
+}
+
 const FGameplayTagContainer& UItemObject::GetRuntimeState() const
 {
 	return RuntimeItemState.StateTags;

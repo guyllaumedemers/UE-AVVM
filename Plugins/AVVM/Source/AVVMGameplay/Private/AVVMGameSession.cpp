@@ -22,7 +22,7 @@
 #include "AVVMOnlineInterfaceUtils.h"
 #include "GameFramework/PlayerState.h"
 
-int32 AAVVMGameSession::GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState)
+int32 AAVVMGameSession::Static_GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState)
 {
 	const AAVVMGameSession* GameSession = Get(World);
 	if (IsValid(GameSession))

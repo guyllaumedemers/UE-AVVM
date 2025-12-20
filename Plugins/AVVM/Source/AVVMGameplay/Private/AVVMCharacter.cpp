@@ -109,7 +109,7 @@ int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
 	if (HasAuthority())
 	{
 		const APlayerState* NewPlayerState = GetPlayerState();
-		return AAVVMGameSession::GetUserUniqueId(GetWorld(), NewPlayerState);
+		return AAVVMGameSession::Static_GetUserUniqueId(GetWorld(), NewPlayerState);
 	}
 	else
 #endif

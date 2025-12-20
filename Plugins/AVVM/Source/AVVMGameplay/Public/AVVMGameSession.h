@@ -39,7 +39,7 @@ class AVVMGAMEPLAY_API AAVVMGameSession : public AGameSession
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static int32 GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState);
+	static int32 Static_GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState);
 
 protected:
 	static AAVVMGameSession* Get(const UWorld* World);
