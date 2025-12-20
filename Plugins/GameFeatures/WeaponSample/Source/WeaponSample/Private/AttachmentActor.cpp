@@ -208,7 +208,7 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	RecursiveContextArgs.Parent = Target;
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, ContextArgs);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, RecursiveContextArgs);
 	if (!bIsRooted)
 	{
 		return;
@@ -219,6 +219,6 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	if (ensureAlwaysMsgf(IsValid(ASC),
 	                     TEXT("New OwningOuter doesn't own a valid ASC.")))
 	{
-		ASC->SetupAttributeSet(ContextArgs.SrcAttributeSetSoftObjectPath, Target);
+		ASC->SetupAttributeSet(RecursiveContextArgs.SrcAttributeSetSoftObjectPath, Target);
 	}
 }
