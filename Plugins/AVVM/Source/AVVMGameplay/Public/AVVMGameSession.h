@@ -46,5 +46,5 @@ protected:
 	int32 GetUserUniqueId(const APlayerState* PlayerState) const;
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const APlayerState>, int32> UserUniqueIds;
+	TMap<TWeakObjectPtr<const APlayerState>, int32/*{FActorContent.UniqueId}*/> UserUniqueIds;
 };
