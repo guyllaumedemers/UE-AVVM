@@ -174,11 +174,6 @@ protected:
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
-	// @gdemers Make sure to match this property value with your FItemIdentifierDataTableRow entry.
-	// TODO convert this to be set based on Package name at editor time or something.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FName ItemIdentifierTableRowName = NAME_None;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
 	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
 
