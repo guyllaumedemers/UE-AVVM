@@ -46,7 +46,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
 
 		// @gdemers aggregate dependencies defined in backend representation.
-		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Src, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 	else
 	{
@@ -57,7 +57,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 			const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
 
 			// @gdemers aggregate dependencies defined in backend representation.
-			Dependencies = UAVVMOnlineUtils::GetElementDependencies(Src, TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
+			Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor, TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
 		}
 	}
 
