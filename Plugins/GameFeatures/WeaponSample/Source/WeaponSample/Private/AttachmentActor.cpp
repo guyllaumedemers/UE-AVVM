@@ -31,6 +31,11 @@
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
 	const int32 SearchUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(Src);
+	if (!ensureAlwaysMsgf(SearchUniqueId != INDEX_NONE,
+	                      TEXT("Your Actor Class isn't referencing a valid UniqueId in the Actor Identifier Data Table.")))
+	{
+		return nullptr;
+	}
 
 	TArray<int32> Dependencies;
 
