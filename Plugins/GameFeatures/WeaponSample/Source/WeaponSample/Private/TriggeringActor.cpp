@@ -333,7 +333,9 @@ void UTriggeringUtils::Swap(AActor* UnEquip,
                             const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
 	FAVVMSocketTargetingHelper::Static_Detach(UnEquip);
-	// @gdemers this api is used when the Outer Actor is already created. As such, attachments
-	// can be executed without recursive search.
+	// @gdemers this api is used during deterministic case, where the attachment is created based on the TriggeringActor
+	// Definition. i.e Our Actor creation request comes from instancing sub-registry withing the Outer Actor Definition.
+	// As such, async request to find the correct parent isnt required. It's already owned, most-likely called from within
+	// the parent actor.
 	FAVVMSocketTargetingHelper::Static_AttachToActor(Equip, ContextArgs);
 }
