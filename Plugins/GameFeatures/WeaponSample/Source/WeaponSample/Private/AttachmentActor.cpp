@@ -30,9 +30,15 @@
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
+	if (!IsValid(Src))
+	{
+		return nullptr;
+	}
+
 	const int32 SearchUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(Src);
 	if (!ensureAlwaysMsgf(SearchUniqueId != INDEX_NONE,
-	                      TEXT("Your Actor Class isn't referencing a valid UniqueId in the Actor Identifier Data Table.")))
+	                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
+	                      *Src->GetName()))
 	{
 		return nullptr;
 	}
@@ -44,6 +50,12 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	{
 		// @gdemers fetch {FActorContent.UniqueId}
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
+		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+		                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
+		                      *Character->GetName()))
+		{
+			return nullptr;
+		}
 
 		// @gdemers aggregate dependencies defined in backend representation.
 		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
@@ -55,6 +67,12 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		{
 			// @gdemers fetch {FItem.UniqueId}
 			const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
+			if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+			                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
+			                      *TriggeringActor->GetName()))
+			{
+				return nullptr;
+			}
 
 			// @gdemers aggregate dependencies defined in backend representation.
 			Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor, TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
