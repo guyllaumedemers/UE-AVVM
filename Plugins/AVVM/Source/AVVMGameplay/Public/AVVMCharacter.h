@@ -25,7 +25,9 @@
 #include "AVVMSocketTargetingHelper.h"
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "InstancedStruct.h"
 #include "ModularCharacter.h"
+#include "Backend/AVVMDataResolverHelper.h"
 #include "Data/AVVMActorPayload.h"
 #include "Resources/AVVMResourceProvider.h"
 
@@ -33,6 +35,19 @@
 
 class UAbilitySystemComponent;
 class UAVVMAbilitySystemComponent;
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMCharacterDataResolverHelper is a context struct that resolve backend information about a character.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMCharacterDataResolverHelper : public FAVVMDataResolverHelper
+{
+	GENERATED_BODY()
+	
+	virtual TArray<int32> GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const override;
+};
 
 /**
  *	Class description:
@@ -95,6 +110,9 @@ public:
 	virtual int32 GetProviderUniqueId_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
+	
+	// @gdemers Data Resolver for backend representation of a ACharacter. 
+	static const TInstancedStruct<FAVVMDataResolverHelper>& GetCharacterDataResolverHelper();
 
 protected:
 	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;

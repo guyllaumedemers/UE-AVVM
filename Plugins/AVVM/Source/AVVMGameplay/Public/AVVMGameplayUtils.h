@@ -51,4 +51,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static FString PrintConnectionInfo(const UNetConnection* Connection);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 GetUniqueIdentifier(const AActor* Actor);
 };

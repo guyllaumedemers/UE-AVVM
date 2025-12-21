@@ -69,7 +69,7 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSo
 		return false;
 	}
 
-	SocketTarget = Helper->GetDesiredTypedInner(Parent);
+	SocketTarget = Helper->GetDesiredTypedInner(Src, SocketTarget);
 	if (!IsValid(SocketTarget))
 	{
 		UE_LOG(LogGameplay,

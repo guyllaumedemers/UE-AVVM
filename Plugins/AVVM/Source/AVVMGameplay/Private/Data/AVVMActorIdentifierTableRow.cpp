@@ -17,10 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/ItemIdentifierTableRow.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 
 #if WITH_EDITOR
-EDataValidationResult FItemIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FAVVMActorIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 	if (ItemActorClass.IsNull())

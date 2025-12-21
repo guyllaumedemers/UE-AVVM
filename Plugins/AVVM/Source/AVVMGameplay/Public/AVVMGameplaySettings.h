@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,43 +17,31 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class TeamSample : ModuleRules
+#include "Engine/DeveloperSettings.h"
+
+#include "AVVMGameplaySettings.generated.h"
+
+class UDataTable;
+
+/**
+ *	Class description:
+ *
+ *	UAVVMGameplaySettings is a DeveloperSettings that expose global data specific to gameplay.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMGameplaySettings"))
+class AVVMGAMEPLAY_API UAVVMGameplaySettings : public UDeveloperSettings
 {
-	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		SetupIrisSupport(Target);
+	GENERATED_BODY()
 
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
-		}
+public:
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const TSoftObjectPtr<UDataTable>& GetActorIdentifierDataTable();
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMOnline",
-				"AVVMToolkit",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayTags",
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"NetCore",
-				"Niagara"
-			}
-		);
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSoftObjectPtr<UDataTable> ActorIdentifierDataTable = nullptr;
+};

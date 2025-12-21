@@ -30,14 +30,20 @@
 #include "GameFramework/Character.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
-AActor* FTriggeringSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) const
+TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
 {
-	if (!IsValid(Src))
+	// TODO @gdemers retrieve a global access of the relevant data.
+	return TArray<int32>();
+}
+
+AActor* FTriggeringSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
+{
+	if (!IsValid(Target))
 	{
-		return Src;
+		return nullptr;
 	}
 
-	auto* Pawn = Cast<ACharacter>(Src);
+	auto* Pawn = Cast<ACharacter>(Target);
 	return IsValid(Pawn) ? Pawn : nullptr;
 }
 
@@ -232,6 +238,12 @@ UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Imp
 TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionResourceIds_Implementation() const
 {
 	return {TriggeringDefinitionId};
+}
+
+const TInstancedStruct<FAVVMDataResolverHelper>& ATriggeringActor::GetTriggeringActorDataResolverHelper()
+{
+	static auto Helper = FAVVMDataResolverHelper::Make<FTriggeringActorDataResolverHelper>();
+	return Helper;
 }
 
 void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,

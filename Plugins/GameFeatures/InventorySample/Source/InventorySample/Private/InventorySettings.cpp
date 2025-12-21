@@ -24,11 +24,6 @@ TSubclassOf<UInventoryStringParser> UInventorySettings::GetJsonParserClass()
 	return GetDefault<UInventorySettings>()->JsonParserClass;
 }
 
-const TSoftObjectPtr<UDataTable>& UInventorySettings::GetItemIdentifierDataTable()
-{
-	return GetDefault<UInventorySettings>()->ItemIdentifierDataTable;
-}
-
 const FGameplayTag& UInventorySettings::GetPendingSpawnTag()
 {
 	return GetDefault<UInventorySettings>()->PendingSpawnTag;

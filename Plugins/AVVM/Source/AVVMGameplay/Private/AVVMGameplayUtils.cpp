@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "AVVMGameplayUtils.h"
 
+#include "AVVMGameplaySettings.h"
+#include "Data/AVVMActorDefinitionDataAsset.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/NetConnection.h"
 #include "GameFramework/Actor.h"
 
@@ -125,4 +128,43 @@ FStringView UAVVMGameplayUtils::PrintNetSource(const AActor* Actor)
 FString UAVVMGameplayUtils::PrintConnectionInfo(const UNetConnection* Connection)
 {
 	return IsValid(Connection) ? const_cast<UNetConnection*>(Connection)->RemoteAddressToString() : TEXT("Unknown");
+}
+
+int32 UAVVMGameplayUtils::GetUniqueIdentifier(const AActor* Actor)
+{
+	if (!IsValid(Actor))
+	{
+		return INDEX_NONE;
+	}
+
+	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
+	if (ActorIdentifierDataTable.IsNull())
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers since entries are TSoftClassPtr themselves, this should be fairly quick to load
+	// and not create any hitches during gameplay.
+	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
+	if (!IsValid(DataTable))
+	{
+		return INDEX_NONE;
+	}
+
+	const UClass* ActorClass = Actor->GetClass();
+	if (!IsValid(ActorClass))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(ActorClass->GetFName(), TEXT(""));
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
 }

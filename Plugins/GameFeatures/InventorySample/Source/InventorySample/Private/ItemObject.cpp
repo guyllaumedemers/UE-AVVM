@@ -28,10 +28,8 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
-#include "Data/ItemIdentifierTableRow.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
-#include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -143,34 +141,6 @@ bool UItemObject::IsEmpty() const
 int32 UItemObject::GetRuntimeCount() const
 {
 	return RuntimeItemState.Counter;
-}
-
-int32 UItemObject::GetItemUniqueId() const
-{
-	const TSoftObjectPtr<UDataTable>& ItemIdentifierDataTable = UInventorySettings::GetItemIdentifierDataTable();
-	if (ItemIdentifierDataTable.IsNull())
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers since entries are TSoftClassPtr themselves, this should be fairly quick to load
-	// and not create any hitches during gameplay.
-	const UDataTable* DataTable = ItemIdentifierDataTable.LoadSynchronous();
-	if (!IsValid(DataTable))
-	{
-		return INDEX_NONE;
-	}
-
-	const auto* RowValue = DataTable->FindRow<FItemIdentifierDataTableRow>(ItemIdentifierTableRowName, TEXT(""));
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-	                     TEXT("Invalid Row Entry. Make sure ItemIdentifierTableRowName match the Data Table.")))
-	{
-		return RowValue->UniqueId;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
 }
 
 const FDataRegistryId& UItemObject::GetItemActorId() const

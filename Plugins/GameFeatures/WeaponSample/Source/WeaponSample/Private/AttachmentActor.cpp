@@ -19,31 +19,54 @@
 //SOFTWARE.
 #include "AttachmentActor.h"
 
+#include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMUtils.h"
 #include "TriggeringActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 
-AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src) const
+AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
-	if (!IsValid(Src))
+	const int32 SearchUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(Src);
+
+	TArray<int32> Dependencies;
+
+	auto* Character = Cast<AAVVMCharacter>(Target);
+	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMResourceProvider>(Character))
 	{
-		return Src;
+		// @gdemers fetch {FActorContent.UniqueId}
+		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
+
+		// @gdemers aggregate dependencies defined in backend representation.
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Src, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+	}
+	else
+	{
+		auto* TriggeringActor = Cast<ATriggeringActor>(Target);
+		if (IsValid(TriggeringActor))
+		{
+			// @gdemers fetch {FItem.UniqueId}
+			const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
+
+			// @gdemers aggregate dependencies defined in backend representation.
+			Dependencies = UAVVMOnlineUtils::GetElementDependencies(Src, TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
+		}
 	}
 
-	TArray<AActor*> Children;
-	Src->GetAttachedActors(Children);
-
-	AActor** SearchResult = Children.FindByPredicate([](const AActor* Actor)
+	const int32* SearchResult = Dependencies.FindByPredicate([CompareValue = SearchUniqueId](const int32 Value)
 	{
-		// @gdemers We can further define this later so to narrow the search with more granular constraint.
-		const auto* TriggeringActor = Cast<ATriggeringActor>(Actor);
-		return IsValid(TriggeringActor);
+		return (CompareValue == Value);
 	});
 
-	return (SearchResult != nullptr) ? *SearchResult : nullptr;
+	if (SearchResult != nullptr)
+	{
+		return Target;
+	}
+
+	return nullptr;
 }
 
 AAttachmentActor::AAttachmentActor(const FObjectInitializer& ObjectInitializer)

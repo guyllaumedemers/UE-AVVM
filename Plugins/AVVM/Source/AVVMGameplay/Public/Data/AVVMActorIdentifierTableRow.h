@@ -27,21 +27,22 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "ItemIdentifierTableRow.generated.h"
+#include "AVVMActorIdentifierTableRow.generated.h"
 
 /**
  *	Class description:
  *	
- *	FItemIdentifierDataTableRow is a table row entry that pair a UItemObject::ItemActorClass derived BP
+ *	FAVVMActorIdentifierDataTableRow is a table row entry that pair an Actor derived BP
  *	to a unique identifier.
  *	
  *	This mapping allow user to access the dependent objects referenced in backend representation
- *	of an {FItem.UniqueId}. Example : {FItem::Mods}. Doing so allow resolving attachment socket targeting during inventory initialization.
+ *	of an {FActorContent.UniqueId}. Doing so allow resolving attachment socket targeting during inventory initialization, and grant
+ *	general access to backend entries based on Actor at hand.
  *	
- *	Note : In order to work, we require access to the Outer {FActorContent::UniqueId}.
+ *	IMPORTANT : All GFP should contribute to populate this DT dynamically based on plugin availability.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemIdentifierDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -49,6 +50,8 @@ struct INVENTORYSAMPLE_API FItemIdentifierDataTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	// @gdemers sorta useless, but provide visual feedback to which actor we expect
+	// to be referenced by the UniqueId.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<AActor> ItemActorClass = nullptr;
 

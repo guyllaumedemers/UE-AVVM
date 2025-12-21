@@ -46,6 +46,7 @@ public class WeaponSample : ModuleRules
 			new string[]
 			{
 				"AVVMAudio",
+				"AVVMOnline",
 				"AVVMToolkit",
 			}
 		);

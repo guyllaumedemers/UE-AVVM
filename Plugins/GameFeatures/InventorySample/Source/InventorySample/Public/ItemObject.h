@@ -154,9 +154,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
-	UFUNCTION(BlueprintCallable)
-	int32 GetItemUniqueId() const;
-
 	const FDataRegistryId& GetItemActorId() const;
 
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,

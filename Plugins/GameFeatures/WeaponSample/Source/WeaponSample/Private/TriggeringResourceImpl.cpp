@@ -70,19 +70,22 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 		}
 	}
 
-	auto* AttachmentManagerComponent = Cast<UAttachmentManagerComponent>(ActorComponent);
-	if (IsValid(AttachmentManagerComponent))
+	if (!OutAttachmentDefinition.IsEmpty())
 	{
-		if (!OutAttachmentDefinition.IsEmpty())
+		auto* AttachmentManagerComponent = Cast<UAttachmentManagerComponent>(ActorComponent);
+		if (IsValid(AttachmentManagerComponent))
 		{
 			AttachmentManagerComponent->SetupAttachments(OutAttachmentDefinition);
 		}
 	}
 
-	auto* ProjectileComponent = Cast<UProjectileComponent>(ActorComponent);
-	if (IsValid(ProjectileComponent))
+	if (!OutProjectileDefinition.IsEmpty())
 	{
-		ProjectileComponent->SetupProjectiles(OutProjectileDefinition);
+		auto* ProjectileComponent = Cast<UProjectileComponent>(ActorComponent);
+		if (IsValid(ProjectileComponent))
+		{
+			ProjectileComponent->SetupProjectiles(OutProjectileDefinition);
+		}
 	}
 
 	return OutResources;

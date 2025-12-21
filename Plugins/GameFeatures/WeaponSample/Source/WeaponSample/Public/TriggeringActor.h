@@ -25,7 +25,9 @@
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "GameplayAbilitySpecHandle.h"
+#include "InstancedStruct.h"
 #include "Ability/AVVMAttributeSet.h"
+#include "Backend/AVVMDataResolverHelper.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
 
@@ -38,6 +40,19 @@ class UTriggeringAbility;
 /**
  *	Class description:
  *	
+ *	FTriggeringActorDataResolverHelper is a context struct that resolve backend information about a triggering actor.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FTriggeringActorDataResolverHelper : public FAVVMDataResolverHelper
+{
+	GENERATED_BODY()
+	
+	virtual TArray<int32> GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const override;
+};
+
+/**
+ *	Class description:
+ *	
  *	FTriggeringSocketTargetingHelper is a context struct that defines how an attachment should socket itself based
  *	on the known root actor (i.e ACharacter).
  */
@@ -46,7 +61,7 @@ struct WEAPONSAMPLE_API FTriggeringSocketTargetingHelper : public FAVVMSocketTar
 {
 	GENERATED_BODY()
 
-	virtual AActor* GetDesiredTypedInner(AActor* Src) const override;
+	virtual AActor* GetDesiredTypedInner(AActor* Src, AActor* Target) const override;
 };
 
 /**
@@ -87,6 +102,9 @@ public:
 	// @gdemers IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
+	
+	// @gdemers Data Resolver for backend representation of a ATriggeringActor.
+	static const TInstancedStruct<FAVVMDataResolverHelper>& GetTriggeringActorDataResolverHelper();
 
 protected:
 	UFUNCTION()
@@ -129,7 +147,7 @@ protected:
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
 	FDelegateHandle DeferredSocketParentingDelegateHandle;
-	
+
 	friend class UTriggeringUtils;
 };
 

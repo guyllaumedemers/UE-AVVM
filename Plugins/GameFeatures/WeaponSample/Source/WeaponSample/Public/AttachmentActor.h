@@ -40,7 +40,7 @@ struct WEAPONSAMPLE_API FAttachmentSocketTargetingHelper : public FAVVMSocketTar
 {
 	GENERATED_BODY()
 
-	virtual AActor* GetDesiredTypedInner(AActor* Src) const override;
+	virtual AActor* GetDesiredTypedInner(AActor* Src, AActor* Target) const override;
 };
 
 /**

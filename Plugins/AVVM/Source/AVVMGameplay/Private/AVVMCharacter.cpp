@@ -29,6 +29,12 @@
 #include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
+TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
+{
+	// TODO @gdemers retrieve a global access of the relevant data.
+	return TArray<int32>();
+}
+
 AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -126,6 +132,12 @@ TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionResourceIds_Impleme
 UAVVMResourceManagerComponent* AAVVMCharacter::GetResourceManagerComponent_Implementation() const
 {
 	return ResourceManagerComponent;
+}
+
+const TInstancedStruct<FAVVMDataResolverHelper>& AAVVMCharacter::GetCharacterDataResolverHelper()
+{
+	static auto Helper = FAVVMDataResolverHelper::Make<FAVVMCharacterDataResolverHelper>();
+	return Helper;
 }
 
 void AAVVMCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)

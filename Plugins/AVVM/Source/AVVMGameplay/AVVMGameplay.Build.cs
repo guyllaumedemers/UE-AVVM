@@ -41,6 +41,7 @@ public class AVVMGameplay : ModuleRules
 				"Core",
 				"CoreUObject",
 				"DataRegistry",
+				"DeveloperSettings",
 				"Engine",
 				"EnhancedInput",
 				"GameFeatures",

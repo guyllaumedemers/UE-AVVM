@@ -35,8 +35,8 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingHelper
 {
 	GENERATED_BODY()
 	
-	~FAVVMSocketTargetingHelper() = default;
-	virtual AActor* GetDesiredTypedInner(AActor* Src) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
+	virtual ~FAVVMSocketTargetingHelper() = default;
+	virtual AActor* GetDesiredTypedInner(AActor* Src, AActor* Target) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
 
 	static bool Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
 	static bool Static_Detach(AActor* Src);
