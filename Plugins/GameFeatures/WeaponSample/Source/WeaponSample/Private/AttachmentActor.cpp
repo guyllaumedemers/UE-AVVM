@@ -51,7 +51,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		// @gdemers fetch {FActorContent.UniqueId}
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
 		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-		                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
+		                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on content stored in AVVMGameSession."),
 		                      *Character->GetName()))
 		{
 			return nullptr;
