@@ -244,7 +244,7 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	RecursiveContextArgs.Parent = Target;
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, RecursiveContextArgs);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActorAsync(this, RecursiveContextArgs);
 	if (!bIsRooted)
 	{
 		return;

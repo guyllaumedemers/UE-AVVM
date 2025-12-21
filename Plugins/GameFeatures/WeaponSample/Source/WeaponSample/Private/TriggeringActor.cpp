@@ -260,7 +260,7 @@ void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
 	}
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActor(this, ContextArgs);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActorAsync(this, ContextArgs);
 	if (!bIsRooted)
 	{
 		return;
@@ -333,5 +333,7 @@ void UTriggeringUtils::Swap(AActor* UnEquip,
                             const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
 	FAVVMSocketTargetingHelper::Static_Detach(UnEquip);
+	// @gdemers this api is used when the Outer Actor is already created. As such, attachments
+	// can be executed without recursive search.
 	FAVVMSocketTargetingHelper::Static_AttachToActor(Equip, ContextArgs);
 }

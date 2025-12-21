@@ -39,7 +39,7 @@ void IAVVMDoesSupportSocketDeferral::OnSocketParentAvailableDelegate_Remove(cons
 	OnParentSocketAvailable.Remove(Handle);
 }
 
-bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
+bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
 	const FName SocketName = ContextArgs.SocketName;
 	AActor* Parent = ContextArgs.Parent.Get();
@@ -87,6 +87,32 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSo
 		IAVVMDoesSupportInnerSocketTargeting::Execute_Attach(Src, SocketTarget, SocketName);
 		return true;
 	}
+}
+
+bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
+{
+	const FName SocketName = ContextArgs.SocketName;
+	AActor* Parent = ContextArgs.Parent.Get();
+
+	if (!IsValid(Src) || !IsValid(Parent))
+	{
+		return false;
+	}
+
+	// @gdemers actor we traverse, and search socket on.
+	AActor* SocketTarget = Parent;
+
+	const bool bDoesImplement = Src->Implements<UAVVMDoesSupportInnerSocketTargeting>();
+	if (!bDoesImplement)
+	{
+		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
+		Src->AttachToActor(SocketTarget, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		return true;
+	}
+
+	// @gdemers Update our Owning outer for future ASC retrieval from the AbilitySystem interface api.
+	IAVVMDoesSupportInnerSocketTargeting::Execute_Attach(Src, SocketTarget, SocketName);
+	return true;
 }
 
 bool FAVVMSocketTargetingHelper::Static_Detach(AActor* Src)
