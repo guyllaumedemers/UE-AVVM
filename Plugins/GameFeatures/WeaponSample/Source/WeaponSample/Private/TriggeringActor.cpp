@@ -51,6 +51,7 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 
 	TArray<int32> OutResults;
 
+	// @gdemers retrieve the character preset, and all items that compose it.
 	const auto* Outer = Cast<AAVVMCharacter>(WorldContextObject);
 	if (IsValid(Outer))
 	{
@@ -58,6 +59,7 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 		OutResults = UAVVMOnlineUtils::GetElementDependencies(WorldContextObject, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 
+	// @gdemers search for your attachment in the item composition.
 	const UWorld* World = WorldContextObject->GetWorld();
 	for (const int32 ItemId : OutResults)
 	{
