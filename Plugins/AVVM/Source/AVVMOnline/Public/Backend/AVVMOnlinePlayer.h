@@ -139,7 +139,7 @@ struct AVVMONLINE_API FAVVMCurrency
  *	on the backend.
  *
  *	Note : A player profile is NOT an account. An account could hold various Player profiles. These are tied to a
- *	Character that's playable by the account holder.
+ *	Character that's playable by the account holder. (It can also be seen as a save file/or session data.)
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerProfile

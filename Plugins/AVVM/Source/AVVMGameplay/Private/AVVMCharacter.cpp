@@ -22,17 +22,48 @@
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineSubsystem.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Backend/AVVMOnlinePlayer.h"
 #include "Data/AVVMActorPayload.h"
 #include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
 TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
 {
-	// TODO @gdemers retrieve a global access of the relevant data.
-	return TArray<int32>();
+	if (!IsValid(WorldContextObject))
+	{
+		return TArray<int32>{};
+	}
+
+	UAVVMOnlineStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const FString ProfilePayload = UAVVMOnlineSubsystem::Static_GetPlayerProfile(WorldContextObject->GetWorld(), ElementId);
+	if (ProfilePayload.IsEmpty())
+	{
+		return TArray<int32>{};
+	}
+
+	FAVVMPlayerProfile OutPlayerProfile;
+	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
+
+	const FString PresetPayload = UAVVMOnlineSubsystem::Static_GetPlayerPreset(WorldContextObject->GetWorld(), OutPlayerProfile.EquippedPresetId);
+	if (PresetPayload.IsEmpty())
+	{
+		return TArray<int32>{};
+	}
+
+	FAVVMPlayerPreset OutPlayerPreset;
+	JsonParser->FromString(PresetPayload, OutPlayerPreset);
+
+	return OutPlayerPreset.EquippedItems;
 }
 
 AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)

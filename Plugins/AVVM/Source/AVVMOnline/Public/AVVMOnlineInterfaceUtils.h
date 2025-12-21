@@ -192,12 +192,9 @@ template <typename TPayload>
 FString UAVVMOnlineUtils::SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
-	if (!IsValid(StringParser))
+	if (!ensureAlwaysMsgf(IsValid(StringParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
-		UE_LOG(LogAVVMOnline,
-		       Log,
-		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
-
 		return FString();
 	}
 
@@ -220,12 +217,9 @@ template <typename TPayload>
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::DeserializeString(const FString& Payload)
 {
 	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
-	if (!IsValid(StringParser))
+	if (!ensureAlwaysMsgf(IsValid(StringParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
-		UE_LOG(LogAVVMOnline,
-		       Log,
-		       TEXT("FAVVMOnlineModule doesn't initialize a valid Parser Class."))
-
 		return FAVVMNotificationPayload::Empty;
 	}
 

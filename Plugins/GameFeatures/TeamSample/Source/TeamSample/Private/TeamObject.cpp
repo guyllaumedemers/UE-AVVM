@@ -204,7 +204,8 @@ void UTeamUtils::AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& Un
 	}
 
 	UAVVMOnlineStringParser* OnlineStringParser = FAVVMOnlineModule::GetJsonParser();
-	if (!IsValid(OnlineStringParser))
+	if (!ensureAlwaysMsgf(IsValid(OnlineStringParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
 		return;
 	}
