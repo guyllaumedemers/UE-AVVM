@@ -42,7 +42,10 @@ public:
 	static FString Static_GetPlayerProfile(const UWorld* World, const int32 ProfileId);
 	
 	UFUNCTION(BlueprintCallable)
-	static FString Static_GetPlayerPreset(const UWorld* World, const int32 ProfileId);
+	static FString Static_GetPlayerPreset(const UWorld* World, const int32 PresetId);
+	
+	UFUNCTION(BlueprintCallable)
+	static FString Static_GetItem(const UWorld* World, const int32 ItemId);
 	
 protected:
 	static UAVVMOnlineSubsystem* Get(const UWorld* World);

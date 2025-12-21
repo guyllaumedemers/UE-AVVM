@@ -17,37 +17,37 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/ActorContentProxy.h"
+#include "Backend/AVVMOnlineActorContentProxy.h"
 
-#include "InventorySample.h"
-#include "InventoryStringParser.h"
+#include "AVVMOnline.h"
+#include "AVVMOnlineInventoryStringParser.h"
 
-bool FItemModifierProxy::operator==(const FItemModifierProxy& Rhs) const
+bool FAVVMItemModifierProxy::operator==(const FAVVMItemModifierProxy& Rhs) const
 {
 	return (ResourceId.Equals(Rhs.ResourceId));
 }
 
-bool FItemProxy::operator==(const FItemProxy& Rhs) const
+bool FAVVMItemProxy::operator==(const FAVVMItemProxy& Rhs) const
 {
 	return (ResourceId.Equals(Rhs.ResourceId))
 			&& (ModValues == Rhs.ModValues);
 }
 
-bool FItemHolderProxy::operator==(const FItemHolderProxy& Rhs) const
+bool FAVVMItemHolderProxy::operator==(const FAVVMItemHolderProxy& Rhs) const
 {
 	return (ItemValues == Rhs.ItemValues);
 }
 
-bool FActorContentProxy::operator==(const FActorContentProxy& Rhs) const
+bool FAVVMActorContentProxy::operator==(const FAVVMActorContentProxy& Rhs) const
 {
 	return (ItemHolderValues == Rhs.ItemHolderValues);
 }
 
-TArray<FDataRegistryId> UInventoryUtils::GetAllRegistryIds(const FActorContentProxy& ContentProxy)
+TArray<FDataRegistryId> UAVVMOnlineInventoryUtils::GetAllRegistryIds(const FAVVMActorContentProxy& ContentProxy)
 {
 	TArray<FDataRegistryId> OutResult;
 
-	const UInventoryStringParser* InventoryParser = FInventorySampleModule::GetJsonParser();
+	const UAVVMOnlineInventoryStringParser* InventoryParser = FAVVMOnlineModule::GetJsonParser_Inventory();
 	if (!IsValid(InventoryParser))
 	{
 		return OutResult;
@@ -55,7 +55,7 @@ TArray<FDataRegistryId> UInventoryUtils::GetAllRegistryIds(const FActorContentPr
 
 	for (const FString& HolderPayload : ContentProxy.ItemHolderValues)
 	{
-		FItemHolderProxy OutHolderProxy;
+		FAVVMItemHolderProxy OutHolderProxy;
 		InventoryParser->FromString(HolderPayload, OutHolderProxy);
 
 		// TODO @gdemers we could have a registry id that define the ItemHolder at this level.
@@ -63,7 +63,7 @@ TArray<FDataRegistryId> UInventoryUtils::GetAllRegistryIds(const FActorContentPr
 
 		for (const FString& ItemPayload : OutHolderProxy.ItemValues)
 		{
-			FItemProxy OutItemProxy;
+			FAVVMItemProxy OutItemProxy;
 			InventoryParser->FromString(ItemPayload, OutItemProxy);
 
 			// @gdemers Add our Item RegistryId to be considered set for spawning.
@@ -72,7 +72,7 @@ TArray<FDataRegistryId> UInventoryUtils::GetAllRegistryIds(const FActorContentPr
 
 			for (const FString& ItemModPayload : OutItemProxy.ModValues)
 			{
-				FItemModifierProxy OutItemModifierProxy;
+				FAVVMItemModifierProxy OutItemModifierProxy;
 				InventoryParser->FromString(ItemModPayload, OutItemModifierProxy);
 
 				// @gdemers Add our Item Attachments/Mod RegistryId to be considered set for spawning.

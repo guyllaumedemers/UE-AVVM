@@ -17,14 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InventoryStringParser.h"
+#include "AVVMOnlineInventoryStringParser.h"
 
-#include "Backend/ActorContent.h"
-#include "Backend/ActorContentProxy.h"
+#include "Backend/AVVMOnlineActorContent.h"
+#include "Backend/AVVMOnlineActorContentProxy.h"
 #include "Serialization/JsonSerializer.h"
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FActorContent& OutActorContent) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMActorContent& OutActorContent) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -34,7 +34,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FActorContent NewActorContent;
+	FAVVMActorContent NewActorContent;
 	NewActorContent.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemHolderIds"));
@@ -46,8 +46,8 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 	OutActorContent = NewActorContent;
 }
 
-void UInventoryStringParser::ToString(const FActorContent& NewActorContent,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMActorContent& NewActorContent,
+                                                FString& OutFormat) const
 {
 	TArray<TSharedPtr<FJsonValue>> ItemHolderIds;
 	for (const int32 ItemHolderId : NewActorContent.ItemHolderIds)
@@ -70,8 +70,8 @@ void UInventoryStringParser::ToString(const FActorContent& NewActorContent,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FItemHolder& OutItemHolder) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMItemHolder& OutItemHolder) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -81,7 +81,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FItemHolder NewItemHolder;
+	FAVVMItemHolder NewItemHolder;
 	NewItemHolder.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemIds"));
@@ -93,8 +93,8 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 	OutItemHolder = NewItemHolder;
 }
 
-void UInventoryStringParser::ToString(const FItemHolder& NewItemHolder,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemHolder& NewItemHolder,
+                                                FString& OutFormat) const
 {
 	TArray<TSharedPtr<FJsonValue>> ItemIds;
 	for (const int32 ItemId : NewItemHolder.ItemIds)
@@ -117,8 +117,8 @@ void UInventoryStringParser::ToString(const FItemHolder& NewItemHolder,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FItem& OutItem) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMItem& OutItem) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -128,7 +128,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FItem NewItem;
+	FAVVMItem NewItem;
 	NewItem.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewItem.ResourceId = JsonData->GetIntegerField(TEXT("ResourceId"));
 
@@ -141,8 +141,8 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 	OutItem = NewItem;
 }
 
-void UInventoryStringParser::ToString(const FItem& NewItem,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItem& NewItem,
+                                                FString& OutFormat) const
 {
 	TArray<TSharedPtr<FJsonValue>> ModIds;
 	for (const int32 ModId : NewItem.ModIds)
@@ -166,8 +166,8 @@ void UInventoryStringParser::ToString(const FItem& NewItem,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FItemModifier& OutItemModifier) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMItemModifier& OutItemModifier) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -177,15 +177,15 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FItemModifier NewItemModifier;
+	FAVVMItemModifier NewItemModifier;
 	NewItemModifier.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewItemModifier.ResourceId = JsonData->GetIntegerField(TEXT("ResourceId"));
 
 	OutItemModifier = NewItemModifier;
 }
 
-void UInventoryStringParser::ToString(const FItemModifier& NewItemModifier,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemModifier& NewItemModifier,
+                                                FString& OutFormat) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItemModifier.UniqueId);
@@ -202,8 +202,8 @@ void UInventoryStringParser::ToString(const FItemModifier& NewItemModifier,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FActorContentProxy& OutActorContent) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMActorContentProxy& OutActorContent) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -213,7 +213,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FActorContentProxy NewActorContentProxy;
+	FAVVMActorContentProxy NewActorContentProxy;
 	NewActorContentProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemHolderValues"));
@@ -225,8 +225,8 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 	OutActorContent = NewActorContentProxy;
 }
 
-void UInventoryStringParser::ToString(const FActorContentProxy& NewActorContent,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMActorContentProxy& NewActorContent,
+                                                FString& OutFormat) const
 {
 	TArray<TSharedPtr<FJsonValue>> ItemHolderValues;
 	for (const FString& ItemHolderValue : NewActorContent.ItemHolderValues)
@@ -249,8 +249,8 @@ void UInventoryStringParser::ToString(const FActorContentProxy& NewActorContent,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FItemHolderProxy& OutItemHolder) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMItemHolderProxy& OutItemHolder) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -260,7 +260,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FItemHolderProxy NewItemHolderProxy;
+	FAVVMItemHolderProxy NewItemHolderProxy;
 	NewItemHolderProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ItemValues"));
@@ -272,8 +272,8 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 	OutItemHolder = NewItemHolderProxy;
 }
 
-void UInventoryStringParser::ToString(const FItemHolderProxy& NewItemHolder,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemHolderProxy& NewItemHolder,
+                                                FString& OutFormat) const
 {
 	TArray<TSharedPtr<FJsonValue>> ItemValues;
 	for (const FString& ItemValue : NewItemHolder.ItemValues)
@@ -296,8 +296,8 @@ void UInventoryStringParser::ToString(const FItemHolderProxy& NewItemHolder,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FItemProxy& OutItem) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMItemProxy& OutItem) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -307,7 +307,7 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FItemProxy NewItemProxy;
+	FAVVMItemProxy NewItemProxy;
 	NewItemProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewItemProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 
@@ -320,8 +320,8 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 	OutItem = NewItemProxy;
 }
 
-void UInventoryStringParser::ToString(const FItemProxy& NewItem,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemProxy& NewItem,
+                                                FString& OutFormat) const
 {
 	TArray<TSharedPtr<FJsonValue>> ModValues;
 	for (const FString& ModValue : NewItem.ModValues)
@@ -345,8 +345,8 @@ void UInventoryStringParser::ToString(const FItemProxy& NewItem,
 	OutFormat = JsonOutput;
 }
 
-void UInventoryStringParser::FromString(const FString& NewPayload,
-                                        FItemModifierProxy& OutItemModifier) const
+void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
+                                                  FAVVMItemModifierProxy& OutItemModifier) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -356,15 +356,15 @@ void UInventoryStringParser::FromString(const FString& NewPayload,
 		return;
 	}
 
-	FItemModifierProxy NewItemModifierProxy;
+	FAVVMItemModifierProxy NewItemModifierProxy;
 	NewItemModifierProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewItemModifierProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 
 	OutItemModifier = NewItemModifierProxy;
 }
 
-void UInventoryStringParser::ToString(const FItemModifierProxy& NewItemModifier,
-                                      FString& OutFormat) const
+void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemModifierProxy& NewItemModifier,
+                                                FString& OutFormat) const
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItemModifier.UniqueId);

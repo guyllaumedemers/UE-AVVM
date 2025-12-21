@@ -22,7 +22,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMOnline.h"
 #include "AVVMOnlineInterfaceUtils.h"
-#include "AVVMOnlineStringParser.h"
+#include "AVVMOnlinePlayerStringParser.h"
 #include "NativeGameplayTags.h"
 #include "PlayerStateTeamComponent.h"
 #include "TeamRule.h"
@@ -203,7 +203,7 @@ void UTeamUtils::AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& Un
 		return;
 	}
 
-	UAVVMOnlineStringParser* OnlineStringParser = FAVVMOnlineModule::GetJsonParser();
+	UAVVMOnlinePlayerStringParser* OnlineStringParser = FAVVMOnlineModule::GetJsonParser_Player();
 	if (!ensureAlwaysMsgf(IsValid(OnlineStringParser),
 	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{

@@ -26,7 +26,8 @@
 #include "StructUtils/InstancedStruct.h"
 
 struct FAVVMNotificationPayload;
-class UAVVMOnlineStringParser;
+class UAVVMOnlineInventoryStringParser;
+class UAVVMOnlinePlayerStringParser;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
 
@@ -78,12 +79,14 @@ public:
 	virtual void ShutdownModule() override;
 
 	static AVVMONLINE_API TSharedRef<IConsoleVariable> GetCVarOnlineRequestReturnedStatus();
-	static AVVMONLINE_API UAVVMOnlineStringParser* GetJsonParser();
+	static AVVMONLINE_API UAVVMOnlinePlayerStringParser* GetJsonParser_Player();
+	static AVVMONLINE_API UAVVMOnlineInventoryStringParser* GetJsonParser_Inventory();
 
 private:
 	// cvar that allow user testing. returns the status of a stub request (true/false) without an actual backend hooked.
 	static AVVMONLINE_API TSharedPtr<IConsoleVariable> CVarOnlineRequestReturnedStatus;
-	static AVVMONLINE_API TStrongObjectPtr<UAVVMOnlineStringParser> JsonParser;
+	static AVVMONLINE_API TStrongObjectPtr<UAVVMOnlinePlayerStringParser> PlayerParser;
+	static AVVMONLINE_API TStrongObjectPtr<UAVVMOnlineInventoryStringParser> InventoryParser;
 };
 
 #if !UE_BUILD_SHIPPING

@@ -20,9 +20,9 @@
 #include "Party/AVVMPartyManagerViewModel.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlineStringParser.h"
+#include "AVVMOnlinePlayerStringParser.h"
 
-void UAVVMPartyManagerViewModel::SetParties(const UAVVMOnlineStringParser* JsonParser,
+void UAVVMPartyManagerViewModel::SetParties(const UAVVMOnlinePlayerStringParser* JsonParser,
                                             const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
 	if (!ensureAlwaysMsgf(IsValid(JsonParser), TEXT("Invalid JsonParser Object!")))

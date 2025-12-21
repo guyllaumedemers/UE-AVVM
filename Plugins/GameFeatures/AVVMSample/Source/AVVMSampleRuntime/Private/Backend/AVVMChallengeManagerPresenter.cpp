@@ -93,7 +93,7 @@ void UAVVMChallengeManagerPresenter::SetChallenges(const TInstancedStruct<FAVVMN
 	auto* ChallengeManagerViewModel = Cast<UAVVMChallengeManagerViewModel>(ViewModel.Get());
 	if (IsValid(ChallengeManagerViewModel))
 	{
-		ChallengeManagerViewModel->SetChallenges(FAVVMOnlineModule::GetJsonParser(), Payload);
+		ChallengeManagerViewModel->SetChallenges(FAVVMOnlineModule::GetJsonParser_Player(), Payload);
 	}
 }
 

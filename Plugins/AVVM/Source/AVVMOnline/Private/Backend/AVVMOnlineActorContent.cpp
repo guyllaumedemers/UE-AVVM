@@ -17,28 +17,28 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Backend/ActorContent.h"
+#include "Backend/AVVMOnlineActorContent.h"
 
-bool FItemModifier::operator==(const FItemModifier& Rhs) const
+bool FAVVMItemModifier::operator==(const FAVVMItemModifier& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ResourceId == Rhs.ResourceId);
 }
 
-bool FItem::operator==(const FItem& Rhs) const
+bool FAVVMItem::operator==(const FAVVMItem& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ResourceId == Rhs.ResourceId)
 			&& (ModIds == Rhs.ModIds);
 }
 
-bool FItemHolder::operator==(const FItemHolder& Rhs) const
+bool FAVVMItemHolder::operator==(const FAVVMItemHolder& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ItemIds == Rhs.ItemIds);
 }
 
-bool FActorContent::operator==(const FActorContent& Rhs) const
+bool FAVVMActorContent::operator==(const FAVVMActorContent& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ItemHolderIds == Rhs.ItemHolderIds);

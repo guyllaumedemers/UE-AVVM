@@ -20,14 +20,16 @@
 
 #include "AVVMOnline.h"
 
+#include "AVVMOnlineInventoryStringParser.h"
+#include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMOnlineSettings.h"
-#include "AVVMOnlineStringParser.h"
 #include "Engine.h"
 
 DEFINE_LOG_CATEGORY(LogAVVMOnline);
 
 TSharedPtr<IConsoleVariable> FAVVMOnlineModule::CVarOnlineRequestReturnedStatus = nullptr;
-TStrongObjectPtr<UAVVMOnlineStringParser> FAVVMOnlineModule::JsonParser = nullptr;
+TStrongObjectPtr<UAVVMOnlinePlayerStringParser> FAVVMOnlineModule::PlayerParser = nullptr;
+TStrongObjectPtr<UAVVMOnlineInventoryStringParser> FAVVMOnlineModule::InventoryParser = nullptr;
 
 void FAVVMOnlineModule::StartupModule()
 {
@@ -44,7 +46,7 @@ void FAVVMOnlineModule::ShutdownModule()
 	IConsoleManager::Get().UnregisterConsoleObject(CVarOnlineRequestReturnedStatus.Get());
 	CVarOnlineRequestReturnedStatus.Reset();
 
-	JsonParser.Reset();
+	PlayerParser.Reset();
 }
 
 TSharedRef<IConsoleVariable> FAVVMOnlineModule::GetCVarOnlineRequestReturnedStatus()
@@ -52,15 +54,26 @@ TSharedRef<IConsoleVariable> FAVVMOnlineModule::GetCVarOnlineRequestReturnedStat
 	return CVarOnlineRequestReturnedStatus.ToSharedRef();
 }
 
-UAVVMOnlineStringParser* FAVVMOnlineModule::GetJsonParser()
+UAVVMOnlinePlayerStringParser* FAVVMOnlineModule::GetJsonParser_Player()
 {
-	if (!JsonParser.IsValid())
+	if (!PlayerParser.IsValid())
 	{
-		auto* Parser = NewObject<UAVVMOnlineStringParser>(GEngine, UAVVMOnlineSettings::GetJsonParserClass());
-		JsonParser = TStrongObjectPtr<UAVVMOnlineStringParser>(Parser);
+		auto* Parser = NewObject<UAVVMOnlinePlayerStringParser>(GEngine, UAVVMOnlineSettings::GetJsonParserClass_Player());
+		PlayerParser = TStrongObjectPtr<UAVVMOnlinePlayerStringParser>(Parser);
 	}
 
-	return JsonParser.Get();
+	return PlayerParser.Get();
+}
+
+UAVVMOnlineInventoryStringParser* FAVVMOnlineModule::GetJsonParser_Inventory()
+{
+	if (!InventoryParser.IsValid())
+	{
+		auto* Parser = NewObject<UAVVMOnlineInventoryStringParser>(GEngine, UAVVMOnlineSettings::GetJsonParserClass_Inventory());
+		InventoryParser = TStrongObjectPtr<UAVVMOnlineInventoryStringParser>(Parser);
+	}
+
+	return InventoryParser.Get();
 }
 
 IMPLEMENT_MODULE(FAVVMOnlineModule, AVVMOnline)

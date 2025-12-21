@@ -23,7 +23,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnline.h"
-#include "AVVMOnlineStringParser.h"
+#include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMUtils.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -191,7 +191,7 @@ bool UAVVMOnlineUtils::GetInterface(const UObject* DerivedChild,
 template <typename TPayload>
 FString UAVVMOnlineUtils::SerializeToString(const TInstancedStruct<FAVVMNotificationPayload>& Payload)
 {
-	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
+	const auto* StringParser = FAVVMOnlineModule::GetJsonParser_Player();
 	if (!ensureAlwaysMsgf(IsValid(StringParser),
 	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
@@ -216,7 +216,7 @@ FString UAVVMOnlineUtils::SerializeToString(const TInstancedStruct<FAVVMNotifica
 template <typename TPayload>
 TInstancedStruct<FAVVMNotificationPayload> UAVVMOnlineUtils::DeserializeString(const FString& Payload)
 {
-	const auto* StringParser = FAVVMOnlineModule::GetJsonParser();
+	const auto* StringParser = FAVVMOnlineModule::GetJsonParser_Player();
 	if (!ensureAlwaysMsgf(IsValid(StringParser),
 	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{

@@ -20,35 +20,6 @@
 
 #include "InventorySample.h"
 
-#include "InventorySettings.h"
-#include "InventoryStringParser.h"
-#include "Engine/Engine.h"
-
 DEFINE_LOG_CATEGORY(LogInventorySample);
 
-TStrongObjectPtr<UInventoryStringParser> FInventorySampleModule::JsonParser = nullptr;
-
-void FInventorySampleModule::StartupModule()
-{
-	IModuleInterface::StartupModule();
-}
-
-void FInventorySampleModule::ShutdownModule()
-{
-	IModuleInterface::ShutdownModule();
-
-	JsonParser.Reset();
-}
-
-UInventoryStringParser* FInventorySampleModule::GetJsonParser()
-{
-	if (!JsonParser.IsValid())
-	{
-		auto* Parser = NewObject<UInventoryStringParser>(GEngine, UInventorySettings::GetJsonParserClass());
-		JsonParser = TStrongObjectPtr<UInventoryStringParser>(Parser);
-	}
-
-	return JsonParser.Get();
-}
-
-IMPLEMENT_MODULE(FInventorySampleModule, InventorySample)
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, InventorySample)

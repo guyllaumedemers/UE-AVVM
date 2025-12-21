@@ -23,7 +23,7 @@
 
 #include "UObject/Object.h"
 
-#include "AVVMOnlineStringParser.generated.h"
+#include "AVVMOnlinePlayerStringParser.generated.h"
 
 struct FAVVMCurrency;
 struct FAVVMHostConfiguration;
@@ -48,11 +48,11 @@ struct FAVVMStringPayload;
 /**
  *	Class description:
  *
- *	UAVVMOnlineStringParser is the UObject interfacing with Unreal JSon system to parse the FString payload that defines
+ *	UAVVMOnlinePlayerStringParser is the UObject interfacing with Unreal JSon system to parse the FString payload that defines
  *	the data schema of the project backend.
  */
 UCLASS(BlueprintType, Blueprintable)
-class AVVMONLINE_API UAVVMOnlineStringParser : public UObject
+class AVVMONLINE_API UAVVMOnlinePlayerStringParser : public UObject
 {
 	GENERATED_BODY()
 

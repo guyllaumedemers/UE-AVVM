@@ -22,7 +22,7 @@
 
 #include "AVVMOnline.h"
 #include "AVVMOnlineInterface.h"
-#include "AVVMOnlineStringParser.h"
+#include "AVVMOnlinePlayerStringParser.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 
@@ -40,7 +40,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMOnlineTest, "AutomatedTest.CustomGroup.AVVM
 bool AVVMOnlineTest::RunTest(const FString& Parameters)
 {
 #if WITH_EDITOR && WITH_AUTOMATION_TESTS
-	const UAVVMOnlineStringParser* Parser = FAVVMOnlineModule::GetJsonParser();
+	const UAVVMOnlinePlayerStringParser* Parser = FAVVMOnlineModule::GetJsonParser_Player();
 	UTEST_NOT_NULL("UAVVMOnlineStringParser", Parser);
 
 	{

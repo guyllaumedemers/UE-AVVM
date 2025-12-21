@@ -29,7 +29,7 @@
 #include "AVVMPlayerManagerViewModel.generated.h"
 
 struct FAVVMNotificationPayload;
-class UAVVMOnlineStringParser;
+class UAVVMOnlinePlayerStringParser;
 
 /**
  *	Class description:
@@ -45,7 +45,7 @@ class AVVMSAMPLERUNTIME_API UAVVMPlayerManagerViewModel : public UMVVMViewModelB
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMPlayerManagerViewModel"); };
 
-	void SetPlayerConnections(const UAVVMOnlineStringParser* JsonParser,
+	void SetPlayerConnections(const UAVVMOnlinePlayerStringParser* JsonParser,
 	                          const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

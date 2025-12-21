@@ -24,7 +24,12 @@ UAVVMOnlineSettings::UAVVMOnlineSettings()
 	CategoryName = TEXT("Game");
 }
 
-TSubclassOf<UAVVMOnlineStringParser> UAVVMOnlineSettings::GetJsonParserClass()
+TSubclassOf<UAVVMOnlinePlayerStringParser> UAVVMOnlineSettings::GetJsonParserClass_Player()
 {
-	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass;
+	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Player;
+}
+
+TSubclassOf<UAVVMOnlineInventoryStringParser> UAVVMOnlineSettings::GetJsonParserClass_Inventory()
+{
+	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Inventory;
 }

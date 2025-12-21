@@ -112,7 +112,7 @@ void UAVVMStorePresenter::SetItems(const TInstancedStruct<FAVVMNotificationPaylo
 	auto* StoreViewModel = Cast<UAVVMStoreViewModel>(ViewModel.Get());
 	if (IsValid(StoreViewModel))
 	{
-		StoreViewModel->SetStoreItems(FAVVMOnlineModule::GetJsonParser(), Payload);
+		StoreViewModel->SetStoreItems(FAVVMOnlineModule::GetJsonParser_Player(), Payload);
 	}
 }
 

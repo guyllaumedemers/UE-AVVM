@@ -21,8 +21,6 @@
 
 #include "CoreMinimal.h"
 
-class UInventoryStringParser;
-
 INVENTORYSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogInventorySample, Log, All);
 
 /**
@@ -54,14 +52,3 @@ INVENTORYSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogInventorySample, Log, All);
  *	
  *	Note : Item Progression are managed via the Item AttributeSet, and the reference Data Table it's initialized from!
  */
-class FInventorySampleModule : public IModuleInterface
-{
-public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-
-	static INVENTORYSAMPLE_API UInventoryStringParser* GetJsonParser();
-
-private:
-	static INVENTORYSAMPLE_API TStrongObjectPtr<UInventoryStringParser> JsonParser;
-};

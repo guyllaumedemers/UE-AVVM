@@ -39,7 +39,12 @@ FString UAVVMOnlineSubsystem::Static_GetPlayerProfile(const UWorld* World, const
 	return FString();
 }
 
-FString UAVVMOnlineSubsystem::Static_GetPlayerPreset(const UWorld* World, const int32 ProfileId)
+FString UAVVMOnlineSubsystem::Static_GetPlayerPreset(const UWorld* World, const int32 PresetId)
+{
+	return FString();
+}
+
+FString UAVVMOnlineSubsystem::Static_GetItem(const UWorld* World, const int32 ItemId)
 {
 	return FString();
 }

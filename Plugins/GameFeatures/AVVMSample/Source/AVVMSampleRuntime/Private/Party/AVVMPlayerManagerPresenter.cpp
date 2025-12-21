@@ -77,7 +77,7 @@ void UAVVMPlayerManagerPresenter::SetPlayerConnections(const TInstancedStruct<FA
 	auto* PlayerManagerViewModel = Cast<UAVVMPlayerManagerViewModel>(ViewModel.Get());
 	if (IsValid(PlayerManagerViewModel))
 	{
-		PlayerManagerViewModel->SetPlayerConnections(FAVVMOnlineModule::GetJsonParser(), Payload);
+		PlayerManagerViewModel->SetPlayerConnections(FAVVMOnlineModule::GetJsonParser_Player(), Payload);
 	}
 }
 

@@ -28,7 +28,7 @@
 #include "AVVMChallengeManagerViewModel.generated.h"
 
 struct FAVVMNotificationPayload;
-class UAVVMOnlineStringParser;
+class UAVVMOnlinePlayerStringParser;
 
 /**
  *	Class description:
@@ -44,7 +44,7 @@ class AVVMSAMPLERUNTIME_API UAVVMChallengeManagerViewModel : public UMVVMViewMod
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMChallengeManagerViewModel"); };
 
-	void SetChallenges(const UAVVMOnlineStringParser* JsonParser,
+	void SetChallenges(const UAVVMOnlinePlayerStringParser* JsonParser,
 	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

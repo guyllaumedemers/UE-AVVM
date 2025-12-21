@@ -75,7 +75,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 			}
 
 			// @gdemers aggregate dependencies defined in backend representation.
-			Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor, TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
+			Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(), TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
 		}
 	}
 

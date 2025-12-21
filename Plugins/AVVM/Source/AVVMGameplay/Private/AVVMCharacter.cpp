@@ -38,7 +38,7 @@ TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UOb
 		return TArray<int32>{};
 	}
 
-	UAVVMOnlineStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser();
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
 	if (!ensureAlwaysMsgf(IsValid(JsonParser),
 	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{

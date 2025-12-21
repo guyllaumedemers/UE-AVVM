@@ -23,19 +23,19 @@
 
 #include "DataRegistryId.h"
 
-#include "ActorContentProxy.generated.h"
+#include "AVVMOnlineActorContentProxy.generated.h"
 
 /**
  *	Class description:
  *
- *	FItemModifierProxy is the POD representation of the RESOLVED data returned by the backend following user request.
+ *	FAVVMItemModifierProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemModifierProxy
+struct AVVMONLINE_API FAVVMItemModifierProxy
 {
 	GENERATED_BODY()
 
-	bool operator==(const FItemModifierProxy& Rhs) const;
+	bool operator==(const FAVVMItemModifierProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -49,14 +49,14 @@ struct INVENTORYSAMPLE_API FItemModifierProxy
 /**
  *	Class description:
  *
- *	FItemProxy is the POD representation of the RESOLVED data returned by the backend following user request.
+ *	FAVVMItemProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemProxy
+struct AVVMONLINE_API FAVVMItemProxy
 {
 	GENERATED_BODY()
 
-	bool operator==(const FItemProxy& Rhs) const;
+	bool operator==(const FAVVMItemProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -74,14 +74,14 @@ struct INVENTORYSAMPLE_API FItemProxy
 /**
  *	Class description:
  *
- *	FItemHolderProxy is the POD representation of the RESOLVED data returned by the backend following user request.
+ *	FAVVMItemHolderProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemHolderProxy
+struct AVVMONLINE_API FAVVMItemHolderProxy
 {
 	GENERATED_BODY()
 
-	bool operator==(const FItemHolderProxy& Rhs) const;
+	bool operator==(const FAVVMItemHolderProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -95,14 +95,14 @@ struct INVENTORYSAMPLE_API FItemHolderProxy
 /**
  *	Class description:
  *
- *	FActorContentProxy is the POD representation of the RESOLVED data returned by the backend following user request.
+ *	FAVVMActorContentProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FActorContentProxy
+struct AVVMONLINE_API FAVVMActorContentProxy
 {
 	GENERATED_BODY()
 
-	bool operator==(const FActorContentProxy& Rhs) const;
+	bool operator==(const FAVVMActorContentProxy& Rhs) const;
 
 	// @gdemers UniqueId here is used to retrieve the entry on the backend and apply ordering changes to children based on local array ordering.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -116,14 +116,14 @@ struct INVENTORYSAMPLE_API FActorContentProxy
 /**
  *	Class description:
  *	
- *	UInventoryUtils is a utility blueprint library that expose reusable api.
+ *	UAVVMOnlineInventoryUtils is a utility blueprint library that expose reusable api.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
+class AVVMONLINE_API UAVVMOnlineInventoryUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> GetAllRegistryIds(const FActorContentProxy& ContentProxy);
+	static TArray<FDataRegistryId> GetAllRegistryIds(const FAVVMActorContentProxy& ContentProxy);
 };

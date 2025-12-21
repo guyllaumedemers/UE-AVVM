@@ -28,7 +28,7 @@
 #include "AVVMStoreViewModel.generated.h"
 
 struct FAVVMNotificationPayload;
-class UAVVMOnlineStringParser;
+class UAVVMOnlinePlayerStringParser;
 
 /**
 *	Class description:
@@ -44,7 +44,7 @@ class AVVMSAMPLERUNTIME_API UAVVMStoreViewModel : public UMVVMViewModelBase,
 public:
 	virtual FName GetViewModelFName() const override { return TEXT("UAVVMStoreViewModel"); };
 
-	void SetStoreItems(const UAVVMOnlineStringParser* JsonParser,
+	void SetStoreItems(const UAVVMOnlinePlayerStringParser* JsonParser,
 	                   const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 protected:

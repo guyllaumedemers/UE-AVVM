@@ -19,12 +19,17 @@
 //SOFTWARE.
 #include "TriggeringActor.h"
 
+#include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineInventoryStringParser.h"
+#include "AVVMOnlineSubsystem.h"
 #include "AVVMUtils.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
+#include "Backend/AVVMOnlineActorContent.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
@@ -32,8 +37,48 @@
 
 TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
 {
-	// TODO @gdemers retrieve a global access of the relevant data.
-	return TArray<int32>();
+	if (!IsValid(WorldContextObject))
+	{
+		return TArray<int32>{};
+	}
+
+	UAVVMOnlineInventoryStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Inventory();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return TArray<int32>{};
+	}
+
+	TArray<int32> OutResults;
+
+	const auto* Outer = Cast<AAVVMCharacter>(WorldContextObject);
+	if (IsValid(Outer))
+	{
+		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(WorldContextObject);
+		OutResults = UAVVMOnlineUtils::GetElementDependencies(WorldContextObject, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+	}
+
+	const UWorld* World = WorldContextObject->GetWorld();
+	for (const int32 ItemId : OutResults)
+	{
+		const FString ItemPayload = UAVVMOnlineSubsystem::Static_GetItem(World, ItemId);
+
+		FAVVMItem OutItem;
+		JsonParser->FromString(ItemPayload, OutItem);
+
+		const int32* SearchResult = OutItem.ModIds.FindByPredicate([CompareValue = ElementId](const int32 Value)
+		{
+			return (CompareValue == Value);
+		});
+
+		if (SearchResult != nullptr)
+		{
+			OutResults = OutItem.ModIds;
+			break;
+		}
+	}
+
+	return OutResults;
 }
 
 AActor* FTriggeringSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
