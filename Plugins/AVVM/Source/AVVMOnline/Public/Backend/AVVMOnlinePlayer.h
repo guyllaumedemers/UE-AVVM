@@ -160,7 +160,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
 
-	// @gdemers Bit encoding allow users to retrieve {Item, ItemPocket, Position, and Count} by bit shifting
+	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, and Count} by bit shifting
 	// the integer retrieved.
 	// TODO : Define the bit encoding required to allow bit shifting and retrieve pocket id, position, and count.
 	UPROPERTY(Transient, BlueprintReadWrite)

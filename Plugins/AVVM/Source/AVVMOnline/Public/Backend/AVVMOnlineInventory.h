@@ -70,14 +70,3 @@ struct AVVMONLINE_API FAVVMItem
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ModIds;
 };
-
-/**
- *	Class description:
- *	
- *	UAVVMOnlineInventoryUtils is a utility blueprint library that expose reusable api.
- */
-UCLASS()
-class AVVMONLINE_API UAVVMOnlineInventoryUtils : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-};
