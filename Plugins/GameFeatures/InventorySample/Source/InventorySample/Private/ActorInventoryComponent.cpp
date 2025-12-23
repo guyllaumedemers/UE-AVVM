@@ -176,9 +176,11 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	}
 	else
 	{
-		// @gdemers using the Outer UniqueId, request the associated entry on backend {FActorContent.UniqueId}.
+		// @gdemers using the Outer UniqueId, request the associated entry on backend {FAVVMPlayerProfile.UniqueId} or otherwise if
+		// your backend tracks Actors differently.
 		// https://miro.com/app/board/uXjVJYdFx2Y=/?share_link_id=345226885183
-		// Note : see UInventoryUtils::GetAllRegistryIds(FActorContextProxy) to retrieve relevant Ids from Outer.
+		// Note : I would suggest using Data Asset to define the scheme of gameplay actors that don't evolve over time, and
+		// keep the microservice request to be specific to your player account/character.
 		IInventoryProvider::Execute_RequestItemsFromMicroService(Outer);
 	}
 }
