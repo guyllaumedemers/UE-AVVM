@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "AVVMOnlineInventoryStringParser.h"
 
-#include "Backend/AVVMOnlineActorContent.h"
-#include "Backend/AVVMOnlineActorContentProxy.h"
+#include "Backend/AVVMOnlineInventory.h"
+#include "Backend/AVVMOnlineInventoryProxy.h"
 #include "Serialization/JsonSerializer.h"
 
 void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,

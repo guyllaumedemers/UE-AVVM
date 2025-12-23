@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMOnlineActorContentProxy.generated.h"
+#include "AVVMOnlineInventoryProxy.generated.h"
 
 /**
  *	Class description:

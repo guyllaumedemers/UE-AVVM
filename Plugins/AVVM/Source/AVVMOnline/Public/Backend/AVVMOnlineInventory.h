@@ -23,7 +23,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMOnlineActorContent.generated.h"
+#include "AVVMOnlineInventory.generated.h"
 
 /**
  *	Class description:

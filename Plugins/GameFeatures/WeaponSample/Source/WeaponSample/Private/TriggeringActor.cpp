@@ -29,7 +29,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
-#include "Backend/AVVMOnlineActorContent.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
