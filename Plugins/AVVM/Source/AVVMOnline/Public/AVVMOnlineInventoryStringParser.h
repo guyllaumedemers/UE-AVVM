@@ -25,15 +25,10 @@
 
 #include "AVVMOnlineInventoryStringParser.generated.h"
 
-struct FAVVMItemModifierProxy;
-struct FAVVMActorContent;
-struct FAVVMActorContentProxy;
 struct FAVVMItem;
 struct FAVVMItemProxy;
-struct FAVVMItemHolder;
-struct FAVVMItemHolderProxy;
 struct FAVVMItemModifier;
-struct FItemModifierPRoxy;
+struct FAVVMItemModifierProxy;
 
 /**
 *	Class description:
@@ -47,23 +42,11 @@ class AVVMONLINE_API UAVVMOnlineInventoryStringParser : public UObject
 	GENERATED_BODY()
 
 public:
-	void FromString(const FString& NewPayload, FAVVMActorContent& OutActorContent) const;
-	void ToString(const FAVVMActorContent& NewActorContent, FString& OutFormat) const;
-
-	void FromString(const FString& NewPayload, FAVVMItemHolder& OutItemHolder) const;
-	void ToString(const FAVVMItemHolder& NewItemHolder, FString& OutFormat) const;
-
 	void FromString(const FString& NewPayload, FAVVMItem& OutItem) const;
 	void ToString(const FAVVMItem& NewItem, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMItemModifier& OutItemModifier) const;
 	void ToString(const FAVVMItemModifier& NewItemModifier, FString& OutFormat) const;
-
-	void FromString(const FString& NewPayload, FAVVMActorContentProxy& OutActorContent) const;
-	void ToString(const FAVVMActorContentProxy& NewActorContent, FString& OutFormat) const;
-
-	void FromString(const FString& NewPayload, FAVVMItemHolderProxy& OutItemHolder) const;
-	void ToString(const FAVVMItemHolderProxy& NewItemHolder, FString& OutFormat) const;
 
 	void FromString(const FString& NewPayload, FAVVMItemProxy& OutItem) const;
 	void ToString(const FAVVMItemProxy& NewItem, FString& OutFormat) const;

@@ -31,15 +31,3 @@ bool FAVVMItem::operator==(const FAVVMItem& Rhs) const
 			&& (ResourceId == Rhs.ResourceId)
 			&& (ModIds == Rhs.ModIds);
 }
-
-bool FAVVMItemHolder::operator==(const FAVVMItemHolder& Rhs) const
-{
-	return (UniqueId == Rhs.UniqueId)
-			&& (ItemIds == Rhs.ItemIds);
-}
-
-bool FAVVMActorContent::operator==(const FAVVMActorContent& Rhs) const
-{
-	return (UniqueId == Rhs.UniqueId)
-			&& (ItemHolderIds == Rhs.ItemHolderIds);
-}

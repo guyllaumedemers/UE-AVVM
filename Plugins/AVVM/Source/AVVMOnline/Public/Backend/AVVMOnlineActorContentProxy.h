@@ -21,8 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "DataRegistryId.h"
-
 #include "AVVMOnlineActorContentProxy.generated.h"
 
 /**
@@ -69,61 +67,4 @@ struct AVVMONLINE_API FAVVMItemProxy
 	// @gdemers {FItemModifierProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> ModValues;
-};
-
-/**
- *	Class description:
- *
- *	FAVVMItemHolderProxy is the POD representation of the RESOLVED data returned by the backend following user request.
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMItemHolderProxy
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMItemHolderProxy& Rhs) const;
-
-	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// @gdemers {FItemProxy}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> ItemValues;
-};
-
-/**
- *	Class description:
- *
- *	FAVVMActorContentProxy is the POD representation of the RESOLVED data returned by the backend following user request.
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMActorContentProxy
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMActorContentProxy& Rhs) const;
-
-	// @gdemers UniqueId here is used to retrieve the entry on the backend and apply ordering changes to children based on local array ordering.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// @gdemers {FItemHolderProxy}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> ItemHolderValues;
-};
-
-/**
- *	Class description:
- *	
- *	UAVVMOnlineInventoryUtils is a utility blueprint library that expose reusable api.
- */
-UCLASS()
-class AVVMONLINE_API UAVVMOnlineInventoryUtils : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> GetAllRegistryIds(const FAVVMActorContentProxy& ContentProxy);
 };

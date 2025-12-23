@@ -73,48 +73,11 @@ struct AVVMONLINE_API FAVVMItem
 
 /**
  *	Class description:
- *
- *	FAVVMItemHolder is a backend POD representation of the items held. You can look at it like a bag and it's content,
- *	or a tabulation and it's items, or a NPC equipped items, etc... This POD defines the data layout stored on the backend.
+ *	
+ *	UAVVMOnlineInventoryUtils is a utility blueprint library that expose reusable api.
  */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMItemHolder
+UCLASS()
+class AVVMONLINE_API UAVVMOnlineInventoryUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-
-	bool operator==(const FAVVMItemHolder& Rhs) const;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// TODO @gdemers may want to revert latest change to allow bags (i.e ItemHolder) to reference their
-	// resource definition. i.e How many items can they hold, etc...
-
-	// @gdemers {FItem.UniqueId}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> ItemIds;
-};
-
-/**
- *	Class description:
- *
- *	FAVVMActorContent is a backend POD representation of the content an Actor has ownership on. This POD defines the data layout
- *	stored on the backend.
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMActorContent
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMActorContent& Rhs) const;
-
-	// @gdemers the unique identifier of the actor content. For cases like storage actors from which we buy/sell/trade with, the content
-	// may be shared across instances in a level using a share unique id that can be used to reference the actor type.
-	// Note : int32 can be converted to an enum if required by your project. Prob. what I would do for shared id.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// @gdemers {FItemHolder.UniqueId}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> ItemHolderIds;
 };

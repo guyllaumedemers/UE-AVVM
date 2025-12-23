@@ -160,8 +160,9 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
 
-	// @gdemers {FAVVMActorContent.UniqueId}. TArray<int32> is used for scenarios like "Resident Evil" where story branching prevents
-	// Character.A items to be available during Character.B playtime. Storing unique instances here is required!
+	// @gdemers Bit encoding allow users to retrieve {Item, ItemPocket, Position, and Count} by bit shifting
+	// the integer retrieved.
+	// TODO : Define the bit encoding required to allow bit shifting and retrieve pocket id, position, and count.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
 

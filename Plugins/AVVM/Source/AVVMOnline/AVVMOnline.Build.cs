@@ -32,7 +32,6 @@ public class AVVMOnline : ModuleRules
 				"AVVM",
 				"Core",
 				"CoreUObject",
-				"DataRegistry",
 				"DeveloperSettings",
 				"Engine",
 			}
