@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineEncoding.h"
 
-int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input, const int32 BitRange, const int32 LShift)
+int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input, const int32 BitRange, const int32 RShift)
 {
 	TFunction<int32(const int32 NewInput)> Recurse;
 	Recurse = [&](const int32 NewInput)
@@ -34,7 +34,7 @@ int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input, const int32 BitRa
 		}
 	};
 
-	const int32 Result = ((Input >> LShift) & Recurse(BitRange));
+	const int32 Result = ((Input >> RShift) & Recurse(BitRange));
 	return Result;
 }
 

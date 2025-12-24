@@ -37,7 +37,7 @@ class AVVMONLINE_API UAVVMOnlineEncodingUtils : public UBlueprintFunctionLibrary
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	int32 DecodeInt32(const int32 Input, const int32 BitRange, const int32 LShift);
+	int32 DecodeInt32(const int32 Input, const int32 BitRange, const int32 RShift);
 };
 
 // Bits encoding breakdown
