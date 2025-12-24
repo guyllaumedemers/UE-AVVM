@@ -161,8 +161,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	FString Progression = FString();
 
 	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, and Count} by bit shifting
-	// the integer retrieved.
-	// TODO : Define the bit encoding required to allow bit shifting and retrieve pocket id, position, and count.
+	// the integer retrieved (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
 
