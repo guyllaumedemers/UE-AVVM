@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineEncoding.h"
 
-int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input, const int32 BitRange, const int32 RShift)
+int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input,
+                                            const int32 BitRange,
+                                            const int32 RShift)
 {
 	TFunction<int32(const int32 NewInput)> Recurse;
 	Recurse = [&](const int32 NewInput)
@@ -38,7 +40,9 @@ int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input, const int32 BitRa
 	return Result;
 }
 
-int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input, const int32 BitRange, const int32 LShift)
+int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
+                                            const int32 BitRange,
+                                            const int32 LShift)
 {
 	if (!ensureAlwaysMsgf(Input >= 0 && (Input < (1 << BitRange)),
 	                      TEXT("Invalid Input. Outside provided Range.")))
@@ -50,6 +54,24 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input, const int32 BitRa
 	return Result;
 }
 
+TArray<int32> UAVVMOnlineEncodingUtils::GetAll(const TArray<int32>& Inputs,
+                                               const int32 BitRange,
+                                               const int32 RShift,
+                                               const int32 SearchValue)
+{
+	TArray<int32> OutResults;
+	for (const int32 i : Inputs)
+	{
+		const int32 Result = UAVVMOnlineEncodingUtils::DecodeInt32(i, BitRange, RShift);
+		if (Result == SearchValue)
+		{
+			OutResults.Add(Result);
+		}
+	}
+
+	return OutResults;
+}
+
 // @gdemers ignore this
 void Test()
 {
@@ -57,13 +79,13 @@ void Test()
 	// so according to what data we are trying to inject, we need to validate
 	// if we are within bounds, otherwise assert.
 	int32 ElementId = 10;
-	
+
 	// @gdemers has to also check position bounds.
 	int32 ElementPositionInStorage = 0;
-	
+
 	// @gdemers has to check count.
 	int32 ElementCount = 1;
-	
+
 	// @gdemers we also need to validate the bounds of this input based on our storage encoding.
 	int32 StorageId = 01;
 	int32 StorageIdBounds = (1 << 3);

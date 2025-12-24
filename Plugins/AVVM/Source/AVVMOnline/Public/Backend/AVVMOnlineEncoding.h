@@ -34,13 +34,23 @@ UCLASS()
 class AVVMONLINE_API UAVVMOnlineEncodingUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	UFUNCTION(BlueprintCallable)
-	int32 DecodeInt32(const int32 Input, const int32 BitRange, const int32 RShift);
-	
+	int32 DecodeInt32(const int32 Input,
+	                  const int32 BitRange,
+	                  const int32 RShift);
+
 	UFUNCTION(BlueprintCallable)
-	int32 EncodeInt32(const int32 Input, const int32 BitRange, const int32 LShift);
+	int32 EncodeInt32(const int32 Input,
+	                  const int32 BitRange,
+	                  const int32 LShift);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<int32> GetAll(const TArray<int32>& Inputs,
+	                     const int32 BitRange,
+	                     const int32 RShift,
+	                     const int32 SearchValue);
 };
 
 // Bits encoding breakdown
