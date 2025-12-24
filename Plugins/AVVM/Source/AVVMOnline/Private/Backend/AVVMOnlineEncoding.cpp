@@ -38,6 +38,18 @@ int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input, const int32 BitRa
 	return Result;
 }
 
+int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input, const int32 BitRange, const int32 LShift)
+{
+	if (!ensureAlwaysMsgf(Input >= 0 && (Input < (1 << BitRange)),
+	                      TEXT("Invalid Input. Outside provided Range.")))
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 Result = (Input << LShift);
+	return Result;
+}
+
 // @gdemers ignore this
 void Test()
 {
