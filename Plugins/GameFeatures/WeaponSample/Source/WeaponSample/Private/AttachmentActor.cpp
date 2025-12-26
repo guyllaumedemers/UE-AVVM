@@ -32,8 +32,7 @@
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
-	if (!IsValid(Src) || !ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Target),
-	                                       TEXT("Target Actor isn't implementing the required interface to retrieve UniqueId.")))
+	if (!IsValid(Src) || !UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Target))
 	{
 		return nullptr;
 	}
