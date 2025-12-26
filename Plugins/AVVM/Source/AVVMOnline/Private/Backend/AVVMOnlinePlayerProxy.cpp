@@ -39,8 +39,8 @@ bool FAVVMPlayerProfileProxy::operator==(const FAVVMPlayerProfileProxy& Rhs) con
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (ProfileId.Equals(Rhs.ProfileId))
-			&& (Progression == Rhs.Progression)
 			&& (Inventories == Rhs.Inventories)
+			&& (Skills == Rhs.Skills)
 			&& (Challenges == Rhs.Challenges)
 			&& (EquippedPreset.Equals(Rhs.EquippedPreset));
 }

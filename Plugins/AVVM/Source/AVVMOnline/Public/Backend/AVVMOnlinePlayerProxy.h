@@ -100,12 +100,13 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ProfileId = FString();
 
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Progression = FString();
-
 	// @gdemers {FAVVMPlayerResource}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Inventories;
+
+	// @gdemers {FAVVMPlayerResource}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<FString> Skills;
 
 	// @gdemers {FAVVMPlayerChallenge}
 	UPROPERTY(Transient, BlueprintReadWrite)

@@ -281,8 +281,8 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		FAVVMPlayerProfileProxy A;
 		A.UniqueId = FMath::Rand32();
 		A.ProfileId = TEXT("ProfileA");
-		A.Progression = TEXT("ProfileProgression");
 		A.Inventories = {TEXT("CharacterInventoryA")};
+		A.Skills = {TEXT("SkillA")};
 		A.Challenges = {TEXT("ChallengeA"), TEXT("ChallengeB")};
 		A.EquippedPreset = TEXT("GenericPreset");
 		Parser->ToString(A, OutPayload);

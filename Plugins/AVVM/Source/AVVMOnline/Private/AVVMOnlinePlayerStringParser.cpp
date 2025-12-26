@@ -863,13 +863,18 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 	FAVVMPlayerProfileProxy PlayerProfileProxy;
 	PlayerProfileProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	PlayerProfileProxy.ProfileId = JsonData->GetStringField(TEXT("ProfileId"));
-	PlayerProfileProxy.Progression = JsonData->GetStringField(TEXT("Progression"));
 	PlayerProfileProxy.EquippedPreset = JsonData->GetStringField(TEXT("EquippedPreset"));
 
 	const TArray<TSharedPtr<FJsonValue>> Inventories = JsonData->GetArrayField(TEXT("Inventories"));
 	for (const auto& Inventory : Inventories)
 	{
 		PlayerProfileProxy.Inventories.Add(Inventory->AsString());
+	}
+
+	const TArray<TSharedPtr<FJsonValue>> Skills = JsonData->GetArrayField(TEXT("Skills"));
+	for (const auto& Skill : Skills)
+	{
+		PlayerProfileProxy.Skills.Add(Skill->AsString());
 	}
 
 	const TArray<TSharedPtr<FJsonValue>> Challenges = JsonData->GetArrayField(TEXT("Challenges"));
@@ -887,7 +892,6 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfileProxy& NewP
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerProfileProxy.UniqueId);
 	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfileProxy.ProfileId);
-	JsonData->SetStringField(TEXT("Progression"), NewPlayerProfileProxy.Progression);
 	JsonData->SetStringField(TEXT("EquippedPreset"), NewPlayerProfileProxy.EquippedPreset);
 
 	TArray<TSharedPtr<FJsonValue>> Inventories;
@@ -897,6 +901,14 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfileProxy& NewP
 	}
 
 	JsonData->SetArrayField(TEXT("Inventories"), Inventories);
+
+	TArray<TSharedPtr<FJsonValue>> Skills;
+	for (const FString& Skill : NewPlayerProfileProxy.Skills)
+	{
+		Skills.Add(MakeShareable(new FJsonValueString(Skill)));
+	}
+
+	JsonData->SetArrayField(TEXT("Skills"), Skills);
 
 	TArray<TSharedPtr<FJsonValue>> Challenges;
 	for (const FString& Challenge : NewPlayerProfileProxy.Challenges)
