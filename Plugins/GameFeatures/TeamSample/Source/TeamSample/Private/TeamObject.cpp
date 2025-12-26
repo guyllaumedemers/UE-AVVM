@@ -21,7 +21,7 @@
 
 #include "AVVMGameplayUtils.h"
 #include "AVVMOnline.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "NativeGameplayTags.h"
 #include "PlayerStateTeamComponent.h"

@@ -21,7 +21,7 @@
 
 #include "AutomatedTestTeamActor.h"
 #include "AVVMGameState.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMWorldSetting.h"
 #include "EngineUtils.h"
 #include "GameStateTeamComponent.h"

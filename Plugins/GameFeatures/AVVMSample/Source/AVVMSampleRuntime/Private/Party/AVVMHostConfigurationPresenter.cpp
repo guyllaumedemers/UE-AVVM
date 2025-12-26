@@ -21,7 +21,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMSampleRuntimeModule.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/GameMode.h"

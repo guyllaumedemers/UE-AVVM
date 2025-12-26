@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameSession.h"
 
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "GameFramework/PlayerState.h"
 
 int32 AAVVMGameSession::Static_GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState)

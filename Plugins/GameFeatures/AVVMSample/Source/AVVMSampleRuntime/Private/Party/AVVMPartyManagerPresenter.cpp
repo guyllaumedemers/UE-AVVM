@@ -20,7 +20,7 @@
 #include "Party/AVVMPartyManagerPresenter.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMSampleRuntimeModule.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"

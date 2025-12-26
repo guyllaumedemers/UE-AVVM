@@ -21,7 +21,7 @@
 
 #include "AVVM.h"
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"

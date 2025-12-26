@@ -30,7 +30,7 @@
 #include "Online/CoreOnlineFwd.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "AVVMOnlineInterfaceUtils.generated.h"
+#include "AVVMOnlineUtils.generated.h"
 
 class AGameSession;
 class IAVVMOnlineBattlePassInterface;

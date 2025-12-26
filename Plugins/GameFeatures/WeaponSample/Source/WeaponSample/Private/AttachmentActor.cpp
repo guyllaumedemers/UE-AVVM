@@ -21,7 +21,7 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMUtils.h"
 #include "TriggeringActor.h"
 #include "WeaponSample.h"

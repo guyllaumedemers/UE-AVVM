@@ -21,7 +21,7 @@
 
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlineInterfaceUtils.h"
+#include "AVVMOnlineUtils.h"
 #include "AVVMOnlineSubsystem.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
