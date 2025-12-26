@@ -52,7 +52,3 @@ public:
 	                                  const int32 RShift,
 	                                  const int32 SearchValue);
 };
-
-/**
- *	TODO @gdemers missing api to encode in our PlayerProfile the items with their user defined composition.
- */
