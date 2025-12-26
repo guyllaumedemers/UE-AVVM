@@ -135,7 +135,7 @@ struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdemers {FItemProxy}.
+	// @gdemers {FAVVMPlayerResource}.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> EquippedItems;
 };
