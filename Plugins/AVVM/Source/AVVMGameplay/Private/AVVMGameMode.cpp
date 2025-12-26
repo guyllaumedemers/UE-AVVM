@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameMode.h"
 
+#include "AVVMGameSession.h"
 #include "AVVMWorldSetting.h"
 #include "GameFramework/GameState.h"
 
@@ -144,17 +145,19 @@ void AAVVMGameMode::TerminateDedicatedServer()
 	}
 	else
 	{
-		// TODO @gdemers handle PC seamless travel back to lobby.
 		RecycleProcess();
 	}
 }
 
 void AAVVMGameMode::TerminateListenServer()
 {
-	// TODO @gdemers handle PC seamless travel back to lobby.
 	RecycleProcess();
 }
 
 void AAVVMGameMode::RecycleProcess()
 {
+	if (IsValid(GameSession))
+	{
+		GameSession->ReturnToMainMenuHost();
+	}
 }
