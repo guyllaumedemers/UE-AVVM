@@ -59,7 +59,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 	TArray<int32> Dependencies;
 
-	auto* Character = Cast<AAVVMCharacter>(Target);
+	const auto* Character = Cast<AAVVMCharacter>(Target);
 	if (IsValid(Character))
 	{
 		// @gdemers aggregate dependencies defined in backend representation.
@@ -74,7 +74,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	}
 	else
 	{
-		auto* TriggeringActor = Cast<ATriggeringActor>(Target);
+		const auto* TriggeringActor = Cast<ATriggeringActor>(Target);
 		if (!IsValid(TriggeringActor))
 		{
 			return nullptr;
