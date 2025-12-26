@@ -67,7 +67,7 @@ protected:
 	
 	UPROPERTY(Transient)
 	TMap<int32/*ProfileId*/, FString/*FAVVMPlayerProfile*/> PlayerProfiles;
-	
+
 	UPROPERTY(Transient)
-	TMap<int32/*ProfileId*/, FString/*FAVVMPlayerPreset*/> PlayerPresets;
+	TMap<int32/*PresetId*/, FString/*FAVVMPlayerPreset*/> PlayerPresets;
 };
