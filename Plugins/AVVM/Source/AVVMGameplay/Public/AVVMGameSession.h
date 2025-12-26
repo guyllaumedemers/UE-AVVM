@@ -30,7 +30,8 @@ class APlayerState;
 /**
  *	Class description:
  *	
- *	AAVVMGameSession is a server sided actor who tracking player connection to gameplay session.
+ *	AAVVMGameSession is a server sided actor who tracking player connection to gameplay session. It may also exist
+ *	on your client if the lobby is simulated (example: Offline lobby), and not within a shared level/hub.
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMGameSession : public AGameSession
@@ -38,13 +39,48 @@ class AVVMGAMEPLAY_API AAVVMGameSession : public AGameSession
 	GENERATED_BODY()
 
 public:
+	virtual void RegisterPlayer(APlayerController* NewPlayer, const FUniqueNetIdRepl& UniqueId, bool bWasFromInvite) override;
+	virtual void UnregisterPlayer(const APlayerController* ExitingPlayer) override;
+
 	UFUNCTION(BlueprintCallable)
-	static int32 Static_GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState);
+	static int32 Static_GetPlayerConnectionId(const UWorld* World,
+	                                          const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 Static_GetPlayerProfileId(const UWorld* World,
+	                                       const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 Static_GetPlayerPresetId(const UWorld* World,
+	                                      const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> Static_GetPlayerPresetItems(const UWorld* World,
+	                                                 const int32 ProfileId);
 
 protected:
 	static AAVVMGameSession* Get(const UWorld* World);
-	int32 GetUserUniqueId(const APlayerState* PlayerState) const;
+	int32 GetPlayerConnectionId(const APlayerState* PlayerState) const;
+	int32 GetPlayerProfileId(const APlayerState* PlayerState) const;
+	int32 GetPlayerPresetId(const APlayerState* PlayerState) const;
+	TArray<int32> GetPlayerPresetItems(const int32 ProfileId) const;
 
-	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const APlayerState>, int32/*{FActorContent.UniqueId}*/> UserUniqueIds;
+	// @gdemers {FAVVMParty::UniqueId}
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 PartyId = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<FString/*{FAVVMPlayerConnection::UniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<int32/*{FAVVMPlayerConnection::UniqueId}*/, int32/*{FAVVMPlayerProfile::UniqueId}*/> ProfileIds;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, int32/*{FAVVMPlayerPreset::UniqueId}*/> PresetIds;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, FString/*FAVVMPlayerProfile*/> ResolvedProfiles;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<int32/*{FAVVMPlayerPreset::UniqueId}*/, FString/*FAVVMPlayerPreset*/> ResolvedPresets;
 };

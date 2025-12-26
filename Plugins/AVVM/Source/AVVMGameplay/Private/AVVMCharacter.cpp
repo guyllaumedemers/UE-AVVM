@@ -21,7 +21,6 @@
 
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlinePlayerSubsystem.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -36,7 +35,7 @@ TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UOb
 		return TArray<int32>{};
 	}
 
-	const TArray<int32> OutResults = UAVVMOnlinePlayerSubsystem::Static_GetPlayerEquippedItems(WorldContextObject->GetWorld(), ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
+	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerPresetItems(WorldContextObject->GetWorld(), ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
 	return OutResults;
 }
 
@@ -120,7 +119,7 @@ int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
 	if (HasAuthority())
 	{
 		const APlayerState* NewPlayerState = GetPlayerState();
-		return AAVVMGameSession::Static_GetUserUniqueId(GetWorld(), NewPlayerState);
+		return AAVVMGameSession::Static_GetPlayerProfileId(GetWorld(), NewPlayerState);
 	}
 	else
 #endif

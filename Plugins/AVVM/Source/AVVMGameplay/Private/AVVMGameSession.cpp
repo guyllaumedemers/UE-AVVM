@@ -20,19 +20,47 @@
 #include "AVVMGameSession.h"
 
 #include "AVVMOnlineUtils.h"
-#include "GameFramework/PlayerState.h"
+#include "Backend/AVVMOnlinePlayer.h"
 
-int32 AAVVMGameSession::Static_GetUserUniqueId(const UWorld* World, const APlayerState* PlayerState)
+int32 AAVVMGameSession::Static_GetPlayerConnectionId(const UWorld* World,
+                                                     const APlayerState* PlayerState)
 {
 	const AAVVMGameSession* GameSession = Get(World);
-	if (IsValid(GameSession))
-	{
-		return GameSession->GetUserUniqueId(PlayerState);
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
+	return IsValid(GameSession) ? GameSession->GetPlayerConnectionId(PlayerState) : INDEX_NONE;
+}
+
+int32 AAVVMGameSession::Static_GetPlayerProfileId(const UWorld* World,
+                                                  const APlayerState* PlayerState)
+{
+	const AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->GetPlayerProfileId(PlayerState) : INDEX_NONE;
+}
+
+int32 AAVVMGameSession::Static_GetPlayerPresetId(const UWorld* World,
+                                                 const APlayerState* PlayerState)
+{
+	const AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->GetPlayerPresetId(PlayerState) : INDEX_NONE;
+}
+
+TArray<int32> AAVVMGameSession::Static_GetPlayerPresetItems(const UWorld* World,
+                                                            const int32 ProfileId)
+{
+	const AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->GetPlayerPresetItems(ProfileId) : TArray<int32>{};
+}
+
+void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer, const FUniqueNetIdRepl& UniqueId, bool bWasFromInvite)
+{
+	Super::RegisterPlayer(NewPlayer, UniqueId, bWasFromInvite);
+
+	// TODO @gdemers Resolve newly connected player {FAVVMPlayerConnection}, {FAVVMPlayerProfile}
+	// i.e the selected profile equipped by the new party member.
+}
+
+void AAVVMGameSession::UnregisterPlayer(const APlayerController* ExitingPlayer)
+{
+	Super::UnregisterPlayer(ExitingPlayer);
 }
 
 AAVVMGameSession* AAVVMGameSession::Get(const UWorld* World)
@@ -40,8 +68,96 @@ AAVVMGameSession* AAVVMGameSession::Get(const UWorld* World)
 	return Cast<AAVVMGameSession>(UAVVMOnlineUtils::GetGameSession(World));
 }
 
-int32 AAVVMGameSession::GetUserUniqueId(const APlayerState* PlayerState) const
+int32 AAVVMGameSession::GetPlayerConnectionId(const APlayerState* PlayerState) const
 {
-	const int32* SearchResult = UserUniqueIds.Find(PlayerState);
-	return (SearchResult != nullptr) ? *SearchResult : INDEX_NONE;
+	const FString UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(PlayerState);
+
+	const bool bDoesContains = PlayerConnectionIds.Contains(UniqueNetId);
+	if (ensureAlwaysMsgf(bDoesContains,
+	                     TEXT("Entry missing in collection.")))
+	{
+		return PlayerConnectionIds[UniqueNetId];
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 AAVVMGameSession::GetPlayerProfileId(const APlayerState* PlayerState) const
+{
+	const int32 PlayerConnectionId = GetPlayerConnectionId(PlayerState);
+	if (PlayerConnectionId != INDEX_NONE)
+	{
+		const bool bDoesContains = ProfileIds.Contains(PlayerConnectionId);
+		if (ensureAlwaysMsgf(bDoesContains,
+		                     TEXT("Entry missing in collection.")))
+		{
+			return ProfileIds[PlayerConnectionId];
+		}
+		else
+		{
+			return INDEX_NONE;
+		}
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 AAVVMGameSession::GetPlayerPresetId(const APlayerState* PlayerState) const
+{
+	const int32 PlayerProfileId = GetPlayerProfileId(PlayerState);
+	if (PlayerProfileId != INDEX_NONE)
+	{
+		const bool bDoesContains = PresetIds.Contains(PlayerProfileId);
+		if (ensureAlwaysMsgf(bDoesContains,
+		                     TEXT("Entry missing in collection.")))
+		{
+			return PresetIds[PlayerProfileId];
+		}
+		else
+		{
+			return INDEX_NONE;
+		}
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) const
+{
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const bool bDoesContains = PresetIds.Contains(ProfileId);
+	if (bDoesContains)
+	{
+		const int32 PresetId = PresetIds[ProfileId];
+
+		const bool bHasResolvedPreset = ResolvedPresets.Contains(PresetId);
+		if (!ensureAlwaysMsgf(bHasResolvedPreset,
+		                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+		{
+			return TArray<int32>{};
+		}
+
+		const FString PresetPayload = ResolvedPresets[PresetId];
+
+		FAVVMPlayerPreset OutPlayerPreset;
+		JsonParser->FromString(PresetPayload, OutPlayerPreset);
+
+		return OutPlayerPreset.EquippedItems;
+	}
+	else
+	{
+		return TArray<int32>{};
+	}
 }
