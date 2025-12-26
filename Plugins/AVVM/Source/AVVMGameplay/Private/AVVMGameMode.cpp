@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "AVVMGameMode.h"
 
-#include "AVVMGameSession.h"
 #include "AVVMWorldSetting.h"
+#include "GameFramework/GameSession.h"
 #include "GameFramework/GameState.h"
 
 AAVVMGameMode::AAVVMGameMode(const FObjectInitializer& ObjectInitializer)
