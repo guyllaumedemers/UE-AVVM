@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
 
 #include "WeaponSettings.generated.h"
@@ -40,9 +39,6 @@ public:
 	UWeaponSettings();
 	
 	UFUNCTION(BlueprintCallable, Category="Weapon|Settings")
-	static const FGameplayTag& GetPlayerStateChannelTag();
-	
-	UFUNCTION(BlueprintCallable, Category="Weapon|Settings")
 	static bool DoesDebugTraceShowPersistentLine();
 
 	UFUNCTION(BlueprintCallable, Category="Weapon|Settings")
@@ -52,9 +48,6 @@ public:
 	static float GetSquaredDistanceThreshold();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag PlayerStateChannelTag = FGameplayTag::EmptyTag;
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	bool bDoesDebugTraceShowPersistentLine = false;
 

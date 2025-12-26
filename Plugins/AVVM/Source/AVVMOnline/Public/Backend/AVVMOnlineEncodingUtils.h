@@ -23,7 +23,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "AVVMOnlineEncoding.generated.h"
+#include "AVVMOnlineEncodingUtils.generated.h"
 
 /**
  *	Class description:

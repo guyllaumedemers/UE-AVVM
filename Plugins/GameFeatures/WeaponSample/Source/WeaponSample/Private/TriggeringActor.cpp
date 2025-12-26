@@ -27,7 +27,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
-#include "Backend/AVVMOnlineEncoding.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"

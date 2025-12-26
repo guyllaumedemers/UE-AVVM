@@ -22,7 +22,6 @@
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlinePlayerSubsystem.h"
-#include "AVVMOnlineUtils.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -33,13 +32,6 @@
 TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
 {
 	if (!IsValid(WorldContextObject))
-	{
-		return TArray<int32>{};
-	}
-
-	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
-	if (!ensureAlwaysMsgf(IsValid(JsonParser),
-	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
 		return TArray<int32>{};
 	}

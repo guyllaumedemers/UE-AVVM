@@ -21,6 +21,7 @@
 
 #include "AVVMAudioContext.h"
 #include "AVVMAudioUtils.h"
+#include "AVVMOnlineSettings.h"
 #include "AVVMPlayerState.h"
 #include "NonReplicatedProjectileActor.h"
 #include "WeaponSettings.h"
@@ -56,7 +57,7 @@ void UProjectileManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	Callback.BindDynamic(this, &UProjectileManagerSubsystem::OnPlayerStateAddedOrRemoved);
 
 	FAVVMObserverContextArgs ContextArgs;
-	ContextArgs.ChannelTag = UWeaponSettings::GetPlayerStateChannelTag();
+	ContextArgs.ChannelTag = UAVVMOnlineSettings::GetPlayerStateChannelTag();
 	ContextArgs.Callback = Callback;
 	UAVVMNotificationSubsystem::Static_RegisterObserver(GameStateBase, ContextArgs);
 
@@ -77,7 +78,7 @@ void UProjectileManagerSubsystem::Deinitialize()
 	if (IsValid(GameStateBase))
 	{
 		FAVVMObserverContextArgs ContextArgs;
-		ContextArgs.ChannelTag = UWeaponSettings::GetPlayerStateChannelTag();
+		ContextArgs.ChannelTag = UAVVMOnlineSettings::GetPlayerStateChannelTag();
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(GameStateBase, ContextArgs);
 	}
 }

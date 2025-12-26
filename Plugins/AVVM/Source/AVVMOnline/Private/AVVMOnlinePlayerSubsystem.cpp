@@ -22,8 +22,11 @@
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnline.h"
 #include "AVVMOnlinePlayerStringParser.h"
+#include "AVVMOnlineSettings.h"
 #include "NativeGameplayTags.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "GameFramework/GameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 
 bool UAVVMOnlinePlayerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -40,22 +43,32 @@ void UAVVMOnlinePlayerSubsystem::Initialize(FSubsystemCollectionBase& Collection
 {
 	Super::Initialize(Collection);
 
+	auto* GameStateBase = UGameplayStatics::GetGameState(this);
+	if (!IsValid(GameStateBase))
+	{
+		return;
+	}
+
 	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
 	Callback.BindDynamic(this, &UAVVMOnlinePlayerSubsystem::OnPlayerStateAddedOrRemoved);
 
 	FAVVMObserverContextArgs ContextArgs;
-	ContextArgs.ChannelTag = {};
+	ContextArgs.ChannelTag = UAVVMOnlineSettings::GetPlayerStateChannelTag();
 	ContextArgs.Callback = Callback;
-	UAVVMNotificationSubsystem::Static_RegisterObserver(this, ContextArgs);
+	UAVVMNotificationSubsystem::Static_RegisterObserver(GameStateBase, ContextArgs);
 }
 
 void UAVVMOnlinePlayerSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
-	FAVVMObserverContextArgs ContextArgs;
-	ContextArgs.ChannelTag = {};
-	UAVVMNotificationSubsystem::Static_UnregisterObserver(this, ContextArgs);
+	auto* GameStateBase = UGameplayStatics::GetGameState(this);
+	if (IsValid(GameStateBase))
+	{
+		FAVVMObserverContextArgs ContextArgs;
+		ContextArgs.ChannelTag = UAVVMOnlineSettings::GetPlayerStateChannelTag();
+		UAVVMNotificationSubsystem::Static_UnregisterObserver(GameStateBase, ContextArgs);
+	}
 }
 
 FString UAVVMOnlinePlayerSubsystem::Static_GetPlayerProfile(const UWorld* World,
