@@ -21,6 +21,8 @@
 
 #include "AVVMOnlineUtils.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 int32 AAVVMGameSession::Static_GetPlayerConnectionId(const UWorld* World,
                                                      const APlayerState* PlayerState)
@@ -75,7 +77,8 @@ void AAVVMGameSession::UnregisterPlayer(const APlayerController* ExitingPlayer)
 
 AAVVMGameSession* AAVVMGameSession::Get(const UWorld* World)
 {
-	return Cast<AAVVMGameSession>(UAVVMOnlineUtils::GetGameSession(World));
+	const AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(World);
+	return IsValid(GameModeBase) ? Cast<AAVVMGameSession>(GameModeBase->GameSession) : nullptr;
 }
 
 int32 AAVVMGameSession::GetPlayerConnectionId(const APlayerState* PlayerState) const

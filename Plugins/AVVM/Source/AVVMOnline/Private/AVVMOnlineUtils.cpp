@@ -23,7 +23,6 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
-#include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -39,52 +38,6 @@ bool UAVVMOnlineUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
 	{
 		return false;
 	}
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlineIdentityInterface,
-	                    IAVVMOnlineIdentityInterface>(DerivedChild, OutInterface);
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlinePartyInterface(const UObject* DerivedChild,
-                                                    TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlinePartyInterface,
-	                    IAVVMOnlinePartyInterface>(DerivedChild, OutInterface);
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlineFriendInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineFriendInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlineFriendInterface,
-	                    IAVVMOnlineFriendInterface>(DerivedChild, OutInterface);
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlineMessagingInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineMessagingInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlineMessagingInterface,
-	                    IAVVMOnlineMessagingInterface>(DerivedChild, OutInterface);
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
-                                                         TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlineChallengesInterface,
-	                    IAVVMOnlineChallengesInterface>(DerivedChild, OutInterface);
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
-                                                         TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlineBattlePassInterface,
-	                    IAVVMOnlineBattlePassInterface>(DerivedChild, OutInterface);
-}
-
-bool UAVVMOnlineUtils::GetOuterOnlineStoreInterface(const UObject* DerivedChild,
-                                                    TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface)
-{
-	return GetInterface<UAVVMOnlineStoreInterface,
-	                    IAVVMOnlineStoreInterface>(DerivedChild, OutInterface);
 }
 
 bool UAVVMOnlineUtils::IsFirstPlayerHosting(const UObject* WorldContextObject,
@@ -139,10 +92,50 @@ TArray<int32> UAVVMOnlineUtils::GetElementDependencies(const UObject* WorldConte
 	return OutResults;
 }
 
-AGameSession* UAVVMOnlineUtils::GetGameSession(const UWorld* World)
+bool UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface)
 {
-	const AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(World);
-	return IsValid(GameModeBase) ? GameModeBase->GameSession : nullptr;
+	return GetInterface<UAVVMOnlineIdentityInterface,
+	                    IAVVMOnlineIdentityInterface>(DerivedChild, OutInterface);
+}
+
+bool UAVVMOnlineUtils::GetOuterOnlinePartyInterface(const UObject* DerivedChild,
+                                                    TScriptInterface<IAVVMOnlinePartyInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlinePartyInterface,
+	                    IAVVMOnlinePartyInterface>(DerivedChild, OutInterface);
+}
+
+bool UAVVMOnlineUtils::GetOuterOnlineFriendInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineFriendInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineFriendInterface,
+	                    IAVVMOnlineFriendInterface>(DerivedChild, OutInterface);
+}
+
+bool UAVVMOnlineUtils::GetOuterOnlineMessagingInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineMessagingInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineMessagingInterface,
+	                    IAVVMOnlineMessagingInterface>(DerivedChild, OutInterface);
+}
+
+bool UAVVMOnlineUtils::GetOuterOnlineChallengesInterface(const UObject* DerivedChild,
+                                                         TScriptInterface<IAVVMOnlineChallengesInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineChallengesInterface,
+	                    IAVVMOnlineChallengesInterface>(DerivedChild, OutInterface);
+}
+
+bool UAVVMOnlineUtils::GetOuterOnlineBattlePassInterface(const UObject* DerivedChild,
+                                                         TScriptInterface<IAVVMOnlineBattlePassInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineBattlePassInterface,
+	                    IAVVMOnlineBattlePassInterface>(DerivedChild, OutInterface);
+}
+
+bool UAVVMOnlineUtils::GetOuterOnlineStoreInterface(const UObject* DerivedChild,
+                                                    TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface)
+{
+	return GetInterface<UAVVMOnlineStoreInterface,
+	                    IAVVMOnlineStoreInterface>(DerivedChild, OutInterface);
 }
 
 FString UAVVMOnlineUtils::SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload)

@@ -32,7 +32,6 @@
 
 #include "AVVMOnlineUtils.generated.h"
 
-class AGameSession;
 class IAVVMOnlineBattlePassInterface;
 class IAVVMOnlineChallengesInterface;
 class IAVVMOnlineIdentityInterface;
@@ -50,6 +49,23 @@ class AVVMONLINE_API UAVVMOnlineUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
+									 const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
+
+	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
+						  const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
+
+	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static FString GetUniqueNetId(const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TArray<int32> GetElementDependencies(const UObject* WorldContextObject,
+												const int32 ElementUniqueId,
+												const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
+	
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineIdentityInterface(const UObject* DerivedChild,
 	                                            TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface);
@@ -77,26 +93,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineStoreInterface(const UObject* DerivedChild,
 	                                         TScriptInterface<IAVVMOnlineStoreInterface>& OutInterface);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static bool IsFirstPlayerHosting(const UObject* WorldContextObject,
-	                                 const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
-
-	static bool IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
-	                      const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface);
-
-	static FUniqueNetIdPtr GetUniqueNetIdPtr(const ULocalPlayer* Player);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static FString GetUniqueNetId(const APlayerState* PlayerState);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static TArray<int32> GetElementDependencies(const UObject* WorldContextObject,
-	                                            const int32 ElementUniqueId,
-	                                            const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static AGameSession* GetGameSession(const UWorld* World);
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static FString SerializePlayerWallet(const TInstancedStruct<FAVVMNotificationPayload>& Payload);
