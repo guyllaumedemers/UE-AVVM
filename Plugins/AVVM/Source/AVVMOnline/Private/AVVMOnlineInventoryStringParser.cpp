@@ -38,64 +38,15 @@ void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
 	NewItem.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewItem.ResourceId = JsonData->GetIntegerField(TEXT("ResourceId"));
 
-	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ModIds"));
-	for (const auto& JsonValue : JsonValues)
-	{
-		NewItem.ModIds.Add(JsonValue->AsNumber());
-	}
-
 	OutItem = NewItem;
 }
 
 void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItem& NewItem,
                                                 FString& OutFormat) const
 {
-	TArray<TSharedPtr<FJsonValue>> ModIds;
-	for (const int32 ModId : NewItem.ModIds)
-	{
-		ModIds.Add(MakeShareable(new FJsonValueNumber(ModId)));
-	}
-
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItem.UniqueId);
 	JsonData->SetNumberField(TEXT("ResourceId"), NewItem.ResourceId);
-	JsonData->SetArrayField(TEXT("ModIds"), ModIds);
-
-	FString JsonOutput;
-
-	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
-	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
-	{
-		return;
-	}
-
-	OutFormat = JsonOutput;
-}
-
-void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
-                                                  FAVVMItemModifier& OutItemModifier) const
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
-	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
-	{
-		return;
-	}
-
-	FAVVMItemModifier NewItemModifier;
-	NewItemModifier.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
-	NewItemModifier.ResourceId = JsonData->GetIntegerField(TEXT("ResourceId"));
-
-	OutItemModifier = NewItemModifier;
-}
-
-void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemModifier& NewItemModifier,
-                                                FString& OutFormat) const
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetNumberField(TEXT("UniqueId"), NewItemModifier.UniqueId);
-	JsonData->SetNumberField(TEXT("ResourceId"), NewItemModifier.ResourceId);
 
 	FString JsonOutput;
 
@@ -123,64 +74,15 @@ void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
 	NewItemProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewItemProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
 
-	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("ModValues"));
-	for (const auto& JsonValue : JsonValues)
-	{
-		NewItemProxy.ModValues.Add(JsonValue->AsString());
-	}
-
 	OutItem = NewItemProxy;
 }
 
 void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemProxy& NewItem,
                                                 FString& OutFormat) const
 {
-	TArray<TSharedPtr<FJsonValue>> ModValues;
-	for (const FString& ModValue : NewItem.ModValues)
-	{
-		ModValues.Add(MakeShareable(new FJsonValueString(ModValue)));
-	}
-
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewItem.UniqueId);
 	JsonData->SetStringField(TEXT("ResourceId"), NewItem.ResourceId);
-	JsonData->SetArrayField(TEXT("ModValues"), ModValues);
-
-	FString JsonOutput;
-
-	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
-	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
-	{
-		return;
-	}
-
-	OutFormat = JsonOutput;
-}
-
-void UAVVMOnlineInventoryStringParser::FromString(const FString& NewPayload,
-                                                  FAVVMItemModifierProxy& OutItemModifier) const
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
-	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
-	{
-		return;
-	}
-
-	FAVVMItemModifierProxy NewItemModifierProxy;
-	NewItemModifierProxy.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
-	NewItemModifierProxy.ResourceId = JsonData->GetStringField(TEXT("ResourceId"));
-
-	OutItemModifier = NewItemModifierProxy;
-}
-
-void UAVVMOnlineInventoryStringParser::ToString(const FAVVMItemModifierProxy& NewItemModifier,
-                                                FString& OutFormat) const
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetNumberField(TEXT("UniqueId"), NewItemModifier.UniqueId);
-	JsonData->SetStringField(TEXT("ResourceId"), NewItemModifier.ResourceId);
 
 	FString JsonOutput;
 

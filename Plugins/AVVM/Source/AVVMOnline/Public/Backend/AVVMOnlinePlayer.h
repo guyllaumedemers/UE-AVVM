@@ -159,9 +159,11 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	// @gdemers may refer to a complex system that captures progression details of items, skills, achievements, challenges, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
-
-	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, and Count} by bit shifting
+	
+	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, Count, and Mods} by bit shifting
 	// the integer retrieved (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
+	// @gdemers {FAVVMPlayerProfile::InventoryIds} cache 1x entry per-item. A mod is considered an Item but is encoding it's
+	// id using the last 11bits, ensuring we can refer to the owning Item with the first 12bits encoded.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
 
@@ -198,7 +200,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdemers {FAVVMItem.UniqueId}.
+	// @gdemers see {FAVVMPlayerProfile::InventoryIds} for encoding. EquippedItems is a subset of the afro mentioned property.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> EquippedItems;
 };

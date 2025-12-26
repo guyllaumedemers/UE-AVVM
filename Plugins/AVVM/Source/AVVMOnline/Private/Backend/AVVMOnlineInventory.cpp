@@ -19,15 +19,8 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineInventory.h"
 
-bool FAVVMItemModifier::operator==(const FAVVMItemModifier& Rhs) const
-{
-	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId == Rhs.ResourceId);
-}
-
 bool FAVVMItem::operator==(const FAVVMItem& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId == Rhs.ResourceId)
-			&& (ModIds == Rhs.ModIds);
+			&& (ResourceId == Rhs.ResourceId);
 }

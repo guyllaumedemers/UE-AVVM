@@ -19,13 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineInventoryProxy.h"
 
-bool FAVVMItemModifierProxy::operator==(const FAVVMItemModifierProxy& Rhs) const
-{
-	return (ResourceId.Equals(Rhs.ResourceId));
-}
-
 bool FAVVMItemProxy::operator==(const FAVVMItemProxy& Rhs) const
 {
-	return (ResourceId.Equals(Rhs.ResourceId))
-			&& (ModValues == Rhs.ModValues);
+	return (ResourceId.Equals(Rhs.ResourceId));
 }

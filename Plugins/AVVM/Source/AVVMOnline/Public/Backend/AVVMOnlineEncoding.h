@@ -37,71 +37,18 @@ class AVVMONLINE_API UAVVMOnlineEncodingUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	int32 DecodeInt32(const int32 Input,
-	                  const int32 BitRange,
-	                  const int32 RShift);
+	static int32 DecodeInt32(const int32 Input,
+	                         const int32 BitRange,
+	                         const int32 RShift);
 
 	UFUNCTION(BlueprintCallable)
-	int32 EncodeInt32(const int32 Input,
-	                  const int32 BitRange,
-	                  const int32 LShift);
+	static int32 EncodeInt32(const int32 Input,
+	                         const int32 BitRange,
+	                         const int32 LShift);
 
 	UFUNCTION(BlueprintCallable)
-	TArray<int32> GetAll(const TArray<int32>& Inputs,
-	                     const int32 BitRange,
-	                     const int32 RShift,
-	                     const int32 SearchValue);
+	static TArray<int32> SearchValue(const TArray<int32>& Inputs,
+	                                 const int32 BitRange,
+	                                 const int32 RShift,
+	                                 const int32 SearchValue);
 };
-
-// Bits encoding breakdown
-//
-// How do I want to encode my items.
-//
-// I want it to fit within an 'int32', thats 4Bytes- 32Bits.
-//
-// 2^0 = 1
-// 2^1 = 2
-// 2^2 = 4
-// 2^3 = 8
-// 2^4 = 16
-// 2^5 = 32
-// 2^6 = 64
-// 2^7 = 128
-// 2^8 = 256
-// 2^9 = 512
-// 2^10 = 1024
-// 2^11 = 2048
-// 2^12 = 4096
-//
-// Now the question  is -> How many items do I expect my game to hold ?
-// the next question is -> What do I consider an Item ? (Are abilities, Perks, Skill, etc... Items ?)
-// 
-// Keep in mind that Items are referencing an AttributeSet which allow built-in progression. Limiting the number of unique items may not be
-// a bad idea.
-//
-// lets attempt scheming using 2^12. Which gives designers 4096 unique entries for Items.
-//
-// if we want items to have abilities : exam - fire sword, the fire ability should be considered a mod to the item. with that in mind,
-// abilities would be considered Mods.
-
-// so first 12 bits are reserved to unique item id. (this DO NOT includes storage.)
-// 
-// A storage has an id, and is an item BUT it needs to be encoded separatly from the item id range.
-//
-// storage: 001 (id) << 12; lets say a storage id range is -> 2^3 = 8 unique id, reserving 3 bits.
-//
-// what will be our storage size ? (storage size is fixed but encoding may decide to not use all 6 bits)
-//
-// 2^6 = 64 bits. 6 bits offset.
-//
-// current total : 12 + 3 + 6 = 21 bits uses from our 32 reserved.
-//
-// how do we define the position within the storage.
-//
-// if size = 6 bits reserve. position is identical.
-//
-// 21 + 6 = 27 bits
-//
-// left 5 bits.
-//
-// item count = 5 remaining bits which equal 2^5 = 32 max stack count. we can clamp to 30.

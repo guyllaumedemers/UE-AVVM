@@ -36,7 +36,8 @@ int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input,
 		}
 	};
 
-	const int32 Result = ((Input >> RShift) & Recurse(BitRange));
+	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
+	const int32 Result = ((Input >> RShift) & Recurse(BitRange_Clamped));
 	return Result;
 }
 
@@ -54,15 +55,17 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
 	return Result;
 }
 
-TArray<int32> UAVVMOnlineEncodingUtils::GetAll(const TArray<int32>& Inputs,
-                                               const int32 BitRange,
-                                               const int32 RShift,
-                                               const int32 SearchValue)
+TArray<int32> UAVVMOnlineEncodingUtils::SearchValue(const TArray<int32>& Inputs,
+                                                    const int32 BitRange,
+                                                    const int32 RShift,
+                                                    const int32 SearchValue)
 {
+	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
+
 	TArray<int32> OutResults;
 	for (const int32 i : Inputs)
 	{
-		const int32 Result = UAVVMOnlineEncodingUtils::DecodeInt32(i, BitRange, RShift);
+		const int32 Result = UAVVMOnlineEncodingUtils::DecodeInt32(i, BitRange_Clamped, RShift);
 		if (Result == SearchValue)
 		{
 			OutResults.Add(Result);

@@ -26,27 +26,6 @@
 /**
  *	Class description:
  *
- *	FAVVMItemModifierProxy is the POD representation of the RESOLVED data returned by the backend following user request.
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMItemModifierProxy
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMItemModifierProxy& Rhs) const;
-
-	// @gdemers UniqueId here is used to retrieve the entry on the backend to support data reordering in parent array.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// @gdemers {FDataRegistryId}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ResourceId = FString();
-};
-
-/**
- *	Class description:
- *
  *	FAVVMItemProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
 USTRUCT(BlueprintType)
@@ -63,8 +42,4 @@ struct AVVMONLINE_API FAVVMItemProxy
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ResourceId = FString();
-
-	// @gdemers {FItemModifierProxy}
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> ModValues;
 };

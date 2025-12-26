@@ -23,13 +23,12 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMOnlineInterfaceUtils.h"
 #include "AVVMOnlineInventoryStringParser.h"
-#include "AVVMOnlineSubsystem.h"
 #include "AVVMUtils.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
-#include "Backend/AVVMOnlineInventory.h"
+#include "Backend/AVVMOnlineEncoding.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
@@ -49,37 +48,18 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 		return TArray<int32>{};
 	}
 
-	TArray<int32> OutResults;
+	TArray<int32> Dependencies;
 
 	// @gdemers retrieve the character preset, and all items that compose it.
-	const auto* Outer = Cast<AAVVMCharacter>(WorldContextObject);
-	if (IsValid(Outer))
+	const auto* Character = Cast<AAVVMCharacter>(WorldContextObject);
+	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(WorldContextObject);
-		OutResults = UAVVMOnlineUtils::GetElementDependencies(WorldContextObject, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(WorldContextObject, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 
-	// @gdemers search for your attachment in the item composition.
-	const UWorld* World = WorldContextObject->GetWorld();
-	for (const int32 ItemId : OutResults)
-	{
-		const FString ItemPayload = UAVVMOnlineSubsystem::Static_GetItem(World, ItemId);
-
-		FAVVMItem OutItem;
-		JsonParser->FromString(ItemPayload, OutItem);
-
-		const int32* SearchResult = OutItem.ModIds.FindByPredicate([CompareValue = ElementId](const int32 Value)
-		{
-			return (CompareValue == Value);
-		});
-
-		if (SearchResult != nullptr)
-		{
-			OutResults = OutItem.ModIds;
-			break;
-		}
-	}
-
+	// @gdemers search for all entries that partial match the element id.
+	const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 12, 0, ElementId);
 	return OutResults;
 }
 

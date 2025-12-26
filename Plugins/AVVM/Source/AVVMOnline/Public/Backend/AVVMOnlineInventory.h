@@ -28,29 +28,11 @@
 /**
  *	Class description:
  *
- *	FAVVMItemModifier is the POD representation of a modifier being applied to an item. This POD defines the data layout
+ *	FAVVMItem is the POD representation of the item that's bound to an Actor. This POD defines the data layout
  *  stored on the backend.
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMItemModifier
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMItemModifier& Rhs) const;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// @gdemers {FAVVMPlayerResource.UniqueId}.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ResourceId = INDEX_NONE;
-};
-
-/**
- *	Class description:
- *
- *	FAVVMItem is the RUNTIME POD representation of the item that's bound to an Actor. This POD defines the data layout
- *  stored on the backend.
+ *  
+ *  Note : Items, and mods are the same conceptually. {FAVVMPlayerProfile::InventoryIds} handle item composition
+ *  using bits encoding, and can reconstruct an FAVVMItem, it's Mods, and storage location by parsing the input integer.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMItem
@@ -65,8 +47,4 @@ struct AVVMONLINE_API FAVVMItem
 	// @gdemers {FAVVMPlayerResource.UniqueId}.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 ResourceId = INDEX_NONE;
-
-	// @gdemers {FItemModifier.UniqueId} the POD applied by the player profile to this item. may be null.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> ModIds;
 };

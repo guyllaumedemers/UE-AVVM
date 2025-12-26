@@ -27,8 +27,6 @@
 
 struct FAVVMItem;
 struct FAVVMItemProxy;
-struct FAVVMItemModifier;
-struct FAVVMItemModifierProxy;
 
 /**
 *	Class description:
@@ -45,12 +43,6 @@ public:
 	void FromString(const FString& NewPayload, FAVVMItem& OutItem) const;
 	void ToString(const FAVVMItem& NewItem, FString& OutFormat) const;
 
-	void FromString(const FString& NewPayload, FAVVMItemModifier& OutItemModifier) const;
-	void ToString(const FAVVMItemModifier& NewItemModifier, FString& OutFormat) const;
-
 	void FromString(const FString& NewPayload, FAVVMItemProxy& OutItem) const;
 	void ToString(const FAVVMItemProxy& NewItem, FString& OutFormat) const;
-
-	void FromString(const FString& NewPayload, FAVVMItemModifierProxy& OutItemModifier) const;
-	void ToString(const FAVVMItemModifierProxy& NewItemModifier, FString& OutFormat) const;
 };

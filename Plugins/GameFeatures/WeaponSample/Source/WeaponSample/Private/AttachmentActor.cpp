@@ -27,6 +27,7 @@
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Backend/AVVMOnlineEncoding.h"
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
@@ -46,9 +47,9 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	TArray<int32> Dependencies;
 
 	auto* Character = Cast<AAVVMCharacter>(Target);
-	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMResourceProvider>(Character))
+	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
-		// @gdemers fetch {FActorContent.UniqueId}
+		// @gdemers fetch {FAVVMPlayerProfile.UniqueId}
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
 		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 		                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on content stored in AVVMGameSession."),
@@ -59,34 +60,51 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 		// @gdemers aggregate dependencies defined in backend representation.
 		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+
+		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
+		// target a triggering actor.
+		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 12, 0, TargetUniqueId);
+		if (OutResults.IsEmpty())
+		{
+			return nullptr;
+		}
+
+		// @gdemers from our sub-set of attachments that are equipped to the character such as armor, pendant, etc... we validate our input attachment
+		// against possible match.
+		const TArray<int32> OutAttachments = UAVVMOnlineEncodingUtils::SearchValue(OutResults, 11, 21, SearchUniqueId);
+		if (!OutAttachments.IsEmpty())
+		{
+			return Target;
+		}
 	}
 	else
 	{
 		auto* TriggeringActor = Cast<ATriggeringActor>(Target);
-		if (IsValid(TriggeringActor))
+		if (!IsValid(TriggeringActor))
 		{
-			// @gdemers fetch {FItem.UniqueId}
-			const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
-			if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-			                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
-			                      *TriggeringActor->GetName()))
-			{
-				return nullptr;
-			}
-
-			// @gdemers aggregate dependencies defined in backend representation.
-			Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(), TargetUniqueId, ATriggeringActor::GetTriggeringActorDataResolverHelper());
+			return nullptr;
 		}
-	}
 
-	const int32* SearchResult = Dependencies.FindByPredicate([CompareValue = SearchUniqueId](const int32 Value)
-	{
-		return (CompareValue == Value);
-	});
+		// @gdemers fetch {FItem.UniqueId}
+		const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
+		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+		                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
+		                      *TriggeringActor->GetName()))
+		{
+			return nullptr;
+		}
 
-	if (SearchResult != nullptr)
-	{
-		return Target;
+		// @gdemers aggregate dependencies defined in backend representation.
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
+		                                                        TargetUniqueId,
+		                                                        ATriggeringActor::GetTriggeringActorDataResolverHelper());
+
+		// @gdemers attachment, and mods are encoded at the end.
+		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 11, 21, SearchUniqueId);
+		if (!OutResults.IsEmpty())
+		{
+			return Target;
+		}
 	}
 
 	return nullptr;
