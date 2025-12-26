@@ -28,8 +28,3 @@ TSubclassOf<UAVVMOnlinePlayerStringParser> UAVVMOnlineSettings::GetJsonParserCla
 {
 	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Player;
 }
-
-TSubclassOf<UAVVMOnlineInventoryStringParser> UAVVMOnlineSettings::GetJsonParserClass_Inventory()
-{
-	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Inventory;
-}

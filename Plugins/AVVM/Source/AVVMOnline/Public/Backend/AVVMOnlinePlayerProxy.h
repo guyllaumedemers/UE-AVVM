@@ -103,7 +103,7 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
 
-	// @gdemers {InventorySample::FActorContentProxy}
+	// @gdemers {FAVVMPlayerResource}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<FString> Inventories;
 

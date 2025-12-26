@@ -18,9 +18,3 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Backend/AVVMOnlineInventory.h"
-
-bool FAVVMItem::operator==(const FAVVMItem& Rhs) const
-{
-	return (UniqueId == Rhs.UniqueId)
-			&& (ResourceId == Rhs.ResourceId);
-}

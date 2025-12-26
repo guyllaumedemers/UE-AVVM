@@ -21,11 +21,8 @@
 // ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
 #pragma once
 
-#include "CoreMinimal.h"
-
-#include "AVVMOnlineInventory.generated.h"
-
-// @gdemers if ever project specific impl require changing encoding, preprocessor define may be overwritten.
+// @gdemers Inventory Items are referenced by {FAVVMPlayerResource}. More advance encoding are put in place to parse information
+// within the {FAVVMPlayerProfile::InventoryIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING
 // @gdemers item
 #define GET_ITEM_ID_ENCODING_BIT_RANGE (10)
@@ -45,27 +42,3 @@
 // so to allow validation during the attachment process.
 #define CHECK_CHARACTER_DEPENDENT_ENCODING (1 << 10)
 #endif
-
-/**
- *	Class description:
- *
- *	FAVVMItem is the POD representation of the item that's bound to an Actor. This POD defines the data layout
- *  stored on the backend.
- *  
- *  Note : Items, and mods are the same conceptually. {FAVVMPlayerProfile::InventoryIds} handle item composition
- *  using bits encoding, and can reconstruct an FAVVMItem, it's Mods, and storage location by parsing the input integer.
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMItem
-{
-	GENERATED_BODY()
-
-	bool operator==(const FAVVMItem& Rhs) const;
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
-
-	// @gdemers {FAVVMPlayerResource.UniqueId}.
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ResourceId = INDEX_NONE;
-};

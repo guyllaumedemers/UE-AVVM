@@ -22,7 +22,6 @@
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMOnlineInterfaceUtils.h"
-#include "AVVMOnlineInventoryStringParser.h"
 #include "AVVMUtils.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -38,13 +37,6 @@
 TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
 {
 	if (!IsValid(WorldContextObject))
-	{
-		return TArray<int32>{};
-	}
-
-	UAVVMOnlineInventoryStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Inventory();
-	if (!ensureAlwaysMsgf(IsValid(JsonParser),
-	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
 		return TArray<int32>{};
 	}

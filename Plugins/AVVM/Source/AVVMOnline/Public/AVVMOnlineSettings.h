@@ -26,7 +26,6 @@
 
 #include "AVVMOnlineSettings.generated.h"
 
-class UAVVMOnlineInventoryStringParser;
 class UAVVMOnlinePlayerStringParser;
 
 /**
@@ -44,14 +43,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Settings")
 	static TSubclassOf<UAVVMOnlinePlayerStringParser> GetJsonParserClass_Player();
-	
-	UFUNCTION(BlueprintCallable, Category="AVVM|Settings")
-	static TSubclassOf<UAVVMOnlineInventoryStringParser> GetJsonParserClass_Inventory();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UAVVMOnlinePlayerStringParser> JsonParserClass_Player = nullptr;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TSubclassOf<UAVVMOnlineInventoryStringParser> JsonParserClass_Inventory = nullptr;
 };

@@ -159,11 +159,12 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	// @gdemers may refer to a complex system that captures progression details of items, skills, achievements, challenges, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Progression = FString();
-	
-	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, Count, and Mods} by bit shifting
-	// the integer retrieved (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
-	// @gdemers {FAVVMPlayerProfile::InventoryIds} cache 1x entry per-item. A mod is considered an Item but is encoding it's
-	// id using the last 11bits, ensuring we can refer to the owning Item with the first 12bits encoded.
+
+	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, Count, and Attachments}
+	// by bit shifting the integer retrieved from our collection (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
+	// Items, and attachments both occupy a unique entry within this collection. Parenting of attachments can be retrieved
+	// using our bits encoding scheme. See AVVMOnlineInventory.h for information about the bits encoding.
+	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Item, Attachment, Skill, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
 
@@ -200,7 +201,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PresetId = FString();
 
-	// @gdemers see {FAVVMPlayerProfile::InventoryIds} for encoding. EquippedItems is a subset of the afro mentioned property.
+	// @gdemers aggregate a subset of {FAVVMPlayerProfile::InventoryIds}.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> EquippedItems;
 };
@@ -211,7 +212,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 *	FAVVMPlayerResource is a POD representation of resources that can be owned by a player profile, consumed, bought, sell, etc... This POD defines the data layout stored
  *	on the backend.
  *	
- *	example : Gear, Ammunition, Skills, Potions, etc...
+ *	example : Gear, Weapon, Ammunition, Skills, Potions, etc...
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload

@@ -20,7 +20,6 @@
 
 #include "AVVMOnline.h"
 
-#include "AVVMOnlineInventoryStringParser.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMOnlineSettings.h"
 #include "Engine.h"
@@ -29,7 +28,6 @@ DEFINE_LOG_CATEGORY(LogAVVMOnline);
 
 TSharedPtr<IConsoleVariable> FAVVMOnlineModule::CVarOnlineRequestReturnedStatus = nullptr;
 TStrongObjectPtr<UAVVMOnlinePlayerStringParser> FAVVMOnlineModule::PlayerParser = nullptr;
-TStrongObjectPtr<UAVVMOnlineInventoryStringParser> FAVVMOnlineModule::InventoryParser = nullptr;
 
 void FAVVMOnlineModule::StartupModule()
 {
@@ -63,17 +61,6 @@ UAVVMOnlinePlayerStringParser* FAVVMOnlineModule::GetJsonParser_Player()
 	}
 
 	return PlayerParser.Get();
-}
-
-UAVVMOnlineInventoryStringParser* FAVVMOnlineModule::GetJsonParser_Inventory()
-{
-	if (!InventoryParser.IsValid())
-	{
-		auto* Parser = NewObject<UAVVMOnlineInventoryStringParser>(GEngine, UAVVMOnlineSettings::GetJsonParserClass_Inventory());
-		InventoryParser = TStrongObjectPtr<UAVVMOnlineInventoryStringParser>(Parser);
-	}
-
-	return InventoryParser.Get();
 }
 
 IMPLEMENT_MODULE(FAVVMOnlineModule, AVVMOnline)
