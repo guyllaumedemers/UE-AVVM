@@ -25,6 +25,13 @@
 
 #include "AVVMOnlineInventory.generated.h"
 
+// @gdemers passive items that are direct child of character require their bits encoding to set the first 12 bits to the max value
+// so to allow validation during the attachment process.
+#ifndef CHECK_CHARACTER_DEPENDENT_ENCODING
+#define EXPECTED_VALUE (1 << 12)
+#define CHECK_CHARACTER_DEPENDENT_ENCODING EXPECTED_VALUE
+#endif
+
 /**
  *	Class description:
  *

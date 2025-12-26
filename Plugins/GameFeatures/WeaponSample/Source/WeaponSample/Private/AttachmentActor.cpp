@@ -28,6 +28,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Backend/AVVMOnlineEncoding.h"
+#include "Backend/AVVMOnlineInventory.h"
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
@@ -63,7 +64,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
 		// target a triggering actor.
-		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 12, 0, TargetUniqueId);
+		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 12, 0, CHECK_CHARACTER_DEPENDENT_ENCODING);
 		if (OutResults.IsEmpty())
 		{
 			return nullptr;
