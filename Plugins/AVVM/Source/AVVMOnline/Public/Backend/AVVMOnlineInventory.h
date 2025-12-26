@@ -25,11 +25,25 @@
 
 #include "AVVMOnlineInventory.generated.h"
 
-// @gdemers passive items that are direct child of character require their bits encoding to set the first 12 bits to the max value
+// @gdemers if ever project specific impl require changing encoding, preprocessor define may be overwritten.
+#ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING
+// @gdemers item
+#define GET_ITEM_ID_ENCODING_BIT_RANGE (10)
+// @gdemers item position
+#define GET_ITEM_POSITION_ENCODING_BIT_RANGE (6)
+#define GET_ITEM_POSITION_ENCODING_RSHIFT (10)
+// @gdemers item count
+#define GET_ITEM_COUNT_ENCODING_BIT_RANGE (5)
+#define GET_ITEM_COUNT_ENCODING_RSHIFT (16)
+// @gdemers storage
+#define GET_STORAGE_ID_ENCODING_BIT_RANGE (3)
+#define GET_STORAGE_ID_ENCODING_RSHIFT (21)
+// @gdemers attachment
+#define GET_ATTACHMENT_ID_ENCODING_BIT_RANGE (8)
+#define GET_ATTACHMENT_ID_ENCODING_RSHIFT (24)
+// @gdemers passive items that are direct child of character require their bits encoding to set the first 10 bits to the max value
 // so to allow validation during the attachment process.
-#ifndef CHECK_CHARACTER_DEPENDENT_ENCODING
-#define EXPECTED_VALUE (1 << 12)
-#define CHECK_CHARACTER_DEPENDENT_ENCODING EXPECTED_VALUE
+#define CHECK_CHARACTER_DEPENDENT_ENCODING (1 << 10)
 #endif
 
 /**

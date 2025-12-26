@@ -29,6 +29,7 @@
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Backend/AVVMOnlineEncoding.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
@@ -59,7 +60,11 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 	}
 
 	// @gdemers search for all entries that partial match the element id.
-	const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 12, 0, ElementId);
+	const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies,
+	                                                                       GET_ITEM_ID_ENCODING_BIT_RANGE,
+	                                                                       NULL,
+	                                                                       ElementId);
+
 	return OutResults;
 }
 

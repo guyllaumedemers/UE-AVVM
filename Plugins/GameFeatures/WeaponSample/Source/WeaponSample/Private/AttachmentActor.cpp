@@ -62,7 +62,11 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
 		// target a triggering actor.
-		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 12, 0, CHECK_CHARACTER_DEPENDENT_ENCODING);
+		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies,
+		                                                                       GET_ITEM_ID_ENCODING_BIT_RANGE,
+		                                                                       NULL,
+		                                                                       CHECK_CHARACTER_DEPENDENT_ENCODING);
+
 		if (OutResults.IsEmpty())
 		{
 			return nullptr;
@@ -70,7 +74,11 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 		// @gdemers from our sub-set of attachments that are equipped to the character such as armor, pendant, etc... we validate our input attachment
 		// against possible match.
-		const TArray<int32> OutAttachments = UAVVMOnlineEncodingUtils::SearchValue(OutResults, 11, 21, SearchUniqueId);
+		const TArray<int32> OutAttachments = UAVVMOnlineEncodingUtils::SearchValue(OutResults,
+		                                                                           GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
+		                                                                           GET_ATTACHMENT_ID_ENCODING_RSHIFT,
+		                                                                           SearchUniqueId);
+
 		if (!OutAttachments.IsEmpty())
 		{
 			return Target;
@@ -99,7 +107,11 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		                                                                            ATriggeringActor::GetTriggeringActorDataResolverHelper());
 
 		// @gdemers attachment, and mods are encoded at the end.
-		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 11, 21, SearchUniqueId);
+		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies,
+		                                                                       GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
+		                                                                       GET_ATTACHMENT_ID_ENCODING_RSHIFT,
+		                                                                       SearchUniqueId);
+
 		if (!OutResults.IsEmpty())
 		{
 			return Target;
