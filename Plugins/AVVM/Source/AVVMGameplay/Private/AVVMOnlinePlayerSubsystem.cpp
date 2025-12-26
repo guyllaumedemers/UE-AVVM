@@ -23,6 +23,7 @@
 #include "AVVMOnline.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMOnlineSettings.h"
+#include "AVVMPlayerState.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -166,5 +167,29 @@ TArray<int32> UAVVMOnlinePlayerSubsystem::GetPlayerEquippedItems(const int32 Pro
 }
 
 void UAVVMOnlinePlayerSubsystem::OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
+{
+	const auto* Payload = NewPayload.GetPtr<FAVVMPlayerStatePayload>();
+	if (!ensureAlwaysMsgf(Payload != nullptr,
+						  TEXT("Payload couldnt be casted to FAVVMPlayerStatePayload type")))
+	{
+		return;
+	}
+
+	const bool bWasAddedOrRemoved = Payload->bWasAddedOrRemoved;
+	if (bWasAddedOrRemoved)
+	{
+		OnPlayerStateAdded(Payload->PlayerState.Get());
+	}
+	else
+	{
+		OnPlayerStateRemoved(Payload->PlayerState.Get());
+	}
+}
+
+void UAVVMOnlinePlayerSubsystem::OnPlayerStateAdded(const APlayerState* NewPlayerState)
+{
+}
+
+void UAVVMOnlinePlayerSubsystem::OnPlayerStateRemoved(const APlayerState* NewPlayerState)
 {
 }

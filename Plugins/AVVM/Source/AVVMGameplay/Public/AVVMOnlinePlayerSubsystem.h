@@ -35,7 +35,7 @@ struct FAVVMNotificationPayload;
  *	parse backend information for display purposes.
  */
 UCLASS()
-class AVVMONLINE_API UAVVMOnlinePlayerSubsystem : public UWorldSubsystem
+class AVVMGAMEPLAY_API UAVVMOnlinePlayerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -64,6 +64,12 @@ protected:
 
 	UFUNCTION(CallInEditor)
 	void OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+
+	UFUNCTION()
+	void OnPlayerStateAdded(const APlayerState* NewPlayerState);
+
+	UFUNCTION()
+	void OnPlayerStateRemoved(const APlayerState* NewPlayerState);
 	
 	UPROPERTY(Transient)
 	TMap<int32/*ProfileId*/, FString/*FAVVMPlayerProfile*/> PlayerProfiles;
