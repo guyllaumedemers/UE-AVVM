@@ -83,4 +83,10 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TMap<int32/*{FAVVMPlayerPreset::UniqueId}*/, FString/*FAVVMPlayerPreset*/> ResolvedPresets;
+
+private:
+	void AddPlayer(const FString& UniqueNetId);
+	void RemovePlayer(const FString& UniqueNetId);
+	virtual int32 ResolveNewPlayerConnection(const FString& UniqueNetId);
+	virtual void CleanupOldPlayerConnection(const int32 PlayerConnectionId);
 };

@@ -54,13 +54,23 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer, const FUniqu
 {
 	Super::RegisterPlayer(NewPlayer, UniqueId, bWasFromInvite);
 
-	// TODO @gdemers Resolve newly connected player {FAVVMPlayerConnection}, {FAVVMPlayerProfile}
-	// i.e the selected profile equipped by the new party member.
+	// @gdemers we may not yet have a APlayerState bound to our Server PC but the FUniqueNetId is valid here.
+	FUniqueNetIdPtr UniqueNetIdPtr = UniqueId.GetV1();
+	if (UniqueNetIdPtr.IsValid())
+	{
+		AddPlayer(UniqueNetIdPtr->ToString());
+	}
 }
 
 void AAVVMGameSession::UnregisterPlayer(const APlayerController* ExitingPlayer)
 {
 	Super::UnregisterPlayer(ExitingPlayer);
+
+	const FString UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(IsValid(ExitingPlayer) ? ExitingPlayer->PlayerState : nullptr);
+	if (!UniqueNetId.IsEmpty())
+	{
+		RemovePlayer(UniqueNetId);
+	}
 }
 
 AAVVMGameSession* AAVVMGameSession::Get(const UWorld* World)
@@ -160,4 +170,62 @@ TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) cons
 	{
 		return TArray<int32>{};
 	}
+}
+
+void AAVVMGameSession::AddPlayer(const FString& UniqueNetId)
+{
+	int32& OutPlayerConnectionId = PlayerConnectionIds.FindOrAdd(UniqueNetId);
+	OutPlayerConnectionId = ResolveNewPlayerConnection(UniqueNetId);
+}
+
+void AAVVMGameSession::RemovePlayer(const FString& UniqueNetId)
+{
+	const bool bDoesContains = PlayerConnectionIds.Contains(UniqueNetId);
+	if (bDoesContains)
+	{
+		const int32 PlayerConnectionId = PlayerConnectionIds[UniqueNetId];
+		CleanupOldPlayerConnection(PlayerConnectionId);
+		PlayerConnectionIds.Remove(UniqueNetId);
+	}
+}
+
+int32 AAVVMGameSession::ResolveNewPlayerConnection(const FString& UniqueNetId)
+{
+	// @gdemers TODO make backend request that return a player connection id based on
+	// the available FUniqueNetId.
+	return INDEX_NONE;
+}
+
+void AAVVMGameSession::CleanupOldPlayerConnection(const int32 PlayerConnectionId)
+{
+	const bool bHasProfile = ProfileIds.Contains(PlayerConnectionId);
+	if (!bHasProfile)
+	{
+		return;
+	}
+
+	const int32 ProfileId = ProfileIds[PlayerConnectionId];
+	if (!ensureAlwaysMsgf(ProfileId != INDEX_NONE,
+	                      TEXT("Cannot remove the requested Id from the collection. Missing entry.")))
+	{
+		return;
+	}
+
+	const bool bHasPreset = PresetIds.Contains(ProfileId);
+	if (!bHasPreset)
+	{
+		return;
+	}
+
+	const int32 PresetId = PresetIds[ProfileId];
+	if (!ensureAlwaysMsgf(PresetId != INDEX_NONE,
+	                      TEXT("Cannot remove the requested Id from the collection. Missing entry.")))
+	{
+		return;
+	}
+
+	ProfileIds.Remove(PlayerConnectionId);
+	PresetIds.Remove(ProfileId);
+	ResolvedProfiles.Remove(ProfileId);
+	ResolvedPresets.Remove(PresetId);
 }
