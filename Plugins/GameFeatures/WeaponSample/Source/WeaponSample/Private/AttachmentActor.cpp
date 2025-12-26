@@ -45,8 +45,6 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		return nullptr;
 	}
 
-	TArray<int32> Dependencies;
-
 	auto* Character = Cast<AAVVMCharacter>(Target);
 	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
@@ -60,7 +58,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		}
 
 		// @gdemers aggregate dependencies defined in backend representation.
-		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		const TArray<int32> Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 
 		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
 		// target a triggering actor.
@@ -96,9 +94,9 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		}
 
 		// @gdemers aggregate dependencies defined in backend representation.
-		Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
-		                                                        TargetUniqueId,
-		                                                        ATriggeringActor::GetTriggeringActorDataResolverHelper());
+		const TArray<int32> Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
+		                                                                            TargetUniqueId,
+		                                                                            ATriggeringActor::GetTriggeringActorDataResolverHelper());
 
 		// @gdemers attachment, and mods are encoded at the end.
 		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies, 11, 21, SearchUniqueId);
