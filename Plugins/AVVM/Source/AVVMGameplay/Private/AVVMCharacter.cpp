@@ -21,12 +21,11 @@
 
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMOnlinePlayerSubsystem.h"
 #include "AVVMOnlineUtils.h"
-#include "AVVMOnlineSubsystem.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
-#include "Backend/AVVMOnlinePlayer.h"
 #include "Data/AVVMActorPayload.h"
 #include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
@@ -45,25 +44,8 @@ TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UOb
 		return TArray<int32>{};
 	}
 
-	const FString ProfilePayload = UAVVMOnlineSubsystem::Static_GetPlayerProfile(WorldContextObject->GetWorld(), ElementId);
-	if (ProfilePayload.IsEmpty())
-	{
-		return TArray<int32>{};
-	}
-
-	FAVVMPlayerProfile OutPlayerProfile;
-	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
-
-	const FString PresetPayload = UAVVMOnlineSubsystem::Static_GetPlayerPreset(WorldContextObject->GetWorld(), OutPlayerProfile.EquippedPresetId);
-	if (PresetPayload.IsEmpty())
-	{
-		return TArray<int32>{};
-	}
-
-	FAVVMPlayerPreset OutPlayerPreset;
-	JsonParser->FromString(PresetPayload, OutPlayerPreset);
-
-	return OutPlayerPreset.EquippedItems;
+	const TArray<int32> OutResults = UAVVMOnlinePlayerSubsystem::Static_GetPlayerEquippedItems(WorldContextObject->GetWorld(), ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
+	return OutResults;
 }
 
 AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)

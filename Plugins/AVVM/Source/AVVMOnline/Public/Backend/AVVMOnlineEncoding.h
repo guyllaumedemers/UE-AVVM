@@ -47,8 +47,8 @@ public:
 	                         const int32 LShift);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<int32> SearchValue(const TArray<int32>& Inputs,
-	                                 const int32 BitRange,
-	                                 const int32 RShift,
-	                                 const int32 SearchValue);
+	static TArray<int32> SearchValues(const TArray<int32>& Inputs,
+	                                  const int32 BitRange,
+	                                  const int32 RShift,
+	                                  const int32 SearchValue);
 };

@@ -36,6 +36,7 @@ public class AVVMOnline : ModuleRules
 				"CoreUObject",
 				"DeveloperSettings",
 				"Engine",
+				"GameplayTags",
 			}
 		);
 

@@ -47,17 +47,17 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 	const auto* Character = Cast<AAVVMCharacter>(WorldContextObject);
 	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
-		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(WorldContextObject);
-		Dependencies = UAVVMOnlineUtils::GetElementDependencies(WorldContextObject, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 
 	// @gdemers search for all entries that partial match the element id.
-	const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies,
-	                                                                       GET_ITEM_ID_ENCODING_BIT_RANGE,
-	                                                                       NULL,
-	                                                                       ElementId);
+	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
+	                                                      GET_ITEM_ID_ENCODING_BIT_RANGE,
+	                                                      NULL,
+	                                                      ElementId/*{FAVVMPlayerResource::UniqueId}*/);
 
-	return OutResults;
+	return Dependencies;
 }
 
 AActor* FTriggeringSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
@@ -183,7 +183,7 @@ void ATriggeringActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 
 	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
-						  TEXT("Dest actor doesn't implement the required interface")))
+	                      TEXT("Dest actor doesn't implement the required interface")))
 	{
 		return;
 	}
@@ -201,12 +201,12 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FName NewSock
 	}
 
 	UE_LOG(LogWeaponSample,
-		   Log,
-		   TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
-		   UAVVMGameplayUtils::PrintNetSource(Target).GetData(),
-		   *ATriggeringActor::StaticClass()->GetName(),
-		   *Target->GetName(),
-		   *NewSocketName.ToString());
+	       Log,
+	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
+	       UAVVMGameplayUtils::PrintNetSource(Target).GetData(),
+	       *ATriggeringActor::StaticClass()->GetName(),
+	       *Target->GetName(),
+	       *NewSocketName.ToString());
 
 	// @gdemers detach actor + remove AttributeSet registered
 	IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(this);
@@ -330,7 +330,7 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 	{
 		return;
 	}
-	
+
 	TArray<UObject*> OutStreamableAssets;
 	TriggeringAbilityClassHandle->GetLoadedAssets(OutStreamableAssets);
 
@@ -345,11 +345,12 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 		return;
 	}
 
-	TriggeringAbilitySpecHandle = ASC->GiveAbility(FGameplayAbilitySpec{
-		GameplayAbilityClass,
-		1,
-		GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
-	});
+	TriggeringAbilitySpecHandle = ASC->GiveAbility(FGameplayAbilitySpec
+	                                               {
+			                                               GameplayAbilityClass,
+			                                               1,
+			                                               GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
+	                                               });
 }
 
 void UTriggeringUtils::Swap(AActor* UnEquip,

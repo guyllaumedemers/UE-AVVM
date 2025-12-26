@@ -45,10 +45,12 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		return nullptr;
 	}
 
+	TArray<int32> Dependencies;
+
 	auto* Character = Cast<AAVVMCharacter>(Target);
 	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
-		// @gdemers fetch {FAVVMPlayerProfile.UniqueId}
+		// @gdemers fetch {FAVVMPlayerProfile::UniqueId}
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
 		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 		                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on content stored in AVVMGameSession."),
@@ -58,31 +60,14 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		}
 
 		// @gdemers aggregate dependencies defined in backend representation.
-		const TArray<int32> Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 
 		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
 		// target a triggering actor.
-		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies,
-		                                                                       GET_ITEM_ID_ENCODING_BIT_RANGE,
-		                                                                       NULL,
-		                                                                       CHECK_CHARACTER_DEPENDENT_ENCODING);
-
-		if (OutResults.IsEmpty())
-		{
-			return nullptr;
-		}
-
-		// @gdemers from our sub-set of attachments that are equipped to the character such as armor, pendant, etc... we validate our input attachment
-		// against possible match.
-		const TArray<int32> OutAttachments = UAVVMOnlineEncodingUtils::SearchValue(OutResults,
-		                                                                           GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
-		                                                                           GET_ATTACHMENT_ID_ENCODING_RSHIFT,
-		                                                                           SearchUniqueId);
-
-		if (!OutAttachments.IsEmpty())
-		{
-			return Target;
-		}
+		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
+		                                                      GET_ITEM_ID_ENCODING_BIT_RANGE,
+		                                                      NULL,
+		                                                      CHECK_CHARACTER_DEPENDENT_ENCODING);
 	}
 	else
 	{
@@ -92,7 +77,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 			return nullptr;
 		}
 
-		// @gdemers fetch {FItem.UniqueId}
+		// @gdemers fetch {FAVVMPlayerResource::UniqueId}
 		const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
 		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 		                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
@@ -102,20 +87,20 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		}
 
 		// @gdemers aggregate dependencies defined in backend representation.
-		const TArray<int32> Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
-		                                                                            TargetUniqueId,
-		                                                                            ATriggeringActor::GetTriggeringActorDataResolverHelper());
+		Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
+		                                                        TargetUniqueId,
+		                                                        ATriggeringActor::GetTriggeringActorDataResolverHelper());
+	}
 
-		// @gdemers attachment, and mods are encoded at the end.
-		const TArray<int32> OutResults = UAVVMOnlineEncodingUtils::SearchValue(Dependencies,
-		                                                                       GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
-		                                                                       GET_ATTACHMENT_ID_ENCODING_RSHIFT,
-		                                                                       SearchUniqueId);
+	// @gdemers from our sub-set of attachments that are equipped to the target actor dependency set, we validate our input attachment against possible match.
+	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
+	                                                      GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
+	                                                      GET_ATTACHMENT_ID_ENCODING_RSHIFT,
+	                                                      SearchUniqueId);
 
-		if (!OutResults.IsEmpty())
-		{
-			return Target;
-		}
+	if (!Dependencies.IsEmpty())
+	{
+		return Target;
 	}
 
 	return nullptr;

@@ -21,32 +21,53 @@
 
 #include "CoreMinimal.h"
 
+#include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
 
-#include "AVVMOnlineSubsystem.generated.h"
+#include "AVVMOnlinePlayerSubsystem.generated.h"
+
+struct FAVVMNotificationPayload;
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMOnlinePlayerSubsystem is a subsystem that allow clients retrieval of information about players account, and
+ *	parse backend information for display purposes.
  */
 UCLASS()
-class AVVMONLINE_API UAVVMOnlineSubsystem : public UWorldSubsystem
+class AVVMONLINE_API UAVVMOnlinePlayerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
-	
+
 	UFUNCTION(BlueprintCallable)
-	static FString Static_GetPlayerProfile(const UWorld* World, const int32 ProfileId);
-	
+	static FString Static_GetPlayerProfile(const UWorld* World,
+	                                       const int32 ProfileId);
+
 	UFUNCTION(BlueprintCallable)
-	static FString Static_GetPlayerPreset(const UWorld* World, const int32 PresetId);
-	
+	static FString Static_GetPlayerPreset(const UWorld* World,
+	                                      const int32 PresetId);
+
 	UFUNCTION(BlueprintCallable)
-	static FString Static_GetItem(const UWorld* World, const int32 ItemId);
-	
+	static TArray<int32> Static_GetPlayerEquippedItems(const UWorld* World,
+	                                                   const int32 ProfileId);
+
 protected:
-	static UAVVMOnlineSubsystem* Get(const UWorld* World);
+	static UAVVMOnlinePlayerSubsystem* Get(const UWorld* World);
+	FString GetPlayerProfile(const int32 ProfileId) const;
+	FString GetPlayerPreset(const int32 PresetId) const;
+	TArray<int32> GetPlayerEquippedItems(const int32 ProfileId) const;
+
+	UFUNCTION(CallInEditor)
+	void OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
+	
+	UPROPERTY(Transient)
+	TMap<int32/*ProfileId*/, FString/*FAVVMPlayerProfile*/> PlayerProfiles;
+	
+	UPROPERTY(Transient)
+	TMap<int32/*ProfileId*/, FString/*FAVVMPlayerPreset*/> PlayerPresets;
 };

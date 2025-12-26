@@ -55,10 +55,10 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
 	return Result;
 }
 
-TArray<int32> UAVVMOnlineEncodingUtils::SearchValue(const TArray<int32>& Inputs,
-                                                    const int32 BitRange,
-                                                    const int32 RShift,
-                                                    const int32 SearchValue)
+TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs,
+                                                     const int32 BitRange,
+                                                     const int32 RShift,
+                                                     const int32 SearchValue)
 {
 	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
 
