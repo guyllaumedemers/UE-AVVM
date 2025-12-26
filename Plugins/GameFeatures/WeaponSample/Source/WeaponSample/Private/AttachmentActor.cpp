@@ -32,11 +32,14 @@
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
-	if (!IsValid(Src))
+	if (!IsValid(Src) || !ensureAlwaysMsgf(UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Target),
+	                                       TEXT("Target Actor isn't implementing the required interface to retrieve UniqueId.")))
 	{
 		return nullptr;
 	}
 
+	// @gdemers src (attachment) unique id defined in global table. Note : attachment shouldn't be considered
+	// as resource provider. They are instanced from a resource provider which is different.
 	const int32 SearchUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(Src);
 	if (!ensureAlwaysMsgf(SearchUniqueId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
@@ -45,20 +48,20 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		return nullptr;
 	}
 
+	// @gdemers target (character {FAVVMPlayerProfile::UniqueId}/or triggering actor) unique id.
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Target);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Target->GetName()))
+	{
+		return nullptr;
+	}
+
 	TArray<int32> Dependencies;
 
 	auto* Character = Cast<AAVVMCharacter>(Target);
-	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
+	if (IsValid(Character))
 	{
-		// @gdemers fetch {FAVVMPlayerProfile::UniqueId}
-		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
-		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-		                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on content stored in AVVMGameSession."),
-		                      *Character->GetName()))
-		{
-			return nullptr;
-		}
-
 		// @gdemers aggregate dependencies defined in backend representation.
 		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 
@@ -73,15 +76,6 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	{
 		auto* TriggeringActor = Cast<ATriggeringActor>(Target);
 		if (!IsValid(TriggeringActor))
-		{
-			return nullptr;
-		}
-
-		// @gdemers fetch {FAVVMPlayerResource::UniqueId}
-		const int32 TargetUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(TriggeringActor);
-		if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-		                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
-		                      *TriggeringActor->GetName()))
 		{
 			return nullptr;
 		}

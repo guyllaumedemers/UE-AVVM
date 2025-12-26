@@ -100,6 +100,7 @@ public:
 	virtual void Detach_Implementation() override;
 
 	// @gdemers IAVVMResourceProvider
+	virtual int32 GetProviderUniqueId_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
 	
