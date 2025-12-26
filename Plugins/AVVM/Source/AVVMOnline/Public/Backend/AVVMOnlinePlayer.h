@@ -156,17 +156,18 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ProfileId = FString();
 
-	// @gdemers may refer to a complex system that captures progression details of items, skills, achievements, challenges, etc...
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Progression = FString();
-
 	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, Count, and Attachments}
 	// by bit shifting the integer retrieved from our collection (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
 	// Items, and attachments both occupy a unique entry within this collection. Parenting of attachments can be retrieved
 	// using our bits encoding scheme. See AVVMOnlineInventory.h for information about the bits encoding.
-	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Item, Attachment, Skill, etc...
+	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Item, Attachment, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
+
+	// @gdemers Bits encoding allow users to retrieve {Skill_Id, Category_Id, Position_Index, Level}
+	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Ability, Perks, etc...
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> SkillIds;
 
 	// @gdemers {FAVVMPlayerChallenge.UniqueId} store shared challenges by id that are active for this profile.
 	UPROPERTY(Transient, BlueprintReadWrite)

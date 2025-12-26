@@ -224,13 +224,18 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 	FAVVMPlayerProfile NewPlayerProfile;
 	NewPlayerProfile.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewPlayerProfile.ProfileId = JsonData->GetStringField(TEXT("ProfileId"));
-	NewPlayerProfile.Progression = JsonData->GetStringField(TEXT("Progression"));
 	NewPlayerProfile.EquippedPresetId = JsonData->GetIntegerField(TEXT("EquippedPresetId"));
 
 	const TArray<TSharedPtr<FJsonValue>> InventoryIds = JsonData->GetArrayField(TEXT("InventoryIds"));
 	for (const auto& InventoryId : InventoryIds)
 	{
 		NewPlayerProfile.InventoryIds.Add(InventoryId->AsNumber());
+	}
+
+	const TArray<TSharedPtr<FJsonValue>> SkillIds = JsonData->GetArrayField(TEXT("SkillIds"));
+	for (const auto& SkillId : SkillIds)
+	{
+		NewPlayerProfile.SkillIds.Add(SkillId->AsNumber());
 	}
 
 	const TArray<TSharedPtr<FJsonValue>> ChallengeIds = JsonData->GetArrayField(TEXT("ChallengeIds"));
@@ -251,6 +256,12 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfile& NewPlayer
 		InventoryIds.Add(MakeShareable(new FJsonValueNumber(InventoryId)));
 	}
 
+	TArray<TSharedPtr<FJsonValue>> SkillIds;
+	for (const int32 SkillId : NewPlayerProfile.SkillIds)
+	{
+		SkillIds.Add(MakeShareable(new FJsonValueNumber(SkillId)));
+	}
+
 	TArray<TSharedPtr<FJsonValue>> ChallengeIds;
 	for (const int32 ChallengeId : NewPlayerProfile.ChallengeIds)
 	{
@@ -260,8 +271,8 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfile& NewPlayer
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerProfile.UniqueId);
 	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfile.ProfileId);
-	JsonData->SetStringField(TEXT("Progression"), NewPlayerProfile.Progression);
 	JsonData->SetArrayField(TEXT("InventoryIds"), InventoryIds);
+	JsonData->SetArrayField(TEXT("SkillIds"), SkillIds);
 	JsonData->SetArrayField(TEXT("ChallengeIds"), ChallengeIds);
 	JsonData->SetNumberField(TEXT("EquippedPresetId"), NewPlayerProfile.EquippedPresetId);
 
