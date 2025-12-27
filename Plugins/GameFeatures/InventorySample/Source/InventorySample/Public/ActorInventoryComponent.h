@@ -98,13 +98,13 @@ public:
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	void Drop(UItemObject* PendingDropItemObject);
+	void Drop(UItemObject* PendingDropItemObject) const;
 
 	UFUNCTION(BlueprintCallable)
-	void Pickup(UItemObject* PendingPickupItemObject);
+	void Pickup(UItemObject* PendingPickupItemObject) const;
 
 	UFUNCTION(BlueprintCallable)
-	void Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+	void Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject) const;
 
 protected:
 	UFUNCTION()

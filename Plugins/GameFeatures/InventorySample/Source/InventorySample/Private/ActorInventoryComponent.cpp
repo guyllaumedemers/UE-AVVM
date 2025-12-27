@@ -298,21 +298,21 @@ bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compar
 	return ComponentStateTags.HasAllExact(Compare);
 }
 
-void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
+void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject) const
 {
 	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
 	const auto Rule = FExecutionContextRule::Make<FDropRule>();
 	Execute(Ctx, Rule);
 }
 
-void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
+void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject) const
 {
 	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
 	const auto Rule = FExecutionContextRule::Make<FPickupRule>();
 	Execute(Ctx, Rule);
 }
 
-void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
+void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject) const
 {
 	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
 	const auto Rule = FExecutionContextRule::Make<FSwapRule>();
