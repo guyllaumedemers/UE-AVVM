@@ -26,7 +26,6 @@
 #include "ExecutionContextParams.generated.h"
 
 class UItemObject;
-class UNonReplicatedLoadoutObject;
 
 /**
  *	Class description:
@@ -40,7 +39,6 @@ struct INVENTORYSAMPLE_API FExecutionContextParams
 	GENERATED_BODY()
 
 	virtual ~FExecutionContextParams() = default;
-	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const PURE_VIRTUAL(Execute, return;);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextParams>::Make<T>
 	template <typename TChild, typename... TArgs>
@@ -55,9 +53,10 @@ TInstancedStruct<FExecutionContextParams> FExecutionContextParams::Make(TArgs&&.
 	return TInstancedStruct<FExecutionContextParams>::Make<TChild>(Forward<TArgs>(Args)...);
 }
 
-template<> struct TBaseStructure<FExecutionContextParams> 
+template <>
+struct TBaseStructure<FExecutionContextParams>
 {
-	static INVENTORYSAMPLE_API UScriptStruct* Get(); 
+	static INVENTORYSAMPLE_API UScriptStruct* Get();
 };
 
 /**
@@ -70,10 +69,9 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
-	
+
 	FDropContextParams() = default;
 	FDropContextParams(UItemObject* NewItemObject);
-	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
@@ -92,7 +90,6 @@ struct INVENTORYSAMPLE_API FPickupContextParams : public FExecutionContextParams
 
 	FPickupContextParams() = default;
 	FPickupContextParams(UItemObject* NewItemObject);
-	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
@@ -108,10 +105,9 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
-	
+
 	FSwapContextParams() = default;
 	FSwapContextParams(UItemObject* NewSrcItemObject, UItemObject* NewDestItemObject);
-	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> SrcItemObject = nullptr;

@@ -19,9 +19,7 @@
 //SOFTWARE.
 #include "ExecutionContextParams.h"
 
-#include "ActorInventoryComponent.h"
 #include "ItemObject.h"
-#include "NonReplicatedLoadoutObject.h"
 
 UScriptStruct* TBaseStructure<FExecutionContextParams>::Get()
 {
@@ -33,37 +31,9 @@ FDropContextParams::FDropContextParams(UItemObject* NewItemObject)
 {
 }
 
-void FDropContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
-{
-	if (!IsValid(NonReplicatedLoadoutObject))
-	{
-		return;
-	}
-
-	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
-	{
-		InventoryComponent->OnDrop(ItemObject.Get());
-	}
-}
-
 FPickupContextParams::FPickupContextParams(UItemObject* NewItemObject)
 	: ItemObject(NewItemObject)
 {
-}
-
-void FPickupContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
-{
-	if (!IsValid(NonReplicatedLoadoutObject))
-	{
-		return;
-	}
-
-	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
-	{
-		InventoryComponent->OnPickup(ItemObject.Get());
-	}
 }
 
 FSwapContextParams::FSwapContextParams(UItemObject* NewSrcItemObject,
@@ -71,19 +41,4 @@ FSwapContextParams::FSwapContextParams(UItemObject* NewSrcItemObject,
 	: SrcItemObject(NewSrcItemObject),
 	  DestItemObject(NewDestItemObject)
 {
-}
-
-void FSwapContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
-{
-	if (!IsValid(NonReplicatedLoadoutObject))
-	{
-		return;
-	}
-
-	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
-	{
-		InventoryComponent->OnSwap(SrcItemObject.Get(),
-		                           DestItemObject.Get());
-	}
 }

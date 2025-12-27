@@ -320,55 +320,55 @@ bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compar
 	return ComponentStateTags.HasAllExact(Compare);
 }
 
-void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject) const
+void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 {
 	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
 	const auto Rule = GetDropRule();
-	const bool bWasSuccess = Execute(Ctx, Rule);
-#if !WITH_SERVER_CODE || WITH_EDITOR
+	const bool bWasSuccess = CheckCanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
-		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
-		                                        GetTypedOuter<APlayerController>(),
-		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Empty);
+		OnDrop(PendingDropItemObject);
 	}
-#endif
+
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+	                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
+	                                        GetTypedOuter<APlayerController>(),
+	                                        GetTypedOuter<AActor>(),
+	                                        FAVVMNotificationPayload::Empty);
 }
 
-void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject) const
+void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 {
 	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
 	const auto Rule = GetPickupRule();
-	const bool bWasSuccess = Execute(Ctx, Rule);
-#if !WITH_SERVER_CODE || WITH_EDITOR
+	const bool bWasSuccess = CheckCanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
-		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
-		                                        GetTypedOuter<APlayerController>(),
-		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Empty);
+		OnPickup(PendingPickupItemObject);
 	}
-#endif
+
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+	                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
+	                                        GetTypedOuter<APlayerController>(),
+	                                        GetTypedOuter<AActor>(),
+	                                        FAVVMNotificationPayload::Empty);
 }
 
-void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject) const
+void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
 {
 	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
 	const auto Rule = GetSwapRule();
-	const bool bWasSuccess = Execute(Ctx, Rule);
-#if !WITH_SERVER_CODE || WITH_EDITOR
+	const bool bWasSuccess = CheckCanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
-		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
-		                                        GetTypedOuter<APlayerController>(),
-		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Empty);
+		OnSwap(SrcItemObject, DestItemObject);
 	}
-#endif
+
+	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+	                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
+	                                        GetTypedOuter<APlayerController>(),
+	                                        GetTypedOuter<AActor>(),
+	                                        FAVVMNotificationPayload::Empty);
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
@@ -680,8 +680,8 @@ UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() 
 	return ItemObject.Get();
 }
 
-bool UActorInventoryComponent::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                       const TInstancedStruct<FExecutionContextRule>& Rule) const
+bool UActorInventoryComponent::CheckCanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+                                               const TInstancedStruct<FExecutionContextRule>& Rule) const
 {
 	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
 	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
@@ -696,10 +696,5 @@ bool UActorInventoryComponent::Execute(const TInstancedStruct<FExecutionContextP
 	}
 
 	const bool bPredicate = ContextRule->Predicate(NonReplicatedLoadout, Params);
-	if (bPredicate)
-	{
-		ContextParams->Execute(NonReplicatedLoadout);
-	}
-
 	return bPredicate;
 }

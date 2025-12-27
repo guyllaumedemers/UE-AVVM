@@ -18,8 +18,3 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "CraftingContextParams.h"
-
-void FCraftingContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
-{
-	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
-}

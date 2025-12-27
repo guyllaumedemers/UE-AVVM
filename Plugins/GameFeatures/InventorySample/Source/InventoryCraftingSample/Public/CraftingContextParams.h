@@ -35,6 +35,4 @@ USTRUCT(BlueprintType)
 struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
-	
-	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 };

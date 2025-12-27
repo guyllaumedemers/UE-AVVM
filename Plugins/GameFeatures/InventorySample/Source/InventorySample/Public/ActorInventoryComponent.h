@@ -98,13 +98,13 @@ public:
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	void Drop(UItemObject* PendingDropItemObject) const;
+	void Drop(UItemObject* PendingDropItemObject);
 
 	UFUNCTION(BlueprintCallable)
-	void Pickup(UItemObject* PendingPickupItemObject) const;
+	void Pickup(UItemObject* PendingPickupItemObject);
 
 	UFUNCTION(BlueprintCallable)
-	void Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject) const;
+	void Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
 protected:
 	UFUNCTION()
@@ -136,8 +136,8 @@ protected:
 		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
 	};
 
-	bool Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-	             const TInstancedStruct<FExecutionContextRule>& Rule) const;
+	bool CheckCanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+	                     const TInstancedStruct<FExecutionContextRule>& Rule) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
@@ -174,8 +174,5 @@ private:
 	virtual void OnPickup(UItemObject* ItemObject);
 	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
-	friend struct FDropContextParams;
-	friend struct FPickupContextParams;
-	friend struct FSwapContextParams;
 	friend class UInventoryResourceHandlingImpl;
 };
