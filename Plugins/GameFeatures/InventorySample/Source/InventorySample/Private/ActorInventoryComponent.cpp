@@ -298,6 +298,27 @@ bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compar
 	return ComponentStateTags.HasAllExact(Compare);
 }
 
+void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
+{
+	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
+	const auto Rule = FExecutionContextRule::Make<FDropRule>();
+	Execute(Ctx, Rule);
+}
+
+void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
+{
+	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
+	const auto Rule = FExecutionContextRule::Make<FPickupRule>();
+	Execute(Ctx, Rule);
+}
+
+void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
+{
+	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
+	const auto Rule = FExecutionContextRule::Make<FSwapRule>();
+	Execute(Ctx, Rule);
+}
+
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = ItemHandleSystem.Find(ItemToken.UniqueId);
@@ -605,4 +626,28 @@ UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() 
 	}
 
 	return ItemObject.Get();
+}
+
+bool UActorInventoryComponent::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
+                                       const TInstancedStruct<FExecutionContextRule>& Rule)
+{
+	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
+	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
+	{
+		return false;
+	}
+
+	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
+	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
+	{
+		return false;
+	}
+
+	const bool bPredicate = ContextRule->Predicate(NonReplicatedLoadout, Params);
+	if (bPredicate)
+	{
+		ContextParams->Execute(NonReplicatedLoadout);
+	}
+
+	return bPredicate;
 }

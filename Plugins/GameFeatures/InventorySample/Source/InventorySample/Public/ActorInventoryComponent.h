@@ -21,8 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "ExecutionContextParams.h"
+#include "ExecutionContextRule.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "ActorInventoryComponent.generated.h"
 
@@ -94,6 +97,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
 
+	UFUNCTION(BlueprintCallable)
+	void Drop(UItemObject* PendingDropItemObject);
+
+	UFUNCTION(BlueprintCallable)
+	void Pickup(UItemObject* PendingPickupItemObject);
+
+	UFUNCTION(BlueprintCallable)
+	void Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+
 protected:
 	UFUNCTION()
 	void OnItemsRetrieved(FItemToken ItemToken);
@@ -124,6 +136,9 @@ protected:
 		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
 	};
 
+	bool Execute(const TInstancedStruct<FExecutionContextParams>& Params,
+	             const TInstancedStruct<FExecutionContextRule>& Rule);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
@@ -150,8 +165,7 @@ private:
 	void SetupItemObjects(const TArray<UObject*>& NewResources);
 	void SetupItemActors(const TArray<UObject*>& NewResources);
 
-	// @gdemers virtual overrides are available. respect property access modifiers. use
-	// the ULoadoutUtils api if necessary.
+	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnDrop(UItemObject* ItemObject);
 	virtual void OnPickup(UItemObject* ItemObject);
 	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);

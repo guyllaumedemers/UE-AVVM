@@ -20,37 +20,11 @@
 #include "NonReplicatedLoadoutObject.h"
 
 #include "ActorInventoryComponent.h"
-#include "ExecutionContextParams.h"
-#include "ExecutionContextRule.h"
 
 void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
                                                               const TArray<UItemObject*>& OldItemObjects)
 {
 	// TODO @gdemers Update collection entries
-}
-
-bool UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                          const TInstancedStruct<FExecutionContextRule>& Rule)
-{
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
-	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return false;
-	}
-
-	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
-	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
-	{
-		return false;
-	}
-
-	const bool bPredicate = ContextRule->Predicate(this, Params);
-	if (bPredicate)
-	{
-		ContextParams->Execute(this);
-	}
-
-	return bPredicate;
 }
 
 void ULoadoutUtils::Drop(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,

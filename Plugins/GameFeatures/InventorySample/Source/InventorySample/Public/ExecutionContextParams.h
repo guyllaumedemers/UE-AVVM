@@ -21,6 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "StructUtils/InstancedStruct.h"
+
 #include "ExecutionContextParams.generated.h"
 
 class UItemObject;
@@ -39,7 +41,19 @@ struct INVENTORYSAMPLE_API FExecutionContextParams
 
 	virtual ~FExecutionContextParams() = default;
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const PURE_VIRTUAL(Execute, return;);
+
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextParams>::Make<T>
+	template <typename TChild, typename... TArgs>
+	static TInstancedStruct<FExecutionContextParams> Make(TArgs&&... Args);
+
+	static TInstancedStruct<FExecutionContextParams> Empty;
 };
+
+template <typename TChild, typename... TArgs>
+TInstancedStruct<FExecutionContextParams> FExecutionContextParams::Make(TArgs&&... Args)
+{
+	return TInstancedStruct<FExecutionContextParams>::Make<TChild>(Forward<TArgs>(Args)...);
+}
 
 template<> struct TBaseStructure<FExecutionContextParams> 
 {
@@ -57,6 +71,8 @@ struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
 	
+	FDropContextParams() = default;
+	FDropContextParams(UItemObject* NewItemObject);
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -74,6 +90,8 @@ struct INVENTORYSAMPLE_API FPickupContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
 
+	FPickupContextParams() = default;
+	FPickupContextParams(UItemObject* NewItemObject);
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -90,7 +108,9 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
-
+	
+	FSwapContextParams() = default;
+	FSwapContextParams(UItemObject* NewSrcItemObject, UItemObject* NewDestItemObject);
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)

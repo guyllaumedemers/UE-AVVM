@@ -39,10 +39,21 @@ struct INVENTORYSAMPLE_API FExecutionContextRule
 	GENERATED_BODY()
 
 	virtual ~FExecutionContextRule() = default;
-
 	virtual bool Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
+
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextRule>::Make<T>
+	template <typename TChild, typename... TArgs>
+	static TInstancedStruct<FExecutionContextRule> Make(TArgs&&... Args);
+
+	static TInstancedStruct<FExecutionContextRule> Empty;
 };
+
+template <typename TChild, typename... TArgs>
+TInstancedStruct<FExecutionContextRule> FExecutionContextRule::Make(TArgs&&... Args)
+{
+	return TInstancedStruct<FExecutionContextRule>::Make<TChild>(Forward<TArgs>(Args)...);
+}
 
 template <>
 struct TBaseStructure<FExecutionContextRule>
@@ -61,6 +72,7 @@ struct INVENTORYSAMPLE_API FDropRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
 
+	FDropRule() = default;
 	virtual bool Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
@@ -76,6 +88,7 @@ struct INVENTORYSAMPLE_API FPickupRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
 
+	FPickupRule() = default;
 	virtual bool Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
@@ -90,7 +103,8 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FSwapRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
-
+	
+	FSwapRule() = default;
 	virtual bool Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

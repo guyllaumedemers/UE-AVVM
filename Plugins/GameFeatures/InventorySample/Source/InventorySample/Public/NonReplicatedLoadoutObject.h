@@ -55,10 +55,6 @@ public:
 	void HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
 	                                 const TArray<UItemObject*>& OldItemObjects);
 
-	UFUNCTION(BlueprintCallable)
-	bool Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-	             const TInstancedStruct<FExecutionContextRule>& Rule);
-
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the order in which mouse wheel scolling cycles through items."))
 	TArray<FGameplayTag> CyclingSlots;
