@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
+#include "ActorInventoryComponent.h"
 #include "ExecutionContextParams.h"
 #include "ExecutionContextRule.h"
 
@@ -54,12 +55,26 @@ bool UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionConte
 
 void UNonReplicatedLoadoutObject::Drop(UItemObject* ItemObject)
 {
+	auto* InventoryComponent = GetTypedOuter<UActorInventoryComponent>();
+	if (IsValid(InventoryComponent))
+	{
+		// TODO @gdemers handle context logic for updating gameplay content,
+		// and backend.
+	}
 }
 
 void UNonReplicatedLoadoutObject::Pickup(UItemObject* ItemObject)
 {
+	auto* InventoryComponent = GetTypedOuter<UActorInventoryComponent>();
+	if (IsValid(InventoryComponent))
+	{
+	}
 }
 
 void UNonReplicatedLoadoutObject::Swap(const FGameplayTag& Src, const FGameplayTag& Dest)
 {
+	auto* InventoryComponent = GetTypedOuter<UActorInventoryComponent>();
+	if (IsValid(InventoryComponent))
+	{
+	}
 }

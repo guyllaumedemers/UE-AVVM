@@ -90,7 +90,7 @@ bool FPickupRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoad
 	}
 
 	const FGameplayTagContainer BlockedTags = FGameplayTagContainer(TAG_INVENTORY_ACTION_PICKUP_BLOCKED);
-	if (PendingPickupItemObject->DoesBehaviourHasPartialMatch(BlockedTags)/*maybe it cannot be interacted with yet*/)
+	if (PendingPickupItemObject->DoesRuntimeStateHasPartialMatch(BlockedTags)/*maybe it cannot be interacted with yet*/)
 	{
 		return false;
 	}
