@@ -21,10 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
-#include "ExecutionContextRule.h"
 #include "GameplayTagContainer.h"
-#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "NonReplicatedLoadoutObject.generated.h"
@@ -64,31 +61,4 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Define the slot tag of the item in hand."))
 	FGameplayTag ActiveItemSlotTag = FGameplayTag::EmptyTag;
-
-	friend class ULoadoutUtils;
-};
-
-/**
- *	Class description:
- *	
- *	ULoadoutUtils is a blueprint function library of reusable function for interfacing with the inventory.
- */
-UCLASS()
-class INVENTORYSAMPLE_API ULoadoutUtils : public UBlueprintFunctionLibrary
-{
-	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable)
-	static void Drop(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-	                 UItemObject* ItemObject);
-
-	UFUNCTION(BlueprintCallable)
-	static void Pickup(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-	                   UItemObject* ItemObject);
-
-	UFUNCTION(BlueprintCallable)
-	static void Swap(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-	                 UItemObject* SrcItemObject,
-	                 UItemObject* DestItemObject);
 };

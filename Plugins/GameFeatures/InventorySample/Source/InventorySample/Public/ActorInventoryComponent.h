@@ -170,6 +170,8 @@ private:
 	virtual void OnPickup(UItemObject* ItemObject);
 	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
+	friend struct FDropContextParams;
+	friend struct FPickupContextParams;
+	friend struct FSwapContextParams;
 	friend class UInventoryResourceHandlingImpl;
-	friend class ULoadoutUtils;
 };

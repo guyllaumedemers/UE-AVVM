@@ -19,56 +19,8 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
-#include "ActorInventoryComponent.h"
-
 void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
                                                               const TArray<UItemObject*>& OldItemObjects)
 {
 	// TODO @gdemers Update collection entries
-}
-
-void ULoadoutUtils::Drop(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-                         UItemObject* ItemObject)
-{
-	if (!IsValid(NonReplicatedLoadoutObject))
-	{
-		return;
-	}
-
-	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
-	{
-		InventoryComponent->OnDrop(ItemObject);
-	}
-}
-
-void ULoadoutUtils::Pickup(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-                           UItemObject* ItemObject)
-{
-	if (!IsValid(NonReplicatedLoadoutObject))
-	{
-		return;
-	}
-
-	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
-	{
-		InventoryComponent->OnPickup(ItemObject);
-	}
-}
-
-void ULoadoutUtils::Swap(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-                         UItemObject* SrcItemObject,
-                         UItemObject* DestItemObject)
-{
-	if (!IsValid(NonReplicatedLoadoutObject))
-	{
-		return;
-	}
-
-	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
-	{
-		InventoryComponent->OnSwap(SrcItemObject, DestItemObject);
-	}
 }
