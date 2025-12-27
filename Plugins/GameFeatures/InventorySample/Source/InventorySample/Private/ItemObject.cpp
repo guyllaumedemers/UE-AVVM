@@ -98,14 +98,14 @@ bool UItemObject::DoesBehaviourHasExactMatch(const FGameplayTagContainer& Compar
 	return Compare.HasAllExact(ItemBehaviourTypeTags);
 }
 
-bool UItemObject::DoesModSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
+bool UItemObject::DoesAttachmentSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAnyExact(ItemModSlotTags);
+	return Compare.HasAnyExact(ItemAttachmentSlotTags);
 }
 
-bool UItemObject::DoesModSlotHasExactMatch(const FGameplayTagContainer& Compare) const
+bool UItemObject::DoesAttachmentSlotHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAllExact(ItemModSlotTags);
+	return Compare.HasAllExact(ItemAttachmentSlotTags);
 }
 
 bool UItemObject::DoesSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
@@ -192,6 +192,17 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *RuntimeItemActor->GetName(),
 	       *GetName());
+	
+	const bool bShouldNotifyWhenRegisteringAttachment = RuntimeItemActor->Implements<UAVVMDoesSupportAttachmentNotify>();
+	if (bShouldNotifyWhenRegisteringAttachment)
+	{
+		const auto OnSocketAttached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketAttachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemAttached);
+		const auto OnSocketDetached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketDetachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemDetached);
+		
+		auto Observer = TScriptInterface<IAVVMDoesSupportAttachmentNotify>(RuntimeItemActor);
+		Observer->OnNewSocketAttachedDelegate_Add(OnSocketAttached);
+		Observer->OnNewSocketDetachedDelegate_Add(OnSocketDetached);
+	}
 
 	bool bCanRegisterAttributeSet = true;
 	if (bShouldSpawnAndAttach)
@@ -199,6 +210,9 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		FAVVMSocketTargetingDeferralContextArgs Params;
 		Params.Parent = Outer;
 		Params.SocketName = SocketName;
+		// TODO @gdemers : will require proper tag handling later. keep gameplay tag container for now until requirements
+		// changes.
+		Params.AttachmentSlotTag = ItemAttachmentSlotTags.First();
 		Params.SrcAttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
 
 		// @gdemers We use this so we can handle more complex case that require traversal of our root actor
@@ -221,6 +235,11 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	{
 		ASC->SetupAttributeSet(ContextArgs.AttributeSetSoftObjectPath, RuntimeItemActor);
 	}
+}
+
+const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& UItemObject::GetNonReplicatedItemAttachmentActors() const
+{
+	return NonReplicatedItemAttachmentActors;
 }
 
 void UItemObject::OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath)
@@ -257,4 +276,15 @@ void UItemObject::OnRep_ItemStateModified(const FItemState& OldItemState)
 	{
 		OnItemRuntimeCountChanged.Broadcast(RuntimeItemState.Counter);
 	}
+}
+
+void UItemObject::OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentSlotTag,
+                                          const AActor* NewAttachment)
+{
+	NonReplicatedItemAttachmentActors.FindOrAdd(NewItemAttachmentSlotTag, NewAttachment);
+}
+
+void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag)
+{
+	NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
 }

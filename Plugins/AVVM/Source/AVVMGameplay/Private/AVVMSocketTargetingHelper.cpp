@@ -29,18 +29,49 @@ UScriptStruct* TBaseStructure<FAVVMSocketTargetingHelper>::Get()
 	return FAVVMSocketTargetingHelper::StaticStruct();
 }
 
-FDelegateHandle IAVVMDoesSupportSocketDeferral::OnSocketParentAvailableDelegate_Add(const FOnParentSocketAvailableDelegate::FDelegate& Callback)
+void IAVVMDoesSupportAttachmentNotify::NotifyOnNewSocketAttached(const FGameplayTag& NewItemAttachmentSlotTag, const AActor* NewChild) const
 {
-	return OnParentSocketAvailable.Add(Callback);
+	OnNewSocketAttached.Broadcast(NewItemAttachmentSlotTag, NewChild);
 }
 
-void IAVVMDoesSupportSocketDeferral::OnSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle)
+FDelegateHandle IAVVMDoesSupportAttachmentNotify::OnNewSocketAttachedDelegate_Add(const FOnNewSocketAttachedDelegate::FDelegate& Callback)
 {
-	OnParentSocketAvailable.Remove(Handle);
+	return OnNewSocketAttached.Add(Callback);
+}
+
+void IAVVMDoesSupportAttachmentNotify::OnNewSocketAttachedDelegate_Remove(const FDelegateHandle& Handle)
+{
+	OnNewSocketAttached.Remove(Handle);
+}
+
+void IAVVMDoesSupportAttachmentNotify::NotifyOnNewSocketDetached(const FGameplayTag& NewItemAttachmentSlotTag) const
+{
+	OnNewSocketDetached.Broadcast(NewItemAttachmentSlotTag);
+}
+
+FDelegateHandle IAVVMDoesSupportAttachmentNotify::OnNewSocketDetachedDelegate_Add(const FOnNewSocketDetachedDelegate::FDelegate& Callback)
+{
+	return OnNewSocketDetached.Add(Callback);
+}
+
+void IAVVMDoesSupportAttachmentNotify::OnNewSocketDetachedDelegate_Remove(const FDelegateHandle& Handle)
+{
+	OnNewSocketDetached.Remove(Handle);
+}
+
+FDelegateHandle IAVVMDoesSupportSocketDeferral::OnNewSocketParentAvailableDelegate_Add(const FOnNewSocketParentAvailableDelegate::FDelegate& Callback)
+{
+	return OnNewSocketParentAvailable.Add(Callback);
+}
+
+void IAVVMDoesSupportSocketDeferral::OnNewSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle)
+{
+	OnNewSocketParentAvailable.Remove(Handle);
 }
 
 bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
+	const FGameplayTag& AttachmentSlotTag = ContextArgs.AttachmentSlotTag;
 	const FName SocketName = ContextArgs.SocketName;
 	AActor* Parent = ContextArgs.Parent.Get();
 
@@ -53,7 +84,7 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FA
 	AActor* SocketTarget = Parent;
 
 	// @gdemers in some cases, this will fail which is expected!
-	const bool bDoesImplement = Src->Implements<UAVVMDoesSupportInnerSocketTargeting>();
+	const bool bDoesImplement = Src->Implements<UAVVMDoesSupportSocketTargeting>();
 	if (!bDoesImplement)
 	{
 		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
@@ -61,7 +92,7 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FA
 		return true;
 	}
 
-	const TInstancedStruct<FAVVMSocketTargetingHelper> SocketHelper = IAVVMDoesSupportInnerSocketTargeting::Execute_GetSocketHelper(Src);
+	const TInstancedStruct<FAVVMSocketTargetingHelper> SocketHelper = IAVVMDoesSupportSocketTargeting::Execute_GetSocketHelper(Src);
 
 	const auto* Helper = SocketHelper.GetPtr<FAVVMSocketTargetingHelper>();
 	if (!ensureAlwaysMsgf(Helper != nullptr, TEXT("Invalid Socket Helper impl.")))
@@ -78,19 +109,20 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FA
 		       UAVVMGameplayUtils::PrintNetSource(Src).GetData(),
 		       *Src->GetName());
 
-		IAVVMDoesSupportInnerSocketTargeting::Execute_DeferredSocketParenting(Src, ContextArgs);
+		IAVVMDoesSupportSocketTargeting::Execute_DeferredSocketParenting(Src, ContextArgs);
 		return false;
 	}
 	else
 	{
 		// @gdemers Update our Owning outer for future ASC retrieval from the AbilitySystem interface api.
-		IAVVMDoesSupportInnerSocketTargeting::Execute_Attach(Src, SocketTarget, SocketName);
+		IAVVMDoesSupportSocketTargeting::Execute_Attach(Src, SocketTarget, AttachmentSlotTag, SocketName);
 		return true;
 	}
 }
 
 bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs)
 {
+	const FGameplayTag& AttachmentSlotTag = ContextArgs.AttachmentSlotTag;
 	const FName SocketName = ContextArgs.SocketName;
 	AActor* Parent = ContextArgs.Parent.Get();
 
@@ -102,7 +134,7 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSo
 	// @gdemers actor we traverse, and search socket on.
 	AActor* SocketTarget = Parent;
 
-	const bool bDoesImplement = Src->Implements<UAVVMDoesSupportInnerSocketTargeting>();
+	const bool bDoesImplement = Src->Implements<UAVVMDoesSupportSocketTargeting>();
 	if (!bDoesImplement)
 	{
 		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
@@ -111,17 +143,17 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSo
 	}
 
 	// @gdemers Update our Owning outer for future ASC retrieval from the AbilitySystem interface api.
-	IAVVMDoesSupportInnerSocketTargeting::Execute_Attach(Src, SocketTarget, SocketName);
+	IAVVMDoesSupportSocketTargeting::Execute_Attach(Src, SocketTarget, AttachmentSlotTag, SocketName);
 	return true;
 }
 
 bool FAVVMSocketTargetingHelper::Static_Detach(AActor* Src)
 {
-	if (!IsValid(Src) || !Src->Implements<UAVVMDoesSupportInnerSocketTargeting>())
+	if (!IsValid(Src) || !Src->Implements<UAVVMDoesSupportSocketTargeting>())
 	{
 		return false;
 	}
 
-	IAVVMDoesSupportInnerSocketTargeting::Execute_Detach(Src);
+	IAVVMDoesSupportSocketTargeting::Execute_Detach(Src);
 	return true;
 }

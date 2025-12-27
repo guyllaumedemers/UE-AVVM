@@ -104,7 +104,7 @@ public:
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
 	
 	// IAVVMDoesSupportSocketDeferral
-	virtual void NotifyAvailableSocketParent(AActor* SocketTarget) override;
+	virtual void NotifyOnNewSocketParentAvailable(AActor* SocketTarget) override;
 
 	// IAVVMResourceProvider
 	virtual int32 GetProviderUniqueId_Implementation() const override;

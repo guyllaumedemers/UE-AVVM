@@ -24,6 +24,7 @@
 #include "AbilitySystemInterface.h"
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
+#include "GameplayTags.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "GameFramework/Actor.h"
 
@@ -53,7 +54,7 @@ UCLASS(BlueprintType, Blueprintable)
 class WEAPONSAMPLE_API AAttachmentActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
-                                          public IAVVMDoesSupportInnerSocketTargeting
+                                          public IAVVMDoesSupportSocketTargeting
 {
 	GENERATED_BODY()
 
@@ -71,7 +72,7 @@ public:
 	// @gdemers IDoesSupportSocketTargeting
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
-	virtual void Attach_Implementation(AActor* Target, const FName NewSocketName) override;
+	virtual void Attach_Implementation(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName NewSocketName) override;
 	virtual void Detach_Implementation() override;
 
 protected:
@@ -85,6 +86,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTag OwningSocketSlotTag = FGameplayTag::EmptyTag;
 
 	FDelegateHandle DeferredSocketParentingDelegateHandle;
 

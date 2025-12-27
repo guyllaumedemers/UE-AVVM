@@ -191,12 +191,12 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 		return;
 	}
 
-	IAVVMDoesSupportSocketDeferral::FOnParentSocketAvailableDelegate::FDelegate Callback;
+	IAVVMDoesSupportSocketDeferral::FOnNewSocketParentAvailableDelegate::FDelegate Callback;
 	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred, ContextArgs);
-	DeferredSocketParentingDelegateHandle = SocketDeferral->OnSocketParentAvailableDelegate_Add(Callback);
+	DeferredSocketParentingDelegateHandle = SocketDeferral->OnNewSocketParentAvailableDelegate_Add(Callback);
 }
 
-void AAttachmentActor::Attach_Implementation(AActor* Target, const FName NewSocketName)
+void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName NewSocketName)
 {
 	if (!ensureAlwaysMsgf(IsValid(Target), TEXT("Invalid Parent!")))
 	{
@@ -217,6 +217,15 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FName NewSock
 	// @gdemers attach actor + add AttributeSet
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
 	OwningOuter = Target;
+
+	const bool bShouldNotifyWhenAttachingActor = Target->Implements<UAVVMDoesSupportAttachmentNotify>();
+	if (bShouldNotifyWhenAttachingActor)
+	{
+		OwningSocketSlotTag = NewItemAttachmentSlotTag;
+		
+		const auto Observer = TScriptInterface<const IAVVMDoesSupportAttachmentNotify>(Target);
+		Observer->NotifyOnNewSocketAttached(NewItemAttachmentSlotTag, this);
+	}
 
 	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
@@ -243,6 +252,13 @@ void AAttachmentActor::Detach_Implementation()
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
+	const bool bShouldNotifyWhenDetachingActor = Outer->Implements<UAVVMDoesSupportAttachmentNotify>();
+	if (bShouldNotifyWhenDetachingActor)
+	{
+		const auto Observer = TScriptInterface<const IAVVMDoesSupportAttachmentNotify>(Outer);
+		Observer->NotifyOnNewSocketDetached(OwningSocketSlotTag);
+	}
+
 	// @gdemers clear AttributeSet provided by this attachment.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 	if (IsValid(ASC))
@@ -268,7 +284,7 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	FAVVMSocketTargetingDeferralContextArgs RecursiveContextArgs = ContextArgs;
 	RecursiveContextArgs.Parent = Target;
 
-	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
+	SocketDeferral->OnNewSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
 	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActorAsync(this, RecursiveContextArgs);
 	if (!bIsRooted)
 	{

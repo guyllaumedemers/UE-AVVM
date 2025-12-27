@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTags.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "AVVMSocketTargetingHelper.generated.h"
@@ -78,22 +79,25 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
 	FName SocketName = NAME_None;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
 	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
 };
 
 /**
  *	Class description:
  *	
- *	IAVVMDoesSupportSocketInnerTargeting is an interface to be impl in actor classes that require attachment from an actor thats lives as child of a root actor. example : Attachment Actor that require
+ *	IAVVMDoesSupportSocketTargeting is an interface to be impl in actor classes that require attachment from an actor thats lives as child of a root actor. example : Attachment Actor that require
  *	socketing in Weapons (which itself is rooted under the ACharacter).
  */
 UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UAVVMDoesSupportInnerSocketTargeting : public UInterface
+class AVVMGAMEPLAY_API UAVVMDoesSupportSocketTargeting : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMGAMEPLAY_API IAVVMDoesSupportInnerSocketTargeting
+class AVVMGAMEPLAY_API IAVVMDoesSupportSocketTargeting
 {
 	GENERATED_BODY()
 
@@ -105,14 +109,46 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void DeferredSocketParenting(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) PURE_VIRTUAL(DefferSocketParenting_Implementation, return;);
-	
+
 	UFUNCTION(BlueprintNativeEvent)
-	void Attach(AActor* Target, const FName SocketName);
-	virtual void Attach_Implementation(AActor* Target, const FName NewSocketName) PURE_VIRTUAL(Attach_Implementation, return;);
+	void Attach(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName SocketName);
+	virtual void Attach_Implementation(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName NewSocketName) PURE_VIRTUAL(Attach_Implementation, return;);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void Detach();
 	virtual void Detach_Implementation() PURE_VIRTUAL(Detach_Implementation, return;);
+};
+
+/**
+*	Class description:
+ *	
+ *	IAVVMDoesSupportAttachmentNotify is an interface to be impl in actor classes that require being notified of new child being parent to them.
+ */
+UINTERFACE(BlueprintType)
+class AVVMGAMEPLAY_API UAVVMDoesSupportAttachmentNotify : public UInterface
+{
+	GENERATED_BODY()
+};
+
+class AVVMGAMEPLAY_API IAVVMDoesSupportAttachmentNotify
+{
+	GENERATED_BODY()
+
+public:
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnNewSocketAttachedDelegate, const FGameplayTag& NewItemAttachmentSlotTag, const AActor* NewChild);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnNewSocketDetachedDelegate, const FGameplayTag& NewItemAttachmentSlotTag);
+
+	void NotifyOnNewSocketAttached(const FGameplayTag& NewItemAttachmentSlotTag, const AActor* NewChild) const;
+	FDelegateHandle OnNewSocketAttachedDelegate_Add(const FOnNewSocketAttachedDelegate::FDelegate& Callback);
+	void OnNewSocketAttachedDelegate_Remove(const FDelegateHandle& Handle);
+
+	void NotifyOnNewSocketDetached(const FGameplayTag& NewItemAttachmentSlotTag) const;
+	FDelegateHandle OnNewSocketDetachedDelegate_Add(const FOnNewSocketDetachedDelegate::FDelegate& Callback);
+	void OnNewSocketDetachedDelegate_Remove(const FDelegateHandle& Handle);
+
+protected:
+	FOnNewSocketAttachedDelegate OnNewSocketAttached;
+	FOnNewSocketDetachedDelegate OnNewSocketDetached;
 };
 
 /**
@@ -132,12 +168,12 @@ class AVVMGAMEPLAY_API IAVVMDoesSupportSocketDeferral
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnParentSocketAvailableDelegate, AActor* Parent, AActor* Target);
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnNewSocketParentAvailableDelegate, AActor* Parent, AActor* Target);
 
-	virtual void NotifyAvailableSocketParent(AActor* SocketTarget) PURE_VIRTUAL(NotifyAvailableSocketParent, return;);
-	FDelegateHandle OnSocketParentAvailableDelegate_Add(const FOnParentSocketAvailableDelegate::FDelegate& Callback);
-	void OnSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle);
+	virtual void NotifyOnNewSocketParentAvailable(AActor* SocketTarget) PURE_VIRTUAL(NotifyOnNewSocketParentAvailable, return;);
+	FDelegateHandle OnNewSocketParentAvailableDelegate_Add(const FOnNewSocketParentAvailableDelegate::FDelegate& Callback);
+	void OnNewSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle);
 
 protected:
-	FOnParentSocketAvailableDelegate OnParentSocketAvailable;
+	FOnNewSocketParentAvailableDelegate OnNewSocketParentAvailable;
 };

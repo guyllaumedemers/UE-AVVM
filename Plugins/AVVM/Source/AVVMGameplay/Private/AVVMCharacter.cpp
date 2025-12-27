@@ -108,9 +108,9 @@ TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Imple
 	return bIsValid ? IAVVMCanExposeActorPayload::Execute_GetExposedActorContext(OwningActor.Get()) : IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 
-void AAVVMCharacter::NotifyAvailableSocketParent(AActor* SocketTarget)
+void AAVVMCharacter::NotifyOnNewSocketParentAvailable(AActor* SocketTarget)
 {
-	OnParentSocketAvailable.Broadcast(this, SocketTarget);
+	OnNewSocketParentAvailable.Broadcast(this, SocketTarget);
 }
 
 int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const

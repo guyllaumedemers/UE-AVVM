@@ -128,10 +128,10 @@ public:
 	bool DoesBehaviourHasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesModSlotHasPartialMatch(const FGameplayTagContainer& Compare) const;
+	bool DoesAttachmentSlotHasPartialMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool DoesModSlotHasExactMatch(const FGameplayTagContainer& Compare) const;
+	bool DoesAttachmentSlotHasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool DoesSlotHasPartialMatch(const FGameplayTagContainer& Compare) const;
@@ -161,6 +161,9 @@ public:
 
 	void SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
 
+	// @gdemers read data specific to all attachments equipped on the given UItemObject referenced actor.
+	const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& GetNonReplicatedItemAttachmentActors() const;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;
 
@@ -174,17 +177,24 @@ protected:
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
 
+	UFUNCTION()
+	void OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentSlotTag,
+	                             const AActor* NewAttachment);
+
+	UFUNCTION()
+	void OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
 	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
 	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags that compose this item. Usefull when attaching Modifiers at Runtime."))
-	FGameplayTagContainer ItemModSlotTags = FGameplayTagContainer::EmptyContainer;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
 	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags that compose this item. Usefull when attaching Modifiers at Runtime."))
+	FGameplayTagContainer ItemAttachmentSlotTags = FGameplayTagContainer::EmptyContainer;
 
 	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
 	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.
@@ -196,6 +206,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> RuntimeItemActor = nullptr;
+
+	UPROPERTY(Transient)
+	TMap<FGameplayTag, TWeakObjectPtr<const AActor>> NonReplicatedItemAttachmentActors;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemStateModified")
 	FItemState RuntimeItemState = FItemState();
