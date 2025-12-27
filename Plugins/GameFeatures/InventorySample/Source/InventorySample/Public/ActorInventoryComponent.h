@@ -136,8 +136,8 @@ protected:
 		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
 	};
 
-	bool CheckCanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-	                     const TInstancedStruct<FExecutionContextRule>& Rule) const;
+	bool CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+	                const TInstancedStruct<FExecutionContextRule>& Rule) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;

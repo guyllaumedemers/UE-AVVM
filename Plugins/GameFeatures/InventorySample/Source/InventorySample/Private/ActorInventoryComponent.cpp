@@ -325,7 +325,7 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 {
 	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
 	const auto Rule = GetDropRule();
-	const bool bWasSuccess = CheckCanExecute(Ctx, Rule);
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
 		OnDrop(PendingDropItemObject);
@@ -342,7 +342,7 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 {
 	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
 	const auto Rule = GetPickupRule();
-	const bool bWasSuccess = CheckCanExecute(Ctx, Rule);
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
 		OnPickup(PendingPickupItemObject);
@@ -359,7 +359,7 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 {
 	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
 	const auto Rule = GetSwapRule();
-	const bool bWasSuccess = CheckCanExecute(Ctx, Rule);
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
 		OnSwap(SrcItemObject, DestItemObject);
@@ -681,17 +681,11 @@ UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() 
 	return ItemObject.Get();
 }
 
-bool UActorInventoryComponent::CheckCanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                               const TInstancedStruct<FExecutionContextRule>& Rule) const
+bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+                                          const TInstancedStruct<FExecutionContextRule>& Rule) const
 {
 	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
 	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return false;
-	}
-
-	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
-	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
 	{
 		return false;
 	}
