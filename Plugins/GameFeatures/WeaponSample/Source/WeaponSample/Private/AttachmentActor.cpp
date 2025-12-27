@@ -269,5 +269,17 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	RecursiveContextArgs.Parent = Target;
 
 	SocketDeferral->OnSocketParentAvailableDelegate_Remove(DeferredSocketParentingDelegateHandle);
-	FAVVMSocketTargetingHelper::Static_AttachToActorAsync(this, RecursiveContextArgs);
+	const bool bIsRooted = FAVVMSocketTargetingHelper::Static_AttachToActorAsync(this, RecursiveContextArgs);
+	if (!bIsRooted)
+	{
+		return;
+	}
+
+	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (ensureAlwaysMsgf(IsValid(ASC),
+	                     TEXT("New OwningOuter doesn't own a valid ASC.")))
+	{
+		ASC->SetupAttributeSet(RecursiveContextArgs.SrcAttributeSetSoftObjectPath, Target);
+	}
 }
