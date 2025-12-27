@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "ExecutionContextRule.h"
 
+#include "ExecutionContextParams.h"
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
