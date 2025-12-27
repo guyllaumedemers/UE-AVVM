@@ -96,8 +96,8 @@ struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag Src = FGameplayTag::EmptyTag;
+	FGameplayTag SrcTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag Dest = FGameplayTag::EmptyTag;
+	FGameplayTag DestTag = FGameplayTag::EmptyTag;
 };

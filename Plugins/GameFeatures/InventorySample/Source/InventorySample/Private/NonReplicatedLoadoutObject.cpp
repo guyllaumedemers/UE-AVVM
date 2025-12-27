@@ -53,28 +53,54 @@ bool UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionConte
 	return bPredicate;
 }
 
-void UNonReplicatedLoadoutObject::Drop(UItemObject* ItemObject)
+void ULoadoutUtils::Drop(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                         UItemObject* ItemObject)
 {
-	auto* InventoryComponent = GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
+	if (!IsValid(NonReplicatedLoadoutObject))
 	{
-		// TODO @gdemers handle context logic for updating gameplay content,
-		// and backend.
+		return;
 	}
+
+	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
+	if (!IsValid(InventoryComponent))
+	{
+		return;
+	}
+
+	// TODO @gdemers Modify property referenced on Inventory
 }
 
-void UNonReplicatedLoadoutObject::Pickup(UItemObject* ItemObject)
+void ULoadoutUtils::Pickup(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                           UItemObject* ItemObject)
 {
-	auto* InventoryComponent = GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
+	if (!IsValid(NonReplicatedLoadoutObject))
 	{
+		return;
 	}
+
+	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
+	if (!IsValid(InventoryComponent))
+	{
+		return;
+	}
+
+	// TODO @gdemers Modify property referenced on Inventory
 }
 
-void UNonReplicatedLoadoutObject::Swap(const FGameplayTag& Src, const FGameplayTag& Dest)
+void ULoadoutUtils::Swap(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                         const FGameplayTag& SrcTag,
+                         const FGameplayTag& DestTag)
 {
-	auto* InventoryComponent = GetTypedOuter<UActorInventoryComponent>();
-	if (IsValid(InventoryComponent))
+	if (!IsValid(NonReplicatedLoadoutObject))
 	{
+		return;
 	}
+
+	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
+	if (!IsValid(InventoryComponent))
+	{
+		return;
+	}
+
+	// TODO @gdemers Modify property referenced on Inventory
 }

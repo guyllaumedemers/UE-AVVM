@@ -151,4 +151,5 @@ private:
 	void SetupItemActors(const TArray<UObject*>& NewResources);
 
 	friend class UInventoryResourceHandlingImpl;
+	friend class ULoadoutUtils;
 };
