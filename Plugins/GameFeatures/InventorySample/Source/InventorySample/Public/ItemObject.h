@@ -207,6 +207,10 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> RuntimeItemActor = nullptr;
 
+	// @gdemers server-sided property that cache information about runtime attachments bounds to the actor
+	// referenced by this UItemObject instance. This imply that its not available during gameplay on the client-side which may
+	// not be what you want for your game, but still make its possible to customize/display item configuration in offline scenarios (example : menu lobby).
+	// Note : Alternatives can be put in place to forward that data via RPC following client-sided request.
 	UPROPERTY(Transient)
 	TMap<FGameplayTag, TWeakObjectPtr<const AActor>> NonReplicatedItemAttachmentActors;
 
@@ -214,4 +218,6 @@ protected:
 	FItemState RuntimeItemState = FItemState();
 
 	TSharedPtr<FStreamableHandle> ItemActorHandle;
+	FDelegateHandle OnNewSocketAttachedHandle;
+	FDelegateHandle OnNewSocketDetachedHandle;
 };

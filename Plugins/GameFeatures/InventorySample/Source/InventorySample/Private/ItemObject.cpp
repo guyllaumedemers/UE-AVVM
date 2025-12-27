@@ -21,7 +21,6 @@
 
 #include "AVVMGameplayUtils.h"
 #include "AVVMSocketTargetingHelper.h"
-#include "GameplayTagsManager.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
@@ -200,8 +199,8 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		const auto OnSocketDetached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketDetachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemDetached);
 		
 		auto Observer = TScriptInterface<IAVVMDoesSupportAttachmentNotify>(RuntimeItemActor);
-		Observer->OnNewSocketAttachedDelegate_Add(OnSocketAttached);
-		Observer->OnNewSocketDetachedDelegate_Add(OnSocketDetached);
+		OnNewSocketAttachedHandle = Observer->OnNewSocketAttachedDelegate_Add(OnSocketAttached);
+		OnNewSocketDetachedHandle = Observer->OnNewSocketDetachedDelegate_Add(OnSocketDetached);
 	}
 
 	bool bCanRegisterAttributeSet = true;
