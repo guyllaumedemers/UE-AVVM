@@ -38,6 +38,7 @@
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
+#include "UI/InventoryNotificationPayload.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
@@ -334,7 +335,7 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 	                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
 	                                        GetTypedOuter<APlayerController>(),
 	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Empty);
+	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingDropItemObject, nullptr));
 }
 
 void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
@@ -351,7 +352,7 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 	                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
 	                                        GetTypedOuter<APlayerController>(),
 	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Empty);
+	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingPickupItemObject, nullptr));
 }
 
 void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
@@ -368,7 +369,7 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 	                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
 	                                        GetTypedOuter<APlayerController>(),
 	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Empty);
+	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject));
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
