@@ -56,10 +56,14 @@ public:
 	                                 const TArray<UItemObject*>& OldItemObjects);
 
 	UFUNCTION(BlueprintCallable)
-	void Execute(const TInstancedStruct<FExecutionContextParams>& Params,
+	bool Execute(const TInstancedStruct<FExecutionContextParams>& Params,
 	             const TInstancedStruct<FExecutionContextRule>& Rule);
 
 protected:
+	void Drop(UItemObject* ItemObject);
+	void Pickup(UItemObject* ItemObject);
+	void Swap(const FGameplayTag& Src, const FGameplayTag& Dest);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the order in which mouse wheel scolling cycles through items."))
 	TArray<FGameplayTag> CyclingSlots;
 
@@ -68,4 +72,8 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Define the slot tag of the item in hand."))
 	FGameplayTag ActiveItemSlotTag = FGameplayTag::EmptyTag;
+	
+	friend struct FDropContextParams;
+	friend struct FPickupContextParams;
+	friend struct FSwapContextParams;
 };

@@ -19,22 +19,70 @@
 //SOFTWARE.
 #include "ExecutionContextRule.h"
 
+#include "ItemObject.h"
+#include "NativeGameplayTags.h"
+#include "NonReplicatedLoadoutObject.h"
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_DROP_BLOCKED, "InventorySample.Item.Drop.Blocked");
+
 UScriptStruct* TBaseStructure<FExecutionContextRule>::Get()
 {
 	return FExecutionContextRule::StaticStruct();
 }
 
-bool FSwapRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+bool FDropRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                          const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Params);
+	if (!IsValid(NonReplicatedLoadoutObject))
+	{
+		return false;
+	}
+
+	const auto* DropParams = Params.GetPtr<FDropContextParams>();
+	if (!ensureAlwaysMsgf(DropParams != nullptr,
+	                      TEXT("FExecutionContextParams couldn't be cast to FDropContextParams.")))
+	{
+		return false;
+	}
+
+	const UItemObject* PendingDropItemObject = DropParams->ItemObject.Get();
+	if (!IsValid(PendingDropItemObject))
+	{
+		return false;
+	}
+
+	// @gdemers IMPORTANT : RuntimeCount is handled within the UItemObject, and will apply the expected
+	// tags to prevent actions from being executed on a zero count element.
+	const FGameplayTagContainer BlockedTags = FGameplayTagContainer(TAG_INVENTORY_ACTION_DROP_BLOCKED);
+	if (PendingDropItemObject->DoesBehaviourHasPartialMatch(BlockedTags) /*blocked by design*/ ||
+		PendingDropItemObject->DoesRuntimeStateHasPartialMatch(BlockedTags)/*blocked by another action*/)
+	{
+		return false;
+	}
+
+	// @gdemers more advanced dropping mechanism involving the owning outer should be handled within the
+	// FDropRule context derived type that match design requirements.
+	return true;
 }
 
-bool FPickupRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+bool FPickupRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                            const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Params);
+	if (!IsValid(NonReplicatedLoadoutObject))
+	{
+		return false;
+	}
+
+	return true;
 }
 
-bool FDropRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+bool FSwapRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                          const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Params);
+	if (!IsValid(NonReplicatedLoadoutObject))
+	{
+		return false;
+	}
+
+	return true;
 }

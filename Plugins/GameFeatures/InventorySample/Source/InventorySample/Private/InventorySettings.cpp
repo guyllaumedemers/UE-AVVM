@@ -34,9 +34,9 @@ const FGameplayTag& UInventorySettings::GetEquippedTag()
 	return GetDefault<UInventorySettings>()->EquippedTag;
 }
 
-const FGameplayTag& UInventorySettings::GetDroppedTag()
+const FGameplayTagContainer& UInventorySettings::GetEmptyItemCount_BlockedActions()
 {
-	return GetDefault<UInventorySettings>()->DroppedTag;
+	return GetDefault<UInventorySettings>()->EmptyItemCount_BlockedActions;
 }
 
 const FGameplayTagContainer& UInventorySettings::GetStorageRuleset()

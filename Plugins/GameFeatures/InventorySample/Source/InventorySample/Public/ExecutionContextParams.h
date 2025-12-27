@@ -21,8 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
+
 #include "ExecutionContextParams.generated.h"
 
+class UItemObject;
 class UNonReplicatedLoadoutObject;
 
 /**
@@ -48,15 +51,18 @@ template<> struct TBaseStructure<FExecutionContextParams>
 /**
  *	Class description:
  *
- *	FSwapContextParams is a context struct that defines the properties to be
- *	involved in executing a swap action.
+ *	FDropContextParams is a context struct that defines the properties to be
+ *	involved in executing a drop action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
+struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
 	
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
 };
 
 /**
@@ -69,20 +75,29 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FPickupContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
-	
+
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
 };
 
 /**
  *	Class description:
  *
- *	FDropContextParams is a context struct that defines the properties to be
- *	involved in executing a drop action.
+ *	FSwapContextParams is a context struct that defines the properties to be
+ *	involved in executing a swap action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
+struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
 	
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag Src = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag Dest = FGameplayTag::EmptyTag;
 };

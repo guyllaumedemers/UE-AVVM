@@ -35,6 +35,7 @@ USTRUCT(BlueprintType)
 struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
-	
-	virtual bool Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const override;
+
+	virtual bool Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

@@ -19,22 +19,34 @@
 //SOFTWARE.
 #include "ExecutionContextParams.h"
 
+#include "ItemObject.h" 
+#include "NonReplicatedLoadoutObject.h"
+
 UScriptStruct* TBaseStructure<FExecutionContextParams>::Get()
 {
 	return FExecutionContextParams::StaticStruct();
 }
 
-void FSwapContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
+void FDropContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
 {
-	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
+	if (IsValid(NonReplicatedLoadoutObject))
+	{
+		NonReplicatedLoadoutObject->Drop(ItemObject.Get());
+	}
 }
 
 void FPickupContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
 {
-	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
+	if (IsValid(NonReplicatedLoadoutObject))
+	{
+		NonReplicatedLoadoutObject->Pickup(ItemObject.Get());
+	}
 }
 
-void FDropContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
+void FSwapContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
 {
-	FExecutionContextParams::Execute(NonReplicatedLoadoutObject);
+	if (IsValid(NonReplicatedLoadoutObject))
+	{
+		NonReplicatedLoadoutObject->Swap(Src, Dest);
+	}
 }

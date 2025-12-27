@@ -19,7 +19,8 @@
 //SOFTWARE.
 #include "CraftingContextRule.h"
 
-bool FCraftingContextRule::Predicate(const TInstancedStruct<FExecutionContextParams>& Params) const
+bool FCraftingContextRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+                                     const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Params);
+	return FExecutionContextRule::Predicate(NonReplicatedLoadoutObject, Params);
 }

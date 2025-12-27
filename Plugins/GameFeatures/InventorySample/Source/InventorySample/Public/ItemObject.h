@@ -217,7 +217,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemStateModified")
 	FItemState RuntimeItemState = FItemState();
 
-	TSharedPtr<FStreamableHandle> ItemActorHandle;
+	TSharedPtr<FStreamableHandle> ItemActorHandle = nullptr;
 	FDelegateHandle OnNewSocketAttachedHandle;
 	FDelegateHandle OnNewSocketDetachedHandle;
 };

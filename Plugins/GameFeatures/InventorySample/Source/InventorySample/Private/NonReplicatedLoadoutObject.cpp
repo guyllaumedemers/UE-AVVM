@@ -28,24 +28,38 @@ void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItem
 	// TODO @gdemers Update collection entries
 }
 
-void UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
+bool UNonReplicatedLoadoutObject::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
                                           const TInstancedStruct<FExecutionContextRule>& Rule)
 {
 	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
 	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
 	{
-		return;
+		return false;
 	}
 
 	const auto* ContextParams = Params.GetPtr<FExecutionContextParams>();
 	if (!ensureAlwaysMsgf(ContextParams != nullptr, TEXT("FExecutionContextParams invalid.")))
 	{
-		return;
+		return false;
 	}
 
-	const bool bPredicate = ContextRule->Predicate(Params);
+	const bool bPredicate = ContextRule->Predicate(this, Params);
 	if (bPredicate)
 	{
 		ContextParams->Execute(this);
 	}
+
+	return bPredicate;
+}
+
+void UNonReplicatedLoadoutObject::Drop(UItemObject* ItemObject)
+{
+}
+
+void UNonReplicatedLoadoutObject::Pickup(UItemObject* ItemObject)
+{
+}
+
+void UNonReplicatedLoadoutObject::Swap(const FGameplayTag& Src, const FGameplayTag& Dest)
+{
 }

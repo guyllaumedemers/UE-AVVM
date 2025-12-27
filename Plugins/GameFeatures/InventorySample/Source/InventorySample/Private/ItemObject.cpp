@@ -68,8 +68,14 @@ void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 {
 	RuntimeItemState.Counter = FMath::Clamp<int32>((RuntimeItemState.Counter + NewCountModifier), 0, 999);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
-	
+
 	OnRep_ItemStateModified(RuntimeItemState);
+
+	if (false == !!RuntimeItemState.Counter)
+	{
+		const FGameplayTagContainer BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
+		ModifyRuntimeState(BlockingTags, {});
+	}
 }
 
 bool UItemObject::DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const

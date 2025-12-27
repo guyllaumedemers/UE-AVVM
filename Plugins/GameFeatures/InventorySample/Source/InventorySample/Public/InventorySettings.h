@@ -47,7 +47,7 @@ public:
 	static const FGameplayTag& GetEquippedTag();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetDroppedTag();
+	static const FGameplayTagContainer& GetEmptyItemCount_BlockedActions();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetStorageRuleset();
@@ -81,7 +81,7 @@ protected:
 	FGameplayTag EquippedTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag DroppedTag = FGameplayTag::EmptyTag;
+	FGameplayTagContainer EmptyItemCount_BlockedActions = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
