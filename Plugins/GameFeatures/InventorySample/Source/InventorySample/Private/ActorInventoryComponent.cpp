@@ -629,7 +629,7 @@ UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() 
 }
 
 bool UActorInventoryComponent::Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                       const TInstancedStruct<FExecutionContextRule>& Rule)
+                                       const TInstancedStruct<FExecutionContextRule>& Rule) const
 {
 	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
 	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))

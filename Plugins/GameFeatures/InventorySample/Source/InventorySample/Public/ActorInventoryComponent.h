@@ -137,7 +137,7 @@ protected:
 	};
 
 	bool Execute(const TInstancedStruct<FExecutionContextParams>& Params,
-	             const TInstancedStruct<FExecutionContextRule>& Rule);
+	             const TInstancedStruct<FExecutionContextRule>& Rule) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
