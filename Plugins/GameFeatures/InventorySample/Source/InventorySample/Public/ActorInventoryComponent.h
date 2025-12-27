@@ -164,6 +164,10 @@ protected:
 private:
 	void SetupItemObjects(const TArray<UObject*>& NewResources);
 	void SetupItemActors(const TArray<UObject*>& NewResources);
+	
+	virtual TInstancedStruct<FExecutionContextRule> GetDropRule() const;
+	virtual TInstancedStruct<FExecutionContextRule> GetPickupRule() const;
+	virtual TInstancedStruct<FExecutionContextRule> GetSwapRule() const;
 
 	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnDrop(UItemObject* ItemObject);

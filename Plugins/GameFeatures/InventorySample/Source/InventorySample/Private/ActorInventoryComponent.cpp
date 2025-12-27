@@ -20,12 +20,14 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMGameplayUtils.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMUtils.h"
 #include "InventoryProvider.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
+#include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
@@ -38,6 +40,11 @@
 #include "Resources/AVVMResourceProvider.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
+
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_DROP_ITEM, "InventorySample.Item.Notification.Drop");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM, "InventorySample.Item.Notification.Pickup");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.Item.Notification.Swap");
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -275,6 +282,21 @@ void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResour
 	ItemObject->GetItemActorClassAsync(NewResources[0], Callback);
 }
 
+TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetDropRule() const
+{
+	return FExecutionContextRule::Make<FDropRule>();
+}
+
+TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetPickupRule() const
+{
+	return FExecutionContextRule::Make<FPickupRule>();
+}
+
+TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetSwapRule() const
+{
+	return FExecutionContextRule::Make<FSwapRule>();
+}
+
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 {
 	return Items;
@@ -301,22 +323,52 @@ bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compar
 void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject) const
 {
 	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
-	const auto Rule = FExecutionContextRule::Make<FDropRule>();
-	Execute(Ctx, Rule);
+	const auto Rule = GetDropRule();
+	const bool bWasSuccess = Execute(Ctx, Rule);
+#if !WITH_SERVER_CODE || WITH_EDITOR
+	if (bWasSuccess)
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Empty);
+	}
+#endif
 }
 
 void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject) const
 {
 	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
-	const auto Rule = FExecutionContextRule::Make<FPickupRule>();
-	Execute(Ctx, Rule);
+	const auto Rule = GetPickupRule();
+	const bool bWasSuccess = Execute(Ctx, Rule);
+#if !WITH_SERVER_CODE || WITH_EDITOR
+	if (bWasSuccess)
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Empty);
+	}
+#endif
 }
 
 void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject) const
 {
 	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
-	const auto Rule = FExecutionContextRule::Make<FSwapRule>();
-	Execute(Ctx, Rule);
+	const auto Rule = GetSwapRule();
+	const bool bWasSuccess = Execute(Ctx, Rule);
+#if !WITH_SERVER_CODE || WITH_EDITOR
+	if (bWasSuccess)
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Empty);
+	}
+#endif
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)

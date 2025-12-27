@@ -24,6 +24,7 @@
 #include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
 
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_DROP_BLOCKED, "InventorySample.Item.Drop.Blocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_PICKUP_BLOCKED, "InventorySample.Item.Pickup.Blocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_PICKUP_INTO_SLOT_SWAP, "InventorySample.Item.Pickup.IntoSlotSwap");
