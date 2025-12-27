@@ -29,15 +29,19 @@ UScriptStruct* TBaseStructure<FExecutionContextParams>::Get()
 
 void FDropContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
 {
-	ULoadoutUtils::Drop(NonReplicatedLoadoutObject, ItemObject.Get());
+	ULoadoutUtils::Drop(NonReplicatedLoadoutObject,
+	                    ItemObject.Get());
 }
 
 void FPickupContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
 {
-	ULoadoutUtils::Pickup(NonReplicatedLoadoutObject, ItemObject.Get());
+	ULoadoutUtils::Pickup(NonReplicatedLoadoutObject,
+	                      ItemObject.Get());
 }
 
 void FSwapContextParams::Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const
 {
-	ULoadoutUtils::Swap(NonReplicatedLoadoutObject, SrcTag, DestTag);
+	ULoadoutUtils::Swap(NonReplicatedLoadoutObject,
+	                    SrcItemObject.Get(),
+	                    DestItemObject.Get());
 }

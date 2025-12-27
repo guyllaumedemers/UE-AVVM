@@ -21,8 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
-
 #include "ExecutionContextParams.generated.h"
 
 class UItemObject;
@@ -92,12 +90,12 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
-	
+
 	virtual void Execute(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject) const override;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag SrcTag = FGameplayTag::EmptyTag;
+	TWeakObjectPtr<UItemObject> SrcItemObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag DestTag = FGameplayTag::EmptyTag;
+	TWeakObjectPtr<UItemObject> DestItemObject = nullptr;
 };

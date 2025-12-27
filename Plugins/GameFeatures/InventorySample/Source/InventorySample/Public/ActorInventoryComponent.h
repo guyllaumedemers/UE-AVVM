@@ -150,6 +150,12 @@ private:
 	void SetupItemObjects(const TArray<UObject*>& NewResources);
 	void SetupItemActors(const TArray<UObject*>& NewResources);
 
+	// @gdemers virtual overrides are available. respect property access modifiers. use
+	// the ULoadoutUtils api if necessary.
+	virtual void OnDrop(UItemObject* ItemObject);
+	virtual void OnPickup(UItemObject* ItemObject);
+	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+
 	friend class UInventoryResourceHandlingImpl;
 	friend class ULoadoutUtils;
 };

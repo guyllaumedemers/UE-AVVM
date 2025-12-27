@@ -530,6 +530,28 @@ void UActorInventoryComponent::OnLoadoutObjectRetrieved()
 	}
 }
 
+void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
+{
+	// TODO @gdemers handle item removal, UI notify, and backend update.
+	// Note : UItemObject backend encoding has to be updated to reflect the
+	// storage_id, position, and index count.
+}
+
+void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
+{
+	// TODO @gdemers handle item removal, UI notify, and backend update.
+	// Note : UItemObject backend encoding has to be updated to reflect the
+	// storage_id, position, and index count.
+}
+
+void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
+                                      UItemObject* DestItemObject)
+{
+	// TODO @gdemers handle item removal, UI notify, and backend update.
+	// Note : UItemObject backend encoding has to be updated to reflect the
+	// storage_id, position, and index count.
+}
+
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
 {
 	PendingSpawnRequests.Empty();

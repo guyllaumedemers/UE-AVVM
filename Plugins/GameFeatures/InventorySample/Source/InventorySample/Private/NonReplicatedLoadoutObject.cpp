@@ -62,12 +62,10 @@ void ULoadoutUtils::Drop(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject
 	}
 
 	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (!IsValid(InventoryComponent))
+	if (IsValid(InventoryComponent))
 	{
-		return;
+		InventoryComponent->OnDrop(ItemObject);
 	}
-
-	// TODO @gdemers Modify property referenced on Inventory
 }
 
 void ULoadoutUtils::Pickup(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
@@ -79,17 +77,15 @@ void ULoadoutUtils::Pickup(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObje
 	}
 
 	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (!IsValid(InventoryComponent))
+	if (IsValid(InventoryComponent))
 	{
-		return;
+		InventoryComponent->OnPickup(ItemObject);
 	}
-
-	// TODO @gdemers Modify property referenced on Inventory
 }
 
 void ULoadoutUtils::Swap(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-                         const FGameplayTag& SrcTag,
-                         const FGameplayTag& DestTag)
+                         UItemObject* SrcItemObject,
+                         UItemObject* DestItemObject)
 {
 	if (!IsValid(NonReplicatedLoadoutObject))
 	{
@@ -97,10 +93,8 @@ void ULoadoutUtils::Swap(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject
 	}
 
 	auto* InventoryComponent = NonReplicatedLoadoutObject->GetTypedOuter<UActorInventoryComponent>();
-	if (!IsValid(InventoryComponent))
+	if (IsValid(InventoryComponent))
 	{
-		return;
+		InventoryComponent->OnSwap(SrcItemObject, DestItemObject);
 	}
-
-	// TODO @gdemers Modify property referenced on Inventory
 }

@@ -93,6 +93,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void Swap(UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
-	                 const FGameplayTag& SrcTag,
-	                 const FGameplayTag& DestTag);
+	                 UItemObject* SrcItemObject,
+	                 UItemObject* DestItemObject);
 };
