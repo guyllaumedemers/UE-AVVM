@@ -17,24 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/AVVMActorIdentifierTableRow.h"
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Engine/DataTable.h"
 
 #if WITH_EDITOR
-EDataValidationResult FAVVMActorIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
-{
-	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemActorClass.IsNull())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FItemIdentifierDataTableRow", "", "UItemObject::ItemActorClass missing. No valid TSoftClassPtr specified!"));
-	}
-
-	if (UniqueId < 0 || UniqueId >= INT32_MAX)
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMActorIdentifierDataTableRow", "", "Invalid UniqueId"));
-	}
-
-	return Result;
-}
+#include "Misc/DataValidation.h"
 #endif
+
+#include "ItemStackTableRow.generated.h"
+
+/**
+ *	Class description:
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItemStackTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxStackCount = INDEX_NONE;
+};

@@ -28,6 +28,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
+#include "Data/ItemStackTableRow.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
@@ -160,7 +161,10 @@ bool UItemObject::Stack(UItemObject* Item)
 
 int32 UItemObject::GetMaxStackCount() const
 {
-	return UItemObjectUtils::GetMaxStackCount(this, nullptr);
+	// @gdemers shouldnt require async loading as this table will ever only contains integers.
+	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
+	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
+	return UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
 }
 
 int32 UItemObject::GetRuntimeCount() const
@@ -314,10 +318,24 @@ void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentS
 	NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
 }
 
-int32 UItemObjectUtils::GetMaxStackCount(const UItemObject* SrcItem,
-                                         const UDataTable* MaxStackCountDataTable)
+int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
+                                         const FGameplayTag& MaxStackCountTag)
 {
-	return INDEX_NONE;
+	if (!IsValid(MaxStackCountDataTable))
+	{
+		return INDEX_NONE;
+	}
+
+	const FName RowName = UInventorySettings::GetItemMaxStackCount(MaxStackCountTag);
+	const auto* SearchResult = MaxStackCountDataTable->FindRow<FItemStackTableRow>(RowName, TEXT(""));
+	if (!ensureAlwaysMsgf(SearchResult != nullptr,
+	                      TEXT("Invalid entry. Cannot find UItemObject entry in the data table.")))
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 MaxStackCount = SearchResult->MaxStackCount;
+	return MaxStackCount;
 }
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)

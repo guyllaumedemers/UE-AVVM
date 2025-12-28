@@ -39,6 +39,26 @@ const FGameplayTagContainer& UInventorySettings::GetEmptyItemCount_BlockedAction
 	return GetDefault<UInventorySettings>()->EmptyItemCount_BlockedActions;
 }
 
+const FName UInventorySettings::GetItemMaxStackCount(const FGameplayTag& MaxStackCountTag)
+{
+	for (auto [Tag, RowName] : GetDefault<UInventorySettings>()->ItemMaxStackCounts)
+	{
+		const bool bDoesContains = MaxStackCountTag.MatchesTagExact(Tag);
+		if (bDoesContains)
+		{
+			return RowName;
+		}
+	}
+
+	static const FName Empty = NAME_None;
+	return Empty;
+}
+
+const TSoftObjectPtr<UDataTable>& UInventorySettings::GetItemMaxStackCountDataTable()
+{
+	return GetDefault<UInventorySettings>()->ItemMaxStackCountDataTable;
+}
+
 const FGameplayTagContainer& UInventorySettings::GetStorageRuleset()
 {
 	return GetDefault<UInventorySettings>()->StorageRuleset;

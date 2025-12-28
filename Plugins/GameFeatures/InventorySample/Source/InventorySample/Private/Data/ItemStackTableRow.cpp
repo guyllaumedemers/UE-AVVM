@@ -17,22 +17,16 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/ItemStackTableRow.h"
 
 #if WITH_EDITOR
-EDataValidationResult FAVVMActorIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FItemStackTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemActorClass.IsNull())
+	if (MaxStackCount <= 0 || MaxStackCount >= INT32_MAX)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FItemIdentifierDataTableRow", "", "UItemObject::ItemActorClass missing. No valid TSoftClassPtr specified!"));
-	}
-
-	if (UniqueId < 0 || UniqueId >= INT32_MAX)
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMActorIdentifierDataTableRow", "", "Invalid UniqueId"));
+		Context.AddError(NSLOCTEXT("FItemStackTableRow", "", "Invalid Stack Count"));
 	}
 
 	return Result;

@@ -206,6 +206,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags that compose this item. Usefull when attaching Modifiers at Runtime."))
 	FGameplayTagContainer ItemAttachmentSlotTags = FGameplayTagContainer::EmptyContainer;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Points to a global mapping of tag to int32."))
+	FGameplayTag MaxStackCount_CategoryTag = FGameplayTag::EmptyTag;
+
 	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
 	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
@@ -244,7 +247,8 @@ class INVENTORYSAMPLE_API UItemObjectUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static int32 GetMaxStackCount(const UItemObject* SrcItem, const UDataTable* MaxStackCountDataTable);
+	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
+	                              const FGameplayTag& MaxStackCountTag);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetNumSplits(const UItemObject* SrcItem);

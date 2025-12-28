@@ -50,6 +50,12 @@ public:
 	static const FGameplayTagContainer& GetEmptyItemCount_BlockedActions();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FName GetItemMaxStackCount(const FGameplayTag& MaxStackCountTag);
+
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const TSoftObjectPtr<UDataTable>& GetItemMaxStackCountDataTable();
+
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetStorageRuleset();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
@@ -82,6 +88,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer EmptyItemCount_BlockedActions = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TMap<FGameplayTag/*UItemObject Categories associated with this stack RowName*/, FName> ItemMaxStackCounts;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
