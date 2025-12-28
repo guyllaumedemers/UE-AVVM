@@ -154,7 +154,7 @@ bool UItemObject::CanStack(const UItemObject* Item) const
 	}
 
 	const int32 MaxStackCount = GetMaxStackCount();
-	const int32 TotalStackCount = Item->GetRuntimeCount() + GetRuntimeCount();
+	const int32 TotalStackCount = (Item->GetRuntimeCount() + GetRuntimeCount());
 
 	// @gdemers validate if the total count is lesser than the MaxStackCount.
 	if (TotalStackCount > MaxStackCount)
@@ -167,9 +167,18 @@ bool UItemObject::CanStack(const UItemObject* Item) const
 
 bool UItemObject::Stack(UItemObject* Item)
 {
-	bool bDoesStackOverflow = false;
-	
-	
+	if (!IsValid(Item))
+	{
+		return false;
+	}
+
+	const int32 TotalStackCount = (Item->GetRuntimeCount() + GetRuntimeCount());
+	const int32 ClampedStackCount = FMath::Clamp(TotalStackCount, 0, GetMaxStackCount());
+
+	Item->ModifyRuntimeCount((TotalStackCount - ClampedStackCount)/*handle left-over*/);
+	ModifyRuntimeCount(ClampedStackCount);
+
+	const bool bDoesStackOverflow = (TotalStackCount > ClampedStackCount);
 	return bDoesStackOverflow;
 }
 
