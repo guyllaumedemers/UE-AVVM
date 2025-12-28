@@ -143,6 +143,25 @@ bool UItemObject::IsEmpty() const
 	return (false == !!RuntimeItemState.Counter);
 }
 
+bool UItemObject::CanStack(const UItemObject* Item) const
+{
+	// TODO
+	return true;
+}
+
+bool UItemObject::Stack(UItemObject* Item)
+{
+	bool bDoesStackOverflow = false;
+	
+	
+	return bDoesStackOverflow;
+}
+
+int32 UItemObject::GetMaxStackCount() const
+{
+	return UItemObjectUtils::GetMaxStackCount(this, nullptr);
+}
+
 int32 UItemObject::GetRuntimeCount() const
 {
 	return RuntimeItemState.Counter;
@@ -292,4 +311,34 @@ void UItemObject::OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentS
 void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag)
 {
 	NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
+}
+
+int32 UItemObjectUtils::GetMaxStackCount(const UItemObject* SrcItem,
+                                         const UDataTable* MaxStackCountDataTable)
+{
+	return INDEX_NONE;
+}
+
+int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
+{
+	return INDEX_NONE;
+}
+
+UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
+{
+	UItemObject* OutItem = NewObject<UItemObject>(Outer);
+	if (IsValid(OutItem))
+	{
+		const int32 MaxCount = SrcItem->GetMaxStackCount();
+		const int32 SrcCount = SrcItem->GetRuntimeCount();
+		const int32 SplitResources = FMath::Min(SrcCount, MaxCount);
+		SrcItem->ModifyRuntimeCount(SrcCount - SplitResources);
+		OutItem->ModifyRuntimeCount(SplitResources);
+	}
+
+	return OutItem;
+}
+
+void UItemObjectUtils::DestroyWorldItemObject(const UItemObject* SrcItem)
+{
 }

@@ -35,6 +35,7 @@
 
 struct FStreamableHandle;
 class UAttributeSet;
+class UDataTable;
 class UItemObject;
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, const FSoftObjectPath&, NewActorAttributeSetSoftObjectPath, UItemObject*, NewItemObject);
@@ -152,6 +153,15 @@ public:
 	bool IsEmpty() const;
 
 	UFUNCTION(BlueprintCallable)
+	bool CanStack(const UItemObject* Item) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool Stack(UItemObject* Item);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetMaxStackCount() const;
+
+	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
 	const FDataRegistryId& GetItemActorId() const;
@@ -220,4 +230,26 @@ protected:
 	TSharedPtr<FStreamableHandle> ItemActorHandle = nullptr;
 	FDelegateHandle OnNewSocketAttachedHandle;
 	FDelegateHandle OnNewSocketDetachedHandle;
+};
+
+/**
+ * 
+ */
+UCLASS()
+class UItemObjectUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static int32 GetMaxStackCount(const UItemObject* SrcItem, const UDataTable* MaxStackCountDataTable);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetNumSplits(const UItemObject* SrcItem);
+
+	UFUNCTION(BlueprintCallable)
+	static UItemObject* SplitObject(UObject* Outer, UItemObject* SrcItem);
+	
+	UFUNCTION(BlueprintCallable)
+	static void DestroyWorldItemObject(const UItemObject* SrcItem);
 };

@@ -46,6 +46,7 @@ TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Invent
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_DROP_ITEM, "InventorySample.Item.Notification.Drop");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM, "InventorySample.Item.Notification.Pickup");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.Item.Notification.Swap");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_STORAGE_NOENTRY, "InventorySample.Item.Storage.NoEntry");
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -606,24 +607,82 @@ void UActorInventoryComponent::OnLoadoutObjectRetrieved()
 
 void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 {
-	// TODO @gdemers handle item removal, UI notify, and backend update.
-	// Note : UItemObject backend encoding has to be updated to reflect the
-	// storage_id, position, and index count.
+	if (!IsValid(ItemObject))
+	{
+		return;
+	}
+	
+	const bool bDoesContains = Items.Contains(ItemObject);
+	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Item no longer exist. Possible racing condition.")))
+	{
+		return;
+	}
+
+	TArray<UItemObject*> OldItems = Items;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
+	RemoveReplicatedSubObject(ItemObject);
+	Items.Remove(ItemObject);
+
+	OnRep_ItemCollectionChanged(OldItems);
+	
+	// TODO @gdemers Handle actor creation + UItemObject binding to World Actor created for
+	// later retrieval during pickup.
+	// Also, update backend representation of the player inventory.
 }
 
 void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 {
-	// TODO @gdemers handle item removal, UI notify, and backend update.
-	// Note : UItemObject backend encoding has to be updated to reflect the
-	// storage_id, position, and index count.
+	if (!IsValid(ItemObject))
+	{
+		return;
+	}
+
+	const TObjectPtr<UItemObject>* SearchResult = Items.FindByPredicate([InputItem = ItemObject](const UItemObject* SrcItem)
+	{
+		return IsValid(SrcItem) && SrcItem->CanStack(InputItem);
+	});
+
+	bool bDoesStackOverflow = false;
+
+	// @gdemers an entry already exist for us to support stacking.
+	if ((SearchResult != nullptr) && IsValid(*SearchResult))
+	{
+		// @gdemers our stack was too big to fit the whole set, require inventory expansion.
+		bDoesStackOverflow = (*SearchResult)->Stack(ItemObject);
+	}
+
+	// @gdemers check if there is still unique entries available within our bounds.
+	const auto StorageTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+	const bool bHasAvailableEntries = HasPartialMatch(StorageTags);
+	if (bDoesStackOverflow && bHasAvailableEntries)
+	{
+		// @gdemers add new entry in inventory with remaining stack count.
+		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
+		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
+		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
+		for (int32 i = 0; i < NumSplits; ++i)
+		{
+			UItemObject* NewItemObjectEntry = UItemObjectUtils::SplitObject(this, ItemObject);
+			AddReplicatedSubObject(NewItemObjectEntry);
+			Items.Add(NewItemObjectEntry);
+		}
+	}
+
+	// @gdemers leave the owning actor in world for another player pickup.
+	if (bDoesStackOverflow && !bHasAvailableEntries)
+	{
+		return;
+	}
+
+	// @gdemers destroy our owning interaction actor.
+	UItemObjectUtils::DestroyWorldItemObject(ItemObject);
 }
 
 void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
                                       UItemObject* DestItemObject)
 {
-	// TODO @gdemers handle item removal, UI notify, and backend update.
-	// Note : UItemObject backend encoding has to be updated to reflect the
-	// storage_id, position, and index count.
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
