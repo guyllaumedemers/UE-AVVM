@@ -172,9 +172,12 @@ bool UItemObject::Stack(UItemObject* Item)
 		return false;
 	}
 
+	// @gdemers get stack count from sum between both objects.
 	const int32 TotalStackCount = (Item->GetRuntimeCount() + GetRuntimeCount());
 	const int32 ClampedStackCount = FMath::Clamp(TotalStackCount, 0, GetMaxStackCount());
 
+	// @gdemers update stack internal representation. Note : the function input may overflow the stack
+	// 'this' UItemObject reference.
 	Item->ModifyRuntimeCount((TotalStackCount - ClampedStackCount)/*handle left-over*/);
 	ModifyRuntimeCount(ClampedStackCount);
 
