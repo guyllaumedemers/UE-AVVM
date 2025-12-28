@@ -147,7 +147,21 @@ bool UItemObject::IsEmpty() const
 
 bool UItemObject::CanStack(const UItemObject* Item) const
 {
-	// TODO
+	// @gdemers validate if both items are of same types.
+	if (!IsValid(Item) || (Item->GetItemActorId() != GetItemActorId()))
+	{
+		return false;
+	}
+
+	const int32 MaxStackCount = GetMaxStackCount();
+	const int32 TotalStackCount = Item->GetRuntimeCount() + GetRuntimeCount();
+
+	// @gdemers validate if the total count is lesser than the MaxStackCount.
+	if (TotalStackCount > MaxStackCount)
+	{
+		return false;
+	}
+
 	return true;
 }
 
