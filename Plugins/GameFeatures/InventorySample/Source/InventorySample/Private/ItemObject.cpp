@@ -334,7 +334,12 @@ int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
 
 UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 {
-	UItemObject* OutItem = NewObject<UItemObject>(Outer);
+	if (!IsValid(SrcItem))
+	{
+		return nullptr;
+	}
+
+	UItemObject* OutItem = NewObject<UItemObject>(Outer, SrcItem->GetFName(), RF_NoFlags, SrcItem);
 	if (IsValid(OutItem))
 	{
 		const int32 MaxCount = SrcItem->GetMaxStackCount();
