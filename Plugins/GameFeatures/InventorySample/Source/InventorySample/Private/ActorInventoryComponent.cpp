@@ -611,7 +611,7 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 	{
 		return;
 	}
-	
+
 	const bool bDoesContains = Items.Contains(ItemObject);
 	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Item no longer exist. Possible racing condition.")))
 	{
@@ -625,10 +625,12 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 	Items.Remove(ItemObject);
 
 	OnRep_ItemCollectionChanged(OldItems);
-	
-	// TODO @gdemers Handle actor creation + UItemObject binding to World Actor created for
+
+	// TODO @gdemers update backend representation of the player inventory.
+
+	// @gdemers Handle actor creation + UItemObject binding to World Actor created for
 	// later retrieval during pickup.
-	// Also, update backend representation of the player inventory.
+	UItemObjectUtils::SpawnWorldItemActor(GetWorld(), ItemObject);
 }
 
 void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
@@ -677,7 +679,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	}
 
 	// @gdemers destroy our owning interaction actor.
-	UItemObjectUtils::DestroyWorldItemObject(ItemObject);
+	UItemObjectUtils::DestroyWorldItemActor(ItemObject);
 }
 
 void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,

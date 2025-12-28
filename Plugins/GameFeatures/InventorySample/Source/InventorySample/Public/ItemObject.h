@@ -233,10 +233,12 @@ protected:
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UItemObjectUtils is a blueprint function library that expose reusable api.
  */
 UCLASS()
-class UItemObjectUtils : public UBlueprintFunctionLibrary
+class INVENTORYSAMPLE_API UItemObjectUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -251,5 +253,8 @@ public:
 	static UItemObject* SplitObject(UObject* Outer, UItemObject* SrcItem);
 	
 	UFUNCTION(BlueprintCallable)
-	static void DestroyWorldItemObject(const UItemObject* SrcItem);
+	static AActor* SpawnWorldItemActor(const UWorld* World, UItemObject* SrcItem);
+	
+	UFUNCTION(BlueprintCallable)
+	static void DestroyWorldItemActor(const UItemObject* SrcItem);
 };

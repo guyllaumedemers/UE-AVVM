@@ -24,6 +24,7 @@
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
+#include "PickuptemActor.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
@@ -339,6 +340,27 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 	return OutItem;
 }
 
-void UItemObjectUtils::DestroyWorldItemObject(const UItemObject* SrcItem)
+AActor* UItemObjectUtils::SpawnWorldItemActor(const UWorld* World, UItemObject* SrcItem)
 {
+	auto* Out = Cast<APickupActor>(UInventoryManagerSubsystem::Static_CreateItemActor(World, APickupActor::StaticClass(), nullptr));
+	if (IsValid(Out))
+	{
+		Out->Setup(SrcItem);
+	}
+
+	return Out;
+}
+
+void UItemObjectUtils::DestroyWorldItemActor(const UItemObject* SrcItem)
+{
+	if (!IsValid(SrcItem))
+	{
+		return;
+	}
+
+	auto* OwningOuter = SrcItem->GetTypedOuter<APickupActor>();
+	if (IsValid(OwningOuter))
+	{
+		OwningOuter->Destroy();
+	}
 }
