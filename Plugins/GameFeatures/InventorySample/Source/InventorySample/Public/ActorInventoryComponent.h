@@ -138,6 +138,15 @@ protected:
 
 	bool CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
 	                const TInstancedStruct<FExecutionContextRule>& Rule) const;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Drop(UItemObject* PendingDropItemObject);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Pickup(UItemObject* PendingDropItemObject);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;

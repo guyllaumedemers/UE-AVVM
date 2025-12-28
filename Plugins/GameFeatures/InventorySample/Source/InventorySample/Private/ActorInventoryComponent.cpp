@@ -327,9 +327,16 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
 	const auto Rule = GetDropRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
-	if (bWasSuccess && (GetOwnerRole() == ROLE_Authority))
+	if (bWasSuccess)
 	{
-		OnDrop(PendingDropItemObject);
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnDrop(PendingDropItemObject);
+		}
+		else
+		{
+			Server_Drop(PendingDropItemObject);
+		}
 	}
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
@@ -344,9 +351,16 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
 	const auto Rule = GetPickupRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
-	if (bWasSuccess && (GetOwnerRole() == ROLE_Authority))
+	if (bWasSuccess)
 	{
-		OnPickup(PendingPickupItemObject);
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnPickup(PendingPickupItemObject);
+		}
+		else
+		{
+			Server_Pickup(PendingPickupItemObject);
+		}
 	}
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
@@ -361,9 +375,16 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
 	const auto Rule = GetSwapRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
-	if (bWasSuccess && (GetOwnerRole() == ROLE_Authority))
+	if (bWasSuccess)
 	{
-		OnSwap(SrcItemObject, DestItemObject);
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnSwap(SrcItemObject, DestItemObject);
+		}
+		else
+		{
+			Server_Swap(SrcItemObject, DestItemObject);
+		}
 	}
 
 	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
@@ -755,4 +776,19 @@ bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionConte
 
 	const bool bPredicate = ContextRule->Predicate(NonReplicatedLoadout, Params);
 	return bPredicate;
+}
+
+void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
+{
+	Drop(PendingDropItemObject);
+}
+
+void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* PendingDropItemObject)
+{
+	Pickup(PendingDropItemObject);
+}
+
+void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemObject, UItemObject* DestItemObject)
+{
+	Swap(SrcItemObject, DestItemObject);
 }
