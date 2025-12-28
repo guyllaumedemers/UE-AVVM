@@ -22,8 +22,10 @@
 #include "ItemObject.h"
 
 FInventoryNotificationPayload::FInventoryNotificationPayload(const UItemObject* NewSrcItemObject,
-                                                             const UItemObject* NewDestItemObject)
+                                                             const UItemObject* NewDestItemObject,
+                                                             const bool bNewWasSuccess)
 	: SrcItemObject(NewSrcItemObject),
-	  DestItemObject(NewDestItemObject)
+	  DestItemObject(NewDestItemObject),
+	  bWasSuccess(bNewWasSuccess)
 {
 }

@@ -322,7 +322,14 @@ int32 UItemObjectUtils::GetMaxStackCount(const UItemObject* SrcItem,
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
 {
-	return INDEX_NONE;
+	if (!IsValid(SrcItem))
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 MaxCount = SrcItem->GetMaxStackCount();
+	const int32 SrcCount = SrcItem->GetRuntimeCount();
+	return FMath::CeilToInt(SrcCount * (1.f / MaxCount));
 }
 
 UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)

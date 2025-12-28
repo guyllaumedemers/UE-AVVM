@@ -39,11 +39,15 @@ struct INVENTORYSAMPLE_API FInventoryNotificationPayload : public FAVVMNotificat
 
 	FInventoryNotificationPayload() = default;
 	FInventoryNotificationPayload(const UItemObject* NewSrcItemObject,
-	                              const UItemObject* NewDestItemObject);
+	                              const UItemObject* NewDestItemObject,
+	                              const bool bNewWasSuccess);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const UItemObject> SrcItemObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const UItemObject> DestItemObject = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bWasSuccess = false;
 };

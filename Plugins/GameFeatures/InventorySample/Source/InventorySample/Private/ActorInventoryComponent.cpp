@@ -56,7 +56,7 @@ UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& Obj
 	PrimaryComponentTick.bAllowTickBatching = false;
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 	SetIsReplicatedByDefault(true);
-	
+
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
@@ -343,7 +343,7 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 	                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
 	                                        GetTypedOuter<APlayerController>(),
 	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingDropItemObject, nullptr));
+	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingDropItemObject, nullptr, bWasSuccess));
 }
 
 void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
@@ -367,7 +367,7 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 	                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
 	                                        GetTypedOuter<APlayerController>(),
 	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingPickupItemObject, nullptr));
+	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingPickupItemObject, nullptr, bWasSuccess));
 }
 
 void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
@@ -391,7 +391,7 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 	                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
 	                                        GetTypedOuter<APlayerController>(),
 	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject));
+	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject, bWasSuccess));
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
