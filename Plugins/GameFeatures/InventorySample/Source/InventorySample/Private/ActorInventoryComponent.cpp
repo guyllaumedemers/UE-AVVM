@@ -327,7 +327,7 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
 	const auto Rule = GetDropRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
-	if (bWasSuccess)
+	if (bWasSuccess && (GetOwnerRole() == ROLE_Authority))
 	{
 		OnDrop(PendingDropItemObject);
 	}
@@ -344,7 +344,7 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
 	const auto Rule = GetPickupRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
-	if (bWasSuccess)
+	if (bWasSuccess && (GetOwnerRole() == ROLE_Authority))
 	{
 		OnPickup(PendingPickupItemObject);
 	}
@@ -361,7 +361,7 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
 	const auto Rule = GetSwapRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
-	if (bWasSuccess)
+	if (bWasSuccess && (GetOwnerRole() == ROLE_Authority))
 	{
 		OnSwap(SrcItemObject, DestItemObject);
 	}
