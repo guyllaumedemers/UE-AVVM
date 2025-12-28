@@ -23,7 +23,7 @@
 
 #include "GameFramework/Actor.h"
 
-#include "PickuptemActor.generated.h"
+#include "PickupActor.generated.h"
 
 class UItemObject;
 

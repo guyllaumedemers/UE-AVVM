@@ -672,6 +672,8 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		}
 	}
 
+	// TODO @gdemers update backend representation of the player inventory.
+
 	// @gdemers leave the owning actor in world for another player pickup.
 	if (bDoesStackOverflow && !bHasAvailableEntries)
 	{

@@ -24,7 +24,7 @@
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
-#include "PickuptemActor.h"
+#include "PickupActor.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
