@@ -175,7 +175,9 @@ protected:
 private:
 	void SetupItemObjects(const TArray<UObject*>& NewResources);
 	void SetupItemActors(const TArray<UObject*>& NewResources);
-	
+
+	// @gdemers ai version of this component may require different rules, or any in-game static actor
+	// such as destructables.
 	virtual TInstancedStruct<FExecutionContextRule> GetDropRule() const;
 	virtual TInstancedStruct<FExecutionContextRule> GetPickupRule() const;
 	virtual TInstancedStruct<FExecutionContextRule> GetSwapRule() const;
