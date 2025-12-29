@@ -36,6 +36,6 @@ struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionConte
 {
 	GENERATED_BODY()
 
-	virtual bool Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+	virtual bool Predicate(const UActorInventoryComponent* InventoryComponent,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

@@ -17,10 +17,15 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "CraftingContextRule.h"
+#include "NonReplicatedWeightManagerObject.h"
 
-bool FCraftingContextRule::Predicate(const UActorInventoryComponent* InventoryComponent,
-                                     const TInstancedStruct<FExecutionContextParams>& Params) const
+#include "Ability/AVVMAbilityUtils.h"
+
+bool UNonReplicatedWeightManagerObject::CheckWeightOverflow(const AActor* Outer,
+                                                     const FDataRegistryId& ItemActorId) const
 {
-	return FExecutionContextRule::Predicate(InventoryComponent, Params);
+	// TODO @gdemers retrieve ASC current Weight, and MaxWeight.
+	// also retrieve the ItemActor weight, and compare to ensure we dont overflow.
+	const auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Outer);
+	return true;
 }

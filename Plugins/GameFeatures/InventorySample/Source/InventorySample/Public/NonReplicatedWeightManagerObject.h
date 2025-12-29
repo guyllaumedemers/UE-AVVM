@@ -17,10 +17,27 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "CraftingContextRule.h"
+#pragma once
 
-bool FCraftingContextRule::Predicate(const UActorInventoryComponent* InventoryComponent,
-                                     const TInstancedStruct<FExecutionContextParams>& Params) const
+#include "CoreMinimal.h"
+
+#include "DataRegistryId.h"
+#include "UObject/Object.h"
+
+#include "NonReplicatedWeightManagerObject.generated.h"
+
+/**
+ *	Class description:
+ *	
+ *	UNonReplicatedWeightManagerObject is a system UObject that handle weight validation based on the Outer
+ *	current state.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UNonReplicatedWeightManagerObject : public UObject
 {
-	return FExecutionContextRule::Predicate(InventoryComponent, Params);
-}
+	GENERATED_BODY()
+	
+public:
+	bool CheckWeightOverflow(const AActor* Outer,
+	                         const FDataRegistryId& ItemActorId) const;
+};

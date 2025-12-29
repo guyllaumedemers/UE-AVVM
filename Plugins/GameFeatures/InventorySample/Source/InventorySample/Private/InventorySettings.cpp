@@ -39,6 +39,11 @@ const FGameplayTagContainer& UInventorySettings::GetEmptyItemCount_BlockedAction
 	return GetDefault<UInventorySettings>()->EmptyItemCount_BlockedActions;
 }
 
+const FGameplayTagContainer& UInventorySettings::GetFullInventory_BlockedActions()
+{
+	return GetDefault<UInventorySettings>()->FullInventory_BlockedActions;
+}
+
 const FName UInventorySettings::GetItemMaxStackCount(const FGameplayTag& MaxStackCountTag)
 {
 	for (auto [Tag, RowName] : GetDefault<UInventorySettings>()->ItemMaxStackCounts)

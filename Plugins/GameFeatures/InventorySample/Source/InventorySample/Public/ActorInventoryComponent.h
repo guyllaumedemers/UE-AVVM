@@ -33,6 +33,7 @@ struct FStreamableHandle;
 class UAVVMResourceManagerComponent;
 class UItemObject;
 class UNonReplicatedLoadoutObject;
+class UNonReplicatedWeightManagerObject;
 
 /**
  *	Class description:
@@ -98,6 +99,9 @@ public:
 	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
+	bool CheckWeightOverflow(const UItemObject* NewItemObject) const;
+
+	UFUNCTION(BlueprintCallable)
 	void Drop(UItemObject* PendingDropItemObject);
 
 	UFUNCTION(BlueprintCallable)
@@ -120,6 +124,9 @@ protected:
 	void OnItemActorClassRetrieved(const UClass* NewActorClass,
 	                               const FSoftObjectPath& NewActorAttributeSetSoftObjectPath,
 	                               UItemObject* NewItemObject);
+	
+	UFUNCTION()
+	void OnWeightManagerObjectRetrieved();
 	
 	UFUNCTION()
 	void OnLoadoutObjectRetrieved();
@@ -154,6 +161,9 @@ protected:
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<UNonReplicatedWeightManagerObject> NonReplicatedWeightManagerClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadoutClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
@@ -163,6 +173,9 @@ protected:
 	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UNonReplicatedWeightManagerObject> NonReplicatedWeightManager = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadout = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -170,6 +183,7 @@ protected:
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
 	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism = nullptr;
+	TSharedPtr<FStreamableHandle> WeightManagerHandle = nullptr;
 	TSharedPtr<FStreamableHandle> LoadoutHandle = nullptr;
 
 private:

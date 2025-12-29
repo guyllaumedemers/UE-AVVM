@@ -29,6 +29,7 @@
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
+#include "NonReplicatedWeightManagerObject.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -100,6 +101,13 @@ void UActorInventoryComponent::BeginPlay()
 		RequestItems(Outer);
 	}
 #endif
+
+	if (!NonReplicatedWeightManagerClass.IsNull())
+	{
+		FStreamableDelegate Callback;
+		Callback.BindUObject(this, &UActorInventoryComponent::OnWeightManagerObjectRetrieved);
+		WeightManagerHandle = UAssetManager::Get().LoadAssetList({NonReplicatedWeightManagerClass.ToSoftObjectPath()}, Callback);
+	}
 
 	if (!NonReplicatedLoadoutClass.IsNull())
 	{
@@ -320,6 +328,19 @@ bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Comp
 bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
 	return ComponentStateTags.HasAllExact(Compare);
+}
+
+bool UActorInventoryComponent::CheckWeightOverflow(const UItemObject* NewItemObject) const
+{
+	if (!IsValid(NewItemObject))
+	{
+		return true;
+	}
+	else
+	{
+		const AActor* Outer = OwningOuter.Get();
+		return IsValid(NonReplicatedWeightManager) ? NonReplicatedWeightManager->CheckWeightOverflow(Outer, NewItemObject->GetItemActorId()) : true;
+	}
 }
 
 void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
@@ -602,6 +623,28 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 	NewItemObject->SpawnActor(Params);
 }
 
+void UActorInventoryComponent::OnWeightManagerObjectRetrieved()
+{
+	if (!WeightManagerHandle.IsValid())
+	{
+		return;
+	}
+
+	TArray<UObject*> OutResources;
+	WeightManagerHandle->GetLoadedAssets(OutResources);
+
+	for (const UObject* Resource : OutResources)
+	{
+		const auto* NewWeightManagerClass = Cast<UClass>(Resource);
+		if (!IsValid(NewWeightManagerClass))
+		{
+			continue;
+		}
+
+		NonReplicatedWeightManager = NewObject<UNonReplicatedWeightManagerObject>(this, NewWeightManagerClass);
+	}
+}
+
 void UActorInventoryComponent::OnLoadoutObjectRetrieved()
 {
 	if (!LoadoutHandle.IsValid())
@@ -791,7 +834,7 @@ bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionConte
 		return false;
 	}
 
-	const bool bPredicate = ContextRule->Predicate(NonReplicatedLoadout, Params);
+	const bool bPredicate = ContextRule->Predicate(this, Params);
 	return bPredicate;
 }
 

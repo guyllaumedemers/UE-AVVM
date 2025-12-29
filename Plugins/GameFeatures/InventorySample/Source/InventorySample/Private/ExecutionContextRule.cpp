@@ -19,10 +19,11 @@
 //SOFTWARE.
 #include "ExecutionContextRule.h"
 
+#include "ActorInventoryComponent.h"
 #include "ExecutionContextParams.h"
+#include "InventorySettings.h"
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
-#include "NonReplicatedLoadoutObject.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_DROP_BLOCKED, "InventorySample.Item.Drop.Blocked");
@@ -35,10 +36,10 @@ UScriptStruct* TBaseStructure<FExecutionContextRule>::Get()
 	return FExecutionContextRule::StaticStruct();
 }
 
-bool FDropRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+bool FDropRule::Predicate(const UActorInventoryComponent* InventoryComponent,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	if (!IsValid(NonReplicatedLoadoutObject))
+	if (!IsValid(InventoryComponent))
 	{
 		return false;
 	}
@@ -70,10 +71,10 @@ bool FDropRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadou
 	return true;
 }
 
-bool FPickupRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
                             const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	if (!IsValid(NonReplicatedLoadoutObject))
+	if (!IsValid(InventoryComponent))
 	{
 		return false;
 	}
@@ -101,8 +102,15 @@ bool FPickupRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoad
 	FGameplayTagContainer PickupActions = FGameplayTagContainer::EmptyContainer;
 	PickupActions.AddTag(TAG_INVENTORY_ACTION_PICKUP_INTO_BACKBACK_STORAGE);
 	PickupActions.AddTag(TAG_INVENTORY_ACTION_PICKUP_INTO_SLOT_SWAP);
-	
+
 	if (!PendingPickupItemObject->DoesBehaviourHasPartialMatch(PickupActions))
+	{
+		return false;
+	}
+
+	// @gdemers validate the inventory state. Are we already full ?
+	if (InventoryComponent->HasPartialMatch(UInventorySettings::GetFullInventory_BlockedActions()) ||
+		InventoryComponent->CheckWeightOverflow(PendingPickupItemObject)/*validate possible weight overflow*/)
 	{
 		return false;
 	}
@@ -110,10 +118,10 @@ bool FPickupRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoad
 	return true;
 }
 
-bool FSwapRule::Predicate(const UNonReplicatedLoadoutObject* NonReplicatedLoadoutObject,
+bool FSwapRule::Predicate(const UActorInventoryComponent* InventoryComponent,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	if (!IsValid(NonReplicatedLoadoutObject))
+	if (!IsValid(InventoryComponent))
 	{
 		return false;
 	}
