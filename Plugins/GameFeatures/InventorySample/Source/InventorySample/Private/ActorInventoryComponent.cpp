@@ -679,7 +679,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	if (bDoesStackOverflow)
 	{
 		// @gdemers check if there is still unique entries available within our bounds.
-		const auto StorageTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+		const auto EmptyStorageTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
@@ -687,7 +687,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
 		for (int32 i = 0; i < NumSplits; ++i)
 		{
-			bHasAvailableEntries = !HasPartialMatch(StorageTags);
+			bHasAvailableEntries = !HasPartialMatch(EmptyStorageTags);
 			if (!bHasAvailableEntries)
 			{
 				break;
