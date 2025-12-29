@@ -647,6 +647,9 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 
 	OnRep_ItemCollectionChanged(OldItems);
 
+	// @gdemers validate inventory bounds between removal to remove any flags applied due to possible previous overflow.
+	CheckBounds();
+
 	// TODO @gdemers update backend representation of the player inventory.
 
 	// @gdemers Handle actor creation + UItemObject binding to World Actor created for
