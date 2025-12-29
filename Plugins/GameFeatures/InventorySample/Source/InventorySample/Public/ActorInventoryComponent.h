@@ -147,6 +147,8 @@ protected:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+	
+	void CheckBounds();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;

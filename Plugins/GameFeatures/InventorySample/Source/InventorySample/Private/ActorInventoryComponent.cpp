@@ -675,11 +675,11 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		bDoesStackOverflow = (*SearchResult)->Stack(ItemObject);
 	}
 
-	// @gdemers check if there is still unique entries available within our bounds.
-	const auto StorageTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
-	const bool bHasAvailableEntries = HasPartialMatch(StorageTags);
-	if (bDoesStackOverflow && bHasAvailableEntries)
+	bool bHasAvailableEntries = true;
+	if (bDoesStackOverflow)
 	{
+		// @gdemers check if there is still unique entries available within our bounds.
+		const auto StorageTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
@@ -687,9 +687,19 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
 		for (int32 i = 0; i < NumSplits; ++i)
 		{
+			bHasAvailableEntries = !HasPartialMatch(StorageTags);
+			if (!bHasAvailableEntries)
+			{
+				break;
+			}
+
 			UItemObject* NewItemObjectEntry = UItemObjectUtils::SplitObject(this, ItemObject);
 			AddReplicatedSubObject(NewItemObjectEntry);
 			Items.Add(NewItemObjectEntry);
+
+			// @gdemers validate inventory bounds between addition to prevent overflow based
+			// on design configuration for the owning Actor.
+			CheckBounds();
 		}
 	}
 
@@ -708,6 +718,10 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
                                       UItemObject* DestItemObject)
 {
+	if (!IsValid(SrcItemObject) || !IsValid(DestItemObject))
+	{
+		return;
+	}
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
@@ -776,6 +790,13 @@ bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionConte
 
 	const bool bPredicate = ContextRule->Predicate(NonReplicatedLoadout, Params);
 	return bPredicate;
+}
+
+void UActorInventoryComponent::CheckBounds()
+{
+	// TODO @gdemers GetSet bounds of the inventory system. The Item collection
+	// shouldnt exceed the storage capacity allowed based on the actor configuration.
+	// (example : how many pockets are referenced, etc...)
 }
 
 void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
