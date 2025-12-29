@@ -22,7 +22,7 @@
 #include "Ability/AVVMAbilityUtils.h"
 
 bool UNonReplicatedWeightManagerObject::CheckWeightOverflow(const AActor* Outer,
-                                                     const FDataRegistryId& ItemActorId) const
+                                                            const FDataRegistryId& ItemActorId) const
 {
 	// TODO @gdemers retrieve ASC current Weight, and MaxWeight.
 	// also retrieve the ItemActor weight, and compare to ensure we dont overflow.

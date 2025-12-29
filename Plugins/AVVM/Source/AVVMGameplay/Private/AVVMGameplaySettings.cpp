@@ -23,3 +23,8 @@ const TSoftObjectPtr<UDataTable>& UAVVMGameplaySettings::GetActorIdentifierDataT
 {
 	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierDataTable;
 }
+
+const FGameplayTagContainer& UAVVMGameplaySettings::GetBlockingTags_PlayerAction()
+{
+	return GetDefault<UAVVMGameplaySettings>()->BlockingTags_PlayerAction;
+}

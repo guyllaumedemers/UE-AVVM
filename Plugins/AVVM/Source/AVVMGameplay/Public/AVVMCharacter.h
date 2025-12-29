@@ -114,6 +114,12 @@ public:
 	// @gdemers Data Resolver for backend representation of a ACharacter. 
 	static const TInstancedStruct<FAVVMDataResolverHelper>& GetCharacterDataResolverHelper();
 
+	UFUNCTION(BlueprintCallable)
+	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasExactMatch(const FGameplayTagContainer& Compare) const;
+
 protected:
 	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;
 	virtual void OnRep_Controller() override;

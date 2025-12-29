@@ -36,7 +36,7 @@ UCLASS()
 class INVENTORYSAMPLE_API UNonReplicatedWeightManagerObject : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	bool CheckWeightOverflow(const AActor* Outer,
 	                         const FDataRegistryId& ItemActorId) const;

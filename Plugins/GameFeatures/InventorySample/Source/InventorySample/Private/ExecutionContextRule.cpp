@@ -20,6 +20,8 @@
 #include "ExecutionContextRule.h"
 
 #include "ActorInventoryComponent.h"
+#include "AVVMCharacter.h"
+#include "AVVMGameplaySettings.h"
 #include "ExecutionContextParams.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
@@ -40,6 +42,13 @@ bool FDropRule::Predicate(const UActorInventoryComponent* InventoryComponent,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
 	if (!IsValid(InventoryComponent))
+	{
+		return false;
+	}
+
+	// @gdemers first, validate if our actor is in a state where they can drop an item.
+	const auto* Player = InventoryComponent->GetTypedOuter<AAVVMCharacter>();
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetBlockingTags_PlayerAction()))
 	{
 		return false;
 	}
@@ -75,6 +84,13 @@ bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
                             const TInstancedStruct<FExecutionContextParams>& Params) const
 {
 	if (!IsValid(InventoryComponent))
+	{
+		return false;
+	}
+
+	// @gdemers first, validate if our actor is in a state where they can pickup an item.
+	const auto* Player = InventoryComponent->GetTypedOuter<AAVVMCharacter>();
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetBlockingTags_PlayerAction()))
 	{
 		return false;
 	}
@@ -122,6 +138,13 @@ bool FSwapRule::Predicate(const UActorInventoryComponent* InventoryComponent,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
 	if (!IsValid(InventoryComponent))
+	{
+		return false;
+	}
+
+	// @gdemers first, validate if our actor is in a state where they can swap an item.
+	const auto* Player = InventoryComponent->GetTypedOuter<AAVVMCharacter>();
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetBlockingTags_PlayerAction()))
 	{
 		return false;
 	}

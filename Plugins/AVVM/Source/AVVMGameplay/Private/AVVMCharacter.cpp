@@ -144,6 +144,16 @@ const TInstancedStruct<FAVVMDataResolverHelper>& AAVVMCharacter::GetCharacterDat
 	return Helper;
 }
 
+bool AAVVMCharacter::HasPartialMatch(const FGameplayTagContainer& Compare) const
+{
+	return false;
+}
+
+bool AAVVMCharacter::HasExactMatch(const FGameplayTagContainer& Compare) const
+{
+	return false;
+}
+
 void AAVVMCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)
 {
 	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
