@@ -360,11 +360,16 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 		}
 	}
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-	                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
-	                                        GetTypedOuter<APlayerController>(),
-	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingDropItemObject, nullptr, bWasSuccess));
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingDropItemObject, nullptr, bWasSuccess));
+	}
 }
 
 void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
@@ -384,11 +389,16 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 		}
 	}
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-	                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
-	                                        GetTypedOuter<APlayerController>(),
-	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingPickupItemObject, nullptr, bWasSuccess));
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingPickupItemObject, nullptr, bWasSuccess));
+	}
 }
 
 void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
@@ -408,11 +418,16 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 		}
 	}
 
-	UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-	                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
-	                                        GetTypedOuter<APlayerController>(),
-	                                        GetTypedOuter<AActor>(),
-	                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject, bWasSuccess));
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject, bWasSuccess));
+	}
 }
 
 void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
