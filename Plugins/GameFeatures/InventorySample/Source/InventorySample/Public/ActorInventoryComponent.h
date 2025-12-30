@@ -24,6 +24,7 @@
 #include "ExecutionContextParams.h"
 #include "ExecutionContextRule.h"
 #include "GameplayTagContainer.h"
+#include "Backend/AVVMDataResolverHelper.h"
 #include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -34,6 +35,19 @@ class UAVVMResourceManagerComponent;
 class UItemObject;
 class UNonReplicatedLoadoutObject;
 class UNonReplicatedWeightManagerObject;
+
+/**
+ *	Class description:
+ *	
+ *	FInventoryDataResolverHelper is a context struct that resolve backend information about an Actor inventory.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FInventoryDataResolverHelper : public FAVVMDataResolverHelper
+{
+	GENERATED_BODY()
+
+	virtual TArray<int32> GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const override;
+};
 
 /**
  *	Class description:

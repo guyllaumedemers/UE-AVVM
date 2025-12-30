@@ -33,3 +33,15 @@ TArray<int32> UAVVMOnlineBackendUtils::GetElementDependencies(const UObject* Wor
 
 	return OutResults;
 }
+
+bool UAVVMOnlineBackendUtils::CompareSet(const TArray<int32>& Lhs,
+                                         const TArray<int32>& Rhs)
+{
+	// TODO @gdemers missing comparison check
+	return false;
+}
+
+void UAVVMOnlineBackendUtils::Submit(const int32 TargetUniqueId, const FString& NewProfile)
+{
+	// TODO @gdemers Update backend profile. (valid for any actor type referenced on backend)
+}

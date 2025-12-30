@@ -32,6 +32,7 @@ public class InventorySample : ModuleRules
 			{
 				"AVVM",
 				"AVVMGameplay",
+				"AVVMOnline",
 				"AVVMToolkit",
 				"CommonUI",
 				"Core",
@@ -48,7 +49,6 @@ public class InventorySample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMOnline",
 				"Json",
 				"NetCore"
 			}

@@ -42,4 +42,11 @@ public:
 	static TArray<int32> GetElementDependencies(const UObject* WorldContextObject,
 	                                            const int32 ElementUniqueId,
 	                                            const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static bool CompareSet(const TArray<int32>& Lhs,
+	                       const TArray<int32>& Rhs);
+
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static void Submit(const int32 TargetUniqueId, const FString& NewProfile);
 };

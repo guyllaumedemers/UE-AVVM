@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 
+#include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMScopedUtils.h"
@@ -49,6 +50,12 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_DROP_ITEM, "InventorySample.It
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM, "InventorySample.Item.Notification.Pickup");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.Item.Notification.Swap");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_STORAGE_NOENTRY, "InventorySample.Item.Storage.NoEntry");
+
+TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
+{
+	// TODO @gdemers Has to be able to retrieve the inventory of Any actor thats referenced in the backend.
+	return FAVVMDataResolverHelper::GetElementDependencies(WorldContextObject, ElementId);
+}
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -865,8 +872,35 @@ void UActorInventoryComponent::CheckBounds()
 
 void UActorInventoryComponent::CheckBackend()
 {
-	// TODO @gdemers update backend representation of the player inventory.
-	// TArray<int32> Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+	const AActor* Outer = OwningOuter.Get();
+
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
+		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
+	{
+		return;
+	}
+
+	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
+	// example : a shop with progression that tracks player purchases during gameplay. (Dead space does that!)
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Outer->GetName()))
+	{
+		return;
+	}
+
+	const TArray<int32> OldDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, FAVVMDataResolverHelper::Make<FInventoryDataResolverHelper>());
+	// TODO @gdemers convert local representation into backend usable representation.
+	const TArray<int32> NewDependencies = {};
+
+	const bool bAreSetIdentical = UAVVMOnlineBackendUtils::CompareSet(OldDependencies, NewDependencies);
+	if (ensureAlwaysMsgf((false == bAreSetIdentical),
+	                     TEXT("Attempting backend update on identical Sets.")))
+	{
+		// TODO @gdemers : Missing conversion back into string.
+		UAVVMOnlineBackendUtils::Submit(TargetUniqueId, {});
+	}
 }
 
 void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
