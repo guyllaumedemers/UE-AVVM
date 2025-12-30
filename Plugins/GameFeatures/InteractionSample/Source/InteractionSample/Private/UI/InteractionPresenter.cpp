@@ -205,8 +205,13 @@ void UInteractionPresenter::PostHandshakeValidation(const bool bWasSuccess,
 		InteractionViewModel->Execute();
 	}
 
-	UE_AVVM_NOTIFY(this,
-	               PostInteractionChannelTag,
-	               OwningOuter.Get(),
-	               Payload);
+#if WITH_EDITOR
+	if (OwningOuter.IsValid() && !OwningOuter->IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY(this,
+		               PostInteractionChannelTag,
+		               OwningOuter.Get(),
+		               Payload);
+	}
 }
