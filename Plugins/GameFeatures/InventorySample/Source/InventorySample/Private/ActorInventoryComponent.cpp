@@ -300,6 +300,12 @@ void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResour
 	ItemObject->GetItemActorClassAsync(NewResources[0], Callback);
 }
 
+const TInstancedStruct<FAVVMDataResolverHelper>& UActorInventoryComponent::GetInventoryDataResolverHelper()
+{
+	static auto Helper = FAVVMDataResolverHelper::Make<FInventoryDataResolverHelper>();
+	return Helper;
+}
+
 TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetDropRule() const
 {
 	return FExecutionContextRule::Make<FDropRule>();
@@ -890,7 +896,7 @@ void UActorInventoryComponent::CheckBackend()
 		return;
 	}
 
-	const TArray<int32> OldDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, FAVVMDataResolverHelper::Make<FInventoryDataResolverHelper>());
+	const TArray<int32> OldDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, UActorInventoryComponent::GetInventoryDataResolverHelper());
 	// TODO @gdemers convert local representation into backend usable representation.
 	const TArray<int32> NewDependencies = {};
 

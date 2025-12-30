@@ -204,6 +204,9 @@ protected:
 private:
 	void SetupItemObjects(const TArray<UObject*>& NewResources);
 	void SetupItemActors(const TArray<UObject*>& NewResources);
+	
+	// @gdemers Data Resolver for backend representation of an actor inventory. 
+	static const TInstancedStruct<FAVVMDataResolverHelper>& GetInventoryDataResolverHelper();
 
 	// @gdemers ai version of this component may require different rules, or any in-game static actor
 	// such as destructables.
