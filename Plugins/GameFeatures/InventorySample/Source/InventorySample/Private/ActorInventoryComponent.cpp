@@ -322,12 +322,12 @@ void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& A
 
 bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return ComponentStateTags.HasAnyExact(Compare);
+	return Compare.HasAnyExact(ComponentStateTags);
 }
 
 bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return ComponentStateTags.HasAllExact(Compare);
+	return Compare.HasAllExact(ComponentStateTags);
 }
 
 bool UActorInventoryComponent::CheckWeightOverflow(const UItemObject* NewItemObject) const
