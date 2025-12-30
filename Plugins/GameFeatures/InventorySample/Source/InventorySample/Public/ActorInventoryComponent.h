@@ -156,6 +156,7 @@ protected:
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 	
 	void CheckBounds();
+	void CheckBackend();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;

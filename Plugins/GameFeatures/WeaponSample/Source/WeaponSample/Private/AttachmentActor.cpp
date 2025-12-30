@@ -21,12 +21,12 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMOnlineUtils.h"
 #include "AVVMUtils.h"
 #include "TriggeringActor.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 
@@ -62,7 +62,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	if (IsValid(Character))
 	{
 		// @gdemers aggregate dependencies defined in backend representation.
-		Dependencies = UAVVMOnlineUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 
 		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
 		// target a triggering actor.
@@ -80,9 +80,9 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		}
 
 		// @gdemers aggregate dependencies defined in backend representation.
-		Dependencies = UAVVMOnlineUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
-		                                                        TargetUniqueId,
-		                                                        ATriggeringActor::GetTriggeringActorDataResolverHelper());
+		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
+		                                                               TargetUniqueId,
+		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
 	}
 
 	// @gdemers from our sub-set of attachments that are equipped to the target actor dependency set, we validate our input attachment against possible match.
@@ -222,7 +222,7 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	if (bShouldNotifyWhenAttachingActor)
 	{
 		OwningSocketSlotTag = NewItemAttachmentSlotTag;
-		
+
 		const auto Observer = TScriptInterface<const IAVVMDoesSupportAttachmentNotify>(Target);
 		Observer->NotifyOnNewSocketAttached(NewItemAttachmentSlotTag, this);
 	}

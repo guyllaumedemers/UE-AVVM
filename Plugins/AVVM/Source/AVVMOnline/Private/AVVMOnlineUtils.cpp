@@ -77,21 +77,6 @@ FString UAVVMOnlineUtils::GetUniqueNetId(const APlayerState* PlayerState)
 	return UniqueNetIdPtr->ToString();
 }
 
-TArray<int32> UAVVMOnlineUtils::GetElementDependencies(const UObject* WorldContextObject,
-                                                       const int32 ElementUniqueId,
-                                                       const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper)
-{
-	TArray<int32> OutResults;
-
-	const auto* Helper = DataResolverHelper.GetPtr<FAVVMDataResolverHelper>();
-	if (ensureAlwaysMsgf(Helper != nullptr, TEXT("Invalid Helper.")))
-	{
-		OutResults = Helper->GetElementDependencies(WorldContextObject, ElementUniqueId);
-	}
-
-	return OutResults;
-}
-
 bool UAVVMOnlineUtils::GetOuterOnlineIdentityInterface(const UObject* DerivedChild, TScriptInterface<IAVVMOnlineIdentityInterface>& OutInterface)
 {
 	return GetInterface<UAVVMOnlineIdentityInterface,

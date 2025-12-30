@@ -25,7 +25,6 @@
 #include "AVVMOnline.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMUtils.h"
-#include "Backend/AVVMDataResolverHelper.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Online/CoreOnlineFwd.h"
 #include "StructUtils/InstancedStruct.h"
@@ -60,11 +59,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static FString GetUniqueNetId(const APlayerState* PlayerState);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static TArray<int32> GetElementDependencies(const UObject* WorldContextObject,
-												const int32 ElementUniqueId,
-												const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
 	
 	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
 	static bool GetOuterOnlineIdentityInterface(const UObject* DerivedChild,

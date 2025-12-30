@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,41 +17,29 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class InventorySample : ModuleRules
+#include "Backend/AVVMDataResolverHelper.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+
+#include "AVVMOnlineBackendUtils.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMOnlineBackendUtils expose a set of utility function relevant for the backend service. It
+ *	offers reusable api for data types defined under AVVMOnlinePlayer.
+ */
+UCLASS()
+class AVVMONLINE_API UAVVMOnlineBackendUtils : public UBlueprintFunctionLibrary
 {
-	public InventorySample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		SetupIrisSupport(Target);
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMToolkit",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"ModelViewViewModel"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMOnline",
-				"Json",
-				"NetCore"
-			}
-		);
-	}
-}
+public:
+	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
+	static TArray<int32> GetElementDependencies(const UObject* WorldContextObject,
+	                                            const int32 ElementUniqueId,
+	                                            const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
+};

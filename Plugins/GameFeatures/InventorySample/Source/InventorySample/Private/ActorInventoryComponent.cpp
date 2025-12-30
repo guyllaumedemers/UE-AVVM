@@ -30,6 +30,7 @@
 #include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
 #include "NonReplicatedWeightManagerObject.h"
+#include "Backend/AVVMOnlineBackendUtils.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -705,10 +706,11 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 
 	OnRep_ItemCollectionChanged(OldItems);
 
-	// @gdemers validate inventory bounds between removal to remove any flags applied due to possible previous overflow.
+	// @gdemers validate inventory bounds between removal, and remove any flags applied due to possible previous overflow.
 	CheckBounds();
 
-	// TODO @gdemers update backend representation of the player inventory.
+	// @gdemers update backend representation of our inventory.
+	CheckBackend();
 
 	// @gdemers Handle actor creation + UItemObject binding to World Actor created for
 	// later retrieval during pickup.
@@ -764,7 +766,8 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		}
 	}
 
-	// TODO @gdemers update backend representation of the player inventory.
+	// @gdemers update backend representation of our inventory.
+	CheckBackend();
 
 	// @gdemers leave the owning actor in world for another player pickup.
 	if (bDoesStackOverflow && !bHasAvailableEntries)
@@ -858,6 +861,12 @@ void UActorInventoryComponent::CheckBounds()
 	// TODO @gdemers GetSet bounds of the inventory system. The Item collection
 	// shouldnt exceed the storage capacity allowed based on the actor configuration.
 	// (example : how many pockets are referenced, etc...)
+}
+
+void UActorInventoryComponent::CheckBackend()
+{
+	// TODO @gdemers update backend representation of the player inventory.
+	// TArray<int32> Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 }
 
 void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
