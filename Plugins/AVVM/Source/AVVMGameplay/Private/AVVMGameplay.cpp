@@ -28,6 +28,8 @@ DEFINE_LOG_CATEGORY(LogGameplay);
 
 static const FString TagPath = (FPaths::ProjectPluginsDir() / TEXT("AVVM/Config/Tags"));
 
+TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarTickSchedulerEnableSubsystem = nullptr;
+
 void FAVVMGameplayModule::StartupModule()
 {
 	const IGameplayTagsModule& GameplayTagModule = IGameplayTagsModule::Get();
@@ -35,10 +37,19 @@ void FAVVMGameplayModule::StartupModule()
 	{
 		UGameplayTagsManager::Get().AddTagIniSearchPath(TagPath);
 	}
+
+	IConsoleVariable* NewCVar = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("ToggleTickScheduling"),
+			                         false,
+			                         TEXT("Toggle TickScheduler Subsystem availability."));
+
+	CVarTickSchedulerEnableSubsystem = MakeShareable<IConsoleVariable>(NewCVar);
 }
 
 void FAVVMGameplayModule::ShutdownModule()
 {
+	IConsoleManager::Get().UnregisterConsoleObject(CVarTickSchedulerEnableSubsystem.Get());
+	
 	const bool bIsAvailable = IGameplayTagsModule::IsAvailable();
 	if (!bIsAvailable)
 	{
@@ -62,6 +73,11 @@ UDataRegistry* FAVVMGameplayModule::GetSetAutomatedTestDataRegistry()
 	}
 	
 	return AutomatedTestDataRegistry.Get();
+}
+
+TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarTickSchedulerEnableSubsystem()
+{
+	return CVarTickSchedulerEnableSubsystem.ToSharedRef();
 }
 
 IMPLEMENT_MODULE(FAVVMGameplayModule, AVVMGameplay)

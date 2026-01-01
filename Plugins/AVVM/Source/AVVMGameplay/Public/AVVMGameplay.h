@@ -61,4 +61,9 @@ public:
 	virtual void ShutdownModule() override;
 	
 	static UDataRegistry* GetSetAutomatedTestDataRegistry();
+
+	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarTickSchedulerEnableSubsystem();
+
+private:
+	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarTickSchedulerEnableSubsystem;
 };
