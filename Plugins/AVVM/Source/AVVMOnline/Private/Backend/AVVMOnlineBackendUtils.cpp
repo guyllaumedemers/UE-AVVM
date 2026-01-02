@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlineBackendUtils.h"
 
-TArray<int32> UAVVMOnlineBackendUtils::GetElementDependencies(const UObject* WorldContextObject,
+TArray<int32> UAVVMOnlineBackendUtils::GetElementDependencies(const UObject* Outer,
                                                               const int32 ElementUniqueId,
                                                               const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper)
 {
@@ -28,7 +28,7 @@ TArray<int32> UAVVMOnlineBackendUtils::GetElementDependencies(const UObject* Wor
 	const auto* Helper = DataResolverHelper.GetPtr<FAVVMDataResolverHelper>();
 	if (ensureAlwaysMsgf(Helper != nullptr, TEXT("Invalid Helper.")))
 	{
-		OutResults = Helper->GetElementDependencies(WorldContextObject, ElementUniqueId);
+		OutResults = Helper->GetElementDependencies(Outer, ElementUniqueId);
 	}
 
 	return OutResults;
@@ -41,7 +41,9 @@ bool UAVVMOnlineBackendUtils::CompareSet(const TArray<int32>& Lhs,
 	return false;
 }
 
-void UAVVMOnlineBackendUtils::Submit(const int32 TargetUniqueId, const FString& NewProfile)
+void UAVVMOnlineBackendUtils::Submit(const UObject* WorldContextObject,
+                                     const int32 TargetUniqueId,
+                                     const FString& NewProfile)
 {
 	// TODO @gdemers Update backend profile. (valid for any actor type referenced on backend)
 }

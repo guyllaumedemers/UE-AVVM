@@ -21,34 +21,29 @@
 
 #include "CoreMinimal.h"
 
-#include "Backend/AVVMDataResolverHelper.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "AVVMOnlineBackendUtils.generated.h"
+#include "InventoryUtils.generated.h"
+
+class UItemObject;
 
 /**
  *	Class description:
  *
- *	UAVVMOnlineBackendUtils expose a set of utility function relevant for the backend service. It
- *	offers reusable api for data types defined under AVVMOnlinePlayer.
+ *	UInventoryUtils expose a set of utility function relevant to the inventory system, and the items
+ *	backend representation.
  */
 UCLASS()
-class AVVMONLINE_API UAVVMOnlineBackendUtils : public UBlueprintFunctionLibrary
+class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-
+	
 public:
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static TArray<int32> GetElementDependencies(const UObject* Outer,
-	                                            const int32 ElementUniqueId,
-	                                            const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> GetUniqueIds(const TArray<UItemObject*>& Items);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static bool CompareSet(const TArray<int32>& Lhs,
-	                       const TArray<int32>& Rhs);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Online")
-	static void Submit(const UObject* WorldContextObject,
-	                   const int32 TargetUniqueId,
-	                   const FString& NewProfile);
+	UFUNCTION(BlueprintCallable)
+	static FString ModifyProfile(const UObject* WorldContextObject,
+	                             const int32 ProfileId,
+	                             const TArray<int32>& NewItems);
 };

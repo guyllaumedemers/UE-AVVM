@@ -27,6 +27,7 @@
 #include "InventoryProvider.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
+#include "InventoryUtils.h"
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
@@ -897,15 +898,14 @@ void UActorInventoryComponent::CheckBackend()
 	}
 
 	const TArray<int32> OldDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, UActorInventoryComponent::GetInventoryDataResolverHelper());
-	// TODO @gdemers convert local representation into backend usable representation.
-	const TArray<int32> NewDependencies = {};
+	const TArray<int32> NewDependencies = UInventoryUtils::GetUniqueIds(Items);
 
 	const bool bAreSetIdentical = UAVVMOnlineBackendUtils::CompareSet(OldDependencies, NewDependencies);
 	if (ensureAlwaysMsgf((false == bAreSetIdentical),
 	                     TEXT("Attempting backend update on identical Sets.")))
 	{
-		// TODO @gdemers : Missing conversion back into string.
-		UAVVMOnlineBackendUtils::Submit(TargetUniqueId, {});
+		const FString NewProfile = UInventoryUtils::ModifyProfile(this, TargetUniqueId, NewDependencies);
+		UAVVMOnlineBackendUtils::Submit(this, TargetUniqueId, NewProfile);
 	}
 }
 
