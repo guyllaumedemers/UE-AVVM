@@ -233,7 +233,7 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 {
 	// @gdemers TODO I have some concerns about FPlatformTime::Seconds performance which involve a low level request to platform api
 	// to retrieve time information. (May very well become a bottleneck)
-	
+
 	// @gdemers TODO move this into WorldSettings
 	static float GlobalJobAllotment = 0.f;
 
@@ -243,19 +243,13 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 
 	// @gdemers we ensure that any addition/removal during the frame won't conflict with existing entry during our tick.
 	TArray<FAVVMJobQueue> TempJobQueue = MoveTemp(PriorityQueue);
-	int32 CurrentPriorityLevel = INDEX_NONE;
-	
-	// @gdemers TODO we currently arent doing RoundRobin on the Tick process. We are just ticking everything which is not the desired outcome we are looking for.
-	// Address this issue in follow up commits!
+	int32 NextPriorityLevel = 0;
 
 	// @gdemers go over all priority level, starting at highest (i.e - 0). 
 	for (auto JobIterator = TempJobQueue.CreateIterator(); JobIterator; ++JobIterator)
 	{
-		// @gdemers advance index.
-		++CurrentPriorityLevel;
-
 		// @gdemers clamp index.
-		const int32 NextIndex = FMath::Clamp(CurrentPriorityLevel + 1, 0, TempJobQueue.Num() - 1);
+		NextPriorityLevel = FMath::Clamp(NextPriorityLevel + 1, 0, TempJobQueue.Num() - 1);
 
 		// @gdemers execute tick on all actors of class.
 		for (auto& [Class, Runner_Actor] : JobIterator->Jobs_Actor)
@@ -264,7 +258,7 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 			{
 				continue;
 			}
-			
+
 			// @gdemers timestamp before executing job.
 			const double Before = FPlatformTime::Seconds();
 
@@ -273,27 +267,32 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 			for (auto Iterator = Runner_Actor.Entities.CreateIterator(); Iterator; ++Iterator)
 			{
 				AActor* Actor = Iterator->Get();
-				if (IsValid(Actor))
-				{
-					Actor->Tick(DeltaTime);
-				}
-				else
+				if (!IsValid(Actor))
 				{
 					Iterator.RemoveCurrentSwap();
+					continue;
 				}
-			}
 
-			// @gdemers timestamp after executing job.
-			const double Now = FPlatformTime::Seconds();
+				Actor->Tick(DeltaTime);
 
-			// @gdemers was the job longer than the allotment defined by user, and should we
-			// lower our priority due to long-running job.
-			const bool bWasLongRunningProcess = ((Now - Before) > GlobalJobAllotment);
-			if (bWasLongRunningProcess)
-			{
-				// @gdemers ensure execution ordering, preventing Move semantic to be discarded by compiler when doing executed during argument inlining.
-				TArray<TWeakObjectPtr<AActor>> TempActors = MoveTemp(Runner_Actor.Entities);
-				LongRunningJobs[NextIndex].Append(Class.Get(), TempActors);
+				// @gdemers timestamp after executing job.
+				const double Now = FPlatformTime::Seconds();
+
+				// @gdemers was the job longer than the allotment defined by user, and should we
+				// lower our priority due to long-running job.
+				const bool bWasLongRunningProcess = ((Now - Before) > GlobalJobAllotment);
+				if (bWasLongRunningProcess)
+				{
+					// @gdemers we already ticked our actor, the next index was skipped. we need to swap entries to ensure all actors will eventually update.
+					// if not now, on next frame,
+					const int32 NextIndex = ((Iterator.GetIndex() + 1) % Runner_Actor.Entities.Num());
+					Algo::Rotate(Runner_Actor.Entities, NextIndex);
+
+					// @gdemers ensure execution ordering, preventing Move semantic to be discarded by compiler when doing argument inlining.
+					TArray<TWeakObjectPtr<AActor>> TempActors = MoveTemp(Runner_Actor.Entities);
+					LongRunningJobs[NextPriorityLevel].Append(Class.Get(), TempActors);
+					break;
+				}
 			}
 		}
 
@@ -307,29 +306,32 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 			{
 				continue;
 			}
-			
+
 			const double Before = FPlatformTime::Seconds();
 
 			for (auto Iterator = Runner_ActorComponent.Entities.CreateIterator(); Iterator; ++Iterator)
 			{
 				UActorComponent* Component = Iterator->Get();
-				if (IsValid(Component))
-				{
-					Component->TickComponent(DeltaTime, ELevelTick::LEVELTICK_All, nullptr);
-				}
-				else
+				if (!IsValid(Component))
 				{
 					Iterator.RemoveCurrentSwap();
+					continue;
 				}
-			}
 
-			const double Now = FPlatformTime::Seconds();
+				Component->TickComponent(DeltaTime, ELevelTick::LEVELTICK_All, nullptr);
 
-			const bool bWasLongRunningProcess = ((Now - Before) > GlobalJobAllotment);
-			if (bWasLongRunningProcess)
-			{
-				TArray<TWeakObjectPtr<UActorComponent>> TempActorComponents = MoveTemp(Runner_ActorComponent.Entities);
-				LongRunningJobs[NextIndex].Append(Class.Get(), TempActorComponents);
+				const double Now = FPlatformTime::Seconds();
+
+				const bool bWasLongRunningProcess = ((Now - Before) > GlobalJobAllotment);
+				if (bWasLongRunningProcess)
+				{
+					const int32 NextIndex = ((Iterator.GetIndex() + 1) % Runner_ActorComponent.Entities.Num());
+					Algo::Rotate(Runner_ActorComponent.Entities, NextIndex);
+
+					TArray<TWeakObjectPtr<UActorComponent>> TempActorComponents = MoveTemp(Runner_ActorComponent.Entities);
+					LongRunningJobs[NextPriorityLevel].Append(Class.Get(), TempActorComponents);
+					break;
+				}
 			}
 		}
 	}
@@ -364,7 +366,7 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 			}
 		}
 	}
-	
+
 	// TODO @gdemers Problem : We are currently only supporting lowering the priority level. We need a way to
 	// allow lower priority to get some cpu time eventually.
 }
