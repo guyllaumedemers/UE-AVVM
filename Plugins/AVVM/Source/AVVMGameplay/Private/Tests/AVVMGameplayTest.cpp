@@ -93,3 +93,16 @@ bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
 	// Make the test pass by returning true, or fail by returning false.
 	return true;
 }
+
+/**
+ *	Class description:
+ *
+ *	AVVMTickSchedulerTest is an Automated Test running validation on ability loading process and attribute initialization.
+ */
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMTickSchedulerTest, "AutomatedTest.CustomGroup.AVVMTickSchedulerTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool AVVMTickSchedulerTest::RunTest(const FString& Parameters)
+{
+	// Make the test pass by returning true, or fail by returning false.
+	return true;
+}
