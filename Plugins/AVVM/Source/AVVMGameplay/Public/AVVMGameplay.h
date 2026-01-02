@@ -66,16 +66,19 @@ public:
 	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarEnableOverrideTickSchedulerRule();
 	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarOverrideTickSchedulerJobAllotment();
 	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarOverrideTickSchedulerTickRate();
+	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarOverrideTickSchedulerResetTimeJobQueuePriority();
 
 private:
 	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarEnableTickSchedulerSubsystem;
 	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarEnableOverrideTickSchedulerRule;
 	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarOverrideTickSchedulerJobAllotment;
 	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarOverrideTickSchedulerTickRate;
+	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarOverrideTickSchedulerResetTimeJobQueuePriority;
 
 #if !UE_BUILD_SHIPPING
 	FDelegateHandle HandleA;
 	FDelegateHandle HandleB;
 	FDelegateHandle HandleC;
+	FDelegateHandle HandleD;
 #endif
 };

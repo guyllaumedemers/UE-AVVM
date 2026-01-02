@@ -26,7 +26,7 @@ float UAVVMTickSchedulerRule::GetGlobalResetTimeJobQueuePriority() const
 	const bool bDoesOverride = FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()->GetBool();
 	if (bDoesOverride)
 	{
-		const float GlobalResetTimeJobQueuePriorityOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()->GetFloat();
+		const float GlobalResetTimeJobQueuePriorityOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerResetTimeJobQueuePriority()->GetFloat();
 		return GlobalResetTimeJobQueuePriorityOverride;
 	}
 	else
@@ -54,7 +54,7 @@ float UAVVMTickSchedulerRule::GetTickRate() const
 	const bool bDoesOverride = FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()->GetBool();
 	if (bDoesOverride)
 	{
-		const float TickRateOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()->GetFloat();
+		const float TickRateOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerTickRate()->GetFloat();
 		return TickRateOverride;
 	}
 	else
