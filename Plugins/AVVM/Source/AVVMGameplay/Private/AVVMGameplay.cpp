@@ -73,12 +73,12 @@ void FAVVMGameplayModule::StartupModule()
 
 	IConsoleVariable* CVar_OverrideTickSchedulerJobAllotment = IConsoleManager::Get()
 			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideJobAllotment"),
-			                         false,
+			                         0.f,
 			                         TEXT("Enable Job Allotment Override."));
 
 	IConsoleVariable* CVar_OverrideTickSchedulerTickRate = IConsoleManager::Get()
 			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideTickRate"),
-			                         false,
+			                         0.f,
 			                         TEXT("Enable TickRate Override."));
 
 	CVarEnableTickSchedulerSubsystem = MakeShareable<IConsoleVariable>(CVar_EnableTickSchedulerSubsystem);
