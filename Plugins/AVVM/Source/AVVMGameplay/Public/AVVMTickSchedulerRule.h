@@ -21,25 +21,29 @@
 
 #include "CoreMinimal.h"
 
-#include "UObject/Interface.h"
+#include "AVVMWorldSetting.h"
 
-#include "AVVMDoesSupportManualTicking.generated.h"
+#include "AVVMTickSchedulerRule.generated.h"
 
 /**
  *	Class description:
  *	
- *	IAVVMDoesSupportManualTicking is an interface class that identify an AActor/UActorComponent derived
- *	type who requires Manual support for Tick aggregation.
+ *	UAVVMTickSchedulerRule is a World Setting rule that define how the UAVVMTickScheduler
+ *	should be configured.
  */
-UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UAVVMDoesSupportManualTicking : public UInterface
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMTickSchedulerRule : public UAVVMWorldRule
 {
 	GENERATED_BODY()
-};
 
-class AVVMGAMEPLAY_API IAVVMDoesSupportManualTicking
-{
-	GENERATED_BODY()
-	
-	// TODO @gdemers Define what are the requirements for this interface.
+public:
+	float GetGlobalJobAllotment() const;
+	float GetTickRate() const;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	float GlobalJobAllotment = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	float TickRate = 0.f;
 };

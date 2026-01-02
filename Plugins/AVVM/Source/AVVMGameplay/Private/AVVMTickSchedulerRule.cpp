@@ -17,29 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AVVMTickSchedulerRule.h"
 
-#include "CoreMinimal.h"
-
-#include "UObject/Interface.h"
-
-#include "AVVMDoesSupportManualTicking.generated.h"
-
-/**
- *	Class description:
- *	
- *	IAVVMDoesSupportManualTicking is an interface class that identify an AActor/UActorComponent derived
- *	type who requires Manual support for Tick aggregation.
- */
-UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UAVVMDoesSupportManualTicking : public UInterface
+float UAVVMTickSchedulerRule::GetGlobalJobAllotment() const
 {
-	GENERATED_BODY()
-};
+	return GlobalJobAllotment;
+}
 
-class AVVMGAMEPLAY_API IAVVMDoesSupportManualTicking
+float UAVVMTickSchedulerRule::GetTickRate() const
 {
-	GENERATED_BODY()
-	
-	// TODO @gdemers Define what are the requirements for this interface.
-};
+	return TickRate;
+}

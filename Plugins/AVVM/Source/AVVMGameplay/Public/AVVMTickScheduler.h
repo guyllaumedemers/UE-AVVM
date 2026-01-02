@@ -26,9 +26,13 @@
 #include "AVVMTickScheduler.generated.h"
 
 class IAVVMDoesSupportManualTicking;
+class UAVVMTickSchedulerRule;
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMTickScheduler is a subsystem that manage Tick aggregation for AActor/UActorComponent who
+ *	perform badly on the game thread due to frequent/and sparse memory access/load of the polymorphic Tick function.
  */
 UCLASS()
 class AVVMGAMEPLAY_API UAVVMTickScheduler : public UTickableWorldSubsystem
@@ -53,6 +57,8 @@ protected:
 	static UAVVMTickScheduler* Get(const UWorld* World);
 	void Register(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker);
 	void UnRegister(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker);
+	void GetSetProjectTickSchedulerRule();
+	void InitRule();
 
 	// @gdemers single job, ticking all actors of a given UClass. Tick aggregation
 	// of a given class ensure we load our virtual AActor::Tick call within register
@@ -99,12 +105,20 @@ protected:
 		int64 Push(const UClass* Class, AActor* Actor);
 		void Pop(const int64 Handle, UActorComponent* ActorComponent) const;
 		void Pop(const int64 Handle, AActor* Actor) const;
-		void Tick(const float DeltaTime, TMap<TWeakObjectPtr<const UClass>, int64>& OutHandles);
 
 		/*Priority level is handled by indices*/
 		TArray<FAVVMJobQueue> PriorityQueue;
 	};
 	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UAVVMTickSchedulerRule> TickSchedulerRule = nullptr;
+
 	TMap<TWeakObjectPtr<const UClass>, int64> TickerHandles;
 	FAVVMMLFQ MultiLevelFeedbackQueue = FAVVMMLFQ();
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	float GlobalJobAllotment = 0.f;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	float TickRate = 0.f;
 };

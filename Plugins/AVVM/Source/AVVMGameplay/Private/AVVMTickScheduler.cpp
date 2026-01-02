@@ -21,12 +21,13 @@
 
 #include "AVVMDoesSupportManualTicking.h"
 #include "AVVMGameplay.h"
+#include "AVVMTickSchedulerRule.h"
 #include "AVVMUtils.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TICK_SCHEDULING, "WorldRule.Batching");
+UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TICK_SCHEDULING, "WorldRule.TickScheduling");
 
 bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -37,7 +38,7 @@ bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 	}
 
 	const auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
-	if (!IsValid(WorldSettings) || !WorldSettings->ShouldCreatePluginRule(TAG_WORLD_RULE_TICK_SCHEDULING))
+	if (!IsValid(WorldSettings) || !WorldSettings->DoesProjectRuleClassExist(UAVVMTickSchedulerRule::StaticClass()))
 	{
 		return false;
 	}
@@ -49,6 +50,9 @@ bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 void UAVVMTickScheduler::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	// @gdemers Project Rules are defined in your game project settings, and are loaded by the WorldSetting actors OnBeginPlay.
+	GetSetProjectTickSchedulerRule();
 }
 
 void UAVVMTickScheduler::Deinitialize()
@@ -58,191 +62,14 @@ void UAVVMTickScheduler::Deinitialize()
 
 void UAVVMTickScheduler::Tick(float DeltaTime)
 {
-	MultiLevelFeedbackQueue.Tick(DeltaTime, TickerHandles);
-}
-
-void UAVVMTickScheduler::Static_Register(const UWorld* World,
-                                         const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTickActor)
-{
-	auto* Scheduler = UAVVMTickScheduler::Get(World);
-	if (IsValid(Scheduler))
-	{
-		Scheduler->Register(ManualTickActor);
-	}
-}
-
-void UAVVMTickScheduler::Static_UnRegister(const UWorld* World,
-                                           const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTickActor)
-{
-	auto* Scheduler = UAVVMTickScheduler::Get(World);
-	if (IsValid(Scheduler))
-	{
-		Scheduler->UnRegister(ManualTickActor);
-	}
-}
-
-UAVVMTickScheduler* UAVVMTickScheduler::Get(const UWorld* World)
-{
-	return UWorld::GetSubsystem<UAVVMTickScheduler>(World);
-}
-
-void UAVVMTickScheduler::Register(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker)
-{
-	if (!UAVVMUtils::IsNativeScriptInterfaceValid(ManualTicker))
-	{
-		return;
-	}
-
-	// @gdemers Notes : New jobs entering the system should be placed at the higher priority, and
-	// moved based on allotment time spent during execution time.
-	auto* Actor = Cast<AActor>(ManualTicker.GetObject());
-	if (IsValid(Actor))
-	{
-		const UClass* Class = Actor->GetClass();
-		const int64 OutHandle = MultiLevelFeedbackQueue.Push(Class, Actor);
-		TickerHandles.FindOrAdd(Class, OutHandle);
-		return;
-	}
-
-	auto* ActorComponent = Cast<UActorComponent>(ManualTicker.GetObject());
-	if (IsValid(ActorComponent))
-	{
-		const UClass* Class = ActorComponent->GetClass();
-		const int64 OutHandle = MultiLevelFeedbackQueue.Push(Class, ActorComponent);
-		TickerHandles.FindOrAdd(Class, OutHandle);
-		return;
-	}
-
-	ensureAlwaysMsgf(IsValid(Actor) || IsValid(ActorComponent),
-	                 TEXT("Tick aggregation is only supported on AActor derived types, and UActorComponent derived types."));
-}
-
-void UAVVMTickScheduler::UnRegister(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker)
-{
-	if (!UAVVMUtils::IsNativeScriptInterfaceValid(ManualTicker))
-	{
-		return;
-	}
-
-	auto* Actor = Cast<AActor>(ManualTicker.GetObject());
-	if (IsValid(Actor))
-	{
-		const UClass* Class = Actor->GetClass();
-		const bool bDoesContains = TickerHandles.Contains(Class);
-		if (bDoesContains)
-		{
-			const int64 OutHandle = TickerHandles[Class];
-			MultiLevelFeedbackQueue.Pop(OutHandle, Actor);
-		}
-
-		return;
-	}
-
-	auto* ActorComponent = Cast<UActorComponent>(ManualTicker.GetObject());
-	if (IsValid(ActorComponent))
-	{
-		const UClass* Class = Actor->GetClass();
-		const bool bDoesContains = TickerHandles.Contains(Class);
-		if (bDoesContains)
-		{
-			const int64 OutHandle = TickerHandles[Class];
-			MultiLevelFeedbackQueue.Pop(OutHandle, ActorComponent);
-		}
-
-		return;
-	}
-
-	ensureAlwaysMsgf(IsValid(Actor) || IsValid(ActorComponent),
-	                 TEXT("Tick aggregation is only supported on AActor derived types, and UActorComponent derived types."));
-}
-
-int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, UActorComponent* ActorComponent)
-{
-	FAVVMRunner_ActorComponent& OutResult = Jobs_ActorComponent.FindOrAdd(Class);
-	OutResult.Entities.AddUnique(ActorComponent);
-	return reinterpret_cast<int64>(&OutResult.Entities);
-}
-
-int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, AActor* Actor)
-{
-	FAVVMRunner_Actor& OutResult = Jobs_Actor.FindOrAdd(Class);
-	OutResult.Entities.AddUnique(Actor);
-	return reinterpret_cast<int64>(&OutResult.Entities);
-}
-
-int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents)
-{
-	FAVVMRunner_ActorComponent& Runner_ActorComponent = Jobs_ActorComponent.FindOrAdd(Class);
-	Runner_ActorComponent.Entities.Append(ActorComponents);
-	return reinterpret_cast<int64>(&Jobs_ActorComponent[Class].Entities);
-}
-
-int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors)
-{
-	FAVVMRunner_Actor& Runner_Actor = Jobs_Actor.FindOrAdd(Class);
-	Runner_Actor.Entities.Append(Actors);
-	return reinterpret_cast<int64>(&Jobs_Actor[Class].Entities);
-}
-
-int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, UActorComponent* ActorComponent)
-{
-	if (!IsValid(Class) || !IsValid(ActorComponent))
-	{
-		return INDEX_NONE;
-	}
-
-	FAVVMJobQueue& JobQueue = PriorityQueue[0];
-	const int64 OutHandle = JobQueue.Add(Class, ActorComponent);
-	return OutHandle;
-}
-
-int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, AActor* Actor)
-{
-	if (!IsValid(Class) || !IsValid(Actor))
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers we ALWAYS want new jobs to push onto the highest level.
-	FAVVMJobQueue& JobQueue = PriorityQueue[0];
-	const int64 OutHandle = JobQueue.Add(Class, Actor);
-	return OutHandle;
-}
-
-void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, UActorComponent* ActorComponent) const
-{
-	auto* PtrToArray = reinterpret_cast<TArray<TWeakObjectPtr<UActorComponent>>*>(Handle);
-	if (ensureAlwaysMsgf(PtrToArray != nullptr,
-	                     TEXT("Invalid Handle. Verify that the handle is pointing to the collection type we expect to use during removal process.")))
-	{
-		PtrToArray->Remove(ActorComponent);
-	}
-}
-
-void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, AActor* Actor) const
-{
-	auto* PtrToArray = reinterpret_cast<TArray<TWeakObjectPtr<AActor>>*>(Handle);
-	if (ensureAlwaysMsgf(PtrToArray != nullptr,
-	                     TEXT("Invalid Handle. Verify that the handle is pointing to the collection type we expect to use during removal process.")))
-	{
-		PtrToArray->Remove(Actor);
-	}
-}
-
-void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObjectPtr<const UClass>, int64>& OutHandles)
-{
-	// @gdemers TODO move this into WorldSettings
-	static float GlobalJobAllotment = 0.f;
-	static float TickRate = 0.f;
-
 	// @gdemers entries subject to priority changes.
 	TArray<FAVVMJobQueue> LongRunningJobs;
-	LongRunningJobs.Reserve(PriorityQueue.Num());
+	LongRunningJobs.Reserve(MultiLevelFeedbackQueue.PriorityQueue.Num());
 
 	// @gdemers we ensure that any addition/removal during the frame won't conflict with existing entry during our tick.
-	TArray<FAVVMJobQueue> TempJobQueue = MoveTemp(PriorityQueue);
+	TArray<FAVVMJobQueue> TempJobQueue = MoveTemp(MultiLevelFeedbackQueue.PriorityQueue);
 	int32 NextPriorityLevel = 0;
-	
+
 	// @gdemers timestamp tick begin.
 	const double TickBegin = FPlatformTime::Seconds();
 
@@ -351,7 +178,7 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 		// @gdemers push back everything in the priority queue with new placement.
 		// IMPORTANT : Do not reset, content may have changed between the start, and end of this function for our Actors,
 		// and their components.
-		FAVVMJobQueue& Dest = PriorityQueue[i];
+		FAVVMJobQueue& Dest = MultiLevelFeedbackQueue.PriorityQueue[i];
 
 		for (auto& [Class, Runner_Actor] : TempJobQueue[i].Jobs_Actor)
 		{
@@ -360,7 +187,7 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 			{
 				TArray<TWeakObjectPtr<AActor>> TempActors = MoveTemp(LongRunningJobs[i].Jobs_Actor[Class].Entities);
 				const int32 NewHandle = Dest.Append(Class.Get(), TempActors);
-				OutHandles.FindOrAdd(Class, NewHandle);
+				TickerHandles.FindOrAdd(Class, NewHandle);
 			}
 		}
 
@@ -371,11 +198,205 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 			{
 				TArray<TWeakObjectPtr<UActorComponent>> TempActorComponents = MoveTemp(LongRunningJobs[i].Jobs_ActorComponent[Class].Entities);
 				const int32 NewHandle = Dest.Append(Class.Get(), TempActorComponents);
-				OutHandles.FindOrAdd(Class, NewHandle);
+				TickerHandles.FindOrAdd(Class, NewHandle);
 			}
 		}
 	}
 
 	// TODO @gdemers Problem : We are currently only supporting lowering the priority level. We need a way to
 	// allow lower priority to get some cpu time eventually.
+}
+
+void UAVVMTickScheduler::Static_Register(const UWorld* World,
+                                         const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTickActor)
+{
+	auto* Scheduler = UAVVMTickScheduler::Get(World);
+	if (IsValid(Scheduler))
+	{
+		Scheduler->Register(ManualTickActor);
+	}
+}
+
+void UAVVMTickScheduler::Static_UnRegister(const UWorld* World,
+                                           const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTickActor)
+{
+	auto* Scheduler = UAVVMTickScheduler::Get(World);
+	if (IsValid(Scheduler))
+	{
+		Scheduler->UnRegister(ManualTickActor);
+	}
+}
+
+UAVVMTickScheduler* UAVVMTickScheduler::Get(const UWorld* World)
+{
+	return UWorld::GetSubsystem<UAVVMTickScheduler>(World);
+}
+
+void UAVVMTickScheduler::Register(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker)
+{
+	if (!UAVVMUtils::IsNativeScriptInterfaceValid(ManualTicker))
+	{
+		return;
+	}
+
+	// @gdemers Notes : New jobs entering the system should be placed at the higher priority, and
+	// moved based on allotment time spent during execution time.
+	auto* Actor = Cast<AActor>(ManualTicker.GetObject());
+	if (IsValid(Actor))
+	{
+		const UClass* Class = Actor->GetClass();
+		const int64 OutHandle = MultiLevelFeedbackQueue.Push(Class, Actor);
+		TickerHandles.FindOrAdd(Class, OutHandle);
+		return;
+	}
+
+	auto* ActorComponent = Cast<UActorComponent>(ManualTicker.GetObject());
+	if (IsValid(ActorComponent))
+	{
+		const UClass* Class = ActorComponent->GetClass();
+		const int64 OutHandle = MultiLevelFeedbackQueue.Push(Class, ActorComponent);
+		TickerHandles.FindOrAdd(Class, OutHandle);
+		return;
+	}
+
+	ensureAlwaysMsgf(IsValid(Actor) || IsValid(ActorComponent),
+	                 TEXT("Tick aggregation is only supported on AActor derived types, and UActorComponent derived types."));
+}
+
+void UAVVMTickScheduler::UnRegister(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker)
+{
+	if (!UAVVMUtils::IsNativeScriptInterfaceValid(ManualTicker))
+	{
+		return;
+	}
+
+	auto* Actor = Cast<AActor>(ManualTicker.GetObject());
+	if (IsValid(Actor))
+	{
+		const UClass* Class = Actor->GetClass();
+		const bool bDoesContains = TickerHandles.Contains(Class);
+		if (bDoesContains)
+		{
+			const int64 OutHandle = TickerHandles[Class];
+			MultiLevelFeedbackQueue.Pop(OutHandle, Actor);
+		}
+
+		return;
+	}
+
+	auto* ActorComponent = Cast<UActorComponent>(ManualTicker.GetObject());
+	if (IsValid(ActorComponent))
+	{
+		const UClass* Class = Actor->GetClass();
+		const bool bDoesContains = TickerHandles.Contains(Class);
+		if (bDoesContains)
+		{
+			const int64 OutHandle = TickerHandles[Class];
+			MultiLevelFeedbackQueue.Pop(OutHandle, ActorComponent);
+		}
+
+		return;
+	}
+
+	ensureAlwaysMsgf(IsValid(Actor) || IsValid(ActorComponent),
+	                 TEXT("Tick aggregation is only supported on AActor derived types, and UActorComponent derived types."));
+}
+
+void UAVVMTickScheduler::GetSetProjectTickSchedulerRule()
+{
+	const auto* World = GetTypedOuter<UWorld>();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	if (IsValid(WorldSettings))
+	{
+		TickSchedulerRule = WorldSettings->GetRule<UAVVMTickSchedulerRule>(TAG_WORLD_RULE_TICK_SCHEDULING);
+		InitRule();
+	}
+}
+
+void UAVVMTickScheduler::InitRule()
+{
+	const UAVVMTickSchedulerRule* Rule = TickSchedulerRule.Get();
+	if (IsValid(Rule))
+	{
+		GlobalJobAllotment = Rule->GetGlobalJobAllotment();
+		TickRate = Rule->GetTickRate();
+	}
+}
+
+int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, UActorComponent* ActorComponent)
+{
+	FAVVMRunner_ActorComponent& OutResult = Jobs_ActorComponent.FindOrAdd(Class);
+	OutResult.Entities.AddUnique(ActorComponent);
+	return reinterpret_cast<int64>(&OutResult.Entities);
+}
+
+int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, AActor* Actor)
+{
+	FAVVMRunner_Actor& OutResult = Jobs_Actor.FindOrAdd(Class);
+	OutResult.Entities.AddUnique(Actor);
+	return reinterpret_cast<int64>(&OutResult.Entities);
+}
+
+int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents)
+{
+	FAVVMRunner_ActorComponent& Runner_ActorComponent = Jobs_ActorComponent.FindOrAdd(Class);
+	Runner_ActorComponent.Entities.Append(ActorComponents);
+	return reinterpret_cast<int64>(&Jobs_ActorComponent[Class].Entities);
+}
+
+int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors)
+{
+	FAVVMRunner_Actor& Runner_Actor = Jobs_Actor.FindOrAdd(Class);
+	Runner_Actor.Entities.Append(Actors);
+	return reinterpret_cast<int64>(&Jobs_Actor[Class].Entities);
+}
+
+int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, UActorComponent* ActorComponent)
+{
+	if (!IsValid(Class) || !IsValid(ActorComponent))
+	{
+		return INDEX_NONE;
+	}
+
+	FAVVMJobQueue& JobQueue = PriorityQueue[0];
+	const int64 OutHandle = JobQueue.Add(Class, ActorComponent);
+	return OutHandle;
+}
+
+int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, AActor* Actor)
+{
+	if (!IsValid(Class) || !IsValid(Actor))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers we ALWAYS want new jobs to push onto the highest level.
+	FAVVMJobQueue& JobQueue = PriorityQueue[0];
+	const int64 OutHandle = JobQueue.Add(Class, Actor);
+	return OutHandle;
+}
+
+void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, UActorComponent* ActorComponent) const
+{
+	auto* PtrToArray = reinterpret_cast<TArray<TWeakObjectPtr<UActorComponent>>*>(Handle);
+	if (ensureAlwaysMsgf(PtrToArray != nullptr,
+	                     TEXT("Invalid Handle. Verify that the handle is pointing to the collection type we expect to use during removal process.")))
+	{
+		PtrToArray->Remove(ActorComponent);
+	}
+}
+
+void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, AActor* Actor) const
+{
+	auto* PtrToArray = reinterpret_cast<TArray<TWeakObjectPtr<AActor>>*>(Handle);
+	if (ensureAlwaysMsgf(PtrToArray != nullptr,
+	                     TEXT("Invalid Handle. Verify that the handle is pointing to the collection type we expect to use during removal process.")))
+	{
+		PtrToArray->Remove(Actor);
+	}
 }
