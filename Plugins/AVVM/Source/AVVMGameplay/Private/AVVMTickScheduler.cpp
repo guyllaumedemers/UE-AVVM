@@ -231,11 +231,9 @@ void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, AActor* Actor) const
 
 void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObjectPtr<const UClass>, int64>& OutHandles)
 {
-	// @gdemers TODO I have some concerns about FPlatformTime::Seconds performance which involve a low level request to platform api
-	// to retrieve time information. (May very well become a bottleneck)
-
 	// @gdemers TODO move this into WorldSettings
 	static float GlobalJobAllotment = 0.f;
+	static float TickRate = 0.f;
 
 	// @gdemers entries subject to priority changes.
 	TArray<FAVVMJobQueue> LongRunningJobs;
@@ -244,6 +242,9 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 	// @gdemers we ensure that any addition/removal during the frame won't conflict with existing entry during our tick.
 	TArray<FAVVMJobQueue> TempJobQueue = MoveTemp(PriorityQueue);
 	int32 NextPriorityLevel = 0;
+	
+	// @gdemers timestamp tick begin.
+	const double TickBegin = FPlatformTime::Seconds();
 
 	// @gdemers go over all priority level, starting at highest (i.e - 0). 
 	for (auto JobIterator = TempJobQueue.CreateIterator(); JobIterator; ++JobIterator)
@@ -333,6 +334,14 @@ void UAVVMTickScheduler::FAVVMMLFQ::Tick(const float DeltaTime, TMap<TWeakObject
 					break;
 				}
 			}
+		}
+
+		// @gdemers we may want to split processing our tick data over multiple frame to ensure more consistent frame rate.
+		const double TickNow = FPlatformTime::Seconds();
+		const bool bWasLongTick = ((TickNow - TickBegin) > TickRate);
+		if (bWasLongTick)
+		{
+			break;
 		}
 	}
 
