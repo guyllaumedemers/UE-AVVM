@@ -52,6 +52,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void Static_UnRegister(const UWorld* World,
 	                              const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTickActor);
+	
+#if !UE_BUILD_SHIPPING
+	void OnTickSchedulerRuleCVarChanged();
+#endif
 
 protected:
 	static UAVVMTickScheduler* Get(const UWorld* World);

@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameplay.h"
 
+#include "AVVMTickScheduler.h"
 #include "DataRegistrySubsystem.h"
 #include "GameplayTagsModule.h"
 #include "Engine/AssetManager.h"
@@ -28,7 +29,29 @@ DEFINE_LOG_CATEGORY(LogGameplay);
 
 static const FString TagPath = (FPaths::ProjectPluginsDir() / TEXT("AVVM/Config/Tags"));
 
-TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarTickSchedulerEnableSubsystem = nullptr;
+TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarEnableTickSchedulerSubsystem = nullptr;
+TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarEnableOverrideTickSchedulerRule = nullptr;
+TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarOverrideTickSchedulerJobAllotment = nullptr;
+TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarOverrideTickSchedulerTickRate = nullptr;
+
+namespace NSAVVMFunctor
+{
+#if !UE_BUILD_SHIPPING
+	void OnTickSchedulerCVarChanged(IConsoleVariable* NewCVar)
+	{
+		if (!IsValid(GEngine))
+		{
+			return;
+		}
+
+		auto* TickScheduler = UWorld::GetSubsystem<UAVVMTickScheduler>(GEngine->GetWorld());
+		if (IsValid(TickScheduler))
+		{
+			TickScheduler->OnTickSchedulerRuleCVarChanged();
+		}
+	}
+#endif
+}
 
 void FAVVMGameplayModule::StartupModule()
 {
@@ -38,18 +61,79 @@ void FAVVMGameplayModule::StartupModule()
 		UGameplayTagsManager::Get().AddTagIniSearchPath(TagPath);
 	}
 
-	IConsoleVariable* NewCVar = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("ToggleTickScheduling"),
+	IConsoleVariable* CVar_EnableTickSchedulerSubsystem = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("TickScheduler.EnableShouldCreateSubsystem"),
 			                         false,
-			                         TEXT("Toggle TickScheduler Subsystem availability."));
+			                         TEXT("Enable Tick Scheduler Subsystem creation."));
 
-	CVarTickSchedulerEnableSubsystem = MakeShareable<IConsoleVariable>(NewCVar);
+	IConsoleVariable* CVar_EnableOverrideTickSchedulerRule = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("TickScheduler.EnableRuleOverride"),
+			                         false,
+			                         TEXT("Enable Tick Scheduler Rule Override."));
+
+	IConsoleVariable* CVar_OverrideTickSchedulerJobAllotment = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideJobAllotment"),
+			                         false,
+			                         TEXT("Enable Job Allotment Override."));
+
+	IConsoleVariable* CVar_OverrideTickSchedulerTickRate = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideTickRate"),
+			                         false,
+			                         TEXT("Enable TickRate Override."));
+
+	CVarEnableTickSchedulerSubsystem = MakeShareable<IConsoleVariable>(CVar_EnableTickSchedulerSubsystem);
+	CVarEnableOverrideTickSchedulerRule = MakeShareable<IConsoleVariable>(CVar_EnableOverrideTickSchedulerRule);
+	CVarOverrideTickSchedulerJobAllotment = MakeShareable<IConsoleVariable>(CVar_OverrideTickSchedulerJobAllotment);
+	CVarOverrideTickSchedulerTickRate = MakeShareable<IConsoleVariable>(CVar_OverrideTickSchedulerTickRate);
+
+#if !UE_BUILD_SHIPPING
+	if (CVarEnableOverrideTickSchedulerRule.IsValid())
+	{
+		auto& Delegate = CVarEnableOverrideTickSchedulerRule->OnChangedDelegate();
+		HandleA = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
+	}
+
+	if (CVarOverrideTickSchedulerJobAllotment.IsValid())
+	{
+		auto& Delegate = CVarOverrideTickSchedulerJobAllotment->OnChangedDelegate();
+		HandleB = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
+	}
+
+	if (CVarOverrideTickSchedulerTickRate.IsValid())
+	{
+		auto& Delegate = CVarOverrideTickSchedulerTickRate->OnChangedDelegate();
+		HandleC = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
+	}
+#endif
 }
 
 void FAVVMGameplayModule::ShutdownModule()
 {
-	IConsoleManager::Get().UnregisterConsoleObject(CVarTickSchedulerEnableSubsystem.Get());
-	
+	IConsoleManager::Get().UnregisterConsoleObject(CVarEnableTickSchedulerSubsystem.Get());
+	IConsoleManager::Get().UnregisterConsoleObject(CVarEnableOverrideTickSchedulerRule.Get());
+	IConsoleManager::Get().UnregisterConsoleObject(CVarOverrideTickSchedulerJobAllotment.Get());
+	IConsoleManager::Get().UnregisterConsoleObject(CVarOverrideTickSchedulerTickRate.Get());
+
+#if !UE_BUILD_SHIPPING
+	if (CVarEnableOverrideTickSchedulerRule.IsValid())
+	{
+		auto& Delegate = CVarEnableOverrideTickSchedulerRule->OnChangedDelegate();
+		Delegate.Remove(HandleA);
+	}
+
+	if (CVarOverrideTickSchedulerJobAllotment.IsValid())
+	{
+		auto& Delegate = CVarOverrideTickSchedulerJobAllotment->OnChangedDelegate();
+		Delegate.Remove(HandleB);
+	}
+
+	if (CVarOverrideTickSchedulerTickRate.IsValid())
+	{
+		auto& Delegate = CVarOverrideTickSchedulerTickRate->OnChangedDelegate();
+		Delegate.Remove(HandleC);
+	}
+#endif
+
 	const bool bIsAvailable = IGameplayTagsModule::IsAvailable();
 	if (!bIsAvailable)
 	{
@@ -71,13 +155,28 @@ UDataRegistry* FAVVMGameplayModule::GetSetAutomatedTestDataRegistry()
 		// TODO @gdemers require fallback. we should always have our test case available,
 		// else we should create them.
 	}
-	
+
 	return AutomatedTestDataRegistry.Get();
 }
 
-TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarTickSchedulerEnableSubsystem()
+TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarEnableTickSchedulerSubsystem()
 {
-	return CVarTickSchedulerEnableSubsystem.ToSharedRef();
+	return CVarEnableTickSchedulerSubsystem.ToSharedRef();
+}
+
+TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()
+{
+	return CVarEnableOverrideTickSchedulerRule.ToSharedRef();
+}
+
+TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()
+{
+	return CVarOverrideTickSchedulerJobAllotment.ToSharedRef();
+}
+
+TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarOverrideTickSchedulerTickRate()
+{
+	return CVarOverrideTickSchedulerTickRate.ToSharedRef();
 }
 
 IMPLEMENT_MODULE(FAVVMGameplayModule, AVVMGameplay)

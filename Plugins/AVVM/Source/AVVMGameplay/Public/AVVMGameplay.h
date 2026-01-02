@@ -59,11 +59,23 @@ class FAVVMGameplayModule : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	
+
 	static UDataRegistry* GetSetAutomatedTestDataRegistry();
 
-	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarTickSchedulerEnableSubsystem();
+	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarEnableTickSchedulerSubsystem();
+	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarEnableOverrideTickSchedulerRule();
+	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarOverrideTickSchedulerJobAllotment();
+	static AVVMGAMEPLAY_API TSharedRef<IConsoleVariable> GetCVarOverrideTickSchedulerTickRate();
 
 private:
-	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarTickSchedulerEnableSubsystem;
+	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarEnableTickSchedulerSubsystem;
+	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarEnableOverrideTickSchedulerRule;
+	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarOverrideTickSchedulerJobAllotment;
+	static AVVMGAMEPLAY_API TSharedPtr<IConsoleVariable> CVarOverrideTickSchedulerTickRate;
+
+#if !UE_BUILD_SHIPPING
+	FDelegateHandle HandleA;
+	FDelegateHandle HandleB;
+	FDelegateHandle HandleC;
+#endif
 };

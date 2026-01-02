@@ -19,17 +19,46 @@
 //SOFTWARE.
 #include "AVVMTickSchedulerRule.h"
 
+#include "AVVMGameplay.h"
+
 float UAVVMTickSchedulerRule::GetGlobalResetTimeJobQueuePriority() const
 {
-	return GlobalResetTimeJobQueuePriority;
+	const bool bDoesOverride = FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()->GetBool();
+	if (bDoesOverride)
+	{
+		const float GlobalResetTimeJobQueuePriorityOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()->GetFloat();
+		return GlobalResetTimeJobQueuePriorityOverride;
+	}
+	else
+	{
+		return GlobalResetTimeJobQueuePriority;
+	}
 }
 
 float UAVVMTickSchedulerRule::GetGlobalJobAllotment() const
 {
-	return GlobalJobAllotment;
+	const bool bDoesOverride = FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()->GetBool();
+	if (bDoesOverride)
+	{
+		const float GlobalJobAllotmentOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()->GetFloat();
+		return GlobalJobAllotmentOverride;
+	}
+	else
+	{
+		return GlobalJobAllotment;
+	}
 }
 
 float UAVVMTickSchedulerRule::GetTickRate() const
 {
-	return TickRate;
+	const bool bDoesOverride = FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()->GetBool();
+	if (bDoesOverride)
+	{
+		const float TickRateOverride = FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()->GetFloat();
+		return TickRateOverride;
+	}
+	else
+	{
+		return TickRate;
+	}
 }

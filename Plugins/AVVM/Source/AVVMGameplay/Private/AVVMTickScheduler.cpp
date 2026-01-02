@@ -43,7 +43,7 @@ bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 		return false;
 	}
 
-	const bool bShouldCreateSubsystem = FAVVMGameplayModule::GetCVarTickSchedulerEnableSubsystem()->GetBool();
+	const bool bShouldCreateSubsystem = FAVVMGameplayModule::GetCVarEnableTickSchedulerSubsystem()->GetBool();
 	return bShouldCreateSubsystem;
 }
 
@@ -252,6 +252,18 @@ void UAVVMTickScheduler::Static_UnRegister(const UWorld* World,
 		Scheduler->UnRegister(ManualTickActor);
 	}
 }
+
+#if !UE_BUILD_SHIPPING
+void UAVVMTickScheduler::OnTickSchedulerRuleCVarChanged()
+{
+	auto* World = GetTypedOuter<UWorld>();
+	if (IsValid(World))
+	{
+		const auto Callback = FTimerDelegate::CreateUObject(this, &UAVVMTickScheduler::InitRule);
+		World->GetTimerManager().SetTimerForNextTick(Callback);
+	}
+}
+#endif
 
 UAVVMTickScheduler* UAVVMTickScheduler::Get(const UWorld* World)
 {
