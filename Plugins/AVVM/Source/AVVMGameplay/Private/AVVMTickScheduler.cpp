@@ -74,13 +74,13 @@ void UAVVMTickScheduler::Tick(float DeltaTime)
 	const double TickBegin = FPlatformTime::Seconds();
 
 	// @gdemers go over all priority level, starting at highest (i.e - 0). 
-	for (auto JobIterator = TempJobQueue.CreateIterator(); JobIterator; ++JobIterator)
+	for (auto JobQueueIterator = TempJobQueue.CreateIterator(); JobQueueIterator; ++JobQueueIterator)
 	{
 		// @gdemers clamp index.
 		NextPriorityLevel = FMath::Clamp(NextPriorityLevel + 1, 0, TempJobQueue.Num() - 1);
 
 		// @gdemers execute tick on all actors of class.
-		for (auto& [Class, Runner_Actor] : JobIterator->Jobs_Actor)
+		for (auto& [Class, Runner_Actor] : JobQueueIterator->Jobs_Actor)
 		{
 			if (Runner_Actor.Entities.IsEmpty())
 			{
@@ -128,7 +128,7 @@ void UAVVMTickScheduler::Tick(float DeltaTime)
 		// they should be updated after the actor.
 		// Note : Ticking dependent components shouldnt be required right after parent updates. Otherwise, we suffer hops that counter-effect
 		// the optimization in place.
-		for (auto& [Class, Runner_ActorComponent] : JobIterator->Jobs_ActorComponent)
+		for (auto& [Class, Runner_ActorComponent] : JobQueueIterator->Jobs_ActorComponent)
 		{
 			if (Runner_ActorComponent.Entities.IsEmpty())
 			{
