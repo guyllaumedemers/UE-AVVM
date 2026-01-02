@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "AVVMTickSchedulerRule.h"
 
+float UAVVMTickSchedulerRule::GetGlobalResetTimeJobQueuePriority() const
+{
+	return GlobalResetTimeJobQueuePriority;
+}
+
 float UAVVMTickSchedulerRule::GetGlobalJobAllotment() const
 {
 	return GlobalJobAllotment;

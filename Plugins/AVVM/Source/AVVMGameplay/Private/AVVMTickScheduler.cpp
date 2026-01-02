@@ -203,8 +203,34 @@ void UAVVMTickScheduler::Tick(float DeltaTime)
 		}
 	}
 
-	// TODO @gdemers Problem : We are currently only supporting lowering the priority level. We need a way to
-	// allow lower priority to get some cpu time eventually.
+	// @gdemers after a period of time, we want all job queues to be put at the highest priority,
+	// and grant longer process a chance to run on the cpu again.
+	ResetJobQueuePriorityDeltaTime += DeltaTime;
+	if (ResetJobQueuePriorityDeltaTime > GlobalResetTimeJobQueuePriority)
+	{
+		ResetJobQueuePriorityDeltaTime = 0.f;
+
+		const int32 Count = MultiLevelFeedbackQueue.PriorityQueue.Num();
+		for (int32 i = 1; i < Count; ++i)
+		{
+			FAVVMJobQueue& Dest = MultiLevelFeedbackQueue.PriorityQueue[0];
+			FAVVMJobQueue& Src = MultiLevelFeedbackQueue.PriorityQueue[i];
+
+			for (auto& [Class, Runner_Actor] : Src.Jobs_Actor)
+			{
+				TArray<TWeakObjectPtr<AActor>> TempActors = MoveTemp(Src.Jobs_Actor[Class].Entities);
+				const int32 NewHandle = Dest.Append(Class.Get(), TempActors);
+				TickerHandles.FindOrAdd(Class, NewHandle);
+			}
+
+			for (auto& [Class, Runner_ActorComponent] : Src.Jobs_ActorComponent)
+			{
+				TArray<TWeakObjectPtr<UActorComponent>> TempActorComponents = MoveTemp(Src.Jobs_ActorComponent[Class].Entities);
+				const int32 NewHandle = Dest.Append(Class.Get(), TempActorComponents);
+				TickerHandles.FindOrAdd(Class, NewHandle);
+			}
+		}
+	}
 }
 
 void UAVVMTickScheduler::Static_Register(const UWorld* World,
@@ -323,6 +349,7 @@ void UAVVMTickScheduler::InitRule()
 	const UAVVMTickSchedulerRule* Rule = TickSchedulerRule.Get();
 	if (IsValid(Rule))
 	{
+		GlobalResetTimeJobQueuePriority = Rule->GetGlobalResetTimeJobQueuePriority();
 		GlobalJobAllotment = Rule->GetGlobalJobAllotment();
 		TickRate = Rule->GetTickRate();
 	}

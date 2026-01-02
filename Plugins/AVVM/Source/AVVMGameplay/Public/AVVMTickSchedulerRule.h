@@ -37,10 +37,14 @@ class AVVMGAMEPLAY_API UAVVMTickSchedulerRule : public UAVVMWorldRule
 	GENERATED_BODY()
 
 public:
+	float GetGlobalResetTimeJobQueuePriority() const;
 	float GetGlobalJobAllotment() const;
 	float GetTickRate() const;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	float GlobalResetTimeJobQueuePriority = 0.f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float GlobalJobAllotment = 0.f;
 
