@@ -111,8 +111,16 @@ void UActorInventoryComponent::BeginPlay()
 	}
 #endif
 
+	bool bDoesSupportWeightManagement = false;
+
 	auto* Character = Cast<AAVVMCharacter>(Outer);
-	if (!NonReplicatedWeightManagerClass.IsNull() && IsValid(Character) && IsValid(Character->GetController()))
+	if (IsValid(Character))
+	{
+		auto* PC = Cast<APlayerController>(Character->GetController());
+		bDoesSupportWeightManagement = IsValid(PC);
+	}
+
+	if (!NonReplicatedWeightManagerClass.IsNull() && bDoesSupportWeightManagement)
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UActorInventoryComponent::OnWeightManagerObjectRetrieved);
