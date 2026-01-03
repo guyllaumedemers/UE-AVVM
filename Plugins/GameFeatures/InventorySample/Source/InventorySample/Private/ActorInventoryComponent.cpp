@@ -111,7 +111,8 @@ void UActorInventoryComponent::BeginPlay()
 	}
 #endif
 
-	if (!NonReplicatedWeightManagerClass.IsNull())
+	auto* Character = Cast<AAVVMCharacter>(Outer);
+	if (!NonReplicatedWeightManagerClass.IsNull() && IsValid(Character) && IsValid(Character->GetController()))
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UActorInventoryComponent::OnWeightManagerObjectRetrieved);
