@@ -838,18 +838,20 @@ void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
 void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& NewTags)
 {
 	const bool bShouldDrop = NewTags.HasAnyExact(OuterDropConditionTags);
-	if (bShouldDrop)
+	if (!bShouldDrop)
 	{
-		static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
-		TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
-		{
-			return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
-		});
+		return;
+	}
 
-		for (UItemObject* PendingDropItem : PendingDropItems)
-		{
-			Drop(PendingDropItem);
-		}
+	static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
+	TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
+	{
+		return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
+	});
+
+	for (UItemObject* PendingDropItem : PendingDropItems)
+	{
+		Drop(PendingDropItem);
 	}
 }
 
