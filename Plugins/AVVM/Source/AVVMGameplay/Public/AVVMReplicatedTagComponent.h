@@ -52,10 +52,10 @@ public:
 	void Remove(const FGameplayTagContainer& NewTags);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAnyExact(const FGameplayTagContainer& NewTags) const;
+	bool HasAnyExact(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAllExact(const FGameplayTagContainer& NewTags) const;
+	bool HasAllExact(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
 	static UAVVMReplicatedTagComponent* GetActorComponent(const AActor* NewTarget);

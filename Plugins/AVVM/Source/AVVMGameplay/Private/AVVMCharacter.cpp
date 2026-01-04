@@ -21,6 +21,7 @@
 
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMReplicatedTagComponent.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -43,6 +44,7 @@ AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
+	ReplicatedTagComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMReplicatedTagComponent>(this, TEXT("ReplicatedTagComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -146,12 +148,12 @@ const TInstancedStruct<FAVVMDataResolverHelper>& AAVVMCharacter::GetCharacterDat
 
 bool AAVVMCharacter::HasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return false;
+	return IsValid(ReplicatedTagComponent) ? ReplicatedTagComponent->HasAnyExact(Compare) : false;
 }
 
 bool AAVVMCharacter::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return false;
+	return IsValid(ReplicatedTagComponent) ? ReplicatedTagComponent->HasAllExact(Compare) : false;
 }
 
 void AAVVMCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)

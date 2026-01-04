@@ -35,6 +35,7 @@
 
 class UAbilitySystemComponent;
 class UAVVMAbilitySystemComponent;
+class UAVVMReplicatedTagComponent;
 
 /**
  *	Class description:
@@ -136,6 +137,9 @@ protected:
 	// @gdemers Resource Component handle initialization of our Character.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningActor = nullptr;
