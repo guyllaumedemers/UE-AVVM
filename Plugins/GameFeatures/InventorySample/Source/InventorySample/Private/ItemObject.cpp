@@ -393,6 +393,7 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 		const int32 PrivateItemId = (*SearchResult);
 		const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
 		UnInitializedItemObject->ModifyRuntimeCount(ItemCount);
+		UnInitializedItemObject->PrivateItemId = PrivateItemId;
 
 		return PrivateItemId;
 	}

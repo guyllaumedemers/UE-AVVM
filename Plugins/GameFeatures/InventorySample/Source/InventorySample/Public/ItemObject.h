@@ -237,6 +237,7 @@ protected:
 
 private:
 	int32 PrivateItemId = INDEX_NONE;
+	friend class UItemObjectUtils;
 };
 
 /**
