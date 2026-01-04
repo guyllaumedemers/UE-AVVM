@@ -46,13 +46,11 @@ const FGameplayTagContainer& UInventorySettings::GetFullInventory_BlockedActions
 
 const FName UInventorySettings::GetItemMaxStackCount(const FGameplayTag& MaxStackCountTag)
 {
-	for (auto [Tag, RowName] : GetDefault<UInventorySettings>()->ItemMaxStackCounts)
+	const auto& NewItemMaxStackCounts = GetDefault<UInventorySettings>()->ItemMaxStackCounts;
+	const bool bDoesContains = NewItemMaxStackCounts.Contains(MaxStackCountTag);
+	if (bDoesContains)
 	{
-		const bool bDoesContains = MaxStackCountTag.MatchesTagExact(Tag);
-		if (bDoesContains)
-		{
-			return RowName;
-		}
+		return NewItemMaxStackCounts[MaxStackCountTag];
 	}
 
 	static const FName Empty = NAME_None;

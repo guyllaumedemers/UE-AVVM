@@ -249,6 +249,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
 	                              const FGameplayTag& MaxStackCountTag);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 GetItemStartupStackCount(const UObject* Outer, const UItemObject* UnInitializedItemObject);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetNumSplits(const UItemObject* SrcItem);

@@ -75,7 +75,7 @@ void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 
 	if (false == !!RuntimeItemState.Counter)
 	{
-		const FGameplayTagContainer BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
+		const FGameplayTagContainer& BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
 		ModifyRuntimeState(BlockingTags, {});
 	}
 }
@@ -362,6 +362,12 @@ int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTabl
 
 	const int32 MaxStackCount = SearchResult->MaxStackCount;
 	return MaxStackCount;
+}
+
+int32 UItemObjectUtils::GetItemStartupStackCount(const UObject* Outer, const UItemObject* UnInitializedItemObject)
+{
+	// TODO @gdemers retrieve backend stack count for this item, or stack count defined based on game constraints.
+	return INDEX_NONE;
 }
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)

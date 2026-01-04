@@ -507,8 +507,15 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		}
 
 		auto* NewItem = NewObject<UItemObject>(this, ItemObjectClass);
-		AddReplicatedSubObject(NewItem);
-		Items.Add(NewItem);
+		if (IsValid(NewItem))
+		{
+			// @gdemers retrieve stack count based on backend, or game state rules for object creation.
+			const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(Outer, NewItem);
+			NewItem->ModifyRuntimeCount(ItemCount);
+			
+			AddReplicatedSubObject(NewItem);
+			Items.Add(NewItem);
+		}
 	}
 
 	// @gdemers allow initialization of loadout object based held items. 
@@ -844,7 +851,7 @@ void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& Ne
 	}
 
 	static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
-	TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
+	const TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
 	{
 		return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
 	});
