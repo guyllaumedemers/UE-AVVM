@@ -21,8 +21,14 @@
 
 TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
 {
-	// TODO @gdemers convert local representation into backend usable representation.
-	return TArray<int32>();
+	TArray<int32> OutResults;
+	for (const UItemObject* Item : Items)
+	{
+		const int32 ItemId = UInventoryUtils::GetUniqueId(Item);
+		OutResults.AddUnique(ItemId);
+	}
+
+	return OutResults;
 }
 
 int32 UInventoryUtils::GetUniqueId(const UItemObject* Item)

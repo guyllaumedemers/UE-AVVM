@@ -510,8 +510,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		if (IsValid(NewItem))
 		{
 			// @gdemers retrieve stack count based on backend, or game state rules for object creation.
-			// Note : if the request came from IInventoryProvider::Execute_GetItemSrcType(Outer), and returned static flag, we have to handle count retrieval from
-			// dasta serialized on disk.
+			// Note : if the request came from IInventoryProvider::Execute_GetItemSrcType(Outer), and returned static flag, we have to handle count retrieval from data serialized on disk.
 			// TODO @gdemers allow retrieval of stack count from external source that isnt backend.
 			const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(Outer, NewItem, UActorInventoryComponent::GetInventoryDataResolverHelper());
 			NewItem->ModifyRuntimeCount(ItemCount);

@@ -68,7 +68,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		// target a triggering actor.
 		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
 		                                                      GET_ITEM_ID_ENCODING_BIT_RANGE,
-		                                                      NULL,
+		                                                      GET_ITEM_ID_ENCODING_RSHIFT,
 		                                                      CHECK_CHARACTER_DEPENDENT_ENCODING);
 	}
 	else
