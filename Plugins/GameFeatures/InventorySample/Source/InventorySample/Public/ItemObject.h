@@ -268,6 +268,14 @@ public:
 	                         const TArray<int32>& NewPrivateIds,
 	                         const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                         UItemObject* UnInitializedItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static void NullifyStorage(UItemObject* PendingDropItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static void QualifyStorage(UItemObject* PendingPickupItemObject,
+	                           const int32 NewStorageId,
+	                           const int32 NewStoragePosition);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

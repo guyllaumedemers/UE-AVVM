@@ -766,6 +766,9 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 
 	// @gdemers update backend representation of our inventory.
 	CheckBackend();
+	
+	// @gdemers handle invalidating the storage bits of the item encoding.
+	UItemObjectUtils::NullifyStorage(ItemObject);
 
 	// @gdemers Handle actor creation + UItemObject binding to World Actor created for
 	// later retrieval during pickup.
@@ -812,8 +815,15 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 			}
 
 			UItemObject* NewItemObjectEntry = UItemObjectUtils::SplitObject(this, ItemObject);
-			AddReplicatedSubObject(NewItemObjectEntry);
-			Items.Add(NewItemObjectEntry);
+			if (IsValid(NewItemObjectEntry))
+			{
+				// @gdemers handle configuring the storage bits of the item encoding.
+				// TODO @gdemers handle storage assignment
+				UItemObjectUtils::QualifyStorage(ItemObject, 0, 0);
+				
+				AddReplicatedSubObject(NewItemObjectEntry);
+				Items.Add(NewItemObjectEntry);
+			}
 
 			// @gdemers validate inventory bounds between addition to prevent overflow based
 			// on design configuration for the owning Actor.

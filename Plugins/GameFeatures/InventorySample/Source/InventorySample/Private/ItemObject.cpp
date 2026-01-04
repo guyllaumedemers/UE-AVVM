@@ -425,6 +425,27 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 	}
 }
 
+void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
+{
+	if (IsValid(PendingDropItemObject))
+	{
+		const int32 ItemId = UInventoryUtils::GetUniqueId(PendingDropItemObject);
+		PendingDropItemObject->PrivateItemId &= ItemId;
+	}
+}
+
+void UItemObjectUtils::QualifyStorage(UItemObject* PendingPickupItemObject,
+                                      const int32 NewStorageId,
+                                      const int32 NewStoragePosition)
+{
+	if (IsValid(PendingPickupItemObject))
+	{
+		const int32 StorageId_Shifted = (NewStorageId << GET_STORAGE_ID_ENCODING_RSHIFT/*bit shift is mirrored here*/);
+		const int32 StoragePosition_Shifted = (NewStoragePosition << GET_ITEM_POSITION_ENCODING_RSHIFT/*same here*/);
+		PendingPickupItemObject->PrivateItemId |= (StorageId_Shifted | StoragePosition_Shifted);
+	}
+}
+
 int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
                                          const FGameplayTag& MaxStackCountTag)
 {
@@ -492,6 +513,7 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		const int32 SplitResources = FMath::Min(SrcCount, MaxCount);
 		SrcItem->ModifyRuntimeCount(SrcCount - SplitResources);
 		OutItem->ModifyRuntimeCount(SplitResources);
+		OutItem->PrivateItemId = SrcItem->PrivateItemId;
 	}
 
 	return OutItem;
