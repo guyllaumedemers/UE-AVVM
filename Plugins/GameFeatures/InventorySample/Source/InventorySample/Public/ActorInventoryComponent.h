@@ -181,6 +181,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadoutClass = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTagContainer OuterDropConditionTags = FGameplayTagContainer::EmptyContainer;
+
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
 	TArray<TObjectPtr<UItemObject>> Items;
 
@@ -218,6 +221,9 @@ private:
 	virtual void OnDrop(UItemObject* ItemObject);
 	virtual void OnPickup(UItemObject* ItemObject);
 	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+	
+	UFUNCTION(meta=(AllowPrivateAccess))
+	void OnOuterTagChanged(const FGameplayTagContainer& NewTags);
 
 	friend class UInventoryResourceHandlingImpl;
 };

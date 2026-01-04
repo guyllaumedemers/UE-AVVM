@@ -22,6 +22,7 @@
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMReplicatedTagComponent.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMUtils.h"
 #include "InventoryProvider.h"
@@ -51,6 +52,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_DROP_ITEM, "InventorySample.It
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM, "InventorySample.Item.Notification.Pickup");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.Item.Notification.Swap");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_STORAGE_NOENTRY, "InventorySample.Item.Storage.NoEntry");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DROPPABLE, "InventorySample.Item.Droppable");
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
 {
@@ -105,9 +107,18 @@ void UActorInventoryComponent::BeginPlay()
 	       *Outer->GetName());
 
 #if WITH_SERVER_CODE
-	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
+	if (Outer->HasAuthority())
 	{
-		RequestItems(Outer);
+		if (bShouldAsyncLoadOnBeginPlay)
+		{
+			RequestItems(Outer);
+		}
+
+		auto* TagComponent = Outer->GetComponentByClass<UAVVMReplicatedTagComponent>();
+		if (IsValid(TagComponent))
+		{
+			TagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &UActorInventoryComponent::OnOuterTagChanged);
+		}
 	}
 #endif
 
@@ -162,6 +173,17 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *UActorInventoryComponent::StaticClass()->GetName(),
 	       *Outer->GetName());
+
+#if WITH_SERVER_CODE
+	if (Outer->HasAuthority())
+	{
+		auto* TagComponent = Outer->GetComponentByClass<UAVVMReplicatedTagComponent>();
+		if (IsValid(TagComponent))
+		{
+			TagComponent->OnReplicatedTagChanged.RemoveAll(this);
+		}
+	}
+#endif
 
 	OwningOuter.Reset();
 }
@@ -811,6 +833,27 @@ void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
 	{
 		return;
 	}
+}
+
+void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& NewTags)
+{
+	const bool bShouldDrop = NewTags.HasAnyExact(OuterDropConditionTags);
+	if (bShouldDrop)
+	{
+		static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
+		TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
+		{
+			return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
+		});
+
+		for (UItemObject* PendingDropItem : PendingDropItems)
+		{
+			Drop(PendingDropItem);
+		}
+	}
+
+	// TODO @gdemers Update internal flags held by this component. Maybe the outer state
+	// is preventing other actions that arent drop specific.
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
