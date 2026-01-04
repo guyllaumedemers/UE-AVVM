@@ -177,6 +177,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetStorageId() const;
+	
+	UFUNCTION(BlueprintCallable)
+	int32 GetStoragePosition() const;
+
 	const FDataRegistryId& GetItemActorId() const;
 
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
@@ -255,6 +261,32 @@ private:
 /**
  *	Class description:
  *	
+ *	FStorageContextArgs is a context struct encapsulating parameter argument for searching free storage.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FStorageContextArgs
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> OccupiedEntries;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 StoragePositionBounds = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 StorageIdBounds = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 CurrentStoragePosition = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 CurrentStorageId = INDEX_NONE;
+};
+
+/**
+ *	Class description:
+ *	
  *	UItemObjectUtils is a blueprint function library that expose reusable api.
  */
 UCLASS()
@@ -276,6 +308,16 @@ public:
 	static void QualifyStorage(UItemObject* PendingPickupItemObject,
 	                           const int32 NewStorageId,
 	                           const int32 NewStoragePosition);
+
+	UFUNCTION(BlueprintCallable)
+	static bool CheckNextStorageEntry(const FStorageContextArgs& Params,
+	                                  int32& OutStoragePosition,
+	                                  int32& OutStorageId);
+
+	UFUNCTION(BlueprintCallable)
+	static void GetFreeStorage(const FStorageContextArgs& Params,
+	                           int32& OutStoragePosition,
+	                           int32& OutStorageId);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

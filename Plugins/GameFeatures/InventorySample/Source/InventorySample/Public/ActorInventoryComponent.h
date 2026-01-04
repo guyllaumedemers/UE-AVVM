@@ -227,7 +227,7 @@ private:
 
 	// @gdemers cached representation of what has been attributed during the initialization
 	// phase of our inventory. This address the problem of uniqueness for entries with identical type.
-	TArray<int32> PrivateIds;
+	TArray<int32> PrivateItemIds;
 	
 	friend class UInventoryResourceHandlingImpl;
 };

@@ -224,6 +224,16 @@ int32 UItemObject::GetRuntimeCount() const
 	return RuntimeItemState.Counter;
 }
 
+int32 UItemObject::GetStorageId() const
+{
+	return RuntimeItemState.StorageId;
+}
+
+int32 UItemObject::GetStoragePosition() const
+{
+	return RuntimeItemState.StoragePosition;
+}
+
 const FDataRegistryId& UItemObject::GetItemActorId() const
 {
 	return ItemActorId;
@@ -446,6 +456,21 @@ void UItemObjectUtils::QualifyStorage(UItemObject* PendingPickupItemObject,
 	}
 }
 
+bool UItemObjectUtils::CheckNextStorageEntry(const FStorageContextArgs& Params,
+                                             int32& OutStoragePosition,
+                                             int32& OutStorageId)
+{
+	// TODO @gdemers Make impl.
+	return false;
+}
+
+void UItemObjectUtils::GetFreeStorage(const FStorageContextArgs& Params,
+                                      int32& OutStoragePosition,
+                                      int32& OutStorageId)
+{
+	// TODO @gdemers Make impl.
+}
+
 int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
                                          const FGameplayTag& MaxStackCountTag)
 {
@@ -513,7 +538,8 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		const int32 SplitResources = FMath::Min(SrcCount, MaxCount);
 		SrcItem->ModifyRuntimeCount(SrcCount - SplitResources);
 		OutItem->ModifyRuntimeCount(SplitResources);
-		OutItem->PrivateItemId = SrcItem->PrivateItemId;
+		// @gdemers storage is qualified next. this shouldnt be transient between instance. only id should be!
+		OutItem->PrivateItemId = UAVVMOnlineEncodingUtils::DecodeInt32(SrcItem->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
 	}
 
 	return OutItem;

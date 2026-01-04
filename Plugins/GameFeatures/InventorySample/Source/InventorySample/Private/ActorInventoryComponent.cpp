@@ -34,6 +34,7 @@
 #include "NonReplicatedLoadoutObject.h"
 #include "NonReplicatedWeightManagerObject.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -154,7 +155,7 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	QueueingMechanism.Reset();
 	ItemHandleSystem.Reset();
-	PrivateIds.Reset();
+	PrivateItemIds.Reset();
 
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -511,8 +512,8 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		if (IsValid(NewItem))
 		{
 			// @gdemers initialize the runtime representation of our ItemObject based on backend representation.
-			const int32 PrivateItemId = UItemObjectUtils::RuntimeInit(Outer, PrivateIds, UActorInventoryComponent::GetInventoryDataResolverHelper(), NewItem);
-			PrivateIds.AddUnique(PrivateItemId);
+			const int32 PrivateItemId = UItemObjectUtils::RuntimeInit(Outer, PrivateItemIds, UActorInventoryComponent::GetInventoryDataResolverHelper(), NewItem);
+			PrivateItemIds.AddUnique(PrivateItemId);
 
 			AddReplicatedSubObject(NewItem);
 			Items.Add(NewItem);
@@ -799,8 +800,12 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	bool bHasAvailableEntries = true;
 	if (bDoesStackOverflow)
 	{
+		// @gdemers get storage information from the item onto which we attempted stacking, but generated an overflow from.
+		int32 TargetStoragePosition = (*SearchResult)->GetStoragePosition();
+		int32 TargetStorageId = (*SearchResult)->GetStorageId();
+
 		// @gdemers check if there is still unique entries available within our bounds.
-		const auto EmptyStorageTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+		const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
@@ -808,7 +813,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
 		for (int32 i = 0; i < NumSplits; ++i)
 		{
-			bHasAvailableEntries = !HasPartialMatch(EmptyStorageTags);
+			bHasAvailableEntries = !HasPartialMatch(StorageFullTags);
 			if (!bHasAvailableEntries)
 			{
 				break;
@@ -817,12 +822,39 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 			UItemObject* NewItemObjectEntry = UItemObjectUtils::SplitObject(this, ItemObject);
 			if (IsValid(NewItemObjectEntry))
 			{
+				// @gdemers hard limit set by bit encoding to possible storage positions, and Ids.
+				constexpr int32 StoragePositionBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+				constexpr int32 StorageIdBounds = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE);
+
+				FStorageContextArgs Params;
+				Params.OccupiedEntries = PrivateItemIds;
+				Params.StoragePositionBounds = StoragePositionBounds;
+				Params.StorageIdBounds = StorageIdBounds;
+				Params.CurrentStoragePosition = TargetStoragePosition;
+				Params.CurrentStorageId = TargetStorageId;
+
+				// @gdemers search result
+				int32 OutStoragePosition = INDEX_NONE;
+				int32 OutStorageId = INDEX_NONE;
+
+				const bool bHasFoundStorage = UItemObjectUtils::CheckNextStorageEntry(Params, OutStoragePosition, OutStorageId);
+				if (!bHasFoundStorage)
+				{
+					// @gdemers we have to check that we can insert within current, previous, or next storage.
+					// only after all entries are tested do we return null BUT if we were already Full, we wouldn't be able to execute the above call, and we CheckBounds between addition so
+					// we should ALWAYS be able to find an entry here.
+					UItemObjectUtils::GetFreeStorage(Params, OutStoragePosition, OutStorageId);
+				}
+
 				// @gdemers handle configuring the storage bits of the item encoding.
-				// TODO @gdemers handle storage assignment
-				UItemObjectUtils::QualifyStorage(ItemObject, 0, 0);
-				
+				UItemObjectUtils::QualifyStorage(ItemObject, OutStorageId, OutStoragePosition);
+
 				AddReplicatedSubObject(NewItemObjectEntry);
 				Items.Add(NewItemObjectEntry);
+
+				// @gdemers update our last assigned storage information if ever we have more content to assign.
+				TargetStoragePosition = OutStoragePosition;
+				TargetStorageId = OutStorageId;
 			}
 
 			// @gdemers validate inventory bounds between addition to prevent overflow based
