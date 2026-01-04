@@ -112,12 +112,14 @@ void UActorInventoryComponent::BeginPlay()
 #endif
 
 	bool bDoesSupportWeightManagement = false;
+	bool bDoesSupportLoadout = false;
 
 	auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character))
 	{
 		auto* PC = Cast<APlayerController>(Character->GetController());
 		bDoesSupportWeightManagement = IsValid(PC);
+		bDoesSupportLoadout = true;
 	}
 
 	if (!NonReplicatedWeightManagerClass.IsNull() && bDoesSupportWeightManagement)
@@ -127,7 +129,7 @@ void UActorInventoryComponent::BeginPlay()
 		WeightManagerHandle = UAssetManager::Get().LoadAssetList({NonReplicatedWeightManagerClass.ToSoftObjectPath()}, Callback);
 	}
 
-	if (!NonReplicatedLoadoutClass.IsNull())
+	if (!NonReplicatedLoadoutClass.IsNull() && bDoesSupportLoadout)
 	{
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UActorInventoryComponent::OnLoadoutObjectRetrieved);
