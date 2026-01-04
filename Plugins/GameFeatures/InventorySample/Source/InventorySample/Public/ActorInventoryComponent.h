@@ -30,6 +30,7 @@
 
 #include "ActorInventoryComponent.generated.h"
 
+struct FStorageContextArgs;
 struct FStreamableHandle;
 class UAVVMResourceManagerComponent;
 class UItemObject;
@@ -168,7 +169,8 @@ protected:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
-	
+
+	void SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem) const;
 	void CheckBounds();
 	void CheckBackend();
 

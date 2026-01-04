@@ -788,6 +788,9 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		return IsValid(SrcItem) && SrcItem->CanStack(InputItem);
 	});
 
+	// @gdemers hard limit set by bit encoding to possible storage positions, and Ids.
+	static constexpr int32 StoragePositionBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+	static constexpr int32 StorageIdBounds = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE);
 	bool bDoesStackOverflow = false;
 
 	// @gdemers an entry already exist for us to support stacking.
@@ -795,6 +798,22 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	{
 		// @gdemers our stack was too big to fit the whole set, require inventory expansion.
 		bDoesStackOverflow = (*SearchResult)->Stack(ItemObject);
+	}
+	else
+	{
+		FStorageContextArgs Params;
+		Params.OccupiedEntries = PrivateItemIds;
+		Params.StoragePositionBounds = StoragePositionBounds;
+		Params.StorageIdBounds = StorageIdBounds;
+		Params.CurrentStoragePosition = INDEX_NONE;
+		Params.CurrentStorageId = INDEX_NONE;
+
+		// @gdemers encode storage position into world UItemObject. (based on world pickup)
+		// IMPORTANT : This specific Object isn't stackable!
+		SetStorage(Params, ItemObject);
+
+		AddReplicatedSubObject(ItemObject);
+		Items.Add(ItemObject);
 	}
 
 	bool bHasAvailableEntries = true;
@@ -822,10 +841,6 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 			UItemObject* NewItemObjectEntry = UItemObjectUtils::SplitObject(this, ItemObject);
 			if (IsValid(NewItemObjectEntry))
 			{
-				// @gdemers hard limit set by bit encoding to possible storage positions, and Ids.
-				constexpr int32 StoragePositionBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-				constexpr int32 StorageIdBounds = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE);
-
 				FStorageContextArgs Params;
 				Params.OccupiedEntries = PrivateItemIds;
 				Params.StoragePositionBounds = StoragePositionBounds;
@@ -833,28 +848,15 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 				Params.CurrentStoragePosition = TargetStoragePosition;
 				Params.CurrentStorageId = TargetStorageId;
 
-				// @gdemers search result
-				int32 OutStoragePosition = INDEX_NONE;
-				int32 OutStorageId = INDEX_NONE;
-
-				const bool bHasFoundStorage = UItemObjectUtils::CheckNextStorageEntry(Params, OutStoragePosition, OutStorageId);
-				if (!bHasFoundStorage)
-				{
-					// @gdemers we have to check that we can insert within current, previous, or next storage.
-					// only after all entries are tested do we return null BUT if we were already Full, we wouldn't be able to execute the above call, and we CheckBounds between addition so
-					// we should ALWAYS be able to find an entry here.
-					UItemObjectUtils::GetFreeStorage(Params, OutStoragePosition, OutStorageId);
-				}
-
-				// @gdemers handle configuring the storage bits of the item encoding.
-				UItemObjectUtils::QualifyStorage(ItemObject, OutStorageId, OutStoragePosition);
+				// @gdemers encode storage position into new UItemObject. (based on Split src - this is a stackable object)
+				SetStorage(Params, NewItemObjectEntry);
 
 				AddReplicatedSubObject(NewItemObjectEntry);
 				Items.Add(NewItemObjectEntry);
 
 				// @gdemers update our last assigned storage information if ever we have more content to assign.
-				TargetStoragePosition = OutStoragePosition;
-				TargetStorageId = OutStorageId;
+				TargetStoragePosition = NewItemObjectEntry->GetStoragePosition();
+				TargetStorageId = NewItemObjectEntry->GetStorageId();
 			}
 
 			// @gdemers validate inventory bounds between addition to prevent overflow based
@@ -971,6 +973,26 @@ bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionConte
 
 	const bool bPredicate = ContextRule->Predicate(this, Params);
 	return bPredicate;
+}
+
+void UActorInventoryComponent::SetStorage(const FStorageContextArgs& Params,
+                                          UItemObject* SrcItem) const
+{
+	// @gdemers search result
+	int32 OutStoragePosition = INDEX_NONE;
+	int32 OutStorageId = INDEX_NONE;
+
+	const bool bHasFoundStorage = UItemObjectUtils::CheckNextStorageEntry(Params, OutStoragePosition, OutStorageId);
+	if (!bHasFoundStorage)
+	{
+		// @gdemers we have to check that we can insert within current, previous, or next storage.
+		// only after all entries are tested do we return null BUT if we were already Full, we wouldn't be able to execute the above call, and we CheckBounds between addition so
+		// we should ALWAYS be able to find an entry here.
+		UItemObjectUtils::GetFreeStorage(Params, OutStoragePosition, OutStorageId);
+	}
+
+	// @gdemers handle configuring the storage bits of the item encoding.
+	UItemObjectUtils::QualifyStorage(SrcItem, OutStorageId, OutStoragePosition);
 }
 
 void UActorInventoryComponent::CheckBounds()
