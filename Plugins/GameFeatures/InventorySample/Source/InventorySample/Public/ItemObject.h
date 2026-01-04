@@ -234,6 +234,9 @@ protected:
 	TSharedPtr<FStreamableHandle> ItemActorHandle = nullptr;
 	FDelegateHandle OnNewSocketAttachedHandle;
 	FDelegateHandle OnNewSocketDetachedHandle;
+
+private:
+	int32 PrivateItemId = INDEX_NONE;
 };
 
 /**
@@ -248,23 +251,28 @@ class INVENTORYSAMPLE_API UItemObjectUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
+	static int32 RuntimeInit(const UObject* Outer,
+	                         const TArray<int32>& NewPrivateIds,
+	                         const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
+	                         UItemObject* UnInitializedItemObject);
+
+	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
 	                              const FGameplayTag& MaxStackCountTag);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 GetItemStartupStackCount(const UObject* Outer,
-	                                      const UItemObject* UnInitializedItemObject,
-	                                      const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
+	static int32 GetItemStartupStackCount(const UItemObject* UnInitializedItemObject,
+	                                      const int32 ElementId);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetNumSplits(const UItemObject* SrcItem);
 
 	UFUNCTION(BlueprintCallable)
 	static UItemObject* SplitObject(UObject* Outer, UItemObject* SrcItem);
-	
+
 	UFUNCTION(BlueprintCallable)
 	static AActor* SpawnWorldItemActor(const UWorld* World, UItemObject* SrcItem);
-	
+
 	UFUNCTION(BlueprintCallable)
 	static void DestroyWorldItemActor(const UItemObject* SrcItem);
 };

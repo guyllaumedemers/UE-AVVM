@@ -225,5 +225,9 @@ private:
 	UFUNCTION(meta=(AllowPrivateAccess))
 	void OnOuterTagChanged(const FGameplayTagContainer& NewTags);
 
+	// @gdemers cached representation of what has been attributed during the initialization
+	// phase of our inventory. This address the problem of uniqueness for entries with identical type.
+	TArray<int32> PrivateIds;
+	
 	friend class UInventoryResourceHandlingImpl;
 };

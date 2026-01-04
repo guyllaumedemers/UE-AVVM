@@ -154,6 +154,7 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	QueueingMechanism.Reset();
 	ItemHandleSystem.Reset();
+	PrivateIds.Reset();
 
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -509,12 +510,10 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		auto* NewItem = NewObject<UItemObject>(this, ItemObjectClass);
 		if (IsValid(NewItem))
 		{
-			// @gdemers retrieve stack count based on backend, or game state rules for object creation.
-			// Note : if the request came from IInventoryProvider::Execute_GetItemSrcType(Outer), and returned static flag, we have to handle count retrieval from data serialized on disk.
-			// TODO @gdemers allow retrieval of stack count from external source that isnt backend.
-			const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(Outer, NewItem, UActorInventoryComponent::GetInventoryDataResolverHelper());
-			NewItem->ModifyRuntimeCount(ItemCount);
-			
+			// @gdemers initialize the runtime representation of our ItemObject based on backend representation.
+			const int32 PrivateItemId = UItemObjectUtils::RuntimeInit(Outer, PrivateIds, UActorInventoryComponent::GetInventoryDataResolverHelper(), NewItem);
+			PrivateIds.AddUnique(PrivateItemId);
+
 			AddReplicatedSubObject(NewItem);
 			Items.Add(NewItem);
 		}

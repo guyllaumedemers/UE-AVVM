@@ -352,6 +352,56 @@ void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentS
 	NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
 }
 
+int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
+                                    const TArray<int32>& NewPrivateIds,
+                                    const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
+                                    UItemObject* UnInitializedItemObject)
+{
+	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Outer->GetName()))
+	{
+		return INDEX_NONE;
+	}
+
+	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
+	const int32 ItemId = UInventoryUtils::GetUniqueId(UnInitializedItemObject);
+
+	if (OuterDependencies.IsEmpty() || (ItemId == INDEX_NONE))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers filter the backend set to ensure we dont reallocate an item that was already configured.
+	TArray<int32> FilteredSet = OuterDependencies;
+	for (const int32 ReservedItemId : NewPrivateIds)
+	{
+		FilteredSet.Remove(ReservedItemId);
+	}
+
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
+	{
+		const int32 ParsedId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_ITEM_ID_ENCODING_BIT_RANGE,GET_ITEM_ID_ENCODING_RSHIFT);
+		return (ParsedId == SearchId);
+	});
+
+	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldnt retrieve the ItemId.")))
+	{
+		// @gdemers your backend private id that represent the allocated UItemObject.
+		const int32 PrivateItemId = (*SearchResult);
+		const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
+		UnInitializedItemObject->ModifyRuntimeCount(ItemCount);
+
+		return PrivateItemId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
 int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
                                          const FGameplayTag& MaxStackCountTag)
 {
@@ -372,11 +422,10 @@ int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTabl
 	return MaxStackCount;
 }
 
-int32 UItemObjectUtils::GetItemStartupStackCount(const UObject* Outer,
-                                                 const UItemObject* UnInitializedItemObject,
-                                                 const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper)
+int32 UItemObjectUtils::GetItemStartupStackCount(const UItemObject* UnInitializedItemObject,
+                                                 const int32 ElementId)
 {
-	if (!IsValid(Outer) || !IsValid(UnInitializedItemObject))
+	if (!IsValid(UnInitializedItemObject) || (ElementId == INDEX_NONE))
 	{
 		return INDEX_NONE;
 	}
@@ -389,40 +438,8 @@ int32 UItemObjectUtils::GetItemStartupStackCount(const UObject* Outer,
 		return One;
 	}
 
-	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
-	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
-	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
-	                      *Outer->GetName()))
-	{
-		return INDEX_NONE;
-	}
-
-	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 ItemId = UInventoryUtils::GetUniqueId(UnInitializedItemObject);
-
-	if (OuterDependencies.IsEmpty() || (ItemId == INDEX_NONE))
-	{
-		return INDEX_NONE;
-	}
-
-	const int32* SearchResult = OuterDependencies.FindByPredicate([SearchId = ItemId](const int32 Value)
-	{
-		// TODO @gdemers what happens if I have two of the same elements types. example : Stack_A:30, Stack_A':25. Those share the same Id, but have
-		// different position entry in the inventory, and different stack count.
-		const int32 ParsedId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_ITEM_ID_ENCODING_BIT_RANGE,GET_ITEM_ID_ENCODING_RSHIFT);
-		return (ParsedId == SearchId);
-	});
-
-	if (SearchResult != nullptr)
-	{
-		const int32 StackCount = UAVVMOnlineEncodingUtils::DecodeInt32((*SearchResult), GET_ITEM_COUNT_ENCODING_BIT_RANGE,GET_ITEM_COUNT_ENCODING_RSHIFT);
-		return StackCount;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
+	const int32 StackCount = UAVVMOnlineEncodingUtils::DecodeInt32(ElementId, GET_ITEM_COUNT_ENCODING_BIT_RANGE,GET_ITEM_COUNT_ENCODING_RSHIFT);
+	return StackCount;
 }
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
