@@ -25,6 +25,11 @@ TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
 	return TArray<int32>();
 }
 
+int32 UInventoryUtils::GetUniqueId(const UItemObject* Item)
+{
+	return INDEX_NONE;
+}
+
 FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,
                                        const int32 ProfileId,
                                        const TArray<int32>& NewItems)

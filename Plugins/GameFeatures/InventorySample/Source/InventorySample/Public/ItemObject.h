@@ -25,6 +25,7 @@
 
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #if UE_WITH_IRIS
@@ -249,9 +250,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,
 	                              const FGameplayTag& MaxStackCountTag);
-	
+
 	UFUNCTION(BlueprintCallable)
-	static int32 GetItemStartupStackCount(const UObject* Outer, const UItemObject* UnInitializedItemObject);
+	static int32 GetItemStartupStackCount(const UObject* Outer,
+	                                      const UItemObject* UnInitializedItemObject,
+	                                      const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetNumSplits(const UItemObject* SrcItem);

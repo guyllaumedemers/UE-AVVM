@@ -24,14 +24,22 @@
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
+#include "InventoryUtils.h"
+#include "NativeGameplayTags.h"
 #include "PickupActor.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Backend/AVVMOnlineBackendUtils.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ItemStackTableRow.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
+#include "Resources/AVVMResourceProvider.h"
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STACKABLE, "InventorySample.Item.Stackable");
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -364,10 +372,55 @@ int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTabl
 	return MaxStackCount;
 }
 
-int32 UItemObjectUtils::GetItemStartupStackCount(const UObject* Outer, const UItemObject* UnInitializedItemObject)
+int32 UItemObjectUtils::GetItemStartupStackCount(const UObject* Outer,
+                                                 const UItemObject* UnInitializedItemObject,
+                                                 const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper)
 {
-	// TODO @gdemers retrieve backend stack count for this item, or stack count defined based on game constraints.
-	return INDEX_NONE;
+	if (!IsValid(Outer) || !IsValid(UnInitializedItemObject))
+	{
+		return INDEX_NONE;
+	}
+
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	const bool bDoesItemStack = UnInitializedItemObject->DoesBehaviourHasPartialMatch(StackableTagContainer);
+	if (!bDoesItemStack)
+	{
+		static constexpr int32 One = 1;
+		return One;
+	}
+
+	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Outer->GetName()))
+	{
+		return INDEX_NONE;
+	}
+
+	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
+	const int32 ItemId = UInventoryUtils::GetUniqueId(UnInitializedItemObject);
+
+	if (OuterDependencies.IsEmpty() || (ItemId == INDEX_NONE))
+	{
+		return INDEX_NONE;
+	}
+
+	const int32* SearchResult = OuterDependencies.FindByPredicate([SearchId = ItemId](const int32 Value)
+	{
+		const int32 ParsedId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_ITEM_ID_ENCODING_BIT_RANGE,GET_ITEM_ID_ENCODING_RSHIFT);
+		return (ParsedId == SearchId);
+	});
+
+	if (SearchResult != nullptr)
+	{
+		const int32 StackCount = UAVVMOnlineEncodingUtils::DecodeInt32((*SearchResult), GET_ITEM_COUNT_ENCODING_BIT_RANGE,GET_ITEM_COUNT_ENCODING_RSHIFT);
+		return StackCount;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
 }
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
