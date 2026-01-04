@@ -851,9 +851,6 @@ void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& Ne
 			Drop(PendingDropItem);
 		}
 	}
-
-	// TODO @gdemers Update internal flags held by this component. Maybe the outer state
-	// is preventing other actions that arent drop specific.
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
