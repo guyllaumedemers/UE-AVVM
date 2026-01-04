@@ -59,6 +59,12 @@ struct INVENTORYSAMPLE_API FItemState
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 Counter = 1;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
+	int32 StorageId = NULL;
+
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
+	int32 StoragePosition = NULL;
 };
 
 /**
@@ -110,6 +116,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeStorageId(const int32 NewStorageId);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeStoragePosition(const int32 NewStoragePosition);
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeCount(const int32 NewCountModifier);

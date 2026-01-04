@@ -74,6 +74,24 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 	OnRep_ItemStateModified(RuntimeItemState);
 }
 
+void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
+{
+	static constexpr int32 MaxStorageId = (1 << GET_STORAGE_ID_ENCODING_BIT_RANGE);
+	RuntimeItemState.StorageId = FMath::Clamp<int32>(NewStorageId, 0, MaxStorageId);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
+
+	OnRep_ItemStateModified(RuntimeItemState);
+}
+
+void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
+{
+	static constexpr int32 MaxStoragePosition = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+	RuntimeItemState.StoragePosition = FMath::Clamp<int32>(NewStoragePosition, 0, MaxStoragePosition);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
+
+	OnRep_ItemStateModified(RuntimeItemState);
+}
+
 void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 {
 	RuntimeItemState.Counter = FMath::Clamp<int32>(NewCountModifier, 0, 999);
@@ -392,7 +410,11 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 		// @gdemers your backend private id that represent the allocated UItemObject.
 		const int32 PrivateItemId = (*SearchResult);
 		const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
+		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
 		UnInitializedItemObject->ModifyRuntimeCount(ItemCount);
+		UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
+		UnInitializedItemObject->ModifyRuntimeStoragePosition(StoragePosition);
 		UnInitializedItemObject->PrivateItemId = PrivateItemId;
 
 		return PrivateItemId;
