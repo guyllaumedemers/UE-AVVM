@@ -995,13 +995,6 @@ void UActorInventoryComponent::SetStorage(const FStorageContextArgs& Params,
 	UItemObjectUtils::QualifyStorage(SrcItem, OutStorageId, OutStoragePosition);
 }
 
-void UActorInventoryComponent::CheckBounds()
-{
-	// TODO @gdemers GetSet bounds of the inventory system. The Item collection
-	// shouldnt exceed the storage capacity allowed based on the actor configuration.
-	// (example : how many pockets are referenced, etc...)
-}
-
 void UActorInventoryComponent::CheckBackend()
 {
 	const AActor* Outer = OwningOuter.Get();
@@ -1032,6 +1025,13 @@ void UActorInventoryComponent::CheckBackend()
 		const FString NewProfile = UInventoryUtils::ModifyProfile(this, TargetUniqueId, NewDependencies);
 		UAVVMOnlineBackendUtils::Submit(this, TargetUniqueId, NewProfile);
 	}
+}
+
+void UActorInventoryComponent::CheckBounds()
+{
+	// TODO @gdemers GetSet bounds of the inventory system. The Item collection
+	// shouldnt exceed the storage capacity allowed based on the actor configuration.
+	// (example : how many pockets are referenced, etc...)
 }
 
 void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
