@@ -793,7 +793,6 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	static constexpr int32 StorageIdBounds = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE);
 	bool bDoesStackOverflow = false;
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 	// @gdemers an entry already exist for us to support stacking.
 	if ((SearchResult != nullptr) && IsValid(*SearchResult))
 	{
@@ -813,6 +812,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		// IMPORTANT : This specific Object isn't stackable!
 		SetStorage(Params, ItemObject);
 
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 		AddReplicatedSubObject(ItemObject);
 		Items.Add(ItemObject);
 	}
@@ -829,6 +829,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
 		for (int32 i = 0; i < NumSplits; ++i)
 		{
