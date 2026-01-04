@@ -408,6 +408,8 @@ int32 UItemObjectUtils::GetItemStartupStackCount(const UObject* Outer,
 
 	const int32* SearchResult = OuterDependencies.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
+		// TODO @gdemers what happens if I have two of the same elements types. example : Stack_A:30, Stack_A':25. Those share the same Id, but have
+		// different position entry in the inventory, and different stack count.
 		const int32 ParsedId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_ITEM_ID_ENCODING_BIT_RANGE,GET_ITEM_ID_ENCODING_RSHIFT);
 		return (ParsedId == SearchId);
 	});
