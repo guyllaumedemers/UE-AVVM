@@ -254,6 +254,9 @@ protected:
 	FDelegateHandle OnNewSocketDetachedHandle;
 
 private:
+	// @gdemers IMPORTANT do not modify the following element id unless you have already serialized your changes
+	// to the backend. This handle is your only way of finding the correct instance serialized with your backend (player/actor profile)
+	// representation. (we do nullify during drop action but that imply we have already released our handle from backend.)
 	int32 PrivateItemId = INDEX_NONE;
 	friend class UItemObjectUtils;
 };
