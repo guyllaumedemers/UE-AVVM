@@ -1060,11 +1060,11 @@ void UActorInventoryComponent::CheckBounds()
 		++OutCount;
 	}
 
-	bool bHasStorageReachMaxCapacity = false;
+	bool bHasStorageReachMaxCapacity = true;
 	for (auto& [StorageId, Count] : OccupiedSlots)
 	{
-		bHasStorageReachMaxCapacity |= UItemObjectUtils::HasStorageReachMaxCapacity(StorageId, Count);
-		if (bHasStorageReachMaxCapacity)
+		bHasStorageReachMaxCapacity &= UItemObjectUtils::HasStorageReachMaxCapacity(StorageId, Count);
+		if (!bHasStorageReachMaxCapacity)
 		{
 			break;
 		}
