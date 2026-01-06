@@ -494,6 +494,13 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		return;
 	}
 
+	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
+	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
+	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	{
+		return;
+	}
+
 	TArray<UObject*> OutStreamableAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
@@ -509,15 +516,27 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		}
 
 		auto* NewItem = NewObject<UItemObject>(this, ItemObjectClass);
-		if (IsValid(NewItem))
+		if (!IsValid(NewItem))
+		{
+			continue;
+		}
+
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
+		if (bIsItemSrcStatic)
+		{
+			// TODO @gdemers we need to be able to initialize the item representation, stack, storage id, position based on data cached specific to the outer
+			// which may be cached serialized to disk.
+			// example : our store content, based on gameplay progression, or our character representation on disk.
+		}
+		else
 		{
 			// @gdemers initialize the runtime representation of our ItemObject based on backend representation.
 			const int32 PrivateItemId = UItemObjectUtils::RuntimeInit(Outer, PrivateItemIds, UActorInventoryComponent::GetInventoryDataResolverHelper(), NewItem);
 			PrivateItemIds.AddUnique(PrivateItemId);
-
-			AddReplicatedSubObject(NewItem);
-			Items.Add(NewItem);
 		}
+
+		AddReplicatedSubObject(NewItem);
+		Items.Add(NewItem);
 	}
 
 	// @gdemers allow initialization of loadout object based held items. 
