@@ -309,6 +309,9 @@ public:
 	                           const int32 NewStorageId,
 	                           const int32 NewStoragePosition);
 	
+	UFUNCTION(BlueprintCallable)
+	static bool HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count);
+	
 	
 	UFUNCTION(BlueprintCallable)
 	static void SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem);

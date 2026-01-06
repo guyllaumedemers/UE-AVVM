@@ -456,6 +456,13 @@ void UItemObjectUtils::QualifyStorage(UItemObject* PendingPickupItemObject,
 	}
 }
 
+bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count)
+{
+	// TODo @gdemers we need to be able to fetch the entry id from backend, return the data registry
+	// cached there and parse the max count expected.
+	return false;
+}
+
 void UItemObjectUtils::SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem)
 {
 	// @gdemers search result

@@ -847,7 +847,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		int32 TargetStorageId = (*SearchResult)->GetStorageId();
 
 		// @gdemers check if there is still unique entries available within our bounds.
-		const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
@@ -1032,9 +1032,38 @@ void UActorInventoryComponent::CheckBackend()
 
 void UActorInventoryComponent::CheckBounds()
 {
-	// TODO @gdemers GetSet bounds of the inventory system. The Item collection
-	// shouldnt exceed the storage capacity allowed based on the actor configuration.
-	// (example : how many pockets are referenced, etc...)
+	TMap<int32/*StorageId*/, int32/*Count*/> OccupiedSlots;
+	for (const UItemObject* Item : Items)
+	{
+		if (!IsValid(Item))
+		{
+			continue;
+		}
+
+		const int32 StorageId = Item->GetStorageId();
+		int32& OutCount = OccupiedSlots.FindOrAdd(StorageId);
+		++OutCount;
+	}
+
+	bool bHasStorageReachMaxCapacity = false;
+	for (auto& [StorageId, Count] : OccupiedSlots)
+	{
+		bHasStorageReachMaxCapacity |= UItemObjectUtils::HasStorageReachMaxCapacity(StorageId, Count);
+		if (bHasStorageReachMaxCapacity)
+		{
+			break;
+		}
+	}
+
+	static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+	if (bHasStorageReachMaxCapacity)
+	{
+		ModifyRuntimeState(StorageFullTags, {});
+	}
+	else
+	{
+		ModifyRuntimeState({}, StorageFullTags);
+	}
 }
 
 void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
