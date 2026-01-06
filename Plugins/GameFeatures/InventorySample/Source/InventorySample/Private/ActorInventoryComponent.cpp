@@ -834,6 +834,9 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 		AddReplicatedSubObject(ItemObject);
 		Items.Add(ItemObject);
+
+		// @gdemers validate inventory bounds following addition.
+		CheckBounds();
 	}
 
 	bool bHasAvailableEntries = true;
