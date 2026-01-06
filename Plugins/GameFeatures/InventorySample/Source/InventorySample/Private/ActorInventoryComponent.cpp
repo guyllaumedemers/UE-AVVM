@@ -542,6 +542,9 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	// @gdemers allow initialization of loadout object based held items. 
 	OnRep_ItemCollectionChanged(OldItems);
 
+	// @gdemers we have just initialized our component with new entries. validate our bounds between sessions.
+	CheckBounds();
+
 	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
@@ -908,6 +911,18 @@ void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
 	{
 		return;
 	}
+
+	const int32 SrcStoragePosition = SrcItemObject->GetStoragePosition();
+	const int32 SrcStorageId = SrcItemObject->GetStorageId();
+
+	const int32 DestStoragePosition = DestItemObject->GetStoragePosition();
+	const int32 DestStorageId = DestItemObject->GetStorageId();
+
+	SrcItemObject->ModifyRuntimeStoragePosition(DestStoragePosition);
+	SrcItemObject->ModifyRuntimeStorageId(DestStorageId);
+
+	DestItemObject->ModifyRuntimeStoragePosition(SrcStoragePosition);
+	DestItemObject->ModifyRuntimeStorageId(SrcStorageId);
 }
 
 void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& NewTags)

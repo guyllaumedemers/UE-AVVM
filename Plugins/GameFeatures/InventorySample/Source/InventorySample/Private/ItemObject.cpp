@@ -458,7 +458,15 @@ void UItemObjectUtils::QualifyStorage(UItemObject* PendingPickupItemObject,
 
 bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count)
 {
-	// TODo @gdemers we need to be able to fetch the entry id from backend, return the data registry
+	// @gdemers our count has reach our encoding hard limit. this 100% imply that the storage is full.
+	// if theres an overflow from what design configured in DataAsset, theres a problem at the user level!
+	const bool bDoesCountReachMaxCapacity = (Count & GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+	if (bDoesCountReachMaxCapacity)
+	{
+		return true;
+	}
+	
+	// TODO @gdemers we need to be able to fetch the entry id from backend, return the data registry
 	// cached there and parse the max count expected.
 	return false;
 }
