@@ -456,6 +456,25 @@ void UItemObjectUtils::QualifyStorage(UItemObject* PendingPickupItemObject,
 	}
 }
 
+void UItemObjectUtils::SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem)
+{
+	// @gdemers search result
+	int32 OutStoragePosition = INDEX_NONE;
+	int32 OutStorageId = INDEX_NONE;
+
+	const bool bHasFoundStorage = UItemObjectUtils::CheckNextStorageEntry(Params, OutStoragePosition, OutStorageId);
+	if (!bHasFoundStorage)
+	{
+		// @gdemers we have to check that we can insert within current, previous, or next storage.
+		// only after all entries are tested do we return null BUT if we were already Full, we wouldn't be able to execute the above call, and we CheckBounds between addition so
+		// we should ALWAYS be able to find an entry here.
+		UItemObjectUtils::GetFreeStorage(Params, OutStoragePosition, OutStorageId);
+	}
+
+	// @gdemers handle configuring the storage bits of the item encoding.
+	UItemObjectUtils::QualifyStorage(SrcItem, OutStorageId, OutStoragePosition);
+}
+
 bool UItemObjectUtils::CheckNextStorageEntry(const FStorageContextArgs& Params,
                                              int32& OutStoragePosition,
                                              int32& OutStorageId)

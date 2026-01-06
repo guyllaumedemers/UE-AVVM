@@ -810,7 +810,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 
 		// @gdemers encode storage position into world UItemObject. (based on world pickup)
 		// IMPORTANT : This specific Object isn't stackable!
-		SetStorage(Params, ItemObject);
+		UItemObjectUtils::SetStorage(Params, ItemObject);
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 		AddReplicatedSubObject(ItemObject);
@@ -850,7 +850,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 				Params.CurrentStorageId = TargetStorageId;
 
 				// @gdemers encode storage position into new UItemObject. (based on Split src - this is a stackable object)
-				SetStorage(Params, NewItemObjectEntry);
+				UItemObjectUtils::SetStorage(Params, NewItemObjectEntry);
 
 				AddReplicatedSubObject(NewItemObjectEntry);
 				Items.Add(NewItemObjectEntry);
@@ -974,26 +974,6 @@ bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionConte
 
 	const bool bPredicate = ContextRule->Predicate(this, Params);
 	return bPredicate;
-}
-
-void UActorInventoryComponent::SetStorage(const FStorageContextArgs& Params,
-                                          UItemObject* SrcItem) const
-{
-	// @gdemers search result
-	int32 OutStoragePosition = INDEX_NONE;
-	int32 OutStorageId = INDEX_NONE;
-
-	const bool bHasFoundStorage = UItemObjectUtils::CheckNextStorageEntry(Params, OutStoragePosition, OutStorageId);
-	if (!bHasFoundStorage)
-	{
-		// @gdemers we have to check that we can insert within current, previous, or next storage.
-		// only after all entries are tested do we return null BUT if we were already Full, we wouldn't be able to execute the above call, and we CheckBounds between addition so
-		// we should ALWAYS be able to find an entry here.
-		UItemObjectUtils::GetFreeStorage(Params, OutStoragePosition, OutStorageId);
-	}
-
-	// @gdemers handle configuring the storage bits of the item encoding.
-	UItemObjectUtils::QualifyStorage(SrcItem, OutStorageId, OutStoragePosition);
 }
 
 void UActorInventoryComponent::CheckBackend()

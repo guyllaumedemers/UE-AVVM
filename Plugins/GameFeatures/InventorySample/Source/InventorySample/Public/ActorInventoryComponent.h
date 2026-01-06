@@ -30,7 +30,6 @@
 
 #include "ActorInventoryComponent.generated.h"
 
-struct FStorageContextArgs;
 struct FStreamableHandle;
 class UAVVMResourceManagerComponent;
 class UItemObject;
@@ -170,6 +169,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
+	void CheckBackend();
+	void CheckBounds();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
@@ -219,10 +221,6 @@ private:
 	virtual void OnDrop(UItemObject* ItemObject);
 	virtual void OnPickup(UItemObject* ItemObject);
 	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
-
-	void SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem) const;
-	void CheckBackend();
-	void CheckBounds();
 	
 	UFUNCTION(meta=(AllowPrivateAccess))
 	void OnOuterTagChanged(const FGameplayTagContainer& NewTags);

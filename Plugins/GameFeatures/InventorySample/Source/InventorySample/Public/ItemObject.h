@@ -308,6 +308,10 @@ public:
 	static void QualifyStorage(UItemObject* PendingPickupItemObject,
 	                           const int32 NewStorageId,
 	                           const int32 NewStoragePosition);
+	
+	
+	UFUNCTION(BlueprintCallable)
+	static void SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem);
 
 	UFUNCTION(BlueprintCallable)
 	static bool CheckNextStorageEntry(const FStorageContextArgs& Params,
