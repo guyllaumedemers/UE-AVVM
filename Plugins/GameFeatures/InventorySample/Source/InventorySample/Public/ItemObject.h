@@ -330,6 +330,9 @@ public:
 	                         const TArray<int32>& NewPrivateIds,
 	                         const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                         UItemObject* UnInitializedItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
 
 	// @gdemers util function for UI usage during drag/drop action.
 	UFUNCTION(BlueprintCallable)

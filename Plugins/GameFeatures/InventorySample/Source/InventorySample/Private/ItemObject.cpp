@@ -40,6 +40,7 @@
 #include "Resources/AVVMResourceProvider.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STACKABLE, "InventorySample.Item.Stackable");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK, "InventorySample.Item.DestroyConditions.EmptyStack");
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -100,10 +101,35 @@ void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount)
 
 	OnRep_ItemStateModified(RuntimeItemState);
 
-	if (false == !!RuntimeItemState.StackCount)
+	// @gdemers early out on non-empty stack.
+	if (!!RuntimeItemState.StackCount)
 	{
-		const FGameplayTagContainer& BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
-		ModifyRuntimeState(BlockingTags, {});
+		return;
+	}
+
+	// @gdemers check if we are meeting design conditions for destroying this item from inventory.
+	static const auto DestroyConditions = FGameplayTagContainer(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK);
+	const bool bShouldDestroyOnEmptyStack = DoesBehaviourHasPartialMatch(DestroyConditions);
+
+	// @gdemers invalidate any actions we could be executing while pending to destroy, or while the stack is empty.
+	const FGameplayTagContainer& BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
+	ModifyRuntimeState(BlockingTags, {});
+
+	if (bShouldDestroyOnEmptyStack)
+	{
+		const UWorld* World = GetWorld();
+		if (!IsValid(World))
+		{
+			return;
+		}
+
+		const auto OnDestroyConditionMet = [](const TWeakObjectPtr<UItemObject>& PendingDestroyItemObject)
+		{
+			UItemObjectUtils::RuntimeDestroy(PendingDestroyItemObject.Get());
+		};
+
+		const auto Callback = FTimerDelegate::CreateWeakLambda(this, OnDestroyConditionMet, TWeakObjectPtr(this));
+		World->GetTimerManager().SetTimerForNextTick(Callback);
 	}
 }
 
@@ -434,6 +460,11 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 	{
 		return INDEX_NONE;
 	}
+}
+
+void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
+{
+	// TODO @gdemers remove from owning inventory, and destroy item, and world actor bound to it.
 }
 
 void UItemObjectUtils::Insert(const FInsertionContextArgs& Params,
