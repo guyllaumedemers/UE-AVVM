@@ -264,6 +264,33 @@ private:
 /**
  *	Class description:
  *	
+ *	FInsertionContextArgs is a context struct encapsulating parameter argument for inserting an Object thats
+ *	already within your inventory, into an empty storage location.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FInsertionContextArgs
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> OccupiedEntries;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 StoragePositionBounds = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 StorageIdBounds = INDEX_NONE;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 TargetStorageId = INDEX_NONE;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 TargetStoragePosition = INDEX_NONE;
+};
+
+/**
+ *	Class description:
+ *	
  *	FStorageContextArgs is a context struct encapsulating parameter argument for searching free storage.
  */
 USTRUCT(BlueprintType)
@@ -272,7 +299,7 @@ struct INVENTORYSAMPLE_API FStorageContextArgs
 	GENERATED_BODY()
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> OccupiedEntries;
+	TArray<int32> PrivateItemIds;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 StoragePositionBounds = INDEX_NONE;
@@ -303,31 +330,37 @@ public:
 	                         const TArray<int32>& NewPrivateIds,
 	                         const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                         UItemObject* UnInitializedItemObject);
-	
+
+	// @gdemers util function for UI usage during drag/drop action.
+	UFUNCTION(BlueprintCallable)
+	static void Insert(const FInsertionContextArgs& Params,
+	                   UItemObject* PendingInsertItemObject);
+
 	UFUNCTION(BlueprintCallable)
 	static void NullifyStorage(UItemObject* PendingDropItemObject);
-	
+
 	UFUNCTION(BlueprintCallable)
-	static void QualifyStorage(UItemObject* PendingPickupItemObject,
-	                           const int32 NewStorageId,
-	                           const int32 NewStoragePosition);
+	static void QualifyStorage(const FStorageContextArgs& Params,
+	                           UItemObject* PendingPickupItemObject);
+
+	UFUNCTION(BlueprintCallable)
+	static void GetFreeStorage(const int32 StorageId,
+	                           const TArray<int32>& StoragePositions,
+	                           int32& OutStoragePosition,
+	                           int32& OutStorageId);
+
+	UFUNCTION(BlueprintCallable)
+	static bool GetFreeStorageFromPosition(const int32 StorageId,
+	                                       const TArray<int32>& StoragePositions,
+	                                       const int32 StartPosition,
+	                                       int32& OutStoragePosition,
+	                                       int32& OutStorageId);
 	
 	UFUNCTION(BlueprintCallable)
 	static bool HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count);
 	
-	
 	UFUNCTION(BlueprintCallable)
-	static void SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem);
-
-	UFUNCTION(BlueprintCallable)
-	static bool CheckNextStorageEntry(const FStorageContextArgs& Params,
-	                                  int32& OutStoragePosition,
-	                                  int32& OutStorageId);
-
-	UFUNCTION(BlueprintCallable)
-	static void GetFreeStorage(const FStorageContextArgs& Params,
-	                           int32& OutStoragePosition,
-	                           int32& OutStorageId);
+	static int32 GetStorageMaxCapacity(const int32 StorageId);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

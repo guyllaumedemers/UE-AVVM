@@ -435,6 +435,12 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 	}
 }
 
+void UItemObjectUtils::Insert(const FInsertionContextArgs& Params,
+                              UItemObject* PendingInsertItemObject)
+{
+	// TODO @gdemers Make impl.
+}
+
 void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
@@ -444,16 +450,131 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 	}
 }
 
-void UItemObjectUtils::QualifyStorage(UItemObject* PendingPickupItemObject,
-                                      const int32 NewStorageId,
-                                      const int32 NewStoragePosition)
+void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
+                                      UItemObject* PendingPickupItemObject)
 {
+	int32 OutMin_StoragePosition = INT_MAX;
+	int32 OutMin_StorageId = INT_MAX;
+
+	if (Params.PrivateItemIds.IsEmpty())
+	{
+		// @gdemers ftue default storage.
+		OutMin_StoragePosition = 0;
+		OutMin_StorageId = 0;
+	}
+
+	struct FStorageSlots
+	{
+		TArray<int32> Slots;
+	};
+
+	TMap<int32/*StorageId*/, FStorageSlots/*OccupiedEntries*/> Storages;
+	for (const int32 PrivateItemId : Params.PrivateItemIds)
+	{
+		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
+		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
+		FStorageSlots& OutResult = Storages.FindOrAdd(StorageId);
+		OutResult.Slots.Add(StoragePosition);
+	}
+
+	const auto GetLowestBound = [](const TMap<int32/*StorageId*/, FStorageSlots/*OccupiedEntries*/>& NewStorages,
+	                               int32& OutStoragePosition,
+	                               int32& OutStorageId)
+	{
+		for (auto& [StorageId, StoragePositions] : NewStorages)
+		{
+			int32 OutSearchResult_StoragePosition = INT_MAX;
+			int32 OutSearchResult_StorageId = INT_MAX;
+			UItemObjectUtils::GetFreeStorage(StorageId, StoragePositions.Slots/*OccupiedEntries*/, OutSearchResult_StoragePosition, OutSearchResult_StorageId);
+
+			if (OutSearchResult_StorageId < OutStorageId)
+			{
+				OutStoragePosition = OutSearchResult_StoragePosition;
+				OutStorageId = OutSearchResult_StorageId;
+			}
+		}
+	};
+
+	// @gdemers item was picked up from world, and wasn't stacked on top of existing entry.
+	const bool bDoesContains = Storages.Contains(Params.CurrentStorageId);
+	if (!bDoesContains)
+	{
+		GetLowestBound(Storages, OutMin_StoragePosition, OutMin_StorageId);
+	}
+	else
+	{
+		// @gdemers attempting to neighbor the item that generated a stack overflow.
+		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(Params.CurrentStorageId,
+		                                                                                       Storages[Params.CurrentStorageId].Slots,
+		                                                                                       Params.CurrentStoragePosition,
+		                                                                                       OutMin_StoragePosition,
+		                                                                                       OutMin_StorageId);
+
+		// @gdemers search failed, we fall back to finding the entry sitting at the lower bounds of the storage system.
+		if (!bCouldPlaceWithinSameStorage)
+		{
+			GetLowestBound(Storages, OutMin_StoragePosition, OutMin_StorageId);
+		}
+	}
+
 	if (IsValid(PendingPickupItemObject))
 	{
-		const int32 StorageId_Shifted = (NewStorageId << GET_STORAGE_ID_ENCODING_RSHIFT/*bit shift is mirrored here*/);
-		const int32 StoragePosition_Shifted = (NewStoragePosition << GET_ITEM_POSITION_ENCODING_RSHIFT/*same here*/);
+		const int32 StorageId_Shifted = (OutMin_StorageId << GET_STORAGE_ID_ENCODING_RSHIFT/*bit shift is mirrored here*/);
+		const int32 StoragePosition_Shifted = (OutMin_StoragePosition << GET_ITEM_POSITION_ENCODING_RSHIFT/*same here*/);
 		PendingPickupItemObject->PrivateItemId |= (StorageId_Shifted | StoragePosition_Shifted);
 	}
+}
+
+void UItemObjectUtils::GetFreeStorage(const int32 StorageId,
+                                      const TArray<int32>& StoragePositions,
+                                      int32& OutStoragePosition,
+                                      int32& OutStorageId)
+{
+	GetFreeStorageFromPosition(StorageId, StoragePositions, 0, OutStoragePosition, OutStorageId);
+}
+
+bool UItemObjectUtils::GetFreeStorageFromPosition(const int32 StorageId,
+                                                  const TArray<int32>& StoragePositions,
+                                                  const int32 StartPosition,
+                                                  int32& OutStoragePosition,
+                                                  int32& OutStorageId)
+{
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(StorageId);
+	if (!ensureAlwaysMsgf(StoragePositions.Num() <= StorageMaxCapacity,
+	                      TEXT("Allocated number of positions exceed the expectation defined in data for this Storage Id.")))
+	{
+		return false;
+	}
+
+	TArray<int32> Temp;
+	Temp.Reserve(StorageMaxCapacity);
+
+	// @gdemers place already allocated space within set.
+	for (int32 StoragePosition : StoragePositions)
+	{
+		Temp[StoragePosition/*may want to not validate position, and crash if ever its poorly encoded.*/] = 1;
+	}
+
+	int32 StorageBounds = StorageMaxCapacity;
+	int32 SearchIndex = FMath::Clamp(StartPosition, 0, StorageMaxCapacity);
+
+	while ((SearchIndex < StorageBounds) && !!Temp[SearchIndex])
+	{
+		SearchIndex = ((SearchIndex + 1) % StorageMaxCapacity);
+		if (false == !!SearchIndex)
+		{
+			StorageBounds = FMath::Clamp(StartPosition, 0, StorageMaxCapacity);
+		}
+	}
+
+	if (SearchIndex != StorageMaxCapacity)
+	{
+		OutStoragePosition = SearchIndex;
+		OutStorageId = StorageId;
+		return true;
+	}
+
+	return false;
 }
 
 bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count)
@@ -471,38 +592,9 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const i
 	return false;
 }
 
-void UItemObjectUtils::SetStorage(const FStorageContextArgs& Params, UItemObject* SrcItem)
+int32 UItemObjectUtils::GetStorageMaxCapacity(const int32 StorageId)
 {
-	// @gdemers search result
-	int32 OutStoragePosition = INDEX_NONE;
-	int32 OutStorageId = INDEX_NONE;
-
-	const bool bHasFoundStorage = UItemObjectUtils::CheckNextStorageEntry(Params, OutStoragePosition, OutStorageId);
-	if (!bHasFoundStorage)
-	{
-		// @gdemers we have to check that we can insert within current, previous, or next storage.
-		// only after all entries are tested do we return null BUT if we were already Full, we wouldn't be able to execute the above call, and we CheckBounds between addition so
-		// we should ALWAYS be able to find an entry here.
-		UItemObjectUtils::GetFreeStorage(Params, OutStoragePosition, OutStorageId);
-	}
-
-	// @gdemers handle configuring the storage bits of the item encoding.
-	UItemObjectUtils::QualifyStorage(SrcItem, OutStorageId, OutStoragePosition);
-}
-
-bool UItemObjectUtils::CheckNextStorageEntry(const FStorageContextArgs& Params,
-                                             int32& OutStoragePosition,
-                                             int32& OutStorageId)
-{
-	// TODO @gdemers Make impl.
-	return false;
-}
-
-void UItemObjectUtils::GetFreeStorage(const FStorageContextArgs& Params,
-                                      int32& OutStoragePosition,
-                                      int32& OutStorageId)
-{
-	// TODO @gdemers Make impl.
+	return INDEX_NONE;
 }
 
 int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

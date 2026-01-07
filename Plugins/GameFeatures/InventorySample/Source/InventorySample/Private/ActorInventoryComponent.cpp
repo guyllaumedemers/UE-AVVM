@@ -824,15 +824,14 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	else
 	{
 		FStorageContextArgs Params;
-		Params.OccupiedEntries = PrivateItemIds;
+		Params.PrivateItemIds = PrivateItemIds;
 		Params.StoragePositionBounds = StoragePositionBounds;
 		Params.StorageIdBounds = StorageIdBounds;
 		Params.CurrentStoragePosition = INDEX_NONE;
 		Params.CurrentStorageId = INDEX_NONE;
 
-		// @gdemers encode storage position into world UItemObject. (based on world pickup)
-		// IMPORTANT : This specific Object isn't stackable!
-		UItemObjectUtils::SetStorage(Params, ItemObject);
+		// @gdemers encode new storage position into UItemObject based on inventory available layout.
+		UItemObjectUtils::QualifyStorage(Params, ItemObject);
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 		AddReplicatedSubObject(ItemObject);
@@ -868,14 +867,14 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 			if (IsValid(NewItemObjectEntry))
 			{
 				FStorageContextArgs Params;
-				Params.OccupiedEntries = PrivateItemIds;
+				Params.PrivateItemIds = PrivateItemIds;
 				Params.StoragePositionBounds = StoragePositionBounds;
 				Params.StorageIdBounds = StorageIdBounds;
 				Params.CurrentStoragePosition = TargetStoragePosition;
 				Params.CurrentStorageId = TargetStorageId;
 
-				// @gdemers encode storage position into new UItemObject. (based on Split src - this is a stackable object)
-				UItemObjectUtils::SetStorage(Params, NewItemObjectEntry);
+				// @gdemers encode new storage position into UItemObject based on inventory latest layout.
+				UItemObjectUtils::QualifyStorage(Params, NewItemObjectEntry);
 
 				AddReplicatedSubObject(NewItemObjectEntry);
 				Items.Add(NewItemObjectEntry);
