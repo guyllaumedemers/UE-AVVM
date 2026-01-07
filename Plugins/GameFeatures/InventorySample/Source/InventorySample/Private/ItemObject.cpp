@@ -456,13 +456,6 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 	int32 OutMin_StoragePosition = INT_MAX;
 	int32 OutMin_StorageId = INT_MAX;
 
-	if (Params.PrivateItemIds.IsEmpty())
-	{
-		// @gdemers ftue default storage.
-		OutMin_StoragePosition = 0;
-		OutMin_StorageId = 0;
-	}
-
 	struct FStorageSlots
 	{
 		TArray<int32> Slots;
@@ -503,17 +496,24 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 	}
 	else
 	{
+		int32 OutSearchResult_StoragePosition = INT_MAX;
+		int32 OutSearchResult_StorageId = INT_MAX;
 		// @gdemers attempting to neighbor the item that generated a stack overflow.
 		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(Params.CurrentStorageId,
 		                                                                                       Storages[Params.CurrentStorageId].Slots,
 		                                                                                       Params.CurrentStoragePosition,
-		                                                                                       OutMin_StoragePosition,
-		                                                                                       OutMin_StorageId);
+		                                                                                       OutSearchResult_StoragePosition,
+		                                                                                       OutSearchResult_StorageId);
 
 		// @gdemers search failed, we fall back to finding the entry sitting at the lower bounds of the storage system.
 		if (!bCouldPlaceWithinSameStorage)
 		{
 			GetLowestBound(Storages, OutMin_StoragePosition, OutMin_StorageId);
+		}
+		else
+		{
+			OutMin_StoragePosition = OutSearchResult_StoragePosition;
+			OutMin_StorageId = OutSearchResult_StorageId;
 		}
 	}
 
