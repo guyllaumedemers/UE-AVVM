@@ -124,7 +124,7 @@ public:
 	void ModifyRuntimeStoragePosition(const int32 NewStoragePosition);
 
 	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeCount(const int32 NewCountModifier);
+	void ModifyRuntimeStackCount(const int32 NewStackCount);
 
 	UFUNCTION(BlueprintCallable)
 	bool DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const;

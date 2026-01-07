@@ -92,10 +92,10 @@ void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 	OnRep_ItemStateModified(RuntimeItemState);
 }
 
-void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
+void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount)
 {
 	static constexpr int32 MaxStackCount = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
-	RuntimeItemState.StackCount = FMath::Clamp<int32>(NewCountModifier, 0, MaxStackCount);
+	RuntimeItemState.StackCount = FMath::Clamp<int32>(NewStackCount, 0, MaxStackCount);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
 	OnRep_ItemStateModified(RuntimeItemState);
@@ -205,8 +205,8 @@ bool UItemObject::Stack(UItemObject* Item)
 
 	// @gdemers update stack internal representation. Note : the function input may overflow the stack
 	// 'this' UItemObject reference.
-	Item->ModifyRuntimeCount((TotalStackCount - ClampedStackCount)/*handle left-over*/);
-	ModifyRuntimeCount(ClampedStackCount);
+	Item->ModifyRuntimeStackCount((TotalStackCount - ClampedStackCount)/*handle left-over*/);
+	ModifyRuntimeStackCount(ClampedStackCount);
 
 	const bool bDoesStackOverflow = (TotalStackCount > ClampedStackCount);
 	return bDoesStackOverflow;
@@ -423,7 +423,7 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 		const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
 		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
 		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
-		UnInitializedItemObject->ModifyRuntimeCount(ItemCount);
+		UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
 		UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
 		UnInitializedItemObject->ModifyRuntimeStoragePosition(StoragePosition);
 		UnInitializedItemObject->PrivateItemId = PrivateItemId;
@@ -664,8 +664,8 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		const int32 MaxCount = SrcItem->GetMaxStackCount();
 		const int32 SrcCount = SrcItem->GetRuntimeCount();
 		const int32 SplitResources = FMath::Min(SrcCount, MaxCount);
-		SrcItem->ModifyRuntimeCount(SrcCount - SplitResources);
-		OutItem->ModifyRuntimeCount(SplitResources);
+		SrcItem->ModifyRuntimeStackCount(SrcCount - SplitResources);
+		OutItem->ModifyRuntimeStackCount(SplitResources);
 		// @gdemers storage is qualified next. this shouldnt be transient between instance. only id should be!
 		OutItem->PrivateItemId = UAVVMOnlineEncodingUtils::DecodeInt32(SrcItem->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
 	}
