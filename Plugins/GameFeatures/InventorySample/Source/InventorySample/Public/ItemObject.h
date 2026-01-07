@@ -58,7 +58,7 @@ struct INVENTORYSAMPLE_API FItemState
 	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 Counter = 1;
+	int32 StackCount = 1;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 StorageId = NULL;

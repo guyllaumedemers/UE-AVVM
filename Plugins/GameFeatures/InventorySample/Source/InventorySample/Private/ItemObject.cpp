@@ -94,12 +94,13 @@ void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 
 void UItemObject::ModifyRuntimeCount(const int32 NewCountModifier)
 {
-	RuntimeItemState.Counter = FMath::Clamp<int32>(NewCountModifier, 0, 999);
+	static constexpr int32 MaxStackCount = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+	RuntimeItemState.StackCount = FMath::Clamp<int32>(NewCountModifier, 0, MaxStackCount);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
 	OnRep_ItemStateModified(RuntimeItemState);
 
-	if (false == !!RuntimeItemState.Counter)
+	if (false == !!RuntimeItemState.StackCount)
 	{
 		const FGameplayTagContainer& BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
 		ModifyRuntimeState(BlockingTags, {});
@@ -168,7 +169,7 @@ bool UItemObject::DoesRuntimeStateHasExactMatch(const FGameplayTagContainer& Com
 
 bool UItemObject::IsEmpty() const
 {
-	return (false == !!RuntimeItemState.Counter);
+	return (false == !!RuntimeItemState.StackCount);
 }
 
 bool UItemObject::CanStack(const UItemObject* Item) const
@@ -221,7 +222,7 @@ int32 UItemObject::GetMaxStackCount() const
 
 int32 UItemObject::GetRuntimeCount() const
 {
-	return RuntimeItemState.Counter;
+	return RuntimeItemState.StackCount;
 }
 
 int32 UItemObject::GetStorageId() const
@@ -362,10 +363,10 @@ void UItemObject::OnRep_ItemStateModified(const FItemState& OldItemState)
 		OnItemRuntimeStateChanged.Broadcast(RuntimeItemState.StateTags);
 	}
 
-	const bool bHasDifferentCount = (RuntimeItemState.Counter != OldItemState.Counter);
+	const bool bHasDifferentCount = (RuntimeItemState.StackCount != OldItemState.StackCount);
 	if (bHasDifferentCount)
 	{
-		OnItemRuntimeCountChanged.Broadcast(RuntimeItemState.Counter);
+		OnItemRuntimeCountChanged.Broadcast(RuntimeItemState.StackCount);
 	}
 }
 
