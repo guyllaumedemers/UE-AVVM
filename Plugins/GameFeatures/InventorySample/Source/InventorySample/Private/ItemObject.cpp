@@ -646,7 +646,16 @@ int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTabl
 		return INDEX_NONE;
 	}
 
+	static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+
 	const int32 MaxStackCount = SearchResult->MaxStackCount;
+	if (!ensureAlwaysMsgf(MaxStackCount <= MaxStackCountBounds,
+	                      TEXT("Invalid Stack Count. Review the assigned value as it exceed the configured bit encoding bounds (%d)."),
+	                      MaxStackCountBounds))
+	{
+		return INDEX_NONE;
+	}
+
 	return MaxStackCount;
 }
 
