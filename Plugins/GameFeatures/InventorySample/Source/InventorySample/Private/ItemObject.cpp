@@ -489,7 +489,7 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 	};
 
 	// @gdemers item was picked up from world, and wasn't stacked on top of existing entry.
-	const bool bDoesContains = Storages.Contains(Params.CurrentStorageId);
+	const bool bDoesContains = Storages.Contains(Params.CurrentStorageId/*INDEX_NONE or otherwise*/);
 	if (!bDoesContains)
 	{
 		GetLowestBound(Storages, OutMin_StoragePosition, OutMin_StorageId);
@@ -501,7 +501,7 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 		// @gdemers attempting to neighbor the item that generated a stack overflow.
 		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(Params.CurrentStorageId,
 		                                                                                       Storages[Params.CurrentStorageId].Slots,
-		                                                                                       Params.CurrentStoragePosition,
+		                                                                                       Params.CurrentStoragePosition/*INDEX_NONE or otherwise*/,
 		                                                                                       OutSearchResult_StoragePosition,
 		                                                                                       OutSearchResult_StorageId);
 
