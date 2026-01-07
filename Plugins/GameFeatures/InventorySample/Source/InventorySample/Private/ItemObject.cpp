@@ -581,19 +581,20 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const i
 {
 	// @gdemers our count has reach our encoding hard limit. this 100% imply that the storage is full.
 	// if theres an overflow from what design configured in DataAsset, theres a problem at the user level!
-	const bool bDoesCountReachMaxCapacity = (Count & GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+	const bool bDoesCountReachMaxCapacity = (Count >= (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE));
 	if (bDoesCountReachMaxCapacity)
 	{
 		return true;
 	}
-	
-	// TODO @gdemers we need to be able to fetch the entry id from backend, return the data registry
-	// cached there and parse the max count expected.
-	return false;
+
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(StorageId);
+	return (Count >= StorageMaxCapacity);
 }
 
 int32 UItemObjectUtils::GetStorageMaxCapacity(const int32 StorageId)
 {
+	// TODO @gdemers we need to be able to fetch the entry id from backend, return the data registry
+	// cached there and parse the max count expected.
 	return INDEX_NONE;
 }
 
