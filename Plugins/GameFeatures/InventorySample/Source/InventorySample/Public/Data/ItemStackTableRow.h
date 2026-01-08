@@ -31,6 +31,9 @@
 
 /**
  *	Class description:
+ *	
+ *	FItemStackTableRow is a context struct type that define the information about the stacking
+ *	capability of an Item.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemStackTableRow : public FTableRowBase

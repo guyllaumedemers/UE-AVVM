@@ -831,7 +831,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		Params.CurrentStorageId = INDEX_NONE;
 
 		// @gdemers encode new storage position into UItemObject based on inventory available layout.
-		UItemObjectUtils::QualifyStorage(Params, ItemObject);
+		UItemObjectUtils::QualifyStorage(this, Params, ItemObject);
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 		AddReplicatedSubObject(ItemObject);
@@ -874,7 +874,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 				Params.CurrentStorageId = TargetStorageId;
 
 				// @gdemers encode new storage position into UItemObject based on inventory latest layout.
-				UItemObjectUtils::QualifyStorage(Params, NewItemObjectEntry);
+				UItemObjectUtils::QualifyStorage(this, Params, NewItemObjectEntry);
 
 				AddReplicatedSubObject(NewItemObjectEntry);
 				Items.Add(NewItemObjectEntry);
@@ -1065,7 +1065,7 @@ void UActorInventoryComponent::CheckBounds()
 	bool bHasStorageReachMaxCapacity = true;
 	for (auto& [StorageId, Count] : OccupiedSlots)
 	{
-		bHasStorageReachMaxCapacity &= UItemObjectUtils::HasStorageReachMaxCapacity(StorageId, Count);
+		bHasStorageReachMaxCapacity &= UItemObjectUtils::HasStorageReachMaxCapacity(this, StorageId, Count);
 		if (!bHasStorageReachMaxCapacity)
 		{
 			break;

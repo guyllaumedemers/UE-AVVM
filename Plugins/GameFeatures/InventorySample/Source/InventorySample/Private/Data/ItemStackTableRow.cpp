@@ -19,14 +19,16 @@
 //SOFTWARE.
 #include "Data/ItemStackTableRow.h"
 
+#include "Backend/AVVMOnlineInventory.h"
+
 #if WITH_EDITOR
 EDataValidationResult FItemStackTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (MaxStackCount <= 0 || MaxStackCount >= INT32_MAX)
+	if ((MaxStackCount <= 0) || (MaxStackCount >= INT32_MAX) || (MaxStackCount > (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE)))
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FItemStackTableRow", "", "Invalid Stack Count"));
+		Context.AddError(NSLOCTEXT("FItemStackTableRow", "", "Invalid Stack Count."));
 	}
 
 	return Result;

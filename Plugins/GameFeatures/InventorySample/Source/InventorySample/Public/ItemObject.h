@@ -172,9 +172,6 @@ public:
 	bool Stack(UItemObject* Item);
 
 	UFUNCTION(BlueprintCallable)
-	int32 GetMaxStackCount() const;
-
-	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -212,6 +209,9 @@ protected:
 
 	UFUNCTION()
 	void OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag);
+
+	int32 GetStorageMaxCapacity() const;
+	int32 GetMaxStackCount() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
 	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
@@ -343,27 +343,33 @@ public:
 	static void NullifyStorage(UItemObject* PendingDropItemObject);
 
 	UFUNCTION(BlueprintCallable)
-	static void QualifyStorage(const FStorageContextArgs& Params,
+	static void QualifyStorage(const UActorInventoryComponent* InventoryComponent,
+	                           const FStorageContextArgs& Params,
 	                           UItemObject* PendingPickupItemObject);
 
 	UFUNCTION(BlueprintCallable)
-	static void GetFreeStorage(const int32 StorageId,
+	static void GetFreeStorage(const UActorInventoryComponent* InventoryComponent,
+	                           const int32 StorageId,
 	                           const TArray<int32>& StoragePositions,
 	                           int32& OutStoragePosition,
 	                           int32& OutStorageId);
 
 	UFUNCTION(BlueprintCallable)
-	static bool GetFreeStorageFromPosition(const int32 StorageId,
+	static bool GetFreeStorageFromPosition(const UActorInventoryComponent* InventoryComponent,
+	                                       const int32 StorageId,
 	                                       const TArray<int32>& StoragePositions,
 	                                       const int32 StartPosition,
 	                                       int32& OutStoragePosition,
 	                                       int32& OutStorageId);
-	
+
 	UFUNCTION(BlueprintCallable)
-	static bool HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count);
-	
+	static bool HasStorageReachMaxCapacity(const UActorInventoryComponent* InventoryComponent,
+	                                       const int32 StorageId,
+	                                       const int32 Count);
+
 	UFUNCTION(BlueprintCallable)
-	static int32 GetStorageMaxCapacity(const int32 StorageId);
+	static int32 GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
+	                                   const int32 StorageId);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

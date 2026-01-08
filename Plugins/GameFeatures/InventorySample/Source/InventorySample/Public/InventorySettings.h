@@ -53,7 +53,7 @@ public:
 	static const FGameplayTagContainer& GetFullInventory_BlockedActions();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FName GetItemMaxStackCount(const FGameplayTag& MaxStackCountTag);
+	static const FName GetItemMaxStackCount(const FGameplayTag& StackCategoryTag);
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftObjectPtr<UDataTable>& GetItemMaxStackCountDataTable();
@@ -96,7 +96,7 @@ protected:
 	FGameplayTagContainer FullInventory_BlockedActions = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TMap<FGameplayTag/*UItemObject Categories associated with this stack RowName*/, FName> ItemMaxStackCounts;
+	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;

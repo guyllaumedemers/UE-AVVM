@@ -87,8 +87,8 @@ void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 
 void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 {
-	static constexpr int32 MaxStoragePosition = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-	RuntimeItemState.StoragePosition = FMath::Clamp<int32>(NewStoragePosition, 0, MaxStoragePosition);
+	const int32 MaxStorageCapacity = GetStorageMaxCapacity();
+	RuntimeItemState.StoragePosition = FMath::Clamp<int32>(NewStoragePosition, 0, MaxStorageCapacity);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
 	OnRep_ItemStateModified(RuntimeItemState);
@@ -96,7 +96,7 @@ void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 
 void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount)
 {
-	static constexpr int32 MaxStackCount = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+	const int32 MaxStackCount = GetMaxStackCount();
 	RuntimeItemState.StackCount = FMath::Clamp<int32>(NewStackCount, 0, MaxStackCount);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
@@ -244,14 +244,6 @@ bool UItemObject::Stack(UItemObject* Item)
 
 	const bool bDoesStackOverflow = (TotalStackCount > ClampedStackCount);
 	return bDoesStackOverflow;
-}
-
-int32 UItemObject::GetMaxStackCount() const
-{
-	// @gdemers shouldnt require async loading as this table will ever only contains integers.
-	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
-	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
-	return UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
 }
 
 int32 UItemObject::GetRuntimeCount() const
@@ -415,6 +407,19 @@ void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentS
 	NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
 }
 
+int32 UItemObject::GetStorageMaxCapacity() const
+{
+	return UItemObjectUtils::GetStorageMaxCapacity(GetTypedOuter<UActorInventoryComponent>(), RuntimeItemState.StorageId);
+}
+
+int32 UItemObject::GetMaxStackCount() const
+{
+	// @gdemers shouldnt require async loading as this table will ever only contains integers.
+	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
+	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
+	return UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+}
+
 int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
                                     const TArray<int32>& NewPrivateIds,
                                     const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
@@ -511,7 +516,8 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 	}
 }
 
-void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
+void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryComponent,
+                                      const FStorageContextArgs& Params,
                                       UItemObject* PendingPickupItemObject)
 {
 	int32 OutMin_StoragePosition = INT_MAX;
@@ -531,7 +537,8 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 		OutResult.Slots.Add(StoragePosition);
 	}
 
-	const auto GetLowestBound = [](const TMap<int32/*StorageId*/, FStorageSlots/*OccupiedEntries*/>& NewStorages,
+	const auto GetLowestBound = [](const TWeakObjectPtr<const UActorInventoryComponent>& NewInventoryComponent,
+	                               const TMap<int32/*StorageId*/, FStorageSlots/*OccupiedEntries*/>& NewStorages,
 	                               int32& OutStoragePosition,
 	                               int32& OutStorageId)
 	{
@@ -539,7 +546,12 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 		{
 			int32 OutSearchResult_StoragePosition = INT_MAX;
 			int32 OutSearchResult_StorageId = INT_MAX;
-			UItemObjectUtils::GetFreeStorage(StorageId, StoragePositions.Slots/*OccupiedEntries*/, OutSearchResult_StoragePosition, OutSearchResult_StorageId);
+			
+			UItemObjectUtils::GetFreeStorage(NewInventoryComponent.Get(),
+			                                 StorageId,
+			                                 StoragePositions.Slots/*OccupiedEntries*/,
+			                                 OutSearchResult_StoragePosition,
+			                                 OutSearchResult_StorageId);
 
 			if (OutSearchResult_StorageId < OutStorageId)
 			{
@@ -553,14 +565,15 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 	const bool bDoesContains = Storages.Contains(Params.CurrentStorageId/*INDEX_NONE or otherwise*/);
 	if (!bDoesContains)
 	{
-		GetLowestBound(Storages, OutMin_StoragePosition, OutMin_StorageId);
+		GetLowestBound(InventoryComponent, Storages, OutMin_StoragePosition, OutMin_StorageId);
 	}
 	else
 	{
 		int32 OutSearchResult_StoragePosition = INT_MAX;
 		int32 OutSearchResult_StorageId = INT_MAX;
 		// @gdemers attempting to neighbor the item that generated a stack overflow.
-		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(Params.CurrentStorageId,
+		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(InventoryComponent,
+		                                                                                       Params.CurrentStorageId,
 		                                                                                       Storages[Params.CurrentStorageId].Slots,
 		                                                                                       Params.CurrentStoragePosition/*INDEX_NONE or otherwise*/,
 		                                                                                       OutSearchResult_StoragePosition,
@@ -569,7 +582,7 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 		// @gdemers search failed, we fall back to finding the entry sitting at the lower bounds of the storage system.
 		if (!bCouldPlaceWithinSameStorage)
 		{
-			GetLowestBound(Storages, OutMin_StoragePosition, OutMin_StorageId);
+			GetLowestBound(InventoryComponent, Storages, OutMin_StoragePosition, OutMin_StorageId);
 		}
 		else
 		{
@@ -586,21 +599,23 @@ void UItemObjectUtils::QualifyStorage(const FStorageContextArgs& Params,
 	}
 }
 
-void UItemObjectUtils::GetFreeStorage(const int32 StorageId,
+void UItemObjectUtils::GetFreeStorage(const UActorInventoryComponent* InventoryComponent,
+                                      const int32 StorageId,
                                       const TArray<int32>& StoragePositions,
                                       int32& OutStoragePosition,
                                       int32& OutStorageId)
 {
-	GetFreeStorageFromPosition(StorageId, StoragePositions, 0, OutStoragePosition, OutStorageId);
+	GetFreeStorageFromPosition(InventoryComponent, StorageId, StoragePositions, 0, OutStoragePosition, OutStorageId);
 }
 
-bool UItemObjectUtils::GetFreeStorageFromPosition(const int32 StorageId,
+bool UItemObjectUtils::GetFreeStorageFromPosition(const UActorInventoryComponent* InventoryComponent,
+                                                  const int32 StorageId,
                                                   const TArray<int32>& StoragePositions,
                                                   const int32 StartPosition,
                                                   int32& OutStoragePosition,
                                                   int32& OutStorageId)
 {
-	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(StorageId);
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, StorageId);
 	if (!ensureAlwaysMsgf(StoragePositions.Num() <= StorageMaxCapacity,
 	                      TEXT("Allocated number of positions exceed the expectation defined in data for this Storage Id.")))
 	{
@@ -638,7 +653,9 @@ bool UItemObjectUtils::GetFreeStorageFromPosition(const int32 StorageId,
 	return false;
 }
 
-bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const int32 Count)
+bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent* InventoryComponent,
+                                                  const int32 StorageId,
+                                                  const int32 Count)
 {
 	// @gdemers our count has reach our encoding hard limit. this 100% imply that the storage is full.
 	// if theres an overflow from what design configured in DataAsset, theres a problem at the user level!
@@ -648,17 +665,31 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const i
 		return true;
 	}
 
-	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(StorageId);
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, StorageId);
 	return (Count >= StorageMaxCapacity);
 }
 
-int32 UItemObjectUtils::GetStorageMaxCapacity(const int32 StorageId)
+int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
+                                              const int32 StorageId)
 {
 	const int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE)/*1024*/ + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE)/*64*/ + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE)/*32*/;
 	const int32 Real_StorageId = (StorageId + StorageId_Offset);
-	
-	// TODO @gdemers we need to be able to fetch the entry id {FAVVMPlayerResource::UniqueId} from backend, return the data registry
-	// cached there and parse the max count expected.
+
+	// Remember that storage are UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout, i.e
+	// the total of items they can fit in.
+	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = Real_StorageId](const UItemObject* ItemObject)
+	{
+		// @gdemers we look over the bits of storage, if theres a hit, it should return true.
+		return IsValid(ItemObject) && !!(ItemObject->PrivateItemId & SearchId);
+	});
+
+	if ((SearchResult != nullptr) && IsValid(*SearchResult))
+	{
+		// @gdemers the backend returned the UItemObject representing the Storage object, this Stack Count represent that number of entries
+		// allowed within the storage.
+		return (*SearchResult)->GetMaxStackCount();
+	}
+
 	return INDEX_NONE;
 }
 
