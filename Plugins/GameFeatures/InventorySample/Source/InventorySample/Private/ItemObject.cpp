@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "ItemObject.h"
 
+#include "ActorInventoryComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "InventoryManagerSubsystem.h"
@@ -471,7 +472,27 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 
 void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
 {
-	// TODO @gdemers remove from owning inventory, and destroy item, and world actor bound to it.
+	if (!IsValid(PendingDestroyItemObject))
+	{
+		return;
+	}
+
+	AActor* ChildActor = PendingDestroyItemObject->RuntimeItemActor;
+	if (IsValid(ChildActor))
+	{
+		// TODO @gdemers maybe this need to be pooled. TBD!
+		ChildActor->Destroy();
+	}
+
+	auto* OwningInventory = PendingDestroyItemObject->GetTypedOuter<UActorInventoryComponent>();
+	if (IsValid(OwningInventory))
+	{
+		// @gdemers little hack that violate encapsulation, but I prefer that than exposing yet another
+		// interface to the inventory component class who would allow external removal of an item.
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, OwningInventory);
+		OwningInventory->RemoveReplicatedSubObject(PendingDestroyItemObject);
+		OwningInventory->Items.Remove(PendingDestroyItemObject);
+	}
 }
 
 void UItemObjectUtils::Insert(const FInsertionContextArgs& Params,
@@ -632,10 +653,11 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const int32 StorageId, const i
 
 int32 UItemObjectUtils::GetStorageMaxCapacity(const int32 StorageId)
 {
-	// TODO @gdemers we need to be able to fetch the entry id from backend, return the data registry
+	const int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE)/*1024*/ + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE)/*64*/ + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE)/*32*/;
+	const int32 Real_StorageId = (StorageId + StorageId_Offset);
+	
+	// TODO @gdemers we need to be able to fetch the entry id {FAVVMPlayerResource::UniqueId} from backend, return the data registry
 	// cached there and parse the max count expected.
-	const int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE) + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE) + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
-	const int32 Real_StorageId = StorageId + StorageId_Offset;
 	return INDEX_NONE;
 }
 

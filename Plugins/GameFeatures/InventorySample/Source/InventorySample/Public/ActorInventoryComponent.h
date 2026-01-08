@@ -230,4 +230,5 @@ private:
 	TArray<int32> PrivateItemIds;
 	
 	friend class UInventoryResourceHandlingImpl;
+	friend class UItemObjectUtils;
 };
