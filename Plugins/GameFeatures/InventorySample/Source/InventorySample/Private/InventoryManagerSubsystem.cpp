@@ -32,17 +32,27 @@ bool UInventoryManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
                                                            const UClass* ItemActorClass,
-                                                           AActor* Owner)
+                                                           AActor* Outer)
 {
-	const auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(World);
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(World);
 	if (IsValid(InventoryManagerSubsystem))
 	{
 		FActorSpawnParameters Params;
-		Params.Owner = Owner;
+		Params.Owner = Outer;
 		return InventoryManagerSubsystem->CreateItemActor(ItemActorClass, Params);
 	}
 
 	return nullptr;
+}
+
+void UInventoryManagerSubsystem::Static_Shutdown(const UWorld* World,
+                                                 AActor* ItemActor)
+{
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(World);
+	if (IsValid(InventoryManagerSubsystem))
+	{
+		InventoryManagerSubsystem->Shutdown(ItemActor);
+	}
 }
 
 UInventoryManagerSubsystem* UInventoryManagerSubsystem::GetSubsystem(const UWorld* World)
@@ -51,13 +61,13 @@ UInventoryManagerSubsystem* UInventoryManagerSubsystem::GetSubsystem(const UWorl
 }
 
 AActor* UInventoryManagerSubsystem::CreateItemActor(const UClass* ItemActorClass,
-                                                    const FActorSpawnParameters& SpawnParams) const
+                                                    const FActorSpawnParameters& SpawnParams)
 {
 	return Factory(ItemActorClass, SpawnParams);
 }
 
 AActor* UInventoryManagerSubsystem::Factory(const UClass* ItemActorClass,
-                                            const FActorSpawnParameters& SpawnParams) const
+                                            const FActorSpawnParameters& SpawnParams)
 {
 	UWorld* World = GetWorld();
 	if (IsValid(World))

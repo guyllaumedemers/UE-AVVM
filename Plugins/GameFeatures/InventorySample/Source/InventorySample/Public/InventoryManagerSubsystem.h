@@ -45,17 +45,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static AActor* Static_CreateItemActor(const UWorld* World,
 	                                      const UClass* ItemActorClass,
-	                                      AActor* Owner);
+	                                      AActor* Outer);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_Shutdown(const UWorld* World,
+	                            AActor* ItemActor);
 
 protected:
 	static UInventoryManagerSubsystem* GetSubsystem(const UWorld* World);
 
 	AActor* CreateItemActor(const UClass* ItemActorClass,
-							const FActorSpawnParameters& SpawnParams) const;
-	
+	                        const FActorSpawnParameters& SpawnParams);
+
 	// @gdemers factory method to support pooling or other instancing system specific to your project.
-	virtual AActor* Factory(const UClass* ItemActorClass, const FActorSpawnParameters& SpawnParams) const;
-	
+	virtual AActor* Factory(const UClass* ItemActorClass, const FActorSpawnParameters& SpawnParams);
+
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(AActor* ItemActor);
 };

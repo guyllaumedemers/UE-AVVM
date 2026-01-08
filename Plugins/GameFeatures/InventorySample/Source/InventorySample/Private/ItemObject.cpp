@@ -480,8 +480,9 @@ void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
 	AActor* ChildActor = PendingDestroyItemObject->RuntimeItemActor;
 	if (IsValid(ChildActor))
 	{
-		// TODO @gdemers maybe this need to be pooled. TBD!
-		ChildActor->Destroy();
+		// @gdemers allow possible pooling of actor if inventory manager system
+		// is overloaded.
+		UInventoryManagerSubsystem::Static_Shutdown(PendingDestroyItemObject->GetWorld(), ChildActor);
 	}
 
 	auto* OwningInventory = PendingDestroyItemObject->GetTypedOuter<UActorInventoryComponent>();
