@@ -200,15 +200,15 @@ bool UItemObject::IsEmpty() const
 
 bool UItemObject::CanStack(const UItemObject* Item) const
 {
-	// @gdemers validate if both items are of same types.
-	if (!IsValid(Item) || (Item->GetItemActorId() != GetItemActorId()))
-	{
-		return false;
-	}
-
 	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
 	const bool bDoesItemStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesItemStack)
+	{
+		return false;
+	}
+	
+	// @gdemers validate if both items are of same types.
+	if (!IsValid(Item) || (Item->GetItemActorId() != GetItemActorId()))
 	{
 		return false;
 	}
