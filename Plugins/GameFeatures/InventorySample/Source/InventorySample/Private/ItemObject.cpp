@@ -206,6 +206,13 @@ bool UItemObject::CanStack(const UItemObject* Item) const
 		return false;
 	}
 
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	const bool bDoesItemStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
+	if (!bDoesItemStack)
+	{
+		return false;
+	}
+
 	const int32 MaxStackCount = GetMaxStackCount();
 	const int32 TotalStackCount = (Item->GetRuntimeCount() + GetRuntimeCount());
 
@@ -656,7 +663,7 @@ int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTabl
 		return INDEX_NONE;
 	}
 
-	return MaxStackCount;
+	return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
 }
 
 int32 UItemObjectUtils::GetItemStartupStackCount(const UItemObject* UnInitializedItemObject,
