@@ -58,11 +58,11 @@ void APickupActor::Setup(UItemObject* NewItemObject)
 {
 	if (IsValid(NewItemObject))
 	{
-		MARK_PROPERTY_DIRTY_FROM_NAME(APickupActor, ItemObject, this);
 		// @gdemers reparent our item outer chain to 'this' actor so we can handle
 		// the actor destruction case using it.
 		NewItemObject->Rename(nullptr, this);
 	}
-	
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(APickupActor, ItemObject, this);
 	ItemObject = NewItemObject;
 }
