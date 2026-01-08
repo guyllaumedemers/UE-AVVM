@@ -410,7 +410,14 @@ void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentS
 
 int32 UItemObject::GetStorageMaxCapacity() const
 {
-	return UItemObjectUtils::GetStorageMaxCapacity(GetTypedOuter<UActorInventoryComponent>(), RuntimeItemState.StorageId);
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(GetTypedOuter<UActorInventoryComponent>(), RuntimeItemState.StorageId);
+	if (!ensureAlwaysMsgf((StorageMaxCapacity != INDEX_NONE),
+	                      TEXT("StorageId provided couldn't resolve a valid Storage Capacity.")))
+	{
+		return INDEX_NONE;
+	}
+
+	return StorageMaxCapacity;
 }
 
 int32 UItemObject::GetMaxStackCount() const
@@ -634,7 +641,7 @@ bool UItemObjectUtils::GetFreeStorageFromPosition(const UActorInventoryComponent
                                                   int32& OutStorageId)
 {
 	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, StorageId);
-	if (!ensureAlwaysMsgf(StoragePositions.Num() <= StorageMaxCapacity,
+	if (!ensureAlwaysMsgf((StoragePositions.Num() <= StorageMaxCapacity) && (StorageMaxCapacity != INDEX_NONE),
 	                      TEXT("Allocated number of positions exceed the expectation defined in data for this Storage Id.")))
 	{
 		return false;
@@ -684,6 +691,12 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 	}
 
 	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, StorageId);
+	if (!ensureAlwaysMsgf((StorageMaxCapacity != INDEX_NONE),
+	                      TEXT("StorageId provided couldn't resolve a valid Storage Capacity.")))
+	{
+		return false;
+	}
+
 	return (Count >= StorageMaxCapacity);
 }
 
