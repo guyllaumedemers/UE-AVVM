@@ -45,5 +45,8 @@ struct INVENTORYSAMPLE_API FItemStackTableRow : public FTableRowBase
 #endif
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldRepresentStorageCapacity = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 MaxStackCount = INDEX_NONE;
 };
