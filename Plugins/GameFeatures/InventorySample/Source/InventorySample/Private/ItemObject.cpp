@@ -41,6 +41,7 @@
 #include "Resources/AVVMResourceProvider.h"
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STACKABLE, "InventorySample.Item.Stackable");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STORAGE, "InventorySample.Item.Storage");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK, "InventorySample.Item.DestroyConditions.EmptyStack");
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -414,10 +415,27 @@ int32 UItemObject::GetStorageMaxCapacity() const
 
 int32 UItemObject::GetMaxStackCount() const
 {
-	// @gdemers shouldnt require async loading as this table will ever only contains integers.
-	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
-	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
-	return UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+	const bool bDoesStack = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE));
+	if (!bDoesStack)
+	{
+		static constexpr int32 One = 1;
+		return One;
+	}
+	else
+	{
+		const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORY_ITEM_STORAGE));
+		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+
+		// @gdemers shouldnt require async loading as this table will ever only contains integers.
+		const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
+		const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
+
+		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+		const int32 BitEncodingLimit = (bIsStorage ? MaxStorageCapacityBounds : MaxStackCountBounds);
+
+		return FMath::Clamp(MaxStackCount, 0, BitEncodingLimit);
+	}
 }
 
 int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
@@ -703,23 +721,13 @@ int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTabl
 
 	const FName RowName = UInventorySettings::GetItemMaxStackCount(MaxStackCountTag);
 	const auto* SearchResult = MaxStackCountDataTable->FindRow<FItemStackTableRow>(RowName, TEXT(""));
-	if (!ensureAlwaysMsgf(SearchResult != nullptr,
-	                      TEXT("Invalid entry. Cannot find UItemObject entry in the data table.")))
+	if (ensureAlwaysMsgf(SearchResult != nullptr,
+	                     TEXT("Invalid entry. Cannot find UItemObject entry in the data table.")))
 	{
-		return INDEX_NONE;
+		return SearchResult->MaxStackCount;
 	}
 
-	static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
-
-	const int32 MaxStackCount = SearchResult->MaxStackCount;
-	if (!ensureAlwaysMsgf(MaxStackCount <= MaxStackCountBounds,
-	                      TEXT("Invalid Stack Count. Review the assigned value as it exceed the configured bit encoding bounds (%d)."),
-	                      MaxStackCountBounds))
-	{
-		return INDEX_NONE;
-	}
-
-	return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
+	return INDEX_NONE;
 }
 
 int32 UItemObjectUtils::GetItemStartupStackCount(const UItemObject* UnInitializedItemObject,
