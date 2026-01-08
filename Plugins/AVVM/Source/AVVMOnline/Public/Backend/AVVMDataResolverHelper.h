@@ -37,7 +37,7 @@ struct AVVMONLINE_API FAVVMDataResolverHelper
 
 	virtual ~FAVVMDataResolverHelper() = default;
 
-	virtual TArray<int32> GetElementDependencies(const UObject* WorldContextObject,
+	virtual TArray<int32> GetElementDependencies(const UObject* Outer,
 	                                             const int32 ElementId) const PURE_VIRTUAL(GetElementDependencies, return TArray<int32>{};);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMDataResolverHelper>::Make<T>

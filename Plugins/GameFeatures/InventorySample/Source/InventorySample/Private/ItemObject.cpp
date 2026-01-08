@@ -200,15 +200,15 @@ bool UItemObject::IsEmpty() const
 
 bool UItemObject::CanStack(const UItemObject* Item) const
 {
-	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
-	const bool bDoesItemStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
-	if (!bDoesItemStack)
+	// @gdemers validate if both items are of same types.
+	if (!IsValid(Item) || (Item->GetItemActorId() != GetItemActorId()))
 	{
 		return false;
 	}
-	
-	// @gdemers validate if both items are of same types.
-	if (!IsValid(Item) || (Item->GetItemActorId() != GetItemActorId()))
+
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	const bool bDoesItemStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
+	if (!bDoesItemStack)
 	{
 		return false;
 	}
@@ -634,6 +634,8 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const int32 StorageId)
 {
 	// TODO @gdemers we need to be able to fetch the entry id from backend, return the data registry
 	// cached there and parse the max count expected.
+	const int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE) + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE) + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+	const int32 Real_StorageId = StorageId + StorageId_Offset;
 	return INDEX_NONE;
 }
 

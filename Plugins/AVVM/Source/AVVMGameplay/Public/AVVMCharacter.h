@@ -47,7 +47,7 @@ struct AVVMGAMEPLAY_API FAVVMCharacterDataResolverHelper : public FAVVMDataResol
 {
 	GENERATED_BODY()
 	
-	virtual TArray<int32> GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const override;
+	virtual TArray<int32> GetElementDependencies(const UObject* Outer, const int32 ElementId) const override;
 };
 
 /**

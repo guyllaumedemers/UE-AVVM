@@ -55,10 +55,10 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.It
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_STORAGE_NOENTRY, "InventorySample.Item.Storage.NoEntry");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DROPPABLE, "InventorySample.Item.Droppable");
 
-TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
+TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
 	// TODO @gdemers Has to be able to retrieve the inventory of Any actor thats referenced in the backend.
-	return FAVVMDataResolverHelper::GetElementDependencies(WorldContextObject, ElementId);
+	return FAVVMDataResolverHelper::GetElementDependencies(Outer, ElementId);
 }
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)

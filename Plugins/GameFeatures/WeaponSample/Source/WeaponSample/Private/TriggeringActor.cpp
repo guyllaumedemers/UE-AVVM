@@ -34,9 +34,9 @@
 #include "GameFramework/Character.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
-TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
+TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
-	if (!IsValid(WorldContextObject))
+	if (!IsValid(Outer))
 	{
 		return TArray<int32>{};
 	}
@@ -44,7 +44,7 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 	TArray<int32> Dependencies;
 
 	// @gdemers retrieve the character preset, and all items that compose it.
-	const auto* Character = Cast<AAVVMCharacter>(WorldContextObject);
+	const auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character) && UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);

@@ -29,14 +29,14 @@
 #include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
-TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UObject* WorldContextObject, const int32 ElementId) const
+TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
-	if (!IsValid(WorldContextObject))
+	if (!IsValid(Outer))
 	{
 		return TArray<int32>{};
 	}
 
-	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerPresetItems(WorldContextObject->GetWorld(), ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
+	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerPresetItems(Outer->GetWorld(), ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
 	return OutResults;
 }
 
