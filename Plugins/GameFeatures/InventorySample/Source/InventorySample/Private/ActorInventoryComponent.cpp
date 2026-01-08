@@ -901,6 +901,9 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 
 	// @gdemers destroy our owning interaction actor.
 	UItemObjectUtils::DestroyWorldItemActor(ItemObject);
+
+	// @gdemers reparent our item outer chain since we have destroyed our Pickup actor through our previous outer chain.
+	ItemObject->Rename(nullptr, this);
 }
 
 void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,

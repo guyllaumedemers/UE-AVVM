@@ -766,6 +766,10 @@ void UItemObjectUtils::DestroyWorldItemActor(const UItemObject* SrcItem)
 	auto* OwningOuter = SrcItem->GetTypedOuter<APickupActor>();
 	if (IsValid(OwningOuter))
 	{
-		OwningOuter->Destroy();
+		// @gdemers invalidate our Pickup Actor to prevent collision during pooling, if supported.
+		OwningOuter->Setup(nullptr);
+		// @gdemers allow possible pooling of actor if inventory manager system
+		// is overloaded.
+		UInventoryManagerSubsystem::Static_Shutdown(OwningOuter->GetWorld(), OwningOuter);
 	}
 }

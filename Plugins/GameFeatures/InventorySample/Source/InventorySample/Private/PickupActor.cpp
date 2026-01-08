@@ -63,4 +63,6 @@ void APickupActor::Setup(UItemObject* NewItemObject)
 		// the actor destruction case using it.
 		NewItemObject->Rename(nullptr, this);
 	}
+	
+	ItemObject = NewItemObject;
 }
