@@ -233,6 +233,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
 	FDataRegistryId ItemActorId = FDataRegistryId();
 
+	// @gdemers reference the ui definition of the referenced actor this UItemObject owns.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorUIDefinitionDataTableRow"))
+	FDataRegistryId ItemActorUIId = FDataRegistryId();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FName SocketName = NAME_None;
 
