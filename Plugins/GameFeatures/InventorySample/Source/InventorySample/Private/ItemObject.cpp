@@ -711,8 +711,18 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 	// the total of items they can fit in.
 	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = Real_StorageId](const UItemObject* ItemObject)
 	{
-		// @gdemers we look over the bits of storage, if theres a hit, it should return true.
-		return IsValid(ItemObject) && !!(ItemObject->PrivateItemId & SearchId);
+		if (!IsValid(ItemObject))
+		{
+			return false;
+		}
+		else
+		{
+			// @gdemers this PrivateItemId holds information about storage but isnt an Item, or an Attachment.
+			const bool bHoldStorageId = (ItemObject->PrivateItemId & SearchId);
+			const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+			const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+			return (!!(ItemId & CHECK_CHARACTER_DEPENDENT_ENCODING)) && (false == !!AttachmentId) && (bHoldStorageId);
+		}
 	});
 
 	if ((SearchResult != nullptr) && IsValid(*SearchResult))
