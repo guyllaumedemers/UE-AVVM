@@ -422,7 +422,8 @@ int32 UItemObject::GetStorageMaxCapacity() const
 
 int32 UItemObject::GetMaxStackCount() const
 {
-	const bool bDoesStack = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE));
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	const bool bDoesStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesStack)
 	{
 		static constexpr int32 One = 1;
