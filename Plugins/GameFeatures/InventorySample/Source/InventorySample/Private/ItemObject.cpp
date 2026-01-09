@@ -704,7 +704,7 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
                                               const int32 StorageId)
 {
-	const int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE)/*1024*/ + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE)/*64*/ + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE)/*32*/;
+	constexpr int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE)/*1024*/ + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE)/*64*/ + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE)/*32*/;
 	const int32 Real_StorageId = (StorageId + StorageId_Offset);
 
 	// Remember that storage are UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout, i.e
