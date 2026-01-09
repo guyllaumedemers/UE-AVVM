@@ -73,7 +73,7 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 	RuntimeItemState.StateTags.RemoveTags(RemovedTags);
 	RuntimeItemState.StateTags.AppendTags(AddedTags);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
-	
+
 	OnRep_ItemStateModified(RuntimeItemState);
 }
 
@@ -295,7 +295,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 
 	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), ActorClass, Outer);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemActor, this);
-	
+
 	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                      TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
@@ -311,13 +311,13 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
 	       *RuntimeItemActor->GetName(),
 	       *GetName());
-	
+
 	const bool bShouldNotifyWhenRegisteringAttachment = RuntimeItemActor->Implements<UAVVMDoesSupportAttachmentNotify>();
 	if (bShouldNotifyWhenRegisteringAttachment)
 	{
 		const auto OnSocketAttached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketAttachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemAttached);
 		const auto OnSocketDetached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketDetachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemDetached);
-		
+
 		auto Observer = TScriptInterface<IAVVMDoesSupportAttachmentNotify>(RuntimeItemActor);
 		OnNewSocketAttachedHandle = Observer->OnNewSocketAttachedDelegate_Add(OnSocketAttached);
 		OnNewSocketDetachedHandle = Observer->OnNewSocketDetachedDelegate_Add(OnSocketDetached);
@@ -543,7 +543,7 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 }
 
 void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryComponent,
-                                      const FStorageContextArgs& Params,
+                                      const FStorageQualifierContextArgs& Params,
                                       UItemObject* PendingPickupItemObject)
 {
 	int32 OutMin_StoragePosition = INT_MAX;
@@ -570,14 +570,15 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 	{
 		for (auto& [StorageId, StoragePositions] : NewStorages)
 		{
+			FStorageContextArgs SearchParams;
+			SearchParams.InventoryComponent = NewInventoryComponent;
+			SearchParams.StartPosition = NULL;
+			SearchParams.StorageId = StorageId;
+			SearchParams.StoragePositions = StoragePositions.Slots/*OccupiedEntries*/;
+
 			int32 OutSearchResult_StoragePosition = INT_MAX;
 			int32 OutSearchResult_StorageId = INT_MAX;
-			
-			UItemObjectUtils::GetFreeStorage(NewInventoryComponent.Get(),
-			                                 StorageId,
-			                                 StoragePositions.Slots/*OccupiedEntries*/,
-			                                 OutSearchResult_StoragePosition,
-			                                 OutSearchResult_StorageId);
+			UItemObjectUtils::GetFreeStorageFromPosition(SearchParams, OutSearchResult_StoragePosition, OutSearchResult_StorageId);
 
 			if (OutSearchResult_StorageId < OutStorageId)
 			{
@@ -595,15 +596,17 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 	}
 	else
 	{
+		FStorageContextArgs SearchParams;
+		SearchParams.InventoryComponent = InventoryComponent;
+		SearchParams.StartPosition = Params.CurrentStoragePosition/*INDEX_NONE or otherwise*/;
+		SearchParams.StorageId = Params.CurrentStorageId;
+		SearchParams.StoragePositions = Storages[Params.CurrentStorageId].Slots;
+
 		int32 OutSearchResult_StoragePosition = INT_MAX;
 		int32 OutSearchResult_StorageId = INT_MAX;
+
 		// @gdemers attempting to neighbor the item that generated a stack overflow.
-		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(InventoryComponent,
-		                                                                                       Params.CurrentStorageId,
-		                                                                                       Storages[Params.CurrentStorageId].Slots,
-		                                                                                       Params.CurrentStoragePosition/*INDEX_NONE or otherwise*/,
-		                                                                                       OutSearchResult_StoragePosition,
-		                                                                                       OutSearchResult_StorageId);
+		const bool bCouldPlaceWithinSameStorage = UItemObjectUtils::GetFreeStorageFromPosition(SearchParams, OutSearchResult_StoragePosition, OutSearchResult_StorageId);
 
 		// @gdemers search failed, we fall back to finding the entry sitting at the lower bounds of the storage system.
 		if (!bCouldPlaceWithinSameStorage)
@@ -625,24 +628,12 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 	}
 }
 
-void UItemObjectUtils::GetFreeStorage(const UActorInventoryComponent* InventoryComponent,
-                                      const int32 StorageId,
-                                      const TArray<int32>& StoragePositions,
-                                      int32& OutStoragePosition,
-                                      int32& OutStorageId)
-{
-	GetFreeStorageFromPosition(InventoryComponent, StorageId, StoragePositions, 0, OutStoragePosition, OutStorageId);
-}
-
-bool UItemObjectUtils::GetFreeStorageFromPosition(const UActorInventoryComponent* InventoryComponent,
-                                                  const int32 StorageId,
-                                                  const TArray<int32>& StoragePositions,
-                                                  const int32 StartPosition,
+bool UItemObjectUtils::GetFreeStorageFromPosition(const FStorageContextArgs& Params,
                                                   int32& OutStoragePosition,
                                                   int32& OutStorageId)
 {
-	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, StorageId);
-	if (!ensureAlwaysMsgf((StoragePositions.Num() <= StorageMaxCapacity) && (StorageMaxCapacity != INDEX_NONE),
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(Params.InventoryComponent.Get(), Params.StorageId);
+	if (!ensureAlwaysMsgf((Params.StoragePositions.Num() <= StorageMaxCapacity) && (StorageMaxCapacity != INDEX_NONE),
 	                      TEXT("Allocated number of positions exceed the expectation defined in data for this Storage Id.")))
 	{
 		return false;
@@ -652,27 +643,27 @@ bool UItemObjectUtils::GetFreeStorageFromPosition(const UActorInventoryComponent
 	Temp.Reserve(StorageMaxCapacity);
 
 	// @gdemers place already allocated space within set.
-	for (int32 StoragePosition : StoragePositions)
+	for (int32 StoragePosition : Params.StoragePositions)
 	{
 		Temp[StoragePosition/*may want to not validate position, and crash if ever its poorly encoded.*/] = 1;
 	}
 
 	int32 StorageBounds = StorageMaxCapacity;
-	int32 SearchIndex = FMath::Clamp(StartPosition, 0, StorageMaxCapacity);
+	int32 SearchIndex = FMath::Clamp(Params.StartPosition, 0, StorageMaxCapacity);
 
 	while ((SearchIndex < StorageBounds) && !!Temp[SearchIndex])
 	{
 		SearchIndex = ((SearchIndex + 1) % StorageMaxCapacity);
 		if (false == !!SearchIndex)
 		{
-			StorageBounds = FMath::Clamp(StartPosition, 0, StorageMaxCapacity);
+			StorageBounds = FMath::Clamp(Params.StartPosition, 0, StorageMaxCapacity);
 		}
 	}
 
 	if (SearchIndex != StorageMaxCapacity)
 	{
 		OutStoragePosition = SearchIndex;
-		OutStorageId = StorageId;
+		OutStorageId = Params.StorageId;
 		return true;
 	}
 

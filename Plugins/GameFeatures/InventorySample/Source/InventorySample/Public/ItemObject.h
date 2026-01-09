@@ -34,13 +34,16 @@
 
 #include "ItemObject.generated.h"
 
+class UActorInventoryComponent;
 struct FStreamableHandle;
 class UAttributeSet;
 class UDataTable;
 class UItemObject;
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnRequestItemActorClassComplete, const UClass*, NewActorClass, const FSoftObjectPath&, NewActorAttributeSetSoftObjectPath, UItemObject*, NewItemObject);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeStateChanged, const FGameplayTagContainer&, NewState);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRuntimeCountChanged, const int32, NewState);
 
 /**
@@ -176,7 +179,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetStorageId() const;
-	
+
 	UFUNCTION(BlueprintCallable)
 	int32 GetStoragePosition() const;
 
@@ -275,7 +278,7 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FInsertionContextArgs
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> OccupiedEntries;
 
@@ -284,10 +287,10 @@ struct INVENTORYSAMPLE_API FInsertionContextArgs
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 StorageIdBounds = INDEX_NONE;
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 TargetStorageId = INDEX_NONE;
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 TargetStoragePosition = INDEX_NONE;
 };
@@ -295,13 +298,14 @@ struct INVENTORYSAMPLE_API FInsertionContextArgs
 /**
  *	Class description:
  *	
- *	FStorageContextArgs is a context struct encapsulating parameter argument for searching free storage.
+ *	FStorageQualifierContextArgs is a context struct encapsulating parameter argument for searching/finding/and assigning a free storage encoding (PrivateItemId)
+ *	using backend information stored in the inventory system, and modify the encoding of the caller.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FStorageContextArgs
+struct INVENTORYSAMPLE_API FStorageQualifierContextArgs
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> PrivateItemIds;
 
@@ -321,6 +325,30 @@ struct INVENTORYSAMPLE_API FStorageContextArgs
 /**
  *	Class description:
  *	
+ *	FStorageContextArgs is a context struct encapsulating parameter argument for searching for a Storage (UItemObject)
+ *	within the Inventory system item collection.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FStorageContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const UActorInventoryComponent> InventoryComponent = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 StorageId = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 StartPosition = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> StoragePositions;
+};
+
+/**
+ *	Class description:
+ *	
  *	UItemObjectUtils is a blueprint function library that expose reusable api.
  */
 UCLASS()
@@ -334,7 +362,7 @@ public:
 	                         const TArray<int32>& NewPrivateIds,
 	                         const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                         UItemObject* UnInitializedItemObject);
-	
+
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
 
@@ -348,21 +376,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void QualifyStorage(const UActorInventoryComponent* InventoryComponent,
-	                           const FStorageContextArgs& Params,
+	                           const FStorageQualifierContextArgs& Params,
 	                           UItemObject* PendingPickupItemObject);
 
 	UFUNCTION(BlueprintCallable)
-	static void GetFreeStorage(const UActorInventoryComponent* InventoryComponent,
-	                           const int32 StorageId,
-	                           const TArray<int32>& StoragePositions,
-	                           int32& OutStoragePosition,
-	                           int32& OutStorageId);
-
-	UFUNCTION(BlueprintCallable)
-	static bool GetFreeStorageFromPosition(const UActorInventoryComponent* InventoryComponent,
-	                                       const int32 StorageId,
-	                                       const TArray<int32>& StoragePositions,
-	                                       const int32 StartPosition,
+	static bool GetFreeStorageFromPosition(const FStorageContextArgs& Params,
 	                                       int32& OutStoragePosition,
 	                                       int32& OutStorageId);
 

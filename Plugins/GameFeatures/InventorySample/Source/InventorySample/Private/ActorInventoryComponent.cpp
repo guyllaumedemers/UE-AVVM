@@ -778,7 +778,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	}
 	else
 	{
-		FStorageContextArgs Params;
+		FStorageQualifierContextArgs Params;
 		Params.PrivateItemIds = PrivateItemIds;
 		Params.StoragePositionBounds = StoragePositionBounds;
 		Params.StorageIdBounds = StorageIdBounds;
@@ -821,7 +821,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 			UItemObject* NewItemObjectEntry = UItemObjectUtils::SplitObject(this, ItemObject);
 			if (IsValid(NewItemObjectEntry))
 			{
-				FStorageContextArgs Params;
+				FStorageQualifierContextArgs Params;
 				Params.PrivateItemIds = PrivateItemIds;
 				Params.StoragePositionBounds = StoragePositionBounds;
 				Params.StorageIdBounds = StorageIdBounds;
