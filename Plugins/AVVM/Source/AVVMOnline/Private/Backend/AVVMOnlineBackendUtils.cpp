@@ -37,8 +37,22 @@ TArray<int32> UAVVMOnlineBackendUtils::GetElementDependencies(const UObject* Out
 bool UAVVMOnlineBackendUtils::CompareSet(const TArray<int32>& Lhs,
                                          const TArray<int32>& Rhs)
 {
-	// TODO @gdemers missing comparison check
-	return false;
+	if ((Lhs.Num() != Rhs.Num()))
+	{
+		return false;
+	}
+
+	// @gdemers the order of the elements don't matter, their internal values
+	// are the only relevant information.
+	for (const int32 Value : Lhs)
+	{
+		if (!Rhs.Contains(Value))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void UAVVMOnlineBackendUtils::Submit(const UObject* WorldContextObject,

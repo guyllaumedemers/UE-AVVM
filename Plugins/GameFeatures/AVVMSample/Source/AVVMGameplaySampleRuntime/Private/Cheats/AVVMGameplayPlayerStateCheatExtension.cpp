@@ -450,7 +450,6 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 	}
 
 	{
-		// TODO @gdemers Require to be better defined! Workout details about these calls. What do they involve ?
 		ImGui::Text("World Interactions");
 		ImGui::Separator();
 
