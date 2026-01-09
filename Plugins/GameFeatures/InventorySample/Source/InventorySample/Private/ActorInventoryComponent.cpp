@@ -32,7 +32,7 @@
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
-#include "NonReplicatedWeightManagerObject.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/ItemDefinitionDataAsset.h"
@@ -45,6 +45,7 @@
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
 #include "UI/InventoryNotificationPayload.h"
+#include "UObject/GarbageCollectionSchema.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
@@ -123,22 +124,12 @@ void UActorInventoryComponent::BeginPlay()
 	}
 #endif
 
-	bool bDoesSupportWeightManagement = false;
 	bool bDoesSupportLoadout = false;
 
 	auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character))
 	{
-		auto* PC = Cast<APlayerController>(Character->GetController());
-		bDoesSupportWeightManagement = IsValid(PC);
 		bDoesSupportLoadout = true;
-	}
-
-	if (!NonReplicatedWeightManagerClass.IsNull() && bDoesSupportWeightManagement)
-	{
-		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UActorInventoryComponent::OnWeightManagerObjectRetrieved);
-		WeightManagerHandle = UAssetManager::Get().LoadAssetList({NonReplicatedWeightManagerClass.ToSoftObjectPath()}, Callback);
 	}
 
 	if (!NonReplicatedLoadoutClass.IsNull() && bDoesSupportLoadout)
@@ -378,19 +369,6 @@ bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Comp
 bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
 	return Compare.HasAllExact(ComponentStateTags);
-}
-
-bool UActorInventoryComponent::CheckWeightOverflow(const UItemObject* NewItemObject) const
-{
-	if (!IsValid(NewItemObject))
-	{
-		return true;
-	}
-	else
-	{
-		const AActor* Outer = OwningOuter.Get();
-		return IsValid(NonReplicatedWeightManager) ? NonReplicatedWeightManager->CheckWeightOverflow(Outer, NewItemObject->GetItemActorId()) : true;
-	}
 }
 
 void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
@@ -717,28 +695,6 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 	NewItemObject->SpawnActor(Params);
 }
 
-void UActorInventoryComponent::OnWeightManagerObjectRetrieved()
-{
-	if (!WeightManagerHandle.IsValid())
-	{
-		return;
-	}
-
-	TArray<UObject*> OutResources;
-	WeightManagerHandle->GetLoadedAssets(OutResources);
-
-	for (const UObject* Resource : OutResources)
-	{
-		const auto* NewWeightManagerClass = Cast<UClass>(Resource);
-		if (!IsValid(NewWeightManagerClass))
-		{
-			continue;
-		}
-
-		NonReplicatedWeightManager = NewObject<UNonReplicatedWeightManagerObject>(this, NewWeightManagerClass);
-	}
-}
-
 void UActorInventoryComponent::OnLoadoutObjectRetrieved()
 {
 	if (!LoadoutHandle.IsValid())
@@ -945,6 +901,20 @@ void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& Ne
 	{
 		Drop(PendingDropItem);
 	}
+}
+
+bool UActorInventoryUtils::CheckWeightOverflow(const UActorInventoryComponent* InventoryComponent,
+                                               const UItemObject* NewItemObject)
+{
+	if (!IsValid(InventoryComponent) || !IsValid(NewItemObject))
+	{
+		return false;
+	}
+
+	// TODO @gdemers retrieve ASC current Weight, and MaxWeight.
+	// also retrieve the ItemActor weight, and compare to ensure we dont overflow.
+	const auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(InventoryComponent->GetTypedOuter<AActor>());
+	return true;
 }
 
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
