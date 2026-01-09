@@ -882,40 +882,6 @@ void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
 	DestItemObject->ModifyRuntimeStorageId(SrcStorageId);
 }
 
-void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& NewTags)
-{
-	const bool bShouldDrop = NewTags.HasAnyExact(OuterDropConditionTags);
-	if (!bShouldDrop)
-	{
-		return;
-	}
-
-	static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
-	const TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
-	{
-		return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
-	});
-
-	for (UItemObject* PendingDropItem : PendingDropItems)
-	{
-		Drop(PendingDropItem);
-	}
-}
-
-bool UActorInventoryUtils::CheckWeightOverflow(const UActorInventoryComponent* InventoryComponent,
-                                               const UItemObject* NewItemObject)
-{
-	if (!IsValid(InventoryComponent) || !IsValid(NewItemObject))
-	{
-		return false;
-	}
-
-	// TODO @gdemers retrieve ASC current Weight, and MaxWeight.
-	// also retrieve the ItemActor weight, and compare to ensure we dont overflow.
-	const auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(InventoryComponent->GetTypedOuter<AActor>());
-	return true;
-}
-
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
 {
 	PendingSpawnRequests.Empty();
@@ -982,6 +948,21 @@ bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionConte
 
 	const bool bPredicate = ContextRule->Predicate(this, Params);
 	return bPredicate;
+}
+
+void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
+{
+	Drop(PendingDropItemObject);
+}
+
+void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* PendingDropItemObject)
+{
+	Pickup(PendingDropItemObject);
+}
+
+void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemObject, UItemObject* DestItemObject)
+{
+	Swap(SrcItemObject, DestItemObject);
 }
 
 void UActorInventoryComponent::CheckBackend()
@@ -1052,17 +1033,36 @@ void UActorInventoryComponent::CheckBounds()
 	}
 }
 
-void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)
+void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& NewTags)
 {
-	Drop(PendingDropItemObject);
+	const bool bShouldDrop = NewTags.HasAnyExact(OuterDropConditionTags);
+	if (!bShouldDrop)
+	{
+		return;
+	}
+
+	static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
+	const TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
+	{
+		return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
+	});
+
+	for (UItemObject* PendingDropItem : PendingDropItems)
+	{
+		Drop(PendingDropItem);
+	}
 }
 
-void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* PendingDropItemObject)
+bool UActorInventoryUtils::CheckWeightOverflow(const UActorInventoryComponent* InventoryComponent,
+											   const UItemObject* NewItemObject)
 {
-	Pickup(PendingDropItemObject);
-}
+	if (!IsValid(InventoryComponent) || !IsValid(NewItemObject))
+	{
+		return false;
+	}
 
-void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemObject, UItemObject* DestItemObject)
-{
-	Swap(SrcItemObject, DestItemObject);
+	// TODO @gdemers retrieve ASC current Weight, and MaxWeight.
+	// also retrieve the ItemActor weight, and compare to ensure we dont overflow.
+	const auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(InventoryComponent->GetTypedOuter<AActor>());
+	return true;
 }
