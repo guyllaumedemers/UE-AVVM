@@ -132,6 +132,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="TriggeringDefinitionDataTableRow"))
 	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
 
+	// @gdemers lives on the actor as we will require runtime access during player interactions.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorUIDefinitionDataTableRow"))
+	FDataRegistryId ActorUIDefinitionId = FDataRegistryId();
+
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 

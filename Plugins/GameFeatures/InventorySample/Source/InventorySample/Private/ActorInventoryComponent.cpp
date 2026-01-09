@@ -45,7 +45,6 @@
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
 #include "UI/InventoryNotificationPayload.h"
-#include "UObject/GarbageCollectionSchema.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 

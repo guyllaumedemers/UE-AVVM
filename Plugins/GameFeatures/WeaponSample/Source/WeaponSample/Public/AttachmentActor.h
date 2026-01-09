@@ -81,6 +81,10 @@ protected:
 	                               AActor* Target,
 	                               const FAVVMSocketTargetingDeferralContextArgs ContextArgs);
 
+	// @gdemers lives on the actor as we will require runtime access during player interactions.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorUIDefinitionDataTableRow"))
+	FDataRegistryId ActorUIDefinitionId = FDataRegistryId();
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 
