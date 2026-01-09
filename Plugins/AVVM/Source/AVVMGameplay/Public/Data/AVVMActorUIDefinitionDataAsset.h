@@ -56,9 +56,10 @@ TInstancedStruct<FAVVMActorUIDefinition> FAVVMActorUIDefinition::Make(TArgs&&...
 	return TInstancedStruct<FAVVMActorUIDefinition>::Make<TChild>(Forward<TArgs>(Args)...);
 }
 
-template<> struct TBaseStructure<FAVVMActorUIDefinition> 
+template <>
+struct TBaseStructure<FAVVMActorUIDefinition>
 {
-	static AVVMGAMEPLAY_API UScriptStruct* Get(); 
+	static AVVMGAMEPLAY_API UScriptStruct* Get();
 };
 
 /**
@@ -72,10 +73,6 @@ class AVVMGAMEPLAY_API UAVVMActorUIDefinitionDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
 	template <typename T = FAVVMActorUIDefinition>
 	const T* GetActorUIDefinition() const;
 

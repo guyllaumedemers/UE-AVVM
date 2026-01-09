@@ -22,13 +22,6 @@
 TInstancedStruct<FAVVMActorUIDefinition> FAVVMActorUIDefinition::Empty = TInstancedStruct<FAVVMActorUIDefinition>();
 
 #if WITH_EDITOR
-EDataValidationResult UAVVMActorUIDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
-{
-	return Super::IsDataValid(Context);
-}
-#endif
-
-#if WITH_EDITOR
 EDataValidationResult FAVVMActorUIDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
