@@ -55,6 +55,28 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
 	return Result;
 }
 
+int32 UAVVMOnlineEncodingUtils::FilterInt32(const int32 Input,
+                                            const int32 BitRange,
+                                            const int32 LShift)
+{
+	TFunction<int32(const int32 NewInput)> Recurse;
+	Recurse = [&](const int32 NewInput)
+	{
+		if (NewInput == 0)
+		{
+			return 1;
+		}
+		else
+		{
+			return (1 << NewInput) + Recurse(NewInput - 1);
+		}
+	};
+
+	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
+	const int32 FilteringRange = (Recurse(BitRange_Clamped) << LShift);
+	return (Input & FilteringRange);
+}
+
 TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs,
                                                      const int32 BitRange,
                                                      const int32 RShift,

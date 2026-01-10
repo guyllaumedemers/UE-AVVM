@@ -779,12 +779,10 @@ int32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)
 	const int32 StorageId = ItemObject->GetStorageId() + (1 << GET_STORAGE_ID_ENCODING_RSHIFT);
 	const int32 StoragePosition = ItemObject->GetStoragePosition() + (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
 
-	const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
-	const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-	const int32 LShift_ItemId = ItemId + (1 << GET_ITEM_ID_ENCODING_RSHIFT);
-	const int32 LShift_AttachmentId = AttachmentId + (1 << GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
 
-	return (LShift_ItemId + StackCount + StorageId + StoragePosition + LShift_AttachmentId);
+	return (ItemId + StackCount + StorageId + StoragePosition + AttachmentId);
 }
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
