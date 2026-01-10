@@ -44,6 +44,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetUniqueIds(const TArray<UItemObject*>& Items);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
 
 	UFUNCTION(BlueprintCallable)
 	static FString ModifyProfile(const UObject* WorldContextObject,

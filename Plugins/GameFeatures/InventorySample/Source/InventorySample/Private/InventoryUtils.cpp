@@ -19,9 +19,11 @@
 //SOFTWARE.
 #include "InventoryUtils.h"
 
+#include "AVVMGameplaySettings.h"
 #include "ItemObject.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 
 int32 UInventoryUtils::DecodeItem(const int32 EncodedBits)
 {
@@ -64,11 +66,43 @@ TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
 	TArray<int32> OutResults;
 	for (const UItemObject* Item : Items)
 	{
-		const int32 ItemId = UItemObjectUtils::GetObjectUniqueIdentifier(Item);
+		const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(Item);
 		OutResults.AddUnique(ItemId);
 	}
 
 	return OutResults;
+}
+
+int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
+{
+	if (!IsValid(Item))
+	{
+		return INDEX_NONE;
+	}
+
+	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
+	if (ActorIdentifierDataTable.IsNull())
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers this should be fairly quick to load and not create any hitches during gameplay.
+	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
+	if (!IsValid(DataTable))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(Item->GetItemActorId().ItemName, TEXT(""));
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
 }
 
 FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,

@@ -20,7 +20,6 @@
 #include "ItemObject.h"
 
 #include "ActorInventoryComponent.h"
-#include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "InventoryManagerSubsystem.h"
@@ -35,7 +34,6 @@
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
-#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemStackTableRow.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -463,7 +461,7 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 ItemId = UItemObjectUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
+	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
 
 	if (OuterDependencies.IsEmpty() || (ItemId == INDEX_NONE))
 	{
@@ -531,38 +529,6 @@ void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
 	}
 }
 
-int32 UItemObjectUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
-{
-	if (!IsValid(Item))
-	{
-		return INDEX_NONE;
-	}
-
-	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
-	if (ActorIdentifierDataTable.IsNull())
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers this should be fairly quick to load and not create any hitches during gameplay.
-	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
-	if (!IsValid(DataTable))
-	{
-		return INDEX_NONE;
-	}
-
-	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(Item->GetItemActorId().ItemName, TEXT(""));
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-						 TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
-	{
-		return RowValue->UniqueId;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
-}
-
 void UItemObjectUtils::Insert(const FInsertionContextArgs& Params,
                               UItemObject* PendingInsertItemObject)
 {
@@ -573,7 +539,7 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
 	{
-		const int32 ItemId = UItemObjectUtils::GetObjectUniqueIdentifier(PendingDropItemObject);
+		const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(PendingDropItemObject);
 		PendingDropItemObject->PrivateItemId &= ItemId;
 	}
 }
