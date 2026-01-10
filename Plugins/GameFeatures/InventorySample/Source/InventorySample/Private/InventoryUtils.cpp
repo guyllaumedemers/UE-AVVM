@@ -20,11 +20,43 @@
 #include "InventoryUtils.h"
 
 #include "ItemObject.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
 
 int32 UInventoryUtils::DecodeItem(const int32 EncodedBits)
 {
-	// TODO @gdemers add impl for decoding item
-	return INDEX_NONE;
+	// @gdemers our bit encoding is telling us that the element we are looking at
+	// require socket support, and target our character actor.
+	const bool bDoesReferenceCharacter = !!(EncodedBits & (1 << CHECK_CHARACTER_DEPENDENT_ENCODING));
+	if (bDoesReferenceCharacter)
+	{
+		// @gdemers the above imply, we are either an attachment, or a storage.
+		const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+		if (!!AttachmentId)
+		{
+			return AttachmentId;
+		}
+		else
+		{
+			const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);;
+			return StorageId;
+		}
+	}
+	else
+	{
+		// @gdemers here, we may be bound to another actor who isn't a character, maybe ATriggeringActor (Weapon), or we are simply just an item.
+		// regular Items such as weapons do not require referencing the CHECK_CHARACTER_DEPENDENT_ENCODING in their bit encoding as it's implicitly referencing one possible Actor.
+		const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+		if (!!AttachmentId)
+		{
+			return AttachmentId;
+		}
+		else
+		{
+			const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+			return ItemId;
+		}
+	}
 }
 
 TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)

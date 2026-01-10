@@ -965,7 +965,7 @@ void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemOb
 	Swap(SrcItemObject, DestItemObject);
 }
 
-void UActorInventoryComponent::CheckBackend()
+void UActorInventoryComponent::CheckBackend() const
 {
 	const AActor* Outer = OwningOuter.Get();
 
