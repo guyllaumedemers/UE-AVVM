@@ -401,6 +401,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static int32 GetItemStartupStackCount(const UItemObject* UnInitializedItemObject,
 	                                      const int32 ElementId);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 MakeRuntimePrivateItemId(const UItemObject* ItemObject);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetNumSplits(const UItemObject* SrcItem);

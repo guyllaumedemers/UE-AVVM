@@ -67,8 +67,13 @@ TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
 	TArray<int32> OutResults;
 	for (const UItemObject* Item : Items)
 	{
-		const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(Item);
-		OutResults.AddUnique(ItemId);
+		if (IsValid(Item))
+		{
+			// @gdemers return the runtime version of our UItemObject::PrivateItemId so we can compare against
+			// the version serialized with our backend.
+			const int32 ItemId = UItemObjectUtils::MakeRuntimePrivateItemId(Item);
+			OutResults.AddUnique(ItemId);
+		}
 	}
 
 	return OutResults;
