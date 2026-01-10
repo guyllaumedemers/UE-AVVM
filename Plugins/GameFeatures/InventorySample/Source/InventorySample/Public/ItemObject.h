@@ -34,6 +34,7 @@
 
 #include "ItemObject.generated.h"
 
+struct FAVVMDataResolverHelper;
 struct FStreamableHandle;
 class UActorInventoryComponent;
 class UAttributeSet;

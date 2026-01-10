@@ -21,6 +21,7 @@
 
 #include "AVVMGameplaySettings.h"
 #include "ItemObject.h"
+#include "Backend/AVVMDataResolverHelper.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
@@ -29,7 +30,7 @@ int32 UInventoryUtils::DecodeItem(const int32 EncodedBits)
 {
 	// @gdemers our bit encoding is telling us that the element we are looking at
 	// require socket support, and target our character actor.
-	const bool bDoesReferenceCharacter = !!(EncodedBits & (1 << CHECK_CHARACTER_DEPENDENT_ENCODING));
+	const bool bDoesReferenceCharacter = !!(EncodedBits & CHECK_CHARACTER_DEPENDENT_ENCODING);
 	if (bDoesReferenceCharacter)
 	{
 		// @gdemers the above imply, we are either an attachment, or a storage.
