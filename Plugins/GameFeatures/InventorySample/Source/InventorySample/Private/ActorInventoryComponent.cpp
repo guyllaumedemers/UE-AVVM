@@ -21,6 +21,7 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMScopedUtils.h"
@@ -57,8 +58,36 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DROPPABLE, "InventorySample.Item.Dropp
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
-	// TODO @gdemers Has to be able to retrieve the inventory of Any actor thats referenced in the backend.
-	return FAVVMDataResolverHelper::GetElementDependencies(Outer, ElementId);
+	if (!IsValid(Outer))
+	{
+		return TArray<int32>{};
+	}
+
+	// @gdemers target (character {FAVVMPlayerProfile::UniqueId}/or triggering actor) unique id.
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Outer->GetName()))
+	{
+		return TArray<int32>{};
+	}
+
+	TArray<int32> OutResults;
+
+	const auto* Character = Cast<AAVVMCharacter>(Outer);
+	if (IsValid(Character))
+	{
+		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer->GetWorld(), TargetUniqueId);
+	}
+	else
+	{
+		// TODO @gdemers make solution for general purpose actor. example : a shop, a box, etc...
+		// The question we have right now is : Where should we store that specific data thats not bound to a player.
+		// backend ? data asset ?
+		// and who handle access ?
+	}
+
+	return OutResults;
 }
 
 UActorInventoryComponent::UActorInventoryComponent(const FObjectInitializer& ObjectInitializer)

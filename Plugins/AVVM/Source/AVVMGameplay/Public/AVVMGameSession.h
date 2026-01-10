@@ -58,12 +58,17 @@ public:
 	static TArray<int32> Static_GetPlayerPresetItems(const UWorld* World,
 	                                                 const int32 ProfileId);
 
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> Static_GetPlayerInventoryItems(const UWorld* World,
+	                                                    const int32 ProfileId);
+
 protected:
 	static AAVVMGameSession* Get(const UWorld* World);
 	int32 GetPlayerConnectionId(const APlayerState* PlayerState) const;
 	int32 GetPlayerProfileId(const APlayerState* PlayerState) const;
 	int32 GetPlayerPresetId(const APlayerState* PlayerState) const;
 	TArray<int32> GetPlayerPresetItems(const int32 ProfileId) const;
+	TArray<int32> GetPlayerInventoryItems(const int32 ProfileId) const;
 
 	// @gdemers {FAVVMParty::UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
