@@ -21,6 +21,12 @@
 
 #include "ItemObject.h"
 
+int32 UInventoryUtils::DecodeItem(const int32 EncodedBits)
+{
+	// TODO @gdemers add impl for decoding item
+	return INDEX_NONE;
+}
+
 TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
 {
 	TArray<int32> OutResults;

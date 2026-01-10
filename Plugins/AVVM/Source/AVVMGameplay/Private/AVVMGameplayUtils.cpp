@@ -143,8 +143,7 @@ int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
 		return INDEX_NONE;
 	}
 
-	// @gdemers since entries are TSoftClassPtr themselves, this should be fairly quick to load
-	// and not create any hitches during gameplay.
+	// @gdemers this should be fairly quick to load and not create any hitches during gameplay.
 	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
 	if (!IsValid(DataTable))
 	{

@@ -26,6 +26,7 @@
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
+#include "InventoryUtils.h"
 #include "NativeGameplayTags.h"
 #include "PickupActor.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -478,10 +479,10 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
-		// TODO @gdemers we need to be able to parse if the object is an item,
-		// storage item, or attachment
-		const int32 ParsedId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_ITEM_ID_ENCODING_BIT_RANGE,GET_ITEM_ID_ENCODING_RSHIFT);
-		return (ParsedId == SearchId);
+		// @gdemers decode Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
+		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
+		const int32 OutValue = UInventoryUtils::DecodeItem(Value);
+		return !!(OutValue & SearchId);
 	});
 
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldnt retrieve the ItemId.")))
@@ -543,8 +544,7 @@ int32 UItemObjectUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 		return INDEX_NONE;
 	}
 
-	// @gdemers since entries are TSoftClassPtr themselves, this should be fairly quick to load
-	// and not create any hitches during gameplay.
+	// @gdemers this should be fairly quick to load and not create any hitches during gameplay.
 	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
 	if (!IsValid(DataTable))
 	{

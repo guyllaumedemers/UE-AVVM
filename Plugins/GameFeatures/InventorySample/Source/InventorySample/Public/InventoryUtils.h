@@ -40,6 +40,9 @@ class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
 	
 public:
 	UFUNCTION(BlueprintCallable)
+	static int32 DecodeItem(const int32 EncodedBits);
+	
+	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetUniqueIds(const TArray<UItemObject*>& Items);
 
 	UFUNCTION(BlueprintCallable)
