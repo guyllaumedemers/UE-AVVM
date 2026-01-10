@@ -779,6 +779,11 @@ int32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)
 	const int32 StorageId = ItemObject->GetStorageId() + (1 << GET_STORAGE_ID_ENCODING_RSHIFT);
 	const int32 StoragePosition = ItemObject->GetStoragePosition() + (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
 
+	// TODO @gdemers theres a problem here !
+	// MakeRuntimePrivateItemId is called from within CheckBackend, and indirectly from OnDrop, and OnPickup. This means that our inventory
+	// updates in those two cases. We may have an Actor in World representing this UItemObject, or not. If our UItemObject is an attachment, its dependent on another
+	// actor being dropped, but also being picked up. Attachment can be drop as a unique element, or parented by an outer. The encoding as to reflect all those cases, and
+	// update accordingly.
 	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
 	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
 
