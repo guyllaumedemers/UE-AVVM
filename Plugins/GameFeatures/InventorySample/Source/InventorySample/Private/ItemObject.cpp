@@ -40,9 +40,10 @@
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceProvider.h"
 
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK, "InventorySample.Item.DestroyConditions.EmptyStack");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STACKABLE, "InventorySample.Item.Stackable");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STORAGE, "InventorySample.Item.Storage");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK, "InventorySample.Item.DestroyConditions.EmptyStack");
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
