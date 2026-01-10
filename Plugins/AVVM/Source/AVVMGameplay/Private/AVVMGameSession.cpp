@@ -59,6 +59,13 @@ TArray<int32> AAVVMGameSession::Static_GetPlayerInventoryItems(const UWorld* Wor
 	return IsValid(GameSession) ? GameSession->GetPlayerInventoryItems(ProfileId) : TArray<int32>{};
 }
 
+TArray<int32> AAVVMGameSession::Static_GetActorInventoryItems(const UWorld* World,
+                                                              const int32 ProfileId)
+{
+	const AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->GetActorInventoryItems(ProfileId) : TArray<int32>{};
+}
+
 void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
                                       const FUniqueNetIdRepl& UniqueId,
                                       bool bWasFromInvite)
@@ -206,6 +213,13 @@ TArray<int32> AAVVMGameSession::GetPlayerInventoryItems(const int32 ProfileId) c
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
 	return OutPlayerProfile.InventoryIds;
+}
+
+TArray<int32> AAVVMGameSession::GetActorInventoryItems(const int32 ProfileId) const
+{
+	// TODO @gdemers access backend representation of our actor, and their inventory
+	// this may apply to NPC types, Shops, Boxes, etc... 
+	return TArray<int32>{};
 }
 
 void AAVVMGameSession::AddPlayer(const FString& UniqueNetId)

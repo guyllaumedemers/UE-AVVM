@@ -63,28 +63,18 @@ TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject
 		return TArray<int32>{};
 	}
 
-	// @gdemers target (character {FAVVMPlayerProfile::UniqueId}/or triggering actor) unique id.
-	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
-	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
-	                      *Outer->GetName()))
-	{
-		return TArray<int32>{};
-	}
-
 	TArray<int32> OutResults;
 
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character))
 	{
-		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer->GetWorld(), TargetUniqueId);
+		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer->GetWorld(), ElementId/*calling Player UniqueId*/);
 	}
 	else
 	{
-		// TODO @gdemers make solution for general purpose actor. example : a shop, a box, etc...
-		// The question we have right now is : Where should we store that specific data thats not bound to a player.
-		// backend ? data asset ?
-		// and who handle access ?
+		// @gdemers we may attempt retrieving the inventory for an NPC actor
+		// (or any other actor type) that are defined in backend.
+		OutResults = AAVVMGameSession::Static_GetActorInventoryItems(Outer->GetWorld(), ElementId/*calling Actor UniqueId*/);
 	}
 
 	return OutResults;
