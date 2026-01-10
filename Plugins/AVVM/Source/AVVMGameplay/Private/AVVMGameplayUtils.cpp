@@ -130,7 +130,7 @@ FString UAVVMGameplayUtils::PrintConnectionInfo(const UNetConnection* Connection
 	return IsValid(Connection) ? const_cast<UNetConnection*>(Connection)->RemoteAddressToString() : TEXT("Unknown");
 }
 
-int32 UAVVMGameplayUtils::GetUniqueIdentifier(const AActor* Actor)
+int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
 {
 	if (!IsValid(Actor))
 	{

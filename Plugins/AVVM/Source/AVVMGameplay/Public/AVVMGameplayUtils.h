@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DataRegistryId.h"
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
@@ -53,5 +54,5 @@ public:
 	static FString PrintConnectionInfo(const UNetConnection* Connection);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 GetUniqueIdentifier(const AActor* Actor);
+	static int32 GetActorUniqueIdentifier(const AActor* Actor);
 };

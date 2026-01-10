@@ -34,8 +34,8 @@
 
 #include "ItemObject.generated.h"
 
-class UActorInventoryComponent;
 struct FStreamableHandle;
+class UActorInventoryComponent;
 class UAttributeSet;
 class UDataTable;
 class UItemObject;
@@ -365,6 +365,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
 
 	// @gdemers util function for UI usage during drag/drop action.
 	UFUNCTION(BlueprintCallable)

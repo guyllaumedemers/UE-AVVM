@@ -20,12 +20,12 @@
 #include "ItemObject.h"
 
 #include "ActorInventoryComponent.h"
+#include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
-#include "InventoryUtils.h"
 #include "NativeGameplayTags.h"
 #include "PickupActor.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -34,6 +34,7 @@
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemStackTableRow.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -461,7 +462,7 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 ItemId = UInventoryUtils::GetUniqueId(UnInitializedItemObject);
+	const int32 ItemId = UItemObjectUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
 
 	if (OuterDependencies.IsEmpty() || (ItemId == INDEX_NONE))
 	{
@@ -477,6 +478,8 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
+		// TODO @gdemers we need to be able to parse if the object is an item,
+		// storage item, or attachment
 		const int32 ParsedId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_ITEM_ID_ENCODING_BIT_RANGE,GET_ITEM_ID_ENCODING_RSHIFT);
 		return (ParsedId == SearchId);
 	});
@@ -527,6 +530,39 @@ void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
 	}
 }
 
+int32 UItemObjectUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
+{
+	if (!IsValid(Item))
+	{
+		return INDEX_NONE;
+	}
+
+	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
+	if (ActorIdentifierDataTable.IsNull())
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers since entries are TSoftClassPtr themselves, this should be fairly quick to load
+	// and not create any hitches during gameplay.
+	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
+	if (!IsValid(DataTable))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(Item->GetItemActorId().ItemName, TEXT(""));
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+						 TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
 void UItemObjectUtils::Insert(const FInsertionContextArgs& Params,
                               UItemObject* PendingInsertItemObject)
 {
@@ -537,7 +573,7 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
 	{
-		const int32 ItemId = UInventoryUtils::GetUniqueId(PendingDropItemObject);
+		const int32 ItemId = UItemObjectUtils::GetObjectUniqueIdentifier(PendingDropItemObject);
 		PendingDropItemObject->PrivateItemId &= ItemId;
 	}
 }
@@ -695,7 +731,7 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
                                               const int32 StorageId)
 {
-	constexpr int32 StorageId_Offset = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE)/*1024*/ + (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE)/*64*/ + (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE)/*32*/;
+	constexpr int32 StorageId_Offset = (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
 	const int32 Real_StorageId = (StorageId + StorageId_Offset);
 
 	// Remember that storage are UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout, i.e

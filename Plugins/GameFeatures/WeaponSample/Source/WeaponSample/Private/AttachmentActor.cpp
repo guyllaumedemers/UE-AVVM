@@ -39,7 +39,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 	// @gdemers src (attachment) unique id defined in global table. Note : attachment shouldn't be considered
 	// as resource provider. They are instanced from a resource provider which is different.
-	const int32 SearchUniqueId = UAVVMGameplayUtils::GetUniqueIdentifier(Src);
+	const int32 SearchUniqueId = UAVVMGameplayUtils::GetActorUniqueIdentifier(Src);
 	if (!ensureAlwaysMsgf(SearchUniqueId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
 	                      *Src->GetName()))

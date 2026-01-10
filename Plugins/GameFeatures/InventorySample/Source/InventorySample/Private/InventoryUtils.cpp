@@ -19,26 +19,24 @@
 //SOFTWARE.
 #include "InventoryUtils.h"
 
+#include "ItemObject.h"
+
 TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
 {
 	TArray<int32> OutResults;
 	for (const UItemObject* Item : Items)
 	{
-		const int32 ItemId = UInventoryUtils::GetUniqueId(Item);
+		const int32 ItemId = UItemObjectUtils::GetObjectUniqueIdentifier(Item);
 		OutResults.AddUnique(ItemId);
 	}
 
 	return OutResults;
 }
 
-int32 UInventoryUtils::GetUniqueId(const UItemObject* Item)
-{
-	return INDEX_NONE;
-}
-
 FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,
                                        const int32 ProfileId,
                                        const TArray<int32>& NewItems)
 {
+	// TODO @gdemers Update profile string.
 	return FString();
 }

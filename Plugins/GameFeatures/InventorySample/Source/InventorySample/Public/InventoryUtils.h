@@ -41,9 +41,6 @@ class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetUniqueIds(const TArray<UItemObject*>& Items);
-	
-	UFUNCTION(BlueprintCallable)
-	static int32 GetUniqueId(const UItemObject* Item);
 
 	UFUNCTION(BlueprintCallable)
 	static FString ModifyProfile(const UObject* WorldContextObject,

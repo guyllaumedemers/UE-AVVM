@@ -23,12 +23,6 @@
 EDataValidationResult FAVVMActorIdentifierDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ItemActorClass.IsNull())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FItemIdentifierDataTableRow", "", "UItemObject::ItemActorClass missing. No valid TSoftClassPtr specified!"));
-	}
-
 	if (UniqueId < 0 || UniqueId >= INT32_MAX)
 	{
 		Result = EDataValidationResult::Invalid;

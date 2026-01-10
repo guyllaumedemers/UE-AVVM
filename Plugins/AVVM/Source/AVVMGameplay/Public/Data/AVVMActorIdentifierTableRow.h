@@ -32,14 +32,11 @@
 /**
  *	Class description:
  *	
- *	FAVVMActorIdentifierDataTableRow is a table row entry that pair an Actor derived BP
- *	to a unique identifier.
+ *	FAVVMActorIdentifierDataTableRow is a table row entry thet define a unique identifier for a given Actor type. Doing so allows
+ *	our Backend encoding system to reference elements, and create complex encoding scheme for tightly packing data.
  *	
- *	This mapping allow user to access the dependent objects referenced in backend representation
- *	of an {FActorContent.UniqueId}. Doing so allow resolving attachment socket targeting during inventory initialization, and grant
- *	general access to backend entries based on Actor at hand.
- *	
- *	IMPORTANT : All GFP should contribute to populate this DT dynamically based on plugin availability.
+ *	Note : We do expect some rules to be followed. Make sure the RowName define for this entry match the Actor Class FName, and if you are
+ *	using the InventorySample system, make sure the FDataRegistryId::ItemName is identical to the Actor Class FName referenced.
  */
 USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
@@ -50,11 +47,7 @@ struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers sorta useless, but provide visual feedback to which actor we expect
-	// to be referenced by the UniqueId.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<AActor> ItemActorClass = nullptr;
-
+	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can target Attachment bits, Storage bits, and items.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 UniqueId = INDEX_NONE;
 };
