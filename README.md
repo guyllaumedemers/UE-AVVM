@@ -112,7 +112,9 @@ This GameFeature plugin is a sample plugin for supporting content gathering. Pla
 * Interfaces : Your inventory Outer is expected to support **IIventoryProvider** interface. This allows project specific support for accessing data from either backend, or DataAsset.
 * Thats it!
 
-*Simply call the api for requesting your inventory Outer resources, and be done with it! Actor Socketing is handled within the system, and UI expect their ViewModel to receive a UItemObject to handle visual representation of an Object. For 3D display, the UItemObject handled Actor is there for you!*
+**Note : For backend, we expect your project to comply to the AVVMOnlinePlayer, and AVVMOnlineInventory standards.**
+
+*Otherwise, simply call the api for requesting your inventory Outer resources, and be done with it! Actor Socketing is handled within the system, and UI expect their ViewModel to receive a UItemObject to handle visual representation of an Object. For 3D display, the UItemObject managed Actor is there for you!*
 
 ### Fencing Sample [Completed]
 
