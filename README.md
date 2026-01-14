@@ -78,7 +78,7 @@ Under **AVVMGameplay** can be found extended version of Unreal's actor model for
 * **AVVMNetSynchronization** : A system that register system features state, and ensure synchronization of all Actors (local, or simulated) on local client UI.
 * **AVVMAbilityInputComponent** : A system that capture user input, and trigger Abilities registered via tags (also support InputId).
 * **AVVMAbilitySystemComponent** : Extended version of Unreal ASC which handles Async loading/granting of Abilities, and AttributeSets.
-...
+* ...
 
 #### PlayerTrace (FPS, and TPS)
 
