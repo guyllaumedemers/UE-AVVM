@@ -55,10 +55,10 @@ ImGui plugin was added as a submodule, so it likely that any deprecation fixes m
 
 ### A quick walkthrough to help the reader be made aware of the existing utilities that can be found under the AVVM plugin.
 
- * AVVMDebugger : Is a developer tool module that register descriptor context (i.e cheat extension) and execute draw calls using imgui immediate mode.
- * AVVM : Is a core system for UI development. It exposes the base class required to create View Model instance (with the Actor-View-ViewModel paradigm) and register Presenter object with the notification system from which we can forward generic payload information.
- * AVVMOnline : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected base class use by the AVVM notification system. User defined types exposed here all support serialization through Unreal json object and can be converted back/from string, facilitating interfacing with your backend api.
- * AVVMGameplay : Is a core system for gameplay development. It exposes the base class for supporting **Async Resource loading** using FDataRegistryId and **Input/Ability triggering** via tag activation.
+ * **AVVMDebugger** : Is a developer tool module that register descriptor context (i.e cheat extension) and execute draw calls using imgui immediate mode.
+ * **AVVM** : Is a core system for UI development. It exposes the base class required to create View Model instance (with the Actor-View-ViewModel paradigm) and register Presenter object with the notification system from which we can forward generic payload information.
+ * **AVVMOnline** : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected base class use by the AVVM notification system. User defined types exposed here all support serialization through Unreal json object and can be converted back/from string, facilitating interfacing with your backend api.
+ * **AVVMGameplay** : Is a core system for gameplay development. It exposes the base class for supporting **Async Resource loading** using FDataRegistryId and **Input/Ability triggering** via tag activation.
  * ...
 
 **Other modules are placeholder work for ideas that are currently floating around.**
@@ -69,7 +69,16 @@ To properly vehicule the train of thought into laying down good grounds for gene
 
 ### AVVMGameplay
 
-tbd 
+Under **AVVMGameplay** can be found extended version of Unreal's actor model for gameplay. Systems such as GameMode, GameState PlayerState, and Character have been extended, and configured to expose basic hooks into Unreal api. Entry point for gameplay Replication handling initialization of PlayerState, and Character have been set, ensuring support for Net synchronization of stateful UI for local, and simulated clients.
+
+**Other systems**
+
+* **AVVMTickScheduler** : A MLFQ (Multi-Level Feedback Queue) that aggregate Actor Tick per-class, and Round Robin through jobs.
+* **AVVMResourceManagerComponent** : A Resource loading system that Async load DataRegistry, and forward resulting data to calling Outer.
+* **AVVMNetSynchronization** : A system that register system features state, and ensure synchronization of all Actors (local, or simulated) on local client.
+* **AVVMAbilityInputComponent** : A system that capture user input, and trigger Abilities registered via tags (also support InputId).
+* **AVVMAbilitySystemComponent** : Extended version of Unreal ASC which handles Async loading/granting of Abilities, and AttributeSets.
+...
 
 #### PlayerTrace (FPS, and TPS)
 
@@ -83,30 +92,38 @@ tbd
 
 ![TPS-Side](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_PlayerTrace_TPS_Side_ProblemWhenFps.png)
 
-### Interaction Sample
+### Interaction Sample [Completed]
 
 This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
 
-### Transaction Sample
+### Transaction Sample [Completed]
 
 This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Transaction payload are parsed using Unreal json object and store statistics via a string field. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
 
-### Inventory Sample
+### Inventory Sample [WIP - 80%]
 
-This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. Implementation details are still in the earlier stage of development and have to be further polished. Abilities for consuming, equipping and/or dropping items are yet to be put in place. **Edit** : This system has recently been cleanup to allow backend information to populate player representation, and support initialization of ItemActors via GAS AttributeSet.
+This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. **Edit** : Through GFP_AddComponent, your target actors will support resource loading, actor socketing, and AttributeSet registration in an asynchronous fashion. With the required interfaces, the User will be able to interface with backend or DataAsset, retrieve relevant information, and let the system parse the data configuration to fully initialized their runtime represention.
 
 * Notes : **Network optimization** may become a bottleneck over time depending on your project size. As such, creating **FFastArraySerializer** proxy of the internal state of your UItemObject during Inventory replication should be considered. Keep in mind that such system would require a central place handling updates, and data forwarding. **Build around the existing api!** 
 
-### Fencing Sample
+#### How To
+
+* Data Scheme : An item representation is structured as such - create a BP deriving from UItemObject, this will be the runtime representation of the object owned by your inventory component Outer. It is a stateful object, and is replicated. This object handle the instancing of it's Actor counter-part.
+* Interfaces : Your inventory Outer is expected to support **IIventoryProvider** interface. This allows project specific support for accessing data from either backend, or DataAsset.
+* Thats it!
+
+*Simply call the api for requesting your inventory Outer resources, and be done with it! Actor Socketing is handled within the system, and UI expect their ViewModel to receive a UItemObject to handle visual representation of an Object. For 3D display, the UItemObject handled Actor is there for you!*
+
+### Fencing Sample [Completed]
 
 This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system leverage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
 
-### Batch Sample
+### Batch Sample [Completed]
 
 This GameFeature plugin is a sample plugin for supporting batch actions on content that are subject for registration with the managing system. Currently only supporting batching call to AActor::Destroy, the purpose this system is to allow generalizing
 batch actions, and execute process based on user-defined conditions.
 
-### Weapon Sample
+### Weapon Sample [WIP - 40%]
 
 This GameFeature plugin is a sample plugin that define reusable construct for **Triggering** abilities tied to an Actor our player may reference during gameplay. This system, build a-top the InventorySample plugin, allow creation of **Triggering** items, and their initialization based on AttributeSet reference. Implementation details are still under development. Notes : It's suggested that the data scheme be first reviewed to better understand the constraint within which this system exist.
 
@@ -120,7 +137,7 @@ This GameFeature plugin is a sample plugin that define reusable construct for **
 
 tbd
 
-### Team Sample
+### Team Sample [Completed]
 
 This GameFeature plugin is a sample plugin for supporting team gameplay separation, and expose the necessary api to building teams based on backend information retrieved.
 
