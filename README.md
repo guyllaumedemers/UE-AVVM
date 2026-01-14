@@ -75,7 +75,7 @@ Under **AVVMGameplay** can be found extended version of Unreal's actor model for
 
 * **AVVMTickScheduler** : A MLFQ (Multi-Level Feedback Queue) that aggregate Actor Tick per-class, and Round Robin through jobs.
 * **AVVMResourceManagerComponent** : A Resource loading system that Async load DataRegistry, and forward resulting data to calling Outer.
-* **AVVMNetSynchronization** : A system that register system features state, and ensure synchronization of all Actors (local, or simulated) on local client.
+* **AVVMNetSynchronization** : A system that register system features state, and ensure synchronization of all Actors (local, or simulated) on local client UI.
 * **AVVMAbilityInputComponent** : A system that capture user input, and trigger Abilities registered via tags (also support InputId).
 * **AVVMAbilitySystemComponent** : Extended version of Unreal ASC which handles Async loading/granting of Abilities, and AttributeSets.
 ...
