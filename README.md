@@ -150,6 +150,25 @@ tbd
 
 **Notes : All plugins defined above are example cases that utilize the api from AVVM plugin.**
 
+## Tips and Tricks
+
+#### Optimization (Random facts learn on Shrapnel during game thread optimization)
+
+* Gc Interval. Set your dedicated server (ds) garbage collection to be intervale so object gathering happens across multiple frames, instead of a single frame.
+* Enable Actor clustering with the Gc.
+* NiagaraSystem (NS) Culling. Make sure Niagara systems are referencing a valid **EffectType**. Doing so allows for particle systems to be culled, and free performance. (See **-Stat UObject**)
+* NS Pooling (obvious one!)
+* Tick aggregation. Reduce cache misses by loading into register the mem address of the v-func to be executed, and executing it for all ctx.
+* Disable Tick on static Actors that don't run animations (or require logic support in Tick).
+* Disable Tick on Colliders when overlaps events are the only thing of interest. PrimitiveComponents are doing overlap check following parent SceneComponent Move (See **UpdateOverlapsImpl**).
+* Reduce number of Audio systems. (Please!!!)
+* Pool Components/Actors when applicable.
+* Pack Data.
+* Use Push Model Replication (w/ Iris)
+* Set COND_ for replicated property when applicable.
+* RPC smart (not like a maniac!)
+* Monitor texture memory consumption.
+
 # Automation Testing (Functional Test/ Gauntlet)
 
 **Notes** : Automated Testing is in the work for existing GFP modules, and will keep being worked on so to ensure the api provided is put to the test. In the meantime, here's a list of the existing api that is validated!
