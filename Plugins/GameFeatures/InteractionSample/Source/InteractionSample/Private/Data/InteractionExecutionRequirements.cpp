@@ -26,14 +26,9 @@ FInteractionExecutionFloatRequirements::FInteractionExecutionFloatRequirements(c
 {
 }
 
-bool FInteractionExecutionFloatRequirements::DoesMeetRequirements(const UActorInteractionImpl* Impl) const
+bool FInteractionExecutionFloatRequirements::DoesMeetRequirements(const TInstancedStruct<FInteractionExecutionRequirements> Compare) const
 {
-	if (!IsValid(Impl))
-	{
-		return false;
-	}
-
-	const auto* Requirements = Impl->Requirements.GetPtr<FInteractionExecutionFloatRequirements>();
+	const auto* Requirements = Compare.GetPtr<FInteractionExecutionFloatRequirements>();
 	if (!ensureAlwaysMsgf(Requirements != nullptr, TEXT("Comparing against UActorInteractionImpl with Requirement type mismatch!")))
 	{
 		return false;

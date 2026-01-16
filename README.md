@@ -93,9 +93,20 @@ Under **AVVMGameplay** can be found extended version of Unreal's actor model for
 
 ![TPS-Side](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_PlayerTrace_TPS_Side_ProblemWhenFps.png)
 
-### Interaction Sample [Completed]
+### Interaction Sample [WIP - 95%]
 
 This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
+
+#### How To
+
+* Through GFP_AddComponent, push an UActorInteractionComponent onto the **interactable** Actor. This component handle CRUD principle via a **record** object, acting as a handshake between a player and itself, handling future contingency for interaction ownership.
+* Define an **Interaction Implementation** object within the component for handling record locking, and GameplayEffect granting. (During Overlap events, between the item and player, a GameplayEffect is granted to the Player)
+* Define a derived impl of **FInteractionExecutionRequirements** that will validate the interaction completion on the Impl Object.
+* Define a derived impl of **FInteractionExecutionContext** that will execute an action following the interaction completion.
+* Register a **UPlayerInteractionAbilityBase** derived ability with your Player. Note : This Ability has to define a Tag identical to whats applied to the Player by the Interaction Actor during Overlap Events. Doing so allow retrieval of the Interaction Actor within the Ability via the GameplayEffect **EffectCauser**.
+* During Player Ability (**Interact**), our **Interaction** actor can be access to accept/or reject the handshake due to contingency, and conditionally execute our behaviour.
+
+Note : An example usage is available with **UPlayerHoldInteractionAbility**, where player can interact with the shop actor in World to open empty menu.
 
 ### Transaction Sample [Completed]
 
@@ -168,6 +179,7 @@ tbd
 * Set COND_ for replicated property when applicable.
 * RPC smart (not like a maniac!)
 * Monitor texture memory consumption.
+* Mesh LODs
 
 # Automation Testing (Functional Test/ Gauntlet)
 

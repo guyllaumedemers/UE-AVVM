@@ -30,7 +30,6 @@
 
 #include "ActorInteractionComponent.generated.h"
 
-struct FInteractionExecutionContext;
 struct FInteractionExecutionRequirements;
 class UAbilitySystemComponent;
 class UActorInteractionImpl;
@@ -59,12 +58,11 @@ public:
 
 	bool StartExecution(const AActor* NewTarget) const;
 	bool StopExecution(const AActor* NewTarget) const;
-	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const;
+	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const;
+	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const;
 	virtual void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
 	virtual void Execute(const AActor* NewTarget) const;
 	virtual void Kill(const AActor* NewTarget) const;
-
-	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const;
 
 protected:
 	UFUNCTION()
@@ -106,9 +104,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UActorInteractionImpl> InteractionImpl = nullptr;

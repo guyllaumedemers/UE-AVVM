@@ -26,8 +26,6 @@
 #include "AVVMTagUtils.h"
 #include "Interaction.h"
 #include "Components/ShapeComponent.h"
-#include "Data/InteractionExecutionContext.h"
-#include "Data/InteractionExecutionRequirements.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
@@ -167,47 +165,11 @@ bool UActorInteractionComponent::StopExecution(const AActor* NewTarget) const
 		       : false;
 }
 
-bool UActorInteractionComponent::DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Requirements) const
+bool UActorInteractionComponent::DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const
 {
-	const auto* Instanced = Requirements.GetPtr<FInteractionExecutionRequirements>();
-	return (Instanced != nullptr) ? Instanced->DoesMeetRequirements(InteractionImpl) : false;
-}
-
-void UActorInteractionComponent::PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const
-{
-	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
-	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
-	{
-		return;
-	}
-
-	Instanced->PumpHeartbeat(OwningOuter.Get(),
-	                         NewTarget,
-	                         NewDelta);
-}
-
-void UActorInteractionComponent::Execute(const AActor* NewTarget) const
-{
-	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
-	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
-	{
-		return;
-	}
-
-	Instanced->Execute(OwningOuter.Get(),
-	                   NewTarget);
-}
-
-void UActorInteractionComponent::Kill(const AActor* NewTarget) const
-{
-	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
-	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
-	{
-		return;
-	}
-
-	Instanced->Kill(OwningOuter.Get(),
-	                NewTarget);
+	return IsValid(InteractionImpl)
+		       ? InteractionImpl->DoesMeetExecutionRequirements(Compare)
+		       : false;
 }
 
 void UActorInteractionComponent::GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const
@@ -215,6 +177,30 @@ void UActorInteractionComponent::GetInteractionRequirements(TInstancedStruct<FIn
 	if (IsValid(InteractionImpl))
 	{
 		OutRequirements = InteractionImpl->GetExecutionRequirements();
+	}
+}
+
+void UActorInteractionComponent::PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const
+{
+	if (IsValid(InteractionImpl))
+	{
+		InteractionImpl->PumpHeartbeat(NewTarget, NewDelta);
+	}
+}
+
+void UActorInteractionComponent::Execute(const AActor* NewTarget) const
+{
+	if (IsValid(InteractionImpl))
+	{
+		InteractionImpl->Execute(NewTarget);
+	}
+}
+
+void UActorInteractionComponent::Kill(const AActor* NewTarget) const
+{
+	if (IsValid(InteractionImpl))
+	{
+		InteractionImpl->Kill(NewTarget);
 	}
 }
 

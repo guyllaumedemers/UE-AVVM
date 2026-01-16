@@ -39,7 +39,7 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
 	GENERATED_BODY()
 
 	virtual ~FInteractionExecutionRequirements() = default;
-	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const PURE_VIRTUAL(DoesMetRequirements, return false;);
+	virtual bool DoesMeetRequirements(const TInstancedStruct<FInteractionExecutionRequirements> Compare) const PURE_VIRTUAL(DoesMetRequirements, return false;);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FInteractionExecutionRequirements>::Make<T>
 	template <typename TChild, typename... TArgs>
@@ -67,7 +67,7 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FIn
 
 	FInteractionExecutionFloatRequirements() = default;
 	FInteractionExecutionFloatRequirements(const float NewThreshold);
-	virtual bool DoesMeetRequirements(const UActorInteractionImpl* Impl) const override;
+	virtual bool DoesMeetRequirements(const TInstancedStruct<FInteractionExecutionRequirements> Compare) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bRequireInputMashing"))
 	bool bRequireInputHolding = false;

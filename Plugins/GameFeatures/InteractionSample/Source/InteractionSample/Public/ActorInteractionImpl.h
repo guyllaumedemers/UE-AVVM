@@ -29,6 +29,7 @@
 #include "ActorInteractionImpl.generated.h"
 
 struct FGameplayEffectSpecHandle;
+struct FInteractionExecutionContext;
 struct FInteractionExecutionRequirements;
 class UAbilitySystemComponent;
 class UGameplayAbility;
@@ -70,7 +71,12 @@ public:
 	                 const AActor* NewTarget,
 	                 const TArray<UInteraction*>& NewRecords,
 	                 const bool bShouldPreventContingency);
+	
+	void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
+	void Execute(const AActor* NewTarget) const;
+	void Kill(const AActor* NewTarget) const;
 
+	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const;
 	const TInstancedStruct<FInteractionExecutionRequirements>& GetExecutionRequirements() const;
 
 protected:
@@ -115,11 +121,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TInstancedStruct<FInteractionExecutionRequirements> Requirements;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx;
+
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-
-	friend struct FInteractionExecutionFloatRequirements;
 };

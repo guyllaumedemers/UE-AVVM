@@ -31,7 +31,7 @@
  *	Example :
  *	
  *		* Door
- *		* Chess
+ *		* Chest box
  *		* etc...
  *
  *	This system allow granting of the required 'Activation' tag, so the locally controlled APlayerController can execute

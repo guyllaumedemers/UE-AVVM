@@ -26,6 +26,8 @@
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "Data/AVVMHandshakePayload.h"
+#include "Data/InteractionExecutionContext.h"
+#include "Data/InteractionExecutionRequirements.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerState.h"
 
@@ -218,6 +220,49 @@ bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
 #endif
 
 	return true;
+}
+
+void UActorInteractionImpl::PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const
+{
+	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	{
+		return;
+	}
+
+	Instanced->PumpHeartbeat(OwningOuter.Get(),
+							 NewTarget,
+							 NewDelta);
+}
+
+void UActorInteractionImpl::Execute(const AActor* NewTarget) const
+{
+	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	{
+		return;
+	}
+
+	Instanced->Execute(OwningOuter.Get(),
+					   NewTarget);
+}
+
+void UActorInteractionImpl::Kill(const AActor* NewTarget) const
+{
+	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
+	{
+		return;
+	}
+
+	Instanced->Kill(OwningOuter.Get(),
+					NewTarget);
+}
+
+bool UActorInteractionImpl::DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const
+{
+	const auto* Instanced = Compare.GetPtr<FInteractionExecutionRequirements>();
+	return (Instanced != nullptr) ? Instanced->DoesMeetRequirements(Requirements) : false;
 }
 
 const TInstancedStruct<FInteractionExecutionRequirements>& UActorInteractionImpl::GetExecutionRequirements() const
