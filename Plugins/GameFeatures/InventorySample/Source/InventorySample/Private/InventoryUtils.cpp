@@ -62,7 +62,7 @@ int32 UInventoryUtils::DecodeItem(const int32 EncodedBits)
 	}
 }
 
-TArray<int32> UInventoryUtils::GetUniqueIds(const TArray<UItemObject*>& Items)
+TArray<int32> UInventoryUtils::GetRuntimeUniqueIds(const TArray<UItemObject*>& Items)
 {
 	TArray<int32> OutResults;
 	for (const UItemObject* Item : Items)

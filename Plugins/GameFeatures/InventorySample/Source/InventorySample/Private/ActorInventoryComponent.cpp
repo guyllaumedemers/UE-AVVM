@@ -1005,7 +1005,7 @@ void UActorInventoryComponent::CheckBackend() const
 	}
 
 	const TArray<int32> OldDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, UActorInventoryComponent::GetInventoryDataResolverHelper());
-	const TArray<int32> NewDependencies = UInventoryUtils::GetUniqueIds(Items);
+	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
 
 	const bool bAreSetIdentical = UAVVMOnlineBackendUtils::CompareSet(OldDependencies, NewDependencies);
 	if (ensureAlwaysMsgf((false == bAreSetIdentical),

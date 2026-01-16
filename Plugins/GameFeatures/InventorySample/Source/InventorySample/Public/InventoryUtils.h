@@ -43,7 +43,7 @@ public:
 	static int32 DecodeItem(const int32 EncodedBits);
 	
 	UFUNCTION(BlueprintCallable)
-	static TArray<int32> GetUniqueIds(const TArray<UItemObject*>& Items);
+	static TArray<int32> GetRuntimeUniqueIds(const TArray<UItemObject*>& Items);
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
