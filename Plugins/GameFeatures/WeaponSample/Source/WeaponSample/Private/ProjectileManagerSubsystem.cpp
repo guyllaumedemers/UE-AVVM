@@ -19,12 +19,9 @@
 //SOFTWARE.
 #include "ProjectileManagerSubsystem.h"
 
-#include "AVVMAudioContext.h"
-#include "AVVMAudioUtils.h"
 #include "AVVMOnlineSettings.h"
 #include "AVVMPlayerState.h"
 #include "NonReplicatedProjectileActor.h"
-#include "WeaponSettings.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
@@ -86,17 +83,6 @@ void UProjectileManagerSubsystem::Deinitialize()
 void UProjectileManagerSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	const UWorld* World = GetWorld();
-	if (!IsValid(World))
-	{
-		return;
-	}
-
-	if (!World->IsNetMode(NM_DedicatedServer))
-	{
-		HandleClientPassByBullets();
-	}
 }
 
 TStatId UProjectileManagerSubsystem::GetStatId() const
@@ -242,37 +228,4 @@ void UProjectileManagerSubsystem::Shutdown(ANonReplicatedProjectileActor* Projec
 void UProjectileManagerSubsystem::OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile)
 {
 	Shutdown(Projectile);
-}
-
-void UProjectileManagerSubsystem::HandleClientPassByBullets()
-{
-	if (!ClientPlayerController.IsValid())
-	{
-		return;
-	}
-
-	const APawn* Pawn = ClientPlayerController->GetPawn();
-	if (!IsValid(Pawn))
-	{
-		return;
-	}
-
-	for (auto Iterator = Projectiles.CreateIterator(); Iterator; ++Iterator)
-	{
-		if (!IsValid(*Iterator))
-		{
-			Iterator.RemoveCurrentSwap();
-			continue;
-		}
-
-		const bool bIsWithinRange = UProjectileFunctionLibrary::CheckDistance(Iterator->Get(),
-																			  Pawn,
-																			  UWeaponSettings::GetSquaredDistanceThreshold());
-		if (bIsWithinRange)
-		{
-			const TInstancedStruct<FAVVMAudioContext> SpatialAudioContext = FAVVMAudioContext::Make<FAVVMSpatialAudioContext>(Iterator->Get(), Pawn, 1.f);
-			UAVVMAudioUtils::NotifyAudioCue(this, SpatialAudioContext);
-			Iterator.RemoveCurrentSwap();
-		}
-	}
 }

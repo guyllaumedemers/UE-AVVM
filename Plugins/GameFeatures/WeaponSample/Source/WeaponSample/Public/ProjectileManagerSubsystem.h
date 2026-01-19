@@ -102,8 +102,6 @@ protected:
 	virtual ANonReplicatedProjectileActor* Factory(const UClass* ProjectileClass, const FTransform& AimTransform) const;
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(ANonReplicatedProjectileActor* Projectile);
-
-	void HandleClientPassByBullets();
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const APlayerController> ClientPlayerController = nullptr;
