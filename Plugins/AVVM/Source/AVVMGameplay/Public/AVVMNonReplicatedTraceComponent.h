@@ -82,7 +82,7 @@ protected:
 	ECollisionChannel CollisionChannel = ECollisionChannel::ECC_MAX;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers", meta=(ClampMin="0", ClampMax="999"))
-	float VoxelCellSpacing = 0.f;
+	float VoxelCellPadding = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers", meta=(ClampMin="0", ClampMax="999"))
 	float SphereRadius = 0.f;

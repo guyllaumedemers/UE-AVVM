@@ -108,6 +108,7 @@ void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELeve
 
 	const FTransform WorldTransform = OwningOuter->GetTransform();
 	const FVector TraceStart = WorldTransform.GetLocation();
+	const float CenterOffset_VoxelCell = ((OuterCapsuleHalfHeight * VoxelCellPadding) + SphereRadius);
 
 	TArray<FHitResult*> OutResults;
 	for (int32 i = 0; i < VoxelGrid.Cells.Num(); ++i)
@@ -129,7 +130,7 @@ void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELeve
 			ScaledDirection *= PreBuiltTraceDirection.Size();
 		}
 
-		const FVector TraceEnd = (TraceStart + (ScaledDirection * OuterCapsuleHalfHeight * VoxelCellSpacing));
+		const FVector TraceEnd = (TraceStart + (ScaledDirection * CenterOffset_VoxelCell));
 		const bool bHasBlockingHit = World->SweepSingleByChannel(Cell.Result, TraceStart, TraceEnd, FQuat::Identity, CollisionChannel, FCollisionShape::MakeSphere(SphereRadius));
 		if (bHasBlockingHit)
 		{
