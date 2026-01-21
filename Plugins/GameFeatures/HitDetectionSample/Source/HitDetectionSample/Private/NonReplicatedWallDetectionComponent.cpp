@@ -17,14 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMNonReplicatedTraceComponent.h"
+#include "NonReplicatedWallDetectionComponent.h"
 
 #include "AVVMTickScheduler.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 
-UAVVMNonReplicatedTraceComponent::UAVVMNonReplicatedTraceComponent(const FObjectInitializer& ObjectInitializer)
+UNonReplicatedWallDetectionComponent::UNonReplicatedWallDetectionComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -34,7 +34,7 @@ UAVVMNonReplicatedTraceComponent::UAVVMNonReplicatedTraceComponent(const FObject
 	SetIsReplicatedByDefault(false);
 }
 
-void UAVVMNonReplicatedTraceComponent::BeginPlay()
+void UNonReplicatedWallDetectionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -47,7 +47,7 @@ void UAVVMNonReplicatedTraceComponent::BeginPlay()
 #endif
 }
 
-void UAVVMNonReplicatedTraceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UNonReplicatedWallDetectionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -60,7 +60,7 @@ void UAVVMNonReplicatedTraceComponent::EndPlay(const EEndPlayReason::Type EndPla
 #endif
 }
 
-void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNonReplicatedWallDetectionComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -141,7 +141,7 @@ void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELeve
 	}
 }
 
-void UAVVMNonReplicatedTraceComponent::OnOuterCapsuleResized(const UCapsuleComponent* ModifiedCapsule)
+void UNonReplicatedWallDetectionComponent::OnOuterCapsuleResized(const UCapsuleComponent* ModifiedCapsule)
 {
 	if (IsValid(ModifiedCapsule))
 	{

@@ -56,6 +56,10 @@
       "Enabled": true
     },
     {
+      "Name": "HitDetectionSample",
+      "Enabled": true
+    },
+    {
       "Name": "InteractionSample",
       "Enabled": true
     },

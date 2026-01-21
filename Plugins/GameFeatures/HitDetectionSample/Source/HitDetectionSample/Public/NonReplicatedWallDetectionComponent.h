@@ -24,28 +24,28 @@
 #include "AVVMDoesSupportManualTicking.h"
 #include "Components/ActorComponent.h"
 
-#include "AVVMNonReplicatedTraceComponent.generated.h"
+#include "NonReplicatedWallDetectionComponent.generated.h"
 
 class UCapsuleComponent;
 
 /**
  *	Class description:
  *	
- *	UAVVMNonReplicatedTraceComponent is a general purpose component for tracing in world based on requirements
- *	defined by the owning Outer.
+ *	UNonReplicatedWallDetectionComponent is a detection system for testing collision against environment
+ *	using the current player position in world.
  */
-UCLASS(ClassGroup=("AVVMGameplay"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class AVVMGAMEPLAY_API UAVVMNonReplicatedTraceComponent : public UActorComponent,
-                                                          public IAVVMDoesSupportManualTicking
+UCLASS(ClassGroup=("HitDetection"), Blueprintable, meta=(BlueprintSpawnableComponent))
+class HITDETECTIONSAMPLE_API UNonReplicatedWallDetectionComponent : public UActorComponent,
+                                                                    public IAVVMDoesSupportManualTicking
 {
 	GENERATED_BODY()
-	
+
 public:
-	UAVVMNonReplicatedTraceComponent(const FObjectInitializer& ObjectInitializer);
+	UNonReplicatedWallDetectionComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+
 protected:
 	/**
 	 *	Class description:
@@ -57,7 +57,7 @@ protected:
 		FHitResult Result = FHitResult();
 		bool bIsEnabled = false;
 	};
-	
+
 	/**
 	 *	Class description:
 	 *	
@@ -74,10 +74,10 @@ protected:
 
 		TArray<FAVVMVoxelCell> Cells;
 	};
-	
+
 	UFUNCTION()
 	void OnOuterCapsuleResized(const UCapsuleComponent* ModifiedCapsule);
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers")
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECollisionChannel::ECC_MAX;
 
@@ -89,7 +89,7 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float OuterCapsuleHalfHeight = 0.f;
-	
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
