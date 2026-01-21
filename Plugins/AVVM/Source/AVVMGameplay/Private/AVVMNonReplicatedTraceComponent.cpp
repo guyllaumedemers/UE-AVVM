@@ -67,7 +67,7 @@ void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELeve
 	/**
 	 *	Always left-bottom, to top-right.
 	 */
-	static constexpr FVector TraceDirections[26]
+	static const FVector TraceDirections[26]
 	{
 			// front
 			(FVector::DownVector + FVector::LeftVector + FVector::ForwardVector)/*0*/,
@@ -110,6 +110,9 @@ void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELeve
 	const FVector TraceStart = WorldTransform.GetLocation();
 	const float CenterOffset_VoxelCell = ((OuterCapsuleHalfHeight * VoxelCellPadding) + SphereRadius);
 
+	// 4, 13, 19, 21, 23, 25 should be unit length
+	static const TSet<int32> IndexesOfUnitLength(TArrayView<const int32>{4, 13, 19, 21, 23, 25});
+
 	TArray<FHitResult*> OutResults;
 	for (int32 i = 0; i < VoxelGrid.Cells.Num(); ++i)
 	{
@@ -118,9 +121,6 @@ void UAVVMNonReplicatedTraceComponent::TickComponent(float DeltaTime, enum ELeve
 		{
 			continue;
 		}
-
-		// 4, 13, 19, 21, 23, 25 should be unit length
-		static const TSet<int32> IndexesOfUnitLength = TSet(TArrayView<int32>{4, 13, 19, 21, 23, 25});
 
 		const FVector& PreBuiltTraceDirection = TraceDirections[i];
 		// get evenly distributed position of our sphere trace center

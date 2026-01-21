@@ -79,7 +79,7 @@ protected:
 	void OnOuterCapsuleResized(const UCapsuleComponent* ModifiedCapsule);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers")
-	ECollisionChannel CollisionChannel = ECollisionChannel::ECC_MAX;
+	TEnumAsByte<ECollisionChannel> CollisionChannel = ECollisionChannel::ECC_MAX;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers", meta=(ClampMin="0", ClampMax="999"))
 	float VoxelCellPadding = 0.f;
