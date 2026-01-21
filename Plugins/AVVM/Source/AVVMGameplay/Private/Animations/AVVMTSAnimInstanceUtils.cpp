@@ -18,3 +18,27 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Animations/AVVMTSAnimInstanceUtils.h"
+
+#include "GameFramework/Character.h"
+
+UAnimInstance* UAVVMTSAnimInstanceUtils::GetCharacterAnimInstance(const UAnimInstance* RootAnim)
+{
+	if (!IsValid(RootAnim))
+	{
+		return nullptr;
+	}
+
+	const auto* Character = Cast<ACharacter>(RootAnim->TryGetPawnOwner());
+	if (!IsValid(Character))
+	{
+		return nullptr;
+	}
+
+	const USkeletalMeshComponent* SkeletalMeshComponent = Character->GetMesh();
+	if (!IsValid(SkeletalMeshComponent))
+	{
+		return nullptr;
+	}
+
+	return SkeletalMeshComponent->GetAnimInstance();
+}

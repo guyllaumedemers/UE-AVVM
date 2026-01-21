@@ -27,7 +27,6 @@
 #include "GameplayTagContainer.h"
 #include "InstancedStruct.h"
 #include "ModularCharacter.h"
-#include "Animations/AVVMAnimInstanceProperties_TS.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "Data/AVVMActorPayload.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -141,9 +140,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
-	
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMAnimInstanceProperties_TS AnimInstanceProperties_TS = FAVVMAnimInstanceProperties_TS();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningActor = nullptr;

@@ -35,6 +35,8 @@ UCLASS()
 class AVVMGAMEPLAY_API UAVVMTSAnimInstanceUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
-	// TODO @gdemers Make general purpose functions for thread safe usage.
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static UAnimInstance* GetCharacterAnimInstance(const UAnimInstance* RootAnim);
 };
