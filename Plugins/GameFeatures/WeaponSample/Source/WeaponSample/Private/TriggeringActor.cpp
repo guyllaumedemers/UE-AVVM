@@ -21,6 +21,7 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMReplicatedTagComponent.h"
 #include "AVVMUtils.h"
 #include "WeaponSample.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -76,6 +77,7 @@ ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
 {
 	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("MAbilitySystemComponent"));
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
+	ReplicatedTagComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMReplicatedTagComponent>(this, TEXT("ReplicatedTagComponent"));
 
 	// @gdemers if tick is required, start an AbilityTask_Tick, and kill the process on completion.
 	PrimaryActorTick.bCanEverTick = false;

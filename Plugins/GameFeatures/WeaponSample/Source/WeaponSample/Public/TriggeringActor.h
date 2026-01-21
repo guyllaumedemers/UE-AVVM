@@ -35,6 +35,7 @@
 
 struct FStreamableHandle;
 class UAVVMAbilitySystemComponent;
+class UAVVMReplicatedTagComponent;
 class UTriggeringAbility;
 
 /**
@@ -137,6 +138,12 @@ protected:
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
+
+	// @gdemers ReplicatedTagComponent handle state tracking and is required to batch handle
+	// TS properties update for animation. the ASC could be a possible candidate for such job, but
+	// would imply support on a per-tag basis, instead of our current Container approach we have.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();

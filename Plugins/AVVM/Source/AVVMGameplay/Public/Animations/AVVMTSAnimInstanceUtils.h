@@ -25,6 +25,13 @@
 
 #include "AVVMTSAnimInstanceUtils.generated.h"
 
+// @gdemers macro
+#define DOES_NATIVE_TAG_MATCH(MovementStateTag, Compare)\
+MovementStateTag.GetTag().MatchesAnyExact(Compare);\
+
+#define UPDATE_TS_PROPERTY(StructName, PropertyName, MovementStateTag, Compare)\
+StructName.PropertyName = DOES_NATIVE_TAG_MATCH(MovementStateTag, Compare);\
+
 /**
  *	Class description:
  *	

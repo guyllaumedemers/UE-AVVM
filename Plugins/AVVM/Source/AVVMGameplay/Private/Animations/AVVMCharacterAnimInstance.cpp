@@ -22,6 +22,7 @@
 #include "AVVMCharacter.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "NativeGameplayTags.h"
+#include "Animations/AVVMTSAnimInstanceUtils.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_IDLE, "MovementState.Idle");
@@ -38,13 +39,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_GROUND, "Status.Ground");
 UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_AIR, "Status.Air");
 UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_DOWN, "Status.Down");
 UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_RAGDOLL, "Status.RagDoll");
-
-// @gdemers macro
-#define DOES_NATIVE_TAG_MATCH(MovementStateTag, Compare)\
-MovementStateTag.GetTag().MatchesAnyExact(Compare);\
-
-#define UPDATE_TS_PROPERTY(StructName, PropertyName, MovementStateTag, Compare)\
-StructName.PropertyName = DOES_NATIVE_TAG_MATCH(MovementStateTag, Compare);\
 
 void UAVVMCharacterAnimInstance::NativeBeginPlay()
 {
