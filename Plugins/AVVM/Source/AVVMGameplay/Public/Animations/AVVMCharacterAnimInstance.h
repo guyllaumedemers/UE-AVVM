@@ -64,7 +64,19 @@ struct AVVMGAMEPLAY_API FAVVMMovementProperties_TS
 	bool bIsGliding = false;
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsClimbing = false;
+	bool bIsMantling = false;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bIsVaulting = false;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bIsProne = false;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bIsCrouching = false;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bIsStanding = false;
 };
 
 /**
