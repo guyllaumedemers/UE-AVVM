@@ -456,32 +456,32 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	// During progression, internal representation may change, which require tracking, most-likely by serializing to disk under the user AppData.
 	struct FItemReader
 	{
-		FItemReader(const FStringView NewFilePath,
-		            const TArray<int32>& NewPrivateIds,
-		            const int32 OuterElementId,
-		            const int32 ItemElementId)
+		FItemReader(const FStringView NewFilePath)
 		{
 			// TODO @gdemers Add missing impl
 		}
-		
-		int32 GetFieldAsInteger(const FStringView SearchField) const
+
+		int32 GetFieldAsInteger(const TArray<int32>& NewPrivateIds,
+		                        const int32 OuterElementId,
+		                        const int32 ItemElementId,
+		                        const FStringView SearchField) const
 		{
 			// TODO @gdemers Add missing impl
 			return INDEX_NONE;
 		}
-		
+
 	private:
 		int32 FileHandle = INDEX_NONE;
 	};
-	
+
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
-						  TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
-						  *Outer->GetName()))
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Outer->GetName()))
 	{
 		return INDEX_NONE;
 	}
-	
+
 	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
 	if (!ensureAlwaysMsgf(ItemId != INDEX_NONE,
 	                      TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
@@ -489,9 +489,15 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
+	// @gdemers lazy initialize our reader object to reduce file handle retrieval.
+	static TSharedPtr<FItemReader> ItemReader;
+	if (!ItemReader.IsValid())
+	{
+		ItemReader = MakeShared<FItemReader>(UInventorySettings::GetAppDataDirPath());
+	}
+
 	// @gdemers find entry on disk, and read field value.
-	FItemReader ItemReader(UInventorySettings::GetAppDataDirPath(), NewPrivateIds, TargetUniqueId, ItemId);
-	const int32 FieldValue = ItemReader.GetFieldAsInteger(UInventorySettings::GetItemJsonProperty());
+	const int32 FieldValue = ItemReader->GetFieldAsInteger(NewPrivateIds, TargetUniqueId, ItemId, UInventorySettings::GetItemJsonProperty());
 	return FieldValue;
 }
 
