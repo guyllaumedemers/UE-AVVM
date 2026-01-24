@@ -481,7 +481,7 @@ int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
 		// @gdemers decode Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
 		const int32 OutValue = UInventoryUtils::DecodeItem(Value);
-		return (false == (OutValue ^ SearchId))/*if both bits equal 1, return 0. which means identical bits.*/;
+		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldn't retrieve the ItemId.")))

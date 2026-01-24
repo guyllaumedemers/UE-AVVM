@@ -88,7 +88,7 @@ TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs
 	for (const int32 i : Inputs)
 	{
 		const int32 Result = UAVVMOnlineEncodingUtils::DecodeInt32(i, BitRange_Clamped, RShift);
-		if (Result == SearchValue)
+		if (false == (Result ^ SearchValue))
 		{
 			OutResults.Add(Result);
 		}

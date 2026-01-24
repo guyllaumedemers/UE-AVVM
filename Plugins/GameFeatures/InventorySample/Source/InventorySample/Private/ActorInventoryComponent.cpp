@@ -528,7 +528,10 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		{
 			// @gdemers initialize the runtime representation of our ItemObject based on backend representation.
 			const int32 PrivateItemId = UItemObjectUtils::RuntimeInit(Outer, PrivateItemIds, UActorInventoryComponent::GetInventoryDataResolverHelper(), NewItem);
-			PrivateItemIds.AddUnique(PrivateItemId);
+			if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Item with a valid ItemId.")))
+			{
+				PrivateItemIds.AddUnique(PrivateItemId);
+			}
 		}
 
 		AddReplicatedSubObject(NewItem);
