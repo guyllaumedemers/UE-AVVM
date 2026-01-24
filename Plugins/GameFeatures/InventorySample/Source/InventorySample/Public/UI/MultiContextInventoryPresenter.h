@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMPrimaryGameLayoutInterface.h"
 #include "GameplayTagContainer.h"
 #include "Archetypes/AVVMPresenter.h"
@@ -28,7 +29,6 @@
 
 #include "MultiContextInventoryPresenter.generated.h"
 
-struct FAVVMNotificationPayload;
 class UAVVMAbilitySystemComponent;
 
 /**

@@ -20,7 +20,6 @@
 #include "UI/MultiContextInventoryPresenter.h"
 
 #include "AVVM.h"
-#include "AVVMNotificationSubsystem.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
