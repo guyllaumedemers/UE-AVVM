@@ -447,10 +447,20 @@ int32 UItemObject::GetMaxStackCount() const
 	}
 }
 
-int32 UItemObjectUtils::RuntimeInit(const UObject* Outer,
-                                    const TArray<int32>& NewPrivateIds,
-                                    const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
-                                    UItemObject* UnInitializedItemObject)
+int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
+                                              const TArray<int32>& NewPrivateIds,
+                                              UItemObject* UnInitializedItemObject)
+{
+	// TODO @gdemers we need to be able to initialize the item representation, stack, storage id, position based on data cached specific to the outer
+	// which may be cached serialized to disk.
+	// example : our store content, based on gameplay progression, or our character representation on disk.
+	return INDEX_NONE;
+}
+
+int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
+                                              const TArray<int32>& NewPrivateIds,
+                                              const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
+                                              UItemObject* UnInitializedItemObject)
 {
 	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);

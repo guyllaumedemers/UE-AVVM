@@ -517,25 +517,33 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 			continue;
 		}
 
+		// @gdemers initialize our ItemObject runtime representation. This integer encapsulate
+		// information about storage, position within storage, item stack count, etc...
+		int32 PrivateItemId = INDEX_NONE;
+
 		const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
 		if (bIsItemSrcStatic)
 		{
-			// TODO @gdemers we need to be able to initialize the item representation, stack, storage id, position based on data cached specific to the outer
-			// which may be cached serialized to disk.
-			// example : our store content, based on gameplay progression, or our character representation on disk.
+			PrivateItemId = UItemObjectUtils::RuntimeInitStaticItem(Outer,
+			                                                        PrivateItemIds,
+			                                                        NewItem);
 		}
 		else
 		{
-			// @gdemers initialize the runtime representation of our ItemObject based on backend representation.
-			const int32 PrivateItemId = UItemObjectUtils::RuntimeInit(Outer, PrivateItemIds, UActorInventoryComponent::GetInventoryDataResolverHelper(), NewItem);
-			if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Item with a valid ItemId.")))
-			{
-				PrivateItemIds.AddUnique(PrivateItemId);
-			}
+			PrivateItemId = UItemObjectUtils::RuntimeInitOnlineItem(Outer,
+			                                                        PrivateItemIds,
+			                                                        UActorInventoryComponent::GetInventoryDataResolverHelper(),
+			                                                        NewItem);
 		}
 
-		AddReplicatedSubObject(NewItem);
-		Items.Add(NewItem);
+		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE,
+		                     TEXT("Couldn't initialize Item with a valid ItemId.")))
+		{
+			PrivateItemIds.AddUnique(PrivateItemId);
+
+			AddReplicatedSubObject(NewItem);
+			Items.Add(NewItem);
+		}
 	}
 
 	// @gdemers allow initialization of loadout object based held items. 

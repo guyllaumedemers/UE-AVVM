@@ -359,10 +359,15 @@ class INVENTORYSAMPLE_API UItemObjectUtils : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable)
-	static int32 RuntimeInit(const UObject* Outer,
-	                         const TArray<int32>& NewPrivateIds,
-	                         const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
-	                         UItemObject* UnInitializedItemObject);
+	static int32 RuntimeInitStaticItem(const UObject* Outer,
+	                                   const TArray<int32>& NewPrivateIds,
+	                                   UItemObject* UnInitializedItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 RuntimeInitOnlineItem(const UObject* Outer,
+	                                   const TArray<int32>& NewPrivateIds,
+	                                   const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
+	                                   UItemObject* UnInitializedItemObject);
 
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
