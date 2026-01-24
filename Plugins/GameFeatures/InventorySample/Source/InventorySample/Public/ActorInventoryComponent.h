@@ -163,6 +163,7 @@ protected:
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
 	void CheckBackend() const;
+	void CheckDisk() const;
 	void CheckBounds();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")

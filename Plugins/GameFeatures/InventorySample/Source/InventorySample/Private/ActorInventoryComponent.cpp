@@ -225,9 +225,9 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		Iterator.RemoveCurrentSwap();
 	}
 
-	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
-	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
-	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	EItemSrcType OutSrcType = EItemSrcType::None;
+	const bool bIsValid = UInventoryUtils::GetOuterSourceType(Outer, OutSrcType);
+	if (!bIsValid)
 	{
 		return;
 	}
@@ -236,10 +236,10 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	       Log,
 	       TEXT("Executed from \"%s\". Requesting Items Type \"%s\" on Outer \"%s\"."),
 	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       EnumToString(ItemSrcType),
+	       EnumToString(OutSrcType),
 	       *Outer->GetName());
 
-	const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
+	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
 	if (bIsItemSrcStatic)
 	{
 		IInventoryProvider::Execute_RequestItemsFromDataAsset(Outer);
@@ -489,10 +489,10 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	{
 		return;
 	}
-
-	const EItemSrcType ItemSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
-	const bool bIsNone = EnumHasAnyFlags(ItemSrcType, EItemSrcType::None);
-	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	
+	EItemSrcType OutSrcType = EItemSrcType::None;
+	const bool bIsValid = UInventoryUtils::GetOuterSourceType(Outer, OutSrcType);
+	if (!bIsValid)
 	{
 		return;
 	}
@@ -521,7 +521,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		// information about storage, position within storage, item stack count, etc...
 		int32 PrivateItemId = INDEX_NONE;
 
-		const bool bIsItemSrcStatic = EnumHasAnyFlags(ItemSrcType, EItemSrcType::Static);
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
 		if (bIsItemSrcStatic)
 		{
 			PrivateItemId = UItemObjectUtils::RuntimeInitStaticItem(Outer,
@@ -772,8 +772,23 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 	// @gdemers validate inventory bounds between removal, and remove any flags applied due to possible previous overflow.
 	CheckBounds();
 
-	// @gdemers update backend representation of our inventory.
-	CheckBackend();
+	// @gdemers update our backend or file to disk.
+	EItemSrcType OutSrcType = EItemSrcType::None;
+	const bool bIsValid = UInventoryUtils::GetOuterSourceType(OwningOuter.Get(), OutSrcType);
+	if (bIsValid)
+	{
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
+		if (bIsItemSrcStatic)
+		{
+			// @gdemers update on disk representation of our inventory.
+			CheckDisk();
+		}
+		else
+		{
+			// @gdemers update backend representation of our inventory.
+			CheckBackend();
+		}
+	}
 	
 	// @gdemers handle invalidating the storage bits of the item encoding.
 	UItemObjectUtils::NullifyStorage(ItemObject);
@@ -875,8 +890,23 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		}
 	}
 
-	// @gdemers update backend representation of our inventory.
-	CheckBackend();
+	// @gdemers update our backend or file to disk.
+	EItemSrcType OutSrcType = EItemSrcType::None;
+	const bool bIsValid = UInventoryUtils::GetOuterSourceType(OwningOuter.Get(), OutSrcType);
+	if (bIsValid)
+	{
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
+		if (bIsItemSrcStatic)
+		{
+			// @gdemers update on disk representation of our inventory.
+			CheckDisk();
+		}
+		else
+		{
+			// @gdemers update backend representation of our inventory.
+			CheckBackend();
+		}
+	}
 
 	// @gdemers leave the owning actor in world for another player pickup.
 	if (bDoesStackOverflow && !bHasAvailableEntries)
@@ -1025,6 +1055,11 @@ void UActorInventoryComponent::CheckBackend() const
 		const FString NewProfile = UInventoryUtils::ModifyProfile(this, TargetUniqueId, NewDependencies);
 		UAVVMOnlineBackendUtils::Submit(this, TargetUniqueId, NewProfile);
 	}
+}
+
+void UActorInventoryComponent::CheckDisk() const
+{
+	// TODO Add impl
 }
 
 void UActorInventoryComponent::CheckBounds()
