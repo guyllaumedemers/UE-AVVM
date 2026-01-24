@@ -1059,16 +1059,19 @@ void UActorInventoryComponent::CheckBackend() const
 
 void UActorInventoryComponent::CheckDisk() const
 {
+	// @gdemers we need to be able to create/and modify the cached representation of our the item on disk.
+	// This will allow gameplay to track progression information about content shared by Actors.
 	struct FItemWriter
 	{
 		FItemWriter(const FStringView NewFilePath)
 		{
-			// TODO @gdemers Add missing impl
-		}
-		
-		~FItemWriter()
-		{
-			// TODO @gdemers Manage Handle release
+			const TCHAR* FilePath = NewFilePath.GetData();
+
+			IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+			if (ensureAlwaysMsgf(FileManager.FileExists(FilePath), TEXT("Invalid FilePath \"%s\""), FilePath))
+			{
+				FFileHelper::LoadFileToString(FileContent, FilePath);
+			}
 		}
 
 		bool WriteAtElementId(const TArray<int32>& NewPrivateIds,
@@ -1079,7 +1082,7 @@ void UActorInventoryComponent::CheckDisk() const
 		}
 
 	private:
-		int32 FileHandle = INDEX_NONE;
+		FString FileContent;
 	};
 
 	const AActor* Outer = OwningOuter.Get();

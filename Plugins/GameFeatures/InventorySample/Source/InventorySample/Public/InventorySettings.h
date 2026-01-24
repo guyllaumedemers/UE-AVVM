@@ -82,9 +82,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FString& GetAppDataDirPath();
 
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FString& GetItemJsonProperty();
-
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
@@ -131,8 +128,4 @@ protected:
 	// @gdemers Path to serialize inventory layout of Actors who's content require progression tracking.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FString AppDataDirPath = FString();
-
-	// @gdemers field property we are interested in during deserializing from file.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FString ItemJsonProperty = FString();
 };

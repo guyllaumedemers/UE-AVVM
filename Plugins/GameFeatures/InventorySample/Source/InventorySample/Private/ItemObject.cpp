@@ -459,25 +459,39 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	{
 		FItemReader(const FStringView NewFilePath)
 		{
-			// TODO @gdemers Add missing impl
-		}
-		
-		~FItemReader()
-		{
-			// TODO @gdemers Manage Handle release
+			IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+			const TCHAR* FilePath = NewFilePath.GetData();
+
+			if (ensureAlwaysMsgf(FileManager.FileExists(FilePath), TEXT("Invalid FilePath \"%s\""), FilePath))
+			{
+				FFileHelper::LoadFileToString(FileContent, FilePath);
+			}
 		}
 
 		int32 GetFieldAsInteger(const TArray<int32>& NewPrivateIds,
 		                        const int32 OuterElementId,
-		                        const int32 ItemElementId,
-		                        const FStringView SearchField) const
+		                        const int32 ItemElementId) const
 		{
-			// TODO @gdemers Add missing impl
-			return INDEX_NONE;
+			FString OutValue;
+
+			const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent, OuterElementId);
+			if (InventoryProviderPayload.IsEmpty())
+			{
+				return INDEX_NONE;
+			}
+
+			const FString ItemPayload = UInventoryUtils::GetInventoryProviderItemById(InventoryProviderPayload, NewPrivateIds, ItemElementId);
+			if (ItemPayload.IsEmpty())
+			{
+				return INDEX_NONE;
+			}
+
+			const int32 PrivateId = UInventoryUtils::GetItemPrivateId(ItemPayload);
+			return PrivateId;
 		}
 
 	private:
-		int32 FileHandle = INDEX_NONE;
+		FString FileContent;
 	};
 
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
@@ -509,7 +523,7 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers find entry on disk, and read field value.
-	const int32 FieldValue = ItemReader->GetFieldAsInteger(NewPrivateIds, TargetUniqueId, ItemId, UInventorySettings::GetItemJsonProperty());
+	const int32 FieldValue = ItemReader->GetFieldAsInteger(NewPrivateIds, TargetUniqueId, ItemId);
 	return FieldValue;
 }
 

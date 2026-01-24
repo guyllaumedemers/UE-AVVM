@@ -137,3 +137,151 @@ FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,
 	// TODO @gdemers Update profile string.
 	return FString();
 }
+
+TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return TArray<FString>();
+	}
+
+	TArray<FString> OutProviders;
+
+	const TArray<TSharedPtr<FJsonValue>> InventoryProviders = JsonData->GetArrayField(TEXT("InventoryProviders"));
+	for (const auto& InventoryProvider : InventoryProviders)
+	{
+		OutProviders.Add(InventoryProvider->AsString());
+	}
+
+	return OutProviders;
+}
+
+FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
+                                                  const int32 NewProviderId)
+{
+	const TArray<FString> InventoryProviders = GetInventoryProviderPayloads(NewPayload);
+	if (InventoryProviders.IsEmpty())
+	{
+		return FString();
+	}
+	
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	const FString* SearchResult = InventoryProviders.FindByPredicate([JsonData, NewProviderId](const FString& Payload)
+	{
+		if (!JsonData.IsValid() || Payload.IsEmpty())
+		{
+			return false;
+		}
+
+		// TODO @gdemers Must ensure data is overwritten between assignment.
+		TSharedPtr<FJsonObject> NewJsonData = JsonData;
+
+		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(Payload);
+		if (!FJsonSerializer::Deserialize(JsonReaderRef, NewJsonData))
+		{
+			return false;
+		}
+
+		const int32 InventoryProviderId = NewJsonData->GetIntegerField(TEXT("InventoryProviderId"));
+		return (false == (InventoryProviderId ^ NewProviderId));
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return TEXT("");
+	}
+}
+
+TArray<FString> UInventoryUtils::GetInventoryProviderItems(const FString& NewProviderPayload)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewProviderPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return TArray<FString>();
+	}
+
+	TArray<FString> OutItems;
+
+	const TArray<TSharedPtr<FJsonValue>> Items = JsonData->GetArrayField(TEXT("Items"));
+	for (const auto& Item : Items)
+	{
+		OutItems.Add(Item->AsString());
+	}
+	
+	return OutItems;
+}
+
+FString UInventoryUtils::GetInventoryProviderItemById(const FString& NewProviderPayload,
+                                                      const TArray<int32>& NewPrivateIds,
+                                                      const int32 NewItemId)
+{
+	const TArray<FString> Items = GetInventoryProviderItems(NewProviderPayload);
+	if (Items.IsEmpty())
+	{
+		return FString();
+	}
+	
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	const FString* SearchResult = Items.FindByPredicate([JsonData, NewItemId, NewPrivateIds](const FString& Payload)
+	{
+		if (!JsonData.IsValid() || Payload.IsEmpty())
+		{
+			return false;
+		}
+
+		// TODO @gdemers Must ensure data is overwritten between assignment.
+		TSharedPtr<FJsonObject> NewJsonData = JsonData;
+
+		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(Payload);
+		if (!FJsonSerializer::Deserialize(JsonReaderRef, NewJsonData))
+		{
+			return false;
+		}
+
+		// @gdemers Filter out entries that are already assigned in the runtime representation
+		// of the inventory.
+		const int32 ItemId = NewJsonData->GetIntegerField(TEXT("ItemId"));
+		if (NewPrivateIds.Contains(ItemId))
+		{
+			return false;
+		}
+		else
+		{
+			return (false == (ItemId ^ NewItemId));
+		}
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return TEXT("");
+	}
+}
+
+int32 UInventoryUtils::GetItemPrivateId(const FString& NewItemPayload)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewItemPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 PrivateId = JsonData->GetIntegerField(TEXT("PrivateId"));
+	return PrivateId;
+}

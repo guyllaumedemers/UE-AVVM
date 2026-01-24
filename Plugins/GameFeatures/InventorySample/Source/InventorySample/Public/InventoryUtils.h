@@ -55,4 +55,22 @@ public:
 	static FString ModifyProfile(const UObject* WorldContextObject,
 	                             const int32 ProfileId,
 	                             const TArray<int32>& NewItems);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FString> GetInventoryProviderPayloads(const FString& NewPayload/*FileContent*/);
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetInventoryProviderById(const FString& NewPayload/*FileContent*/,
+	                                        const int32 NewProviderId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FString> GetInventoryProviderItems(const FString& NewProviderPayload);
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetInventoryProviderItemById(const FString& NewProviderPayload,
+	                                            const TArray<int32>& NewPrivateIds,
+	                                            const int32 NewItemId);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetItemPrivateId(const FString& NewItemPayload);
 };
