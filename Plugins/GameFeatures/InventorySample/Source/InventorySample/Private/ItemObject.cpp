@@ -451,10 +451,48 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                               const TArray<int32>& NewPrivateIds,
                                               UItemObject* UnInitializedItemObject)
 {
-	// TODO @gdemers we need to be able to initialize the item representation, stack, storage id, position based on data cached specific to the outer
-	// which may be cached serialized to disk.
-	// example : our store content, based on gameplay progression, or our character representation on disk.
-	return INDEX_NONE;
+	// @gdemers we need to be able to initialize the item representation, stack, storage id, position based on data cached specific to the outer which may be cached serialized to disk.
+	// example : our store content will display X amount of items based on the Data Asset representation it references.
+	// During progression, internal representation may change, which require tracking, most-likely by serializing to disk under the user AppData.
+	struct FItemReader
+	{
+		FItemReader(const FStringView NewFilePath,
+		            const TArray<int32>& NewPrivateIds,
+		            const int32 OuterElementId,
+		            const int32 ItemElementId)
+		{
+			// TODO @gdemers Add missing impl
+		}
+		
+		int32 GetFieldAsInteger(const FStringView SearchField) const
+		{
+			// TODO @gdemers Add missing impl
+			return INDEX_NONE;
+		}
+		
+	private:
+		int32 FileHandle = INDEX_NONE;
+	};
+	
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+						  TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+						  *Outer->GetName()))
+	{
+		return INDEX_NONE;
+	}
+	
+	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
+	if (!ensureAlwaysMsgf(ItemId != INDEX_NONE,
+	                      TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers find entry on disk, and read field value.
+	FItemReader ItemReader(UInventorySettings::GetAppDataDirPath(), NewPrivateIds, TargetUniqueId, ItemId);
+	const int32 FieldValue = ItemReader.GetFieldAsInteger(UInventorySettings::GetItemJsonProperty());
+	return FieldValue;
 }
 
 int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
@@ -474,7 +512,8 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
 	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
 
-	if (OuterDependencies.IsEmpty() || (ItemId == INDEX_NONE))
+	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(ItemId != INDEX_NONE,
+	                                                     TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
 	}

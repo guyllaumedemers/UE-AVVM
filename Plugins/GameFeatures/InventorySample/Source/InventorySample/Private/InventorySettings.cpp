@@ -96,3 +96,13 @@ const FGameplayTagContainer& UInventorySettings::GetConsumableRuleset()
 {
 	return GetDefault<UInventorySettings>()->ConsumableRuleset;
 }
+
+const FString& UInventorySettings::GetAppDataDirPath()
+{
+	return GetDefault<UInventorySettings>()->AppDataDirPath;
+}
+
+const FString& UInventorySettings::GetItemJsonProperty()
+{
+	return GetDefault<UInventorySettings>()->ItemJsonProperty;
+}
