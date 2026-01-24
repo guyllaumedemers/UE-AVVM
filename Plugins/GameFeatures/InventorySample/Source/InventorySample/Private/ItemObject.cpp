@@ -22,6 +22,7 @@
 #include "ActorInventoryComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMSocketTargetingHelper.h"
+#include "AVVMUtils.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
@@ -460,6 +461,11 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		{
 			// TODO @gdemers Add missing impl
 		}
+		
+		~FItemReader()
+		{
+			// TODO @gdemers Manage Handle release
+		}
 
 		int32 GetFieldAsInteger(const TArray<int32>& NewPrivateIds,
 		                        const int32 OuterElementId,
@@ -473,6 +479,12 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	private:
 		int32 FileHandle = INDEX_NONE;
 	};
+
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
+		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
+	{
+		return INDEX_NONE;
+	}
 
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,

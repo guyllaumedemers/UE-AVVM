@@ -20,15 +20,21 @@
 #include "InventoryUtils.h"
 
 #include "AVVMGameplaySettings.h"
+#include "AVVMUtils.h"
 #include "InventoryProvider.h"
 #include "ItemObject.h"
-#include "Backend/AVVMDataResolverHelper.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 
 bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)
 {
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
+		!UAVVMUtils::IsBlueprintScriptInterfaceValid<const UInventoryProvider>(Outer))
+	{
+		return false;
+	}
+
 	OutSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
 	const bool bIsNone = EnumHasAnyFlags(OutSrcType, EItemSrcType::None);
 	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))

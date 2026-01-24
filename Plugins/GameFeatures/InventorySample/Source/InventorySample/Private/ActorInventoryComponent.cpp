@@ -1059,7 +1059,56 @@ void UActorInventoryComponent::CheckBackend() const
 
 void UActorInventoryComponent::CheckDisk() const
 {
-	// TODO Add impl
+	struct FItemWriter
+	{
+		FItemWriter(const FStringView NewFilePath)
+		{
+			// TODO @gdemers Add missing impl
+		}
+		
+		~FItemWriter()
+		{
+			// TODO @gdemers Manage Handle release
+		}
+
+		bool WriteAtElementId(const TArray<int32>& NewPrivateIds,
+		                      const int32 OuterElementId) const
+		{
+			// TODO @gdemers Add missing impl
+			return false;
+		}
+
+	private:
+		int32 FileHandle = INDEX_NONE;
+	};
+
+	const AActor* Outer = OwningOuter.Get();
+
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
+		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
+	{
+		return;
+	}
+
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *Outer->GetName()))
+	{
+		return;
+	}
+
+	// @gdemers lazy initialize our writer object to reduce file handle retrieval.
+	static TSharedPtr<FItemWriter> ItemWriter;
+	if (!ItemWriter.IsValid())
+	{
+		ItemWriter = MakeShared<FItemWriter>(UInventorySettings::GetAppDataDirPath());
+	}
+
+	// @gdemers find entry on disk, and write to field value.
+	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
+	const bool bResult = ItemWriter->WriteAtElementId(NewDependencies, TargetUniqueId);
+	ensureAlwaysMsgf(bResult, TEXT("FItemWriter failed to serialized to disk."));
 }
 
 void UActorInventoryComponent::CheckBounds()
