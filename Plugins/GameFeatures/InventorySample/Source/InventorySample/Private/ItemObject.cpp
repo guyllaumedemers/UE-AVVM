@@ -23,6 +23,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "AVVMUtils.h"
+#include "InventoryFileHelper.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
@@ -457,24 +458,14 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	// During progression, internal representation may change, which require tracking, most-likely by serializing to disk under the user AppData.
 	struct FItemReader
 	{
-		FItemReader(const FStringView NewFilePath)
+		static int32 GetPrivateItemId(const TArray<int32>& NewPrivateIds,
+		                              const int32 OuterElementId,
+		                              const int32 ItemElementId)
 		{
-			IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
-			const TCHAR* FilePath = NewFilePath.GetData();
+			// @gdemers get-set file content, ensuring latest.
+			const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
 
-			if (ensureAlwaysMsgf(FileManager.FileExists(FilePath), TEXT("Invalid FilePath \"%s\""), FilePath))
-			{
-				FFileHelper::LoadFileToString(FileContent, FilePath);
-			}
-		}
-
-		int32 GetFieldAsInteger(const TArray<int32>& NewPrivateIds,
-		                        const int32 OuterElementId,
-		                        const int32 ItemElementId) const
-		{
-			FString OutValue;
-
-			const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent, OuterElementId);
+			const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), OuterElementId);
 			if (InventoryProviderPayload.IsEmpty())
 			{
 				return INDEX_NONE;
@@ -489,9 +480,6 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 			const int32 PrivateId = UInventoryUtils::GetItemPrivateId(ItemPayload);
 			return PrivateId;
 		}
-
-	private:
-		FString FileContent;
 	};
 
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
@@ -515,15 +503,8 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	// @gdemers lazy initialize our reader object to reduce file handle retrieval.
-	static TSharedPtr<FItemReader> ItemReader;
-	if (!ItemReader.IsValid())
-	{
-		ItemReader = MakeShared<FItemReader>(UInventorySettings::GetAppDataDirPath());
-	}
-
 	// @gdemers find entry on disk, and read field value.
-	const int32 FieldValue = ItemReader->GetFieldAsInteger(NewPrivateIds, TargetUniqueId, ItemId);
+	const int32 FieldValue = FItemReader::GetPrivateItemId(NewPrivateIds, TargetUniqueId, ItemId);
 	return FieldValue;
 }
 

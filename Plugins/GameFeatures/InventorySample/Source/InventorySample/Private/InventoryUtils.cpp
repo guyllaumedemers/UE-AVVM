@@ -200,7 +200,7 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	}
 }
 
-TArray<FString> UInventoryUtils::GetInventoryProviderItems(const FString& NewProviderPayload)
+TArray<FString> UInventoryUtils::GetInventoryProviderItemPayloads(const FString& NewProviderPayload)
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
@@ -225,7 +225,7 @@ FString UInventoryUtils::GetInventoryProviderItemById(const FString& NewProvider
                                                       const TArray<int32>& NewPrivateIds,
                                                       const int32 NewItemId)
 {
-	const TArray<FString> Items = GetInventoryProviderItems(NewProviderPayload);
+	const TArray<FString> Items = GetInventoryProviderItemPayloads(NewProviderPayload);
 	if (Items.IsEmpty())
 	{
 		return FString();
@@ -249,8 +249,7 @@ FString UInventoryUtils::GetInventoryProviderItemById(const FString& NewProvider
 			return false;
 		}
 
-		// @gdemers Filter out entries that are already assigned in the runtime representation
-		// of the inventory.
+		// @gdemers Filter out entries that are already assigned in the runtime representation of the inventory.
 		const int32 ItemId = NewJsonData->GetIntegerField(TEXT("ItemId"));
 		if (NewPrivateIds.Contains(ItemId))
 		{

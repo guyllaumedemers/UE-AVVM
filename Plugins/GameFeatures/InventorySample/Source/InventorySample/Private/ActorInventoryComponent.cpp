@@ -26,6 +26,7 @@
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMUtils.h"
+#include "InventoryFileHelper.h"
 #include "InventoryProvider.h"
 #include "InventorySample.h"
 #include "InventorySettings.h"
@@ -1063,26 +1064,16 @@ void UActorInventoryComponent::CheckDisk() const
 	// This will allow gameplay to track progression information about content shared by Actors.
 	struct FItemWriter
 	{
-		FItemWriter(const FStringView NewFilePath)
+		static bool WriteAtElementId(const TArray<int32>& NewPrivateIds,
+		                             const int32 OuterElementId)
 		{
-			const TCHAR* FilePath = NewFilePath.GetData();
-
-			IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
-			if (ensureAlwaysMsgf(FileManager.FileExists(FilePath), TEXT("Invalid FilePath \"%s\""), FilePath))
-			{
-				FFileHelper::LoadFileToString(FileContent, FilePath);
-			}
-		}
-
-		bool WriteAtElementId(const TArray<int32>& NewPrivateIds,
-		                      const int32 OuterElementId) const
-		{
-			// TODO @gdemers Add missing impl
+			// @gdemers get-set file content, ensuring latest.
+			const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+			
+			// @gdemers : dirty file post modification.
+			UInventoryFileHelper::Static_MarkFileDirty();
 			return false;
 		}
-
-	private:
-		FString FileContent;
 	};
 
 	const AActor* Outer = OwningOuter.Get();
@@ -1101,16 +1092,9 @@ void UActorInventoryComponent::CheckDisk() const
 		return;
 	}
 
-	// @gdemers lazy initialize our writer object to reduce file handle retrieval.
-	static TSharedPtr<FItemWriter> ItemWriter;
-	if (!ItemWriter.IsValid())
-	{
-		ItemWriter = MakeShared<FItemWriter>(UInventorySettings::GetAppDataDirPath());
-	}
-
 	// @gdemers find entry on disk, and write to field value.
 	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
-	const bool bResult = ItemWriter->WriteAtElementId(NewDependencies, TargetUniqueId);
+	const bool bResult = FItemWriter::WriteAtElementId(NewDependencies, TargetUniqueId);
 	ensureAlwaysMsgf(bResult, TEXT("FItemWriter failed to serialized to disk."));
 }
 

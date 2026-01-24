@@ -64,7 +64,7 @@ public:
 	                                        const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FString> GetInventoryProviderItems(const FString& NewProviderPayload);
+	static TArray<FString> GetInventoryProviderItemPayloads(const FString& NewProviderPayload);
 
 	UFUNCTION(BlueprintCallable)
 	static FString GetInventoryProviderItemById(const FString& NewProviderPayload,
