@@ -21,6 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
 #include "InventoryProviderTableRow.generated.h"
 
 class UItemObject;
@@ -35,6 +39,10 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
 	// @gdemers fetch {IAVVMResourceProvider::UniqueId} from CDO class, or UAVVMGameplayUtils::GetActorUniqueIdentifier.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)

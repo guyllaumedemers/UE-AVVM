@@ -18,3 +18,23 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Data/InventoryProviderTableRow.h"
+
+#if WITH_EDITOR
+EDataValidationResult FInventoryProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (!IsValid(ProviderActorClass))
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "TSubclassOf<AActor> missing. No valid Class specified!"));
+	}
+	
+	if (DefaultInventory.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "DefaultInventory empty. No valid entries specified!"));
+	}
+
+	return Result;
+}
+#endif
