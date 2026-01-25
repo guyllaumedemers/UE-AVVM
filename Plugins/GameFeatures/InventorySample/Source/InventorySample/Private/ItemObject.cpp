@@ -471,13 +471,7 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 				return INDEX_NONE;
 			}
 
-			const FString ItemPayload = UInventoryUtils::GetInventoryProviderItemById(InventoryProviderPayload, NewPrivateIds, ItemElementId);
-			if (ItemPayload.IsEmpty())
-			{
-				return INDEX_NONE;
-			}
-
-			const int32 PrivateId = UInventoryUtils::GetItemPrivateId(ItemPayload);
+			const int32 PrivateId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemElementId);
 			return PrivateId;
 		}
 	};

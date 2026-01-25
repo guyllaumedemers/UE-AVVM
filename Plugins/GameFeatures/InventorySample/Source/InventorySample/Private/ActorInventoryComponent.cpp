@@ -1071,10 +1071,10 @@ void UActorInventoryComponent::CheckDisk() const
 			const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
 
 			// @gdemers update provider Id entries.
-			UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), OuterElementId, NewPrivateIds);
+			const FString DirtyFileContent = UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), OuterElementId, NewPrivateIds);
 
-			// @gdemers : dirty file post modification.
-			UInventoryFileHelper::Static_MarkFileDirty();
+			// @gdemers : serialize new file content.
+			UInventoryFileHelper::Static_Serialize(DirtyFileContent);
 		}
 	};
 

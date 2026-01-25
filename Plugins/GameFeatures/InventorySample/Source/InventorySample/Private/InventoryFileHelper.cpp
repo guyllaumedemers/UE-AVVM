@@ -37,13 +37,19 @@ FStringView UInventoryFileHelper::Static_GetSetFileContent()
 	}
 }
 
-void UInventoryFileHelper::Static_MarkFileDirty()
+void UInventoryFileHelper::Static_Serialize(const FString& NewFileContent)
 {
 	auto* FileHelper = UInventoryFileHelper::Get();
 	if (IsValid(FileHelper))
 	{
-		FileHelper->MarkFileDirty();
+		FileHelper->Serialize(NewFileContent);
 	}
+}
+
+void UInventoryFileHelper::Serialize(const FString& NewFileContent)
+{
+	// TODO @gdemers Write to disk
+	MarkFileDirty();
 }
 
 UInventoryFileHelper* UInventoryFileHelper::Get()

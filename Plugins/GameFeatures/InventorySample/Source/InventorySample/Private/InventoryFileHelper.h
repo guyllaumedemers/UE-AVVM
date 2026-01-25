@@ -37,11 +37,12 @@ class INVENTORYSAMPLE_API UInventoryFileHelper : public UObject
 	
 public:
 	static FStringView Static_GetSetFileContent();
-	static void Static_MarkFileDirty();
+	static void Static_Serialize(const FString& NewFileContent);
 	
 protected:
 	static UInventoryFileHelper* Get();
 	FStringView GetSetFileContent(const FStringView NewFilePath);
+	void Serialize(const FString& NewFileContent);
 	void MarkFileDirty();
 	
 	UPROPERTY(Transient,  BlueprintReadOnly)

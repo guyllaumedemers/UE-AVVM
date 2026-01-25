@@ -27,6 +27,75 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 
+/**
+ *	Class description:
+ *	
+ *	NSJsonInventory is a private namespace for class that should be hidden from project.
+ */
+namespace NSJsonInventory
+{
+	struct FJsonInventoryProvider
+	{
+		int32 Id = INDEX_NONE;
+		TArray<int32> PrivateItemIds;
+	};
+
+	void ToString(const FJsonInventoryProvider& NewInventoryProvider,
+	              FString& OutFormat)
+	{
+		FJsonObject StackAllocatedFJsonObject;
+		auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+		JsonData->SetNumberField(TEXT("Id"), NewInventoryProvider.Id);
+
+		TArray<TSharedPtr<FJsonValue>> PrivateItemIds;
+		for (const int32 PrivateItemId : NewInventoryProvider.PrivateItemIds)
+		{
+			PrivateItemIds.Add(MakeShareable(new FJsonValueNumber(PrivateItemId)));
+		}
+
+		JsonData->SetArrayField(TEXT("PrivateItemIds"), PrivateItemIds);
+
+		FString JsonOutput;
+
+		auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+		if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+		{
+			return;
+		}
+
+		OutFormat = JsonOutput;
+	}
+
+	void FromString(const FString& NewPayload,
+	                FJsonInventoryProvider& OutInventoryProvider)
+	{
+		if (NewPayload.IsEmpty())
+		{
+			return;
+		}
+
+		FJsonObject StackAllocatedFJsonObject;
+		auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+
+		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+		if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+		{
+			return;
+		}
+
+		FJsonInventoryProvider InventoryProvider;
+		InventoryProvider.Id = JsonData->GetIntegerField(TEXT("Id"));
+
+		const TArray<TSharedPtr<FJsonValue>> PrivateItemIds = JsonData->GetArrayField(TEXT("PrivateItemIds"));
+		for (const auto& PrivateItemId : PrivateItemIds)
+		{
+			InventoryProvider.PrivateItemIds.Add(PrivateItemId->AsNumber());
+		}
+
+		OutInventoryProvider = InventoryProvider;
+	}
+}
+
 bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)
 {
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
@@ -140,7 +209,8 @@ FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,
 
 TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
 {
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	FJsonObject StackAllocatedFJsonObject;
+	auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
 
 	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
@@ -167,27 +237,12 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	{
 		return FString();
 	}
-	
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	const FString* SearchResult = InventoryProviders.FindByPredicate([JsonData, NewProviderId](const FString& Payload)
+	const FString* SearchResult = InventoryProviders.FindByPredicate([SearchId = NewProviderId](const FString& Payload)
 	{
-		if (!JsonData.IsValid() || Payload.IsEmpty())
-		{
-			return false;
-		}
-
-		// TODO @gdemers Must ensure data is overwritten between assignment.
-		TSharedPtr<FJsonObject> NewJsonData = JsonData;
-
-		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(Payload);
-		if (!FJsonSerializer::Deserialize(JsonReaderRef, NewJsonData))
-		{
-			return false;
-		}
-
-		const int32 InventoryProviderId = NewJsonData->GetIntegerField(TEXT("InventoryProviderId"));
-		return (false == (InventoryProviderId ^ NewProviderId));
+		NSJsonInventory::FJsonInventoryProvider OutProvider;
+		NSJsonInventory::FromString(Payload, OutProvider);
+		return (false == (OutProvider.Id ^ SearchId));
 	});
 
 	if (SearchResult != nullptr)
@@ -200,67 +255,24 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	}
 }
 
-TArray<FString> UInventoryUtils::GetInventoryProviderItemPayloads(const FString& NewProviderPayload)
+int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
+                                        const TArray<int32>& NewPrivateIds,
+                                        const int32 ItemId)
 {
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewProviderPayload);
-	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
+	for (const int32 PrivateId : NewPrivateIds)
 	{
-		return TArray<FString>();
+		FilteredSet.Remove(PrivateId);
 	}
 
-	TArray<FString> OutItems;
-
-	const TArray<TSharedPtr<FJsonValue>> Items = JsonData->GetArrayField(TEXT("Items"));
-	for (const auto& Item : Items)
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
-		OutItems.Add(Item->AsString());
-	}
-	
-	return OutItems;
-}
-
-FString UInventoryUtils::GetInventoryProviderItemById(const FString& NewProviderPayload,
-                                                      const TArray<int32>& NewPrivateIds,
-                                                      const int32 NewItemId)
-{
-	const TArray<FString> Items = GetInventoryProviderItemPayloads(NewProviderPayload);
-	if (Items.IsEmpty())
-	{
-		return FString();
-	}
-	
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-
-	const FString* SearchResult = Items.FindByPredicate([JsonData, NewItemId, NewPrivateIds](const FString& Payload)
-	{
-		if (!JsonData.IsValid() || Payload.IsEmpty())
-		{
-			return false;
-		}
-
-		// TODO @gdemers Must ensure data is overwritten between assignment.
-		TSharedPtr<FJsonObject> NewJsonData = JsonData;
-
-		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(Payload);
-		if (!FJsonSerializer::Deserialize(JsonReaderRef, NewJsonData))
-		{
-			return false;
-		}
-
-		// @gdemers Filter out entries that are already assigned in the runtime representation of the inventory.
-		const int32 ItemId = NewJsonData->GetIntegerField(TEXT("ItemId"));
-		if (NewPrivateIds.Contains(ItemId))
-		{
-			return false;
-		}
-		else
-		{
-			// @gdemers retrieve only the bits specific to the item id, without storage information, stacking, etc...
-			const int32 FilteredId = (ItemId & NewItemId);
-			return (false == (ItemId ^ FilteredId));
-		}
+		// @gdemers retrieve only the bits specific to the item id, without storage information, stacking, etc...
+		const int32 FilteredId = (SearchId & Value);
+		return (false == (SearchId ^ FilteredId));
 	});
 
 	if (SearchResult != nullptr)
@@ -268,45 +280,56 @@ FString UInventoryUtils::GetInventoryProviderItemById(const FString& NewProvider
 		return *SearchResult;
 	}
 	else
-	{
-		return TEXT("");
-	}
-}
-
-int32 UInventoryUtils::GetItemPrivateId(const FString& NewItemPayload)
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewItemPayload);
-	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return INDEX_NONE;
 	}
-
-	const int32 PrivateId = JsonData->GetIntegerField(TEXT("PrivateId"));
-	return PrivateId;
 }
 
-void UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
-                                              const int32 ProviderId,
-                                              const TArray<int32>& NewPrivateIds)
+FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
+                                                 const int32 ProviderId,
+                                                 const TArray<int32>& NewPrivateIds)
 {
-	// TODO @gdemers
-	// // @gdemers old inventory for provider.
-	// const FString OldInventoryProviderId = UInventoryUtils::GetInventoryProviderById(NewPayload, ProviderId);
-	//
-	// TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	//
-	// // @gdemers fetch for edit the old representation.
-	// auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(OldInventoryProviderId);
-	// if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
-	// {
-	// 	return;
-	// }
-	//
-	// TArray<TSharedPtr<FJsonValue>> PrivateItemIds;
-	// for (const int32 PrivateItemId : NewPrivateIds)
-	// {
-	// 	PrivateItemIds.Add(MakeShareable(new FJsonValueNumber(PrivateItemId)));
-	// }
+	TArray<NSJsonInventory::FJsonInventoryProvider> InventoryProviders;
+	for (const FString& Payload : GetInventoryProviderPayloads(NewPayload))
+	{
+		NSJsonInventory::FJsonInventoryProvider OutProvider;
+		NSJsonInventory::FromString(Payload, OutProvider);
+
+		InventoryProviders.Add(OutProvider);
+	}
+
+	auto* SearchResult = InventoryProviders.FindByPredicate([SearchId = ProviderId](const NSJsonInventory::FJsonInventoryProvider& Provider)
+	{
+		return (false == (Provider.Id ^ SearchId));
+	});
+
+	if (SearchResult != nullptr)
+	{
+		// @gdemers overwrite all item entries within this provider.
+		SearchResult->PrivateItemIds = NewPrivateIds;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	for (const auto& ModifiedProvider : InventoryProviders)
+	{
+		FString OutFormat;
+		NSJsonInventory::ToString(ModifiedProvider, OutFormat);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
+	}
+
+	FJsonObject StackAllocatedFJsonObject;
+	auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return FString();
+	}
+	else
+	{
+		return JsonOutput;
+	}
 }

@@ -64,18 +64,12 @@ public:
 	                                        const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FString> GetInventoryProviderItemPayloads(const FString& NewProviderPayload);
+	static int32 GetItemPrivateId(const FString& NewPayload,
+	                              const TArray<int32>& NewPrivateIds,
+	                              const int32 ItemId);
 
 	UFUNCTION(BlueprintCallable)
-	static FString GetInventoryProviderItemById(const FString& NewProviderPayload,
-	                                            const TArray<int32>& NewPrivateIds,
-	                                            const int32 NewItemId);
-
-	UFUNCTION(BlueprintCallable)
-	static int32 GetItemPrivateId(const FString& NewItemPayload);
-
-	UFUNCTION(BlueprintCallable)
-	static void ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
-	                                    const int32 ProviderId,
-	                                    const TArray<int32>& NewPrivateIds);
+	static FString ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
+	                                       const int32 ProviderId,
+	                                       const TArray<int32>& NewPrivateIds);
 };
