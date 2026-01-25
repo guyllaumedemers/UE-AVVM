@@ -42,7 +42,8 @@ public:
 protected:
 	static UInventoryFileHelper* Get();
 	FStringView GetSetFileContent(const FStringView NewFilePath);
-	void Serialize(const FString& NewFileContent);
+	// @gdemers _v2 prevent function name shadowing in base UObject class.
+	void Serialize_v2(const FString& NewFileContent);
 	void MarkFileDirty();
 	
 	UPROPERTY(Transient,  BlueprintReadOnly)

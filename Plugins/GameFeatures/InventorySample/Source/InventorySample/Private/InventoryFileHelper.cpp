@@ -42,13 +42,22 @@ void UInventoryFileHelper::Static_Serialize(const FString& NewFileContent)
 	auto* FileHelper = UInventoryFileHelper::Get();
 	if (IsValid(FileHelper))
 	{
-		FileHelper->Serialize(NewFileContent);
+		FileHelper->Serialize_v2(NewFileContent);
 	}
 }
 
-void UInventoryFileHelper::Serialize(const FString& NewFileContent)
+void UInventoryFileHelper::Serialize_v2(const FString& NewFileContent)
 {
-	// TODO @gdemers Write to disk
+	const FStringView NewPath = UInventorySettings::GetAppDataDirPath();
+	const TCHAR* FilePath = NewPath.GetData();
+
+	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
+	if (!ensureAlwaysMsgf(FileManager.FileExists(FilePath), TEXT("Invalid FilePath \"%s\""), FilePath))
+	{
+		return;
+	}
+
+	FFileHelper::SaveStringToFile(NewFileContent, FilePath);
 	MarkFileDirty();
 }
 
