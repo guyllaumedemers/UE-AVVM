@@ -84,6 +84,12 @@ FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePat
 		{
 			FFileHelper::LoadFileToString(OutFileContent, FilePath);
 		}
+		else
+		{
+			// TODO @gdemers Next steps! We have to initialize our file on Ftue, or new game, and populate default entries. Maybe even on a per-level
+			// context where the content of actors with static reference to DA, may require being reset (or are persistent, depending on the game behaviour)
+			FFileHelper::SaveStringToFile(TEXT(""), FilePath);
+		}
 
 		return OutFileContent;
 	};
