@@ -504,8 +504,8 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers find entry on disk, and read field value.
-	const int32 FieldValue = FItemReader::GetPrivateItemId(NewPrivateIds, TargetUniqueId, ItemId);
-	return FieldValue;
+	const int32 PrivateItemId = FItemReader::GetPrivateItemId(NewPrivateIds, TargetUniqueId, ItemId);
+	return PrivateItemId;
 }
 
 int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,

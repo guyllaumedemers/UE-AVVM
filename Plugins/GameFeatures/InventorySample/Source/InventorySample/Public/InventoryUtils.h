@@ -73,4 +73,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetItemPrivateId(const FString& NewItemPayload);
+
+	UFUNCTION(BlueprintCallable)
+	static void ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
+	                                    const int32 ProviderId,
+	                                    const TArray<int32>& NewPrivateIds);
 };

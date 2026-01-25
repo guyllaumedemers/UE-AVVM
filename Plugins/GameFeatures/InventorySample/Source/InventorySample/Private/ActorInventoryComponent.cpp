@@ -1064,15 +1064,17 @@ void UActorInventoryComponent::CheckDisk() const
 	// This will allow gameplay to track progression information about content shared by Actors.
 	struct FItemWriter
 	{
-		static bool WriteAtElementId(const TArray<int32>& NewPrivateIds,
+		static void WriteAtElementId(const TArray<int32>& NewPrivateIds,
 		                             const int32 OuterElementId)
 		{
 			// @gdemers get-set file content, ensuring latest.
 			const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
-			
+
+			// @gdemers update provider Id entries.
+			UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), OuterElementId, NewPrivateIds);
+
 			// @gdemers : dirty file post modification.
 			UInventoryFileHelper::Static_MarkFileDirty();
-			return false;
 		}
 	};
 
@@ -1094,8 +1096,7 @@ void UActorInventoryComponent::CheckDisk() const
 
 	// @gdemers find entry on disk, and write to field value.
 	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
-	const bool bResult = FItemWriter::WriteAtElementId(NewDependencies, TargetUniqueId);
-	ensureAlwaysMsgf(bResult, TEXT("FItemWriter failed to serialized to disk."));
+	FItemWriter::WriteAtElementId(NewDependencies, TargetUniqueId);
 }
 
 void UActorInventoryComponent::CheckBounds()

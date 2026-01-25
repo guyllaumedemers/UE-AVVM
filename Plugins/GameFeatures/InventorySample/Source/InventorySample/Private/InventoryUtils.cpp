@@ -257,7 +257,9 @@ FString UInventoryUtils::GetInventoryProviderItemById(const FString& NewProvider
 		}
 		else
 		{
-			return (false == (ItemId ^ NewItemId));
+			// @gdemers retrieve only the bits specific to the item id, without storage information, stacking, etc...
+			const int32 FilteredId = (ItemId & NewItemId);
+			return (false == (ItemId ^ FilteredId));
 		}
 	});
 
@@ -283,4 +285,28 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewItemPayload)
 
 	const int32 PrivateId = JsonData->GetIntegerField(TEXT("PrivateId"));
 	return PrivateId;
+}
+
+void UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
+                                              const int32 ProviderId,
+                                              const TArray<int32>& NewPrivateIds)
+{
+	// TODO @gdemers
+	// // @gdemers old inventory for provider.
+	// const FString OldInventoryProviderId = UInventoryUtils::GetInventoryProviderById(NewPayload, ProviderId);
+	//
+	// TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	//
+	// // @gdemers fetch for edit the old representation.
+	// auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(OldInventoryProviderId);
+	// if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	// {
+	// 	return;
+	// }
+	//
+	// TArray<TSharedPtr<FJsonValue>> PrivateItemIds;
+	// for (const int32 PrivateItemId : NewPrivateIds)
+	// {
+	// 	PrivateItemIds.Add(MakeShareable(new FJsonValueNumber(PrivateItemId)));
+	// }
 }
