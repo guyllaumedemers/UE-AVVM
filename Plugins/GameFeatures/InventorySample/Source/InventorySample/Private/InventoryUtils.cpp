@@ -20,12 +20,15 @@
 #include "InventoryUtils.h"
 
 #include "AVVMGameplaySettings.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
 #include "InventoryProvider.h"
+#include "InventorySettings.h"
 #include "ItemObject.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/InventoryProviderTableRow.h"
 
 /**
  *	Class description:
@@ -315,6 +318,82 @@ FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
 		FString OutFormat;
 		NSJsonInventory::ToString(ModifiedProvider, OutFormat);
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
+	}
+
+	FJsonObject StackAllocatedFJsonObject;
+	auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return FString();
+	}
+	else
+	{
+		return JsonOutput;
+	}
+}
+
+FString UInventoryUtils::CreateDefaultInventoryProviders()
+{
+	const TSoftObjectPtr<UDataTable>& ProviderDataTable = UInventorySettings::GetDefaultProviderInventories();
+	if (!ensureAlwaysMsgf(!ProviderDataTable.IsNull(),
+	                      TEXT("Project doesn't reference a valid Data Table to initialize the Provider Inventories on Disk.")))
+	{
+		return FString();
+	}
+
+	// TODO @gdemers Improve on this. I dont like that its synchronous.
+	const UDataTable* DataTable = ProviderDataTable.LoadSynchronous();
+	if (!IsValid(DataTable))
+	{
+		return FString();
+	}
+
+	TArray<FInventoryProviderTableRow*> OutRows;
+	DataTable->GetAllRows<FInventoryProviderTableRow>(TEXT(""), OutRows);
+
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	for (const FInventoryProviderTableRow* Row : OutRows)
+	{
+		if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row entry.")))
+		{
+			continue;
+		}
+
+		int32 ProviderId = INDEX_NONE;
+
+		if (IsValid(Row->ProviderActorClass))
+		{
+			const auto* ProviderCDO = Row->ProviderActorClass->GetDefaultObject<AActor>();
+			ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifier(ProviderCDO);
+		}
+
+		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
+		                      TEXT("Missing valid Id for Provider entry.")))
+		{
+			continue;
+		}
+
+		// TODO @gdemers Figure out how we can build complex types (i.e attachments on gun, etc...)
+		// and if storage should be required here or not.
+		TArray<int32> Items;
+		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
+		{
+			const int32 PrivateItemId = INDEX_NONE;
+			Items.Add(PrivateItemId);
+		}
+
+		NSJsonInventory::FJsonInventoryProvider InventoryProvider;
+		InventoryProvider.Id = ProviderId;
+		InventoryProvider.PrivateItemIds = Items;
+
+		FString OutProvider;
+		NSJsonInventory::ToString(InventoryProvider, OutProvider);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
 	}
 
 	FJsonObject StackAllocatedFJsonObject;

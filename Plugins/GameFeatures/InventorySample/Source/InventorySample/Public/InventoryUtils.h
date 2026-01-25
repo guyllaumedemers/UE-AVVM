@@ -72,4 +72,7 @@ public:
 	static FString ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
 	                                       const int32 ProviderId,
 	                                       const TArray<int32>& NewPrivateIds);
+
+	UFUNCTION(BlueprintCallable)
+	static FString CreateDefaultInventoryProviders();
 };

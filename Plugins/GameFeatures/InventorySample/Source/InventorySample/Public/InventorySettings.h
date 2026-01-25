@@ -82,6 +82,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FString& GetAppDataDirPath();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
@@ -128,4 +131,7 @@ protected:
 	// @gdemers Path to serialize inventory layout of Actors who's content require progression tracking.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FString AppDataDirPath = FString();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 };

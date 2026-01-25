@@ -101,3 +101,8 @@ const FString& UInventorySettings::GetAppDataDirPath()
 {
 	return GetDefault<UInventorySettings>()->AppDataDirPath;
 }
+
+const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventories()
+{
+	return GetDefault<UInventorySettings>()->DefaultProviderInventories;
+}
