@@ -390,7 +390,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			const UClass* Class = ItemObjectClass.LoadSynchronous();
 			if (IsValid(Class))
 			{
-				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateId(Class->GetDefaultObject<UItemObject>(), PrivateItemIdComposition);
+				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), PrivateItemIdComposition);
 				Items.Add(PrivateItemId);
 			}
 		}
@@ -421,8 +421,8 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 	}
 }
 
-int32 UInventoryUtils::CreateDefaultPrivateId(const UItemObject* ItemObjectCDO,
-                                              const FPrivateItemIdComposition& ItemComposition)
+int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
+                                                  const FPrivateItemIdComposition& ItemComposition)
 {
 	if (!IsValid(ItemObjectCDO) || ItemComposition.OwningOuter.IsNull())
 	{

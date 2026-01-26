@@ -78,6 +78,6 @@ public:
 	static FString CreateDefaultInventoryProviders();
 
 	UFUNCTION(BlueprintCallable)
-	static int32 CreateDefaultPrivateId(const UItemObject* ItemObjectCDO,
-	                                    const FPrivateItemIdComposition& ItemComposition);
+	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
+	                                        const FPrivateItemIdComposition& ItemComposition);
 };
