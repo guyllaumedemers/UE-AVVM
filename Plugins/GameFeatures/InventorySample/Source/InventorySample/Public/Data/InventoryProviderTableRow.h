@@ -29,6 +29,12 @@
 
 class UItemObject;
 
+/**
+ *	Class description:
+ *	
+ *	FPrivateItemIdComposition is a context struct that encapsulate properties relevant to defining the dependencies
+ *	of an Item in the Inventory system.
+ */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FPrivateItemIdComposition
 {
