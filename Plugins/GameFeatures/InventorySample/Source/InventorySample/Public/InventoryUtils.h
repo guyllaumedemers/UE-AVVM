@@ -25,6 +25,7 @@
 
 #include "InventoryUtils.generated.h"
 
+struct FPrivateItemIdComposition;
 class UItemObject;
 
 /**
@@ -75,4 +76,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FString CreateDefaultInventoryProviders();
+
+	UFUNCTION(BlueprintCallable)
+	static int32 CreateDefaultPrivateId(const UItemObject* ItemObjectCDO,
+	                                    const FPrivateItemIdComposition& ItemComposition);
 };

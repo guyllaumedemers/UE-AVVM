@@ -29,6 +29,19 @@
 
 class UItemObject;
 
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FPrivateItemIdComposition
+{
+	GENERATED_BODY()
+	
+	// @gdemers may be null, unless we are an attachment.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSoftClassPtr<UItemObject> OwningOuter = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin="0", ClampMax="999"))
+	int32 DefaultStackCount = INDEX_NONE;
+};
+
 /**
  *	Class description:
  *	
@@ -49,5 +62,5 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	TSubclassOf<AActor> ProviderActorClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TMap<TSoftClassPtr<UItemObject>, int32/*Stack Count*/> DefaultInventory;
+	TMap<TSoftClassPtr<UItemObject>, FPrivateItemIdComposition> DefaultInventory;
 };

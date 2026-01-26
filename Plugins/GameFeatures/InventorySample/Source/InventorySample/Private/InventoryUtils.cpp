@@ -158,11 +158,11 @@ TArray<int32> UInventoryUtils::GetRuntimeUniqueIds(const TArray<UItemObject*>& I
 	TArray<int32> OutResults;
 	for (const UItemObject* Item : Items)
 	{
-		if (IsValid(Item))
+		// @gdemers return the runtime version of our UItemObject::PrivateItemId
+		// so we can compare against the version serialized with our backend.
+		const int32 ItemId = UItemObjectUtils::MakeRuntimePrivateItemId(Item);
+		if (ensureAlwaysMsgf(ItemId != INDEX_NONE, TEXT("Couldn't generate a valid PrivateItemId using runtime information.")))
 		{
-			// @gdemers return the runtime version of our UItemObject::PrivateItemId so we can compare against
-			// the version serialized with our backend.
-			const int32 ItemId = UItemObjectUtils::MakeRuntimePrivateItemId(Item);
 			OutResults.AddUnique(ItemId);
 		}
 	}
@@ -378,13 +378,21 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
-		// TODO @gdemers Figure out how we can build complex types (i.e attachments on gun, etc...)
-		// and if storage should be required here or not.
 		TArray<int32> Items;
-		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
+		for (auto& [ItemObjectClass, PrivateItemIdComposition] : Row->DefaultInventory)
 		{
-			const int32 PrivateItemId = INDEX_NONE;
-			Items.Add(PrivateItemId);
+			if (ItemObjectClass.IsNull())
+			{
+				continue;
+			}
+
+			// TODO @gdemers Improve on this. I dont like that its synchronous.
+			const UClass* Class = ItemObjectClass.LoadSynchronous();
+			if (IsValid(Class))
+			{
+				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateId(Class->GetDefaultObject<UItemObject>(), PrivateItemIdComposition);
+				Items.Add(PrivateItemId);
+			}
 		}
 
 		NSJsonInventory::FJsonInventoryProvider InventoryProvider;
@@ -411,4 +419,40 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 	{
 		return JsonOutput;
 	}
+}
+
+int32 UInventoryUtils::CreateDefaultPrivateId(const UItemObject* ItemObjectCDO,
+                                              const FPrivateItemIdComposition& ItemComposition)
+{
+	if (!IsValid(ItemObjectCDO) || ItemComposition.OwningOuter.IsNull())
+	{
+		return INDEX_NONE;
+	}
+
+	// TODO @gdemers Improve on this. I dont like that its synchronous.
+	const UClass* Class = ItemComposition.OwningOuter.LoadSynchronous();
+	if (!IsValid(Class))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers retrieve unique id of item.
+	int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
+	int32 AttachmentId = NULL;
+
+	// @gdemers if valid, this implies we are initializing an attachment, and referencing the object it's attached to.
+	const UItemObject* DependentOnItemObjectCDO = Class->GetDefaultObject<UItemObject>();
+	if (IsValid(DependentOnItemObjectCDO))
+	{
+		AttachmentId = ItemId + (1 << GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+		ItemId = UInventoryUtils::GetObjectUniqueIdentifier(DependentOnItemObjectCDO);
+	}
+
+	const int32 StackCount = ItemComposition.DefaultStackCount + (1 << GET_ITEM_COUNT_ENCODING_RSHIFT);
+
+	// TODO @gdemers define how storage referencing must be handled here!
+	const int32 StorageId = 1 + (1 << GET_STORAGE_ID_ENCODING_RSHIFT);
+	const int32 StoragePosition = 1 + (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
+
+	return (ItemId + StackCount + StorageId + StoragePosition + AttachmentId);
 }
