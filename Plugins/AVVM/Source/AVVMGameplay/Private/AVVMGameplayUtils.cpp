@@ -20,6 +20,7 @@
 #include "AVVMGameplayUtils.h"
 
 #include "AVVMGameplaySettings.h"
+#include "DataRegistrySubsystem.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/NetConnection.h"
@@ -137,15 +138,8 @@ int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
 		return INDEX_NONE;
 	}
 
-	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
-	if (ActorIdentifierDataTable.IsNull())
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers this should be fairly quick to load and not create any hitches during gameplay.
-	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
-	if (!IsValid(DataTable))
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
 	{
 		return INDEX_NONE;
 	}
@@ -156,7 +150,14 @@ int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
 		return INDEX_NONE;
 	}
 
-	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(ActorClass->GetFName(), TEXT(""));
+	const FDataRegistryId ActorUniqueId =
+	{
+			UAVVMGameplaySettings::GetActorIdentifierRegistryType(),
+			ActorClass->GetFName()
+	};
+
+	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ActorUniqueId);
 	if (ensureAlwaysMsgf(RowValue != nullptr,
 	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
 	{

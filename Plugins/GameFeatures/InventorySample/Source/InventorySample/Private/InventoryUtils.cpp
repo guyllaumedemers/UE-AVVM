@@ -22,6 +22,7 @@
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
+#include "DataRegistrySubsystem.h"
 #include "InventoryProvider.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
@@ -189,22 +190,16 @@ int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemA
 		return INDEX_NONE;
 	}
 
-	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
-	if (ActorIdentifierDataTable.IsNull())
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
 	{
 		return INDEX_NONE;
 	}
 
-	// @gdemers this should be fairly quick to load and not create any hitches during gameplay.
-	const UDataTable* DataTable = ActorIdentifierDataTable.LoadSynchronous();
-	if (!IsValid(DataTable))
-	{
-		return INDEX_NONE;
-	}
-
-	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(ItemActorId.ItemName, TEXT(""));
+	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ItemActorId);
 	if (ensureAlwaysMsgf(RowValue != nullptr,
-						 TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
 	{
 		return RowValue->UniqueId;
 	}

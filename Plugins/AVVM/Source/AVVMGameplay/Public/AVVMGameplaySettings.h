@@ -21,12 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
 
 #include "AVVMGameplaySettings.generated.h"
-
-class UDataTable;
 
 /**
  *	Class description:
@@ -40,14 +39,14 @@ class AVVMGAMEPLAY_API UAVVMGameplaySettings : public UDeveloperSettings
 
 public:
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
-	static const TSoftObjectPtr<UDataTable>& GetActorIdentifierDataTable();
+	static const FDataRegistryType& GetActorIdentifierRegistryType();
 	
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FGameplayTagContainer& GetBlockingTags_PlayerAction();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TSoftObjectPtr<UDataTable> ActorIdentifierDataTable = nullptr;
+	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
 
 	// @gdemers defined tags that are able to prevent user from executing actions based on conditions. (i.e Stasis, Down, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")

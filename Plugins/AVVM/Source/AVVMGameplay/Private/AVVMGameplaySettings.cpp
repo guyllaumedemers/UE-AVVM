@@ -19,9 +19,9 @@
 //SOFTWARE.
 #include "AVVMGameplaySettings.h"
 
-const TSoftObjectPtr<UDataTable>& UAVVMGameplaySettings::GetActorIdentifierDataTable()
+const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
 {
-	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierDataTable;
+	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
 }
 
 const FGameplayTagContainer& UAVVMGameplaySettings::GetBlockingTags_PlayerAction()
