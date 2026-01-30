@@ -422,14 +422,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
                                                   const FPrivateItemIdComposition& ItemComposition)
 {
-	if (!IsValid(ItemObjectCDO) || ItemComposition.OwningOuter.IsNull())
-	{
-		return INDEX_NONE;
-	}
-
-	// TODO @gdemers Improve on this. I dont like that its synchronous.
-	const UClass* Class = ItemComposition.OwningOuter.LoadSynchronous();
-	if (!IsValid(Class))
+	if (!IsValid(ItemObjectCDO))
 	{
 		return INDEX_NONE;
 	}
@@ -439,11 +432,15 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 	int32 AttachmentId = NULL;
 
 	// @gdemers if valid, this implies we are initializing an attachment, and referencing the object it's attached to.
-	const UItemObject* DependentOnItemObjectCDO = Class->GetDefaultObject<UItemObject>();
-	if (IsValid(DependentOnItemObjectCDO))
+	const UClass* Class = !ItemComposition.OwningOuter.IsNull() ? ItemComposition.OwningOuter.LoadSynchronous() : nullptr;
+	if (IsValid(Class))
 	{
-		AttachmentId = ItemId + (1 << GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-		ItemId = UInventoryUtils::GetObjectUniqueIdentifier(DependentOnItemObjectCDO);
+		const UItemObject* DependentOnItemObjectCDO = Class->GetDefaultObject<UItemObject>();
+		if (IsValid(DependentOnItemObjectCDO))
+		{
+			AttachmentId = ItemId + (1 << GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+			ItemId = UInventoryUtils::GetObjectUniqueIdentifier(DependentOnItemObjectCDO);
+		}
 	}
 
 	const int32 StackCount = ItemComposition.DefaultStackCount + (1 << GET_ITEM_COUNT_ENCODING_RSHIFT);
