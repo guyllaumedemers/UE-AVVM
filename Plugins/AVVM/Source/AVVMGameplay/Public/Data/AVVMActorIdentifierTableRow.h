@@ -48,6 +48,6 @@ struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
 #endif
 
 	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can target Attachment bits, Storage bits, and items.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	int32 UniqueId = INDEX_NONE;
 };

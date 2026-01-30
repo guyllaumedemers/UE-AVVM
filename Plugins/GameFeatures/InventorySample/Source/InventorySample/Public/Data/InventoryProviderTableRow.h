@@ -41,12 +41,12 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FPrivateItemIdComposition
 {
 	GENERATED_BODY()
-	
+
 	// @gdemers may be null, unless we are an attachment.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UItemObject> OwningOuter = nullptr;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin="0", ClampMax="999"))
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
 	int32 DefaultStackCount = INDEX_NONE;
 };
 
@@ -66,9 +66,9 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 #endif
 
 	// @gdemers fetch {IAVVMResourceProvider::UniqueId} from UInventoryUtils::GetItemActorUniqueIdentifier.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FDataRegistryId InventoryProviderActorId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TMap<TSoftClassPtr<UItemObject>, FPrivateItemIdComposition> DefaultInventory;
 };

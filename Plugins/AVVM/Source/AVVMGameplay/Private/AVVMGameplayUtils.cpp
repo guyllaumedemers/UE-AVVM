@@ -21,7 +21,6 @@
 
 #include "AVVMGameplaySettings.h"
 #include "DataRegistrySubsystem.h"
-#include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/NetConnection.h"
 #include "GameFramework/Actor.h"

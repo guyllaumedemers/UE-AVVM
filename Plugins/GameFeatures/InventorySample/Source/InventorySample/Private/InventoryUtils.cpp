@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "InventoryUtils.h"
 
-#include "AVVMGameplaySettings.h"
-#include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "InventoryProvider.h"
