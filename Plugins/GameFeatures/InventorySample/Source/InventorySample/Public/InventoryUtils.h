@@ -27,6 +27,7 @@
 
 struct FDataRegistryId;
 struct FPrivateItemIdComposition;
+struct FStorageHelper;
 class UItemObject;
 
 /**
@@ -83,5 +84,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-	                                        const FPrivateItemIdComposition& ItemComposition);
+	                                        const FPrivateItemIdComposition& ItemComposition,
+	                                        const FStorageHelper& OutStorageHelper);
 };

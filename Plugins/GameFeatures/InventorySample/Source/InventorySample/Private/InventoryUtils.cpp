@@ -24,6 +24,7 @@
 #include "InventoryProvider.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
+#include "StorageHelper.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
@@ -377,6 +378,10 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		}
 
 		TArray<int32> Items;
+		// @gdemers configure Helper object for the specific provider context. helps resolve default placement of objects
+		// within the inventory system for serialization.
+		FStorageHelper StorageHelper(ProviderId, &Items);
+
 		for (auto& [ItemObjectClass, PrivateItemIdComposition] : Row->DefaultInventory)
 		{
 			if (ItemObjectClass.IsNull())
@@ -388,7 +393,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			const UClass* Class = ItemObjectClass.LoadSynchronous();
 			if (IsValid(Class))
 			{
-				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), PrivateItemIdComposition);
+				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), PrivateItemIdComposition, StorageHelper);
 				Items.Add(PrivateItemId);
 			}
 		}
@@ -420,7 +425,8 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 }
 
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-                                                  const FPrivateItemIdComposition& ItemComposition)
+                                                  const FPrivateItemIdComposition& ItemComposition,
+                                                  const FStorageHelper& OutStorageHelper)
 {
 	if (!IsValid(ItemObjectCDO))
 	{
@@ -445,9 +451,8 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 
 	const int32 StackCount = ItemComposition.DefaultStackCount + (1 << GET_ITEM_COUNT_ENCODING_RSHIFT);
 
-	// TODO @gdemers define how storage referencing must be handled here!
-	const int32 StorageId = 1 + (1 << GET_STORAGE_ID_ENCODING_RSHIFT);
-	const int32 StoragePosition = 1 + (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
-
-	return (ItemId + StackCount + StorageId + StoragePosition + AttachmentId);
+	int32 OutStoragePosition = INDEX_NONE;
+	int32 OutStorageId = INDEX_NONE;
+	OutStorageHelper.GetStorageInfo(OutStorageId, OutStoragePosition);
+	return (ItemId + StackCount + OutStorageId + OutStoragePosition + AttachmentId);
 }
