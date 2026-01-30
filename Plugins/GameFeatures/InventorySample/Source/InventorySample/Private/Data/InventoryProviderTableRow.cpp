@@ -23,10 +23,10 @@
 EDataValidationResult FInventoryProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!IsValid(ProviderActorClass))
+	if (!InventoryProviderActorId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "TSubclassOf<AActor> missing. No valid Class specified!"));
+		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
 	}
 	
 	if (DefaultInventory.IsEmpty())

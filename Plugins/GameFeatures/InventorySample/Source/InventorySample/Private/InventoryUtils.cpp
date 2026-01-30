@@ -176,6 +176,18 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 	{
 		return INDEX_NONE;
 	}
+	else
+	{
+		return UInventoryUtils::GetItemActorUniqueIdentifier(Item->GetItemActorId());
+	}
+}
+
+int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId)
+{
+	if (!ItemActorId.IsValid())
+	{
+		return INDEX_NONE;
+	}
 
 	const TSoftObjectPtr<UDataTable>& ActorIdentifierDataTable = UAVVMGameplaySettings::GetActorIdentifierDataTable();
 	if (ActorIdentifierDataTable.IsNull())
@@ -190,9 +202,9 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 		return INDEX_NONE;
 	}
 
-	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(Item->GetItemActorId().ItemName, TEXT(""));
+	const auto* RowValue = DataTable->FindRow<FAVVMActorIdentifierDataTableRow>(ItemActorId.ItemName, TEXT(""));
 	if (ensureAlwaysMsgf(RowValue != nullptr,
-	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+						 TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
 	{
 		return RowValue->UniqueId;
 	}
@@ -364,14 +376,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
-		int32 ProviderId = INDEX_NONE;
-
-		if (IsValid(Row->ProviderActorClass))
-		{
-			const auto* ProviderCDO = Row->ProviderActorClass->GetDefaultObject<AActor>();
-			ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifier(ProviderCDO);
-		}
-
+		const int32 ProviderId = UInventoryUtils::GetItemActorUniqueIdentifier(Row->InventoryProviderActorId);
 		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
 		                      TEXT("Missing valid Id for Provider entry.")))
 		{

@@ -21,6 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
+
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
 #endif
@@ -63,9 +65,9 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers fetch {IAVVMResourceProvider::UniqueId} from CDO class, or UAVVMGameplayUtils::GetActorUniqueIdentifier.
+	// @gdemers fetch {IAVVMResourceProvider::UniqueId} from UInventoryUtils::GetItemActorUniqueIdentifier.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<AActor> ProviderActorClass = nullptr;
+	FDataRegistryId InventoryProviderActorId = FDataRegistryId();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TMap<TSoftClassPtr<UItemObject>, FPrivateItemIdComposition> DefaultInventory;

@@ -25,6 +25,7 @@
 
 #include "InventoryUtils.generated.h"
 
+struct FDataRegistryId;
 struct FPrivateItemIdComposition;
 class UItemObject;
 
@@ -51,6 +52,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId);
 
 	UFUNCTION(BlueprintCallable)
 	static FString ModifyProfile(const UObject* WorldContextObject,
