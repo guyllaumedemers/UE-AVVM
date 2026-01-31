@@ -385,7 +385,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		FStorageHelper StorageHelper(ProviderId, &Items);
 
 		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset
-		// are Blueprints, not elements dynamically composed. A complex entry is configured based on a Item Actor definition.
+		// are Blueprints, not elements dynamically composed. A complex entry is configured based on an Item Actor definition.
 		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
 		{
 			if (ItemObjectClass.IsNull())

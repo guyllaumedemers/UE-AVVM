@@ -45,7 +45,7 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
                                             const int32 BitRange,
                                             const int32 LShift)
 {
-	if (!ensureAlwaysMsgf(Input >= 0 && (Input < (1 << BitRange)),
+	if (!ensureAlwaysMsgf(Input >= 1 && (Input < (1 << BitRange)),
 	                      TEXT("Invalid Input. Outside provided Range.")))
 	{
 		return INDEX_NONE;
