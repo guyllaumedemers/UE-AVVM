@@ -85,6 +85,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FGameplayTag& GetStorageTypeTag();
+
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FGameplayTag& GetAttachmentTypeTag();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
@@ -134,4 +140,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FGameplayTag StorageTypeTag = FGameplayTag::EmptyTag;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FGameplayTag AttachmentTypeTag = FGameplayTag::EmptyTag;
 };

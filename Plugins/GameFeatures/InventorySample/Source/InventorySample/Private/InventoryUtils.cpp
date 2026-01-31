@@ -441,9 +441,8 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 	// @gdemers retrieve unique id of item. IMPORTANT : our item id isnt shifted. we may be an attachment, or storage.
 	int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
 
-	// TODO @gdemers expose tags here
-	static const auto ItemAttachmentType = FGameplayTagContainer();
-	static const auto ItemStorageType = FGameplayTagContainer();
+	static const auto ItemAttachmentType = FGameplayTagContainer(UInventorySettings::GetAttachmentTypeTag());
+	static const auto ItemStorageType = FGameplayTagContainer(UInventorySettings::GetStorageTypeTag());
 
 	if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemStorageType))
 	{

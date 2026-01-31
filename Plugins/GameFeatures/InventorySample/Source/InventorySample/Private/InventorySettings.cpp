@@ -106,3 +106,13 @@ const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventor
 {
 	return GetDefault<UInventorySettings>()->DefaultProviderInventories;
 }
+
+const FGameplayTag& UInventorySettings::GetStorageTypeTag()
+{
+	return GetDefault<UInventorySettings>()->StorageTypeTag;
+}
+
+const FGameplayTag& UInventorySettings::GetAttachmentTypeTag()
+{
+	return GetDefault<UInventorySettings>()->AttachmentTypeTag;
+}

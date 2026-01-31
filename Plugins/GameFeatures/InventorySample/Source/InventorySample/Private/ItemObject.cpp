@@ -832,9 +832,9 @@ int32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)
 		return INDEX_NONE;
 	}
 
-	const int32 StackCount = ItemObject->GetRuntimeCount() + (1 << GET_ITEM_COUNT_ENCODING_RSHIFT);
-	const int32 StorageId = ItemObject->GetStorageId() + (1 << GET_STORAGE_ID_ENCODING_RSHIFT);
-	const int32 StoragePosition = ItemObject->GetStoragePosition() + (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
+	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(), GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
+	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetStorageId(), GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetStoragePosition(), GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
 
 	// TODO @gdemers theres a problem here !
 	// MakeRuntimePrivateItemId is called from within CheckBackend, and indirectly from OnDrop, and OnPickup. This means that our inventory
