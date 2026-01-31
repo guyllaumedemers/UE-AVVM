@@ -19,20 +19,14 @@
 //SOFTWARE.
 #include "StorageHelper.h"
 
-TStrongObjectPtr<UDataTable> FStorageHelper::WeightTable = nullptr;
+#include "ItemObject.h"
 
 FStorageHelper::FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItems)
 	: Items(NewItems),
 	  ProviderId(NewProviderId)
 {
-	if (!WeightTable.IsValid())
-	{
-		// TODO @gdemers define Rules that is project specific, and load it!
-		WeightTable = nullptr;
-	}
 }
 
-void FStorageHelper::GetStorageInfo(int32& OutStorageId, int32& OutStoragePosition) const
+void FStorageHelper::GetStorageInfo(const UItemObject* ItemObjectCDO, int32& OutStorageId, int32& OutStoragePosition) const
 {
-	// TODO @gdemers make impl
 }

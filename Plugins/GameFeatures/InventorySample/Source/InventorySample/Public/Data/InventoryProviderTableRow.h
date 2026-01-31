@@ -34,27 +34,11 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	FPrivateItemIdComposition is a context struct that encapsulate properties relevant to defining the dependencies
- *	of an Item in the Inventory system.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FPrivateItemIdComposition
-{
-	GENERATED_BODY()
-
-	// @gdemers may be null, unless we are an attachment.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<UItemObject> OwningOuter = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
-	int32 DefaultStackCount = INDEX_NONE;
-};
-
-/**
- *	Class description:
- *	
  *	FInventoryProviderTableRow is a Row type that define the default values used to initialize an
- *	Inventory Provider entry on disk.
+ *	Inventory Provider entry on disk (based on Data Asset).
+ *	
+ *	Notes : Item defined in this Row Table are unique elements. Complex scheme, such as a weapon with attachments
+ *	are pre-baked from the Item Actor definition a UItemObject reference. There shouldn't be any relationship between items here!
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
@@ -69,6 +53,6 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FDataRegistryId InventoryProviderActorId = FDataRegistryId();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSoftClassPtr<UItemObject>, FPrivateItemIdComposition> DefaultInventory;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
+	TMap<TSoftClassPtr<UItemObject>, int32/*DefaultStackCount*/> DefaultInventory;
 };

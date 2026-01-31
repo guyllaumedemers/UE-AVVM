@@ -23,7 +23,7 @@
 
 #include "StorageHelper.generated.h"
 
-class UDataTable;
+class UItemObject;
 
 /**
  *	Class description:
@@ -38,10 +38,9 @@ struct INVENTORYSAMPLE_API FStorageHelper
 	
 	FStorageHelper() = default;
 	FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItems);
-	void GetStorageInfo(int32& OutStorageId, int32& OutStoragePosition) const;
+	void GetStorageInfo(const UItemObject* ItemObjectCDO, int32& OutStorageId, int32& OutStoragePosition) const;
 
 protected:
-	static TStrongObjectPtr<UDataTable> WeightTable;
 	TArray<int32>* Items = nullptr;
 	int32 ProviderId = INDEX_NONE;
 };

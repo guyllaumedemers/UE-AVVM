@@ -26,7 +26,6 @@
 #include "InventoryUtils.generated.h"
 
 struct FDataRegistryId;
-struct FPrivateItemIdComposition;
 struct FStorageHelper;
 class UItemObject;
 
@@ -51,6 +50,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetRuntimeUniqueIds(const TArray<UItemObject*>& Items);
 	
+	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle
+	// shifting following user defined rules.
 	UFUNCTION(BlueprintCallable)
 	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
 	
@@ -84,6 +85,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-	                                        const FPrivateItemIdComposition& ItemComposition,
+	                                        const int32 StackCount,
 	                                        const FStorageHelper& OutStorageHelper);
 };

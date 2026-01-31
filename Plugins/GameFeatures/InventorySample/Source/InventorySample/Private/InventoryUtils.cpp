@@ -24,6 +24,7 @@
 #include "InventoryProvider.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
+#include "NativeGameplayTags.h"
 #include "StorageHelper.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
@@ -279,9 +280,10 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
-		// @gdemers retrieve only the bits specific to the item id, without storage information, stacking, etc...
-		const int32 FilteredId = (SearchId & Value);
-		return (false == (SearchId ^ FilteredId));
+		// @gdemers decode Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
+		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
+		const int32 OutValue = UInventoryUtils::DecodeItem(Value);
+		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (SearchResult != nullptr)
@@ -382,7 +384,9 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		// within the inventory system for serialization.
 		FStorageHelper StorageHelper(ProviderId, &Items);
 
-		for (auto& [ItemObjectClass, PrivateItemIdComposition] : Row->DefaultInventory)
+		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset
+		// are Blueprints, not elements dynamically composed. A complex entry is configured based on a Item Actor definition.
+		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
 		{
 			if (ItemObjectClass.IsNull())
 			{
@@ -393,7 +397,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			const UClass* Class = ItemObjectClass.LoadSynchronous();
 			if (IsValid(Class))
 			{
-				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), PrivateItemIdComposition, StorageHelper);
+				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), StackCount, StorageHelper);
 				Items.Add(PrivateItemId);
 			}
 		}
@@ -425,7 +429,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 }
 
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-                                                  const FPrivateItemIdComposition& ItemComposition,
+                                                  const int32 StackCount,
                                                   const FStorageHelper& OutStorageHelper)
 {
 	if (!IsValid(ItemObjectCDO))
@@ -433,26 +437,30 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 		return INDEX_NONE;
 	}
 
-	// @gdemers retrieve unique id of item.
+	const int32 NewStackCount = UAVVMOnlineEncodingUtils::EncodeInt32(StackCount, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
+	// @gdemers retrieve unique id of item. IMPORTANT : our item id isnt shifted. we may be an attachment, or storage.
 	int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
-	int32 AttachmentId = NULL;
 
-	// @gdemers if valid, this implies we are initializing an attachment, and referencing the object it's attached to.
-	const UClass* Class = !ItemComposition.OwningOuter.IsNull() ? ItemComposition.OwningOuter.LoadSynchronous() : nullptr;
-	if (IsValid(Class))
+	// TODO @gdemers expose tags here
+	static const auto ItemAttachmentType = FGameplayTagContainer();
+	static const auto ItemStorageType = FGameplayTagContainer();
+
+	if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemStorageType))
 	{
-		const UItemObject* DependentOnItemObjectCDO = Class->GetDefaultObject<UItemObject>();
-		if (IsValid(DependentOnItemObjectCDO))
-		{
-			AttachmentId = ItemId + (1 << GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-			ItemId = UInventoryUtils::GetObjectUniqueIdentifier(DependentOnItemObjectCDO);
-		}
+		ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT) + CHECK_CHARACTER_DEPENDENT_ENCODING;
+		return (ItemId + NewStackCount);
 	}
+	else
+	{
+		if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemAttachmentType))
+		{
+			ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+		}
 
-	const int32 StackCount = ItemComposition.DefaultStackCount + (1 << GET_ITEM_COUNT_ENCODING_RSHIFT);
+		int32 OutStoragePosition = NULL;
+		int32 OutStorageId = NULL;
 
-	int32 OutStoragePosition = INDEX_NONE;
-	int32 OutStorageId = INDEX_NONE;
-	OutStorageHelper.GetStorageInfo(OutStorageId, OutStoragePosition);
-	return (ItemId + StackCount + OutStorageId + OutStoragePosition + AttachmentId);
+		OutStorageHelper.GetStorageInfo(ItemObjectCDO, OutStorageId, OutStoragePosition);
+		return (ItemId + OutStorageId + OutStoragePosition + NewStackCount);
+	}
 }
