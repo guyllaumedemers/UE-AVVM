@@ -477,13 +477,15 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 
 	// @gdemers get-set file from disk caching all inventory providers representation.
 	const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
-	
+
+	// @gdemers fetch provider payload from disk representation.
 	const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
 	if (InventoryProviderPayload.IsEmpty())
 	{
 		return INDEX_NONE;
 	}
 
+	// @gdemers read private item id from payload.
 	const int32 PrivateId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemId);
 	return PrivateId;
 }

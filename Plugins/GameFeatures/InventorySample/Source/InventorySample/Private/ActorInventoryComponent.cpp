@@ -1079,7 +1079,7 @@ void UActorInventoryComponent::CheckDisk() const
 	// @gdemers get-set file from disk caching all inventory providers representation.
 	const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
 
-	// @gdemers serialize runtime values so we can write to disk
+	// @gdemers serialize runtime values so we can write to disk.
 	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
 
 	// @gdemers update provider Id entries.
