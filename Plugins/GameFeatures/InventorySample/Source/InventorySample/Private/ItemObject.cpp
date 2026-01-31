@@ -454,29 +454,6 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                               const TArray<int32>& NewPrivateIds,
                                               UItemObject* UnInitializedItemObject)
 {
-	// @gdemers we need to be able to initialize the item representation, stack, storage id, position based on data cached specific to the outer which may be cached serialized to disk.
-	// example : our store content will display X amount of items based on the Data Asset representation it references.
-	// During progression, internal representation may change, which require tracking, most-likely by serializing to disk under the user AppData.
-	struct FItemReader
-	{
-		static int32 GetPrivateItemId(const TArray<int32>& NewPrivateIds,
-		                              const int32 OuterElementId,
-		                              const int32 ItemElementId)
-		{
-			// @gdemers get-set file content, ensuring latest.
-			const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
-
-			const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), OuterElementId);
-			if (InventoryProviderPayload.IsEmpty())
-			{
-				return INDEX_NONE;
-			}
-
-			const int32 PrivateId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemElementId);
-			return PrivateId;
-		}
-	};
-
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
 		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
 	{
@@ -498,9 +475,17 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	// @gdemers find entry on disk, and read field value.
-	const int32 PrivateItemId = FItemReader::GetPrivateItemId(NewPrivateIds, TargetUniqueId, ItemId);
-	return PrivateItemId;
+	// @gdemers get-set file from disk caching all inventory providers representation.
+	const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+	
+	const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
+	if (InventoryProviderPayload.IsEmpty())
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 PrivateId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemId);
+	return PrivateId;
 }
 
 int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,

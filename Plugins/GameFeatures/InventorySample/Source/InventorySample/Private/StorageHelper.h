@@ -35,10 +35,13 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FStorageHelper
 {
 	GENERATED_BODY()
-	
+
 	FStorageHelper() = default;
 	FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItems);
-	void GetStorageInfo(const UItemObject* ItemObjectCDO, int32& OutStorageId, int32& OutStoragePosition) const;
+
+	void GetStorageInfo(const UItemObject* ItemObjectCDO,
+	                    int32& OutStorageId,
+	                    int32& OutStoragePosition) const;
 
 protected:
 	TArray<int32>* Items = nullptr;

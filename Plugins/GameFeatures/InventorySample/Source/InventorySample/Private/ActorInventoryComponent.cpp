@@ -1060,24 +1060,6 @@ void UActorInventoryComponent::CheckBackend() const
 
 void UActorInventoryComponent::CheckDisk() const
 {
-	// @gdemers we need to be able to create/and modify the cached representation of our the item on disk.
-	// This will allow gameplay to track progression information about content shared by Actors.
-	struct FItemWriter
-	{
-		static void WriteAtElementId(const TArray<int32>& NewPrivateIds,
-		                             const int32 OuterElementId)
-		{
-			// @gdemers get-set file content, ensuring latest.
-			const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
-
-			// @gdemers update provider Id entries.
-			const FString DirtyFileContent = UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), OuterElementId, NewPrivateIds);
-
-			// @gdemers : serialize new file content.
-			UInventoryFileHelper::Static_Serialize(DirtyFileContent);
-		}
-	};
-
 	const AActor* Outer = OwningOuter.Get();
 
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
@@ -1094,9 +1076,17 @@ void UActorInventoryComponent::CheckDisk() const
 		return;
 	}
 
-	// @gdemers find entry on disk, and write to field value.
+	// @gdemers get-set file from disk caching all inventory providers representation.
+	const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+
+	// @gdemers serialize runtime values so we can write to disk
 	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
-	FItemWriter::WriteAtElementId(NewDependencies, TargetUniqueId);
+
+	// @gdemers update provider Id entries.
+	const FString DirtyFileContent = UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), TargetUniqueId, NewDependencies);
+
+	// @gdemers : serialize new file content.
+	UInventoryFileHelper::Static_Serialize(DirtyFileContent);
 }
 
 void UActorInventoryComponent::CheckBounds()

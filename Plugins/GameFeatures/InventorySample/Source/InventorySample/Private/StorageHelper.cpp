@@ -27,6 +27,8 @@ FStorageHelper::FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItem
 {
 }
 
-void FStorageHelper::GetStorageInfo(const UItemObject* ItemObjectCDO, int32& OutStorageId, int32& OutStoragePosition) const
+void FStorageHelper::GetStorageInfo(const UItemObject* ItemObjectCDO,
+                                    int32& OutStorageId,
+                                    int32& OutStoragePosition) const
 {
 }
