@@ -65,10 +65,11 @@ void FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<co
 			continue;
 		}
 
+		const int32 FilteredStorageId = UAVVMOnlineEncodingUtils::FilterInt32(StoragePrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
 		for (int32 i = StorageStartPosition; (i < Items.Num()) && (i < (StorageStartPosition + StorageMaxCapacity)); ++i)
 		{
 			const int32 StoragePosition = ((StorageStartPosition + i) % StorageMaxCapacity);
-			Items[i] += (StoragePrivateItemId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT));
+			Items[i] += (FilteredStorageId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT));
 		}
 
 		StorageStartPosition += StorageMaxCapacity;
