@@ -404,12 +404,26 @@ void UItemObject::OnRep_ItemStateModified(const FItemState& OldItemState)
 void UItemObject::OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentSlotTag,
                                           const AActor* NewAttachment)
 {
-	NonReplicatedItemAttachmentActors.FindOrAdd(NewItemAttachmentSlotTag, NewAttachment);
+	const bool bDoesDefineAttachmentSlot = DoesAttachmentSlotHasPartialMatch(FGameplayTagContainer(NewItemAttachmentSlotTag));
+	if (ensureAlwaysMsgf(bDoesDefineAttachmentSlot,
+	                     TEXT("Attachment Slot Tag \"%s\" isn't expected to be referenced on the UItemObject targeted \"%s\"."),
+	                     *NewItemAttachmentSlotTag.GetTagName().ToString(),
+	                     *GetName()))
+	{
+		NonReplicatedItemAttachmentActors.FindOrAdd(NewItemAttachmentSlotTag, NewAttachment);
+	}
 }
 
 void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag)
 {
-	NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
+	const bool bDoesDefineAttachmentSlot = DoesAttachmentSlotHasPartialMatch(FGameplayTagContainer(NewItemAttachmentSlotTag));
+	if (ensureAlwaysMsgf(bDoesDefineAttachmentSlot,
+	                     TEXT("Attachment Slot Tag \"%s\" isn't expected to be referenced on the UItemObject targeted \"%s\"."),
+	                     *NewItemAttachmentSlotTag.GetTagName().ToString(),
+	                     *GetName()))
+	{
+		NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
+	}
 }
 
 int32 UItemObject::GetStorageMaxCapacity() const
