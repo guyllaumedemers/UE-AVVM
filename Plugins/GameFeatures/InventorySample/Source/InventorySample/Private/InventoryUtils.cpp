@@ -451,15 +451,12 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 		ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT) + CHECK_CHARACTER_DEPENDENT_ENCODING;
 		return (ItemId + NewStackCount);
 	}
-	else
+	else if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemAttachmentType))
 	{
-		if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemAttachmentType))
-		{
-			ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-		}
-
-		int32 OutStoragePosition = NULL;
-		int32 OutStorageId = NULL;
-		return (ItemId + OutStorageId + OutStoragePosition + NewStackCount);
+		ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
 	}
+
+	// @gdemers we do not assign storage as we are still unaware of which storage type is referenced
+	// on the Inventory Provider we are trying to initialize. This information will be handled from within the calling function.
+	return (ItemId + NewStackCount);
 }
