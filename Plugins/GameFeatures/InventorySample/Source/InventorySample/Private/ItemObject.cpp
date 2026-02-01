@@ -266,9 +266,52 @@ int32 UItemObject::GetRuntimeStoragePosition() const
 	return RuntimeItemState.StoragePosition;
 }
 
+int32 UItemObject::GetStorageMaxCapacity() const
+{
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(GetTypedOuter<UActorInventoryComponent>(), RuntimeItemState.StorageId);
+	if (!ensureAlwaysMsgf((StorageMaxCapacity != INDEX_NONE),
+	                      TEXT("StorageId provided couldn't resolve a valid Storage Capacity.")))
+	{
+		return INDEX_NONE;
+	}
+
+	return StorageMaxCapacity;
+}
+
+int32 UItemObject::GetMaxStackCount() const
+{
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	const bool bDoesStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
+	if (!bDoesStack)
+	{
+		static constexpr int32 One = 1;
+		return One;
+	}
+	else
+	{
+		const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORY_ITEM_STORAGE));
+		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+
+		// @gdemers shouldnt require async loading as this table will ever only contains integers.
+		const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
+		const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
+
+		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+		const int32 BitEncodingLimit = (bIsStorage ? MaxStorageCapacityBounds : MaxStackCountBounds);
+
+		return FMath::Clamp(MaxStackCount, 0, BitEncodingLimit);
+	}
+}
+
 const FDataRegistryId& UItemObject::GetItemActorId() const
 {
 	return ItemActorId;
+}
+
+const FDataRegistryId& UItemObject::GetItemActorUIId() const
+{
+	return ItemActorUIId;
 }
 
 void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
@@ -423,44 +466,6 @@ void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentS
 	                     *GetName()))
 	{
 		NonReplicatedItemAttachmentActors.Remove(NewItemAttachmentSlotTag);
-	}
-}
-
-int32 UItemObject::GetStorageMaxCapacity() const
-{
-	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(GetTypedOuter<UActorInventoryComponent>(), RuntimeItemState.StorageId);
-	if (!ensureAlwaysMsgf((StorageMaxCapacity != INDEX_NONE),
-	                      TEXT("StorageId provided couldn't resolve a valid Storage Capacity.")))
-	{
-		return INDEX_NONE;
-	}
-
-	return StorageMaxCapacity;
-}
-
-int32 UItemObject::GetMaxStackCount() const
-{
-	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
-	const bool bDoesStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
-	if (!bDoesStack)
-	{
-		static constexpr int32 One = 1;
-		return One;
-	}
-	else
-	{
-		const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORY_ITEM_STORAGE));
-		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
-
-		// @gdemers shouldnt require async loading as this table will ever only contains integers.
-		const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
-		const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
-
-		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
-		const int32 BitEncodingLimit = (bIsStorage ? MaxStorageCapacityBounds : MaxStackCountBounds);
-
-		return FMath::Clamp(MaxStackCount, 0, BitEncodingLimit);
 	}
 }
 

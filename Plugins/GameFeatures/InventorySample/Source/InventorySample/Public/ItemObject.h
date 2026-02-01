@@ -184,7 +184,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeStoragePosition() const;
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetStorageMaxCapacity() const;
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetMaxStackCount() const;
+
+	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& GetItemActorId() const;
+
+	UFUNCTION(BlueprintCallable)
+	const FDataRegistryId& GetItemActorUIId() const;
 
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
@@ -213,9 +223,6 @@ protected:
 
 	UFUNCTION()
 	void OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag);
-
-	int32 GetStorageMaxCapacity() const;
-	int32 GetMaxStackCount() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
 	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
@@ -266,7 +273,6 @@ private:
 	// to the backend. This handle is your only way of finding the correct instance serialized with your backend (player/actor profile)
 	// representation. (we do nullify during drop action but that imply we have already released our handle from backend.)
 	int32 PrivateItemId = INDEX_NONE;
-	friend class FStorageHelper;
 	friend class UItemObjectUtils;
 };
 
