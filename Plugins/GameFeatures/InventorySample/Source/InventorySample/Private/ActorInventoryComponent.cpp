@@ -846,8 +846,8 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	if (bDoesStackOverflow)
 	{
 		// @gdemers get storage information from the item onto which we attempted stacking, but generated an overflow from.
-		int32 TargetStoragePosition = (*SearchResult)->GetStoragePosition();
-		int32 TargetStorageId = (*SearchResult)->GetStorageId();
+		int32 TargetStoragePosition = (*SearchResult)->GetRuntimeStoragePosition();
+		int32 TargetStorageId = (*SearchResult)->GetRuntimeStorageId();
 
 		// @gdemers check if there is still unique entries available within our bounds.
 		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
@@ -881,8 +881,8 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 				Items.Add(NewItemObjectEntry);
 
 				// @gdemers update our last assigned storage information if ever we have more content to assign.
-				TargetStoragePosition = NewItemObjectEntry->GetStoragePosition();
-				TargetStorageId = NewItemObjectEntry->GetStorageId();
+				TargetStoragePosition = NewItemObjectEntry->GetRuntimeStoragePosition();
+				TargetStorageId = NewItemObjectEntry->GetRuntimeStorageId();
 			}
 
 			// @gdemers validate inventory bounds between addition to prevent overflow based
@@ -930,11 +930,11 @@ void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
 		return;
 	}
 
-	const int32 SrcStoragePosition = SrcItemObject->GetStoragePosition();
-	const int32 SrcStorageId = SrcItemObject->GetStorageId();
+	const int32 SrcStoragePosition = SrcItemObject->GetRuntimeStoragePosition();
+	const int32 SrcStorageId = SrcItemObject->GetRuntimeStorageId();
 
-	const int32 DestStoragePosition = DestItemObject->GetStoragePosition();
-	const int32 DestStorageId = DestItemObject->GetStorageId();
+	const int32 DestStoragePosition = DestItemObject->GetRuntimeStoragePosition();
+	const int32 DestStorageId = DestItemObject->GetRuntimeStorageId();
 
 	SrcItemObject->ModifyRuntimeStoragePosition(DestStoragePosition);
 	SrcItemObject->ModifyRuntimeStorageId(DestStorageId);
@@ -1099,7 +1099,7 @@ void UActorInventoryComponent::CheckBounds()
 			continue;
 		}
 
-		const int32 StorageId = Item->GetStorageId();
+		const int32 StorageId = Item->GetRuntimeStorageId();
 		int32& OutCount = OccupiedSlots.FindOrAdd(StorageId);
 		++OutCount;
 	}

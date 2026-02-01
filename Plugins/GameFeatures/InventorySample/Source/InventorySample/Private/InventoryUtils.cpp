@@ -379,11 +379,8 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
+		TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
 		TArray<int32> Items;
-		// @gdemers configure Helper object for the specific provider context. helps resolve default placement of objects
-		// within the inventory system for serialization.
-		FStorageHelper StorageHelper(ProviderId, &Items);
-
 		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset
 		// are Blueprints, not elements dynamically composed. A complex entry is configured based on an Item Actor definition.
 		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
@@ -397,10 +394,16 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			const UClass* Class = ItemObjectClass.LoadSynchronous();
 			if (IsValid(Class))
 			{
-				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), StackCount, StorageHelper);
+				const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
+				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, StackCount);
+				ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
 				Items.Add(PrivateItemId);
 			}
 		}
+
+		// @gdemers all items are initialized. if our inventory provider definition was configured correctly,
+		// a valid storage object, or more are available for referencing on relevant items.
+		FStorageHelper::HandleStorageAssignment(ItemCDOs, Items);
 
 		NSJsonInventory::FJsonInventoryProvider InventoryProvider;
 		InventoryProvider.Id = ProviderId;
@@ -429,8 +432,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 }
 
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-                                                  const int32 StackCount,
-                                                  const FStorageHelper& OutStorageHelper)
+                                                  const int32 StackCount)
 {
 	if (!IsValid(ItemObjectCDO))
 	{
@@ -458,8 +460,6 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 
 		int32 OutStoragePosition = NULL;
 		int32 OutStorageId = NULL;
-
-		OutStorageHelper.GetStorageInfo(ItemObjectCDO, OutStorageId, OutStoragePosition);
 		return (ItemId + OutStorageId + OutStoragePosition + NewStackCount);
 	}
 }

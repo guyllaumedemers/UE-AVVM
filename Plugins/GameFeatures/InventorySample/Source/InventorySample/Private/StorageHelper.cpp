@@ -20,15 +20,57 @@
 #include "StorageHelper.h"
 
 #include "ItemObject.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
 
-FStorageHelper::FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItems)
-	: Items(NewItems),
-	  ProviderId(NewProviderId)
+void FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<const UItemObject>>& ItemCDOs,
+                                             TArray<int32>& Items)
 {
-}
+	const TArray<int32> SearchResults = Items.FilterByPredicate([](const int32 Value)
+	{
+		const int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(Value, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		return (!!StorageId);
+	});
 
-void FStorageHelper::GetStorageInfo(const UItemObject* ItemObjectCDO,
-                                    int32& OutStorageId,
-                                    int32& OutStoragePosition) const
-{
+	if (!ensureAlwaysMsgf(!SearchResults.IsEmpty(),
+	                      TEXT("Inventory Provider definition is not referencing a valid Storage UItemObject. Please add one!")))
+	{
+		return;
+	}
+
+	int32 StorageStartPosition = NULL;
+	for (const int32 StoragePrivateItemId : SearchResults)
+	{
+		if (StorageStartPosition >= Items.Num())
+		{
+			return;
+		}
+
+		const bool bDoesContains = ItemCDOs.Contains(StoragePrivateItemId);
+		if (!bDoesContains)
+		{
+			continue;
+		}
+
+		const TWeakObjectPtr<const UItemObject>& StorageObject = ItemCDOs[StoragePrivateItemId];
+		if (!StorageObject.IsValid())
+		{
+			continue;
+		}
+
+		const int32 StorageMaxCapacity = StorageObject->GetStorageMaxCapacity();
+		if (!ensureAlwaysMsgf(StorageMaxCapacity != INDEX_NONE,
+		                      TEXT("Invalid Storage Capacity set. Make sure you have configured the required Data Table for Storage Capacity")))
+		{
+			continue;
+		}
+
+		for (int32 i = StorageStartPosition; (i < Items.Num()) && (i < (StorageStartPosition + StorageMaxCapacity)); ++i)
+		{
+			const int32 StoragePosition = ((StorageStartPosition + i) % StorageMaxCapacity);
+			Items[i] += (StoragePrivateItemId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT));
+		}
+
+		StorageStartPosition += StorageMaxCapacity;
+	}
 }

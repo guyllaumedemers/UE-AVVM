@@ -1,0 +1,258 @@
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ActorInventoryComponent.cpp b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ActorInventoryComponent.cpp[m
+[1mindex ce4c1a0..d364cda 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ActorInventoryComponent.cpp[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ActorInventoryComponent.cpp[m
+[36m@@ -846,8 +846,8 @@[m [mvoid UActorInventoryComponent::OnPickup(UItemObject* ItemObject)[m
+ 	if (bDoesStackOverflow)[m
+ 	{[m
+ 		// @gdemers get storage information from the item onto which we attempted stacking, but generated an overflow from.[m
+[31m-		int32 TargetStoragePosition = (*SearchResult)->GetStoragePosition();[m
+[31m-		int32 TargetStorageId = (*SearchResult)->GetStorageId();[m
+[32m+[m		[32mint32 TargetStoragePosition = (*SearchResult)->GetRuntimeStoragePosition();[m
+[32m+[m		[32mint32 TargetStorageId = (*SearchResult)->GetRuntimeStorageId();[m
+ [m
+ 		// @gdemers check if there is still unique entries available within our bounds.[m
+ 		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);[m
+[36m@@ -881,8 +881,8 @@[m [mvoid UActorInventoryComponent::OnPickup(UItemObject* ItemObject)[m
+ 				Items.Add(NewItemObjectEntry);[m
+ [m
+ 				// @gdemers update our last assigned storage information if ever we have more content to assign.[m
+[31m-				TargetStoragePosition = NewItemObjectEntry->GetStoragePosition();[m
+[31m-				TargetStorageId = NewItemObjectEntry->GetStorageId();[m
+[32m+[m				[32mTargetStoragePosition = NewItemObjectEntry->GetRuntimeStoragePosition();[m
+[32m+[m				[32mTargetStorageId = NewItemObjectEntry->GetRuntimeStorageId();[m
+ 			}[m
+ [m
+ 			// @gdemers validate inventory bounds between addition to prevent overflow based[m
+[36m@@ -930,11 +930,11 @@[m [mvoid UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,[m
+ 		return;[m
+ 	}[m
+ [m
+[31m-	const int32 SrcStoragePosition = SrcItemObject->GetStoragePosition();[m
+[31m-	const int32 SrcStorageId = SrcItemObject->GetStorageId();[m
+[32m+[m	[32mconst int32 SrcStoragePosition = SrcItemObject->GetRuntimeStoragePosition();[m
+[32m+[m	[32mconst int32 SrcStorageId = SrcItemObject->GetRuntimeStorageId();[m
+ [m
+[31m-	const int32 DestStoragePosition = DestItemObject->GetStoragePosition();[m
+[31m-	const int32 DestStorageId = DestItemObject->GetStorageId();[m
+[32m+[m	[32mconst int32 DestStoragePosition = DestItemObject->GetRuntimeStoragePosition();[m
+[32m+[m	[32mconst int32 DestStorageId = DestItemObject->GetRuntimeStorageId();[m
+ [m
+ 	SrcItemObject->ModifyRuntimeStoragePosition(DestStoragePosition);[m
+ 	SrcItemObject->ModifyRuntimeStorageId(DestStorageId);[m
+[36m@@ -1099,7 +1099,7 @@[m [mvoid UActorInventoryComponent::CheckBounds()[m
+ 			continue;[m
+ 		}[m
+ [m
+[31m-		const int32 StorageId = Item->GetStorageId();[m
+[32m+[m		[32mconst int32 StorageId = Item->GetRuntimeStorageId();[m
+ 		int32& OutCount = OccupiedSlots.FindOrAdd(StorageId);[m
+ 		++OutCount;[m
+ 	}[m
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/InventoryUtils.cpp b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/InventoryUtils.cpp[m
+[1mindex e1603e3..46f0cd2 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/InventoryUtils.cpp[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/InventoryUtils.cpp[m
+[36m@@ -379,11 +379,8 @@[m [mFString UInventoryUtils::CreateDefaultInventoryProviders()[m
+ 			continue;[m
+ 		}[m
+ [m
+[32m+[m		[32mTMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;[m
+ 		TArray<int32> Items;[m
+[31m-		// @gdemers configure Helper object for the specific provider context. helps resolve default placement of objects[m
+[31m-		// within the inventory system for serialization.[m
+[31m-		FStorageHelper StorageHelper(ProviderId, &Items);[m
+[31m-[m
+ 		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset[m
+ 		// are Blueprints, not elements dynamically composed. A complex entry is configured based on an Item Actor definition.[m
+ 		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)[m
+[36m@@ -397,11 +394,17 @@[m [mFString UInventoryUtils::CreateDefaultInventoryProviders()[m
+ 			const UClass* Class = ItemObjectClass.LoadSynchronous();[m
+ 			if (IsValid(Class))[m
+ 			{[m
+[31m-				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(Class->GetDefaultObject<UItemObject>(), StackCount, StorageHelper);[m
+[32m+[m				[32mconst auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();[m
+[32m+[m				[32mconst int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, StackCount);[m
+[32m+[m				[32mItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);[m
+ 				Items.Add(PrivateItemId);[m
+ 			}[m
+ 		}[m
+ [m
+[32m+[m		[32m// @gdemers all items are initialized. if our inventory provider definition was configured correctly,[m
+[32m+[m		[32m// a valid storage object, or more are available for referencing on relevant items.[m
+[32m+[m		[32mFStorageHelper::HandleStorageAssignment(ItemCDOs, Items);[m
+[32m+[m
+ 		NSJsonInventory::FJsonInventoryProvider InventoryProvider;[m
+ 		InventoryProvider.Id = ProviderId;[m
+ 		InventoryProvider.PrivateItemIds = Items;[m
+[36m@@ -429,8 +432,7 @@[m [mFString UInventoryUtils::CreateDefaultInventoryProviders()[m
+ }[m
+ [m
+ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,[m
+[31m-                                                  const int32 StackCount,[m
+[31m-                                                  const FStorageHelper& OutStorageHelper)[m
+[32m+[m[32m                                                  const int32 StackCount)[m
+ {[m
+ 	if (!IsValid(ItemObjectCDO))[m
+ 	{[m
+[36m@@ -458,8 +460,6 @@[m [mint32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC[m
+ [m
+ 		int32 OutStoragePosition = NULL;[m
+ 		int32 OutStorageId = NULL;[m
+[31m-[m
+[31m-		OutStorageHelper.GetStorageInfo(ItemObjectCDO, OutStorageId, OutStoragePosition);[m
+ 		return (ItemId + OutStorageId + OutStoragePosition + NewStackCount);[m
+ 	}[m
+ }[m
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ItemObject.cpp b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ItemObject.cpp[m
+[1mindex 8521274..f161846 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ItemObject.cpp[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/ItemObject.cpp[m
+[36m@@ -256,12 +256,12 @@[m [mint32 UItemObject::GetRuntimeCount() const[m
+ 	return RuntimeItemState.StackCount;[m
+ }[m
+ [m
+[31m-int32 UItemObject::GetStorageId() const[m
+[32m+[m[32mint32 UItemObject::GetRuntimeStorageId() const[m
+ {[m
+ 	return RuntimeItemState.StorageId;[m
+ }[m
+ [m
+[31m-int32 UItemObject::GetStoragePosition() const[m
+[32m+[m[32mint32 UItemObject::GetRuntimeStoragePosition() const[m
+ {[m
+ 	return RuntimeItemState.StoragePosition;[m
+ }[m
+[36m@@ -756,12 +756,10 @@[m [mbool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent[m
+ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,[m
+                                               const int32 StorageId)[m
+ {[m
+[31m-	constexpr int32 StorageId_Offset = (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);[m
+[31m-	const int32 Real_StorageId = (StorageId + StorageId_Offset);[m
+[31m-[m
+[31m-	// Remember that storage are UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout, i.e[m
+[31m-	// the total of items they can fit in.[m
+[31m-	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = Real_StorageId](const UItemObject* ItemObject)[m
+[32m+[m	[32mconst int32 NewStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);[m
+[32m+[m	[32m// Remember that storage are also UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout,[m
+[32m+[m	[32m// i.e the total of items they can fit in.[m
+[32m+[m	[32mconst TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = NewStorageId](const UItemObject* ItemObject)[m
+ 	{[m
+ 		if (!IsValid(ItemObject))[m
+ 		{[m
+[36m@@ -834,8 +832,8 @@[m [mint32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)[m
+ 	}[m
+ [m
+ 	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(), GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);[m
+[31m-	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetStorageId(), GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);[m
+[31m-	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetStoragePosition(), GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);[m
+[32m+[m	[32mconst int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStorageId(), GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);[m
+[32m+[m	[32mconst int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStoragePosition(), GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);[m
+ [m
+ 	// TODO @gdemers theres a problem here ![m
+ 	// MakeRuntimePrivateItemId is called from within CheckBackend, and indirectly from OnDrop, and OnPickup. This means that our inventory[m
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.cpp b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.cpp[m
+[1mindex 42e4586..e697b93 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.cpp[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.cpp[m
+[36m@@ -20,15 +20,36 @@[m
+ #include "StorageHelper.h"[m
+ [m
+ #include "ItemObject.h"[m
+[32m+[m[32m#include "Backend/AVVMOnlineEncodingUtils.h"[m
+[32m+[m[32m#include "Backend/AVVMOnlineInventory.h"[m
+ [m
+[31m-FStorageHelper::FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItems)[m
+[31m-	: Items(NewItems),[m
+[31m-	  ProviderId(NewProviderId)[m
+[32m+[m[32mvoid FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<const UItemObject>>& ItemCDOs,[m
+[32m+[m[32m                                             TArray<int32>& Items)[m
+ {[m
+[31m-}[m
+[32m+[m	[32mconst TArray<int32> SearchResults = Items.FilterByPredicate([](const int32 Value)[m
+[32m+[m	[32m{[m
+[32m+[m		[32mconst int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(Value, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);[m
+[32m+[m		[32mreturn (!!StorageId);[m
+[32m+[m	[32m});[m
+ [m
+[31m-void FStorageHelper::GetStorageInfo(const UItemObject* ItemObjectCDO,[m
+[31m-                                    int32& OutStorageId,[m
+[31m-                                    int32& OutStoragePosition) const[m
+[31m-{[m
+[32m+[m	[32mif (!ensureAlwaysMsgf(!SearchResults.IsEmpty(),[m
+[32m+[m	[32m                      TEXT("Inventory Provider definition is not referencing a valid Storage UItemObject. Please add one!")))[m
+[32m+[m	[32m{[m
+[32m+[m		[32mreturn;[m
+[32m+[m	[32m}[m
+[32m+[m
+[32m+[m	[32mfor (const int32 StoragePrivateItemId : SearchResults)[m
+[32m+[m	[32m{[m
+[32m+[m		[32mconst bool bDoesContains = ItemCDOs.Contains(StoragePrivateItemId);[m
+[32m+[m		[32mif (!bDoesContains)[m
+[32m+[m		[32m{[m
+[32m+[m			[32mcontinue;[m
+[32m+[m		[32m}[m
+[32m+[m
+[32m+[m		[32mconst TWeakObjectPtr<const UItemObject>& StorageObject = ItemCDOs[StoragePrivateItemId];[m
+[32m+[m		[32mif (!StorageObject.IsValid())[m
+[32m+[m		[32m{[m
+[32m+[m			[32mcontinue;[m
+[32m+[m		[32m}[m
+[32m+[m	[32m}[m
+ }[m
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.h b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.h[m
+[1mindex 201b1b2..92bf4ac 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.h[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Private/StorageHelper.h[m
+[36m@@ -36,14 +36,6 @@[m [mstruct INVENTORYSAMPLE_API FStorageHelper[m
+ {[m
+ 	GENERATED_BODY()[m
+ [m
+[31m-	FStorageHelper() = default;[m
+[31m-	FStorageHelper(const int32 NewProviderId, TArray<int32>* NewItems);[m
+[31m-[m
+[31m-	void GetStorageInfo(const UItemObject* ItemObjectCDO,[m
+[31m-	                    int32& OutStorageId,[m
+[31m-	                    int32& OutStoragePosition) const;[m
+[31m-[m
+[31m-protected:[m
+[31m-	TArray<int32>* Items = nullptr;[m
+[31m-	int32 ProviderId = INDEX_NONE;[m
+[32m+[m	[32mstatic void HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<const UItemObject>>& ItemCDOs,[m
+[32m+[m	[32m                                    TArray<int32>& Items);[m
+ };[m
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/InventoryUtils.h b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/InventoryUtils.h[m
+[1mindex a0d7d5d..eb3540e 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/InventoryUtils.h[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/InventoryUtils.h[m
+[36m@@ -85,6 +85,5 @@[m [mpublic:[m
+ [m
+ 	UFUNCTION(BlueprintCallable)[m
+ 	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,[m
+[31m-	                                        const int32 StackCount,[m
+[31m-	                                        const FStorageHelper& OutStorageHelper);[m
+[32m+[m	[32m                                        const int32 StackCount);[m
+ };[m
+[1mdiff --git a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/ItemObject.h b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/ItemObject.h[m
+[1mindex 2c763ec..19f052e 100644[m
+[1m--- a/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/ItemObject.h[m
+[1m+++ b/Plugins/GameFeatures/InventorySample/Source/InventorySample/Public/ItemObject.h[m
+[36m@@ -179,10 +179,10 @@[m [mpublic:[m
+ 	int32 GetRuntimeCount() const;[m
+ [m
+ 	UFUNCTION(BlueprintCallable)[m
+[31m-	int32 GetStorageId() const;[m
+[32m+[m	[32mint32 GetRuntimeStorageId() const;[m
+ [m
+ 	UFUNCTION(BlueprintCallable)[m
+[31m-	int32 GetStoragePosition() const;[m
+[32m+[m	[32mint32 GetRuntimeStoragePosition() const;[m
+ [m
+ 	const FDataRegistryId& GetItemActorId() const;[m
+ [m
+[1mdiff --git a/Plugins/ImGui b/Plugins/ImGui[m
+[1m--- a/Plugins/ImGui[m
+[1m+++ b/Plugins/ImGui[m
+[36m@@ -1 +1 @@[m
+[31m-Subproject commit e00a13361794e7523a86183985e1f6168197b997[m
+[32m+[m[32mSubproject commit e00a13361794e7523a86183985e1f6168197b997-dirty[m

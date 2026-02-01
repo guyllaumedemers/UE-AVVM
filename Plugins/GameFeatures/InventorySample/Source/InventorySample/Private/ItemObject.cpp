@@ -256,12 +256,12 @@ int32 UItemObject::GetRuntimeCount() const
 	return RuntimeItemState.StackCount;
 }
 
-int32 UItemObject::GetStorageId() const
+int32 UItemObject::GetRuntimeStorageId() const
 {
 	return RuntimeItemState.StorageId;
 }
 
-int32 UItemObject::GetStoragePosition() const
+int32 UItemObject::GetRuntimeStoragePosition() const
 {
 	return RuntimeItemState.StoragePosition;
 }
@@ -756,12 +756,10 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
                                               const int32 StorageId)
 {
-	constexpr int32 StorageId_Offset = (1 << GET_ITEM_POSITION_ENCODING_RSHIFT);
-	const int32 Real_StorageId = (StorageId + StorageId_Offset);
-
-	// Remember that storage are UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout, i.e
-	// the total of items they can fit in.
-	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = Real_StorageId](const UItemObject* ItemObject)
+	const int32 NewStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+	// Remember that storage are also UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout,
+	// i.e the total of items they can fit in.
+	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = NewStorageId](const UItemObject* ItemObject)
 	{
 		if (!IsValid(ItemObject))
 		{
@@ -834,8 +832,8 @@ int32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)
 	}
 
 	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(), GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
-	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetStorageId(), GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetStoragePosition(), GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStorageId(), GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStoragePosition(), GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
 
 	// TODO @gdemers theres a problem here !
 	// MakeRuntimePrivateItemId is called from within CheckBackend, and indirectly from OnDrop, and OnPickup. This means that our inventory

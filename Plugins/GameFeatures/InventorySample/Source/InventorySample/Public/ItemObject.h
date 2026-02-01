@@ -179,10 +179,10 @@ public:
 	int32 GetRuntimeCount() const;
 
 	UFUNCTION(BlueprintCallable)
-	int32 GetStorageId() const;
+	int32 GetRuntimeStorageId() const;
 
 	UFUNCTION(BlueprintCallable)
-	int32 GetStoragePosition() const;
+	int32 GetRuntimeStoragePosition() const;
 
 	const FDataRegistryId& GetItemActorId() const;
 
@@ -266,6 +266,7 @@ private:
 	// to the backend. This handle is your only way of finding the correct instance serialized with your backend (player/actor profile)
 	// representation. (we do nullify during drop action but that imply we have already released our handle from backend.)
 	int32 PrivateItemId = INDEX_NONE;
+	friend class FStorageHelper;
 	friend class UItemObjectUtils;
 };
 

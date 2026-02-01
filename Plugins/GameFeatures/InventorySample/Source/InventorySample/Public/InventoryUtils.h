@@ -85,6 +85,5 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-	                                        const int32 StackCount,
-	                                        const FStorageHelper& OutStorageHelper);
+	                                        const int32 StackCount);
 };
