@@ -29,7 +29,7 @@ class UItemObject;
  *	Class description:
  *	
  *	FStorageHelper is a context struct that resolve the default inventory layout of an Inventory Provider, allowing
- *	configuring storage information by weighing the object placement using user defined rules.
+ *	configuring storage information via brute force approach.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FStorageHelper
