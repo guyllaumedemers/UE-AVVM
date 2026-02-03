@@ -88,6 +88,10 @@
       "Enabled": true
     },
     {
+      "Name": "SkillSample",
+      "Enabled": true
+    },
+    {
       "Name": "SnapshotSample",
       "Enabled": true
     },
