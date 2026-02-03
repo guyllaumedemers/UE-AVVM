@@ -141,6 +141,14 @@ This GameFeature plugin is a sample plugin for supporting content gathering. Pla
 
 *Otherwise, simply call the api for requesting your inventory Outer resources, and be done with it! Actor Socketing is handled within the system, and UI expect their ViewModel to receive a UItemObject to handle visual representation of an Object. For 3D display, the UItemObject managed Actor is there for you!*
 
+### Skill Sample [WIP - 01%]
+
+This GameFeature plugin is a sample plugin for supporting GameplayAbility, GameplayEffect granting based on Player skill progression.
+
+#### How To
+
+tbd!
+
 ### Fencing Sample [Completed]
 
 This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system leverage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!

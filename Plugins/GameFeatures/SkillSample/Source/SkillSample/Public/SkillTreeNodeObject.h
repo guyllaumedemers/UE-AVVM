@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "SkillTreeNodeObject.generated.h"
