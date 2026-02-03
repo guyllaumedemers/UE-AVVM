@@ -23,6 +23,10 @@
 
 #include "UObject/Object.h"
 
+#if UE_WITH_IRIS
+#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
+#endif // UE_WITH_IRIS
+
 #include "SkillTreeNodeObject.generated.h"
 
 class UGameplayEffect;
@@ -44,4 +48,9 @@ protected:
 	// for handling Skills, Perks, and Traits. No custom implementation needed!
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftClassPtr<UGameplayEffect> GrantEffect = nullptr;
+
+private:
+	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
+	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 
+	int32 PrivateTreeNodeId = INDEX_NONE;
 };
