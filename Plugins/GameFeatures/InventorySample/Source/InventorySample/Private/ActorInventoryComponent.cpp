@@ -56,6 +56,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.It
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_DROP_ITEM, "InventorySample.Item.Notification.Drop");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_STORAGE_NOENTRY, "InventorySample.Item.Storage.NoEntry");
 UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DROPPABLE, "InventorySample.Item.Droppable");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_ALWAYS_VISIBLE, "InventorySample.Item.VisibilityConditions.AlwaysVisible");
+UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_ONLY_VISIBLE_IN_HANDS, "InventorySample.Item.VisibilityConditions.VisibleWhenInHands");
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
@@ -577,12 +579,18 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		NewItem = Items.Last();
 	}
 
-	if (!IsValid(NewItem))
+	// @gdemers we want to prevent spawning item actors that don't respect our flag system, and represent mostly data driving other items.
+	// example : ammo, consumables, etc...
+	FGameplayTagContainer ActorSpawnConditions;
+	ActorSpawnConditions.AddTag(TAG_INVENTORY_ITEM_ONLY_VISIBLE_IN_HANDS);
+	ActorSpawnConditions.AddTag(TAG_INVENTORY_ITEM_ALWAYS_VISIBLE);
+
+	if (!IsValid(NewItem) || !NewItem->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 	{
 		return;
 	}
 
-	// @gdemers handle spawning default object that are currently equipped
+	// @gdemers handle spawning default object that are currently in hands or visible at all time.
 	const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItem);
 	if (bIsItemEquipped)
 	{
