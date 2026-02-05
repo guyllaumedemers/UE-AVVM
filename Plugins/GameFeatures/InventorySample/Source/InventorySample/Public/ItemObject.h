@@ -191,6 +191,9 @@ public:
 	int32 GetMaxStackCount() const;
 
 	UFUNCTION(BlueprintCallable)
+	const FGameplayTagContainer& GetItemSlotTags() const;
+
+	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& GetItemActorId() const;
 
 	UFUNCTION(BlueprintCallable)

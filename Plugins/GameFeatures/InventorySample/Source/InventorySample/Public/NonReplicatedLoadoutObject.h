@@ -47,12 +47,15 @@ class INVENTORYSAMPLE_API UNonReplicatedLoadoutObject : public UObject
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable)
+protected:
 	void HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
 	                                 const TArray<UItemObject*>& OldItemObjects);
 
-protected:
+	void RemoveOldItems(const TArray<UItemObject*>& NewItemObjects,
+	                    const TArray<UItemObject*>& OldItemObjects);
+
+	void ModifyLoadout(const TArray<UItemObject*>& NewItemObjects);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the order in which mouse wheel scolling cycles through items."))
 	TArray<FGameplayTag> CyclingSlots;
 
@@ -61,4 +64,6 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Define the slot tag of the item in hand."))
 	FGameplayTag ActiveItemSlotTag = FGameplayTag::EmptyTag;
+	
+	friend class UActorInventoryComponent;
 };

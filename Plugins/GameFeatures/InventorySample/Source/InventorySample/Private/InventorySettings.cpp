@@ -116,3 +116,8 @@ const FGameplayTag& UInventorySettings::GetAttachmentTypeTag()
 {
 	return GetDefault<UInventorySettings>()->AttachmentTypeTag;
 }
+
+const FGameplayTagContainer& UInventorySettings::GetItemActorSpawnConditions()
+{
+	return GetDefault<UInventorySettings>()->ItemActorSpawnConditions;
+}

@@ -91,6 +91,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTag& GetAttachmentTypeTag();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FGameplayTagContainer& GetItemActorSpawnConditions();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
@@ -146,4 +149,7 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTag AttachmentTypeTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FGameplayTagContainer ItemActorSpawnConditions = FGameplayTagContainer::EmptyContainer;
 };

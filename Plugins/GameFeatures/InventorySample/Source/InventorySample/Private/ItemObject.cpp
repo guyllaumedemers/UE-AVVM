@@ -304,6 +304,11 @@ int32 UItemObject::GetMaxStackCount() const
 	}
 }
 
+const FGameplayTagContainer& UItemObject::GetItemSlotTags() const
+{
+	return ItemSlotTags;
+}
+
 const FDataRegistryId& UItemObject::GetItemActorId() const
 {
 	return ItemActorId;
