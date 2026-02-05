@@ -23,10 +23,6 @@
 
 #include "UObject/Object.h"
 
-#if UE_WITH_IRIS
-#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
-#endif // UE_WITH_IRIS
-
 #include "SkillTreeNodeObject.generated.h"
 
 class UGameplayEffect;

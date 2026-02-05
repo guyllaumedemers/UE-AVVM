@@ -73,6 +73,8 @@ bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 	return (UniqueId == Rhs.UniqueId)
 			&& (ProfileId.Equals(Rhs.ProfileId))
 			&& (InventoryIds == Rhs.InventoryIds)
+			&& (SkinIds == Rhs.SkinIds)
+			&& (CharmsIds == Rhs.CharmsIds)
 			&& (SkillIds == Rhs.SkillIds)
 			&& (ChallengeIds == Rhs.ChallengeIds)
 			&& (EquippedPresetId == Rhs.EquippedPresetId);

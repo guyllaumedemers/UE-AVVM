@@ -163,6 +163,12 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Item, Attachment, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> SkinIds;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> CharmsIds;
 
 	// @gdemers Bits encoding allow users to retrieve {Skill_Id, Category_Id, Position_Index, Level}
 	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Ability, Perks, etc...

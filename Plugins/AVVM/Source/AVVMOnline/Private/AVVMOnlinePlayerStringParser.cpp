@@ -232,6 +232,18 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 		NewPlayerProfile.InventoryIds.Add(InventoryId->AsNumber());
 	}
 
+	const TArray<TSharedPtr<FJsonValue>> SkinIds = JsonData->GetArrayField(TEXT("SkinIds"));
+	for (const auto& SkinId : SkinIds)
+	{
+		NewPlayerProfile.SkinIds.Add(SkinId->AsNumber());
+	}
+
+	const TArray<TSharedPtr<FJsonValue>> CharmsIds = JsonData->GetArrayField(TEXT("CharmsIds"));
+	for (const auto& CharmsId : CharmsIds)
+	{
+		NewPlayerProfile.CharmsIds.Add(CharmsId->AsNumber());
+	}
+
 	const TArray<TSharedPtr<FJsonValue>> SkillIds = JsonData->GetArrayField(TEXT("SkillIds"));
 	for (const auto& SkillId : SkillIds)
 	{
@@ -256,6 +268,18 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfile& NewPlayer
 		InventoryIds.Add(MakeShareable(new FJsonValueNumber(InventoryId)));
 	}
 
+	TArray<TSharedPtr<FJsonValue>> SkinIds;
+	for (const int32 SkinId : NewPlayerProfile.SkinIds)
+	{
+		SkinIds.Add(MakeShareable(new FJsonValueNumber(SkinId)));
+	}
+
+	TArray<TSharedPtr<FJsonValue>> CharmsIds;
+	for (const int32 CharmsId : NewPlayerProfile.CharmsIds)
+	{
+		CharmsIds.Add(MakeShareable(new FJsonValueNumber(CharmsId)));
+	}
+
 	TArray<TSharedPtr<FJsonValue>> SkillIds;
 	for (const int32 SkillId : NewPlayerProfile.SkillIds)
 	{
@@ -272,6 +296,8 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfile& NewPlayer
 	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerProfile.UniqueId);
 	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfile.ProfileId);
 	JsonData->SetArrayField(TEXT("InventoryIds"), InventoryIds);
+	JsonData->SetArrayField(TEXT("SkinIds"), SkinIds);
+	JsonData->SetArrayField(TEXT("CharmsIds"), CharmsIds);
 	JsonData->SetArrayField(TEXT("SkillIds"), SkillIds);
 	JsonData->SetArrayField(TEXT("ChallengeIds"), ChallengeIds);
 	JsonData->SetNumberField(TEXT("EquippedPresetId"), NewPlayerProfile.EquippedPresetId);

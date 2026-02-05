@@ -111,6 +111,9 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		A.UniqueId = FMath::Rand32();
 		A.ProfileId = TEXT("Secret");
 		A.InventoryIds = {FMath::Rand32(), FMath::Rand32()};
+		A.SkinIds = {FMath::Rand32(), FMath::Rand32()};
+		A.CharmsIds = {FMath::Rand32(), FMath::Rand32()};
+		A.SkillIds = {FMath::Rand32(), FMath::Rand32()};
 		A.ChallengeIds = {FMath::Rand32(), FMath::Rand32()};
 		A.EquippedPresetId = FMath::Rand32();
 		Parser->ToString(A, OutPayload);

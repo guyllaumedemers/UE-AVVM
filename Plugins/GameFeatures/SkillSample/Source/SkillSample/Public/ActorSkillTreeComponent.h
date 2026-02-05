@@ -21,9 +21,12 @@
 
 #include "CoreMinimal.h"
 
+#include "ActiveGameplayEffectHandle.h"
 #include "Components/ActorComponent.h"
 
 #include "ActorSkillTreeComponent.generated.h"
+
+class USkillTreeNodeObject;
 
 /**
  *	Class description:
@@ -44,4 +47,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static UActorSkillTreeComponent* GetActorComponent(const AActor* NewActor);
+	
+protected:
+	// @gdemers : set of GE granted from CDO objects referenced based on backend or data asset
+	// retrieval.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<TObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/, FActiveGameplayEffectHandle> GameplayEffectHandles;
 };
