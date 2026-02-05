@@ -49,8 +49,8 @@ public:
 	static UActorSkillTreeComponent* GetActorComponent(const AActor* NewActor);
 	
 protected:
-	// @gdemers : set of GE granted from CDO objects referenced based on backend or data asset
-	// retrieval.
+	// @gdemers : set of GE granted from CDO objects referenced based on backend or data asset. Can be accessed from within
+	// ability by referencing the handle tied to the GE.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<TObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/, FActiveGameplayEffectHandle> GameplayEffectHandles;
+	TMap<FActiveGameplayEffectHandle, TObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/> SkillTreeNodes;
 };
