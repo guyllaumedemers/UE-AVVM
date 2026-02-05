@@ -66,6 +66,14 @@ TArray<int32> AAVVMGameSession::Static_GetActorInventoryItems(const UWorld* Worl
 	return IsValid(GameSession) ? GameSession->GetActorInventoryItems(ProfileId) : TArray<int32>{};
 }
 
+FString AAVVMGameSession::Static_ModifyPlayerProfileInventory(const UWorld* World,
+                                                              const int32 ProfileId,
+                                                              const TArray<int32>& NewItems)
+{
+	AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->ModifyPlayerProfileInventory(ProfileId, NewItems) : FString();
+}
+
 void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
                                       const FUniqueNetIdRepl& UniqueId,
                                       bool bWasFromInvite)
@@ -220,6 +228,35 @@ TArray<int32> AAVVMGameSession::GetActorInventoryItems(const int32 ProfileId) co
 	// TODO @gdemers access backend representation of our actor, and their inventory
 	// this may apply to NPC types, Shops, Boxes, etc... 
 	return TArray<int32>{};
+}
+
+FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,
+                                                       const TArray<int32>& NewItems)
+{
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return FString();
+	}
+
+	const bool bHasResolvedProfile = ResolvedProfiles.Contains(ProfileId);
+	if (!ensureAlwaysMsgf(bHasResolvedProfile,
+	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+	{
+		return FString();
+	}
+
+	FAVVMPlayerProfile OutOldProfile;
+
+	FString& OldProfile = ResolvedProfiles[ProfileId];
+	JsonParser->FromString(OldProfile, OutOldProfile);
+
+	// @gdemers dirty profile with new data.
+	OutOldProfile.InventoryIds = NewItems;
+	JsonParser->ToString(OutOldProfile, OldProfile);
+
+	return OldProfile;
 }
 
 void AAVVMGameSession::AddPlayer(const FString& UniqueNetId)

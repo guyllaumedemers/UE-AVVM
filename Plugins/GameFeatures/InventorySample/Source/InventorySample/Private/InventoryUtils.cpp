@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "InventoryUtils.h"
 
+#include "AVVMGameSession.h"
 #include "AVVMUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "InventoryProvider.h"
@@ -213,8 +214,13 @@ FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,
                                        const int32 ProfileId,
                                        const TArray<int32>& NewItems)
 {
-	// TODO @gdemers Update profile string.
-	return FString();
+	FString Output;
+	if (IsValid(WorldContextObject))
+	{
+		Output = AAVVMGameSession::Static_ModifyPlayerProfileInventory(WorldContextObject->GetWorld(), ProfileId, NewItems);
+	}
+
+	return Output;
 }
 
 TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
