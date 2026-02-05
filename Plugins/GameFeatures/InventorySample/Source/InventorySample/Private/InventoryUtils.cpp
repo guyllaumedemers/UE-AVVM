@@ -210,19 +210,6 @@ int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemA
 	}
 }
 
-FString UInventoryUtils::ModifyProfile(const UObject* WorldContextObject,
-                                       const int32 ProfileId,
-                                       const TArray<int32>& NewItems)
-{
-	FString Output;
-	if (IsValid(WorldContextObject))
-	{
-		Output = AAVVMGameSession::Static_ModifyPlayerProfileInventory(WorldContextObject->GetWorld(), ProfileId, NewItems);
-	}
-
-	return Output;
-}
-
 TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
 {
 	FJsonObject StackAllocatedFJsonObject;

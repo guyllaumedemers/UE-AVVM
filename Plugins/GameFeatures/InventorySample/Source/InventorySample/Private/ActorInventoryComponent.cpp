@@ -1053,7 +1053,7 @@ void UActorInventoryComponent::CheckBackend() const
 	if (ensureAlwaysMsgf((false == bAreSetIdentical),
 	                     TEXT("Attempting backend update on identical Sets.")))
 	{
-		const FString NewProfile = UInventoryUtils::ModifyProfile(this, TargetUniqueId, NewDependencies);
+		const FString NewProfile = AAVVMGameSession::Static_ModifyPlayerProfileInventory(GetWorld(), TargetUniqueId, NewDependencies);
 		UAVVMOnlineBackendUtils::Submit(this, TargetUniqueId, NewProfile);
 	}
 }

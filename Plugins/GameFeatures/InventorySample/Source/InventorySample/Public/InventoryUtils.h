@@ -59,11 +59,6 @@ public:
 	static int32 GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId);
 
 	UFUNCTION(BlueprintCallable)
-	static FString ModifyProfile(const UObject* WorldContextObject,
-	                             const int32 ProfileId,
-	                             const TArray<int32>& NewItems);
-
-	UFUNCTION(BlueprintCallable)
 	static TArray<FString> GetInventoryProviderPayloads(const FString& NewPayload/*FileContent*/);
 
 	UFUNCTION(BlueprintCallable)
