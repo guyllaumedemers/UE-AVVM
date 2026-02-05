@@ -60,4 +60,9 @@ void UAVVMOnlineBackendUtils::Submit(const UObject* WorldContextObject,
                                      const FString& NewProfile)
 {
 	// TODO @gdemers Update backend profile. (valid for any actor type referenced on backend)
+	if (!ensureAlwaysMsgf(!NewProfile.IsEmpty(),
+	                      TEXT("Attempting to serialize invalid String payload. Verify the input data expected!")))
+	{
+		return;
+	}
 }
