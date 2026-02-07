@@ -42,12 +42,12 @@ void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHa
 		ParentTask->ReadyForActivation();
 	}
 
-	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
-	if (!IsValid(PC) || !PC->IsLocalController())
+	if (!PlayerController.IsValid() || !PlayerController->IsLocalController())
 	{
 		return;
 	}
 
+	// @gdemers handle pumping heartbeat in UI
 	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, true);
 	if (IsValid(ChildTask))
 	{
