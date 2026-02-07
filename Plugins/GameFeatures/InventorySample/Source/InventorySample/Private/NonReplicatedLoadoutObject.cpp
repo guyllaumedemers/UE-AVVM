@@ -23,6 +23,21 @@
 #include "InventorySettings.h"
 #include "ItemObject.h"
 
+void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
+{
+	if (!ensureAlwaysMsgf(bDoesSupportItemCycling,
+	                      TEXT("Attempt to cycle on an Owning Inventory Component that doesn't support it!")))
+	{
+		return;
+	}
+
+	const bool bDoesContains = CyclingSlots.Contains(TargetTag);
+	if (bDoesContains)
+	{
+		ActiveItemSlotTag = TargetTag;
+	}
+}
+
 void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
                                                               const TArray<UItemObject*>& OldItemObjects)
 {
@@ -90,7 +105,7 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 
 	for (UItemObject* NewItemObject : NewItemObjects)
 	{
-		if (!IsValid(NewItemObject) || !NewItemObject->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
+		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}))
 		{
 			return;
 		}
@@ -102,17 +117,26 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 			continue;
 		}
 
-		const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItemObject);
-		if (bIsItemEquipped)
+		// @gdemers its important to enforce that the tag order be from highest priority to lowest.
+		// example : PrimarySlot, SecondarySlot, etc...
+		// an Item can be placed in both Primary, and secondary so to allow context switch between both entry
+		// but thats only relevant for the UI, not for gameplay. game play only care about setting the active slot
+		// to the user selection, they dont need to modify the object reference attached to the slot tag.
+		const FGameplayTag ItemSlotTag_HighestPriority = ItemSlotTags.First();
+		auto& OutValue = Loadout.FindOrAdd(ItemSlotTag_HighestPriority);
+		OutValue = NewItemObject;
+
+		if (!NewItemObject->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 		{
-			// @gdemers its important to enforce that the tag order be from highest priority to lowest.
-			// example : PrimarySlot, SecondarySlot, etc...
-			// an Item can be placed in both Primary, and secondary so to allow context switch between both entry
-			// but thats only relevant for the UI, not for gameplay. game play only care about setting the active slot
-			// to the user selection, they dont need to modify the object reference attached to the slot tag.
-			const FGameplayTag ItemSlotTag_HighestPriority = ItemSlotTags.First();
-			auto& OutValue = Loadout.FindOrAdd(ItemSlotTag_HighestPriority);
-			OutValue = NewItemObject;
+			continue;
+		}
+
+		// @gdemers we need to initialize our loadout with the default element in hand represented
+		// by the highest priority tag.
+		const bool bShouldDefaultInHand = (bDoesSupportItemCycling && true);
+		if (bShouldDefaultInHand)
+		{
+			Cycle(ItemSlotTag_HighestPriority);
 		}
 	}
 }

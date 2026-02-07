@@ -46,6 +46,10 @@ UCLASS(BlueprintType, Blueprintable)
 class INVENTORYSAMPLE_API UNonReplicatedLoadoutObject : public UObject
 {
 	GENERATED_BODY()
+	
+public:
+	UFUNCTION(BlueprintCallable)
+	void Cycle(const FGameplayTag& TargetTag);
 
 protected:
 	void HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
@@ -56,7 +60,10 @@ protected:
 
 	void ModifyLoadout(const TArray<UItemObject*>& NewItemObjects);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Define the order in which mouse wheel scolling cycles through items."))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bDoesSupportItemCycling = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportItemCycling", ToolTip="Define the order in which mouse wheel scolling cycles through items."))
 	TArray<FGameplayTag> CyclingSlots;
 
 	UPROPERTY(Transient, meta=(ToolTip="Define the items that are in the Equipped state, but not necessarily active."))

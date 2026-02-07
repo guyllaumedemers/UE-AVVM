@@ -579,22 +579,30 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		NewItem = Items.Last();
 	}
 
-	// @gdemers we want to prevent spawning item actors that don't respect our flag system, and represent mostly data driving other items.
+	if (!IsValid(NewItem))
+	{
+		return;
+	}
+
+	// @gdemers configure runtime state of the item based on if it's held by the outer or just sits in the inventory.
+	const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItem);
+	if (!bIsItemEquipped)
+	{
+		return;
+	}
+
+	// @gdemers update runtime state for the item to equipped. Note : this doesn't imply that the item is visible.
+	NewItem->ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}, {});
+
+	// @gdemers we want to prevent spawning item actors that don't respect our flag system, and mostly provide data constraint to other items.
 	// example : ammo, consumables, etc...
 	FGameplayTagContainer ActorSpawnConditions;
 	ActorSpawnConditions.AddTag(TAG_INVENTORY_ITEM_ONLY_VISIBLE_IN_HANDS);
 	ActorSpawnConditions.AddTag(TAG_INVENTORY_ITEM_ALWAYS_VISIBLE);
 
-	if (!IsValid(NewItem) || !NewItem->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
+	if (NewItem->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 	{
-		return;
-	}
-
-	// @gdemers handle spawning default object that are currently in hands or visible at all time.
-	const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItem);
-	if (bIsItemEquipped)
-	{
-		SpawnEquipItem(ResourceManagerComponent, NewItem);
+		SpawnVisibleItem(ResourceManagerComponent, NewItem);
 	}
 }
 
@@ -636,8 +644,8 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 	}
 }
 
-void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
-                                              UItemObject* NewItem)
+void UActorInventoryComponent::SpawnVisibleItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
+                                                UItemObject* NewItem)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -648,11 +656,6 @@ void UActorInventoryComponent::SpawnEquipItem(UAVVMResourceManagerComponent* Res
 	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
 	{
 		return;
-	}
-
-	if (IsValid(NewItem))
-	{
-		NewItem->ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}, {});
 	}
 
 	const auto RequestItemSpawning = [](TWeakObjectPtr<UActorInventoryComponent> NewActorInventoryComponent,

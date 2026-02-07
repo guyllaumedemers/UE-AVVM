@@ -127,8 +127,8 @@ protected:
 	UFUNCTION()
 	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
 
-	void SpawnEquipItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
-	                    UItemObject* NewItem);
+	void SpawnVisibleItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
+	                      UItemObject* NewItem);
 
 	UFUNCTION()
 	void OnItemActorClassRetrieved(const UClass* NewActorClass,
