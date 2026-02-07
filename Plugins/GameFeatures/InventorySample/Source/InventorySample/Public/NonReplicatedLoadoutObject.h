@@ -74,3 +74,22 @@ protected:
 	
 	friend class UActorInventoryComponent;
 };
+
+/**
+ *	Class description:
+ *	
+ *	UActorLoadoutUtils is a blueprint function library that expose reusable api.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UActorLoadoutUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool DoesActiveItemHasHighestPriority(const TArray<FGameplayTag>& CyclingSlots,
+	                                             const FGameplayTag& ActiveItemSlotTag,
+	                                             const FGameplayTag& NewItemSlotTag);
+};
+
+

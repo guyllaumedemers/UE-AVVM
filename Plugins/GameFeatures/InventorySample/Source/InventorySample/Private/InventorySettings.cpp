@@ -34,6 +34,11 @@ const FGameplayTag& UInventorySettings::GetEquippedTag()
 	return GetDefault<UInventorySettings>()->EquippedTag;
 }
 
+const FGameplayTag& UInventorySettings::GetActiveTag()
+{
+	return GetDefault<UInventorySettings>()->ActiveTag;
+}
+
 const FGameplayTagContainer& UInventorySettings::GetEmptyItemCount_BlockedActions()
 {
 	return GetDefault<UInventorySettings>()->EmptyItemCount_BlockedActions;

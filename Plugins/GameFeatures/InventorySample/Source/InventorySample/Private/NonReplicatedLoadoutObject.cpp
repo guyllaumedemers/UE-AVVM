@@ -30,10 +30,26 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		return;
 	}
 
-	const bool bDoesContains = CyclingSlots.Contains(TargetTag);
-	if (bDoesContains)
+	static const auto ActiveTags = FGameplayTagContainer{UInventorySettings::GetActiveTag()};
+	const FGameplayTag& OldTag = ActiveItemSlotTag;
+	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
+
+	if (CyclingSlots.Contains(OldTag))
 	{
-		ActiveItemSlotTag = TargetTag;
+		auto& OldItem = Loadout[OldTag];
+		if (OldItem.IsValid())
+		{
+			OldItem->ModifyRuntimeState({}, ActiveTags);
+		}
+	}
+
+	if (CyclingSlots.Contains(NewTag))
+	{
+		auto& NewItem = Loadout[NewTag];
+		if (NewItem.IsValid())
+		{
+			NewItem->ModifyRuntimeState(ActiveTags, {});
+		}
 	}
 }
 
@@ -130,12 +146,20 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 			continue;
 		}
 
-		// @gdemers we need to initialize our loadout with the default element in hand represented
-		// by the highest priority tag.
-		const bool bShouldDefaultInHand = (bDoesSupportItemCycling && true);
-		if (bShouldDefaultInHand)
+		// @gdemers we need to initialize our loadout with the default element in hand represented by the highest priority tag.
+		const bool bDoesActiveItemHasHighestPriority = (bDoesSupportItemCycling && UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, ItemSlotTag_HighestPriority));
+		if (!bDoesActiveItemHasHighestPriority)
 		{
 			Cycle(ItemSlotTag_HighestPriority);
 		}
 	}
+}
+
+bool UActorLoadoutUtils::DoesActiveItemHasHighestPriority(const TArray<FGameplayTag>& CyclingSlots,
+                                                          const FGameplayTag& ActiveItemSlotTag,
+                                                          const FGameplayTag& NewItemSlotTag)
+{
+	const int32 ActiveItemIndex = CyclingSlots.IndexOfByKey(ActiveItemSlotTag);
+	const int32 NewItemIndex = CyclingSlots.IndexOfByKey(NewItemSlotTag);
+	return (ActiveItemIndex >= NewItemIndex);
 }
