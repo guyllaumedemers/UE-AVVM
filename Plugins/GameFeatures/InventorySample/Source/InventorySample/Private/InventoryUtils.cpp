@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "InventoryUtils.h"
 
+#include "AVVMGameplaySettings.h"
 #include "AVVMGameSession.h"
 #include "AVVMUtils.h"
 #include "DataRegistrySubsystem.h"
@@ -180,7 +181,7 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 	}
 	else
 	{
-		return UInventoryUtils::GetItemActorUniqueIdentifier(Item->GetItemActorId());
+		return UInventoryUtils::GetItemActorUniqueIdentifier({UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->GetItemActorId().ItemName});
 	}
 }
 

@@ -478,8 +478,8 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                               const TArray<int32>& NewPrivateIds,
                                               UItemObject* UnInitializedItemObject)
 {
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
-		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
+	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	if (!bResult)
 	{
 		return INDEX_NONE;
 	}
@@ -519,6 +519,12 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
                                               const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
                                               UItemObject* UnInitializedItemObject)
 {
+	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	if (!bResult)
+	{
+		return INDEX_NONE;
+	}
+	
 	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
