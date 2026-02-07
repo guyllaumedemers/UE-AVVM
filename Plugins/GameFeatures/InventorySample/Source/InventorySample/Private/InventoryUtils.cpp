@@ -187,7 +187,8 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 
 int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId)
 {
-	if (!ItemActorId.IsValid())
+	if (!ensureAlwaysMsgf(ItemActorId.IsValid(),
+	                      TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the Actor Identifier RegistryType.")))
 	{
 		return INDEX_NONE;
 	}
