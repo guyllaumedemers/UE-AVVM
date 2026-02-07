@@ -549,12 +549,56 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		}
 	}
 
+	// @gdemers try spawn item actor based on outer representation.
+	TrySpawnEquipItem(Outer);
+
 	// @gdemers allow initialization of loadout object based held items. 
 	OnRep_ItemCollectionChanged(OldItems);
 
 	// @gdemers we have just initialized our component with new entries. validate our bounds between sessions.
 	CheckBounds();
+}
 
+void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
+{
+	auto* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
+	const int32 OldSize = OldItemObjects.Num();
+	const int32 NewSize = Items.Num();
+
+	FStringView SV;
+	if (NewSize == OldSize)
+	{
+		SV = TEXT("has identical Size. We may have Swapped Items!");
+	}
+	else if (NewSize > OldSize)
+	{
+		SV = TEXT("has increased!");
+	}
+	else
+	{
+		SV = TEXT("has decreased!");
+	}
+
+	UE_LOG(LogInventorySample,
+	       Log,
+	       TEXT("Executed from \"%s\". Item Collection modified on Outer \"%s\"! Collection %s"),
+	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
+	       *Outer->GetName(),
+	       SV.GetData());
+
+	if (IsValid(NonReplicatedLoadout))
+	{
+		NonReplicatedLoadout->HandleItemCollectionChanged(Items, OldItemObjects);
+	}
+}
+
+void UActorInventoryComponent::TrySpawnEquipItem(const AActor* Outer)
+{
 	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
@@ -602,49 +646,11 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 
 	if (NewItem->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 	{
-		SpawnVisibleItem(ResourceManagerComponent, NewItem);
+		RequestItemActor(ResourceManagerComponent, NewItem);
 	}
 }
 
-void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
-{
-	auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
-	{
-		return;
-	}
-
-	const int32 OldSize = OldItemObjects.Num();
-	const int32 NewSize = Items.Num();
-
-	FStringView SV;
-	if (NewSize == OldSize)
-	{
-		SV = TEXT("has identical Size. We may have Swapped Items!");
-	}
-	else if (NewSize > OldSize)
-	{
-		SV = TEXT("has increased!");
-	}
-	else
-	{
-		SV = TEXT("has decreased!");
-	}
-
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Item Collection modified on Outer \"%s\"! Collection %s"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       SV.GetData());
-
-	if (IsValid(NonReplicatedLoadout))
-	{
-		NonReplicatedLoadout->HandleItemCollectionChanged(Items, OldItemObjects);
-	}
-}
-
-void UActorInventoryComponent::SpawnVisibleItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
+void UActorInventoryComponent::RequestItemActor(UAVVMResourceManagerComponent* ResourceManagerComponent,
                                                 UItemObject* NewItem)
 {
 	const AActor* Outer = OwningOuter.Get();

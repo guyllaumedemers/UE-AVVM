@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
-#include "InventoryProvider.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
 

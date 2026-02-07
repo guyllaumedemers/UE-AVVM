@@ -127,7 +127,9 @@ protected:
 	UFUNCTION()
 	void OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects);
 
-	void SpawnVisibleItem(UAVVMResourceManagerComponent* ResourceManagerComponent,
+	void TrySpawnEquipItem(const AActor* Outer);
+
+	void RequestItemActor(UAVVMResourceManagerComponent* ResourceManagerComponent,
 	                      UItemObject* NewItem);
 
 	UFUNCTION()
