@@ -141,13 +141,13 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		auto& OutValue = Loadout.FindOrAdd(ItemSlotTag_HighestPriority);
 		OutValue = NewItemObject;
 
-		if (!NewItemObject->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
+		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 		{
 			continue;
 		}
 
 		// @gdemers we need to initialize our loadout with the default element in hand represented by the highest priority tag.
-		const bool bDoesActiveItemHasHighestPriority = (bDoesSupportItemCycling && UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, ItemSlotTag_HighestPriority));
+		const bool bDoesActiveItemHasHighestPriority = UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, ItemSlotTag_HighestPriority);
 		if (!bDoesActiveItemHasHighestPriority)
 		{
 			Cycle(ItemSlotTag_HighestPriority);
