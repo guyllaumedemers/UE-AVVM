@@ -30,7 +30,7 @@
 #include "Tests/AutomationEditorCommon.h"
 #endif
 
-// TODO @gdemers check if this conflict in server build and cause tag mismatch.
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG, "FunctionalTest.NotificationSubsystem.TestChannel");
 
 /**

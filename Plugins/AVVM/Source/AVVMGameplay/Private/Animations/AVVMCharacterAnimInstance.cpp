@@ -21,28 +21,8 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMReplicatedTagComponent.h"
-#include "NativeGameplayTags.h"
 #include "Animations/AVVMTSAnimInstanceUtils.h"
-
-// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_IDLE, "MovementState.Idle");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_WALK, "MovementState.Walk");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_SPRINT, "MovementState.Sprint");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_RUN, "MovementState.Run");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_SLIDING, "MovementState.Sliding");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_CHARGING, "MovementState.Charging");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_SWIMMING, "MovementState.Swimming");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_GLIDING, "MovementState.Gliding");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_MANTLING, "MovementState.Mantling");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_VAULTING, "MovementState.Vaulting");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_PRONE, "MovementState.Prone");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_CROUCHING, "MovementState.Crouching");
-UE_DEFINE_GAMEPLAY_TAG(TAG_MOVEMENT_STATE_STANDING, "MovementState.Standing");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_GROUND, "Status.Ground");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_AIR, "Status.Air");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_DOWN, "Status.Down");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_RAGDOLL, "Status.RagDoll");
+#include "Tags/AVVMGameplayTags.h"
 
 void UAVVMCharacterAnimInstance::NativeBeginPlay()
 {
@@ -99,23 +79,23 @@ void UAVVMCharacterAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeco
 void UAVVMCharacterAnimInstance::OnCharacterStateTagChanged(const FGameplayTagContainer& NewStateTags)
 {
 	// @gdemers movements
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsIdle, TAG_MOVEMENT_STATE_IDLE, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsWalking, TAG_MOVEMENT_STATE_WALK, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSprinting, TAG_MOVEMENT_STATE_SPRINT, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsRunning, TAG_MOVEMENT_STATE_RUN, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSliding, TAG_MOVEMENT_STATE_SLIDING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsCharging, TAG_MOVEMENT_STATE_CHARGING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSwimming, TAG_MOVEMENT_STATE_SWIMMING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsGliding, TAG_MOVEMENT_STATE_GLIDING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsMantling, TAG_MOVEMENT_STATE_MANTLING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsVaulting, TAG_MOVEMENT_STATE_VAULTING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsProne, TAG_MOVEMENT_STATE_PRONE, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsCrouching, TAG_MOVEMENT_STATE_CROUCHING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsStanding, TAG_MOVEMENT_STATE_STANDING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsIdle, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_IDLE, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsWalking, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_WALK, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSprinting, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SPRINT, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsRunning, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_RUN, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSliding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SLIDING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsCharging, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_CHARGING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSwimming, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SWIMMING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsGliding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_GLIDING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsMantling, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_MANTLING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsVaulting, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_VAULTING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsProne, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_PRONE, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsCrouching, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_CROUCHING, NewStateTags);
+	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsStanding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_STANDING, NewStateTags);
 	
 	// @gdemers status
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsGrounded, TAG_STATUS_STATE_GROUND, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsAired, TAG_STATUS_STATE_AIR, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsDown, TAG_STATUS_STATE_DOWN, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRagdoll, TAG_STATUS_STATE_RAGDOLL, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsGrounded, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_GROUND, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsAired, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_AIR, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsDown, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_DOWN, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRagdoll, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_RAGDOLL, NewStateTags);
 }

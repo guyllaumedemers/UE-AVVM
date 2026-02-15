@@ -30,6 +30,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Kismet/GameplayStatics.h"
 
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(AUTOMATED_TEST_TAG_WORLD_RULE_TEAM, "WorldRule.Team");
 
 void ATeamSampleTest::PrepareTest()
