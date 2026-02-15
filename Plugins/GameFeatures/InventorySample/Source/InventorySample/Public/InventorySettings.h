@@ -143,10 +143,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer ConsumableRuleset = FGameplayTagContainer::EmptyContainer;
 
-	// @gdemers Path to serialize inventory layout of Actors who's content require progression tracking.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FString AppDataDirPath = FString();
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 	

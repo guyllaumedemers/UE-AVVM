@@ -23,7 +23,7 @@
 EDataValidationResult FInventoryProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!InventoryProviderActorId.IsValid())
+	if (!InventoryProviderActorIdentifierId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));

@@ -104,7 +104,8 @@ const FGameplayTagContainer& UInventorySettings::GetConsumableRuleset()
 
 const FString& UInventorySettings::GetAppDataDirPath()
 {
-	return GetDefault<UInventorySettings>()->AppDataDirPath;
+	static const FString Path = (FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA")) /= FApp::GetProjectName());
+	return Path;
 }
 
 const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventories()

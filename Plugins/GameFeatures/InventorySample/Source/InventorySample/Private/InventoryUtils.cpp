@@ -367,7 +367,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
-		const int32 ProviderId = UInventoryUtils::GetItemActorUniqueIdentifier(Row->InventoryProviderActorId);
+		const int32 ProviderId = UInventoryUtils::GetItemActorUniqueIdentifier(Row->InventoryProviderActorIdentifierId);
 		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
 		                      TEXT("Missing valid Id for Provider entry.")))
 		{

@@ -49,9 +49,9 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers fetch {IAVVMResourceProvider::UniqueId} from UInventoryUtils::GetItemActorUniqueIdentifier.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FDataRegistryId InventoryProviderActorId = FDataRegistryId();
+	// @gdemers the unique identifier that represent the inventory provider actor. example : a shop.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
+	FDataRegistryId InventoryProviderActorIdentifierId = FDataRegistryId();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
 	TMap<TSoftClassPtr<UItemObject>, int32/*DefaultStackCount*/> DefaultInventory;
