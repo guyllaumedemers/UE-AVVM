@@ -80,13 +80,13 @@ public:
 	static const FGameplayTagContainer& GetItemActorSpawnConditions();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="AVVMActorIdentifierDataTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(RowType="ItemStackTableRow"))
 	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(ForceInlineRow))
 	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")

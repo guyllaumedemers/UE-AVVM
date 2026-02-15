@@ -28,8 +28,3 @@ TSubclassOf<UAVVMOnlinePlayerStringParser> UAVVMOnlineSettings::GetJsonParserCla
 {
 	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Player;
 }
-
-const FGameplayTag& UAVVMOnlineSettings::GetPlayerStateChannelTag()
-{
-	return GetDefault<UAVVMOnlineSettings>()->PlayerStateChannelTag;
-}

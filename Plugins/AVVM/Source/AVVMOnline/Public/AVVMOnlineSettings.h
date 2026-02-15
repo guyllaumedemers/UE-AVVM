@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
 #include "Templates/SubclassOf.h"
 
@@ -45,13 +44,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVMOnline|Settings")
 	static TSubclassOf<UAVVMOnlinePlayerStringParser> GetJsonParserClass_Player();
 
-	UFUNCTION(BlueprintCallable, Category="AVVMOnline|Settings")
-	static const FGameplayTag& GetPlayerStateChannelTag();
-
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UAVVMOnlinePlayerStringParser> JsonParserClass_Player = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag PlayerStateChannelTag = FGameplayTag::EmptyTag;
 };

@@ -19,13 +19,13 @@
 //SOFTWARE.
 #include "ProjectileManagerSubsystem.h"
 
-#include "AVVMOnlineSettings.h"
 #include "AVVMPlayerState.h"
 #include "NonReplicatedProjectileActor.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tags/AVVMGameplayTags.h"
 
 bool UProjectileManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -54,7 +54,7 @@ void UProjectileManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	Callback.BindDynamic(this, &UProjectileManagerSubsystem::OnPlayerStateAddedOrRemoved);
 
 	FAVVMObserverContextArgs ContextArgs;
-	ContextArgs.ChannelTag = UAVVMOnlineSettings::GetPlayerStateChannelTag();
+	ContextArgs.ChannelTag = TAG_AVVMGAMEPLAY_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
 	ContextArgs.Callback = Callback;
 	UAVVMNotificationSubsystem::Static_RegisterObserver(GameStateBase, ContextArgs);
 
@@ -75,7 +75,7 @@ void UProjectileManagerSubsystem::Deinitialize()
 	if (IsValid(GameStateBase))
 	{
 		FAVVMObserverContextArgs ContextArgs;
-		ContextArgs.ChannelTag = UAVVMOnlineSettings::GetPlayerStateChannelTag();
+		ContextArgs.ChannelTag = TAG_AVVMGAMEPLAY_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(GameStateBase, ContextArgs);
 	}
 }
