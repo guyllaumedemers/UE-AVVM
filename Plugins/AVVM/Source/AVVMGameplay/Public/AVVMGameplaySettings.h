@@ -44,7 +44,7 @@ public:
 	static const FDataRegistryType& GetActorIdentifierRegistryType();
 	
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
-	static const FGameplayTagContainer& GetBlockingTags_PlayerAction();
+	static const FGameplayTagContainer& GetPlayerActionBlockingTags();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -52,5 +52,5 @@ protected:
 
 	// @gdemers defined tags that are able to prevent user from executing actions based on conditions. (i.e Stasis, Down, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTagContainer BlockingTags_PlayerAction = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer PlayerActionBlockingTags = FGameplayTagContainer::EmptyContainer;
 };

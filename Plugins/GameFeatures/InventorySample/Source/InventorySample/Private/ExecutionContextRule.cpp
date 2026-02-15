@@ -42,7 +42,7 @@ bool FDropRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 
 	// @gdemers first, validate if our actor is in a state where they can drop an item.
 	const auto* Player = InventoryComponent->GetTypedOuter<AAVVMCharacter>();
-	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetBlockingTags_PlayerAction()))
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetPlayerActionBlockingTags()))
 	{
 		return false;
 	}
@@ -85,7 +85,7 @@ bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 
 	// @gdemers first, validate if our actor is in a state where they can pickup an item.
 	const auto* Player = InventoryComponent->GetTypedOuter<AAVVMCharacter>();
-	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetBlockingTags_PlayerAction()))
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetPlayerActionBlockingTags()))
 	{
 		return false;
 	}
@@ -139,7 +139,7 @@ bool FSwapRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 
 	// @gdemers first, validate if our actor is in a state where they can swap an item.
 	const auto* Player = InventoryComponent->GetTypedOuter<AAVVMCharacter>();
-	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetBlockingTags_PlayerAction()))
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetPlayerActionBlockingTags()))
 	{
 		return false;
 	}
