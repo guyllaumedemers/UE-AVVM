@@ -110,12 +110,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer ConsumableRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags|Behaviour")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
 	FGameplayTagContainer BlockingTagsWhenEmpty = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags|Behaviour")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
 	FGameplayTagContainer BlockingTagsWhenFull = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags|Behaviour")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
 	FGameplayTagContainer ItemActorSpawnConditions = FGameplayTagContainer::EmptyContainer;
 };

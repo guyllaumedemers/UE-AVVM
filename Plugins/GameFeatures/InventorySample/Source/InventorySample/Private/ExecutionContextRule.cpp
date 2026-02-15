@@ -25,13 +25,7 @@
 #include "ExecutionContextParams.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
-#include "NativeGameplayTags.h"
-
-// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_DROP_BLOCKED, "InventorySample.Item.Drop.Blocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_PICKUP_BLOCKED, "InventorySample.Item.Pickup.Blocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_PICKUP_INTO_SLOT_SWAP, "InventorySample.Item.Pickup.IntoSlotSwap");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ACTION_PICKUP_INTO_BACKBACK_STORAGE, "InventorySample.Item.Pickup.IntoBackpackStorage");
+#include "Tags/PrivateTags.h"
 
 UScriptStruct* TBaseStructure<FExecutionContextRule>::Get()
 {
@@ -68,9 +62,10 @@ bool FDropRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 
 	// @gdemers IMPORTANT : RuntimeCount is handled within the UItemObject, and will apply the expected
 	// tags to prevent actions from being executed on a zero count element.
-	const FGameplayTagContainer BlockedTags = FGameplayTagContainer(TAG_INVENTORY_ACTION_DROP_BLOCKED);
-	if (PendingDropItemObject->DoesBehaviourHasPartialMatch(BlockedTags) /*blocked by design*/ ||
-		PendingDropItemObject->DoesRuntimeStateHasPartialMatch(BlockedTags)/*blocked by another action*/)
+	const FGameplayTagContainer BlockedTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_TRANSIENT_PREVENT_DROPPING);
+	const FGameplayTagContainer RequiredTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_BE_DROPPED);
+	if ((false == PendingDropItemObject->DoesBehaviourHasPartialMatch(RequiredTags)) /*blocked by design*/ ||
+		(true == PendingDropItemObject->DoesRuntimeStateHasPartialMatch(BlockedTags))/*blocked by another action*/)
 	{
 		return false;
 	}
@@ -108,7 +103,7 @@ bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 		return false;
 	}
 
-	const FGameplayTagContainer BlockedTags = FGameplayTagContainer(TAG_INVENTORY_ACTION_PICKUP_BLOCKED);
+	const FGameplayTagContainer BlockedTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_TRANSIENT_PREVENT_PICKUP);
 	if (PendingPickupItemObject->DoesRuntimeStateHasPartialMatch(BlockedTags)/*maybe it cannot be interacted with yet*/)
 	{
 		return false;
@@ -116,8 +111,8 @@ bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 
 	// @gdemers world items can be either swap with currently equipped element, or put into storage held by outer.
 	FGameplayTagContainer PickupActions = FGameplayTagContainer::EmptyContainer;
-	PickupActions.AddTag(TAG_INVENTORY_ACTION_PICKUP_INTO_BACKBACK_STORAGE);
-	PickupActions.AddTag(TAG_INVENTORY_ACTION_PICKUP_INTO_SLOT_SWAP);
+	PickupActions.AddTag(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_PICKUP_INTO_ACTIVE_SLOT);
+	PickupActions.AddTag(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_PICKUP_INTO_STORAGE);
 
 	if (!PendingPickupItemObject->DoesBehaviourHasPartialMatch(PickupActions))
 	{
