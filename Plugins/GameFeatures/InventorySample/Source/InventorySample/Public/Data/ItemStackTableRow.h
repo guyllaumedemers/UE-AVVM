@@ -44,9 +44,9 @@ struct INVENTORYSAMPLE_API FItemStackTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldRepresentStorageCapacity = false;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	int32 MaxStackCount = INDEX_NONE;
 };

@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "TeamSettings.h"
 
+UTeamSettings::UTeamSettings()
+{
+	CategoryName = TEXT("Game");
+}
+
 const TSoftClassPtr<UTeamRule>& UTeamSettings::GetTeamRuleClass()
 {
 	return GetDefault<UTeamSettings>()->TeamRuleClass;

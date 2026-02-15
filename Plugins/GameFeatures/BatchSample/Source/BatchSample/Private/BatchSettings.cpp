@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "BatchSettings.h"
 
+UBatchSettings::UBatchSettings()
+{
+	CategoryName = TEXT("Game");
+}
+
 const TSoftClassPtr<UBatchingRule>& UBatchSettings::GetBatchingRuleClass()
 {
 	return GetDefault<UBatchSettings>()->BatchingRuleClass;

@@ -38,6 +38,8 @@ class AVVMGAMEPLAY_API UAVVMGameplaySettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
+	UAVVMGameplaySettings();
+	
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FDataRegistryType& GetActorIdentifierRegistryType();
 	

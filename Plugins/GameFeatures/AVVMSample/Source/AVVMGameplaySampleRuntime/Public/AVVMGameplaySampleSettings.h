@@ -39,22 +39,24 @@ class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplaySampleSettings : public UDevelo
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UAVVMGameplaySampleSettings();
+	
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplaySample|Settings")
 	static TSubclassOf<UActorComponent> GetHealthComponentClass();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplaySample|Settings")
 	static TSubclassOf<UActorComponent> GetStaminaComponentClass();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplaySample|Settings")
 	static TSubclassOf<UActorComponent> GetStatusEffectComponentClass();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplaySample|Settings")
 	static TSubclassOf<UActorComponent> GetAbilityComponentClass();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplaySample|Settings")
 	static TSubclassOf<UActorComponent> GetCurrencyComponentClass();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplaySample|Settings")
 	static TSubclassOf<UActorComponent> GetInteractionComponentClass();
 
 protected:

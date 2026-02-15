@@ -21,6 +21,7 @@
 
 #include "InventorySettings.h"
 #include "ItemObject.h"
+#include "Tags/PrivateTags.h"
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 {
@@ -30,7 +31,7 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		return;
 	}
 
-	static const auto ActiveTags = FGameplayTagContainer{UInventorySettings::GetActiveTag()};
+	static const auto ActiveTags = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE};
 	const FGameplayTag& OldTag = ActiveItemSlotTag;
 	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
 
@@ -120,7 +121,7 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 
 	for (UItemObject* NewItemObject : NewItemObjects)
 	{
-		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}))
+		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED}))
 		{
 			return;
 		}

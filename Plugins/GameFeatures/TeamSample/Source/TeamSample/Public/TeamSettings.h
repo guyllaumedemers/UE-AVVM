@@ -40,6 +40,8 @@ class TEAMSAMPLE_API UTeamSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
+	UTeamSettings();
+	
 	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static const TSoftClassPtr<UTeamRule>& GetTeamRuleClass();
 	

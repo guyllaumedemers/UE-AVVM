@@ -32,7 +32,6 @@
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
 #include "ItemObject.h"
-#include "NativeGameplayTags.h"
 #include "NonReplicatedLoadoutObject.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
@@ -46,18 +45,10 @@
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
+#include "Tags/PrivateTags.h"
 #include "UI/InventoryNotificationPayload.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
-
-// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM, "InventorySample.Item.Notification.Pickup");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_SWAP_ITEM, "InventorySample.Item.Notification.Swap");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_NOTIFICATION_DROP_ITEM, "InventorySample.Item.Notification.Drop");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_STORAGE_NOENTRY, "InventorySample.Item.Storage.NoEntry");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DROPPABLE, "InventorySample.Item.Droppable");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_ALWAYS_VISIBLE, "InventorySample.Item.VisibilityConditions.AlwaysVisible");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_ONLY_VISIBLE_IN_HANDS, "InventorySample.Item.VisibilityConditions.VisibleWhenInHands");
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
@@ -414,7 +405,7 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 #endif
 	{
 		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        TAG_INVENTORY_NOTIFICATION_DROP_ITEM,
+		                                        TAG_INVENTORYSAMPLE_ITEM_NOTIFICATION_DROP,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
 		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingDropItemObject, nullptr, bWasSuccess));
@@ -443,7 +434,7 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 #endif
 	{
 		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        TAG_INVENTORY_NOTIFICATION_PICKUP_ITEM,
+		                                        TAG_INVENTORYSAMPLE_ITEM_NOTIFICATION_PICKUP,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
 		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(PendingPickupItemObject, nullptr, bWasSuccess));
@@ -472,7 +463,7 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 #endif
 	{
 		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        TAG_INVENTORY_NOTIFICATION_SWAP_ITEM,
+		                                        TAG_INVENTORYSAMPLE_ITEM_NOTIFICATION_SWAP,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
 		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject, bWasSuccess));
@@ -636,13 +627,13 @@ void UActorInventoryComponent::TrySpawnEquipItem(const AActor* Outer)
 	}
 
 	// @gdemers update runtime state for the item to equipped. Note : this doesn't imply that the item is visible.
-	NewItem->ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetEquippedTag()}, {});
+	NewItem->ModifyRuntimeState(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED}, {});
 
 	// @gdemers we want to prevent spawning item actors that don't respect our flag system, and mostly provide data constraint to other items.
 	// example : ammo, consumables, etc...
 	FGameplayTagContainer ActorSpawnConditions;
-	ActorSpawnConditions.AddTag(TAG_INVENTORY_ITEM_ONLY_VISIBLE_IN_HANDS);
-	ActorSpawnConditions.AddTag(TAG_INVENTORY_ITEM_ALWAYS_VISIBLE);
+	ActorSpawnConditions.AddTag(TAG_INVENTORYSAMPLE_ITEM_VISIBILITY_ONLY_WHEN_ACTIVE);
+	ActorSpawnConditions.AddTag(TAG_INVENTORYSAMPLE_ITEM_VISIBILITY_ALWAYS_VISIBLE);
 
 	if (NewItem->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 	{
@@ -867,7 +858,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		int32 TargetStorageId = (*SearchResult)->GetRuntimeStorageId();
 
 		// @gdemers check if there is still unique entries available within our bounds.
-		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_FULL);
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
@@ -1131,7 +1122,7 @@ void UActorInventoryComponent::CheckBounds()
 		}
 	}
 
-	static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORY_STORAGE_NOENTRY);
+	static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_FULL);
 	if (bHasStorageReachMaxCapacity)
 	{
 		ModifyRuntimeState(StorageFullTags, {});
@@ -1150,7 +1141,7 @@ void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& Ne
 		return;
 	}
 
-	static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_DROPPABLE);
+	static const auto DroppableTagContainer = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_BE_DROPPED);
 	const TArray<UItemObject*> PendingDropItems = Items.FilterByPredicate([Compare = DroppableTagContainer](const UItemObject* Item)
 	{
 		return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);

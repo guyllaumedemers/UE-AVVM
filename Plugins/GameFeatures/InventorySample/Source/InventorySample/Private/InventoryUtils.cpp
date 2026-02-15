@@ -26,12 +26,12 @@
 #include "InventoryProvider.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
-#include "NativeGameplayTags.h"
 #include "StorageHelper.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/InventoryProviderTableRow.h"
+#include "Tags/PrivateTags.h"
 
 /**
  *	Class description:
@@ -438,8 +438,8 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 	// @gdemers retrieve unique id of item. IMPORTANT : our item id isnt shifted. we may be an attachment, or storage.
 	int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
 
-	static const auto ItemAttachmentType = FGameplayTagContainer(UInventorySettings::GetAttachmentTypeTag());
-	static const auto ItemStorageType = FGameplayTagContainer(UInventorySettings::GetStorageTypeTag());
+	static const auto ItemAttachmentType = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_TYPE_ATTACHMENT};
+	static const auto ItemStorageType = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE};
 
 	if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemStorageType))
 	{

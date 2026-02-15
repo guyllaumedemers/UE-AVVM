@@ -28,7 +28,6 @@
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
-#include "NativeGameplayTags.h"
 #include "PickupActor.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -41,12 +40,7 @@
 #include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceProvider.h"
-
-// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK, "InventorySample.Item.DestroyConditions.EmptyStack");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STACKABLE, "InventorySample.Item.Stackable");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_STORAGE, "InventorySample.Item.Storage");
-UE_DEFINE_GAMEPLAY_TAG(TAG_INVENTORY_ITEM_ATTACHMENT, "InventorySample.Item.Attachment");
+#include "Tags/PrivateTags.h"
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -114,11 +108,11 @@ void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount)
 	}
 
 	// @gdemers check if we are meeting design conditions for destroying this item from inventory.
-	static const auto DestroyConditions = FGameplayTagContainer(TAG_INVENTORY_ITEM_DESTROY_CONDITION_ON_EMPTY_STACK);
+	static const auto DestroyConditions = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_DESTROY_WHEN_EMPTY);
 	const bool bShouldDestroyOnEmptyStack = DoesBehaviourHasPartialMatch(DestroyConditions);
 
 	// @gdemers invalidate any actions we could be executing while pending to destroy, or while the stack is empty.
-	const FGameplayTagContainer& BlockingTags = UInventorySettings::GetEmptyItemCount_BlockedActions();
+	const FGameplayTagContainer& BlockingTags = UInventorySettings::GetBlockingTagsWhenEmpty();
 	ModifyRuntimeState(BlockingTags, {});
 
 	if (bShouldDestroyOnEmptyStack)
@@ -212,7 +206,7 @@ bool UItemObject::CanStack(const UItemObject* Item) const
 		return false;
 	}
 
-	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_STACK);
 	const bool bDoesItemStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesItemStack)
 	{
@@ -280,7 +274,7 @@ int32 UItemObject::GetStorageMaxCapacity() const
 
 int32 UItemObject::GetMaxStackCount() const
 {
-	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_STACK);
 	const bool bDoesStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesStack)
 	{
@@ -289,7 +283,7 @@ int32 UItemObject::GetMaxStackCount() const
 	}
 	else
 	{
-		const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORY_ITEM_STORAGE));
+		const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE));
 		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
 		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
 
@@ -328,7 +322,7 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 		return;
 	}
 
-	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()}, {});
+	ModifyRuntimeState(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN}, {});
 
 	FStreamableDelegate OnRequestItemActorClassComplete;
 	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnItemActorClassAcquired, Callback, ActorDefinitionDataAsset->GetActorAttributeSetClassSoftObjectPath());
@@ -354,8 +348,8 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		return;
 	}
 
-	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{UInventorySettings::GetEquippedTag()});
-	ModifyRuntimeState(FGameplayTagContainer{UInventorySettings::GetInstancedTag()}, FGameplayTagContainer{UInventorySettings::GetPendingSpawnTag()});
+	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED});
+	ModifyRuntimeState(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_INSTANCED}, FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN});
 
 	UE_LOG(LogInventorySample,
 	       Log,
@@ -828,7 +822,7 @@ int32 UItemObjectUtils::GetItemStartupStackCount(const UItemObject* UnInitialize
 		return INDEX_NONE;
 	}
 
-	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORY_ITEM_STACKABLE);
+	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_STACK);
 	const bool bDoesItemStack = UnInitializedItemObject->DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesItemStack)
 	{

@@ -125,7 +125,7 @@ bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 	}
 
 	// @gdemers validate the inventory state. Are we already full ?
-	if (InventoryComponent->HasPartialMatch(UInventorySettings::GetFullInventory_BlockedActions()) ||
+	if (InventoryComponent->HasPartialMatch(UInventorySettings::GetBlockingTagsWhenFull()) ||
 		UActorInventoryUtils::CheckWeightOverflow(InventoryComponent, PendingPickupItemObject)/*validate possible weight overflow*/)
 	{
 		return false;

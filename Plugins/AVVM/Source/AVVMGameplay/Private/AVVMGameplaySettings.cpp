@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "AVVMGameplaySettings.h"
 
+UAVVMGameplaySettings::UAVVMGameplaySettings()
+{
+	CategoryName = TEXT("Game");
+}
+
 const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
 {
 	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;

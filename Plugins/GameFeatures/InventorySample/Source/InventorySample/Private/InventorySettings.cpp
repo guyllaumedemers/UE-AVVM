@@ -19,34 +19,14 @@
 //SOFTWARE.
 #include "InventorySettings.h"
 
-const FGameplayTag& UInventorySettings::GetPendingSpawnTag()
+const FGameplayTagContainer& UInventorySettings::GetBlockingTagsWhenEmpty()
 {
-	return GetDefault<UInventorySettings>()->PendingSpawnTag;
+	return GetDefault<UInventorySettings>()->BlockingTagsWhenEmpty;
 }
 
-const FGameplayTag& UInventorySettings::GetInstancedTag()
+const FGameplayTagContainer& UInventorySettings::GetBlockingTagsWhenFull()
 {
-	return GetDefault<UInventorySettings>()->InstancedTag;
-}
-
-const FGameplayTag& UInventorySettings::GetEquippedTag()
-{
-	return GetDefault<UInventorySettings>()->EquippedTag;
-}
-
-const FGameplayTag& UInventorySettings::GetActiveTag()
-{
-	return GetDefault<UInventorySettings>()->ActiveTag;
-}
-
-const FGameplayTagContainer& UInventorySettings::GetEmptyItemCount_BlockedActions()
-{
-	return GetDefault<UInventorySettings>()->EmptyItemCount_BlockedActions;
-}
-
-const FGameplayTagContainer& UInventorySettings::GetFullInventory_BlockedActions()
-{
-	return GetDefault<UInventorySettings>()->FullInventory_BlockedActions;
+	return GetDefault<UInventorySettings>()->BlockingTagsWhenFull;
 }
 
 const FName UInventorySettings::GetItemMaxStackCount(const FGameplayTag& StackCategoryTag)
@@ -111,16 +91,6 @@ const FString& UInventorySettings::GetAppDataDirPath()
 const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventories()
 {
 	return GetDefault<UInventorySettings>()->DefaultProviderInventories;
-}
-
-const FGameplayTag& UInventorySettings::GetStorageTypeTag()
-{
-	return GetDefault<UInventorySettings>()->StorageTypeTag;
-}
-
-const FGameplayTag& UInventorySettings::GetAttachmentTypeTag()
-{
-	return GetDefault<UInventorySettings>()->AttachmentTypeTag;
 }
 
 const FGameplayTagContainer& UInventorySettings::GetItemActorSpawnConditions()

@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "AVVMGameplaySampleSettings.h"
 
+UAVVMGameplaySampleSettings::UAVVMGameplaySampleSettings()
+{
+	CategoryName = TEXT("Game");
+}
+
 TSubclassOf<UActorComponent> UAVVMGameplaySampleSettings::GetHealthComponentClass()
 {
 	return GetDefault<UAVVMGameplaySampleSettings>()->HealthComponentClass;

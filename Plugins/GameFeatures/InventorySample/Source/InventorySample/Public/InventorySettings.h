@@ -38,22 +38,10 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetPendingSpawnTag();
+	static const FGameplayTagContainer& GetBlockingTagsWhenEmpty();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetInstancedTag();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetEquippedTag();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetActiveTag();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTagContainer& GetEmptyItemCount_BlockedActions();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTagContainer& GetFullInventory_BlockedActions();
+	static const FGameplayTagContainer& GetBlockingTagsWhenFull();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FName GetItemMaxStackCount(const FGameplayTag& StackCategoryTag);
@@ -89,69 +77,45 @@ public:
 	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetStorageTypeTag();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTag& GetAttachmentTypeTag();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetItemActorSpawnConditions();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag PendingSpawnTag = FGameplayTag::EmptyTag;
+	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag InstancedTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag EquippedTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag ActiveTag = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTagContainer EmptyItemCount_BlockedActions = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTagContainer FullInventory_BlockedActions = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition")
 	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition")
+	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer HoldingRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer EquippedRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer PassiveRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer OffensiveRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer DefensiveRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer ConsumableRuleset = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag StorageTypeTag = FGameplayTag::EmptyTag;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTag AttachmentTypeTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags|Behaviour")
+	FGameplayTagContainer BlockingTagsWhenEmpty = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags|Behaviour")
+	FGameplayTagContainer BlockingTagsWhenFull = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags|Behaviour")
 	FGameplayTagContainer ItemActorSpawnConditions = FGameplayTagContainer::EmptyContainer;
 };
