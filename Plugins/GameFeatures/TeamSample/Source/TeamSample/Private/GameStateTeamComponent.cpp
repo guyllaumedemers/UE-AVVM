@@ -39,8 +39,8 @@
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAM, "WorldRule.Team");
-UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_DESTROYED_NOTIFICATION, "TeamSample.Notification.TeamDestroyed");
-UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_CREATED_NOTIFICATION, "TeamSample.Notification.TeamCreated");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_DESTROYED_NOTIFICATION, "TeamSample.UIChannel.Notification.TeamDestroyed");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_CREATED_NOTIFICATION, "TeamSample.UIChannel.Notification.TeamCreated");
 
 UGameStateTeamComponent::UGameStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

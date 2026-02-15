@@ -31,7 +31,7 @@
 #include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_OWNERSHIP_CHANGED_NOTIFICATION, "TeamSample.Notification.TeamOwnershipChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_OWNERSHIP_CHANGED_NOTIFICATION, "TeamSample.UIChannel.Notification.TeamOwnershipChanged");
 
 UPlayerStateTeamComponent::UPlayerStateTeamComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

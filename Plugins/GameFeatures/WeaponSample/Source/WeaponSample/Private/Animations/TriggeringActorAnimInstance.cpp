@@ -23,14 +23,7 @@
 #include "NativeGameplayTags.h"
 #include "TriggeringActor.h"
 #include "Animations/AVVMTSAnimInstanceUtils.h"
-
-// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_DRAW, "Status.Draw");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_RELAXED, "Status.Relaxed");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_RAISED, "Status.Raised");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_TRIGGERED, "Status.Triggered");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_EXHAUSTED, "Status.Exhausted");
-UE_DEFINE_GAMEPLAY_TAG(TAG_STATUS_STATE_RECHARGING, "Status.Recharging");
+#include "Tags/PrivateTags.h"
 
 void UTriggeringActorAnimInstance::NativeBeginPlay()
 {
@@ -87,10 +80,10 @@ void UTriggeringActorAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSe
 void UTriggeringActorAnimInstance::OnTriggeringActorStateTagChanged(const FGameplayTagContainer& NewStateTags)
 {
 	// @gdemers status
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsDraw, TAG_STATUS_STATE_DRAW, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRelaxed, TAG_STATUS_STATE_RELAXED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRaised, TAG_STATUS_STATE_RAISED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsTriggered, TAG_STATUS_STATE_TRIGGERED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsExhausted, TAG_STATUS_STATE_EXHAUSTED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRecharging, TAG_STATUS_STATE_RECHARGING, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsDraw, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_DRAW, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRelaxed, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RELAXED, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRaised, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RAISED, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsTriggered, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_TRIGGERED, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsExhausted, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_EXHAUSTED, NewStateTags);
+	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRecharging, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RECHARGING, NewStateTags);
 }

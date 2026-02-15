@@ -33,7 +33,7 @@
 #include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_COMPOSITION_CHANGED_NOTIFICATION, "TeamSample.Notification.TeamCompositionChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TEAM_COMPOSITION_CHANGED_NOTIFICATION, "TeamSample.UIChannel.Notification.TeamCompositionChanged");
 
 FTeamPayload::FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
                            const FGameplayTag& NewTeamTag)

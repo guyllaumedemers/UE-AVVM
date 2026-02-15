@@ -31,7 +31,7 @@
 #include "Net/Core/PushModel/PushModel.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.Notification.Transaction");
+UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.UIChannel.Notification.Transaction");
 
 UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
