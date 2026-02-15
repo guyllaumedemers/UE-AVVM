@@ -92,8 +92,3 @@ const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventor
 {
 	return GetDefault<UInventorySettings>()->DefaultProviderInventories;
 }
-
-const FGameplayTagContainer& UInventorySettings::GetItemActorSpawnConditions()
-{
-	return GetDefault<UInventorySettings>()->ItemActorSpawnConditions;
-}

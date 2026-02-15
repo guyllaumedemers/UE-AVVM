@@ -112,13 +112,6 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		return;
 	}
 
-	static const auto ActorSpawnConditions = UInventorySettings::GetItemActorSpawnConditions();
-	if (!ensureAlwaysMsgf(!ActorSpawnConditions.IsEmpty(),
-	                      TEXT("ActorSpawnConditions missing. Verify your developer settings.")))
-	{
-		return;
-	}
-
 	for (UItemObject* NewItemObject : NewItemObjects)
 	{
 		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED}))
@@ -142,7 +135,7 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		auto& OutValue = Loadout.FindOrAdd(ItemSlotTag_HighestPriority);
 		OutValue = NewItemObject;
 
-		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
+		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_SPAWN_ACTOR}))
 		{
 			continue;
 		}

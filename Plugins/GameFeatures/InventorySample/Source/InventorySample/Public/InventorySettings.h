@@ -76,9 +76,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
 
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FGameplayTagContainer& GetItemActorSpawnConditions();
-
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="AVVMActorIdentifierDataTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
@@ -115,7 +112,4 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
 	FGameplayTagContainer BlockingTagsWhenFull = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
-	FGameplayTagContainer ItemActorSpawnConditions = FGameplayTagContainer::EmptyContainer;
 };
