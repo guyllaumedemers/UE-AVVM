@@ -21,33 +21,18 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DataTable.h"
+#include "Editor/Blutility/Classes/EditorUtilityWidget.h"
 
-#if WITH_EDITOR
-#include "Misc/DataValidation.h"
-#endif
-
-#include "AVVMActorIdentifierTableRow.generated.h"
+#include "AVVMDataEditorUtilityWidget.generated.h"
 
 /**
  *	Class description:
  *	
- *	FAVVMActorIdentifierDataTableRow is a table row entry thet define a unique identifier for a given Actor type. Doing so allows
- *	our Backend encoding system to reference elements, and create complex encoding scheme for tightly packing data.
- *	
- *	Note : We do expect some rules to be followed. Make sure the RowName define for this entry match the Actor Class FName, and if you are
- *	using the InventorySample system, make sure the FDataRegistryId::ItemName is identical to the Actor Class FName referenced.
+ *	UAVVMDataEditorUtilityWidget is an Editor Tool that offer support for creating dependent data entries (in Data Table) ready for gameplay
+ *	based on the AVVM plugin API impl details (and samples).
  */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
+UCLASS()
+class AVVMEDITORTOOLKIT_API UAVVMDataEditorUtilityWidget : public UEditorUtilityWidget
 {
 	GENERATED_BODY()
-
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can target Attachment bits, Storage bits, and items.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0"))
-	int32 UniqueId = INDEX_NONE;
 };
