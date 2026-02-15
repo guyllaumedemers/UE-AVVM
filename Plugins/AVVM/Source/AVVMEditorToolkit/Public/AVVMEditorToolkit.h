@@ -30,3 +30,17 @@
  *
  *		TODO @gdemers do a rundown of all available utilities here as you go!
  */
+
+class FAVVMEditorToolkit : public IModuleInterface
+{
+public:
+	/** IModuleInterface implementation */
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+
+private:
+	TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs,
+	                                            int32 TabIndex);
+
+	FText GetTabLabel(int32 TabIndex);
+};

@@ -21,18 +21,14 @@
 
 #include "CoreMinimal.h"
 
-#include "Editor/Blutility/Classes/EditorUtilityWidget.h"
-
-#include "AVVMDataEditorUtilityWidget.generated.h"
-
 /**
- *	Class description:
- *	
- *	UAVVMDataEditorUtilityWidget is an Editor Tool that offer support for creating dependent data entries (in Data Table) ready for gameplay
- *	based on the AVVM plugin API impl details (and samples).
+ * 
  */
-UCLASS()
-class AVVMEDITORTOOLKIT_API UAVVMDataEditorUtilityWidget : public UEditorUtilityWidget
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRoot : public SCompoundWidget
 {
-	GENERATED_BODY()
+public:
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitRoot) {}
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs, int32 InTabIndex);
 };

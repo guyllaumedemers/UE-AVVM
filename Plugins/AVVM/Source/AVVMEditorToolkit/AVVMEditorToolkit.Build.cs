@@ -36,12 +36,14 @@ public class AVVMEditorToolkit : ModuleRules
 				"Slate",
 				"SlateCore",
 				"UMG",
+				"UnrealEd",
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"WorkspaceMenuStructure"
 			}
 		);
 	}
