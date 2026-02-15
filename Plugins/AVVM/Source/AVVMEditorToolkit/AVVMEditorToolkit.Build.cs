@@ -29,11 +29,13 @@ public class AVVMEditorToolkit : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Blutility",
 				"Core",
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore"
+				"SlateCore",
+				"UMG",
 			}
 		);
 
