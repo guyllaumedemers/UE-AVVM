@@ -21,21 +21,26 @@
 
 #include "CoreMinimal.h"
 
-class FAVVMEditorToolkit_Core;
-
 /**
  * 
  */
-class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRoot : public SCompoundWidget
+class AVVMEDITORTOOLKIT_API FAVVMEditorToolbar
 {
+	struct FAVVMSubMenuContext
+	{
+		FName SectionName = NAME_None;
+		FName SubSectionName = NAME_None;
+		FText SubSection_Label = FText::GetEmpty();
+		FText SubSection_Tooltips = FText::GetEmpty();
+		FSlateIcon SubSection_Icon = FSlateIcon();
+		TArray<TSharedPtr<FUICommandInfo>> Commands;
+	};
+	
 public:
-	SLATE_BEGIN_ARGS(SAVVMEditorToolkitRoot) {}
-	SLATE_END_ARGS()
-
-	void Construct(const FArguments& InArgs, int32 InTabIndex);
-	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
-
-protected:
-	/** Pointer to the widget that houses the level editor's mode toolbar */
-	TSharedPtr<SBorder> SecondaryMenuToolbarWidget;
+	static TSharedRef<SWidget> MakeSecondaryToolbar(TSharedRef<FUICommandList> InCommandList, TSharedPtr<FExtender> MenuBarExtenders);
+	static void MakeNewSubMenu(const FAVVMSubMenuContext& Ctx, UToolMenu& Menu);
+	static void FillNewSubMenu(UToolMenu* InMenu, FName SectionName, TArray<TSharedPtr<FUICommandInfo>> Commands);
+	
+private:
+	static void MakeDataTableEditor(UToolMenu& InMenu);
 };

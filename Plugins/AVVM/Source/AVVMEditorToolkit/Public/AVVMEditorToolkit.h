@@ -53,7 +53,14 @@ public:
 	virtual void RegisterCommands() override;
 	// End of TCommand<> interface
 
-	TSharedPtr<FUICommandInfo> OpenEditorToolkit = nullptr;
+	// @gdemers main toolkit window
+	TSharedPtr<FUICommandInfo> OpenEditorToolkit_Window = nullptr;
+	// @gdemers data table editor commands
+	// Notes : it's expected that the following commands create a context object that's plugin specific
+	// so RowTable actions are following rules specific plugin implementation details.
+	TSharedPtr<FUICommandInfo> OpenDataTableEditor_RecentFiles = nullptr;
+	TSharedPtr<FUICommandInfo> OpenDataTableEditor_OpenFile = nullptr;
+	TSharedPtr<FUICommandInfo> OpenDataTableEditor_SaveAll = nullptr;
 };
 
 /**
@@ -80,8 +87,24 @@ public:
 protected:
 	void BindCommands();
 	void RegisterUnderWindowTab();
-	void RegisterUnderLevelEditorTab();
-	void AppendMenuBar();
+	void RegisterUnderLevelEditorTab() const;
+	void RegisterUnderMenuBar() const;
+	
+	struct FAVVMExtensibilityContext
+	{
+		FName ExtensionHook = NAME_None;
+		EExtensionHook::Position Position = EExtensionHook::Position::After;
+		TAttribute<FText> Label = FText::GetEmpty();
+		TAttribute<FText> Tooltips = FText::GetEmpty();
+		
+		TSharedPtr<FExtensibilityManager> ExtensibilityManager = nullptr;
+		TArray<TSharedPtr<FUICommandInfo>> Commands;
+		TSharedPtr<FUICommandList> CommandList = nullptr;
+	};
+
+	static void MakeNewPullDownMenuEntries(const FAVVMExtensibilityContext& Ctx);
+	static void MakeNewPullDownMenu(FMenuBarBuilder& Builder, FAVVMExtensibilityContext Ctx);
+	static void MakeNewMenuEntry(FMenuBuilder& Builder, TArray<TSharedPtr<FUICommandInfo>> Commands);
 
 	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager = nullptr;
 	TSharedPtr<FExtensibilityManager> MenuExtensibilityManager = nullptr;

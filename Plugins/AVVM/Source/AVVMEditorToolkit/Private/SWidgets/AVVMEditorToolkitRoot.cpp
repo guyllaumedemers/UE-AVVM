@@ -19,6 +19,61 @@
 //SOFTWARE.
 #include "AVVMEditorToolkitRoot.h"
 
-void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs, int32 InTabIndex)
+#include "AVVMEditorToolbar.h"
+#include "AVVMEditorToolkit.h"
+
+void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs,
+                                       int32 InTabIndex)
 {
+}
+
+void SAVVMEditorToolkitRoot::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
+                                   TSharedPtr<FExtender> MenuBarExtenders)
+{
+	if (!Core.IsValid() || !MenuBarExtenders.IsValid())
+	{
+		return;
+	}
+
+	SecondaryMenuToolbarWidget = SNew(SBorder)
+		.Padding(0.f)
+		.BorderImage(FAppStyle::Get().GetBrush("NoBorder"));
+
+	TSharedRef<SWidget> SecondaryToolbar = FAVVMEditorToolbar::MakeSecondaryToolbar(Core->GetToolkitCommands(), MenuBarExtenders);
+	SecondaryMenuToolbarWidget->SetContent(SecondaryToolbar);
+	
+	ChildSlot
+	[
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		[
+			SNew(SImage)
+			.Image(&FCoreStyle::Get().GetWidgetStyle<FWindowStyle>("Window").BackgroundBrush)
+		]
+		+ SOverlay::Slot()
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SecondaryMenuToolbarWidget.ToSharedRef()
+			]
+			+ SVerticalBox::Slot()
+			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
+			.FillContentHeight(1.f)
+			[
+				SNew(SBorder)
+				.Padding(12.f)
+				.BorderImage(FAppStyle::Get().GetBrush("NoBorder"))
+				.IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
+				[
+					// TODO @gdemers replace this with the toolkit context selected in the tab menu. Default should be a presentation screen that
+					// explain the toolkit purpose.
+					SNew(SImage)
+					.ColorAndOpacity(FColor::Green)
+				]
+			]
+		]
+	];
 }

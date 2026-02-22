@@ -42,11 +42,13 @@ namespace NS_AVVMEditorToolkit
 	// @gdemers viewport header
 	const FText Viewport_Label = LOCTEXT("Viewport_Label", "Core");
 	// @gdemers TabId
-	const FName MainTab = TEXT("MainTab");
+	const FName MainTab_Name = TEXT("MainTab");
+	// @gdemers Section
+	const FName MainSection_Name = TEXT("MainSection");
 	// @gdemers toolkit
 	const FText DataTableEditor_Label = LOCTEXT("DataTableEditor_Label", "DataTableEditor");
 	const FText DataTableEditor_Tooltips = LOCTEXT("DataTableEditor_Tooltips", "Open a Data Table Editor to generate project data following AVVM plugin requirements.");
-	const FSlateIcon DataTableEditor_DataTableIcon = FSlateIcon(FUMGStyle::GetStyleSetName(), "Designer.TabIcon");
+	const FSlateIcon DataTableEditor_Icon = FSlateIcon(FUMGStyle::GetStyleSetName(), "Designer.TabIcon");
 }
 
 FLinearColor FAVVMEditorToolkit_Core::GetWorldCentricTabColorScale() const
@@ -76,7 +78,10 @@ FAVVMEditorToolkit_Commands::FAVVMEditorToolkit_Commands()
 
 void FAVVMEditorToolkit_Commands::RegisterCommands()
 {
-	UI_COMMAND(OpenEditorToolkit, "Open AVVMEditorToolkit", "Open AVVMEditorToolkit", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenEditorToolkit_Window, "Open Window", "Open Window", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenDataTableEditor_RecentFiles, "Open Recent Files", "Open Recent Files", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenDataTableEditor_OpenFile, "Open File", "Open File", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenDataTableEditor_SaveAll, "Save All", "Save All", EUserInterfaceActionType::Button, FInputChord());
 }
 
 void FAVVMEditorToolkitModule::StartupModule()
@@ -89,9 +94,9 @@ void FAVVMEditorToolkitModule::StartupModule()
 	
 	{
 		BindCommands();
+		RegisterUnderMenuBar();
 		RegisterUnderWindowTab();
 		RegisterUnderLevelEditorTab();
-		AppendMenuBar();
 	}
 }
 
@@ -100,11 +105,12 @@ void FAVVMEditorToolkitModule::ShutdownModule()
 	{
 		ToolBarExtensibilityManager.Reset();
 		MenuExtensibilityManager.Reset();
+		Core.Reset();
 	}
 	
 	{
 		// @gdemers unregister global tab for our main presentation viewport.
-		FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab);
+		FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab_Name);
 	}
 }
 
@@ -118,20 +124,57 @@ TSharedPtr<FExtensibilityManager> FAVVMEditorToolkitModule::GetMenuExtensibility
 	return MenuExtensibilityManager;
 }
 
+void FAVVMEditorToolkitModule::BindCommands()
+{
+	{
+		// @gdemers get-set singleton instance for our FUICommandList
+		TCommands<FAVVMEditorToolkit_Commands>::Register();
+	}
+
+	struct FAVVMEditorActions
+	{
+		static void OpenEditorToolkitWindow()
+		{
+			// @gdemers open our tool viewport from the registered tab system so we don't have to handle
+			// the viewport lifecycle ourselves.
+			FGlobalTabmanager::Get()->TryInvokeTab(NS_AVVMEditorToolkit::MainTab_Name);
+		}
+
+		static void OpenDataTableEditorContent()
+		{
+			UE_LOG(LogTemp, Log, TEXT("Open DataTableEditor Content"));
+		}
+	};
+
+	{
+		Core = MakeShared<FAVVMEditorToolkit_Core>();
+		FAVVMEditorToolkit_Commands& Commands = FAVVMEditorToolkit_Commands::Get();
+		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_RecentFiles, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenDataTableEditorContent), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_OpenFile, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenDataTableEditorContent), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_SaveAll, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenDataTableEditorContent), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(Commands.OpenEditorToolkit_Window, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenEditorToolkitWindow), FCanExecuteAction());
+	}
+}
+
 void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 {
 	struct FAVVMWindowTabBuilder
 	{
-		static TSharedRef<class SDockTab> MakeWindowTabEntry(const class FSpawnTabArgs& SpawnTabArgs, int32 TabIndex)
+		static TSharedRef<class SDockTab> MakeWindowTabEntry(const class FSpawnTabArgs& SpawnTabArgs,
+		                                                     int32 TabIndex,
+		                                                     TSharedPtr<FExtensibilityManager> ExtensibilityManager,
+		                                                     TSharedPtr<FAVVMEditorToolkit_Core> EditorToolkit)
 		{
-			const auto NewPalette = SNew(SAVVMEditorToolkitRoot, TabIndex);
+			const auto NewRoot = SNew(SAVVMEditorToolkitRoot, TabIndex);
 			TSharedRef<SDockTab> ResultTab = SNew(SDockTab)
 				.TabRole(ETabRole::NomadTab)
 				.Label(NS_AVVMEditorToolkit::Viewport_Label)
 				[
-					NewPalette
+					NewRoot
 				];
 
+			// @gdemers configure our internal layout.
+			NewRoot->Setup(EditorToolkit, ExtensibilityManager.IsValid() ? ExtensibilityManager->GetAllExtenders() : nullptr);
 			return ResultTab;
 		}
 	};
@@ -144,14 +187,14 @@ void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 	                                                  true);
 
 	FGlobalTabmanager::Get()
-			->RegisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab, FOnSpawnTab::CreateStatic(&FAVVMWindowTabBuilder::MakeWindowTabEntry, 0))
+			->RegisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab_Name, FOnSpawnTab::CreateStatic(&FAVVMWindowTabBuilder::MakeWindowTabEntry, 0, GetMenuExtensibilityManager(), Core))
 			.SetDisplayName(NS_AVVMEditorToolkit::DataTableEditor_Label)
 			.SetTooltipText(NS_AVVMEditorToolkit::DataTableEditor_Tooltips)
-			.SetGroup(ToolGroup)
-			.SetIcon(NS_AVVMEditorToolkit::DataTableEditor_DataTableIcon);
+			.SetIcon(NS_AVVMEditorToolkit::DataTableEditor_Icon)
+			.SetGroup(ToolGroup);
 }
 
-void FAVVMEditorToolkitModule::RegisterUnderLevelEditorTab()
+void FAVVMEditorToolkitModule::RegisterUnderLevelEditorTab() const
 {
 	auto* GlobalToolMenu = UToolMenus::Get();
 	if (!IsValid(GlobalToolMenu) || !Core.IsValid())
@@ -164,73 +207,56 @@ void FAVVMEditorToolkitModule::RegisterUnderLevelEditorTab()
 	{
 		const TAttribute<FText>& Label = NS_AVVMEditorToolkit::DataTableEditor_Label;
 		const TAttribute<FText>& Tooltips = NS_AVVMEditorToolkit::DataTableEditor_Tooltips;
-		const FSlateIcon& Icon = NS_AVVMEditorToolkit::DataTableEditor_DataTableIcon;
+		const FSlateIcon& Icon = NS_AVVMEditorToolkit::DataTableEditor_Icon;
 
-		const auto& Commands = FAVVMEditorToolkit_Commands::Get();
-		FToolMenuSection& Section = ToolkitMenu->AddSection("Dummy_Section");
-		const auto ToolEntry = FToolMenuEntry::InitMenuEntryWithCommandList(Commands.OpenEditorToolkit, Core->GetToolkitCommands(), Label, Tooltips, Icon);
-		Section.AddEntry(ToolEntry);
+		FToolMenuSection& Section = ToolkitMenu->AddSection(NS_AVVMEditorToolkit::MainSection_Name);
+		Section.AddMenuEntryWithCommandList(FAVVMEditorToolkit_Commands::Get().OpenEditorToolkit_Window, Core->GetToolkitCommands(), Label, Tooltips, Icon);
 	}
 }
 
-void FAVVMEditorToolkitModule::AppendMenuBar()
+void FAVVMEditorToolkitModule::RegisterUnderMenuBar() const
 {
-	struct FAVVMMenuBarEntryBuilder
+	if (Core.IsValid())
 	{
-		static void MakeMenuBarEntry(FMenuBuilder& Builder)
-		{
-			const FAVVMEditorToolkit_Commands& Commands = FAVVMEditorToolkit_Commands::Get();
-			Builder.AddMenuEntry(Commands.OpenEditorToolkit);
-		}
-	};
+		auto& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 
-	struct FAVVMMenuBarBuilder
-	{
-		static void MakeMenuBar(FMenuBarBuilder& Builder)
-		{
-			const TAttribute<FText>& Label = NS_AVVMEditorToolkit::Menu_Label;
-			const TAttribute<FText>& Tooltips = NS_AVVMEditorToolkit::Menu_Tooltips;
-			Builder.AddPullDownMenu(Label, Tooltips, FNewMenuDelegate::CreateStatic(&FAVVMMenuBarEntryBuilder::MakeMenuBarEntry));
-		}
-	};
+		FAVVMExtensibilityContext Ctx;
+		Ctx.ExtensionHook = TEXT("Help");
+		Ctx.Position = EExtensionHook::Position::After;
+		Ctx.Label = NS_AVVMEditorToolkit::Menu_Label;
+		Ctx.Tooltips = NS_AVVMEditorToolkit::Menu_Tooltips;
+		Ctx.ExtensibilityManager = LevelEditorModule.GetMenuExtensibilityManager();
+		Ctx.Commands = {FAVVMEditorToolkit_Commands::Get().OpenEditorToolkit_Window};
+		Ctx.CommandList = Core->GetToolkitCommands();
+		FAVVMEditorToolkitModule::MakeNewPullDownMenuEntries(Ctx);
+	}
+}
 
-	if (!Core.IsValid())
+void FAVVMEditorToolkitModule::MakeNewPullDownMenuEntries(const FAVVMExtensibilityContext& Ctx)
+{
+	if (!Ctx.ExtensibilityManager.IsValid() || Ctx.Commands.IsEmpty())
 	{
 		return;
 	}
 
-	auto& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	TSharedRef<FExtender> MenuBarExtender(new FExtender());
-	MenuBarExtender->AddMenuBarExtension("Help", EExtensionHook::After, Core->GetToolkitCommands(), FMenuBarExtensionDelegate::CreateStatic(&FAVVMMenuBarBuilder::MakeMenuBar));
+	Ctx.ExtensibilityManager->AddExtender(MenuBarExtender);
 
-	auto NewMenuExtensibilityManager = LevelEditorModule.GetMenuExtensibilityManager();
-	if (NewMenuExtensibilityManager.IsValid())
-	{
-		NewMenuExtensibilityManager->AddExtender(MenuBarExtender);
-	}
+	const auto Callback = FMenuBarExtensionDelegate::CreateStatic(&FAVVMEditorToolkitModule::MakeNewPullDownMenu, Ctx);
+	MenuBarExtender->AddMenuBarExtension(Ctx.ExtensionHook, Ctx.Position, Ctx.CommandList, Callback);
 }
 
-void FAVVMEditorToolkitModule::BindCommands()
+void FAVVMEditorToolkitModule::MakeNewPullDownMenu(FMenuBarBuilder& Builder, FAVVMExtensibilityContext Ctx)
 {
+	const auto Callback = FNewMenuDelegate::CreateStatic(&FAVVMEditorToolkitModule::MakeNewMenuEntry, Ctx.Commands);
+	Builder.AddPullDownMenu(Ctx.Label, Ctx.Tooltips, Callback);
+}
+
+void FAVVMEditorToolkitModule::MakeNewMenuEntry(FMenuBuilder& Builder, TArray<TSharedPtr<FUICommandInfo>> Commands)
+{
+	for (const auto& Command : Commands)
 	{
-		// @gdemers get-set singleton instance for our FUICommandList
-		TCommands<FAVVMEditorToolkit_Commands>::Register();
-	}
-	
-	struct FAVVMTabSpawner
-	{
-		static void OpenEditorToolkitWindow()
-		{
-			// @gdemers open our tool viewport from the registered tab system so we don't have to handle
-			// the viewport lifecycle ourselves.
-			FGlobalTabmanager::Get()->TryInvokeTab(NS_AVVMEditorToolkit::MainTab);
-		}
-	};
-	
-	{
-		Core = MakeShared<FAVVMEditorToolkit_Core>();
-		FAVVMEditorToolkit_Commands& Commands = FAVVMEditorToolkit_Commands::Get();
-		Core->GetToolkitCommands()->MapAction(Commands.OpenEditorToolkit, FExecuteAction::CreateStatic(&FAVVMTabSpawner::OpenEditorToolkitWindow), FCanExecuteAction());
+		Builder.AddMenuEntry(Command);
 	}
 }
 
