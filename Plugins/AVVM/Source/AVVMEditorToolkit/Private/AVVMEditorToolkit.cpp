@@ -20,6 +20,7 @@
 
 #include "AVVMEditorToolkit.h"
 
+#include "AVVMDataTableEditor.cpp"
 #include "LevelEditor.h"
 #include "UMGStyle.h"
 #include "ToolMenu.h"
@@ -139,19 +140,14 @@ void FAVVMEditorToolkitModule::BindCommands()
 			// the viewport lifecycle ourselves.
 			FGlobalTabmanager::Get()->TryInvokeTab(NS_AVVMEditorToolkit::MainTab_Name);
 		}
-
-		static void OpenDataTableEditorContent()
-		{
-			UE_LOG(LogTemp, Log, TEXT("Open DataTableEditor Content"));
-		}
 	};
 
 	{
 		Core = MakeShared<FAVVMEditorToolkit_Core>();
 		FAVVMEditorToolkit_Commands& Commands = FAVVMEditorToolkit_Commands::Get();
-		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_RecentFiles, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenDataTableEditorContent), FCanExecuteAction());
-		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_OpenFile, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenDataTableEditorContent), FCanExecuteAction());
-		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_SaveAll, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenDataTableEditorContent), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_RecentFiles, FExecuteAction::CreateStatic(&NS_AVVMDataTableEditor::OpenRecentFiles), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_OpenFile, FExecuteAction::CreateStatic(&NS_AVVMDataTableEditor::OpenFile), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_SaveAll, FExecuteAction::CreateStatic(&NS_AVVMDataTableEditor::SaveAll), FCanExecuteAction());
 		Core->GetToolkitCommands()->MapAction(Commands.OpenEditorToolkit_Window, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenEditorToolkitWindow), FCanExecuteAction());
 	}
 }

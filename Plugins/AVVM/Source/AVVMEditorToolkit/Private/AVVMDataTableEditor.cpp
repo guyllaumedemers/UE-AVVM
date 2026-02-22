@@ -17,35 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
 
 #include "CoreMinimal.h"
 
 /**
- *	Class description:
- *	
- *	FAVVMEditorToolbar is a global accessor to reusable api participating in the population of our Toolkit MenuBar.
- *	
- *	TODO @gdemers
- *	FExtender are not in used here for SubMenu generation... which I maybe due to misconfiguration of my own cached ExtensibilityManager ?
+ *	@gdemers Private namespace for reusable api specific to the AVVM DataTableEditor toolkit.
  */
-class AVVMEDITORTOOLKIT_API FAVVMEditorToolbar
+namespace NS_AVVMDataTableEditor
 {
-	struct FAVVMSubMenuContext
+	static void OpenRecentFiles()
 	{
-		FName SectionName = NAME_None;
-		FName SubSectionName = NAME_None;
-		FText SubSection_Label = FText::GetEmpty();
-		FText SubSection_Tooltips = FText::GetEmpty();
-		FSlateIcon SubSection_Icon = FSlateIcon();
-		TArray<TSharedPtr<FUICommandInfo>> Commands;
-	};
-	
-public:
-	static TSharedRef<SWidget> MakeSecondaryToolbar(TSharedRef<FUICommandList> InCommandList, TSharedPtr<FExtender> MenuBarExtenders);
-	static void MakeNewSubMenu(const FAVVMSubMenuContext& Ctx, UToolMenu& Menu);
-	static void FillNewSubMenu(UToolMenu* InMenu, FName SectionName, TArray<TSharedPtr<FUICommandInfo>> Commands);
-	
-private:
-	static void MakeDataTableEditor(UToolMenu& InMenu);
-};
+		UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::OpenRecentFiles"));
+	}
+
+	static void OpenFile()
+	{
+		UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::OpenFile"));
+	}
+
+	static void SaveAll()
+	{
+		UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::SaveAll"));
+	}
+}
