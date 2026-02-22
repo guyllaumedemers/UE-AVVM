@@ -21,7 +21,40 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMEditorToolkit_Core is a derived class that impl our Tool core behaviour.
+ */
+class FAVVMEditorToolkit_Core : public FAssetEditorToolkit
+{
+public:
+	FAVVMEditorToolkit_Core() = default;
+	
+	virtual FLinearColor GetWorldCentricTabColorScale() const override;
+	virtual FName GetToolkitFName() const override;
+	virtual FText GetBaseToolkitName() const override;
+	virtual FString GetWorldCentricTabPrefix() const override;
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMEditorToolkit_Commands is a global instance class that register ui commands / inputs with the engine input manager, and trigger
+ *	events for our Editor extensions.
+ */
+class FAVVMEditorToolkit_Commands : public TCommands<FAVVMEditorToolkit_Commands>
+{
+public:
+	FAVVMEditorToolkit_Commands();
+	
+	// TCommand<> interface
+	virtual void RegisterCommands() override;
+	// End of TCommand<> interface
+
+	TSharedPtr<FUICommandInfo> OpenEditorToolkit = nullptr;
+};
 
 /**
  *	Plugin Description :
@@ -30,17 +63,28 @@
  *
  *		TODO @gdemers do a rundown of all available utilities here as you go!
  */
-
-class FAVVMEditorToolkit : public IModuleInterface
+class FAVVMEditorToolkitModule : public IModuleInterface,
+                                 public IHasMenuExtensibility,
+                                 public IHasToolBarExtensibility
 {
 public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+	
+	// IHasToolBarExtensibility
+	virtual TSharedPtr<FExtensibilityManager> GetToolBarExtensibilityManager() override;
+	// IHasMenuExtensibility
+	virtual TSharedPtr<FExtensibilityManager> GetMenuExtensibilityManager() override;
 
-private:
-	TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs,
-	                                            int32 TabIndex);
+protected:
+	void BindCommands();
+	void RegisterUnderWindowTab();
+	void RegisterUnderLevelEditorTab();
+	void AppendMenuBar();
 
-	FText GetTabLabel(int32 TabIndex);
+	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager = nullptr;
+	TSharedPtr<FExtensibilityManager> MenuExtensibilityManager = nullptr;
+	// @gdemers core object handle the toolkit cmds invocation.
+	TSharedPtr<FAVVMEditorToolkit_Core> Core = nullptr;
 };

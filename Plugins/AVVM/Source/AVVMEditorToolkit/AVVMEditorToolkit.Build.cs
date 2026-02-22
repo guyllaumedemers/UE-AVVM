@@ -43,7 +43,10 @@ public class AVVMEditorToolkit : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"WorkspaceMenuStructure"
+				"InputCore",
+				"ToolMenus",
+				"TranslationEditor",
+				"WorkspaceMenuStructure",
 			}
 		);
 	}
