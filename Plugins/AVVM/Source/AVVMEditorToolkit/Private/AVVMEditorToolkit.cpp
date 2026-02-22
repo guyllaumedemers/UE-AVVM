@@ -41,6 +41,8 @@ namespace NS_AVVMEditorToolkit
 	const FSlateIcon Menu_TabIcon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.TabIcon");
 	// @gdemers viewport header
 	const FText Viewport_Label = LOCTEXT("Viewport_Label", "Core");
+	// @gdemers TabId
+	const FName MainTab = TEXT("MainTab");
 	// @gdemers toolkit
 	const FText DataTableEditor_Label = LOCTEXT("DataTableEditor_Label", "DataTableEditor");
 	const FText DataTableEditor_Tooltips = LOCTEXT("DataTableEditor_Tooltips", "Open a Data Table Editor to generate project data following AVVM plugin requirements.");
@@ -102,7 +104,7 @@ void FAVVMEditorToolkitModule::ShutdownModule()
 	
 	{
 		// @gdemers unregister global tab for our main presentation viewport.
-		FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TEXT("FAVVMEditorToolkitModule"));
+		FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab);
 	}
 }
 
@@ -142,7 +144,7 @@ void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 	                                                  true);
 
 	FGlobalTabmanager::Get()
-			->RegisterNomadTabSpawner(TEXT("FAVVMEditorToolkitModule"), FOnSpawnTab::CreateStatic(&FAVVMWindowTabBuilder::MakeWindowTabEntry, 0))
+			->RegisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab, FOnSpawnTab::CreateStatic(&FAVVMWindowTabBuilder::MakeWindowTabEntry, 0))
 			.SetDisplayName(NS_AVVMEditorToolkit::DataTableEditor_Label)
 			.SetTooltipText(NS_AVVMEditorToolkit::DataTableEditor_Tooltips)
 			.SetGroup(ToolGroup)
@@ -219,8 +221,9 @@ void FAVVMEditorToolkitModule::BindCommands()
 	{
 		static void OpenEditorToolkitWindow()
 		{
-			// TODO @gdemers Should I open a SViewport ? or attempt following the TabManager system ? I cant manually spawn a tab with the manager from what im seeing...
-			UE_LOG(LogTemp, Log, TEXT("Open"));
+			// @gdemers open our tool viewport from the registered tab system so we don't have to handle
+			// the viewport lifecycle ourselves.
+			FGlobalTabmanager::Get()->TryInvokeTab(NS_AVVMEditorToolkit::MainTab);
 		}
 	};
 	
