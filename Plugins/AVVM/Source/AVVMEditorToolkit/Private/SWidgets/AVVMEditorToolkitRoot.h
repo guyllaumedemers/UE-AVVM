@@ -24,7 +24,10 @@
 class FAVVMEditorToolkit_Core;
 
 /**
- * 
+ *	Class description:
+ *	
+ *	SAVVMEditorToolkitRoot is the main Slate element used for drawing our Tool. All sub-element generation
+ *	is piped down through this Root.
  */
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRoot : public SCompoundWidget
 {
