@@ -81,7 +81,12 @@ Under **AVVMGameplay** can be found extended version of Unreal's actor model for
 * **AVVMWorldSetting** : Extend Unreal WorldSetting, and manage user defined Rules. **AVVMWorldRule** can be defined under project, or plugin, and be registered with the system to configure gameplay, or subsystem creation on a per-world basis.
 * ...
 
-#### PlayerTrace (FPS, and TPS)
+### AVVMEditorToolkit
+
+Under **AVVMEditorToolkit** can be found (wip) tools that are used to develop Data driven gameplay content. In the work, is the AVVMDataTableEditor which serve as a Helper for creating
+Data Table content that respect rules defined in the AVVM plugin Api (& Samples). A good example : **UInventorySample** which require ActorIdentifier to be within a user defined range based on the Category type referenced.
+
+### PlayerTrace (FPS, and TPS)
 
 **Notes** : Math explanation coming soon! 
 
