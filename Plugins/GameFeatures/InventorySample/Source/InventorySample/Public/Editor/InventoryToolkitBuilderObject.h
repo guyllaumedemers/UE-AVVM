@@ -20,29 +20,39 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SCompoundWidget.h"
 
-class FAVVMEditorToolkit_Core;
-class FExtender;
+#ifdef UE_ENABLE_AVVM_EDITORTOOLKIT
+#include "AVVMEditorToolkitBuilderObject.h"
+#endif
+
+#include "InventoryToolkitBuilderObject.generated.h"
+
+class FUICommandInfo;
+
+#if WITH_EDITORONLY_DATA
 
 /**
  *	Class description:
  *	
- *	SAVVMEditorToolkitRoot is the main Slate element used for drawing our Tool. All sub-element generation
- *	is piped down through this Root.
+ *	UInventoryToolkitBuilderObject is a UObject type used to build editor slate Tool used by
+ *	the InventorySample plugin.
  */
-class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRoot : public SCompoundWidget
+UCLASS()
+class INVENTORYSAMPLE_API UInventoryToolkitBuilderObject : public UAVVMEditorToolkitBuilderObject
 {
-public:
-	SLATE_BEGIN_ARGS(SAVVMEditorToolkitRoot) {}
-	SLATE_END_ARGS()
+	GENERATED_BODY()
 
-	void Construct(const FArguments& InArgs);
-	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
+public:
+	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) override;
 
 protected:
-	/** Pointer to the widget that houses the level editor's mode context window */
-	TSharedPtr<SBorder> SecondaryContextWindowWidget = nullptr;
-	/** Pointer to the widget that houses the level editor's mode toolbar */
-	TSharedPtr<SBorder> SecondaryMenuToolbarWidget = nullptr;
+	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const override;
+	// @gdemers data table editor commands
+	// Notes : it's expected that the following commands create a context object that's plugin specific
+	// so RowTable actions are following rules specific plugin implementation details.
+	TSharedPtr<FUICommandInfo> OpenDataTableEditor_RecentFiles = nullptr;
+	TSharedPtr<FUICommandInfo> OpenDataTableEditor_OpenFile = nullptr;
+	TSharedPtr<FUICommandInfo> OpenDataTableEditor_SaveAll = nullptr;
 };
+
+#endif

@@ -21,13 +21,40 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AVVMEditorToolkitBuilderObject.h"
+
+/**
+ *	@gdemers reusable macro for binding FUICommandInfo in external module/plugins.
+ */
+#define BIND_NEW_BUTTON_COMMAND(Cmd, CmdName, CmdLabel, CmdDesc)\
+	{\
+		const auto Ctx = FAVVMEditorToolkit_Commands::MakeButtonContext(CmdName, CmdLabel, CmdDesc);\
+		FAVVMEditorToolkit_Commands::Get().BindNewCommand(Cmd, Ctx);\
+	}\
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMBindingContext is a context struct for encapsulating information relevant for binding UICommandInfo.
+ */
+struct AVVMEDITORTOOLKIT_API FAVVMBindingContext
+{
+	FName CommandName = NAME_None;
+	FText CommandLabel = FText::GetEmpty();
+	FText CommandDesc = FText::GetEmpty();
+	FSlateIcon Icon = FSlateIcon();
+	EUserInterfaceActionType UserInterfaceType = EUserInterfaceActionType::None;
+	FInputChord DefaultChord = FInputChord();
+	FInputChord AlternateDefaultChord = FInputChord();
+	FName Bundle = NAME_None;
+};
 
 /**
  *	Class description:
  *	
  *	FAVVMEditorToolkit_Core is a derived class that impl our Tool core behaviour.
  */
-class FAVVMEditorToolkit_Core : public FAssetEditorToolkit
+class AVVMEDITORTOOLKIT_API FAVVMEditorToolkit_Core : public FAssetEditorToolkit
 {
 public:
 	FAVVMEditorToolkit_Core() = default;
@@ -36,6 +63,14 @@ public:
 	virtual FName GetToolkitFName() const override;
 	virtual FText GetBaseToolkitName() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
+	
+	// @gdemers our UObject that represent the active tool layout.
+	const TArray<TStrongObjectPtr<UAVVMEditorToolkitBuilderObject>>& GetBuilderContexts();
+	UAVVMEditorToolkitBuilderObject* GetSelectedBuilderContext() const;
+	
+protected:
+	TArray<TStrongObjectPtr<UAVVMEditorToolkitBuilderObject>> BuilderContexts;
+	TStrongObjectPtr<UAVVMEditorToolkitBuilderObject> SelectedContext = nullptr;
 };
 
 /**
@@ -44,23 +79,20 @@ public:
  *	FAVVMEditorToolkit_Commands is a global instance class that register ui commands / inputs with the engine input manager, and trigger
  *	events for our Editor extensions.
  */
-class FAVVMEditorToolkit_Commands : public TCommands<FAVVMEditorToolkit_Commands>
+class AVVMEDITORTOOLKIT_API FAVVMEditorToolkit_Commands : public TCommands<FAVVMEditorToolkit_Commands>
 {
 public:
 	FAVVMEditorToolkit_Commands();
-	
+
 	// TCommand<> interface
 	virtual void RegisterCommands() override;
 	// End of TCommand<> interface
 
+	void BindNewCommand(TSharedPtr<FUICommandInfo> NewCmd, const FAVVMBindingContext& BindingContext);
+	static FAVVMBindingContext MakeButtonContext(const FName CmdName, const FText& CmdLabel, const FText& CmdDescription);
+
 	// @gdemers main toolkit window
 	TSharedPtr<FUICommandInfo> OpenEditorToolkit_Window = nullptr;
-	// @gdemers data table editor commands
-	// Notes : it's expected that the following commands create a context object that's plugin specific
-	// so RowTable actions are following rules specific plugin implementation details.
-	TSharedPtr<FUICommandInfo> OpenDataTableEditor_RecentFiles = nullptr;
-	TSharedPtr<FUICommandInfo> OpenDataTableEditor_OpenFile = nullptr;
-	TSharedPtr<FUICommandInfo> OpenDataTableEditor_SaveAll = nullptr;
 };
 
 /**

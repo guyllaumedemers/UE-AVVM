@@ -20,7 +20,6 @@
 
 #include "AVVMEditorToolkit.h"
 
-#include "AVVMDataTableEditor.cpp"
 #include "LevelEditor.h"
 #include "UMGStyle.h"
 #include "ToolMenu.h"
@@ -72,6 +71,16 @@ FString FAVVMEditorToolkit_Core::GetWorldCentricTabPrefix() const
 	return FString("FAVVMEditorToolkit_Core");
 }
 
+const TArray<TStrongObjectPtr<UAVVMEditorToolkitBuilderObject>>& FAVVMEditorToolkit_Core::GetBuilderContexts()
+{
+	return BuilderContexts;
+}
+
+UAVVMEditorToolkitBuilderObject* FAVVMEditorToolkit_Core::GetSelectedBuilderContext() const
+{
+	return SelectedContext.Get();
+}
+
 FAVVMEditorToolkit_Commands::FAVVMEditorToolkit_Commands()
 	: TCommands("FAVVMEditorToolkit_Commands", FText(), "", FAppStyle::GetAppStyleSetName())
 {
@@ -80,9 +89,35 @@ FAVVMEditorToolkit_Commands::FAVVMEditorToolkit_Commands()
 void FAVVMEditorToolkit_Commands::RegisterCommands()
 {
 	UI_COMMAND(OpenEditorToolkit_Window, "Open Window", "Open Window", EUserInterfaceActionType::Button, FInputChord());
-	UI_COMMAND(OpenDataTableEditor_RecentFiles, "Open Recent Files", "Open Recent Files", EUserInterfaceActionType::Button, FInputChord());
-	UI_COMMAND(OpenDataTableEditor_OpenFile, "Open File", "Open File", EUserInterfaceActionType::Button, FInputChord());
-	UI_COMMAND(OpenDataTableEditor_SaveAll, "Save All", "Save All", EUserInterfaceActionType::Button, FInputChord());
+}
+
+void FAVVMEditorToolkit_Commands::BindNewCommand(TSharedPtr<FUICommandInfo> NewCmd, const FAVVMBindingContext& BindingContext)
+{
+	FUICommandInfo::MakeCommandInfo(AsShared(),
+	                                NewCmd,
+	                                BindingContext.CommandName,
+	                                BindingContext.CommandLabel,
+	                                BindingContext.CommandDesc,
+	                                BindingContext.Icon,
+	                                BindingContext.UserInterfaceType,
+	                                BindingContext.DefaultChord,
+	                                BindingContext.AlternateDefaultChord,
+	                                BindingContext.Bundle);
+}
+
+FAVVMBindingContext FAVVMEditorToolkit_Commands::MakeButtonContext(const FName CmdName, const FText& CmdLabel, const FText& CmdDescription)
+{
+	return FAVVMBindingContext
+	{
+			CmdName,
+			CmdLabel,
+			CmdDescription,
+			FSlateIcon(),
+			EUserInterfaceActionType::Button,
+			FInputChord(),
+			FInputChord(),
+			NAME_None
+	};
 }
 
 void FAVVMEditorToolkitModule::StartupModule()
@@ -145,9 +180,6 @@ void FAVVMEditorToolkitModule::BindCommands()
 	{
 		Core = MakeShared<FAVVMEditorToolkit_Core>();
 		FAVVMEditorToolkit_Commands& Commands = FAVVMEditorToolkit_Commands::Get();
-		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_RecentFiles, FExecuteAction::CreateStatic(&NS_AVVMDataTableEditor::OpenRecentFiles), FCanExecuteAction());
-		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_OpenFile, FExecuteAction::CreateStatic(&NS_AVVMDataTableEditor::OpenFile), FCanExecuteAction());
-		Core->GetToolkitCommands()->MapAction(Commands.OpenDataTableEditor_SaveAll, FExecuteAction::CreateStatic(&NS_AVVMDataTableEditor::SaveAll), FCanExecuteAction());
 		Core->GetToolkitCommands()->MapAction(Commands.OpenEditorToolkit_Window, FExecuteAction::CreateStatic(&FAVVMEditorActions::OpenEditorToolkitWindow), FCanExecuteAction());
 	}
 }
@@ -161,7 +193,7 @@ void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 		                                                     TSharedPtr<FExtensibilityManager> ExtensibilityManager,
 		                                                     TSharedPtr<FAVVMEditorToolkit_Core> EditorToolkit)
 		{
-			const auto NewRoot = SNew(SAVVMEditorToolkitRoot, TabIndex);
+			const auto NewRoot = SNew(SAVVMEditorToolkitRoot);
 			TSharedRef<SDockTab> ResultTab = SNew(SDockTab)
 				.TabRole(ETabRole::NomadTab)
 				.Label(NS_AVVMEditorToolkit::Viewport_Label)

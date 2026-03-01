@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,43 +17,29 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
 
-public class AVVMEditorToolkit : ModuleRules
+class FAVVMEditorToolkit_Core;
+class UAVVMEditorToolkitBuilderObject;
+
+/**
+ *	Class description:
+ *	
+ *	SAVVMEditorToolkitContextWindow is the main Slate element used for drawing our Tool Window context.
+ *	All context specific features are piped down through this Root.
+ */
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitContextWindow : public SCompoundWidget
 {
-	public AVVMEditorToolkit(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+public:
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitContextWindow) {}
+	SLATE_END_ARGS()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Blutility",
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore",
-				"UMG",
-				"UnrealEd",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"InputCore",
-				"ToolMenus",
-				"TranslationEditor",
-				"WorkspaceMenuStructure",
-			}
-		);
-
-		PublicDefinitions.AddRange(
-			new string[]
-			{
-				"UE_ENABLE_AVVM_EDITORTOOLKIT"
-			});
-	}
-}
+	void Construct(const FArguments& InArgs);
+	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core);
+	
+protected:
+	void OnBuildContextChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject);
+};

@@ -53,5 +53,18 @@ public class InventorySample : ModuleRules
 				"NetCore"
 			}
 		);
+
+		if (Target.bBuildEditor == true)
+		{
+			PublicDependencyModuleNames.AddRange(new string[]
+			{
+				"AVVMEditorToolkit"
+			});
+
+			PrivateDependencyModuleNames.AddRange(new string[]
+			{
+				"Slate"
+			});
+		}
 	}
 }

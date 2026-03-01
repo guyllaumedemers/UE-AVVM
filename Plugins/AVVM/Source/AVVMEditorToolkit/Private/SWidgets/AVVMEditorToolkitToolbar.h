@@ -20,32 +20,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
+
+class UAVVMEditorToolkitBuilderObject;
+class FAVVMEditorToolkit_Core;
+class FExtender;
 
 /**
  *	Class description:
  *	
- *	FAVVMEditorToolbar is a global accessor to reusable api participating in the population of our Toolkit MenuBar.
- *	
- *	TODO @gdemers
- *	FExtender are not in used here for SubMenu generation... which I maybe due to misconfiguration of my own cached ExtensibilityManager ?
+ *	SAVVMEditorToolkitToolbar is the main Slate element used for drawing our Tool toolbar. All menu entry generation
+ *	is piped down through this Root.
  */
-class AVVMEDITORTOOLKIT_API FAVVMEditorToolbar
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitToolbar : public SCompoundWidget
 {
-	struct FAVVMSubMenuContext
-	{
-		FName SectionName = NAME_None;
-		FName SubSectionName = NAME_None;
-		FText SubSection_Label = FText::GetEmpty();
-		FText SubSection_Tooltips = FText::GetEmpty();
-		FSlateIcon SubSection_Icon = FSlateIcon();
-		TArray<TSharedPtr<FUICommandInfo>> Commands;
-	};
-	
 public:
-	static TSharedRef<SWidget> MakeSecondaryToolbar(TSharedRef<FUICommandList> InCommandList, TSharedPtr<FExtender> MenuBarExtenders);
-	static void MakeNewSubMenu(const FAVVMSubMenuContext& Ctx, UToolMenu& Menu);
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitToolbar){};
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs);
+	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
+
+protected:
+	static void MakeGenericMenuEntry(UAVVMEditorToolkitBuilderObject* BuilderObject, TSharedPtr<FAVVMEditorToolkit_Core> Core, UToolMenu& OutMenu);
 	static void FillNewSubMenu(UToolMenu* InMenu, FName SectionName, TArray<TSharedPtr<FUICommandInfo>> Commands);
-	
-private:
-	static void MakeDataTableEditor(UToolMenu& InMenu);
 };

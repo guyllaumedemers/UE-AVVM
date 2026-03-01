@@ -19,28 +19,36 @@
 //SOFTWARE.
 #include "AVVMEditorToolkitRoot.h"
 
-#include "AVVMEditorToolbar.h"
-#include "AVVMEditorToolkit.h"
+#include "AVVMEditorToolkitContextWindow.h"
+#include "AVVMEditorToolkitToolbar.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 
-void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs,
-                                       int32 InTabIndex)
+void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs)
 {
 }
 
 void SAVVMEditorToolkitRoot::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
                                    TSharedPtr<FExtender> MenuBarExtenders)
 {
-	if (!Core.IsValid() || !MenuBarExtenders.IsValid())
-	{
-		return;
-	}
-
 	SecondaryMenuToolbarWidget = SNew(SBorder)
 		.Padding(0.f)
 		.BorderImage(FAppStyle::Get().GetBrush("NoBorder"));
 
-	TSharedRef<SWidget> SecondaryToolbar = FAVVMEditorToolbar::MakeSecondaryToolbar(Core->GetToolkitCommands(), MenuBarExtenders);
-	SecondaryMenuToolbarWidget->SetContent(SecondaryToolbar);
+	{
+		const auto NewToolbar = SNew(SAVVMEditorToolkitToolbar);
+		NewToolbar->Setup(Core, MenuBarExtenders);
+		SecondaryMenuToolbarWidget->SetContent(NewToolbar);
+	}
+
+	SecondaryContextWindowWidget = SNew(SBorder)
+		.Padding(0.f)
+		.BorderImage(FAppStyle::Get().GetBrush("NoBorder"));
+
+	{
+		const auto NewWindowContext = SNew(SAVVMEditorToolkitContextWindow);
+		NewWindowContext->Setup(Core);
+		SecondaryContextWindowWidget->SetContent(NewWindowContext);
+	}
 	
 	ChildSlot
 	[
@@ -68,10 +76,7 @@ void SAVVMEditorToolkitRoot::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
 				.BorderImage(FAppStyle::Get().GetBrush("NoBorder"))
 				.IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
 				[
-					// TODO @gdemers replace this with the toolkit context selected in the tab menu. Default should be a presentation screen that
-					// explain the toolkit purpose.
-					SNew(SImage)
-					.ColorAndOpacity(FColor::Green)
+					SecondaryContextWindowWidget.ToSharedRef()
 				]
 			]
 		]

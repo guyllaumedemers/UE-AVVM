@@ -30,13 +30,9 @@
 class UAVVMDebuggerInputHandler;
 class UGameInstance;
 
-// @gdemers this handle IAVVMImGuiDescriptor conditional existence, as the AVVMDebugger Module wont be delivered in UE_SHIPPING_BUILD,
-// and doesn't exist when Target doesn't compile with DeveloperTool included.
-#ifdef UE_ENABLE_AVVM_DEBUGGER
-#define WITH_AVVM_DEBUGGER 1
-#else
-#define WITH_AVVM_DEBUGGER 0
-#endif
+// @gdemers strip symbols out of build based on AVVMDebugger.Build.cs. Since the module only exist as an Developer Module,
+// we won't get the `UE_ENABLE_AVVM_DEBUGGER` symbol in Shipping build.
+#define WITH_AVVM_DEBUGGER UE_ENABLE_AVVM_DEBUGGER
 
 /**
 *	Class description:
