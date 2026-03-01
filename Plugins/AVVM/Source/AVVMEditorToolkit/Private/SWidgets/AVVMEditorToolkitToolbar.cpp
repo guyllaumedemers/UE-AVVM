@@ -38,7 +38,6 @@ namespace NS_AVVMEditorToolkit_ToolBar
 
 void SAVVMEditorToolkitToolbar::Construct(const FArguments& InArgs)
 {
-	Setup(NewCore, NewMenuBarExtenders);
 }
 
 void SAVVMEditorToolkitToolbar::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
@@ -48,9 +47,6 @@ void SAVVMEditorToolkitToolbar::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
 	{
 		return;
 	}
-	
-	NewCore = Core;
-	NewMenuBarExtenders = MenuBarExtenders;
 
 	UToolMenu* ToolkitMenuBar = UToolMenus::Get()->RegisterMenu(NS_AVVMEditorToolkit_ToolBar::ToolkitMenu_Name, NAME_None, EMultiBoxType::MenuBar);
 	if (IsValid(ToolkitMenuBar))
