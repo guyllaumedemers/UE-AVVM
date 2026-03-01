@@ -63,14 +63,6 @@ public:
 	virtual FName GetToolkitFName() const override;
 	virtual FText GetBaseToolkitName() const override;
 	virtual FString GetWorldCentricTabPrefix() const override;
-	
-	// @gdemers our UObject that represent the active tool layout.
-	const TArray<TStrongObjectPtr<UAVVMEditorToolkitBuilderObject>>& GetBuilderContexts();
-	UAVVMEditorToolkitBuilderObject* GetSelectedBuilderContext() const;
-	
-protected:
-	TArray<TStrongObjectPtr<UAVVMEditorToolkitBuilderObject>> BuilderContexts;
-	TStrongObjectPtr<UAVVMEditorToolkitBuilderObject> SelectedContext = nullptr;
 };
 
 /**

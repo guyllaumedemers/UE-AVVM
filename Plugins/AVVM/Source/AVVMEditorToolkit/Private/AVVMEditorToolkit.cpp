@@ -71,16 +71,6 @@ FString FAVVMEditorToolkit_Core::GetWorldCentricTabPrefix() const
 	return FString("FAVVMEditorToolkit_Core");
 }
 
-const TArray<TStrongObjectPtr<UAVVMEditorToolkitBuilderObject>>& FAVVMEditorToolkit_Core::GetBuilderContexts()
-{
-	return BuilderContexts;
-}
-
-UAVVMEditorToolkitBuilderObject* FAVVMEditorToolkit_Core::GetSelectedBuilderContext() const
-{
-	return SelectedContext.Get();
-}
-
 FAVVMEditorToolkit_Commands::FAVVMEditorToolkit_Commands()
 	: TCommands("FAVVMEditorToolkit_Commands", FText(), "", FAppStyle::GetAppStyleSetName())
 {

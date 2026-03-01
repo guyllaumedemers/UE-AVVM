@@ -32,6 +32,7 @@ public class AVVMEditorToolkit : ModuleRules
 				"Blutility",
 				"Core",
 				"CoreUObject",
+				"EditorSubsystem",
 				"Engine",
 				"Slate",
 				"SlateCore",

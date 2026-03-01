@@ -296,7 +296,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		       *Outer->GetName());
 	}
 }
- 
+
 void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 {
 	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))

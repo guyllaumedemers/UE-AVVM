@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMEditorToolkitToolbar.h"
 
+#include "AVVMEditorBuilderSubsystem.h"
 #include "AVVMEditorToolkit.h"
 #include "ToolMenu.h"
 #include "Styling/ToolBarStyle.h"
@@ -54,10 +55,11 @@ void SAVVMEditorToolkitToolbar::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
 		ToolkitMenuBar->SetStyleSet(&FAppStyle::Get());
 		ToolkitMenuBar->StyleName = MainMenuStyleName;
 
-		for (const auto& BuilderObject : Core->GetBuilderContexts())
+		const TArray<UAVVMEditorToolkitBuilderObject*> BuilderObjects = UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(GEditor);
+		for (auto* BuilderObject : BuilderObjects)
 		{
 			// @gdemers build module extensions using the provided builder object.
-			MakeGenericMenuEntry(BuilderObject.Get(), Core, *ToolkitMenuBar);
+			MakeGenericMenuEntry(BuilderObject, Core, *ToolkitMenuBar);
 		}
 	}
 

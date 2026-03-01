@@ -50,7 +50,7 @@ struct AVVMEDITORTOOLKIT_API FAVVMBuilderInfo
  *	and provide impl details specific to their feature definition. Doing so allow flexibility, and customization, of the AVVMEditorToolkit context window
  *	without requiring modification of the underline system.
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Blueprintable)
 class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitBuilderObject : public UObject
 {
 	GENERATED_BODY()
