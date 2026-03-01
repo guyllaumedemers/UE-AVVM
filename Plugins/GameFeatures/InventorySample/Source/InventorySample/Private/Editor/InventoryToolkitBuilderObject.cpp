@@ -56,6 +56,11 @@ inline namespace NS_InventoryDataTableEditor
 
 void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core)
 {
+	if (OpenDataTableEditor_RecentFiles.IsValid() || OpenDataTableEditor_OpenFile.IsValid() || OpenDataTableEditor_SaveAll.IsValid())
+	{
+		return;
+	}
+
 	BIND_NEW_BUTTON_COMMAND(OpenDataTableEditor_RecentFiles,
 	                        FName("InventorySample_OpenRecentFiles"),
 	                        LOCTEXT("Open Recent Files", "Open Recent Files"),

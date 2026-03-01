@@ -26,10 +26,10 @@
 /**
  *	@gdemers reusable macro for binding FUICommandInfo in external module/plugins.
  */
-#define BIND_NEW_BUTTON_COMMAND(Cmd, CmdName, CmdLabel, CmdDesc)\
+#define BIND_NEW_BUTTON_COMMAND(OutCmd, CmdName, CmdLabel, CmdDesc)\
 	{\
 		const auto Ctx = FAVVMEditorToolkit_Commands::MakeButtonContext(CmdName, CmdLabel, CmdDesc);\
-		FAVVMEditorToolkit_Commands::Get().BindNewCommand(Cmd, Ctx);\
+		FAVVMEditorToolkit_Commands::Get().BindNewCommand(Ctx, OutCmd);\
 	}\
 
 /**
@@ -80,7 +80,7 @@ public:
 	virtual void RegisterCommands() override;
 	// End of TCommand<> interface
 
-	void BindNewCommand(TSharedPtr<FUICommandInfo> NewCmd, const FAVVMBindingContext& BindingContext);
+	void BindNewCommand(const FAVVMBindingContext& BindingContext, TSharedPtr<FUICommandInfo>& OutCmd);
 	static FAVVMBindingContext MakeButtonContext(const FName CmdName, const FText& CmdLabel, const FText& CmdDescription);
 
 	// @gdemers main toolkit window

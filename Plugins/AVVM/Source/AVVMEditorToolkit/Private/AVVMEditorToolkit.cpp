@@ -81,10 +81,10 @@ void FAVVMEditorToolkit_Commands::RegisterCommands()
 	UI_COMMAND(OpenEditorToolkit_Window, "Open Window", "Open Window", EUserInterfaceActionType::Button, FInputChord());
 }
 
-void FAVVMEditorToolkit_Commands::BindNewCommand(TSharedPtr<FUICommandInfo> NewCmd, const FAVVMBindingContext& BindingContext)
+void FAVVMEditorToolkit_Commands::BindNewCommand(const FAVVMBindingContext& BindingContext, TSharedPtr<FUICommandInfo>& OutCmd)
 {
 	FUICommandInfo::MakeCommandInfo(AsShared(),
-	                                NewCmd,
+	                                OutCmd,
 	                                BindingContext.CommandName,
 	                                BindingContext.CommandLabel,
 	                                BindingContext.CommandDesc,

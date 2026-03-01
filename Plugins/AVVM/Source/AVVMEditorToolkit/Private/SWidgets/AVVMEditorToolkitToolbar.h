@@ -44,4 +44,7 @@ public:
 protected:
 	static void MakeGenericMenuEntry(UAVVMEditorToolkitBuilderObject* BuilderObject, TSharedPtr<FAVVMEditorToolkit_Core> Core, UToolMenu& OutMenu);
 	static void FillNewSubMenu(UToolMenu* InMenu, FName SectionName, TArray<TSharedPtr<FUICommandInfo>> Commands);
+
+	TSharedPtr<FAVVMEditorToolkit_Core> NewCore = nullptr;
+	TSharedPtr<FExtender> NewMenuBarExtenders = nullptr;
 };
