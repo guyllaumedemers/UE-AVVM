@@ -62,7 +62,7 @@ void UAVVMEditorBuilderSubsystem::Static_SelectBuilder(const UEditorEngine* Edit
                                                        UAVVMEditorToolkitBuilderObject* Builder)
 {
 	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
-	if (IsValid(Subsystem))
+	if (IsValid(Subsystem) && (Subsystem->ActiveToolkitBuilder != Builder))
 	{
 		Subsystem->ActiveToolkitBuilder = Builder;
 		Subsystem->OnBuildContextChanged.Broadcast(Builder);

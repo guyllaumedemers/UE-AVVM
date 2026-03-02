@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,55 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "InventoryToolkitWindow.h"
 
-using UnrealBuildTool;
+#if WITH_EDITORONLY_DATA
 
-public class InventorySample : ModuleRules
+void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 {
-	public InventorySample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		SetupIrisSupport(Target);
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMOnline",
-				"AVVMToolkit",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"ModelViewViewModel"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Json",
-				"NetCore"
-			}
-		);
-
-		if (Target.bBuildEditor == true)
-		{
-			PublicDependencyModuleNames.AddRange(new string[]
-			{
-				"AVVMEditorToolkit"
-			});
-
-			PrivateDependencyModuleNames.AddRange(new string[]
-			{
-				"Slate",
-				"SlateCore",
-			});
-		}
-	}
+	// TODO @gdemers create a viewport slate widget thats loads the required Data Table for
+	// populating our inventory system.
+	ChildSlot
+	[
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		[
+			SNew(SImage)
+			.ColorAndOpacity(FColor::Green)
+		]
+	];
 }
+
+#endif

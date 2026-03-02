@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,55 +17,27 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
+#include "Widgets/SCompoundWidget.h"
 
-public class InventorySample : ModuleRules
+#if WITH_EDITORONLY_DATA
+
+/**
+ *	Class description:
+ *	
+ *	SInventoryToolkitWindow is a slate context for handling data table edits for the inventory
+ *	system.
+ */
+class INVENTORYSAMPLE_API SInventoryToolkitWindow : public SCompoundWidget
 {
-	public InventorySample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		SetupIrisSupport(Target);
+public:
+	SLATE_BEGIN_ARGS(SInventoryToolkitWindow){};
+	SLATE_END_ARGS()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"AVVMOnline",
-				"AVVMToolkit",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DataRegistry",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayAbilities",
-				"GameplayTags",
-				"ModelViewViewModel"
-			}
-		);
+	/** Constructs this widget with InArgs */
+	void Construct(const FArguments& InArgs);
+};
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Json",
-				"NetCore"
-			}
-		);
-
-		if (Target.bBuildEditor == true)
-		{
-			PublicDependencyModuleNames.AddRange(new string[]
-			{
-				"AVVMEditorToolkit"
-			});
-
-			PrivateDependencyModuleNames.AddRange(new string[]
-			{
-				"Slate",
-				"SlateCore",
-			});
-		}
-	}
-}
+#endif

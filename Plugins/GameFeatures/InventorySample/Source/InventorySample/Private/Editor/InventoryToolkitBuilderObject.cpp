@@ -23,6 +23,7 @@
 
 #if WITH_EDITORONLY_DATA
 #include "AVVMEditorToolkit.h"
+#include "InventoryToolkitWindow.h"
 #include "Framework/Commands/UICommandInfo.h"
 
 /**
@@ -50,9 +51,8 @@ inline namespace NS_InventoryDataTableEditor
 
 TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget()
 {
-	// TODO @gdemers create a viewport slate widget thats loads the required Data Table for
-	// populating our inventory system.
-	return nullptr;
+	BuilderContextWidget = SNew(SInventoryToolkitWindow);
+	return BuilderContextWidget;
 }
 
 void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core)
@@ -64,7 +64,7 @@ void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorTool
 
 	BIND_NEW_BUTTON_COMMAND(OpenTool,
 	                        FName("InventorySample_OpenTool"),
-	                        LOCTEXT("Open Tool", "Open Tool"),
+	                        LOCTEXT("Open InventorySample", "Open InventorySample"),
 	                        LOCTEXT("Lorem Ipsum", "Lorem Ipsum"));
 
 	if (Core.IsValid())
