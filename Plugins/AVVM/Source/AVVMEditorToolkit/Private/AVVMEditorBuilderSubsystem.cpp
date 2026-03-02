@@ -98,4 +98,10 @@ void UAVVMEditorBuilderSubsystem::OnSoftObjectAcquired()
 			ToolkitBuilders.Add(Builder);
 		}
 	}
+
+	if (!ToolkitBuilders.IsEmpty())
+	{
+		ActiveToolkitBuilder.Reset();
+		ActiveToolkitBuilder = ToolkitBuilders[0];
+	}
 }

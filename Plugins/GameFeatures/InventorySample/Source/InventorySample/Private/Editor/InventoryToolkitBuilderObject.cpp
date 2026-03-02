@@ -54,6 +54,13 @@ inline namespace NS_InventoryDataTableEditor
 	}
 }
 
+TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget()
+{
+	// TODO @gdemers create a viewport slate widget thats loads the required Data Table for
+	// populating our inventory system.
+	return nullptr;
+}
+
 void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core)
 {
 	if (OpenDataTableEditor_RecentFiles.IsValid() || OpenDataTableEditor_OpenFile.IsValid() || OpenDataTableEditor_SaveAll.IsValid())

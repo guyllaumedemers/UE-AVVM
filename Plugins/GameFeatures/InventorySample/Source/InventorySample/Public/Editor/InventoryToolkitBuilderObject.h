@@ -43,6 +43,7 @@ class INVENTORYSAMPLE_API UInventoryToolkitBuilderObject : public UAVVMEditorToo
 	GENERATED_BODY()
 
 public:
+	virtual TSharedPtr<SWidget> BuildWidget() override;
 	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) override;
 
 protected:

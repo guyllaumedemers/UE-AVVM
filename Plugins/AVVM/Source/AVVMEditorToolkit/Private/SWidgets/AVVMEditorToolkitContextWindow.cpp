@@ -19,23 +19,38 @@
 //SOFTWARE.
 #include "AVVMEditorToolkitContextWindow.h"
 
+#include "AVVMEditorBuilderSubsystem.h"
+#include "AVVMEditorToolkitBuilderObject.h"
+
 void SAVVMEditorToolkitContextWindow::Construct(const FArguments& InArgs)
 {
 }
 
 void SAVVMEditorToolkitContextWindow::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core)
 {
+	UAVVMEditorToolkitBuilderObject* BuilderObject = UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(GEditor);
+	OnBuildContextChanged(BuilderObject);
+}
+
+void SAVVMEditorToolkitContextWindow::OnBuildContextChanged(UAVVMEditorToolkitBuilderObject* BuilderContextObject)
+{
+	if (!IsValid(BuilderContextObject))
+	{
+		return;
+	}
+
+	TSharedPtr<SWidget> Widget = BuilderContextObject->BuildWidget();
+	if (!Widget.IsValid())
+	{
+		return;
+	}
+
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SImage)
-			.ColorAndOpacity(FColor::Green)
+			Widget->AsShared()
 		]
 	];
-}
-
-void SAVVMEditorToolkitContextWindow::OnBuildContextChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject)
-{
 }
