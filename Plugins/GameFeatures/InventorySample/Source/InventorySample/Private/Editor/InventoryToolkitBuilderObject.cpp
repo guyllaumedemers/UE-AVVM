@@ -37,19 +37,13 @@ inline namespace NS_InventoryDataTableEditor
 	// and expose to the parent scope.
 	namespace
 	{
-		void OpenRecentFiles()
+		void OpenTool(UInventoryToolkitBuilderObject* BuilderContextObject)
 		{
-			UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::OpenRecentFiles"));
-		}
-
-		void OpenFile()
-		{
-			UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::OpenFile"));
-		}
-
-		void SaveAll()
-		{
-			UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::SaveAll"));
+			if (IsValid(BuilderContextObject))
+			{
+				UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::OpenTool"));
+				BuilderContextObject->SetActiveSelf();
+			}
 		}
 	}
 }
@@ -63,31 +57,19 @@ TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget()
 
 void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core)
 {
-	if (OpenDataTableEditor_RecentFiles.IsValid() || OpenDataTableEditor_OpenFile.IsValid() || OpenDataTableEditor_SaveAll.IsValid())
+	if (OpenTool.IsValid())
 	{
 		return;
 	}
 
-	BIND_NEW_BUTTON_COMMAND(OpenDataTableEditor_RecentFiles,
-	                        FName("InventorySample_OpenRecentFiles"),
-	                        LOCTEXT("Open Recent Files", "Open Recent Files"),
-	                        LOCTEXT("Lorem Ipsum", "Lorem Ipsum"));
-
-	BIND_NEW_BUTTON_COMMAND(OpenDataTableEditor_OpenFile,
-	                        FName("InventorySample_OpenFile"),
-	                        LOCTEXT("Open File", "Open Recent Files"),
-	                        LOCTEXT("Lorem Ipsum", "Lorem Ipsum"));
-
-	BIND_NEW_BUTTON_COMMAND(OpenDataTableEditor_SaveAll,
-	                        FName("InventorySample_SaveAll"),
-	                        LOCTEXT("Save All", "Save All"),
+	BIND_NEW_BUTTON_COMMAND(OpenTool,
+	                        FName("InventorySample_OpenTool"),
+	                        LOCTEXT("Open Tool", "Open Tool"),
 	                        LOCTEXT("Lorem Ipsum", "Lorem Ipsum"));
 
 	if (Core.IsValid())
 	{
-		Core->GetToolkitCommands()->MapAction(OpenDataTableEditor_RecentFiles, FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::OpenRecentFiles), FCanExecuteAction());
-		Core->GetToolkitCommands()->MapAction(OpenDataTableEditor_OpenFile, FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::OpenFile), FCanExecuteAction());
-		Core->GetToolkitCommands()->MapAction(OpenDataTableEditor_SaveAll, FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::SaveAll), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(OpenTool, FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::OpenTool, this), FCanExecuteAction());
 	}
 }
 
@@ -95,9 +77,7 @@ TArray<TSharedPtr<FUICommandInfo>> UInventoryToolkitBuilderObject::GetUICommands
 {
 	return
 	{
-			OpenDataTableEditor_OpenFile,
-			OpenDataTableEditor_RecentFiles,
-			OpenDataTableEditor_SaveAll,
+			OpenTool
 	};
 }
 #endif

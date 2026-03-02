@@ -42,4 +42,6 @@ public:
 	
 protected:
 	void OnBuildContextChanged(UAVVMEditorToolkitBuilderObject* BuilderContextObject);
+	
+	FDelegateHandle Handle;
 };

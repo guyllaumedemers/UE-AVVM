@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMEditorToolkitBuilderObject.h"
 
+#include "AVVMEditorBuilderSubsystem.h"
+
 void UAVVMEditorToolkitBuilderObject::GetBuilderInfo(FAVVMBuilderInfo& OutBuilderInfo) const
 {
 	OutBuilderInfo.SectionName = SectionName;
@@ -26,4 +28,9 @@ void UAVVMEditorToolkitBuilderObject::GetBuilderInfo(FAVVMBuilderInfo& OutBuilde
 	OutBuilderInfo.SubSection_Label = SubSection_Label;
 	OutBuilderInfo.SubSection_Tooltips = SubSection_Tooltips;
 	OutBuilderInfo.Commands = GetUICommands();
+}
+
+void UAVVMEditorToolkitBuilderObject::SetActiveSelf()
+{
+	UAVVMEditorBuilderSubsystem::Static_SelectBuilder(GEditor, this);
 }

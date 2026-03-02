@@ -29,6 +29,8 @@
 class UAVVMEditorToolkitBuilderObject;
 class UEditorEngine;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBuildContextChangedDelegate, UAVVMEditorToolkitBuilderObject* NewBuilderContext);
+
 /**
  *	Class description:
  *	
@@ -39,6 +41,8 @@ UCLASS(config = Game)
 class AVVMEDITORTOOLKIT_API UAVVMEditorBuilderSubsystem : public UEditorSubsystem
 {
 	GENERATED_BODY()
+
+	FOnBuildContextChangedDelegate OnBuildContextChanged;
 	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -49,6 +53,13 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static UAVVMEditorToolkitBuilderObject* Static_GetActiveBuilder(const UEditorEngine* Editor);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_SelectBuilder(const UEditorEngine* Editor,
+	                                 UAVVMEditorToolkitBuilderObject* Builder);
+
+	static FDelegateHandle Static_CallOrRegisterOnBuildContextChanged(const UEditorEngine* Editor,
+	                                                                  const FOnBuildContextChangedDelegate::FDelegate& Delegate);
 
 protected:
 	static UAVVMEditorBuilderSubsystem* Get(const UEditorEngine* Editor);

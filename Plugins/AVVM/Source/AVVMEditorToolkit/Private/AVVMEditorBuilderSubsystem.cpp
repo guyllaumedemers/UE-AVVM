@@ -58,6 +58,24 @@ UAVVMEditorToolkitBuilderObject* UAVVMEditorBuilderSubsystem::Static_GetActiveBu
 	return IsValid(Subsystem) ? Subsystem->ActiveToolkitBuilder.Get() : nullptr;
 }
 
+void UAVVMEditorBuilderSubsystem::Static_SelectBuilder(const UEditorEngine* Editor,
+                                                       UAVVMEditorToolkitBuilderObject* Builder)
+{
+	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
+	if (IsValid(Subsystem))
+	{
+		Subsystem->ActiveToolkitBuilder = Builder;
+		Subsystem->OnBuildContextChanged.Broadcast(Builder);
+	}
+}
+
+FDelegateHandle UAVVMEditorBuilderSubsystem::Static_CallOrRegisterOnBuildContextChanged(const UEditorEngine* Editor,
+                                                                                        const FOnBuildContextChangedDelegate::FDelegate& Delegate)
+{
+	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
+	return IsValid(Subsystem) ? Subsystem->OnBuildContextChanged.Add(Delegate) : FDelegateHandle();
+}
+
 UAVVMEditorBuilderSubsystem* UAVVMEditorBuilderSubsystem::Get(const UEditorEngine* Editor)
 {
 	return IsValid(Editor) ? Editor->GetEditorSubsystem<UAVVMEditorBuilderSubsystem>() : nullptr;

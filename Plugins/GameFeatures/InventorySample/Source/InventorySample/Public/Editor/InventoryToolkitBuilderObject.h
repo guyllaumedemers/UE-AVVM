@@ -51,9 +51,7 @@ protected:
 	// @gdemers data table editor commands
 	// Notes : it's expected that the following commands create a context object that's plugin specific
 	// so RowTable actions are following rules specific plugin implementation details.
-	TSharedPtr<FUICommandInfo> OpenDataTableEditor_RecentFiles = nullptr;
-	TSharedPtr<FUICommandInfo> OpenDataTableEditor_OpenFile = nullptr;
-	TSharedPtr<FUICommandInfo> OpenDataTableEditor_SaveAll = nullptr;
+	TSharedPtr<FUICommandInfo> OpenTool = nullptr;
 };
 
 #endif

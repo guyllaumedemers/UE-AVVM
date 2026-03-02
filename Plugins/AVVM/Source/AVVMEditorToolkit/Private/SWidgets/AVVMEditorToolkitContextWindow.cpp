@@ -28,6 +28,12 @@ void SAVVMEditorToolkitContextWindow::Construct(const FArguments& InArgs)
 
 void SAVVMEditorToolkitContextWindow::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core)
 {
+	if (!Handle.IsValid())
+	{
+		const auto Callback = FOnBuildContextChangedDelegate::FDelegate::CreateRaw(this, &SAVVMEditorToolkitContextWindow::OnBuildContextChanged);
+		Handle = UAVVMEditorBuilderSubsystem::Static_CallOrRegisterOnBuildContextChanged(GEditor, Callback);
+	}
+
 	UAVVMEditorToolkitBuilderObject* BuilderObject = UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(GEditor);
 	OnBuildContextChanged(BuilderObject);
 }
