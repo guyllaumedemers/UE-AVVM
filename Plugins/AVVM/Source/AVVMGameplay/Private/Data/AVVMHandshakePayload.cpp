@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Data/AVVMHandshakePayload.h"
 
+#include "GameFramework/Actor.h"
+
 FAVVMHandshakePayload::FAVVMHandshakePayload(const AActor* NewInstigator,
                                              const AActor* NewTarget)
 	: Instigator(NewInstigator)

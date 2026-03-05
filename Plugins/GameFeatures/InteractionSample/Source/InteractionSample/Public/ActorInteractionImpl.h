@@ -23,8 +23,9 @@
 
 #include "ActiveGameplayEffectHandle.h"
 #include "GameplayTagContainer.h"
-#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
+#include "StructUtils/InstancedStruct.h"
+#include "Templates/SubclassOf.h"
 
 #include "ActorInteractionImpl.generated.h"
 

@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"

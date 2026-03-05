@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "InventoryManagerSubsystem.h"
 
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
+
 bool UInventoryManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);

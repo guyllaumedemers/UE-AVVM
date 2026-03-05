@@ -23,6 +23,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "AVVMAutomatedTestActor.generated.h"
 
@@ -97,7 +98,7 @@ private:
  *	UAVVMAutomatedTestUtils is a blueprint function library for Automated test.
  */
 UCLASS()
-class UAVVMAutomatedTestUtils : public UBlueprintFunctionLibrary
+class AVVM_API UAVVMAutomatedTestUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

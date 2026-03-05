@@ -25,6 +25,8 @@
 
 #include "AVVMHandshakePayload.generated.h"
 
+class AActor;
+
 /**
  *	Class description:
  *

@@ -21,6 +21,7 @@
 
 #include "AVVMOnlineUtils.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 

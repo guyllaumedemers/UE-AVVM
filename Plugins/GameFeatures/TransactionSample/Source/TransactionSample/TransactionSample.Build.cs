@@ -24,12 +24,17 @@ public class TransactionSample : ModuleRules
 {
 	public TransactionSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 		SetupIrisSupport(Target);
 
 		if (Target.bBuildEditor)
 		{
-			PublicDependencyModuleNames.AddRange(new string[] { "UnrealEd", });
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"UnrealEd",
+				});
 		}
 
 		PublicDependencyModuleNames.AddRange(

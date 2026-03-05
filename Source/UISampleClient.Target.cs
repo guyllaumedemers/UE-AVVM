@@ -32,11 +32,5 @@ public class UISampleClientTarget : TargetRules
 
 		bUseIris = true;
 		bBuildDeveloperTools = true;
-		RegisterModulesCreatedByRider();
-	}
-
-	private void RegisterModulesCreatedByRider()
-	{
-		ExtraModuleNames.AddRange(new string[] {  });
 	}
 }

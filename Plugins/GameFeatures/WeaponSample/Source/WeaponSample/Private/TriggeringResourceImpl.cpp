@@ -22,10 +22,12 @@
 #include "AttachmentManagerComponent.h"
 #include "AVVMGameplayUtils.h"
 #include "ProjectileComponent.h"
+#include "Components/ActorComponent.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Data/TriggeringDefinitionDataAsset.h"
+#include "GameFramework/Actor.h"
 
 TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponent* ActorComponent,
                                                                   const TArray<UObject*>& Resources) const

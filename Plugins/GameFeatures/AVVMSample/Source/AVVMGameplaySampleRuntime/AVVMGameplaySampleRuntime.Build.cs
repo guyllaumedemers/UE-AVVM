@@ -24,25 +24,8 @@ public class AVVMGameplaySampleRuntime : ModuleRules
 {
 	public AVVMGameplaySampleRuntime(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-			}
-		);
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 
 		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
 		// is enabled. Set your project editor .target.cs to enable it!
@@ -65,5 +48,23 @@ public class AVVMGameplaySampleRuntime : ModuleRules
 				string.Format("IMPLOT_API=DLLIMPORT")
 			);
 		}
+
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"AVVM",
+				"AVVMGameplay",
+				"Core",
+				"CoreUObject",
+				"DeveloperSettings",
+				"Engine",
+			}
+		);
+
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+			}
+		);
 	}
 }

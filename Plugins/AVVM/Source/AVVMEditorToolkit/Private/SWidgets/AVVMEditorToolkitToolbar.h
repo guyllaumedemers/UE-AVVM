@@ -22,9 +22,11 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
-class UAVVMEditorToolkitBuilderObject;
 class FAVVMEditorToolkit_Core;
 class FExtender;
+class FUICommandInfo;
+class UAVVMEditorToolkitBuilderObject;
+class UToolMenu;
 
 /**
  *	Class description:

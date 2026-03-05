@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "CollisionQueryParams.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/BlueprintFunctionLibrary.h"

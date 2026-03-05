@@ -21,7 +21,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AVVMEditorToolkitBuilderObject.h"
+
+#include "Framework/Commands/Commands.h"
+#include "Modules/ModuleManager.h"
+#include "Toolkits/AssetEditorToolkit.h"
 
 /**
  *	@gdemers reusable macro for binding FUICommandInfo in external module/plugins.

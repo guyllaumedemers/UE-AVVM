@@ -24,30 +24,17 @@ public class FencingSample : ModuleRules
 {
 	public FencingSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 
 		if (Target.bBuildEditor)
 		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"FunctionalTesting",
+				});
 		}
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"GameplayTags"
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay"
-			}
-		);
 
 		if (Target.bBuildDeveloperTools)
 		{
@@ -67,5 +54,23 @@ public class FencingSample : ModuleRules
 				string.Format("IMPLOT_API=DLLIMPORT")
 			);
 		}
+
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"Core",
+				"CoreUObject",
+				"Engine",
+				"GameplayTags"
+			}
+		);
+
+
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"AVVMGameplay"
+			}
+		);
 	}
 }

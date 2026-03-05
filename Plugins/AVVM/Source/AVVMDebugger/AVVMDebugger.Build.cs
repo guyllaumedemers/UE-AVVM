@@ -24,7 +24,19 @@ public class AVVMDebugger : ModuleRules
 {
 	public AVVMDebugger(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
+
+		PublicDefinitions.AddRange(
+			new string[]
+			{
+				"UE_ENABLE_AVVM_DEBUGGER"
+			});
+
+		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
+		PrivateDefinitions.Add(
+			string.Format("IMPLOT_API=DLLIMPORT")
+		);
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -45,17 +57,6 @@ public class AVVMDebugger : ModuleRules
 			new string[]
 			{
 			}
-		);
-		
-		PublicDefinitions.AddRange(
-			new string[]
-			{
-				"UE_ENABLE_AVVM_DEBUGGER"
-			});
-
-		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
 		);
 	}
 }

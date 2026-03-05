@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "WeaponSample.h"
 
+#include "HAL/IConsoleManager.h"
+
 DEFINE_LOG_CATEGORY(LogWeaponSample);
 
 TSharedPtr<IConsoleVariable> FWeaponSampleModule::CVarWeaponDebugTrace = nullptr;
@@ -73,5 +75,3 @@ TSharedRef<IConsoleVariable> FWeaponSampleModule::GetCVarWeaponFriction()
 {
 	return CVarWeaponFriction.ToSharedRef();
 }
-
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, WeaponSample)

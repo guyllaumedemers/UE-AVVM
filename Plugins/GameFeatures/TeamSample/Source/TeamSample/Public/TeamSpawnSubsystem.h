@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Subsystems/WorldSubsystem.h"
 
 #include "TeamSpawnSubsystem.generated.h"

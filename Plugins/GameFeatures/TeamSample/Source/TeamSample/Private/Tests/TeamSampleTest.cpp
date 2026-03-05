@@ -27,6 +27,7 @@
 #include "GameStateTeamComponent.h"
 #include "NativeGameplayTags.h"
 #include "TeamRule.h"
+#include "TimerManager.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Kismet/GameplayStatics.h"
 

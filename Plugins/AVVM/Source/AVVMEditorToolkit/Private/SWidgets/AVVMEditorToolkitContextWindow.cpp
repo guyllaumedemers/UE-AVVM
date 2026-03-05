@@ -21,6 +21,7 @@
 
 #include "AVVMEditorBuilderSubsystem.h"
 #include "AVVMEditorToolkitBuilderObject.h"
+#include "Editor.h"
 
 void SAVVMEditorToolkitContextWindow::Construct(const FArguments& InArgs)
 {

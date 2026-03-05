@@ -22,12 +22,14 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTags.h"
+#include "Templates/SubclassOf.h"
 #include "UObject/Interface.h"
 
 #include "AVVMPrimaryGameLayoutInterface.generated.h"
 
 enum class EAsyncWidgetLayerState : uint8;
 class UCommonActivatableWidget;
+class ULocalPlayer;
 
 /**
  *	Class description:

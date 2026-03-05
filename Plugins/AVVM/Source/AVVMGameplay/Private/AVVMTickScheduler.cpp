@@ -25,6 +25,7 @@
 #include "AVVMUtils.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
+#include "TimerManager.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TICK_SCHEDULING, "WorldRule.TickScheduling");

@@ -22,6 +22,7 @@
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Components/ActorComponent.h"
 
 TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {

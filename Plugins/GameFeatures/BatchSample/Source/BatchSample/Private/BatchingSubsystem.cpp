@@ -27,7 +27,9 @@
 #include "BatchSample.h"
 #include "BatchSettings.h"
 #include "NativeGameplayTags.h"
+#include "TimerManager.h"
 #include "Engine/StreamableManager.h"
+#include "Engine/World.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_BATCHING, "WorldRule.Batching");
@@ -150,11 +152,18 @@ void UBatchingSubsystem::Static_Clear(const UWorld* World)
 	}
 }
 
+#if WITH_AUTOMATION_TESTS
 bool UBatchingSubsystem::Static_IsEmpty(const UWorld* World)
 {
 	auto* BatchingSubsystem = UBatchingSubsystem::Get(World);
 	return IsValid(BatchingSubsystem) ? BatchingSubsystem->IsEmpty() : true;
 }
+
+bool UBatchingSubsystem::IsEmpty() const
+{
+	return PendingDestroy.IsEmpty() && !NextTickHandle.IsValid();
+}
+#endif
 
 UBatchingSubsystem* UBatchingSubsystem::Get(const UWorld* World)
 {
@@ -250,13 +259,6 @@ void UBatchingSubsystem::Clear()
 	StreamableHandle.Reset();
 	PendingDestroy.Empty();
 }
-
-#if WITH_AUTOMATION_TESTS
-bool UBatchingSubsystem::IsEmpty() const
-{
-	return PendingDestroy.IsEmpty() && !NextTickHandle.IsValid();
-}
-#endif
 
 void UBatchingSubsystem::CreateBatchingRule()
 {

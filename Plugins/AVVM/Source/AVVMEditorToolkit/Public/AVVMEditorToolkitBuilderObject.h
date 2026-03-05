@@ -21,11 +21,14 @@
 
 #include "CoreMinimal.h"
 
+#include "Textures/SlateIcon.h"
 #include "UObject/Object.h"
 
 #include "AVVMEditorToolkitBuilderObject.generated.h"
 
 class FAVVMEditorToolkit_Core;
+class FUICommandInfo;
+class SWidget;
 
 /**
  *	Class description:

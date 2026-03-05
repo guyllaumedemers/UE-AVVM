@@ -22,6 +22,7 @@
 #include "AVVMPlayerState.h"
 #include "NonReplicatedProjectileActor.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
+#include "Engine/World.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"

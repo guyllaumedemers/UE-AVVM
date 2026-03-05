@@ -24,8 +24,25 @@ public class InventorySample : ModuleRules
 {
 	public InventorySample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 		SetupIrisSupport(Target);
+
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMEditorToolkit"
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"Slate",
+					"SlateCore",
+				});
+		}
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -53,19 +70,5 @@ public class InventorySample : ModuleRules
 				"NetCore"
 			}
 		);
-
-		if (Target.bBuildEditor == true)
-		{
-			PublicDependencyModuleNames.AddRange(new string[]
-			{
-				"AVVMEditorToolkit"
-			});
-
-			PrivateDependencyModuleNames.AddRange(new string[]
-			{
-				"Slate",
-				"SlateCore",
-			});
-		}
 	}
 }

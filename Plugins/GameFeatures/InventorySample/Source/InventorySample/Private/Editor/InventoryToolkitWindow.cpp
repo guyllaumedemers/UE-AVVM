@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "InventoryToolkitWindow.h"
 
+#include "Widgets/SOverlay.h"
+#include "Widgets/Images/SImage.h"
+
 #if WITH_EDITORONLY_DATA
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)

@@ -25,6 +25,10 @@
 #include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
 
+#if !UE_BUILD_SHIPPING
+#include "Misc/AutomationTest.h"
+#endif
+
 #include "AVVMNotificationSubsystem.generated.h"
 
 struct FAVVMNotificationPayload;

@@ -23,13 +23,13 @@
 #include "CoreMinimal.h"
 
 #include "HAL/IConsoleManager.h"
+#include "Modules/ModuleInterface.h"
 #include "StructUtils/InstancedStruct.h"
 
 struct FAVVMNotificationPayload;
 class UAVVMOnlinePlayerStringParser;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnlineResquestDelegate, const bool /*bWasSuccess*/, const TInstancedStruct<FAVVMNotificationPayload>& /*Payload*/);
-
 AVVMONLINE_API DECLARE_LOG_CATEGORY_EXTERN(LogAVVMOnline, Log, All);
 
 /**

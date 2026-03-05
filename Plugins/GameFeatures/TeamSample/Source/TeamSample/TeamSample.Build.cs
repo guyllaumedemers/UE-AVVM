@@ -24,12 +24,17 @@ public class TeamSample : ModuleRules
 {
 	public TeamSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 		SetupIrisSupport(Target);
 
 		if (Target.bBuildEditor)
 		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"FunctionalTesting",
+				});
 		}
 
 		PublicDependencyModuleNames.AddRange(

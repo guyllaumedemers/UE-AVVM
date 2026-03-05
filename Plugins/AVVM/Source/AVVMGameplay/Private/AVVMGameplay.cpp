@@ -23,6 +23,7 @@
 #include "DataRegistrySubsystem.h"
 #include "GameplayTagsModule.h"
 #include "Engine/AssetManager.h"
+#include "Engine/Engine.h"
 #include "Misc/Paths.h"
 
 DEFINE_LOG_CATEGORY(LogGameplay);

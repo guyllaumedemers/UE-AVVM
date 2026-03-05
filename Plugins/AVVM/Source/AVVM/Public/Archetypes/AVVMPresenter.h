@@ -27,6 +27,7 @@
 
 #include "AVVMPresenter.generated.h"
 
+class AActor;
 class UCommonUserWidget;
 class UMVVMViewModelBase;
 
@@ -45,8 +46,8 @@ class AVVM_API UAVVMPresenter : public UObject
 public:
 	virtual void SafeBeginPlay(const UWorld* World);
 	virtual void SafeEndPlay();
-	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const { return ViewModelClass; };
-	virtual AActor* GetOuterKey() const { return GetTypedOuter<AActor>(); }
+	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const;
+	virtual AActor* GetOuterKey() const;
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)

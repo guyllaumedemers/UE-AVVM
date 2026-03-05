@@ -24,7 +24,14 @@ public class AVVMEditorToolkit : ModuleRules
 {
 	public AVVMEditorToolkit(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
+
+		PublicDefinitions.AddRange(
+			new string[]
+			{
+				"UE_ENABLE_AVVM_EDITORTOOLKIT"
+			});
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -50,11 +57,5 @@ public class AVVMEditorToolkit : ModuleRules
 				"WorkspaceMenuStructure",
 			}
 		);
-
-		PublicDefinitions.AddRange(
-			new string[]
-			{
-				"UE_ENABLE_AVVM_EDITORTOOLKIT"
-			});
 	}
 }

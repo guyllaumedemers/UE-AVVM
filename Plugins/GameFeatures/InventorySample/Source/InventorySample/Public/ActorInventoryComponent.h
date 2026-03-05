@@ -26,6 +26,7 @@
 #include "GameplayTagContainer.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "Components/ActorComponent.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "ActorInventoryComponent.generated.h"

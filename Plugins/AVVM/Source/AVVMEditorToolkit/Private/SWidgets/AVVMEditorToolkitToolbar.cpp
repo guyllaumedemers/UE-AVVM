@@ -21,9 +21,13 @@
 
 #include "AVVMEditorBuilderSubsystem.h"
 #include "AVVMEditorToolkit.h"
+#include "AVVMEditorToolkitBuilderObject.h"
 #include "ToolMenu.h"
+#include "ToolMenus.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Styling/ToolBarStyle.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
+#include "Widgets/Images/SImage.h"
 
 #define LOCTEXT_NAMESPACE "AVVMEditorToolkit_ToolBar"
 

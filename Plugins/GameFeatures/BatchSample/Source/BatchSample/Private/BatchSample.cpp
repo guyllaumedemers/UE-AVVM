@@ -20,6 +20,8 @@
 
 #include "BatchSample.h"
 
+#include "HAL/IConsoleManager.h"
+
 DEFINE_LOG_CATEGORY(LogBatchSample);
 
 TSharedPtr<IConsoleVariable> FBatchSampleModule::CVarBatchEnableSubsystem = nullptr;
@@ -43,5 +45,3 @@ TSharedRef<IConsoleVariable> FBatchSampleModule::GetCVarBatchEnableSubsystem()
 {
 	return CVarBatchEnableSubsystem.ToSharedRef();
 }
-
-IMPLEMENT_MODULE(FBatchSampleModule, BatchSample)

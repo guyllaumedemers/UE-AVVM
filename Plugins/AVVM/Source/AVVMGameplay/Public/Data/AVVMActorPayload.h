@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "UObject/Interface.h"
 
 #include "AVVMActorPayload.generated.h"
 

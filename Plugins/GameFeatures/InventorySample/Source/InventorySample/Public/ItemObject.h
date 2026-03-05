@@ -26,6 +26,7 @@
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Backend/AVVMDataResolverHelper.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 

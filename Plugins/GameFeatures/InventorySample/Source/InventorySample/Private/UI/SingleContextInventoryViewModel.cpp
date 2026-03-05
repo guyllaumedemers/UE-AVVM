@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "UI/SingleContextInventoryViewModel.h"
 
+#include "Engine/LocalPlayer.h"
 #include "UI/ItemObjectViewModel.h"
 
 USingleContextInventoryViewModel* USingleContextInventoryViewModel::Make(const TArray<UItemObject*>& NewItems,

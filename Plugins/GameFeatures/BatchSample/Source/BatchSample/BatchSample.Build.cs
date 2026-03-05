@@ -24,11 +24,16 @@ public class BatchSample : ModuleRules
 {
 	public BatchSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 
 		if (Target.bBuildEditor)
 		{
-			PublicDependencyModuleNames.AddRange(new string[] { "FunctionalTesting", });
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"FunctionalTesting",
+				});
 		}
 
 		PublicDependencyModuleNames.AddRange(

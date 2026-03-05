@@ -20,6 +20,8 @@
 #include "DynamicHitBoxComponent.h"
 
 #include "AVVMCharacter.h"
+#include "TimerManager.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 

@@ -20,6 +20,7 @@
 #include "AVVMEditorBuilderSubsystem.h"
 
 #include "AVVMEditorToolkitBuilderObject.h"
+#include "Editor/EditorEngine.h"
 #include "Engine/AssetManager.h"
 
 void UAVVMEditorBuilderSubsystem::Initialize(FSubsystemCollectionBase& Collection)

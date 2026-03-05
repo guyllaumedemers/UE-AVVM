@@ -22,6 +22,8 @@
 #include "InventorySample.h"
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
+#include "HAL/PlatformFileManager.h"
+#include "Misc/FileHelper.h"
 
 TStrongObjectPtr<UInventoryFileHelper> UInventoryFileHelper::gInventoryFileHelper = nullptr;
 

@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "ActorSkillTreeComponent.h"
 
+#include "GameFramework/Actor.h"
+
 UActorSkillTreeComponent::UActorSkillTreeComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

@@ -23,6 +23,7 @@
 
 #include "AVVMDoesSupportManualTicking.h"
 #include "Components/ActorComponent.h"
+#include "Engine/HitResult.h"
 
 #include "NonReplicatedWallDetectionComponent.generated.h"
 

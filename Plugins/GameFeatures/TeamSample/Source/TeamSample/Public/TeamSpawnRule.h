@@ -30,6 +30,7 @@
 
 #include "TeamSpawnRule.generated.h"
 
+class ACharacter;
 class UAnimInstance;
 class UCameraModifier;
 class UNiagaraSystem;

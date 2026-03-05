@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "TeamSettings.h"
 
+#include "Engine/Level.h"
+
 UTeamSettings::UTeamSettings()
 {
 	CategoryName = TEXT("Game");

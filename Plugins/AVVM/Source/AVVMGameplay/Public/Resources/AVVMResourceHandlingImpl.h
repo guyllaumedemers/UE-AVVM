@@ -26,6 +26,8 @@
 
 #include "AVVMResourceHandlingImpl.generated.h"
 
+class UActorComponent;
+
 /**
  *	Class description:
  *

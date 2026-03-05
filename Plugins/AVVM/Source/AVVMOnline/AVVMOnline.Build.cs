@@ -24,9 +24,14 @@ public class AVVMOnline : ModuleRules
 {
 	public AVVMOnline(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicDefinitions.Add("AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING");
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
+
+		PublicDefinitions.AddRange(
+			new string[]
+			{
+				"AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING"
+			});
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]

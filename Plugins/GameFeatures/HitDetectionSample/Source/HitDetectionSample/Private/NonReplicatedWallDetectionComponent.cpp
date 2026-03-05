@@ -21,6 +21,7 @@
 
 #include "AVVMTickScheduler.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 

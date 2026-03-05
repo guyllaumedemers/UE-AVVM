@@ -22,8 +22,13 @@
 #include "AVVMUtils.h"
 #include "DoesTransactionProviderSupportIdentifier.h"
 #include "TransactionSettings.h"
+#include "Dom/JsonObject.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
 
 void UTransaction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {

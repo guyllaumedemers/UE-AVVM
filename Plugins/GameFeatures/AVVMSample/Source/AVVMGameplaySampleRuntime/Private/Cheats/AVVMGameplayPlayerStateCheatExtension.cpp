@@ -23,6 +23,7 @@
 #include "AVVMGameplaySampleSettings.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "AVVMUtils.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 

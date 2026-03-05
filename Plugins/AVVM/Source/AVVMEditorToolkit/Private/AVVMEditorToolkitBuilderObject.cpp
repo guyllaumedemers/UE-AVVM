@@ -20,6 +20,7 @@
 #include "AVVMEditorToolkitBuilderObject.h"
 
 #include "AVVMEditorBuilderSubsystem.h"
+#include "Editor.h"
 
 void UAVVMEditorToolkitBuilderObject::GetBuilderInfo(FAVVMBuilderInfo& OutBuilderInfo) const
 {

@@ -24,7 +24,8 @@ public class AVVMGameplay : ModuleRules
 {
 	public AVVMGameplay(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 
 		if (Target.bBuildEditor)
 		{

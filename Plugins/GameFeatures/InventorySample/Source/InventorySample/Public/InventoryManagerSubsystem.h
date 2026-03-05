@@ -25,6 +25,9 @@
 
 #include "InventoryManagerSubsystem.generated.h"
 
+class AActor;
+struct FActorSpawnParameters;
+
 /**
 *	Class description:
  *

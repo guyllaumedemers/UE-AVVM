@@ -64,8 +64,8 @@ void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorTool
 
 	BIND_NEW_BUTTON_COMMAND(OpenTool,
 	                        FName("InventorySample_OpenTool"),
-	                        LOCTEXT("Open InventorySample", "Open InventorySample"),
-	                        LOCTEXT("Lorem Ipsum", "Lorem Ipsum"));
+	                        NSLOCTEXT("AVVMEditorToolkit", "Open InventorySample", "Open InventorySample"),
+	                        NSLOCTEXT("AVVMEditorToolkit", "Lorem Ipsum", "Lorem Ipsum"));
 
 	if (Core.IsValid())
 	{

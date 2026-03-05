@@ -24,6 +24,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "GameplayTagContainer.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 

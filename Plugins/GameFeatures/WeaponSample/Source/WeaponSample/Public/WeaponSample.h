@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Modules/ModuleInterface.h"
 
 WEAPONSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogWeaponSample, Log, All);
 

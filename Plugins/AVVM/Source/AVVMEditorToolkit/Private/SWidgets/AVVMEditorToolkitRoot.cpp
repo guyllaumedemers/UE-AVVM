@@ -21,7 +21,12 @@
 
 #include "AVVMEditorToolkitContextWindow.h"
 #include "AVVMEditorToolkitToolbar.h"
+#include "Components/VerticalBox.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
+#include "Widgets/SOverlay.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Layout/SBorder.h"
 
 void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs)
 {

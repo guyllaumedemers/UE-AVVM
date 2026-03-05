@@ -22,6 +22,8 @@
 #include "AVVM.h"
 #include "AVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
 
 void UAVVMPresenter::SafeBeginPlay(const UWorld* World)
 {
@@ -63,4 +65,14 @@ void UAVVMPresenter::SafeEndPlay()
 	{
 		BP_UnregisterNotificationChannels();
 	}
+}
+
+TSubclassOf<UMVVMViewModelBase> UAVVMPresenter::GetViewModelClass() const
+{
+	return ViewModelClass;
+}
+
+AActor* UAVVMPresenter::GetOuterKey() const
+{
+	return GetTypedOuter<AActor>();
 }

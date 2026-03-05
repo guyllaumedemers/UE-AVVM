@@ -22,6 +22,9 @@
 #include "InputMappingContext.h"
 #include "Ability/AVVMAbilityInputComponent.h"
 #include "Engine/AssetManager.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 
 void UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(const APlayerController* Receiver, bool bAddOnlyInGameWorlds)
 {

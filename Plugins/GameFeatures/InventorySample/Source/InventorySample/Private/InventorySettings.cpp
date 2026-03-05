@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "InventorySettings.h"
 
+#include "Misc/App.h"
+
 const FGameplayTagContainer& UInventorySettings::GetBlockingTagsWhenEmpty()
 {
 	return GetDefault<UInventorySettings>()->BlockingTagsWhenEmpty;

@@ -23,6 +23,7 @@
 #include "AVVMGameplayUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "GameFramework/Actor.h"
 
 TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {

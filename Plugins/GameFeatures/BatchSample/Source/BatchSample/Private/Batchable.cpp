@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Batchable.h"
 
+#include "GameFramework/Actor.h"
+
 int32 IBatchable::GetOwningBatchIndex() const
 {
 	return BatchIndex;

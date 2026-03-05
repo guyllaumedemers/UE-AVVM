@@ -21,6 +21,7 @@
 
 #include "AVVMGameplay.h"
 #include "AVVMUtils.h"
+#include "Engine/World.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"
 
 bool UAVVMNetSynchronizationManager::ShouldCreateSubsystem(UObject* Outer) const

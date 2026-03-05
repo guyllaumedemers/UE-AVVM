@@ -23,6 +23,10 @@
 
 #include "Subsystems/WorldSubsystem.h"
 
+#if !UE_BUILD_SHIPPING
+#include "Misc/AutomationTest.h"
+#endif
+
 #include "BatchingSubsystem.generated.h"
 
 struct FStreamableHandle;

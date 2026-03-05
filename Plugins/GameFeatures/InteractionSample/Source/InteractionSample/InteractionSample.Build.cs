@@ -24,7 +24,8 @@ public class InteractionSample : ModuleRules
 {
 	public InteractionSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(

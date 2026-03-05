@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 
+#include "Animation/AnimInstance.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 
 UAnimInstance* UAVVMTSAnimInstanceUtils::GetCharacterAnimInstance(const UAnimInstance* RootAnim)

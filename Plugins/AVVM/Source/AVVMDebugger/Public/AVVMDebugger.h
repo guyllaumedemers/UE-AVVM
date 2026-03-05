@@ -23,6 +23,7 @@
 #include "CoreMinimal.h"
 
 #include "ImGuiModuleProperties.h"
+#include "Modules/ModuleInterface.h"
 #include "UObject/Interface.h"
 
 #include "AVVMDebugger.generated.h"

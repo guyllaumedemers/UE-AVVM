@@ -24,7 +24,8 @@ public class InventoryCraftingSample : ModuleRules
 {
 	public InventoryCraftingSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(

@@ -21,6 +21,7 @@
 
 #include "InventorySettings.h"
 #include "ItemObject.h"
+#include "GameFramework/Actor.h"
 #include "Tags/PrivateTags.h"
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)

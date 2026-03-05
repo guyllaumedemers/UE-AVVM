@@ -23,6 +23,7 @@
 
 #include "Transaction.h"
 #include "TransactionFactoryUtils.h"
+#include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "GameStateTransactionHistory.generated.h"

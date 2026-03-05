@@ -24,11 +24,15 @@ public class AVVM : ModuleRules
 {
 	public AVVM(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
 
 		if (Target.bBuildEditor)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", });
+			PrivateDependencyModuleNames.AddRange(new string[]
+			{
+				"UnrealEd",
+			});
 		}
 
 		PublicDependencyModuleNames.AddRange(

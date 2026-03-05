@@ -24,6 +24,7 @@
 
 class FAVVMEditorToolkit_Core;
 class FExtender;
+class SBorder;
 
 /**
  *	Class description:

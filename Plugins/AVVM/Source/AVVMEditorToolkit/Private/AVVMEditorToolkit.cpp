@@ -23,10 +23,12 @@
 #include "LevelEditor.h"
 #include "UMGStyle.h"
 #include "ToolMenu.h"
+#include "ToolMenus.h"
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
 #include "SWidgets/AVVMEditorToolkitRoot.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Widgets/Docking/SDockTab.h"
 
 #define LOCTEXT_NAMESPACE "AVVMEditorToolkit"
 

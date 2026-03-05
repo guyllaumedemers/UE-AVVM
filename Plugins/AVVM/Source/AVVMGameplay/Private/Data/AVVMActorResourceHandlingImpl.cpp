@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Data/AVVMActorResourceHandlingImpl.h"
 
+#include "Components/ActorComponent.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 
 TArray<FDataRegistryId> UAVVMActorResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
@@ -31,7 +32,6 @@ TArray<FDataRegistryId> UAVVMActorResourceHandlingImpl::ProcessResources(UActorC
 		if (IsValid(ActorDefinitionDataAsset))
 		{
 			OutResources.Append(ActorDefinitionDataAsset->GetActorTraitIds());
-			continue;
 		}
 	}
 

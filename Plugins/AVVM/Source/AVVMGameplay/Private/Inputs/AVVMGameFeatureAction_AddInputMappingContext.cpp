@@ -20,6 +20,8 @@
 #include "Inputs/AVVMGameFeatureAction_AddInputMappingContext.h"
 
 #include "GameFeaturesSubsystem.h"
+#include "Engine/GameInstance.h"
+#include "Engine/LocalPlayer.h"
 
 void UAVVMGameFeatureAction_AddInputMappingContext::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {

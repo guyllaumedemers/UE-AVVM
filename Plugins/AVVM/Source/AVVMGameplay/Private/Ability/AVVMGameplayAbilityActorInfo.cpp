@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 
+#include "GameFramework/Actor.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 
 FAVVMGameplayAbilityActorInfo::FAVVMGameplayAbilityActorInfo(const FGameplayAbilityActorInfo& NewAbilityActorInfo)

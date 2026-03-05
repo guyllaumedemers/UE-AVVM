@@ -23,6 +23,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Ability/AVVMAttributeSet.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "WeaponAttributeSet.generated.h"
 
