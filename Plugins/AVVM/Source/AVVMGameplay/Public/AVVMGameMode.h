@@ -89,6 +89,11 @@ protected:
 	
 	UFUNCTION()
 	void OnGameStateSet(AGameStateBase* NewGameState);
+
+	// @gdemers handle player joining/leaving AGameSession.
+	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();

@@ -162,6 +162,11 @@ void AAVVMPlayerState::HandleSimulatedPlayerBackfilling()
 	}
 }
 
+void AAVVMPlayerState::OnSetUniqueId()
+{
+	Super::OnSetUniqueId();
+}
+
 void AAVVMPlayerState::Server_OnPlayerBackfillingReceived_Implementation(AAVVMPlayerState* SimulatedPlayerState)
 {
 	const UWorld* World = GetWorld();

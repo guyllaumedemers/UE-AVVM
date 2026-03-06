@@ -123,6 +123,35 @@ void AAVVMGameMode::OnGameStateSet(AGameStateBase* NewGameState)
 	}
 }
 
+void AAVVMGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+
+	// @gdemers Run validation on players that are joining a AGameSession, and kick out whomever
+	// isn't authorized to join this session.
+	// TODO @gdemers use a AVVMWorldRule to check this predicate.
+}
+
+void AAVVMGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	// @gdemers AGameMode::Login will assign a valid UniqueNetId to the APlayerState which means that it is safe to
+	// enforce data refresh on the server after this steps.
+	// example : any system handling caching of players using unique net id. 
+}
+
+void AAVVMGameMode::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+	
+	// TODO @gdemers Serialize Server sided information about the player leaving to
+	// the project specific backend, or local save file, or drop progression if forfeiting.
+	
+	// IMPORTANT APlayerState is safe for access as the invocation call is made before we destroy
+	// the player.
+}
+
 void AAVVMGameMode::Terminate()
 {
 	if (IsNetMode(NM_DedicatedServer))

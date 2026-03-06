@@ -125,6 +125,9 @@ protected:
 	void Client_OnSimulatedClientNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized,
 	                                          AAVVMPlayerState* SimulatedPlayerState);
 	
+	// TODO @gdemers handle refresh on player content with new unique id. (happens both server/client)
+	virtual void OnSetUniqueId() override;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
 	
