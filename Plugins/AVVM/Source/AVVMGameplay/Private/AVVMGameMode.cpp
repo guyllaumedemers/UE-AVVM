@@ -20,8 +20,11 @@
 #include "AVVMGameMode.h"
 
 #include "AVVMWorldSetting.h"
+#include "Engine/NetConnection.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameState.h"
+#include "GameFramework/PlayerState.h"
+#include "Net/AVVMPlayerRule.h"
 
 AAVVMGameMode::AAVVMGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -127,9 +130,44 @@ void AAVVMGameMode::PreLogin(const FString& Options, const FString& Address, con
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
 
-	// @gdemers Run validation on players that are joining a AGameSession, and kick out whomever
-	// isn't authorized to join this session.
-	// TODO @gdemers use a AVVMWorldRule to check this predicate.
+	// @gdemers Run validation on players that are joining a AGameSession, and kick out
+	// whomever isn't authorized to join this session.
+	bool bUnexpectedPlayer = false;
+	if (WorldSetting.IsValid())
+	{
+		const auto* PlayerAcceptanceRule = Cast<UAVVMPlayerRule>(WorldSetting->GetRule(RuleTagAggregator.PlayerAcceptanceTag));
+		bUnexpectedPlayer |= (IsValid(PlayerAcceptanceRule) ? PlayerAcceptanceRule->Predicate_UniqueNetId(UniqueId) : false);
+	}
+
+	if (!bUnexpectedPlayer)
+	{
+		return;
+	}
+
+	if (!IsValid(GameState))
+	{
+		return;
+	}
+
+	const auto* SearchResult = GameState->PlayerArray.FindByPredicate([Compare = UniqueId](const APlayerState* NewPlayerState)
+	{
+		return IsValid(NewPlayerState) && (Compare == NewPlayerState->GetUniqueId());
+	});
+
+	if (SearchResult != nullptr)
+	{
+		const APlayerController* PC = (*SearchResult)->GetPlayerController();
+		if (!IsValid(PC))
+		{
+			return;
+		}
+
+		UNetConnection* NewConnection = PC->GetNetConnection();
+		if (IsValid(NewConnection))
+		{
+			NewConnection->Close();
+		}
+	}
 }
 
 void AAVVMGameMode::PostLogin(APlayerController* NewPlayer)

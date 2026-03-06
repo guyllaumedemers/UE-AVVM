@@ -50,6 +50,9 @@ struct AVVMGAMEPLAY_API FAVVMGameModeRuleTagAggregator
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag MatchProgressTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PlayerAcceptanceTag = FGameplayTag::EmptyTag;
 };
 
 /**
