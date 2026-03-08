@@ -53,12 +53,15 @@ struct AVVMGAMEPLAY_API FAVVMGameModeRuleTagAggregator
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag PlayerAcceptanceTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag SpawnPointSelectionTag = FGameplayTag::EmptyTag;
 };
 
 /**
  *	Class description:
  *
-*	AAVVMGameMode is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
+ *	AAVVMGameMode is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
  *	
  *	IMPORTANT : Replicated systems SHOULD BE managed through a component added via GFP. Unreal's USubsystem derived classes CANNOT be replicated! Doing this approach makes for a more modular system
  *	due to component addition and removal no longer requiring hard references in the Actor derived class.
@@ -97,6 +100,9 @@ protected:
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
+	// @gdemers handle pawn creation failure, and spawn location. (pawn configuration should be handled within component base systems)
+	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName = L"") override;
+	virtual void FailedToRestartPlayer(AController* NewPlayer) override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();

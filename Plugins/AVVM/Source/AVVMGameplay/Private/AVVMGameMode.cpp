@@ -20,11 +20,15 @@
 #include "AVVMGameMode.h"
 
 #include "AVVMWorldSetting.h"
+#include "TimerManager.h"
 #include "Engine/NetConnection.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameState.h"
+#include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
-#include "Net/AVVMPlayerRule.h"
+#include "Kismet/GameplayStatics.h"
+#include "Rules/AVVMPlayerRule.h"
+#include "Rules/AVVMSpawnPointRule.h"
 
 AAVVMGameMode::AAVVMGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -188,6 +192,92 @@ void AAVVMGameMode::Logout(AController* Exiting)
 	
 	// IMPORTANT APlayerState is safe for access as the invocation call is made before we destroy
 	// the player.
+}
+
+AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+	// @gdemers internal context object for tracking player attempts
+	// to finding a valid start position.
+	struct FAVVMPlayerRetryTracker
+	{
+		TMap<TWeakObjectPtr<AController>/*Player*/, int32/*Counter*/> CounterPerPlayer;
+	};
+
+	static FAVVMPlayerRetryTracker PlayerRetryTRacker;
+	int32& OutRetryCounter = PlayerRetryTRacker.CounterPerPlayer.FindOrAdd(Player);
+
+	if (!WorldSetting.IsValid())
+	{
+		return nullptr;
+	}
+
+	const auto* SpawnPointRule = Cast<UAVVMSpawnPointRule>(WorldSetting->GetRule(RuleTagAggregator.SpawnPointSelectionTag));
+	if (!IsValid(SpawnPointRule))
+	{
+		return nullptr;
+	}
+
+	AActor* SpawnPoint = nullptr;
+	bool bResult = false;
+
+	TArray<AActor*> OutSpawnPoints;
+	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), OutSpawnPoints);
+
+	bResult |= SpawnPointRule->Predicate_GetSpawnPoint(OutSpawnPoints, SpawnPoint);
+	if (bResult)
+	{
+		// @gdemers safe reset counter upon finding valid spot.
+		OutRetryCounter = 0;
+		return SpawnPoint;
+	}
+
+	const bool bShouldClearPrevious = (false == SpawnPointRule->CanUsePreviousStartPositionOnFailure());
+	if (bShouldClearPrevious)
+	{
+		Player->StartSpot.Reset();
+	}
+
+	const bool bCanDeferRetry = SpawnPointRule->CanRetrySearch();
+	if (!ensureAlwaysMsgf(bCanDeferRetry,
+	                      TEXT("Couldn't find a valid APlayerStart for %s. Retrying isn't supported! We are about to close the player net connection."),
+	                      *GetNameSafe(Player)) ||
+		!ensureAlwaysMsgf(OutRetryCounter < SpawnPointRule->GetMaxNumRetry(),
+		                  TEXT("Couldn't find a valid APlayerStart for %s. We have exceeded the allowed number of retry (%d). We are about to close the player net connection."),
+		                  *GetNameSafe(Player),
+		                  SpawnPointRule->GetMaxNumRetry()))
+	{
+		UNetConnection* PlayerConnection = IsValid(Player) ? Player->GetNetConnection() : nullptr;
+		if (IsValid(PlayerConnection))
+		{
+			PlayerConnection->Close();
+		}
+
+		return nullptr;
+	}
+
+	const auto OnStartPosition = [](TWeakObjectPtr<AAVVMGameMode> GameMode,
+	                                TWeakObjectPtr<AController> RestartPlayer)
+	{
+		if (GameMode.IsValid())
+		{
+			GameMode->RestartPlayer(RestartPlayer.Get());
+		}
+	};
+
+	FTimerHandle OutHandle;
+	GetWorldTimerManager().SetTimer(OutHandle,
+	                                FTimerDelegate::CreateWeakLambda(this, OnStartPosition, this, Player),
+	                                SpawnPointRule->GetRetryRate(),
+	                                false);
+
+	// @gdemers increment counter so we can eventually timeout on failure.
+	OutRetryCounter += 1;
+	return nullptr;
+}
+
+void AAVVMGameMode::FailedToRestartPlayer(AController* NewPlayer)
+{
+	Super::FailedToRestartPlayer(NewPlayer);
 }
 
 void AAVVMGameMode::Terminate()
