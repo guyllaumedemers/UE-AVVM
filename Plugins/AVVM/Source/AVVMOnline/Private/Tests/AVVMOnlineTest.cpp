@@ -20,7 +20,7 @@
 
 #include "Misc/AutomationTest.h"
 
-#include "AVVMOnline.h"
+#include "AVVMOnlineModule.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "Backend/AVVMOnlinePlayer.h"

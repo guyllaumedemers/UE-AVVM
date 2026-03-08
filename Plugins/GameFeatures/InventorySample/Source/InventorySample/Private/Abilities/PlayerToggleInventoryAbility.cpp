@@ -21,7 +21,7 @@
 
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
-#include "InventorySample.h"
+#include "InventorySampleModule.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "GameFramework/PlayerController.h"

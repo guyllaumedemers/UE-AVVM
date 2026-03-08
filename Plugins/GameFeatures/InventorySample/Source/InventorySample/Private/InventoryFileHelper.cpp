@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "InventoryFileHelper.h"
 
-#include "InventorySample.h"
+#include "InventorySampleModule.h"
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
 #include "HAL/PlatformFileManager.h"

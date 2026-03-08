@@ -18,7 +18,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#include "AVVMEditorToolkit.h"
+#include "AVVMEditorToolkitModule.h"
 
 #include "LevelEditor.h"
 #include "UMGStyle.h"

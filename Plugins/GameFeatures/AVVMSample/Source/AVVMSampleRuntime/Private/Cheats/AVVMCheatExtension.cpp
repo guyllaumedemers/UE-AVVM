@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Cheats/AVVMCheatExtension.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSettings.h"
 #include "DataRegistrySubsystem.h"

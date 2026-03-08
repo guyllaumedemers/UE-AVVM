@@ -20,7 +20,7 @@
 #include "AVVMEditorToolkitToolbar.h"
 
 #include "AVVMEditorBuilderSubsystem.h"
-#include "AVVMEditorToolkit.h"
+#include "AVVMEditorToolkitModule.h"
 #include "AVVMEditorToolkitBuilderObject.h"
 #include "ToolMenu.h"
 #include "ToolMenus.h"

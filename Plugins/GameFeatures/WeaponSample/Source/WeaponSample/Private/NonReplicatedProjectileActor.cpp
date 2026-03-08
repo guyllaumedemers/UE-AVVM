@@ -24,7 +24,7 @@
 #include "ProjectileManagerSubsystem.h"
 #include "TriggeringActor.h"
 #include "WeaponSettings.h"
-#include "WeaponSample.h"
+#include "WeaponSampleModule.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/DamageEvents.h"
 #include "Engine/World.h"

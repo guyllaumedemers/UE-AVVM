@@ -29,10 +29,11 @@ public class AVVM : ModuleRules
 
 		if (Target.bBuildEditor)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[]
-			{
-				"UnrealEd",
-			});
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"UnrealEd",
+				});
 		}
 
 		PublicDependencyModuleNames.AddRange(

@@ -20,7 +20,7 @@
 #include "Abilities/TradeItemAbility.h"
 
 #include "AVVMGameplayUtils.h"
-#include "InventorySample.h"
+#include "InventorySampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"

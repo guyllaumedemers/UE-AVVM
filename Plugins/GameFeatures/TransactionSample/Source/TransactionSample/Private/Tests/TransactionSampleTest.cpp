@@ -24,7 +24,7 @@
 #include "TransactionFactoryImplTest.h"
 #include "GameFramework/GameStateBase.h"
 
-#if WITH_EDITOR && WITH_AUTOMATION_TESTS
+#if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationEditorCommon.h"
 #endif
 
@@ -37,7 +37,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TransactionSampleTest, "AutomatedTest.CustomGro
 
 bool TransactionSampleTest::RunTest(const FString& Parameters)
 {
-#if WITH_EDITOR && WITH_AUTOMATION_TESTS
+#if WITH_AUTOMATION_TESTS
 	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
 	UTEST_NOT_NULL("UWorld.", World)
 

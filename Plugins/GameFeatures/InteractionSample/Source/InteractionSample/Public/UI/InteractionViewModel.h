@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "MVVMViewModelBase.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Styling/SlateBrush.h"

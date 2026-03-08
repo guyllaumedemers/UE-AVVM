@@ -23,7 +23,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMNotificationSubsystem.h"
 #include "UObject/Interface.h"
 

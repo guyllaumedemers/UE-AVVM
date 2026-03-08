@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,29 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-#include "AVVMModule.h"
-#include "MVVMViewModelBase.h"
-
-#include "AVVMEditorPreviewViewModel.generated.h"
-
-/**
- *	Class description:
- *
- *	UAVVMEditorPreviewViewModel is a placeholder View Model for widget that requires UObject arguments
- *	as function to create dynamic entries.
- *
- *	This is to be used in dynamic container types like UAVVMDynamicEntryBoxExtended and types deriving from UListViewBase.
- */
-UCLASS()
-class AVVMTOOLKIT_API UAVVMEditorPreviewViewModel : public UMVVMViewModelBase,
-                                                    public IAVVMViewModelFNameHelper
-{
-	GENERATED_BODY()
-
-public:
-	virtual FName GetViewModelFName() const override { return TEXT("UAVVMEditorPreviewViewModel"); };
-};
+#include "Rules/AVVMPlayerRule.h"

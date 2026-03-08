@@ -20,7 +20,7 @@
 #include "FenceManagerSubsystem.h"
 
 #include "ActorFenceComponent.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "Engine/World.h"
 
 bool UFenceManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const

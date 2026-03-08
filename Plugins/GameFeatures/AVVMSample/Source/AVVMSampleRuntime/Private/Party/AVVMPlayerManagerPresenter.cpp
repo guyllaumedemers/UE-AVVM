@@ -20,7 +20,7 @@
 #include "Party/AVVMPlayerManagerPresenter.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnline.h"
+#include "AVVMOnlineModule.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "GameFramework/GameMode.h"

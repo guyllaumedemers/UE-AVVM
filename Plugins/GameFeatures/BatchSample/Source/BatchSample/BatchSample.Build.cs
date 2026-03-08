@@ -27,7 +27,7 @@ public class BatchSample : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 
-		if (Target.bBuildEditor)
+		if (Target.WithAutomationTests)
 		{
 			PublicDependencyModuleNames.AddRange(
 				new string[]
@@ -43,7 +43,7 @@ public class BatchSample : ModuleRules
 				"Core",
 				"CoreUObject",
 				"DeveloperSettings",
-				"Engine",
+				"Engine"
 			}
 		);
 

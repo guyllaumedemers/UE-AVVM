@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMSubsystem.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "MVVMViewModelBase.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "Engine/World.h"

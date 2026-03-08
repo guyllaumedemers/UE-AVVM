@@ -17,9 +17,6 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "HitDetectionSampleModule.h"
 
-#include "InventorySample.h"
-
-DEFINE_LOG_CATEGORY(LogInventorySample);
-
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, InventorySample)
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, HitDetectionSample)

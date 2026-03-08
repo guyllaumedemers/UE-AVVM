@@ -21,7 +21,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "ActorInteractionComponent.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"

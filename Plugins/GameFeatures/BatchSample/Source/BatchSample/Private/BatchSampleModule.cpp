@@ -17,6 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplaySampleRuntime.h"
-    
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMGameplaySampleRuntime)
+
+#include "BatchSampleModule.h"
+
+#include "HAL/IConsoleManager.h"
+#include "Modules/ModuleManager.h"
+
+DEFINE_LOG_CATEGORY(LogBatchSample);
+
+TSharedPtr<IConsoleVariable> FBatchSampleModule::CVarBatchEnableSubsystem = nullptr;
+
+void FBatchSampleModule::StartupModule()
+{
+	IConsoleVariable* NewCVar = IConsoleManager::Get()
+			.RegisterConsoleVariable(TEXT("ToggleBatching"),
+			                         false,
+			                         TEXT("Toggle Batch Subsystem availability."));
+
+	CVarBatchEnableSubsystem = MakeShareable<IConsoleVariable>(NewCVar);
+}
+
+void FBatchSampleModule::ShutdownModule()
+{
+	IConsoleManager::Get().UnregisterConsoleObject(CVarBatchEnableSubsystem.Get());
+}
+
+TSharedRef<IConsoleVariable> FBatchSampleModule::GetCVarBatchEnableSubsystem()
+{
+	return CVarBatchEnableSubsystem.ToSharedRef();
+}
+
+IMPLEMENT_MODULE(FBatchSampleModule, BatchSample)

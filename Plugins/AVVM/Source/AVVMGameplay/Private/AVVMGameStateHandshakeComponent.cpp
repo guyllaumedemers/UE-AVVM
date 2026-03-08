@@ -20,7 +20,7 @@
 #include "AVVMGameStateHandshakeComponent.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"

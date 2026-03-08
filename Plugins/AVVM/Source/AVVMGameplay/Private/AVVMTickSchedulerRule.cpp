@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMTickSchedulerRule.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 
 float UAVVMTickSchedulerRule::GetGlobalResetTimeJobQueuePriority() const
 {

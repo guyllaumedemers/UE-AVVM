@@ -25,7 +25,7 @@
 #include "AVVMUtils.h"
 #include "InventoryFileHelper.h"
 #include "InventoryManagerSubsystem.h"
-#include "InventorySample.h"
+#include "InventorySampleModule.h"
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
 #include "PickupActor.h"

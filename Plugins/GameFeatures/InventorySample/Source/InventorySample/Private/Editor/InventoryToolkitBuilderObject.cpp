@@ -22,7 +22,7 @@
 #define LOCTEXT_NAMESPACE "AVVMEditorToolkit"
 
 #if WITH_EDITORONLY_DATA
-#include "AVVMEditorToolkit.h"
+#include "AVVMEditorToolkitModule.h"
 #include "InventoryToolkitWindow.h"
 #include "Framework/Commands/UICommandInfo.h"
 

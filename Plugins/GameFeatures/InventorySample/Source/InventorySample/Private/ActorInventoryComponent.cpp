@@ -28,7 +28,7 @@
 #include "AVVMUtils.h"
 #include "InventoryFileHelper.h"
 #include "InventoryProvider.h"
-#include "InventorySample.h"
+#include "InventorySampleModule.h"
 #include "InventoryUtils.h"
 #include "ItemObject.h"
 #include "NonReplicatedLoadoutObject.h"

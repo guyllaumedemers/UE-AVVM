@@ -28,7 +28,7 @@ public class TeamSample : ModuleRules
 		bUseUnity = false;
 		SetupIrisSupport(Target);
 
-		if (Target.bBuildEditor)
+		if (Target.WithAutomationTests)
 		{
 			PublicDependencyModuleNames.AddRange(
 				new string[]

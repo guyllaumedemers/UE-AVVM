@@ -20,7 +20,7 @@
 #include "AVVMTickScheduler.h"
 
 #include "AVVMDoesSupportManualTicking.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMTickSchedulerRule.h"
 #include "AVVMUtils.h"
 #include "AVVMWorldSetting.h"

@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMNotificationSubsystem.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "Engine/World.h"
 

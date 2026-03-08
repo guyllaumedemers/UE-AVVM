@@ -17,9 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "TransactionSampleModule.h"
 
-#include "TeamSample.h"
-
-DEFINE_LOG_CATEGORY(LogTeamSample);
+DEFINE_LOG_CATEGORY(LogTransactionSample);
 	
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, TeamSample)
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, TransactionSample)

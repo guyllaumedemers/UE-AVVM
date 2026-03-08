@@ -20,7 +20,7 @@
 #include "Ability/AVVMAbilityInputComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
 #include "EnhancedInputComponent.h"

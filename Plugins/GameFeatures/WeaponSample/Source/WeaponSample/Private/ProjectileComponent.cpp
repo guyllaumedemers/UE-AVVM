@@ -23,7 +23,7 @@
 #include "AVVMNotificationSubsystem.h"
 #include "NonReplicatedProjectileActor.h"
 #include "ProjectileManagerSubsystem.h"
-#include "WeaponSample.h"
+#include "WeaponSampleModule.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 

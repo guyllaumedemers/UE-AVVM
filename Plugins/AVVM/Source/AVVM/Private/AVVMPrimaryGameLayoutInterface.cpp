@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMPrimaryGameLayoutInterface.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "PrimaryGameLayout.h"

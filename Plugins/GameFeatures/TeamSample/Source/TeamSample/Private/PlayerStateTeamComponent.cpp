@@ -23,7 +23,7 @@
 #include "DoesTeamProviderSupportExecution.h"
 #include "NativeGameplayTags.h"
 #include "TeamObject.h"
-#include "TeamSample.h"
+#include "TeamSampleModule.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"

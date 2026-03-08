@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Cheats/AVVMGameplayPlayerStateCheatExtension.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMGameplaySampleSettings.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "AVVMUtils.h"

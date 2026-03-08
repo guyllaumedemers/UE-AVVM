@@ -24,7 +24,7 @@
 #include "AVVMWorldSetting.h"
 #include "Batchable.h"
 #include "BatchingRule.h"
-#include "BatchSample.h"
+#include "BatchSampleModule.h"
 #include "BatchSettings.h"
 #include "NativeGameplayTags.h"
 #include "TimerManager.h"

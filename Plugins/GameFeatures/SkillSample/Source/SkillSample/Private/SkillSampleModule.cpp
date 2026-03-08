@@ -17,12 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVM.h"
+#include "SkillSampleModule.h"
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVM)
-
-// @gdemers define global LOG category
-DEFINE_LOG_CATEGORY(LogUI);
-
-// @gdemers define global LLM tag
-AVVM_API LLM_DEFINE_TAG(AVVMTag);
+DEFINE_LOG_CATEGORY(LogSkillSample);
+	
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, SkillSample)

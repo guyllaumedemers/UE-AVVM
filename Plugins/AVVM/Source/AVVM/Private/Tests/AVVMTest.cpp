@@ -26,7 +26,7 @@
 #include "NativeGameplayTags.h"
 #include "Archetypes/AVVMPresenter.h"
 
-#if WITH_EDITOR && WITH_AUTOMATION_TESTS
+#if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationEditorCommon.h"
 #endif
 

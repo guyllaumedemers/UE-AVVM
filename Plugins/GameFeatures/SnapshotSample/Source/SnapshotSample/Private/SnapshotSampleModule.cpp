@@ -1,15 +1,15 @@
 ﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "DamageSample.h"
+#include "SnapshotSampleModule.h"
 
-#define LOCTEXT_NAMESPACE "FDamageSampleModule"
+#define LOCTEXT_NAMESPACE "FSnapshotSampleModule"
 
-void FDamageSampleModule::StartupModule()
+void FSnapshotSampleModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 }
 
-void FDamageSampleModule::ShutdownModule()
+void FSnapshotSampleModule::ShutdownModule()
 {
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
@@ -17,4 +17,4 @@ void FDamageSampleModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FDamageSampleModule, DamageSample)
+IMPLEMENT_MODULE(FSnapshotSampleModule, SnapshotSample)

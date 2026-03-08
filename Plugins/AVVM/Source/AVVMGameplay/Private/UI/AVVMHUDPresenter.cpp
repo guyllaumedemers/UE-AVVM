@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "UI/AVVMHUDPresenter.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"

@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMAutomatedTestActor.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMComponent.h"
 #include "Archetypes/AVVMPresenter.h"
 
@@ -51,7 +51,7 @@ void AAVVMAutomatedTestActor::OnInvokeCallback(const TInstancedStruct<FAVVMNotif
 UAVVMPresenter* UAVVMAutomatedTestUtils::GetSetPresenter(const TSubclassOf<UAVVMPresenter>& PresenterClass,
                                                          AAVVMAutomatedTestActor* Actor)
 {
-#if WITH_EDITOR && WITH_AUTOMATION_TESTS
+#if WITH_AUTOMATION_TESTS
 	if (!IsValid(Actor))
 	{
 		return nullptr;

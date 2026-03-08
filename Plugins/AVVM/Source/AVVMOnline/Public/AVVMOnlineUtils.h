@@ -22,7 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnline.h"
+#include "AVVMOnlineModule.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMUtils.h"
 #include "Kismet/BlueprintFunctionLibrary.h"

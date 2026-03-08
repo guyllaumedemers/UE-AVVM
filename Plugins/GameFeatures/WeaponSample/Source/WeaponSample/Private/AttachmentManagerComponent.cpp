@@ -22,7 +22,7 @@
 #include "AttachmentActor.h"
 #include "AVVMGameplayUtils.h"
 #include "TriggeringActor.h"
-#include "WeaponSample.h"
+#include "WeaponSampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"

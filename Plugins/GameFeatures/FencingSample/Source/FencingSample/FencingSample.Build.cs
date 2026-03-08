@@ -27,7 +27,7 @@ public class FencingSample : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 
-		if (Target.bBuildEditor)
+		if (Target.WithAutomationTests)
 		{
 			PublicDependencyModuleNames.AddRange(
 				new string[]

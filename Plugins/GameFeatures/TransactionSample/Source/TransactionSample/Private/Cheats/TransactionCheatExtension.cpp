@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Cheats/TransactionCheatExtension.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "GameStateTransactionHistory.h"
 #include "TransactionFactoryUtils.h"
 #include "GameFramework/PlayerState.h"

@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Resources/AVVMResourceManagerComponent.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
 #include "DataRegistrySubsystem.h"

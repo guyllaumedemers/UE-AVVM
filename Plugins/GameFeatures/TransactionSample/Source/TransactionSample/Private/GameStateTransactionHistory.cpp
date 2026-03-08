@@ -19,12 +19,12 @@
 //SOFTWARE.
 #include "GameStateTransactionHistory.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMNotificationSubsystem.h"
 #include "NativeGameplayTags.h"
 #include "Transaction.h"
-#include "TransactionSample.h"
+#include "TransactionSampleModule.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"

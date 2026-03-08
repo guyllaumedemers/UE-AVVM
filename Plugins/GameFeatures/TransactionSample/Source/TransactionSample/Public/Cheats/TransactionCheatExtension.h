@@ -25,7 +25,7 @@
 #include "GameFramework/CheatManager.h"
 
 #ifdef UE_ENABLE_AVVM_DEBUGGER
-#include "AVVMDebugger.h"
+#include "AVVMDebuggerModule.h"
 #endif
 
 #include "TransactionCheatExtension.generated.h"

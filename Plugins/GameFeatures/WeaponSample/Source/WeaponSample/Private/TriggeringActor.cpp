@@ -23,7 +23,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMUtils.h"
-#include "WeaponSample.h"
+#include "WeaponSampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbility.h"

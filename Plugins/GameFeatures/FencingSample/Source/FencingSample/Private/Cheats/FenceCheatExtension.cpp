@@ -20,7 +20,7 @@
 #include "Cheats/FenceCheatExtension.h"
 
 #include "ActorFenceComponent.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "FenceManagerSubsystem.h"
 
 #if WITH_AVVM_DEBUGGER

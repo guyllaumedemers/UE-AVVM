@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMSocketTargetingHelper.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "GameFramework/Actor.h"
 

@@ -20,7 +20,7 @@
 #include "ActorInteractionComponent.h"
 
 #include "ActorInteractionImpl.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMTagUtils.h"

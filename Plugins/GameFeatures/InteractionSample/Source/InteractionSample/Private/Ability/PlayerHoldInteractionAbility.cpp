@@ -21,7 +21,7 @@
 
 #include "ActorInteractionComponent.h"
 #include "ActorInteractionImpl.h"
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "Ability/AVVMAbilityTask_TickUntil.h"
 #include "Data/InteractionExecutionRequirements.h"

@@ -20,7 +20,7 @@
 #include "Abilities/SellItemAbility.h"
 
 #include "AVVMGameplayUtils.h"
-#include "InventorySample.h"
+#include "InventorySampleModule.h"
 #include "GameFramework/PlayerController.h"
 
 void USellItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,

@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Net/AVVMNetSynchronizationManager.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMUtils.h"
 #include "Engine/World.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"

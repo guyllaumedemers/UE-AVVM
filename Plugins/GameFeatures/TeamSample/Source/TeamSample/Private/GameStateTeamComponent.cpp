@@ -27,7 +27,7 @@
 #include "NativeGameplayTags.h"
 #include "TeamObject.h"
 #include "TeamRule.h"
-#include "TeamSample.h"
+#include "TeamSampleModule.h"
 #include "TeamSettings.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/StreamableManager.h"

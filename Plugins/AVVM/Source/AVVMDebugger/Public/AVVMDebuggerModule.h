@@ -26,7 +26,7 @@
 #include "Modules/ModuleInterface.h"
 #include "UObject/Interface.h"
 
-#include "AVVMDebugger.generated.h"
+#include "AVVMDebuggerModule.generated.h"
 
 class UAVVMDebuggerInputHandler;
 class UGameInstance;

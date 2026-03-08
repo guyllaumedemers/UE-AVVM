@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMReplicatedTagComponent.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"

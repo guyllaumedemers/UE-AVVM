@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMUtils.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "CommonUserWidget.h"
 #include "MVVMSubsystem.h"
 #include "Engine/GameInstance.h"

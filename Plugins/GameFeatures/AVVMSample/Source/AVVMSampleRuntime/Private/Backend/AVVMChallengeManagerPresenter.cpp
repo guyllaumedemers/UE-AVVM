@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMChallengeManagerPresenter.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineUtils.h"

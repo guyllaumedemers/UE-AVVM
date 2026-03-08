@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Backend/AVVMPlayerProfilePresenter.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineUtils.h"
 #include "AVVMUtils.h"

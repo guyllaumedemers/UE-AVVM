@@ -18,6 +18,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#include "FencingSample.h"
+#include "AVVMToolkitModule.h"
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, FencingSample)
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMToolkit)

@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "GameplayTagContainer.h"
 #include "MVVMViewModelBase.h"
 

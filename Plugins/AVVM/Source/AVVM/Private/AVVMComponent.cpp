@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMComponent.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "GameFramework/Actor.h"
 

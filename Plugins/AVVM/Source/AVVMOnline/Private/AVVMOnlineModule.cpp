@@ -18,7 +18,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#include "AVVMOnline.h"
+#include "AVVMOnlineModule.h"
 
 #include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMOnlineSettings.h"

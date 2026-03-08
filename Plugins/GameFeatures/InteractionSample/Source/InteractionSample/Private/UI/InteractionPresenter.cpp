@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "UI/InteractionPresenter.h"
 
-#include "AVVM.h"
+#include "AVVMModule.h"
 #include "AVVMGameStateHandshakeComponent.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMUtils.h"

@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Ability/AVVMAbilitySystemComponent.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"

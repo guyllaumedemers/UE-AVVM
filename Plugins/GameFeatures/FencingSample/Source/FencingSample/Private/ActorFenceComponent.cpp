@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "ActorFenceComponent.h"
 
-#include "AVVMGameplay.h"
+#include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "FenceManagerSubsystem.h"

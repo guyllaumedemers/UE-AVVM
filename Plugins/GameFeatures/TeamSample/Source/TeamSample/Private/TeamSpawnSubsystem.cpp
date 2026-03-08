@@ -22,7 +22,7 @@
 #include "AVVMGameplayUtils.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
-#include "TeamSample.h"
+#include "TeamSampleModule.h"
 #include "TeamSettings.h"
 #include "TeamSpawnRule.h"
 #include "TeamStartComponent.h"

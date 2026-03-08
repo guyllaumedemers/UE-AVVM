@@ -24,7 +24,7 @@
 #include "Modules/ModuleManager.h"
 #include "UObject/Interface.h"
 
-#include "AVVM.generated.h"
+#include "AVVMModule.generated.h"
 
 AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
 
