@@ -34,7 +34,7 @@ void UFenceCheatExtension::AddedToCheatManager_Implementation()
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Adding ##%s."),
+	                TEXT("Adding %s."),
 	                *GetNameSafe(UFenceCheatExtension::StaticClass()));
 
 	bHasFencesChanged = true;
@@ -49,7 +49,7 @@ void UFenceCheatExtension::RemovedFromCheatManager_Implementation()
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Removing ##%s."),
+	                TEXT("Removing %s."),
 	                *GetNameSafe(UFenceCheatExtension::StaticClass()));
 
 	UFenceManagerSubsystem* NewFenceSubsystem = UFenceManagerSubsystem::Get(this);

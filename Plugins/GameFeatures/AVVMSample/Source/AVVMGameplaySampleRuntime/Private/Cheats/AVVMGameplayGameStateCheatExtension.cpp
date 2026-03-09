@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Cheats/AVVMGameplayGameStateCheatExtension.h"
 
+#include "AVVMLogger.h"
 #include "AVVMModule.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "AVVMToolkitUtils.h"
@@ -32,7 +33,11 @@
 
 void UAVVMGameplayGameStateCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Adding %s."),
+					*GetNameSafe(UAVVMGameplayGameStateCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
@@ -41,7 +46,11 @@ void UAVVMGameplayGameStateCheatExtension::AddedToCheatManager_Implementation()
 
 void UAVVMGameplayGameStateCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Removing %s."),
+					*GetNameSafe(UAVVMGameplayGameStateCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);

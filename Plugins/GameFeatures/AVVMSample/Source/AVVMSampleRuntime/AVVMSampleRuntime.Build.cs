@@ -55,7 +55,6 @@ public class AVVMSampleRuntime : ModuleRules
 				"AVVM",
 				"AVVMGameplay",
 				"AVVMOnline",
-				"AVVMToolkit",
 				"Core",
 				"CoreUObject",
 				"DeveloperSettings",
@@ -71,6 +70,7 @@ public class AVVMSampleRuntime : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMToolkit",
 				"CommonUI",
 				"DataRegistry",
 			});

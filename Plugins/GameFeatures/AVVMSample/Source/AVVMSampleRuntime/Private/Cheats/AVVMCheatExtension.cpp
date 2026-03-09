@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "Cheats/AVVMCheatExtension.h"
 
+#include "AVVMGameplayModule.h"
+#include "AVVMLogger.h"
 #include "AVVMModule.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMSettings.h"
@@ -41,7 +43,11 @@ TRACE_DECLARE_INT_COUNTER(RegistryRebuildCounter, TEXT("Registry Rebuild Counter
 
 void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Adding %s."),
+					*GetNameSafe(UAVVMCheatExtension::StaticClass()));
 
 	// @gdemers hard reset between PIE sessions as the CheatExtension wasnt in memory
 	// when editor changed was applied! for Runtime, we listen to the Module event so if a GFP is adding data registries or tags, we can process.
@@ -64,7 +70,11 @@ void UAVVMCheatExtension::AddedToCheatManager_Implementation()
 
 void UAVVMCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Removing %s."),
+					*GetNameSafe(UAVVMCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
@@ -87,21 +97,18 @@ void UAVVMCheatExtension::NotifyChannelWithPayload(const FString& TagChannel,
 {
 	if (!ensureAlways(FGameplayTag::IsValidGameplayTagString(TagChannel)))
 	{
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Invalid Tag Channel!"), *GetName(), *TagChannel);
 		return;
 	}
 
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(DataRegistrySubsystem))
 	{
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Failed!"), *GetName(), *TagChannel);
 		return;
 	}
 
 	const auto SearchRegistryId = FDataRegistryId{UAVVMSettings::GetCheatRegistryType(), FName(PayloadRegistryId)};
 	if (!ensureAlways(DataRegistrySubsystem->IsValidDataRegistryId(SearchRegistryId)))
 	{
-		UE_LOG(LogUI, Log, TEXT("Resource.Acquisition.%s. Failed!"), *SearchRegistryId.ToString());
 		return;
 	}
 
@@ -110,12 +117,10 @@ void UAVVMCheatExtension::NotifyChannelWithPayload(const FString& TagChannel,
 	const TSharedPtr<FStreamableHandle>* SearchResult = StreamableHandles.Find(SearchRegistryId);
 	if (SearchResult != nullptr)
 	{
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *TagChannel);
 		UE_AVVM_NOTIFY(this, ChannelTag, nullptr, GetPayload(*SearchResult));
 	}
 	else
 	{
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. In-progress..."), *GetName(), *TagChannel);
 		PushRequest({SearchRegistryId, ChannelTag});
 
 		FDataRegistryItemAcquiredCallback Callback;
@@ -129,11 +134,9 @@ void UAVVMCheatExtension::NotifyChannelNoPayload(const FString& TagChannel)
 {
 	if (!ensureAlways(FGameplayTag::IsValidGameplayTagString(TagChannel)))
 	{
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Invalid Tag Channel!"), *GetName(), *TagChannel);
 		return;
 	}
 
-	UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(), *TagChannel);
 	UE_AVVM_NOTIFY(this, FGameplayTag::RequestGameplayTag(FName(TagChannel)), nullptr, FAVVMNotificationPayload::Empty);
 }
 
@@ -196,7 +199,6 @@ void UAVVMCheatExtension::OnRegistryIdAcquired(const FDataRegistryAcquireResult&
 	const bool bIsFullyLoaded = Result.Status == EDataRegistryAcquireStatus::AcquireFinished;
 	if (!bIsFullyLoaded)
 	{
-		UE_LOG(LogUI, Log, TEXT("Resource.Acquisition.%s. Failed!"), *Result.ItemId.ToString());
 		return;
 	}
 
@@ -232,8 +234,6 @@ void UAVVMCheatExtension::OnSoftObjectAcquired()
 			continue;
 		}
 
-		UE_LOG(LogUI, Log, TEXT("%s invoked... Notify.Channel.%s. Progress Complete!"), *GetName(),
-		       *LookAtChannelTag.ToString());
 		UE_AVVM_NOTIFY(this, LookAtChannelTag, nullptr, GetPayload(*StreamableHandle));
 
 		// @gdemers remove already broadcast request
@@ -244,31 +244,26 @@ void UAVVMCheatExtension::OnSoftObjectAcquired()
 void UAVVMCheatExtension::AddStreamableHandle(const FDataRegistryId& RegistryId,
                                               const TSharedPtr<FStreamableHandle> StreamableHandle)
 {
-	UE_LOG(LogUI, Log, TEXT("AddStreamableHandle."));
 	StreamableHandles.Add(RegistryId, StreamableHandle);
 }
 
 void UAVVMCheatExtension::ClearAllStreamableHandle()
 {
-	UE_LOG(LogUI, Log, TEXT("ClearAllStreamableHandle."));
 	StreamableHandles.Empty();
 }
 
 void UAVVMCheatExtension::PushRequest(const TPair<FDataRegistryId, FGameplayTag>& Request)
 {
-	UE_LOG(LogUI, Log, TEXT("PushRequest."));
 	NotificationRequests.Push(Request);
 }
 
 void UAVVMCheatExtension::PopRequest()
 {
-	UE_LOG(LogUI, Log, TEXT("PopRequest."));
 	NotificationRequests.Pop();
 }
 
 void UAVVMCheatExtension::ClearAllRequests()
 {
-	UE_LOG(LogUI, Log, TEXT("ClearAllRequests."));
 	NotificationRequests.Empty();
 }
 

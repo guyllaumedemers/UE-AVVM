@@ -37,7 +37,7 @@ void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Adding ##%s."),
+	                TEXT("Adding %s."),
 	                *GetNameSafe(UTransactionCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
@@ -50,7 +50,7 @@ void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 	AVVM_LOGGER_LOG(LogGameplay,
 					nullptr,
 					this,
-					TEXT("Removing ##%s."),
+					TEXT("Removing %s."),
 					*GetNameSafe(UTransactionCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
@@ -63,7 +63,7 @@ void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionT
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Remove All Transactions of type ##%s from player Index ##%d."),
+	                TEXT("Remove All Transactions of type %s from player Index %d."),
 	                EnumToString(NewType),
 	                PlayerIndex);
 
@@ -76,7 +76,7 @@ void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Remove All Transactions from player Index ##%d."),
+	                TEXT("Remove All Transactions from player Index %d."),
 	                PlayerIndex);
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
@@ -88,7 +88,7 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Add Transaction of type ##%s to player Index ##%d."),
+	                TEXT("Add Transaction of type %s to player Index %d."),
 	                EnumToString(NewType),
 	                PlayerIndex);
 
@@ -108,7 +108,7 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 	AVVM_LOGGER_LOG(LogGameplay,
 	                nullptr,
 	                this,
-	                TEXT("Print All Transactions from Player Index ##%d."),
+	                TEXT("Print All Transactions from Player Index %d."),
 	                PlayerIndex);
 
 	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
@@ -128,7 +128,7 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 		AVVM_LOGGER_LOG(LogGameplay,
 		                nullptr,
 		                this,
-		                TEXT("##%s"),
+		                TEXT("%s"),
 		                IsValid(Transaction) ? *Transaction->ToString() : TEXT(""));
 	}
 }

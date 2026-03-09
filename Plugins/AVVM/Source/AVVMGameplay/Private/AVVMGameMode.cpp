@@ -215,13 +215,13 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 
 	if (!WorldSetting.IsValid())
 	{
-		return nullptr;
+		return Super::FindPlayerStart_Implementation(Player, IncomingName);
 	}
 
 	const auto* SpawnPointRule = Cast<UAVVMSpawnPointRule>(WorldSetting->GetRule(RuleTagAggregator.SpawnPointSelectionTag));
 	if (!IsValid(SpawnPointRule))
 	{
-		return nullptr;
+		return Super::FindPlayerStart_Implementation(Player, IncomingName);
 	}
 
 	AActor* SpawnPoint = nullptr;

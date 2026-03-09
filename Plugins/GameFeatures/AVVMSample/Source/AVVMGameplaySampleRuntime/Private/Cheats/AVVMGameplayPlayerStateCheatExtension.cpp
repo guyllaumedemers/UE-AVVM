@@ -21,6 +21,7 @@
 
 #include "AVVMModule.h"
 #include "AVVMGameplaySampleSettings.h"
+#include "AVVMLogger.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "AVVMToolkitUtils.h"
 #include "GameFramework/Pawn.h"
@@ -34,7 +35,11 @@
 
 void UAVVMGameplayPlayerStateCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Registering %s"), *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Adding %s."),
+					*GetNameSafe(UAVVMGameplayPlayerStateCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
@@ -43,7 +48,11 @@ void UAVVMGameplayPlayerStateCheatExtension::AddedToCheatManager_Implementation(
 
 void UAVVMGameplayPlayerStateCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogUI, Log, TEXT("Unregistering %s"), *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Removing %s."),
+					*GetNameSafe(UAVVMGameplayPlayerStateCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
