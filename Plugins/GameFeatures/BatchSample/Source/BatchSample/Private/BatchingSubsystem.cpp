@@ -198,7 +198,7 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 	AVVM_LOGGER_LOG(LogBatchSample,
 	                Actor,
 	                Actor,
-	                TEXT("Has been unregistered from Batch Index ##%d."),
+	                TEXT("Has been unregistered from Batch Index %d."),
 	                Batchable->GetOwningBatchIndex());
 
 	const int32 BatchIndex = Batchable->GetOwningBatchIndex();
@@ -247,7 +247,7 @@ void UBatchingSubsystem::Register(AActor* Actor)
 		AVVM_LOGGER_LOG(LogBatchSample,
 		                Actor,
 		                Actor,
-		                TEXT("Has been registered with Batch Index ##%d."),
+		                TEXT("Has been registered with Batch Index %d."),
 		                Batchable->GetOwningBatchIndex());
 	}
 }
@@ -363,7 +363,7 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 		AVVM_LOGGER_LOG(LogBatchSample,
 		                Actor,
 		                Actor,
-		                TEXT("Is being destroyed with Batch Index ##%d."),
+		                TEXT("Is being destroyed with Batch Index %d."),
 		                Batchable->GetOwningBatchIndex());
 
 		(*Iterator)->Destroy();
