@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMPrimaryGameLayoutInterface.h"
 
+#include "AVVMLogger.h"
 #include "AVVMModule.h"
 #include "AVVMToolkitUtils.h"
 #include "CommonActivatableWidget.h"
@@ -78,6 +79,12 @@ void IAVVMPrimaryGameLayoutInterface::PopContentFromPrimaryGameLayout(ULocalPlay
 	{
 		GameLayout->FindAndRemoveWidgetFromLayer(Target);
 	}
+
+	AVVM_LOGGER_LOG(LogUI,
+	                nullptr,
+	                Target,
+	                TEXT("Stop presenting %s."),
+	                *GetNameSafe(Target));
 }
 
 void IAVVMPrimaryGameLayoutInterface::OnPushActivatableWidgetCompleted(EAsyncWidgetLayerState State,
@@ -88,7 +95,12 @@ void IAVVMPrimaryGameLayoutInterface::OnPushActivatableWidgetCompleted(EAsyncWid
 		return;
 	}
 
-	UE_LOG(LogUI, Log, TEXT("Presenting %s"), *ActivatableWidget->GetName());
 	ActivatableView = ActivatableWidget;
 	BindViewModel();
+
+	AVVM_LOGGER_LOG(LogUI,
+	                nullptr,
+	                ActivatableWidget,
+	                TEXT("Start presenting %s."),
+	                *GetNameSafe(ActivatableWidget));
 }

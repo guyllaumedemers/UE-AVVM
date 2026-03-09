@@ -57,7 +57,7 @@ void UAVVMAbilitySystemComponent::BeginPlay()
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Adding ##%s."),
+	                TEXT("Adding %s."),
 	                *GetNameSafe(UAVVMAbilitySystemComponent::StaticClass()));
 }
 
@@ -83,7 +83,7 @@ void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Removing ##%s."),
+	                TEXT("Removing %s."),
 	                *GetNameSafe(UAVVMAbilitySystemComponent::StaticClass()));
 
 	OwningOuter.Reset();
@@ -109,7 +109,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 			AVVM_LOGGER_LOG(LogGameplay,
 			                Outer,
 			                Outer,
-			                TEXT("Failed to Grant Ability ##%s due to Blocking Tags."),
+			                TEXT("Failed to Grant Ability %s due to Blocking Tags."),
 			                *GetNameSafe(AbilityAsset));
 
 			continue;
@@ -118,7 +118,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("New Ability Recorded ##%s for deferred Granting."),
+		                TEXT("New Ability Recorded %s for deferred Granting."),
 		                *GetNameSafe(AbilityAsset));
 
 		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
@@ -261,7 +261,7 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("Granting New Ability ##%s."),
+		                TEXT("Granting New Ability %s."),
 		                *GetNameSafe(GameplayAbilityClass));
 
 		const auto GameplayAbilitySpec = FGameplayAbilitySpec
@@ -289,6 +289,6 @@ void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool Tag
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Modifying Tag ##%s."),
+	                TEXT("Modifying Tag %s."),
 	                *Tag.ToString());
 }

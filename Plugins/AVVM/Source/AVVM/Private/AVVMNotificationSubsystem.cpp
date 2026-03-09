@@ -221,6 +221,13 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Unregister(con
 
 	SearchResult->Unregister(Target);
 
+	AVVM_LOGGER_LOG(LogUI,
+	                Target,
+	                Target,
+	                TEXT("%s unregister from channel %s."),
+	                *GetNameSafe(Target),
+	                *ChannelTag.ToString());
+
 	if (SearchResult->IsEmpty())
 	{
 		TagToObservers.Remove(ChannelTag);
@@ -233,6 +240,13 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Register(const
 {
 	FAVVMObservers& SearchResult = TagToObservers.FindOrAdd(ChannelTag);
 	SearchResult.Register(Target, Callback);
+
+	AVVM_LOGGER_LOG(LogUI,
+	                Target,
+	                Target,
+	                TEXT("%s register to channel %s."),
+	                *GetNameSafe(Target),
+	                *ChannelTag.ToString());
 }
 
 void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(const FAVVMNotificationContextArgs& NotificationContext)

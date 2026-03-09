@@ -67,7 +67,7 @@ void UGameStateTransactionHistory::BeginPlay()
 	AVVM_LOGGER_LOG(LogTransactionSample,
 	                Outer,
 	                Outer,
-	                TEXT("Adding ##%s."),
+	                TEXT("Adding %s."),
 	                *GetNameSafe(UGameStateTransactionHistory::StaticClass()));
 
 	OwningOuter = Outer;
@@ -93,7 +93,7 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 	AVVM_LOGGER_LOG(LogTransactionSample,
 					Outer,
 					Outer,
-					TEXT("Removing ##%s."),
+					TEXT("Removing %s."),
 					*GetNameSafe(UGameStateTransactionHistory::StaticClass()));
 }
 
@@ -181,7 +181,7 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 		AVVM_LOGGER_LOG(LogTransactionSample,
 		                Outer,
 		                Outer,
-		                TEXT("Creating new Record ##%s."),
+		                TEXT("Creating new Record %s."),
 		                IsValid(Transaction) ? *Transaction->ToString() : TEXT(""));
 	}
 
@@ -211,7 +211,7 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 		AVVM_LOGGER_LOG(LogTransactionSample,
 		                Outer,
 		                Outer,
-		                TEXT("Remove all transactions of type ##%s from ##%s."),
+		                TEXT("Remove all transactions of type %s from %s."),
 		                EnumToString(NewTransactionType),
 		                *GetNameSafe(NewTarget));
 	}
@@ -241,7 +241,7 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 		AVVM_LOGGER_LOG(LogTransactionSample,
 		                Outer,
 		                Outer,
-		                TEXT("Remove all transactions from ##%s."),
+		                TEXT("Remove all transactions from %s."),
 		                *GetNameSafe(NewTarget));
 	}
 
@@ -296,7 +296,7 @@ void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 	AVVM_LOGGER_LOG(LogTransactionSample,
 	                Outer,
 	                Outer,
-	                TEXT("New Transaction Detected! \r\n Value: ##%s."),
+	                TEXT("New Transaction Detected! \r\n Value: %s."),
 	                IsValid(NewTransaction) ? *NewTransaction->ToString() : TEXT(""));
 
 	FAVVMNotificationContextArgs ContextArgs;

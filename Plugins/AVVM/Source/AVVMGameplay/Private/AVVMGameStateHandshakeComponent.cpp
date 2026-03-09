@@ -52,7 +52,7 @@ void UAVVMGameStateHandshakeComponent::BeginPlay()
 	AVVM_LOGGER_LOG(LogGameplay,
 					Outer,
 					Outer,
-					TEXT("Adding ##%s."),
+					TEXT("Adding %s."),
 					*GetNameSafe(UAVVMGameStateHandshakeComponent::StaticClass()));
 
 	OwningOuter = Outer;
@@ -71,7 +71,7 @@ void UAVVMGameStateHandshakeComponent::EndPlay(const EEndPlayReason::Type EndPla
 	AVVM_LOGGER_LOG(LogGameplay,
 					Outer,
 					Outer,
-					TEXT("Removing ##%s."),
+					TEXT("Removing %s."),
 					*GetNameSafe(UAVVMGameStateHandshakeComponent::StaticClass()));
 
 	OwningOuter.Reset();

@@ -138,7 +138,7 @@ void UAVVMAbilityInputComponent::UnRegisterInputMappingContext(UEnhancedInputLoc
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Removing Input Mapping Context ##%s."),
+	                TEXT("Removing Input Mapping Context %s."),
 	                *GetNameSafe(InputMappingContext));
 }
 
@@ -165,7 +165,7 @@ void UAVVMAbilityInputComponent::RegisterInputMappingContext(UEnhancedInputLocal
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Adding Input Mapping Context ##%s."),
+	                TEXT("Adding Input Mapping Context %s."),
 	                *GetNameSafe(InputMappingContext));
 }
 
@@ -196,7 +196,7 @@ void UAVVMAbilityInputComponent::UnBindInputActions(UEnhancedInputComponent* Enh
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("UnRegistering Old Input Action ##%s and Tag ##%s."),
+		                TEXT("UnRegistering Old Input Action %s and Tag %s."),
 		                *GetNameSafe(InputAction),
 		                *InputAction->AbilityTriggerTag.ToString());
 
@@ -236,7 +236,7 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("Registering New Input Action ##%s and Tag ##%s."),
+		                TEXT("Registering New Input Action %s and Tag %s."),
 		                *GetNameSafe(InputAction),
 		                *OutTag.ToString());
 

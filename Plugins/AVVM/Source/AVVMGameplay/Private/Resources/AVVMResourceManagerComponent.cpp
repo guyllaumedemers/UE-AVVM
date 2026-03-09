@@ -151,7 +151,7 @@ void UAVVMResourceManagerComponent::BeginPlay()
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Adding ##%s."),
+	                TEXT("Adding %s."),
 	                *GetNameSafe(UAVVMResourceManagerComponent::StaticClass()));
 
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_InstanceCounter);
@@ -184,7 +184,7 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Removing ##%s."),
+	                TEXT("Removing %s."),
 	                *GetNameSafe(UAVVMResourceManagerComponent::StaticClass()));
 
 	LLM_SCOPE_BYTAG(AVVMTag);
@@ -205,7 +205,7 @@ void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& N
 	AVVM_LOGGER_LOG(LogGameplay,
 	                OwningOuter.Get(),
 	                OwningOuter.Get(),
-	                TEXT("Requesting Resource Acquisition for ##%s."),
+	                TEXT("Requesting Resource Acquisition for %s."),
 	                *NewRegistryId.ToString());
 
 	const auto OnDataAcquiredCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, OnRequestCompleteCallback);
@@ -228,7 +228,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("Resource Acquisition for ##%s Failed."),
+		                TEXT("Resource Acquisition for %s Failed."),
 		                *Result.ItemId.ToString());
 
 		OnRequestCompleteCallback.ExecuteIfBound();
@@ -261,7 +261,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		AVVM_LOGGER_LOG(LogGameplay,
 		                NewOuter,
 		                NewOuter,
-		                TEXT("Making call to UAssetManager to load resource object for ##%s."),
+		                TEXT("Making call to UAssetManager to load resource object for %s."),
 		                *NewRegistryId.ToString());
 
 		FStreamableDelegate CompletionCallback;
@@ -286,7 +286,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("UAssetManager resource acquisition request for ##%s was Deferred."),
+		                TEXT("UAssetManager resource acquisition request for %s was Deferred."),
 		                *Result.ItemId.ToString());
 	}
 }
@@ -321,7 +321,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
-	                TEXT("Is Resource Manager Done Acquiring Resources. ##%s"),
+	                TEXT("Is Resource Manager Done Acquiring Resources. %s"),
 	                bIsDoneAcquiringResources ? TEXT("True") : TEXT("False"));
 }
 
