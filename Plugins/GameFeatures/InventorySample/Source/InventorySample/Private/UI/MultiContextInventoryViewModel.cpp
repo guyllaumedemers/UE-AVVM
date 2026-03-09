@@ -20,7 +20,7 @@
 #include "UI/MultiContextInventoryViewModel.h"
 
 #include "ActorInventoryComponent.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Engine/LocalPlayer.h"
 #include "UI/SingleContextInventoryViewModel.h"
@@ -38,7 +38,7 @@ void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNot
 
 	if (IsValid(InstigatorInventoryComponent))
 	{
-		ULocalPlayer* LocalPlayer = UAVVMUtils::GetTargetLocalPlayer(Instigator);
+		ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetTargetLocalPlayer(Instigator);
 		auto* NewOuter = IsValid(LocalPlayer) ? Cast<UObject>(LocalPlayer) : Cast<UObject>(this);
 
 		auto* NewSrc = USingleContextInventoryViewModel::Make(InstigatorInventoryComponent->GetItems(), NewOuter);
@@ -50,7 +50,7 @@ void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNot
 
 	if (IsValid(Target))
 	{
-		ULocalPlayer* LocalPlayer = UAVVMUtils::GetTargetLocalPlayer(Instigator);
+		ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetTargetLocalPlayer(Instigator);
 		auto* NewOuter = IsValid(LocalPlayer) ? Cast<UObject>(LocalPlayer) : Cast<UObject>(this);
 
 		auto* NewDest = USingleContextInventoryViewModel::Make(TargetInventoryComponent->GetItems(), NewOuter);

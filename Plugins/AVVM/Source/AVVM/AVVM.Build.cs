@@ -54,6 +54,7 @@ public class AVVM : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMToolkit",
 				"CommonGame",
 				"CommonUI",
 				"UMG",

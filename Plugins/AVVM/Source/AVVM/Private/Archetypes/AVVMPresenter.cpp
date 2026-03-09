@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Archetypes/AVVMPresenter.h"
 
+#include "AVVMLogger.h"
 #include "AVVMModule.h"
 #include "AVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
@@ -27,7 +28,11 @@
 
 void UAVVMPresenter::SafeBeginPlay(const UWorld* World)
 {
-	UE_LOG(LogUI, Log, TEXT("Adding UAVVMPresenter::%s"), *GetClass()->GetName());
+	AVVM_LOGGER_LOG(LogUI,
+	                GetTypedOuter<AActor>(),
+	                this,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UAVVMPresenter::StaticClass()));
 
 	{
 		FAVVMPresenterContextArgs ContextArgs;
@@ -48,7 +53,11 @@ void UAVVMPresenter::SafeBeginPlay(const UWorld* World)
 
 void UAVVMPresenter::SafeEndPlay()
 {
-	UE_LOG(LogUI, Log, TEXT("Removing UAVVMPresenter::%s"), *GetClass()->GetName());
+	AVVM_LOGGER_LOG(LogUI,
+	                GetTypedOuter<AActor>(),
+	                this,
+					TEXT("Removing %s."),
+					*GetNameSafe(UAVVMPresenter::StaticClass()));
 
 	{
 		// @gdemers ensure cleanup during destroy sequence so our UI remains in a valid state!

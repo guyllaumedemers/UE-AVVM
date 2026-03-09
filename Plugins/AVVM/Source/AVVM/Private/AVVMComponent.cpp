@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMComponent.h"
 
+#include "AVVMLogger.h"
 #include "AVVMModule.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "GameFramework/Actor.h"
@@ -46,9 +47,13 @@ void UAVVMComponent::BeginPlay()
 		return;
 	}
 
-	const FString ActorName = *Outer->GetName();
-	UE_LOG(LogUI, Log, TEXT("Adding UAVVMComponent to Actor: %s"), *ActorName)
-	TRACE_BOOKMARK(TEXT("Presenter.Create, TypedOuter: %s"), *ActorName);
+	AVVM_LOGGER_LOG(LogUI,
+					Outer,
+					Outer,
+					TEXT("Adding %s."),
+					*GetNameSafe(UAVVMComponent::StaticClass()));
+
+	TRACE_BOOKMARK(TEXT("%hs line:%d. TypedOuter: %s"), __FUNCTION__, __LINE__, *GetNameSafe(Outer));
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 	// @gdemers presenters are created synchronously which makes it safe to broadcast events in the AActor::BeginPlay()
@@ -81,9 +86,13 @@ void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	const FString ActorName = Outer->GetName();
-	UE_LOG(LogUI, Log, TEXT("Removing UAVVMComponent to Actor: %s"), *ActorName)
-	TRACE_BOOKMARK(TEXT("Presenter.Destroy, TypedOuter: %s"), *ActorName);
+	AVVM_LOGGER_LOG(LogUI,
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UAVVMComponent::StaticClass()));
+
+	TRACE_BOOKMARK(TEXT("%hs line:%d. TypedOuter: %s"), __FUNCTION__, __LINE__, *GetNameSafe(Outer));
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 	for (TObjectPtr<UAVVMPresenter>& Presenter : TransientPresenters)

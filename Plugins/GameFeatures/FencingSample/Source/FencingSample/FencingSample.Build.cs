@@ -69,7 +69,8 @@ public class FencingSample : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMGameplay"
+				"AVVMGameplay",
+				"AVVMToolkit",
 			}
 		);
 	}

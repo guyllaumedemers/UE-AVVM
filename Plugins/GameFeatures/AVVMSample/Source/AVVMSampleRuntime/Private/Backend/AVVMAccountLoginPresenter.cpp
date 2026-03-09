@@ -19,11 +19,10 @@
 //SOFTWARE.
 #include "Backend/AVVMAccountLoginPresenter.h"
 
-#include "AVVMModule.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMViewModelFNameHelper.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMOnlinePlayer.h"
@@ -71,7 +70,7 @@ void UAVVMAccountLoginPresenter::BP_OnNotificationReceived_TryLogin(const TInsta
 
 void UAVVMAccountLoginPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(this);
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UAVVMAccountLoginPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -86,7 +85,7 @@ void UAVVMAccountLoginPresenter::StartPresenting()
 
 void UAVVMAccountLoginPresenter::StopPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(this);
 	if (IsValid(LocalPlayer))
 	{
 		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -96,7 +95,7 @@ void UAVVMAccountLoginPresenter::StopPresenting()
 void UAVVMAccountLoginPresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMToolkitUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }
 
 void UAVVMAccountLoginPresenter::OnLoginRequestCompleted(const bool bWasSuccess,

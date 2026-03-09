@@ -20,7 +20,7 @@
 #include "AVVMReplicatedTagComponent.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
@@ -55,12 +55,11 @@ void UAVVMReplicatedTagComponent::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAVVMReplicatedTagComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UAVVMReplicatedTagComponent::StaticClass()));
 
 	OwningOuter = Outer;
 
@@ -79,12 +78,11 @@ void UAVVMReplicatedTagComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAVVMReplicatedTagComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UAVVMReplicatedTagComponent::StaticClass()));
 
 	OwningOuter.Reset();
 }
@@ -104,12 +102,12 @@ void UAVVMReplicatedTagComponent::Append(const FGameplayTagContainer& NewTags)
 	Flags.AppendTags(NewTags);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, Flags, this);
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding Tag \"%s\". Active Tags \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
-	       *NewTags.ToString(),
-	       *Flags.ToString())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Adding Tag %s. Active Tags %s"),
+	                *NewTags.ToString(),
+	                *Flags.ToString());
 
 	OnRep_FlagsModified(OldTags);
 }
@@ -120,12 +118,12 @@ void UAVVMReplicatedTagComponent::Remove(const FGameplayTagContainer& NewTags)
 	Flags.RemoveTags(NewTags);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, Flags, this);
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing Tag \"%s\". Active Tags \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
-	       *NewTags.ToString(),
-	       *Flags.ToString())
+	AVVM_LOGGER_LOG(LogGameplay,
+					OwningOuter.Get(),
+					OwningOuter.Get(),
+					TEXT("Removing Tag %s. Active Tags %s"),
+					*NewTags.ToString(),
+					*Flags.ToString());
 
 	OnRep_FlagsModified(OldTags);
 }

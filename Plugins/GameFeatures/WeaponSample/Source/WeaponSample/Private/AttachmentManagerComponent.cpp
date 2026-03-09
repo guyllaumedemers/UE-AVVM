@@ -20,7 +20,7 @@
 #include "AttachmentManagerComponent.h"
 
 #include "AttachmentActor.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "TriggeringActor.h"
 #include "WeaponSampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -54,14 +54,13 @@ void UAttachmentManagerComponent::BeginPlay()
 		return;
 	}
 
-	OwningOuter = Outer;
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					Outer,
+					TEXT("Adding %s."),
+					*GetNameSafe(UAttachmentManagerComponent::StaticClass()));
 
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAttachmentManagerComponent::StaticClass()->GetName(),
-	       *Outer->GetName());
+	OwningOuter = Outer;
 }
 
 void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -76,12 +75,11 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 		return;
 	}
 
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAttachmentManagerComponent::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					Outer,
+					TEXT("Removing %s."),
+					*GetNameSafe(UAttachmentManagerComponent::StaticClass()));
 }
 
 void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapContextArgs& NewAttachmentSwapContext)
@@ -129,8 +127,6 @@ void UAttachmentManagerComponent::SetupAttachments(const TArray<UObject*>& NewRe
 		return;
 	}
 
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
-
 	TArray<FSoftObjectPath> DeferredItems;
 	TArray<FSoftObjectPath> DeferredItemsAttributeSet;
 	
@@ -142,11 +138,11 @@ void UAttachmentManagerComponent::SetupAttachments(const TArray<UObject*>& NewRe
 			continue;
 		}
 
-		UE_LOG(LogWeaponSample,
-		       Log,
-		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
-		       IsServerOrClientString,
-		       *ActorDefinitionAsset->GetName());
+		AVVM_LOGGER_LOG(LogWeaponSample,
+		                this,
+		                Outer,
+		                TEXT("%s request for queue."),
+		                *GetNameSafe(ActorDefinitionAsset));
 
 		DeferredItems.Add(ActorDefinitionAsset->GetActorClassSoftObjectPath());
 		DeferredItemsAttributeSet.Add(ActorDefinitionAsset->GetActorAttributeSetClassSoftObjectPath());

@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,43 +17,30 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class BatchSample : ModuleRules
+#include "UObject/Interface.h"
+
+#include "AVVMViewModelFNameHelper.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	UAVVMViewModelFNameHelper. Provide the ViewModel subsystem an abstract approach to binding a ViewModel name to
+ *	a Widget.
+ */
+UINTERFACE(BlueprintType, Blueprintable)
+class AVVMTOOLKIT_API UAVVMViewModelFNameHelper : public UInterface
 {
-	public BatchSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
-		bUseUnity = false;
+	GENERATED_BODY()
+};
 
-		if (Target.WithAutomationTests)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"FunctionalTesting",
-				});
-		}
+class AVVMTOOLKIT_API IAVVMViewModelFNameHelper
+{
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMGameplay",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine"
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit",
-				"GameplayTags"
-			}
-		);
-	}
-}
+public:
+	virtual FName GetViewModelFName() const PURE_VIRTUAL(GetViewModelFName, return NAME_None;);
+};

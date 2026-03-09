@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "AVVMGameMode.h"
 
+#include "AVVMGameplayModule.h"
+#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMWorldSetting.h"
 #include "TimerManager.h"
 #include "Engine/NetConnection.h"
@@ -39,6 +42,10 @@ AAVVMGameMode::AAVVMGameMode(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
 	SetReplicateMovement(false);
 	bReplicates = false;
+
+	// @gdemers disable inactive feature as this cause weird behaviour.
+	InactivePlayerStateLifeSpan = 0;
+	MaxInactivePlayers = 0;
 }
 
 void AAVVMGameMode::BeginPlay()
@@ -203,8 +210,8 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 		TMap<TWeakObjectPtr<AController>/*Player*/, int32/*Counter*/> CounterPerPlayer;
 	};
 
-	static FAVVMPlayerRetryTracker PlayerRetryTRacker;
-	int32& OutRetryCounter = PlayerRetryTRacker.CounterPerPlayer.FindOrAdd(Player);
+	static FAVVMPlayerRetryTracker PlayerRetryTracker;
+	int32& OutRetryCounter = PlayerRetryTracker.CounterPerPlayer.FindOrAdd(Player);
 
 	if (!WorldSetting.IsValid())
 	{
@@ -278,6 +285,17 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 void AAVVMGameMode::FailedToRestartPlayer(AController* NewPlayer)
 {
 	Super::FailedToRestartPlayer(NewPlayer);
+
+	AVVM_LOGGER_ERROR(LogGameplay,
+	                  this,
+	                  NewPlayer,
+	                  TEXT("Couldn't spawn a valid Pawn."));
+	
+	UNetConnection* PlayerConnection = IsValid(NewPlayer) ? NewPlayer->GetNetConnection() : nullptr;
+	if (IsValid(PlayerConnection))
+	{
+		PlayerConnection->Close();
+	}
 }
 
 void AAVVMGameMode::Terminate()

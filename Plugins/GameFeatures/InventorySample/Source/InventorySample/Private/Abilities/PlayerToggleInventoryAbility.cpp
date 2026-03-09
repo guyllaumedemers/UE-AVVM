@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Abilities/PlayerToggleInventoryAbility.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "InventorySampleModule.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
@@ -44,12 +44,11 @@ void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInf
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("%s Ability Granted."),
+	                *GetName());
 }
 
 void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -69,12 +68,11 @@ void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorI
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Outer,
+					Outer,
+					TEXT("%s Ability Revoked."),
+					*GetName());
 }
 
 bool UPlayerToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -117,12 +115,11 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
-	       *GetName(),
-	       *PC->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+					PC,
+					PC,
+					TEXT("TryActivate %s."),
+					*GetName());
 
 #if WITH_EDITOR
 	if (!PC->IsNetMode(NM_DedicatedServer))

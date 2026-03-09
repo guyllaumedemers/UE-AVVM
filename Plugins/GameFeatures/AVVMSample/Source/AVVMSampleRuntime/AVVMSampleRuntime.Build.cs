@@ -55,6 +55,7 @@ public class AVVMSampleRuntime : ModuleRules
 				"AVVM",
 				"AVVMGameplay",
 				"AVVMOnline",
+				"AVVMToolkit",
 				"Core",
 				"CoreUObject",
 				"DeveloperSettings",

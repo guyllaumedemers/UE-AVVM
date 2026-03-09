@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMNotificationSubsystem.h"
 
+#include "AVVMLogger.h"
 #include "AVVMModule.h"
 #include "Archetypes/AVVMPresenter.h"
 #include "Engine/World.h"
@@ -37,12 +38,6 @@ bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	// @gdemers channels should be conditionally registered based on Authority.
 	return true;
-}
-
-void UAVVMNotificationSubsystem::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-	UE_LOG(LogUI, Log, TEXT("UAVVMNotificationSubsystem::Initialize. Running On Client."));
 }
 
 UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UObject* WorldContextObject)
@@ -245,11 +240,12 @@ void UAVVMNotificationSubsystem::FAVVObserversFilteringMechanism::Broadcast(cons
 	const FAVVMObservers* SearchResult = TagToObservers.Find(NotificationContext.ChannelTag);
 	if (SearchResult == nullptr)
 	{
-		UE_LOG(LogUI,
-		       Log,
-		       TEXT("Deferring Tag Channel \"%s\" Notification on \"%s\"."),
-		       *NotificationContext.ChannelTag.ToString(),
-		       NotificationContext.Target.IsValid() ? *NotificationContext.Target->GetName() : TEXT("All Registered Actors"));
+		AVVM_LOGGER_LOG(LogUI,
+		                NotificationContext.Target.Get(),
+		                NotificationContext.Target.Get(),
+		                TEXT("Deferring Tag Channel %s Notification on %s."),
+		                *NotificationContext.ChannelTag.ToString(),
+		                NotificationContext.Target.IsValid() ? *GetNameSafe(NotificationContext.Target.Get()) : TEXT("All Registered Actors"));
 
 		PendingRequests.Add(NotificationContext);
 		return;

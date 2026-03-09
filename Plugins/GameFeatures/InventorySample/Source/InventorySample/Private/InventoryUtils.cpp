@@ -21,7 +21,7 @@
 
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameSession.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "InventoryProvider.h"
 #include "InventorySettings.h"
@@ -108,7 +108,7 @@ namespace NSJsonInventory
 bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)
 {
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
-		!UAVVMUtils::IsBlueprintScriptInterfaceValid<const UInventoryProvider>(Outer))
+		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<const UInventoryProvider>(Outer))
 	{
 		return false;
 	}

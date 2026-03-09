@@ -61,6 +61,7 @@ public class AVVMGameplay : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMToolkit",
 				"ModularGameplay",
 				"NetCore",
 				"UIExtension",

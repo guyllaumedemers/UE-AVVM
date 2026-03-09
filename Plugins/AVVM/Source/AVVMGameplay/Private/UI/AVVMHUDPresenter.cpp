@@ -20,7 +20,7 @@
 #include "UI/AVVMHUDPresenter.h"
 
 #include "AVVMModule.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Cheats/AVVMTagRulesCheatData.h"
@@ -73,7 +73,7 @@ void UAVVMHUDPresenter::BP_OnNotificationReceived_ModifyVisibilityRequirements(c
 
 void UAVVMHUDPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(OwningOuter.Get());
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(OwningOuter.Get());
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UAVVMHUDPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -88,7 +88,7 @@ void UAVVMHUDPresenter::StartPresenting()
 
 void UAVVMHUDPresenter::StopPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(OwningOuter.Get());
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(OwningOuter.Get());
 	if (IsValid(LocalPlayer))
 	{
 		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -98,5 +98,5 @@ void UAVVMHUDPresenter::StopPresenting()
 void UAVVMHUDPresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMToolkitUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }

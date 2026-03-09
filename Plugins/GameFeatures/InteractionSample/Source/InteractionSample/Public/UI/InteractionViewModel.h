@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMModule.h"
+#include "AVVMViewModelFNameHelper.h"
 #include "MVVMViewModelBase.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Styling/SlateBrush.h"
@@ -60,6 +60,9 @@ struct INTERACTIONSAMPLE_API FInputProgress
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float CompletionThreshold = 0.f;
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const AActor> Instigator = nullptr;
 };
 
 /**

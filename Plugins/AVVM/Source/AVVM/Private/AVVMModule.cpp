@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMModule.h"
 
+#include "HAL/LowLevelMemTracker.h"
+
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVM)
 
 // @gdemers define global LOG category

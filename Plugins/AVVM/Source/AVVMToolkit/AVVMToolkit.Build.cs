@@ -30,17 +30,17 @@ public class AVVMToolkit : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVM",
 				"Core",
 				"CoreUObject",
 				"CommonUI",
 				"Engine",
+				"FieldNotification",
 				"GameplayTags",
 				"ModelViewViewModel",
 				"UIExtension",
 				"UMG",
 				"Slate",
-				"SlateCore"
+				"SlateCore",
 			}
 		);
 

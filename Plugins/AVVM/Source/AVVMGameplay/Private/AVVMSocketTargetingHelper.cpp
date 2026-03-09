@@ -21,6 +21,7 @@
 
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "GameFramework/Actor.h"
 
 TInstancedStruct<FAVVMSocketTargetingHelper> FAVVMSocketTargetingHelper::Empty;
@@ -104,11 +105,10 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FA
 	SocketTarget = Helper->GetDesiredTypedInner(Src, SocketTarget);
 	if (!IsValid(SocketTarget))
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Socket Owner \"%s\" not able to retrieve inner child type. Deferring Actor parenting."),
-		       UAVVMGameplayUtils::PrintNetSource(Src).GetData(),
-		       *Src->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Src,
+		                Src,
+		                TEXT("Not able to retrieve inner child type. Deferring Actor parenting."));
 
 		IAVVMDoesSupportSocketTargeting::Execute_DeferredSocketParenting(Src, ContextArgs);
 		return false;

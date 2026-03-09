@@ -23,7 +23,6 @@
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineUtils.h"
-#include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "MVVMViewModelBase.h"
 #include "Backend/AVVMStoreViewModel.h"
@@ -118,7 +117,7 @@ void UAVVMStorePresenter::SetItems(const TInstancedStruct<FAVVMNotificationPaylo
 
 void UAVVMStorePresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(this);
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UAVVMStorePresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -133,7 +132,7 @@ void UAVVMStorePresenter::StartPresenting()
 
 void UAVVMStorePresenter::StopPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(this);
 	if (IsValid(LocalPlayer))
 	{
 		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -143,7 +142,7 @@ void UAVVMStorePresenter::StopPresenting()
 void UAVVMStorePresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMToolkitUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }
 
 void UAVVMStorePresenter::OnForcePullShopContentCompleted(const bool bWasSuccess,

@@ -22,7 +22,7 @@
 #include "ActorInteractionComponent.h"
 #include "ActorInteractionImpl.h"
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "Ability/AVVMAbilityTask_TickUntil.h"
 #include "Data/InteractionExecutionRequirements.h"
 #include "GameFramework/PlayerController.h"
@@ -70,12 +70,11 @@ void UPlayerHoldInteractionAbility::OnInputReleased(float TimeHeld)
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Input Released on Outer \"%s\". Total Held Time \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
-	       *Controller->GetName(),
-	       *FString::SanitizeFloat(TimeHeld, 2));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Controller,
+	                Controller,
+	                TEXT("Input Released. Total Held Time %s."),
+	                *FString::SanitizeFloat(TimeHeld, 2));
 
 	UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (!ensureAlwaysMsgf(IsValid(InteractionComponent), TEXT("Invalid Interaction Component cached!")))

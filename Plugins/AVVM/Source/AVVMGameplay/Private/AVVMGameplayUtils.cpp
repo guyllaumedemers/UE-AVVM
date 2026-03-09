@@ -71,65 +71,6 @@ bool UAVVMGameplayUtils::HasNetworkAuthority(const AActor* Actor)
 	return Actor->HasAuthority();
 }
 
-FString UAVVMGameplayUtils::BP_PrintNetSource(const AActor* Actor)
-{
-	return FString{UAVVMGameplayUtils::PrintNetSource(Actor)};
-}
-
-FStringView UAVVMGameplayUtils::PrintNetSource(const AActor* Actor)
-{
-	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
-	{
-		return TEXT("[Unknown]");
-	}
-
-	const ENetMode NetMode = Actor->GetNetMode();
-	if (NetMode == NM_Standalone)
-	{
-		return TEXT("[Standalone]");
-	}
-	else if ((NetMode == NM_ListenServer) || (NetMode == NM_Client))
-	{
-		const ENetRole RemoteRole = Actor->GetRemoteRole();
-		const ENetRole LocalRole = Actor->GetLocalRole();
-
-		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
-		if (bIsRunningActorOnServer)
-		{
-			return TEXT("[Server|Authority]");
-		}
-
-		const bool bIsRunningActorOnClientWithoutControl = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
-		if (bIsRunningActorOnClientWithoutControl)
-		{
-			return TEXT("[ClientOnServer|NoAuthority]");
-		}
-
-		const bool bIsRunningActorClientOnServer = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
-		if (bIsRunningActorClientOnServer)
-		{
-			return TEXT("[ClientOnServer|Authority]");
-		}
-
-		const bool bIsRunningActorOnClient = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
-		if (bIsRunningActorOnClient)
-		{
-			return TEXT("[Client|Authority]");
-		}
-	}
-	else if (NetMode == NM_DedicatedServer)
-	{
-		return TEXT("[DedicatedServer]");
-	}
-
-	return TEXT("[Unknown]");
-}
-
-FString UAVVMGameplayUtils::PrintConnectionInfo(const UNetConnection* Connection)
-{
-	return IsValid(Connection) ? const_cast<UNetConnection*>(Connection)->RemoteAddressToString() : TEXT("Unknown");
-}
-
 int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
 {
 	if (!IsValid(Actor))

@@ -22,7 +22,7 @@
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMReplicatedTagComponent.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMActorPayload.h"
@@ -106,7 +106,7 @@ UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 
 TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Implementation() const
 {
-	const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMCanExposeActorPayload>(OwningActor.Get());
+	const bool bIsValid = UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMCanExposeActorPayload>(OwningActor.Get());
 	return bIsValid ? IAVVMCanExposeActorPayload::Execute_GetExposedActorContext(OwningActor.Get()) : IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 

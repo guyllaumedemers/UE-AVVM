@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "TeamSpawnSubsystem.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
 #include "TeamSampleModule.h"
@@ -113,11 +113,11 @@ void UTeamSpawnSubsystem::UnRegister(const UTeamStartComponent* Component)
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Actor \"%s\" unregistered."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Unregistering %s."),
+	                *GetNameSafe(Outer));
 }
 
 void UTeamSpawnSubsystem::Register(const UTeamStartComponent* Component)
@@ -135,11 +135,11 @@ void UTeamSpawnSubsystem::Register(const UTeamStartComponent* Component)
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Actor \"%s\" registered."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogTeamSample,
+					Outer,
+					Outer,
+					TEXT("Registering %s."),
+					*GetNameSafe(Outer));
 }
 
 const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const FWorldContextArgs& WorldContextArgs,

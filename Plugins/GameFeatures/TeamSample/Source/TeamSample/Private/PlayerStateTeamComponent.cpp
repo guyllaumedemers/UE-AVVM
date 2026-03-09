@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "PlayerStateTeamComponent.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "DoesTeamProviderSupportExecution.h"
 #include "NativeGameplayTags.h"
 #include "TeamObject.h"
@@ -65,11 +65,11 @@ void UPlayerStateTeamComponent::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding UPlayerStateTeamComponent to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UPlayerStateTeamComponent::StaticClass()));
 
 	OwningOuter = Outer;
 }
@@ -90,11 +90,11 @@ void UPlayerStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing UPlayerStateTeamComponent from Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UPlayerStateTeamComponent::StaticClass()));
 }
 
 void UPlayerStateTeamComponent::Static_TrySwitchTeam(const APlayerState* NewPlayerState, const FGameplayTag& NewTeamTag)
@@ -165,13 +165,12 @@ void UPlayerStateTeamComponent::OnRep_OnTeamOwnershipChanged(const TWeakObjectPt
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Actor \"%s\" changed Team from \"%s\" to Team \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       OldTeamName.GetData(),
-	       *NewTeam->GetName());
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Player changed Team from %s, to %s."),
+	                OldTeamName.GetData(),
+	                *GetNameSafe(NewTeam));
 
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_TEAM_OWNERSHIP_CHANGED_NOTIFICATION;
@@ -194,13 +193,12 @@ void UPlayerStateTeamComponent::TrySwitchTeam_Implementation(const FGameplayTag&
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Actor \"%s\" TrySwitchTeam from Team \"%s\" to Team Tag \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       *Team->GetName(),
-	       *NewTeamTag.ToString());
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Player attempt changing team tag from %s, to %s."),
+	                *Team->GetTeamTag().ToString(),
+	                *NewTeamTag.ToString());
 
 	FSwitchTeamContext Context;
 	Context.OldTeamTag = Team->GetTeamTag();
@@ -225,12 +223,11 @@ void UPlayerStateTeamComponent::TryForfaiting_Implementation()
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Actor \"%s\" TryForfaiting from Team \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       *Team->GetName());
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Player attempt forfeit on team %s."),
+	                *GetNameSafe(Team));
 
 	auto* GameStateBase = UGameplayStatics::GetGameState(Outer);
 	IDoesTeamProviderSupportExecution::Execute_Forfait(GameStateBase, Outer);

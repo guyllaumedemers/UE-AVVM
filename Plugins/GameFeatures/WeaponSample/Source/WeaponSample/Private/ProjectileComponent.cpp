@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "ProjectileComponent.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "NonReplicatedProjectileActor.h"
 #include "ProjectileManagerSubsystem.h"
@@ -84,8 +84,6 @@ void UProjectileComponent::SetupProjectiles(const TArray<UObject*>& NewResources
 	{
 		return;
 	}
-
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 	
 	TArray<FSoftObjectPath> DeferredItems;
 	for (const UObject* Resource : NewResources)
@@ -96,11 +94,11 @@ void UProjectileComponent::SetupProjectiles(const TArray<UObject*>& NewResources
 			continue;
 		}
 
-		UE_LOG(LogWeaponSample,
-			   Log,
-			   TEXT("Executed from \"%s\". New \"%s\" Recorded."),
-			   IsServerOrClientString,
-			   *ProjectileAsset->GetName());
+		AVVM_LOGGER_LOG(LogWeaponSample,
+						this,
+						Outer,
+						TEXT("%s request for queue."),
+						*GetNameSafe(ProjectileAsset));
 
 		DeferredItems.Add(ProjectileAsset->GetProjectileClass().ToSoftObjectPath());
 

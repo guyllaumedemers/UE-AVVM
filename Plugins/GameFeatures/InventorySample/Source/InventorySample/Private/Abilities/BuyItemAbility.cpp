@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Abilities/BuyItemAbility.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "InventorySampleModule.h"
 #include "GameFramework/PlayerController.h"
 
@@ -40,12 +40,11 @@ void UBuyItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("%s Ability Granted."),
+	                *GetName());
 }
 
 void UBuyItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -65,12 +64,11 @@ void UBuyItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Outer,
+					Outer,
+					TEXT("%s Ability Revoked."),
+					*GetName());
 }
 
 bool UBuyItemAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -104,12 +102,11 @@ void UBuyItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
-	       *GetName(),
-	       *Controller->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Controller,
+	                Controller,
+	                TEXT("TryActivate %s."),
+	                *GetName());
 }
 
 void UBuyItemAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

@@ -22,9 +22,9 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMToolkitUtils.h"
 #include "AVVMOnlineModule.h"
 #include "AVVMOnlinePlayerStringParser.h"
-#include "AVVMUtils.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Online/CoreOnlineFwd.h"
 #include "StructUtils/InstancedStruct.h"
@@ -165,7 +165,7 @@ bool UAVVMOnlineUtils::GetInterface(const UObject* DerivedChild,
 
 	OutInterface = TScriptInterface<IInterfaceClass>(Outer);
 
-	const bool bImplement = UAVVMUtils::IsNativeScriptInterfaceValid(OutInterface);
+	const bool bImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(OutInterface);
 	if (!bImplement)
 	{
 		UE_LOG(LogAVVMOnline,

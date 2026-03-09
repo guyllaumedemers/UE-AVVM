@@ -21,7 +21,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "ProfilingDebugging/CountersTrace.h"
@@ -49,13 +49,11 @@ void UAVVMGameStateHandshakeComponent::BeginPlay()
 	}
 
 	TRACE_COUNTER_INCREMENT(UAVVMGameStateHandshakeComponent_InstanceCounter);
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAVVMGameStateHandshakeComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+					Outer,
+					Outer,
+					TEXT("Adding ##%s."),
+					*GetNameSafe(UAVVMGameStateHandshakeComponent::StaticClass()));
 
 	OwningOuter = Outer;
 }
@@ -70,12 +68,11 @@ void UAVVMGameStateHandshakeComponent::EndPlay(const EEndPlayReason::Type EndPla
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAVVMGameStateHandshakeComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+					Outer,
+					Outer,
+					TEXT("Removing ##%s."),
+					*GetNameSafe(UAVVMGameStateHandshakeComponent::StaticClass()));
 
 	OwningOuter.Reset();
 }

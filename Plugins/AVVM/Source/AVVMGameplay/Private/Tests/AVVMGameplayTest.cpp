@@ -20,7 +20,6 @@
 #include "Misc/AutomationTest.h"
 
 #include "AVVMAutomatedTestGameplayActor.h"
-#include "AVVMAutomatedTestResourceComponent.h"
 
 #if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationEditorCommon.h"

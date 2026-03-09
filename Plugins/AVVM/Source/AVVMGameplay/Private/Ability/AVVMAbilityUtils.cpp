@@ -22,7 +22,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "AbilitySystemInterface.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "GameplayEffect.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 
@@ -57,7 +57,7 @@ UAVVMAbilitySystemComponent* UAVVMAbilityUtils::GetAbilitySystemComponent(const 
 {
 	auto ASCInterface = TScriptInterface<const IAbilitySystemInterface>(NewActor);
 
-	const bool bDoesActorImplements = UAVVMUtils::IsNativeScriptInterfaceValid(ASCInterface);
+	const bool bDoesActorImplements = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(ASCInterface);
 	if (bDoesActorImplements)
 	{
 		return Cast<UAVVMAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(NewActor));

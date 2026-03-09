@@ -20,9 +20,9 @@
 #include "ItemObject.h"
 
 #include "ActorInventoryComponent.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMSocketTargetingHelper.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "InventoryFileHelper.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySampleModule.h"
@@ -352,13 +352,12 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 
 	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED});
 	ModifyRuntimeState(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_INSTANCED}, FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN});
-
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding New Visual Actor \"%s\" on Item \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *RuntimeItemActor->GetName(),
-	       *GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("Adding New Visual Actor %s on item %s"),
+	                *GetNameSafe(RuntimeItemActor),
+	                *GetName());
 
 	const bool bShouldNotifyWhenRegisteringAttachment = RuntimeItemActor->Implements<UAVVMDoesSupportAttachmentNotify>();
 	if (bShouldNotifyWhenRegisteringAttachment)
@@ -474,7 +473,7 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                               const TArray<int32>& NewPrivateIds,
                                               UItemObject* UnInitializedItemObject)
 {
-	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
 	{
 		return INDEX_NONE;
@@ -515,7 +514,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
                                               const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
                                               UItemObject* UnInitializedItemObject)
 {
-	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
 	{
 		return INDEX_NONE;

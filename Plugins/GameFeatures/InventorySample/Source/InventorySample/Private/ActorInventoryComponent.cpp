@@ -20,12 +20,12 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMCharacter.h"
-#include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMScopedUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "InventoryFileHelper.h"
 #include "InventoryProvider.h"
 #include "InventorySampleModule.h"
@@ -110,15 +110,13 @@ void UActorInventoryComponent::BeginPlay()
 	}
 
 	TRACE_COUNTER_INCREMENT(UActorInventoryComponent_InstanceCounter);
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UActorInventoryComponent::StaticClass()));
 
 	OwningOuter = Outer;
-
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInventoryComponent::StaticClass()->GetName(),
-	       *Outer->GetName());
 
 #if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
@@ -171,13 +169,12 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		return;
 	}
-
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInventoryComponent::StaticClass()->GetName(),
-	       *Outer->GetName());
+	
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Outer,
+					Outer,
+					TEXT("Removing %s."),
+					*GetNameSafe(UActorInventoryComponent::StaticClass()));
 
 #if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
@@ -206,7 +203,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
-	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
 		return;
@@ -226,12 +223,11 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Requesting Items Type \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       EnumToString(OutSrcType),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("Requesting item type %s."),
+	                EnumToString(OutSrcType));
 
 	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
 	if (bIsItemSrcStatic)
@@ -264,8 +260,6 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 		return;
 	}
 
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
-
 	TArray<FSoftObjectPath> DeferredItems;
 	for (const UObject* Resource : NewResources)
 	{
@@ -277,20 +271,20 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 
 		if (!ItemAsset->CanAccessItem(ComponentStateTags, ComponentStateTags))
 		{
-			UE_LOG(LogInventorySample,
-			       Log,
-			       TEXT("Executed from \"%s\". Failed to Meet \"%s\" Requirements."),
-			       IsServerOrClientString,
-			       *ItemAsset->GetName());
+			AVVM_LOGGER_LOG(LogInventorySample,
+			                Outer,
+			                Outer,
+			                TEXT("Failed to meet %s Requirements."),
+			                *GetNameSafe(ItemAsset));
 
 			continue;
 		}
 
-		UE_LOG(LogInventorySample,
-		       Log,
-		       TEXT("Executed from \"%s\". New \"%s\" Recorded."),
-		       IsServerOrClientString,
-		       *ItemAsset->GetName());
+		AVVM_LOGGER_LOG(LogInventorySample,
+		                Outer,
+		                Outer,
+		                TEXT("%s pending request queued."),
+		                *GetNameSafe(ItemAsset));
 
 		DeferredItems.Add(ItemAsset->GetItemObjectClass().ToSoftObjectPath());
 	}
@@ -575,12 +569,11 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 		SV = TEXT("has decreased!");
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Item Collection modified on Outer \"%s\"! Collection %s"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       SV.GetData());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("Item Collection modified. %s"),
+	                SV.GetData());
 
 	if (IsValid(NonReplicatedLoadout))
 	{
@@ -590,7 +583,7 @@ void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObj
 
 void UActorInventoryComponent::TrySpawnEquipItem(const AActor* Outer)
 {
-	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
 	if (!bResult)
 	{
 		return;
@@ -667,12 +660,11 @@ void UActorInventoryComponent::RequestItemActor(UAVVMResourceManagerComponent* R
 		}
 
 		const AActor* NewOuter = NewActorInventoryComponent->OwningOuter.Get();
-		UE_LOG(LogInventorySample,
-		       Log,
-		       TEXT("Executed from \"%s\". Executing Spawn Item Request for \"%s\" on Outer \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(NewOuter).GetData(),
-		       *ItemToSpawn->GetName(),
-		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
+		AVVM_LOGGER_LOG(LogInventorySample,
+		                NewOuter,
+		                NewOuter,
+		                TEXT("Executing Spawn Item Request for %s"),
+		                *GetNameSafe(ItemToSpawn.Get()));
 
 		NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemActorId(), {});
 	};
@@ -686,12 +678,11 @@ void UActorInventoryComponent::RequestItemActor(UAVVMResourceManagerComponent* R
 	const bool bHasPendingRequest = QueueingMechanism->PushDeferredItem(NewItem, NewRequest);
 	if (bHasPendingRequest)
 	{
-		UE_LOG(LogInventorySample,
-		       Log,
-		       TEXT("Executed from \"%s\". Spawn Item Request for \"%s\" was Deferred on Outer \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *NewItem->GetName(),
-		       IsValid(Outer) ? *Outer->GetName() : TEXT("Unknown"));
+		AVVM_LOGGER_LOG(LogInventorySample,
+		                Outer,
+		                Outer,
+		                TEXT("Spawn Item Request for %s was Deferred."),
+		                *GetNameSafe(NewItem));
 	}
 }
 
@@ -1039,7 +1030,7 @@ void UActorInventoryComponent::CheckBackend() const
 	const AActor* Outer = OwningOuter.Get();
 
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
-		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
+		!UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
 	{
 		return;
 	}
@@ -1071,7 +1062,7 @@ void UActorInventoryComponent::CheckDisk() const
 	const AActor* Outer = OwningOuter.Get();
 
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
-		!UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
+		!UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Outer))
 	{
 		return;
 	}

@@ -20,6 +20,7 @@
 #include "Abilities/TradeItemAbility.h"
 
 #include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "InventorySampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
@@ -43,12 +44,11 @@ void UTradeItemAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Outer,
+					Outer,
+					TEXT("%s Ability Granted."),
+					*GetName());
 }
 
 void UTradeItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -68,12 +68,11 @@ void UTradeItemAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorIn
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("%s Ability Revoked."),
+	                *GetName());
 }
 
 bool UTradeItemAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -133,12 +132,11 @@ void UTradeItemAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	UE_LOG(LogInventorySample,
-	       Log,
-	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
-	       *GetName(),
-	       *Controller->GetName());
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Controller,
+					Controller,
+					TEXT("TryActivate %s."),
+					*GetName());
 }
 
 void UTradeItemAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,

@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "InventoryFileHelper.h"
 
+#include "AVVMLogger.h"
 #include "InventorySampleModule.h"
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
@@ -87,24 +88,24 @@ FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePat
 		if (FileManager.FileExists(FilePath))
 		{
 			FFileHelper::LoadFileToString(OutFileContent, FilePath);
-
-			UE_LOG(LogInventorySample,
-			       Log,
-			       TEXT("I/O action on Disk. FFileHelper::LoadFileToString. DirPath: \"%s\" \n \"%s\"."),
-			       FilePath,
-			       *OutFileContent);
+			AVVM_LOGGER_LOG(LogInventorySample,
+			                nullptr,
+			                GetDefault<UInventoryFileHelper>(),
+			                TEXT("I/O action on Disk. FFileHelper::LoadFileToString. DirPath: %s \n %s"),
+			                FilePath,
+			                *OutFileContent);
 		}
 
 		if (OutFileContent.IsEmpty())
 		{
 			OutFileContent = UInventoryUtils::CreateDefaultInventoryProviders();
 			FFileHelper::SaveStringToFile(OutFileContent, FilePath);
-
-			UE_LOG(LogInventorySample,
-			       Log,
-			       TEXT("I/O action on Disk. FFileHelper::SaveStringToFile. DirPath: \"%s\" \n \"%s\"."),
-			       FilePath,
-			       *OutFileContent);
+			AVVM_LOGGER_LOG(LogInventorySample,
+			                nullptr,
+			                GetDefault<UInventoryFileHelper>(),
+			                TEXT("I/O action on Disk. FFileHelper::SaveStringToFile. DirPath: %s \n %s"),
+			                FilePath,
+			                *OutFileContent);
 		}
 
 		return OutFileContent;

@@ -21,8 +21,8 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -49,7 +49,7 @@ void UAVVMAbilityInputComponent::BeginPlay()
 	Super::BeginPlay();
 
 	auto* Outer = GetTypedOuter<APlayerController>();
-	if (IsValid(Outer) && UAVVMGameplayUtils::CheckActorAuthority(Outer))
+	if (IsValid(Outer) && Outer->IsLocalPlayerController())
 	{
 		OwningOuter = Outer;
 		Outer->OnPossessedPawnChanged.AddDynamic(this, &UAVVMAbilityInputComponent::OnPawnChanged);
@@ -62,7 +62,7 @@ void UAVVMAbilityInputComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	Super::EndPlay(EndPlayReason);
 
 	auto* Outer = OwningOuter.Get();
-	if (IsValid(Outer) && UAVVMGameplayUtils::CheckActorAuthority(Outer))
+	if (IsValid(Outer) && Outer->IsLocalPlayerController())
 	{
 		Outer->OnPossessedPawnChanged.RemoveAll(this);
 
@@ -80,7 +80,7 @@ void UAVVMAbilityInputComponent::OnPawnChanged(APawn* NewPawn,
 		return;
 	}
 
-	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMInputMappingProvider>(NewPawn);
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMInputMappingProvider>(NewPawn);
 	if (!bResult)
 	{
 		return;
@@ -132,15 +132,14 @@ void UAVVMAbilityInputComponent::UnRegisterInputMappingContext(UEnhancedInputLoc
 
 	if (IsValid(InputMappingContext))
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Removing Input Mapping Context \"%s\" on Outer \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *InputMappingContext->GetName(),
-		       *Outer->GetName());
-
 		EnhancedInputSubsystem->RemoveMappingContext(InputMappingContext);
 	}
+
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Removing Input Mapping Context ##%s."),
+	                *GetNameSafe(InputMappingContext));
 }
 
 void UAVVMAbilityInputComponent::RegisterInputMappingContext(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem,
@@ -159,16 +158,15 @@ void UAVVMAbilityInputComponent::RegisterInputMappingContext(UEnhancedInputLocal
 
 	if (IsValid(InputMappingContext))
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Adding Input Mapping Context \"%s\" on Outer \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *InputMappingContext->GetName(),
-		       *Outer->GetName());
-
 		static int32 Priority = 0;
 		EnhancedInputSubsystem->AddMappingContext(InputMappingContext, Priority++);
 	}
+
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Adding Input Mapping Context ##%s."),
+	                *GetNameSafe(InputMappingContext));
 }
 
 void UAVVMAbilityInputComponent::UnBindInputActions(UEnhancedInputComponent* EnhancedInputComponent,
@@ -195,13 +193,12 @@ void UAVVMAbilityInputComponent::UnBindInputActions(UEnhancedInputComponent* Enh
 
 		AbilityTriggerTags.Remove(InputAction);
 
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". UnRegistering Old Input Action \"%s\" and Tag \"%s\" from Outer \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *InputAction->GetName(),
-		       *InputAction->AbilityTriggerTag.ToString(),
-		       *Outer->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("UnRegistering Old Input Action ##%s and Tag ##%s."),
+		                *GetNameSafe(InputAction),
+		                *InputAction->AbilityTriggerTag.ToString());
 
 		FAVVMEnhancedInputEventBindingHandles& OutResult = BindingHandles.FindOrAdd(InputAction);
 		for (const uint32 Handle : OutResult.Handles)
@@ -236,13 +233,12 @@ void UAVVMAbilityInputComponent::BindInputActions(UEnhancedInputComponent* Enhan
 		FGameplayTag& OutTag = AbilityTriggerTags.FindOrAdd(InputAction);
 		OutTag = InputAction->AbilityTriggerTag;
 
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Registering New Input Action \"%s\" and Tag \"%s\" on Outer \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *InputAction->GetName(),
-		       *OutTag.ToString(),
-		       *Outer->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Registering New Input Action ##%s and Tag ##%s."),
+		                *GetNameSafe(InputAction),
+		                *OutTag.ToString());
 
 		FEnhancedInputActionEventBinding& BindingHandle_Started = EnhancedInputComponent->BindAction(InputAction,
 		                                                                                             ETriggerEvent::Started,

@@ -20,8 +20,8 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "Ability/AVVMGameplayAbility.h"
@@ -54,12 +54,11 @@ void UAVVMAbilitySystemComponent::BeginPlay()
 
 	OwningOuter = Outer;
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAVVMAbilitySystemComponent::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Adding ##%s."),
+	                *GetNameSafe(UAVVMAbilitySystemComponent::StaticClass()));
 }
 
 void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -81,12 +80,11 @@ void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UAVVMAbilitySystemComponent::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Removing ##%s."),
+	                *GetNameSafe(UAVVMAbilitySystemComponent::StaticClass()));
 
 	OwningOuter.Reset();
 }
@@ -96,7 +94,6 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	const FGameplayTagContainer& OwnedTags = GetOwnedGameplayTags();
 
 	const AActor* Outer = OwningOuter.Get();
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
 
 	TArray<FSoftObjectPath> DeferredGrantedAbilities;
 	for (const UObject* Resource : Resources)
@@ -109,20 +106,20 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 
 		if (!AbilityAsset->CanGrantAbility(OwnedTags, OwnedTags))
 		{
-			UE_LOG(LogGameplay,
-			       Log,
-			       TEXT("Executed from \"%s\". Failed to Grant Ability \"%s\" due to Blocking Tags."),
-			       IsServerOrClientString,
-			       *AbilityAsset->GetName());
+			AVVM_LOGGER_LOG(LogGameplay,
+			                Outer,
+			                Outer,
+			                TEXT("Failed to Grant Ability ##%s due to Blocking Tags."),
+			                *GetNameSafe(AbilityAsset));
 
 			continue;
 		}
 
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". New Ability Recorded \"%s\" for deferred Granting."),
-		       IsServerOrClientString,
-		       *AbilityAsset->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("New Ability Recorded ##%s for deferred Granting."),
+		                *GetNameSafe(AbilityAsset));
 
 		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
 	}
@@ -190,11 +187,10 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 
 	if (AttributeSetSoftObjectPath.IsNull())
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Attempt to load invalid AttributeSet from Outer \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *Outer->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Attempt to load invalid AttributeSet."));
 
 		return;
 	}
@@ -206,7 +202,7 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 
 void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner)
 {
-	const bool bResult = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMDoesOwnAttributeSet>(AttributeSetOwner);
+	const bool bResult = UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMDoesOwnAttributeSet>(AttributeSetOwner);
 	if (!ensureAlwaysMsgf(bResult,
 	                      TEXT("AttributeSetOwner should inherit from the IAVVMDoesOwnAttributeSet interface.")))
 	{
@@ -251,8 +247,6 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 		return;
 	}
 
-	const auto* IsServerOrClientString = UAVVMGameplayUtils::PrintNetSource(Outer).GetData();
-
 	TArray<UObject*> OutStreamedAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
 
@@ -264,12 +258,11 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 			continue;
 		}
 
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Granting New Ability \"%s\" on Outer \"%s\"."),
-		       IsServerOrClientString,
-		       *GameplayAbilityClass->GetName(),
-		       *Outer->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Granting New Ability ##%s."),
+		                *GetNameSafe(GameplayAbilityClass));
 
 		const auto GameplayAbilitySpec = FGameplayAbilitySpec
 		{
@@ -293,10 +286,9 @@ void UAVVMAbilitySystemComponent::OnTagUpdated(const FGameplayTag& Tag, bool Tag
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Modifying Tag \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Tag.ToString(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Modifying Tag ##%s."),
+	                *Tag.ToString());
 }

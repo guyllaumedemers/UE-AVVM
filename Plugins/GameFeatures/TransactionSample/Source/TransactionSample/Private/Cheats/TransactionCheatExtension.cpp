@@ -20,6 +20,7 @@
 #include "Cheats/TransactionCheatExtension.h"
 
 #include "AVVMGameplayModule.h"
+#include "AVVMLogger.h"
 #include "GameStateTransactionHistory.h"
 #include "TransactionFactoryUtils.h"
 #include "GameFramework/PlayerState.h"
@@ -33,10 +34,11 @@
 
 void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Registering %s"),
-	       *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Adding ##%s."),
+	                *GetNameSafe(UTransactionCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().AddDescriptor(this);
@@ -45,10 +47,11 @@ void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 
 void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Unregistering %s"),
-	       *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					nullptr,
+					this,
+					TEXT("Removing ##%s."),
+					*GetNameSafe(UTransactionCheatExtension::StaticClass()));
 
 #if WITH_AVVM_DEBUGGER
 	FAVVMDebuggerModule::Get().GetDebuggerContext().RemoveDescriptor(this);
@@ -57,11 +60,12 @@ void UTransactionCheatExtension::RemovedFromCheatManager_Implementation()
 
 void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Remove All Transactions of type \"%s\" from Player Index \"%s\"."),
-	       EnumToString(NewType),
-	       *FString::FromInt(PlayerIndex));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Remove All Transactions of type ##%s from player Index ##%d."),
+	                EnumToString(NewType),
+	                PlayerIndex);
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 	UGameStateTransactionHistory::Static_RemoveAllTransactionOfType(this, PlayerState, NewType);
@@ -69,10 +73,11 @@ void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionT
 
 void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Remove All Transactions from Player Index \"%s\"."),
-	       *FString::FromInt(PlayerIndex));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Remove All Transactions from player Index ##%d."),
+	                PlayerIndex);
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 	UGameStateTransactionHistory::Static_RemoveAllTransactions(this, PlayerState);
@@ -80,11 +85,12 @@ void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
 
 void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Add Transaction of type \"%s\" to Player Index \"%s\"."),
-	       EnumToString(NewType),
-	       *FString::FromInt(PlayerIndex));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Add Transaction of type ##%s to player Index ##%d."),
+	                EnumToString(NewType),
+	                PlayerIndex);
 
 	const TInstancedStruct<FTransactionPayload> InputPayload = FTransactionPayload::Make<FTransactionPayloadTest>(StaticCast<int32>(NewType));
 
@@ -99,10 +105,11 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 
 void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Print All Transactions from Player Index \"%s\"."),
-	       *FString::FromInt(PlayerIndex));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Print All Transactions from Player Index ##%d."),
+	                PlayerIndex);
 
 	APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 	if (!IsValid(PlayerState))
@@ -118,10 +125,11 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 
 	for (const UTransaction* Transaction : UGameStateTransactionHistory::Static_GetAllTransactions(this, UniqueNetId->ToString()))
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("%s"),
-		       *Transaction->ToString());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                this,
+		                TEXT("##%s"),
+		                IsValid(Transaction) ? *Transaction->ToString() : TEXT(""));
 	}
 }
 

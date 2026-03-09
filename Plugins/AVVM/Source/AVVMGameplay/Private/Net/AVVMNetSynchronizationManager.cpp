@@ -20,7 +20,7 @@
 #include "Net/AVVMNetSynchronizationManager.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "Engine/World.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"
 
@@ -33,12 +33,6 @@ bool UAVVMNetSynchronizationManager::ShouldCreateSubsystem(UObject* Outer) const
 	}
 
 	return false;
-}
-
-void UAVVMNetSynchronizationManager::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-	UE_LOG(LogGameplay, Log, TEXT("UAVVMNetSynchronizationManager::Initialize. Running On Server."));
 }
 
 void UAVVMNetSynchronizationManager::Deinitialize()
@@ -75,7 +69,7 @@ const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& UAVVMNetSynchro
 void UAVVMNetSynchronizationManager::Register(const UActorComponent* ReplicatedComponent)
 {
 	const auto NetSynchronization = TScriptInterface<IAVVMDoesImplNetSynchronization>(const_cast<UActorComponent*>(ReplicatedComponent));
-	const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid(NetSynchronization);
+	const bool bIsValid = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(NetSynchronization);
 	if (bIsValid)
 	{
 		NetFinalized.AddUnique(NetSynchronization);

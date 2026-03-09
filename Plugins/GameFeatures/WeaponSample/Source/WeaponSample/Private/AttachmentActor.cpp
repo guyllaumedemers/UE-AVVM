@@ -21,7 +21,8 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "TriggeringActor.h"
 #include "WeaponSampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -32,7 +33,7 @@
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
-	if (!IsValid(Src) || !UAVVMUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Target))
+	if (!IsValid(Src) || !UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Target))
 	{
 		return nullptr;
 	}
@@ -121,12 +122,11 @@ void AAttachmentActor::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *AAttachmentActor::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(AAttachmentActor::StaticClass()));
 
 	OwningOuter = Outer;
 }
@@ -141,12 +141,11 @@ void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *AAttachmentActor::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(AAttachmentActor::StaticClass()));
 
 	Detach();
 }
@@ -184,7 +183,7 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 		SocketDeferral = Cast<UObject>(Parent->GetImplementingOuterObject(UAVVMDoesSupportSocketDeferral::StaticClass()));
 	}
 
-	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
+	const bool bDoesImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
 	                      TEXT("Dest actor doesn't implement the required interface")))
 	{
@@ -203,13 +202,11 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 		return;
 	}
 
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Attaching \"%s\" to Outer \"%s\" at SocketName \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Target).GetData(),
-	       *AAttachmentActor::StaticClass()->GetName(),
-	       *Target->GetName(),
-	       *NewSocketName.ToString());
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Target,
+	                TEXT("Target for attach at socket name %s."),
+	                *NewSocketName.ToString());
 
 	// @gdemers detach actor + remove AttributeSet registered
 	Detach();
@@ -243,12 +240,10 @@ void AAttachmentActor::Detach_Implementation()
 		return;
 	}
 
-	UE_LOG(LogWeaponSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Detaching \"%s\" from Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *AAttachmentActor::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Outer,
+	                TEXT("Target for detach."));
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
@@ -273,7 +268,7 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 {
 	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
 
-	const bool bDoesImplement = UAVVMUtils::IsNativeScriptInterfaceValid(SocketDeferral);
+	const bool bDoesImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
 	                      TEXT("Dest actor doesn't implement the required interface")))
 	{

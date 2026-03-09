@@ -20,6 +20,7 @@
 #include "AVVMOnlineUtils.h"
 
 #include "AVVMOnlineInterface.h"
+#include "AVVMToolkitUtils.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
@@ -29,7 +30,7 @@
 bool UAVVMOnlineUtils::IsHosting(const FUniqueNetIdPtr PlayerUniqueNetIdPtr,
                                  const TScriptInterface<IAVVMOnlineIdentityInterface>& OnlineInterface)
 {
-	const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid(OnlineInterface);
+	const bool bIsValid = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(OnlineInterface);
 	if (bIsValid)
 	{
 		return OnlineInterface->IsHosting(PlayerUniqueNetIdPtr);

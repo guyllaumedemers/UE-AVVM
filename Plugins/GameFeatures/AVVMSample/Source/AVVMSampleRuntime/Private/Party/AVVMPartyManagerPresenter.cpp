@@ -22,7 +22,6 @@
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineUtils.h"
 #include "AVVMSampleRuntimeModule.h"
-#include "AVVMUtils.h"
 #include "CommonActivatableWidget.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "GameFramework/GameMode.h"
@@ -173,7 +172,7 @@ void UAVVMPartyManagerPresenter::SetLocalParty(const TInstancedStruct<FAVVMNotif
 
 void UAVVMPartyManagerPresenter::StartPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(this);
 	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
 	                      TEXT("UAVVMPartyManagerPresenter couldn't find a valid LocalPlayer!")))
 	{
@@ -188,7 +187,7 @@ void UAVVMPartyManagerPresenter::StartPresenting()
 
 void UAVVMPartyManagerPresenter::StopPresenting()
 {
-	ULocalPlayer* LocalPlayer = UAVVMUtils::GetFirstOrTargetLocalPlayer(this);
+	ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(this);
 	if (IsValid(LocalPlayer))
 	{
 		PopContentFromPrimaryGameLayout(LocalPlayer, ActivatableView.Get());
@@ -198,7 +197,7 @@ void UAVVMPartyManagerPresenter::StopPresenting()
 void UAVVMPartyManagerPresenter::BindViewModel() const
 {
 	const auto ViewModelFNameHelper = TScriptInterface<IAVVMViewModelFNameHelper>(ViewModel.Get());
-	UAVVMUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
+	UAVVMToolkitUtils::BindViewModel(ViewModelFNameHelper, ActivatableView.Get());
 }
 
 void UAVVMPartyManagerPresenter::OnForcePullPartiesCompleted(const bool bWasSuccess,

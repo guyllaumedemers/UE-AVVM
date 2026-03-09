@@ -37,6 +37,7 @@ public class AVVMOnline : ModuleRules
 			new string[]
 			{
 				"AVVM",
+				"AVVMToolkit",
 				"Core",
 				"CoreUObject",
 				"DeveloperSettings",
@@ -48,7 +49,7 @@ public class AVVMOnline : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Json"
+				"Json",
 			}
 		);
 	}

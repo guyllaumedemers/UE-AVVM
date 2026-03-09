@@ -23,6 +23,7 @@
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "Interaction.h"
 #include "Data/AVVMHandshakePayload.h"
@@ -39,12 +40,11 @@ void UActorInteractionImpl::SafeBegin()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Creating \"%s\" Class Instance on Outer \"%s\"!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInteractionImpl::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Binding %s."),
+	                *GetNameSafe(UActorInteractionImpl::StaticClass()));
 
 	OwningOuter = Outer;
 }
@@ -57,12 +57,11 @@ void UActorInteractionImpl::SafeEnd()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Destroying \"%s\" Class Instance on Outer \"%s\"!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInteractionImpl::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Unbinding %s."),
+	                *GetNameSafe(UActorInteractionImpl::StaticClass()));
 
 	OwningOuter.Reset();
 }
@@ -89,12 +88,12 @@ bool UActorInteractionImpl::HandleBeginOverlap(const TArray<UInteraction*>& NewR
 		return false;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Begin Overlap detected between Instigator \"%s\" and Target \"%s\"!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *NewInstigator->GetName(),
-	       *NewTarget->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Overlap event detected between %s, and %s."),
+	                *GetNameSafe(NewInstigator),
+	                *GetNameSafe(NewTarget));
 
 	return AttemptBeginOverlap(NewRecords,
 	                           NewInstigator /*World Actor*/,
@@ -122,12 +121,12 @@ bool UActorInteractionImpl::HandleEndOverlap(const TArray<UInteraction*>& NewRec
 		return false;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". End Overlap detected between Instigator \"%s\" and Target \"%s\"!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *NewInstigator->GetName(),
-	       *NewTarget->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+					Outer,
+					this,
+					TEXT("Overlap event detected between %s, and %s."),
+					*GetNameSafe(NewInstigator),
+					*GetNameSafe(NewTarget));
 
 	return AttemptEndOverlap(NewRecords,
 	                         NewInstigator /*World Actor*/,
@@ -161,23 +160,21 @@ bool UActorInteractionImpl::StartExecute(const AActor* NewInstigator,
 		return false;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". StartExecute \"%s\" Class Interaction on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInteractionImpl::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("%s Start."),
+	                *GetNameSafe(UActorInteractionImpl::StaticClass()));
 
 #if WITH_SERVER_CODE
 	if (bShouldPreventContingency && IsValid(NewTarget) && NewTarget->HasAuthority())
 	{
 		const bool bResult = Server_LockInteraction(NewRecords, NewInstigator, NewTarget);
-
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Interaction locking \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       bResult ? TEXT("Succeeded") : TEXT("Failed"));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                this,
+		                TEXT("Attempt locking interaction. Result%s."),
+		                bResult ? TEXT("Succeeded") : TEXT("Failed"));
 
 		return bResult;
 	}
@@ -197,23 +194,21 @@ bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
 		return false;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". StopExecute \"%s\" Class Interaction on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInteractionImpl::StaticClass()->GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("%s Stop."),
+	                *GetNameSafe(UActorInteractionImpl::StaticClass()));
 
 #if WITH_SERVER_CODE
 	if (bShouldPreventContingency && IsValid(NewTarget) && NewTarget->HasAuthority())
 	{
 		const bool bResult = Server_UnlockInteraction(NewRecords, NewInstigator, NewTarget);
-
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Interaction unlocking \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       bResult ? TEXT("Succeeded") : TEXT("Failed"));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                this,
+		                TEXT("Attempt unlocking interaction. Result:%s."),
+		                bResult ? TEXT("Succeeded") : TEXT("Failed"));
 
 		return bResult;
 	}
@@ -328,11 +323,10 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Record Collection modified on Outer \"%s\". Adding!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Record Collection modified. Add!"));
 
 	if (NewRecords.IsEmpty())
 	{
@@ -383,11 +377,10 @@ void UActorInteractionImpl::HandlePendingKillRecords(const TArray<UInteraction*>
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Record Collection modified on Outer \"%s\". Removing!"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Record Collection modified. Remove!"));
 
 	if (PendingKillRecords.IsEmpty())
 	{

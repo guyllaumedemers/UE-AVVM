@@ -23,6 +23,7 @@
 #include "ActorInteractionComponent.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
@@ -39,12 +40,11 @@ void UPlayerInteractionAbilityBase::OnGiveAbility(const FGameplayAbilityActorInf
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Granted \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("%s Ability Granted."),
+	                *GetName());
 }
 
 void UPlayerInteractionAbilityBase::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -58,12 +58,11 @@ void UPlayerInteractionAbilityBase::OnRemoveAbility(const FGameplayAbilityActorI
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Ability Removed \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("%s Ability Revoked."),
+	                *GetName());
 }
 
 bool UPlayerInteractionAbilityBase::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -115,12 +114,11 @@ void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHa
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Attempting Ability Activation \"%s\" on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Controller).GetData(),
-	       *GetName(),
-	       *Controller->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Controller,
+	                this,
+	                TEXT("TryActivate %s."),
+	                *GetName());
 
 	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (!IsValid(InteractionComponent))
@@ -146,12 +144,11 @@ void UPlayerInteractionAbilityBase::CancelAbility(const FGameplayAbilitySpecHand
                                                   bool bReplicateCancelAbility)
 {
 	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Aborting Ability \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
-	       *GetClass()->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                PC,
+	                this,
+	                TEXT("Abort %s."),
+	                *GetName());
 
 	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (IsValid(InteractionComponent))
@@ -184,12 +181,11 @@ bool UPlayerInteractionAbilityBase::CommitAbility(const FGameplayAbilitySpecHand
 	}
 
 	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Commiting Ability \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(PC).GetData(),
-	       *GetClass()->GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                PC,
+	                this,
+	                TEXT("Commit %s."),
+	                *GetName());
 
 	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (IsValid(InteractionComponent))

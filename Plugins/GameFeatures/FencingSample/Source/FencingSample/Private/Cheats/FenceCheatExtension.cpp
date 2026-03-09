@@ -21,6 +21,7 @@
 
 #include "ActorFenceComponent.h"
 #include "AVVMGameplayModule.h"
+#include "AVVMLogger.h"
 #include "FenceManagerSubsystem.h"
 
 #if WITH_AVVM_DEBUGGER
@@ -30,10 +31,11 @@
 
 void UFenceCheatExtension::AddedToCheatManager_Implementation()
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Registering %s"),
-	       *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Adding ##%s."),
+	                *GetNameSafe(UFenceCheatExtension::StaticClass()));
 
 	bHasFencesChanged = true;
 
@@ -44,10 +46,11 @@ void UFenceCheatExtension::AddedToCheatManager_Implementation()
 
 void UFenceCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Unregistering %s"),
-	       *GetName());
+	AVVM_LOGGER_LOG(LogGameplay,
+	                nullptr,
+	                this,
+	                TEXT("Removing ##%s."),
+	                *GetNameSafe(UFenceCheatExtension::StaticClass()));
 
 	UFenceManagerSubsystem* NewFenceSubsystem = UFenceManagerSubsystem::Get(this);
 	if (IsValid(NewFenceSubsystem))

@@ -23,7 +23,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "AVVMUtils.generated.h"
+#include "AVVMToolkitUtils.generated.h"
 
 class IAVVMViewModelFNameHelper;
 class UCommonUserWidget;
@@ -31,10 +31,10 @@ class UCommonUserWidget;
 /**
  *	Class description:
  *
- *	UAVVMUtils define reusable Api for general use-case.
+ *	UAVVMToolkitUtils define reusable Api for general use-case.
  */
 UCLASS()
-class AVVM_API UAVVMUtils : public UBlueprintFunctionLibrary
+class AVVMTOOLKIT_API UAVVMToolkitUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -45,30 +45,34 @@ public:
 	template <typename U>
 	static bool IsBlueprintScriptInterfaceValid(const UObject* Target);
 
-	// @gdemers handle binding "Manual" ViewModel type to a Widget
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
-	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
-	                          UCommonUserWidget* Target);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static ULocalPlayer* GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
+	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static ULocalPlayer* GetTargetLocalPlayer(const UObject* WorldContextObject);
+
+	// @gdemers handle binding "Manual" ViewModel type to a Widget
+	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils")
+	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
+							  UCommonUserWidget* Target);
 };
 
 template <typename T>
-bool UAVVMUtils::IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target)
+bool UAVVMToolkitUtils::IsNativeScriptInterfaceValid(const TScriptInterface<T>& Target)
 {
 	const bool bIsValidInterfaceObject = (Target.GetInterface() != nullptr && IsValid(Target.GetObject()));
 	return ensureAlwaysMsgf(bIsValidInterfaceObject,
-	                        TEXT("UAVVMUtilityFunctionLibrary::IsNativeScriptInterfaceValid<{?}>::Failed"));
+	                        TEXT("%hs line:%d."),
+	                        __FUNCTION__,
+	                        __LINE__);
 }
 
 template <typename U>
-bool UAVVMUtils::IsBlueprintScriptInterfaceValid(const UObject* Target)
+bool UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid(const UObject* Target)
 {
 	const bool bDoesBPImplementInterface = IsValid(Target) ? Target->GetClass()->ImplementsInterface(U::StaticClass()) : false;
 	return ensureAlwaysMsgf(bDoesBPImplementInterface,
-	                        TEXT("UAVVMUtilityFunctionLibrary::IsBlueprintScriptInterfaceValid<{%s}>::Failed"), *U::StaticClass()->GetName());
+	                        TEXT("%hs line:%d."),
+	                        __FUNCTION__,
+	                        __LINE__);
 }

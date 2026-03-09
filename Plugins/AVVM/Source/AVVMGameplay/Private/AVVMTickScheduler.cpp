@@ -22,7 +22,7 @@
 #include "AVVMDoesSupportManualTicking.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMTickSchedulerRule.h"
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "AVVMWorldSetting.h"
 #include "NativeGameplayTags.h"
 #include "TimerManager.h"
@@ -273,7 +273,7 @@ UAVVMTickScheduler* UAVVMTickScheduler::Get(const UWorld* World)
 
 void UAVVMTickScheduler::Register(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker)
 {
-	if (!UAVVMUtils::IsNativeScriptInterfaceValid(ManualTicker))
+	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid(ManualTicker))
 	{
 		return;
 	}
@@ -304,7 +304,7 @@ void UAVVMTickScheduler::Register(const TScriptInterface<IAVVMDoesSupportManualT
 
 void UAVVMTickScheduler::UnRegister(const TScriptInterface<IAVVMDoesSupportManualTicking>& ManualTicker)
 {
-	if (!UAVVMUtils::IsNativeScriptInterfaceValid(ManualTicker))
+	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid(ManualTicker))
 	{
 		return;
 	}

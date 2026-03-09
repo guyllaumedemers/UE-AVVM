@@ -121,7 +121,6 @@ class AVVM_API UAVVMNotificationSubsystem : public UWorldSubsystem
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable, Category="AVVM|Events", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static void Static_UnregisterObserver(const UObject* WorldContextObject,

@@ -20,7 +20,7 @@
 
 #include "GameStateTeamComponent.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMPlayerState.h"
 #include "AVVMWorldSetting.h"
@@ -33,7 +33,6 @@
 #include "Engine/StreamableManager.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameState.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 
@@ -74,11 +73,11 @@ void UGameStateTeamComponent::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding UGameStateTeamComponent to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UGameStateTeamComponent::StaticClass()));
 
 	OwningOuter = Outer;
 
@@ -121,11 +120,11 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	UE_LOG(LogTeamSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing UGameStateTeamComponent from Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogTeamSample,
+					Outer,
+					Outer,
+					TEXT("Removing %s."),
+					*GetNameSafe(UGameStateTeamComponent::StaticClass()));
 
 #if WITH_SERVER_CODE
 	if (Outer->HasAuthority())
@@ -161,11 +160,11 @@ void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerSt
 {
 	if (IsValid(NewPlayerState))
 	{
-		UE_LOG(LogTeamSample,
-		       Log,
-		       TEXT("Executed from \"%s\". OnPlayerStateAdded : \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
-		       *NewPlayerState->GetName());
+		AVVM_LOGGER_LOG(LogTeamSample,
+		                OwningOuter.Get(),
+		                OwningOuter.Get(),
+		                TEXT("Added %s."),
+		                *GetNameSafe(NewPlayerState));
 	}
 	
 	// Problem : APlayerState is added by the game when a player attempt reaching the game, but
@@ -192,11 +191,11 @@ void UGameStateTeamComponent::OnPlayerStateRemoved(const APlayerState* NewPlayer
 {
 	if (IsValid(NewPlayerState))
 	{
-		UE_LOG(LogTeamSample,
-		       Log,
-		       TEXT("Executed from \"%s\". OnPlayerStateRemoved : \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
-		       *NewPlayerState->GetName());
+		AVVM_LOGGER_LOG(LogTeamSample,
+		                OwningOuter.Get(),
+		                OwningOuter.Get(),
+		                TEXT("Removed %s."),
+		                *GetNameSafe(NewPlayerState));
 	}
 	
 	// @gdemers theres only one case here to cover :

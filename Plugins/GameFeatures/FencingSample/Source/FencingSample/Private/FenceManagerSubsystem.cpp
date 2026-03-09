@@ -20,7 +20,6 @@
 #include "FenceManagerSubsystem.h"
 
 #include "ActorFenceComponent.h"
-#include "AVVMGameplayModule.h"
 #include "Engine/World.h"
 
 bool UFenceManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
@@ -32,12 +31,6 @@ bool UFenceManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	}
 
 	return false;
-}
-
-void UFenceManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-	UE_LOG(LogGameplay, Log, TEXT("UFenceManagerSubsystem::Initialize. Running On Client."));
 }
 
 void UFenceManagerSubsystem::Deinitialize()

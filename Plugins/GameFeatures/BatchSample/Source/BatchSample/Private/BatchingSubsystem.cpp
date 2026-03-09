@@ -20,7 +20,8 @@
 #include "BatchingSubsystem.h"
 
 #include "AVVMGameplayUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "AVVMWorldSetting.h"
 #include "Batchable.h"
 #include "BatchingRule.h"
@@ -179,28 +180,26 @@ void UBatchingSubsystem::UnRegister(AActor* Actor)
 	}
 
 	const auto Batchable = TScriptInterface<IBatchable>(Actor);
-	if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
+	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
 	{
 		return;
 	}
 
 	if (!ensureAlways(Batchable->HasValidBatchIndex()))
 	{
-		UE_LOG(LogBatchSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Actor \"%s\" doesnt reference a valid Batch index. It may have been marked for Destroy on Next tick and attempt unregistering."),
-		       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
-		       *Actor->GetName())
+		AVVM_LOGGER_LOG(LogBatchSample,
+		                Actor,
+		                Actor,
+		                TEXT("Doesn't reference a valid Batch index. It may have been marked for Destroy on Next tick and attempt unregistering."));
 
 		return;
 	}
 
-	UE_LOG(LogBatchSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Actor \"%s\" has been unregistered from Batch Index \"%d\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
-	       *Actor->GetName(),
-	       Batchable->GetOwningBatchIndex())
+	AVVM_LOGGER_LOG(LogBatchSample,
+	                Actor,
+	                Actor,
+	                TEXT("Has been unregistered from Batch Index ##%d."),
+	                Batchable->GetOwningBatchIndex());
 
 	const int32 BatchIndex = Batchable->GetOwningBatchIndex();
 	const bool bIsValidIndex = PendingDestroy.IsValidIndex(BatchIndex);
@@ -219,7 +218,7 @@ void UBatchingSubsystem::Register(AActor* Actor)
 	}
 
 	const auto Batchable = TScriptInterface<IBatchable>(Actor);
-	if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
+	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid(Batchable) || Batchable->IsPlacedInEditor())
 	{
 		return;
 	}
@@ -245,12 +244,11 @@ void UBatchingSubsystem::Register(AActor* Actor)
 
 	if (ensureAlways(Batchable->HasValidBatchIndex()))
 	{
-		UE_LOG(LogBatchSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Actor \"%s\" has been registered with Batch Index \"%d\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Actor).GetData(),
-		       *Actor->GetName(),
-		       Batchable->GetOwningBatchIndex())
+		AVVM_LOGGER_LOG(LogBatchSample,
+		                Actor,
+		                Actor,
+		                TEXT("Has been registered with Batch Index ##%d."),
+		                Batchable->GetOwningBatchIndex());
 	}
 }
 
@@ -355,18 +353,18 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 	for (auto Iterator = Candidates.CreateIterator(); Iterator; ++Iterator)
 	{
 		const auto Batchable = TScriptInterface<IBatchable>(Iterator->Get());
-		if (!UAVVMUtils::IsNativeScriptInterfaceValid(Batchable))
+		if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid(Batchable))
 		{
 			Iterator.RemoveCurrentSwap();
 			continue;
 		}
 
-		UE_LOG(LogBatchSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Actor \"%s\" is being destroyed with Batch Index \"%d\"."),
-		       UAVVMGameplayUtils::PrintNetSource((*Iterator).Get()).GetData(),
-		       *(*Iterator)->GetName(),
-		       Batchable->GetOwningBatchIndex())
+		const AActor* Actor = Iterator->Get();
+		AVVM_LOGGER_LOG(LogBatchSample,
+		                Actor,
+		                Actor,
+		                TEXT("Is being destroyed with Batch Index ##%d."),
+		                Batchable->GetOwningBatchIndex());
 
 		(*Iterator)->Destroy();
 	}
@@ -387,7 +385,7 @@ void UBatchingSubsystem::FBatchContext::Invalidate() const
 	for (auto Iterator = Candidates.CreateConstIterator(); Iterator; ++Iterator)
 	{
 		const auto Batchable = TScriptInterface<IBatchable>(Iterator->Get());
-		if (UAVVMUtils::IsNativeScriptInterfaceValid(Batchable))
+		if (UAVVMToolkitUtils::IsNativeScriptInterfaceValid(Batchable))
 		{
 			Batchable->SetOwningBatchIndex(INDEX_NONE);
 		}

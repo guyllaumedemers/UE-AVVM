@@ -35,12 +35,6 @@ bool UAVVMSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return false;
 }
 
-void UAVVMSubsystem::Initialize(FSubsystemCollectionBase& Collection)
-{
-	Super::Initialize(Collection);
-	UE_LOG(LogUI, Log, TEXT("UAVVMSubsystem::Initialize. Running On Client."));
-}
-
 void UAVVMSubsystem::Deinitialize()
 {
 	Super::Deinitialize();

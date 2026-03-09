@@ -20,6 +20,8 @@
 #include "UI/InteractionViewModel.h"
 
 #include "ActorInteractionComponent.h"
+#include "AVVMGameplayModule.h"
+#include "AVVMLogger.h"
 #include "CommonInputSubsystem.h"
 #include "CommonUITypes.h"
 #include "MVVMViewModelBase.h"
@@ -33,14 +35,16 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 		return;
 	}
 
-	const auto* Instigator = UActorInteractionComponent::GetActorComponent(NewPayload->Instigator.Get());
-	if (!IsValid(Instigator))
+	Instigator = NewPayload->Instigator.Get();
+
+	const auto* InteractionComponent = UActorInteractionComponent::GetActorComponent(Instigator.Get());
+	if (!IsValid(InteractionComponent))
 	{
 		return;
 	}
 
 	TInstancedStruct<FInteractionExecutionRequirements> OutRequirements;
-	Instigator->GetInteractionRequirements(OutRequirements);
+	InteractionComponent->GetInteractionRequirements(OutRequirements);
 
 	const auto* FloatRequirements = OutRequirements.GetPtr<FInteractionExecutionFloatRequirements>();
 	if (FloatRequirements != nullptr)
@@ -69,12 +73,12 @@ FInputProgress::FInputProgress(const FAVVMHandshakePayload* NewPayload)
 		InteractionType = TEXT("Input Mashing");
 	}
 
-	UE_LOG(LogUI,
-	       Log,
-	       TEXT("New \"%s\" Interaction Recorded. Interaction through Input Action \"%s\". Has Max Threshold \"%s\"."),
-	       InteractionType.GetData(),
-	       InputAction.IsValid() ? *InputAction->GetName() : TEXT("InputAction Unknown"),
-	       *FString::SanitizeFloat(CompletionThreshold, 2));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Instigator.Get(),
+	                Instigator.Get(),
+	                TEXT("%s Input Action Pressed. Has Max Threshold %s."),
+	                *GetNameSafe(InputAction.Get()),
+	                *FString::SanitizeFloat(CompletionThreshold, 2));
 #endif
 }
 
@@ -102,11 +106,12 @@ float FInputProgress::Tick(const float OldProgress, const float NewDelta) const
 		InteractionType = TEXT("Input Mashing");
 	}
 
-	UE_LOG(LogUI,
-	       Log,
-	       TEXT("\"%s\" Ticked. Progress: \"%s\"/\"1.f\"."),
-	       InteractionType.GetData(),
-	       *FString::SanitizeFloat(NewProgress, 2));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Instigator.Get(),
+	                Instigator.Get(),
+	                TEXT("%s Input Action Held. Progress %s."),
+	                *GetNameSafe(InputAction.Get()),
+	                *FString::SanitizeFloat(NewProgress, 2));
 #endif
 
 	return NewProgress;
@@ -134,27 +139,19 @@ void UInteractionViewModel::PumpHeartbeat(const float NewHeartbeat)
 void UInteractionViewModel::Kill()
 {
 	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, 0.f);
-
-	const UInputAction* InputAction = InputContext.InputAction.Get();
-	if (IsValid(InputAction))
-	{
-		UE_LOG(LogUI,
-			   Log,
-			   TEXT("\"%s\" Interaction Cancelled."),
-			   *InputAction->GetName());
-	}
+	AVVM_LOGGER_LOG(LogGameplay,
+	                InputContext.Instigator.Get(),
+	                InputContext.Instigator.Get(),
+	                TEXT("%s Input Action Cancelled."),
+	                *GetNameSafe(InputContext.InputAction.Get()));
 }
 
 void UInteractionViewModel::Execute()
 {
 	UE_MVVM_SET_PROPERTY_VALUE(InputProgress, 0.f);
-
-	const UInputAction* InputAction = InputContext.InputAction.Get();
-	if (IsValid(InputAction))
-	{
-		UE_LOG(LogUI,
-		       Log,
-		       TEXT("\"%s\" Interaction Executed."),
-		       *InputAction->GetName());
-	}
+	AVVM_LOGGER_LOG(LogGameplay,
+	                InputContext.Instigator.Get(),
+	                InputContext.Instigator.Get(),
+	                TEXT("%s Input Action Executed."),
+	                *GetNameSafe(InputContext.InputAction.Get()));
 }

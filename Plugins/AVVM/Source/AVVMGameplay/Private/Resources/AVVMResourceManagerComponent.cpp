@@ -21,7 +21,8 @@
 
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplayUtils.h"
-#include "AVVMUtils.h"
+#include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
@@ -147,14 +148,13 @@ void UAVVMResourceManagerComponent::BeginPlay()
 
 	OwningOuter = Outer;
 
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Adding ##%s."),
+	                *GetNameSafe(UAVVMResourceManagerComponent::StaticClass()));
+
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_InstanceCounter);
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding UAVVMResourceManagerComponent on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName())
-
 	LLM_SCOPE_BYTAG(AVVMTag);
 
 #if WITH_SERVER_CODE
@@ -163,13 +163,6 @@ void UAVVMResourceManagerComponent::BeginPlay()
 		const TArray<FDataRegistryId> ResourceIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(Outer);
 		for (const auto& ResourceId : ResourceIds)
 		{
-			UE_LOG(LogGameplay,
-			       Log,
-			       TEXT("Executed from \"%s\". Requesting Resource Acquisition for \"%s\" on Outer \"%s\"!"),
-			       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-			       *ResourceId.ToString(),
-			       *Outer->GetName());
-
 			RequestAsyncLoading(ResourceId, FOnResourceAsyncLoadingComplete{});
 		}
 	}
@@ -188,14 +181,13 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing UAVVMResourceManagerComponent on Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Removing ##%s."),
+	                *GetNameSafe(UAVVMResourceManagerComponent::StaticClass()));
 
 	LLM_SCOPE_BYTAG(AVVMTag);
-
 	OwningOuter.Reset();
 }
 
@@ -210,6 +202,11 @@ void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& N
 	}
 
 	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_RequestCounter);
+	AVVM_LOGGER_LOG(LogGameplay,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Requesting Resource Acquisition for ##%s."),
+	                *NewRegistryId.ToString());
 
 	const auto OnDataAcquiredCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, OnRequestCompleteCallback);
 	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(NewRegistryId, OnDataAcquiredCallback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
@@ -228,12 +225,11 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	const bool bIsFullyLoaded = Result.Status == EDataRegistryAcquireStatus::AcquireFinished;
 	if (!bIsFullyLoaded)
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Resource Acquisition for \"%s\" Failed on Outer \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *Result.ItemId.ToString(),
-		       *Outer->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Resource Acquisition for ##%s Failed."),
+		                *Result.ItemId.ToString());
 
 		OnRequestCompleteCallback.ExecuteIfBound();
 		return;
@@ -262,12 +258,11 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		}
 
 		const AActor* NewOuter = NewResourceManagerComponent->OwningOuter.Get();
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Executing Resource Acquisition Request for \"%s\" on Outer \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(NewOuter).GetData(),
-		       *NewRegistryId.ToString(),
-		       IsValid(NewOuter) ? *NewOuter->GetName() : TEXT("Unknown"));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                NewOuter,
+		                NewOuter,
+		                TEXT("Making call to UAssetManager to load resource object for ##%s."),
+		                *NewRegistryId.ToString());
 
 		FStreamableDelegate CompletionCallback;
 		CompletionCallback.BindUObject(NewResourceManagerComponent.Get(), &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
@@ -288,12 +283,11 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	const bool bHasPendingRequest = QueueingMechanism->PushDeferredRequest(NewRequest);
 	if (bHasPendingRequest)
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Resource Acquisition Request for \"%s\" was Deferred on Outer \"%s\"!"),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *Result.ItemId.ToString(),
-		       *Outer->GetName());
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("UAssetManager resource acquisition request for ##%s was Deferred."),
+		                *Result.ItemId.ToString());
 	}
 }
 
@@ -310,7 +304,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 		return;
 	}
 
-	const bool bResult = UAVVMUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
 	{
 		return;
@@ -323,12 +317,12 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	// @gdemers recurse on nested registry id until our object is fully loaded.
 	const TArray<FDataRegistryId> RecursiveResources = IAVVMResourceProvider::Execute_CheckIsDoneAcquiringResources(Outer, OutStreamedAssets);
 	const bool bIsDoneAcquiringResources = OnProcessAdditionalResources(RecursiveResources);
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Is Resource Manager Done Acquiring Resources on Outer \"%s\"? %s"),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName(),
-	       bIsDoneAcquiringResources ? TEXT("True") : TEXT("False"));
+
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Is Resource Manager Done Acquiring Resources. ##%s"),
+	                bIsDoneAcquiringResources ? TEXT("True") : TEXT("False"));
 }
 
 bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)

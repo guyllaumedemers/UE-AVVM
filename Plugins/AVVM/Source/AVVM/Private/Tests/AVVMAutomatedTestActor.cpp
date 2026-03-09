@@ -41,7 +41,6 @@ void AAVVMAutomatedTestActor::GetSetDelegate(FScopedCounterNotify* NewScopedCoun
 
 void AAVVMAutomatedTestActor::OnInvokeCallback(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
-	UE_LOG(LogUI, Log, TEXT("%hs line:%d {%s}."), __FUNCTION__, __LINE__, *GetName());
 	if (ScopedCounterNotify != nullptr)
 	{
 		ScopedCounterNotify->Minus();

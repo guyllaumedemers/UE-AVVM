@@ -17,41 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMUtils.h"
+#include "AVVMToolkitUtils.h"
 
-#include "AVVMModule.h"
+#include "AVVMViewModelFNameHelper.h"
 #include "CommonUserWidget.h"
 #include "MVVMSubsystem.h"
 #include "Engine/GameInstance.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
 #include "View/MVVMView.h"
 
-void UAVVMUtils::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
-                               UCommonUserWidget* Target)
-{
-	const bool bIsValid = UAVVMUtils::IsNativeScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
-	if (!bIsValid)
-	{
-		return;
-	}
-
-	UMVVMView* MVVMView = UMVVMSubsystem::GetViewFromUserWidget(Target);
-	if (IsValid(MVVMView))
-	{
-		const FName ViewModelFName = ViewModelFNameHelper->GetViewModelFName();
-		UObject* ViewModel = ViewModelFNameHelper.GetObject();
-		MVVMView->SetViewModel(ViewModelFName, ViewModel);
-	}
-}
-
-ULocalPlayer* UAVVMUtils::GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject)
+ULocalPlayer* UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject)
 {
 	if (!IsValid(WorldContextObject))
 	{
 		return nullptr;
 	}
 
-	ULocalPlayer* TargetLocalPlayer = UAVVMUtils::GetTargetLocalPlayer(WorldContextObject);
+	ULocalPlayer* TargetLocalPlayer = UAVVMToolkitUtils::GetTargetLocalPlayer(WorldContextObject);
 	if (IsValid(TargetLocalPlayer))
 	{
 		return TargetLocalPlayer;
@@ -74,12 +58,12 @@ ULocalPlayer* UAVVMUtils::GetFirstOrTargetLocalPlayer(const UObject* WorldContex
 	}
 }
 
-ULocalPlayer* UAVVMUtils::GetTargetLocalPlayer(const UObject* WorldContextObject)
+ULocalPlayer* UAVVMToolkitUtils::GetTargetLocalPlayer(const UObject* WorldContextObject)
 {
 	auto* PlayerState = Cast<APlayerState>(WorldContextObject);
 	if (IsValid(PlayerState))
 	{
-		return UAVVMUtils::GetTargetLocalPlayer(PlayerState->GetPlayerController());
+		return UAVVMToolkitUtils::GetTargetLocalPlayer(PlayerState->GetPlayerController());
 	}
 
 	auto* PC = Cast<APlayerController>(WorldContextObject);
@@ -89,4 +73,21 @@ ULocalPlayer* UAVVMUtils::GetTargetLocalPlayer(const UObject* WorldContextObject
 	}
 
 	return nullptr;
+}
+
+void UAVVMToolkitUtils::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper, UCommonUserWidget* Target)
+{
+	const bool bIsValid = UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMViewModelFNameHelper>(ViewModelFNameHelper);
+	if (!bIsValid)
+	{
+		return;
+	}
+
+	UMVVMView* MVVMView = UMVVMSubsystem::GetViewFromUserWidget(Target);
+	if (IsValid(MVVMView))
+	{
+		const FName ViewModelFName = ViewModelFNameHelper->GetViewModelFName();
+		UObject* ViewModel = ViewModelFNameHelper.GetObject();
+		MVVMView->SetViewModel(ViewModelFName, ViewModel);
+	}
 }

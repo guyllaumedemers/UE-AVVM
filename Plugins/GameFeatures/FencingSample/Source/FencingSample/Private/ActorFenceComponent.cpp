@@ -20,7 +20,7 @@
 #include "ActorFenceComponent.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "FenceManagerSubsystem.h"
 #include "GameFramework/Actor.h"
@@ -45,12 +45,11 @@ void UActorFenceComponent::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorFenceComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UActorFenceComponent::StaticClass()));
 
 	OwningOuter = Outer;
 	TryRaise();
@@ -76,12 +75,11 @@ void UActorFenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorFenceComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+					Outer,
+					Outer,
+					TEXT("Removing %s."),
+					*GetNameSafe(UActorFenceComponent::StaticClass()));
 
 	OwningOuter.Reset();
 }
@@ -116,11 +114,11 @@ void UActorFenceComponent::TryRaise()
 	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
 	if (!bDoesMeetAllRequirements)
 	{
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Adding Fence Requirements \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *FenceRequirements.ToString())
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Adding Fence Requirements %s."),
+		                *FenceRequirements.ToString());
 
 		NewReplicatedTagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &UActorFenceComponent::OnReplicatedTagChanged);
 		UFenceManagerSubsystem::Static_RegisterFence(this, this);
@@ -157,11 +155,11 @@ void UActorFenceComponent::TryLower()
 	{
 		BP_Execute();
 
-		UE_LOG(LogGameplay,
-		       Log,
-		       TEXT("Executed from \"%s\". Removing Fence Requirements \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *FenceRequirements.ToString())
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Removing Fence Requirements %s."),
+		                *FenceRequirements.ToString());
 
 		UFenceManagerSubsystem::Static_UnregisterFence(this, this);
 		NewReplicatedTagComponent->OnReplicatedTagChanged.RemoveAll(this);

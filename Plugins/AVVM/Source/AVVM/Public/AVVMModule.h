@@ -20,11 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Modules/ModuleManager.h"
-#include "UObject/Interface.h"
-
-#include "AVVMModule.generated.h"
 
 AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
 
@@ -51,23 +47,3 @@ AVVM_API DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
  *			* UAVVMSubsystem is a World Subsystem that manage caching ViewModel instance and allow retrieval of said instance using the AActor type provided. This imply that View Model are owned by a unique
  *			AActor which is great for situation where OnPossesChanges require displaying a new set of data to the HUD but may revert back to an existing Pawn later.
  */
-
-/**
- *	Class description:
- *
- *	UAVVMViewModelFNameHelper. Provide the ViewModel subsystem an abstract approach to binding a ViewModel name to
- *	a Widget.
- */
-UINTERFACE(BlueprintType, Blueprintable)
-class AVVM_API UAVVMViewModelFNameHelper : public UInterface
-{
-	GENERATED_BODY()
-};
-
-class AVVM_API IAVVMViewModelFNameHelper
-{
-	GENERATED_BODY()
-
-public:
-	virtual FName GetViewModelFName() const PURE_VIRTUAL(GetViewModelFName, return NAME_None;);
-};

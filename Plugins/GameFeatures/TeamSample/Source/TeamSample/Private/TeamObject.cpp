@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "TeamObject.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMOnlineModule.h"
 #include "AVVMOnlineUtils.h"
 #include "AVVMOnlinePlayerStringParser.h"
@@ -85,12 +85,12 @@ void UTeamObject::RegisterPlayerState(const APlayerState* NewPlayerState, const 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (IsValid(Outer) && IsValid(NewPlayerState))
 	{
-		UE_LOG(LogTeamSample,
-		       Log,
-		       TEXT("Executed from \"%s\". RegisterPlayerState : \"%s\" with Team \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *NewPlayerState->GetName(),
-		       *GetName());
+		AVVM_LOGGER_LOG(LogTeamSample,
+		                Outer,
+		                Outer,
+		                TEXT("Registering %s with Team %s."),
+		                *GetNameSafe(NewPlayerState),
+		                *GetName());
 	}
 
 	auto* TeamComponent = UPlayerStateTeamComponent::GetActorComponent(NewPlayerState);
@@ -109,12 +109,12 @@ void UTeamObject::UnRegisterPlayerState(const APlayerState* OldPlayerState)
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (IsValid(Outer) && IsValid(OldPlayerState))
 	{
-		UE_LOG(LogTeamSample,
-		       Log,
-		       TEXT("Executed from \"%s\". UnRegisterPlayerState : \"%s\" from Team \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(GetTypedOuter<AActor>()).GetData(),
-		       *OldPlayerState->GetName(),
-		       *GetName());
+		AVVM_LOGGER_LOG(LogTeamSample,
+		                Outer,
+		                Outer,
+		                TEXT("Unregistering %s with Team %s."),
+		                *GetNameSafe(OldPlayerState),
+		                *GetName());
 	}
 }
 
@@ -183,11 +183,11 @@ UTeamObject* UTeamUtils::CreateTeam(UObject* Outer,
 	UTeamObject* NewTeam = NewObject<UTeamObject>(Outer);
 	if (IsValid(NewTeam) && IsValid(Outer))
 	{
-		UE_LOG(LogTeamSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Create new Team \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer->GetTypedOuter<AActor>()).GetData(),
-		       *NewTeam->GetName());
+		AVVM_LOGGER_LOG(LogTeamSample,
+		                Outer,
+		                Outer,
+		                TEXT("Creating new team %s."),
+		                *GetNameSafe(NewTeam));
 	}
 
 	AppendTeam(UnassignedPlayerStates, NewParty.PlayerConnections, NewTeam);

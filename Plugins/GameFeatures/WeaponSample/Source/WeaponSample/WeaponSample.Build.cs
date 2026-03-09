@@ -32,6 +32,7 @@ public class WeaponSample : ModuleRules
 			{
 				"AVVM",
 				"AVVMGameplay",
+				"AVVMToolkit",
 				"Core",
 				"CoreUObject",
 				"DataRegistry",
@@ -47,7 +48,6 @@ public class WeaponSample : ModuleRules
 			new string[]
 			{
 				"AVVMOnline",
-				"AVVMToolkit",
 			}
 		);
 	}

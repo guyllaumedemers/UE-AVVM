@@ -20,7 +20,7 @@
 #include "Interaction.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
@@ -78,14 +78,12 @@ void UInteraction::Lock()
 	bIsInteractable = false;
 
 	const AActor* Outer = GetTypedOuter<AActor>();
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Locking Interaction \"%s\", instigator \"%s\", target \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       IsValid(Instigator) ? *Instigator->GetName() : TEXT("Invalid"),
-	       IsValid(Target) ? *Target->GetName() : TEXT("Invalid"));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Lock interaction between %s, and %s"),
+	                *GetNameSafe(Instigator),
+	                *GetNameSafe(Target));
 }
 
 void UInteraction::Unlock()
@@ -94,14 +92,12 @@ void UInteraction::Unlock()
 	bIsInteractable = true;
 
 	const AActor* Outer = GetTypedOuter<AActor>();
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Unlocking Interaction \"%s\", instigator \"%s\", target \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       IsValid(Instigator) ? *Instigator->GetName() : TEXT("Invalid"),
-	       IsValid(Target) ? *Target->GetName() : TEXT("Invalid"));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("Unlock interaction between %s, and %s"),
+	                *GetNameSafe(Instigator),
+	                *GetNameSafe(Target));
 }
 
 const AActor* UInteraction::GetTarget() const
@@ -120,14 +116,13 @@ void UInteraction::SetPendingKill()
 	bIsPendingKill = true;
 
 	const AActor* Outer = GetTypedOuter<AActor>();
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". SetPendingKill on Interaction \"%s\", instigator \"%s\", target \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *GetName(),
-	       IsValid(Instigator) ? *Instigator->GetName() : TEXT("Invalid"),
-	       IsValid(Target) ? *Target->GetName() : TEXT("Invalid"));
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                this,
+	                TEXT("SetPendingKill on %s between %s, and %s"),
+	                *GetName(),
+	                *GetNameSafe(Instigator),
+	                *GetNameSafe(Target));
 }
 
 void UInteraction::operator()(const AActor* NewInstigator,

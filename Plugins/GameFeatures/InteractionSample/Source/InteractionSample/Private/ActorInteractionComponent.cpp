@@ -21,7 +21,7 @@
 
 #include "ActorInteractionImpl.h"
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMTagUtils.h"
 #include "Interaction.h"
@@ -70,13 +70,11 @@ void UActorInteractionComponent::BeginPlay()
 	}
 
 	TRACE_COUNTER_INCREMENT(UActorInteractionComponent_InstanceCounter);
-
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInteractionComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UActorInteractionComponent::StaticClass()));
 
 	if (ensureAlwaysMsgf(IsValid(InteractionImplClass),
 	                     TEXT("Invalid InteractionImplClass!")))
@@ -136,12 +134,11 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	}
 #endif
 
-	UE_LOG(LogGameplay,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing \"%s\" Class Instance to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *UActorInteractionComponent::StaticClass()->GetName(),
-	       *Outer->GetName())
+	AVVM_LOGGER_LOG(LogGameplay,
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UActorInteractionComponent::StaticClass()));
 
 	OwningOuter.Reset();
 }

@@ -20,7 +20,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DataRegistryId.h"
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
@@ -44,14 +43,6 @@ public:
 	// @gdemers other than the APlayerController, all Actors are ROLE_Authority if non-replicated or if existing on the Server.
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static bool HasNetworkAuthority(const AActor* Actor);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
-	static FString BP_PrintNetSource(const AActor* Actor);
-
-	static FStringView PrintNetSource(const AActor* Actor);
-
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
-	static FString PrintConnectionInfo(const UNetConnection* Connection);
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 GetActorUniqueIdentifier(const AActor* Actor);

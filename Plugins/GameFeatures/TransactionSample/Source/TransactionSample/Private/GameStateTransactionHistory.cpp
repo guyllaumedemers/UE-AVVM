@@ -19,8 +19,7 @@
 //SOFTWARE.
 #include "GameStateTransactionHistory.h"
 
-#include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "NativeGameplayTags.h"
 #include "Transaction.h"
@@ -65,11 +64,11 @@ void UGameStateTransactionHistory::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogTransactionSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Adding UGameStateTransactionHistory to Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogTransactionSample,
+	                Outer,
+	                Outer,
+	                TEXT("Adding ##%s."),
+	                *GetNameSafe(UGameStateTransactionHistory::StaticClass()));
 
 	OwningOuter = Outer;
 }
@@ -91,11 +90,11 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 		return;
 	}
 
-	UE_LOG(LogTransactionSample,
-	       Log,
-	       TEXT("Executed from \"%s\". Removing UGameStateTransactionHistory from Outer \"%s\"."),
-	       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-	       *Outer->GetName());
+	AVVM_LOGGER_LOG(LogTransactionSample,
+					Outer,
+					Outer,
+					TEXT("Removing ##%s."),
+					*GetNameSafe(UGameStateTransactionHistory::StaticClass()));
 }
 
 void UGameStateTransactionHistory::Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
@@ -179,11 +178,11 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 	const auto* Outer = OwningOuter.Get();
 	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		UE_LOG(LogTransactionSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Creating new Record \r\n \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *Transaction->ToString());
+		AVVM_LOGGER_LOG(LogTransactionSample,
+		                Outer,
+		                Outer,
+		                TEXT("Creating new Record ##%s."),
+		                IsValid(Transaction) ? *Transaction->ToString() : TEXT(""));
 	}
 
 	OnRep_NewTransactionRecorded();
@@ -209,12 +208,12 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 	const auto* Outer = OwningOuter.Get();
 	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		UE_LOG(LogTransactionSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Remove All Transactions Of Type \"%s\" from \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       EnumToString(NewTransactionType),
-		       *NewTarget->GetName());
+		AVVM_LOGGER_LOG(LogTransactionSample,
+		                Outer,
+		                Outer,
+		                TEXT("Remove all transactions of type ##%s from ##%s."),
+		                EnumToString(NewTransactionType),
+		                *GetNameSafe(NewTarget));
 	}
 
 	OnRep_NewTransactionRecorded();
@@ -239,11 +238,11 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 	const auto* Outer = OwningOuter.Get();
 	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
-		UE_LOG(LogTransactionSample,
-		       Log,
-		       TEXT("Executed from \"%s\". Remove All Transactions from \"%s\"."),
-		       UAVVMGameplayUtils::PrintNetSource(Outer).GetData(),
-		       *NewTarget->GetName());
+		AVVM_LOGGER_LOG(LogTransactionSample,
+		                Outer,
+		                Outer,
+		                TEXT("Remove all transactions from ##%s."),
+		                *GetNameSafe(NewTarget));
 	}
 
 	OnRep_NewTransactionRecorded();
@@ -293,11 +292,12 @@ void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
 		return;
 	}
 
-	UE_LOG(LogTransactionSample,
-	       Log,
-	       TEXT("Executed from \"%s\". OnRep_NewTransactionRecorded New Transaction Detected! \r\n Value: \"%s\""),
-	       UAVVMGameplayUtils::PrintNetSource(OwningOuter.Get()).GetData(),
-	       *NewTransaction->ToString());
+	const auto* Outer = OwningOuter.Get();
+	AVVM_LOGGER_LOG(LogTransactionSample,
+	                Outer,
+	                Outer,
+	                TEXT("New Transaction Detected! \r\n Value: ##%s."),
+	                IsValid(NewTransaction) ? *NewTransaction->ToString() : TEXT(""));
 
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_TRANSACTION_NOTIFICATION;
