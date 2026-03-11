@@ -125,6 +125,11 @@ void UActorFenceComponent::TryRaise()
 	}
 	else
 	{
+		AVVM_LOGGER_LOG(LogGameplay,
+		                Outer,
+		                Outer,
+		                TEXT("Execute immediate action."));
+
 		BP_Execute();
 	}
 }
@@ -153,13 +158,12 @@ void UActorFenceComponent::TryLower()
 	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
 	if (bDoesMeetAllRequirements)
 	{
-		BP_Execute();
-
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
-		                TEXT("Removing Fence Requirements %s."),
-		                *FenceRequirements.ToString());
+		                TEXT("Execute immediate action."));
+		
+		BP_Execute();
 
 		UFenceManagerSubsystem::Static_UnregisterFence(this, this);
 		NewReplicatedTagComponent->OnReplicatedTagChanged.RemoveAll(this);

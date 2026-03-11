@@ -33,7 +33,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TICK_SCHEDULING, "WorldRule.TickScheduling
 bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);
-	if (!IsValid(World))
+	const bool bIsGameWorld = IsValid(World) ? World->IsGameWorld() : false;
+	if (!bIsGameWorld)
 	{
 		return false;
 	}

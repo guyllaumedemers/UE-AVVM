@@ -27,7 +27,8 @@
 bool UAVVMSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);
-	if (IsValid(World))
+	const bool bIsGameWorld = IsValid(World) ? World->IsGameWorld() : false;
+	if (bIsGameWorld)
 	{
 		return !World->IsNetMode(NM_DedicatedServer);
 	}

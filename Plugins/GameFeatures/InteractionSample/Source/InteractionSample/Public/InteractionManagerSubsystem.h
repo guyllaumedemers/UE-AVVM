@@ -42,6 +42,9 @@ class INTERACTIONSAMPLE_API UInteractionManagerSubsystem : public UWorldSubsyste
 {
 	GENERATED_BODY()
 	
+public:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	
 	/*
 	 *	TODO @gdemers Make all Component register with this subsystem. Create a graph of clusters
 	 *  by proximity, and have use attempting an interaction with a given elements display the owning custer

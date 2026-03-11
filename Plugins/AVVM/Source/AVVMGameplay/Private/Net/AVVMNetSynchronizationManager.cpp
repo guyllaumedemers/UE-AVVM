@@ -26,8 +26,9 @@
 
 bool UAVVMNetSynchronizationManager::ShouldCreateSubsystem(UObject* Outer) const
 {
-	const UWorld* World = Cast<UWorld>(Outer);
-	if (IsValid(World))
+	const auto* World = Cast<UWorld>(Outer);
+	const bool bIsGameWorld = IsValid(World) ? World->IsGameWorld() : false;
+	if (bIsGameWorld)
 	{
 		return World->GetNetMode() < NM_Client;
 	}

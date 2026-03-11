@@ -35,7 +35,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TEAMSPAWNING, "WorldRule.TeamSpawning");
 bool UTeamSpawnSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);
-	if (!IsValid(World))
+	const bool bIsGameWorld = IsValid(World) ? World->IsGameWorld() : false;
+	if (!bIsGameWorld)
 	{
 		return false;
 	}
@@ -49,7 +50,7 @@ bool UTeamSpawnSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	const bool bDoesOverrideSubsystemCreation = UTeamSettings::DoesLevelOverrideSubsystemCreation(World->PersistentLevel);
 	if (bDoesOverrideSubsystemCreation)
 	{
-		return true;
+		return false;
 	}
 
 	return !World->IsNetMode(NM_Client);

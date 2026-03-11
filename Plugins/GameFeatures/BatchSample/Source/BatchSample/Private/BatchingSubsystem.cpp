@@ -38,7 +38,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_BATCHING, "WorldRule.Batching");
 bool UBatchingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);
-	if (!IsValid(World))
+	const bool bIsGameWorld = IsValid(World) ? World->IsGameWorld() : false;
+	if (!bIsGameWorld)
 	{
 		return false;
 	}

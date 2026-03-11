@@ -31,12 +31,7 @@
 bool UProjectileManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);
-	if (!IsValid(World))
-	{
-		return false;
-	}
-
-	return World->IsGameWorld();
+	return IsValid(World) ? World->IsGameWorld() : false;
 }
 
 void UProjectileManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)

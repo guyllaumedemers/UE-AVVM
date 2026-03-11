@@ -18,3 +18,17 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "InteractionManagerSubsystem.h"
+
+#include "Engine/World.h"
+
+bool UInteractionManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+{
+	const auto* World = Cast<UWorld>(Outer);
+	const bool bIsGameWorld = IsValid(World) ? World->IsGameWorld() : false;
+	if (bIsGameWorld)
+	{
+		return World->GetNetMode() < NM_Client;
+	}
+
+	return false;
+}

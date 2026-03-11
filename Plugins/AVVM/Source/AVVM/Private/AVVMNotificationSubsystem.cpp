@@ -36,8 +36,8 @@ UScriptStruct* TBaseStructure<FAVVMNotificationPayload>::Get()
 
 bool UAVVMNotificationSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
-	// @gdemers channels should be conditionally registered based on Authority.
-	return true;
+	const auto* World = Cast<UWorld>(Outer);
+	return IsValid(World) ? World->IsGameWorld() : false;
 }
 
 UAVVMNotificationSubsystem* UAVVMNotificationSubsystem::Get(const UObject* WorldContextObject)
