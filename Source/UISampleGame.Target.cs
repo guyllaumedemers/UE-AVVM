@@ -32,5 +32,6 @@ public class UISampleGameTarget : TargetRules
 
 		bUseIris = true;
 		bBuildDeveloperTools = true;
+		bAllowEnginePluginsEnabledByDefault = false;
 	}
 }

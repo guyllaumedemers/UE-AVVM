@@ -32,5 +32,6 @@ public class UISampleClientTarget : TargetRules
 
 		bUseIris = true;
 		bBuildDeveloperTools = true;
+		bAllowEnginePluginsEnabledByDefault = false;
 	}
 }

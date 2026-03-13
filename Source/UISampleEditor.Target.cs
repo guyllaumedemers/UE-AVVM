@@ -32,5 +32,6 @@ public class UISampleEditorTarget : TargetRules
 
 		bUseIris = true;
 		bBuildDeveloperTools = true;
+		bAllowEnginePluginsEnabledByDefault = false;
 	}
 }

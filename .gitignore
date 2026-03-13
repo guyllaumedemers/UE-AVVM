@@ -550,3 +550,4 @@ Content/__ExternalObjects__
 Content/Developers
 !Build/BatchFiles/*
 !Build/Scripts/*
+Profiling/*
