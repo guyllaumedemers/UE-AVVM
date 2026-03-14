@@ -512,8 +512,15 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers read private item id from payload.
-	const int32 PrivateId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemId);
-	return PrivateId;
+	const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemId);
+	const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
+	const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
+	const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
+	UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
+	UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
+	UnInitializedItemObject->ModifyRuntimeStoragePosition(StoragePosition);
+	UnInitializedItemObject->PrivateItemId = PrivateItemId;
+	return PrivateItemId;
 }
 
 int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
