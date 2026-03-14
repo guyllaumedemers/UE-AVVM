@@ -126,7 +126,8 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 
 	if (!DeferredGrantedAbilities.IsEmpty())
 	{
-		FAbilityToken Token;
+		const auto Token = FAbilityToken::MakeToken();
+		
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred, Token);
 

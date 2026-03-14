@@ -60,14 +60,18 @@ struct INVENTORYSAMPLE_API FItemToken
 {
 	GENERATED_BODY()
 
-	explicit FItemToken()
+	static FItemToken MakeToken()
 	{
 		static uint32 GlobalUniqueId = 0;
-		UniqueId = ++GlobalUniqueId;
+		
+		FItemToken NewToken;
+		NewToken.UniqueId = ++GlobalUniqueId;
+		
+		return NewToken;
 	}
 
 	UPROPERTY()
-	uint32 UniqueId = 0;
+	uint32 UniqueId = INDEX_NONE;
 };
 
 /**

@@ -291,7 +291,8 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 
 	if (!DeferredItems.IsEmpty())
 	{
-		FItemToken Token;
+		const auto Token = FItemToken::MakeToken();
+		
 		FStreamableDelegate Callback;
 		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved, Token);
 
