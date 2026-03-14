@@ -52,8 +52,7 @@ namespace NSJsonInventory
 	void ToString(const FJsonInventoryProvider& NewInventoryProvider,
 	              FString& OutFormat)
 	{
-		FJsonObject StackAllocatedFJsonObject;
-		auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 		JsonData->SetNumberField(TEXT("Id"), NewInventoryProvider.Id);
 
 		TArray<TSharedPtr<FJsonValue>> PrivateItemIds;
@@ -83,8 +82,7 @@ namespace NSJsonInventory
 			return;
 		}
 
-		FJsonObject StackAllocatedFJsonObject;
-		auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
 		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
 		if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
@@ -217,8 +215,7 @@ int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemA
 
 TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
 {
-	FJsonObject StackAllocatedFJsonObject;
-	auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
 	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
@@ -326,8 +323,7 @@ FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
 	}
 
-	FJsonObject StackAllocatedFJsonObject;
-	auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
 
 	FString JsonOutput;
@@ -412,8 +408,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
 	}
 
-	FJsonObject StackAllocatedFJsonObject;
-	auto JsonData = TSharedPtr<FJsonObject>(&StackAllocatedFJsonObject);
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
 
 	FString JsonOutput;
