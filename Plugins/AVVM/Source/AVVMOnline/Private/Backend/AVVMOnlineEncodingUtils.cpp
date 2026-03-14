@@ -51,7 +51,7 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
 		return INDEX_NONE;
 	}
 
-	const int32 Result = (Input << LShift);
+	const int32 Result = (1 << LShift) + Input;
 	return Result;
 }
 

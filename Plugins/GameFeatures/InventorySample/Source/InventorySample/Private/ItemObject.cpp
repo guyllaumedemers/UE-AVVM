@@ -276,6 +276,22 @@ int32 UItemObject::GetStorageMaxCapacity() const
 
 int32 UItemObject::GetMaxStackCount() const
 {
+	// @gdemers shouldnt require async loading as this table will ever only contains integers.
+	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
+	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
+	if (!IsValid(MaxCountDataTable))
+	{
+		return INDEX_NONE;
+	}
+
+	const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE));
+	if (bIsStorage)
+	{
+		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
+	}
+
 	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_STACK);
 	const bool bDoesStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesStack)
@@ -285,18 +301,9 @@ int32 UItemObject::GetMaxStackCount() const
 	}
 	else
 	{
-		const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE));
-		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
 		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
-
-		// @gdemers shouldnt require async loading as this table will ever only contains integers.
-		const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
-		const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
-
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
-		const int32 BitEncodingLimit = (bIsStorage ? MaxStorageCapacityBounds : MaxStackCountBounds);
-
-		return FMath::Clamp(MaxStackCount, 0, BitEncodingLimit);
+		return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
 	}
 }
 

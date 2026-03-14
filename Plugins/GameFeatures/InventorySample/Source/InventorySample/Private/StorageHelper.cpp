@@ -58,7 +58,8 @@ void FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<co
 			continue;
 		}
 
-		const int32 StorageMaxCapacity = StorageObject->GetStorageMaxCapacity();
+		// @gdemers our CDO doesn't have runtime data (cannot call GetStorageMaxCapacity). it can only access stack size based on the referenced tag!
+		const int32 StorageMaxCapacity = StorageObject->GetMaxStackCount();
 		if (!ensureAlwaysMsgf(StorageMaxCapacity != INDEX_NONE,
 		                      TEXT("Invalid Storage Capacity set. Make sure you have configured the required Data Table for Storage Capacity")))
 		{
@@ -68,8 +69,14 @@ void FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<co
 		const int32 FilteredStorageId = UAVVMOnlineEncodingUtils::FilterInt32(StoragePrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
 		for (int32 i = StorageStartPosition; (i < Items.Num()) && (i < (StorageStartPosition + StorageMaxCapacity)); ++i)
 		{
-			const int32 StoragePosition = ((StorageStartPosition + i) % StorageMaxCapacity);
-			Items[i] += (FilteredStorageId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT));
+			const int32 Storage = UAVVMOnlineEncodingUtils::FilterInt32(Items[i], GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+			if (true == !!Storage)
+			{
+				continue;
+			}
+
+			const int32 StoragePosition = ((i - StorageStartPosition) % StorageMaxCapacity);
+			Items[i] += (FilteredStorageId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition + 1/*always start at one*/, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT));
 		}
 
 		StorageStartPosition += StorageMaxCapacity;

@@ -438,22 +438,8 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 	}
 
 	const int32 NewStackCount = UAVVMOnlineEncodingUtils::EncodeInt32(StackCount, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
-	// @gdemers retrieve unique id of item. IMPORTANT : our item id isnt shifted. we may be an attachment, or storage.
-	int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
-
-	static const auto ItemAttachmentType = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_TYPE_ATTACHMENT};
-	static const auto ItemStorageType = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE};
-
-	if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemStorageType))
-	{
-		ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT) + CHECK_CHARACTER_DEPENDENT_ENCODING;
-		return (ItemId + NewStackCount);
-	}
-	else if (ItemObjectCDO->DoesTypeHasPartialMatch(ItemAttachmentType))
-	{
-		ItemId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-	}
-
+	// @gdemers retrieve unique id of item. IMPORTANT : the item should ALREADY be shifted within the Data Table that define its unique Id.
+	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
 	// @gdemers we do not assign storage as we are still unaware of which storage type is referenced
 	// on the Inventory Provider we are trying to initialize. This information will be handled from within the calling function.
 	return (ItemId + NewStackCount);
