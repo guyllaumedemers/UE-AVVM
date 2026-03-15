@@ -23,21 +23,8 @@ int32 UAVVMOnlineEncodingUtils::DecodeInt32(const int32 Input,
                                             const int32 BitRange,
                                             const int32 RShift)
 {
-	TFunction<int32(const int32 NewInput)> Recurse;
-	Recurse = [&](const int32 NewInput)
-	{
-		if (NewInput == 0)
-		{
-			return 1;
-		}
-		else
-		{
-			return (1 << NewInput) + Recurse(NewInput - 1);
-		}
-	};
-
-	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
-	const int32 Result = ((Input >> RShift) & Recurse(BitRange_Clamped));
+	const int32 FilteredRange = UAVVMOnlineEncodingUtils::FilterInt32(Input, BitRange, RShift);
+	const int32 Result = (FilteredRange >> RShift);
 	return Result;
 }
 
@@ -51,7 +38,7 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
 		return INDEX_NONE;
 	}
 
-	const int32 Result = (1 << LShift) + Input;
+	const int32 Result = (Input << LShift);
 	return Result;
 }
 
@@ -72,9 +59,9 @@ int32 UAVVMOnlineEncodingUtils::FilterInt32(const int32 Input,
 		}
 	};
 
-	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
-	const int32 FilteringRange = (Recurse(BitRange_Clamped) << LShift);
-	return (Input & FilteringRange);
+	const int32 FilteringRange = (Recurse(BitRange) << LShift);
+	const int32 Result = (Input & FilteringRange);
+	return Result;
 }
 
 TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs,
@@ -82,12 +69,10 @@ TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs
                                                      const int32 RShift,
                                                      const int32 SearchValue)
 {
-	const int32 BitRange_Clamped = FMath::Clamp(BitRange, 0, 32);
-
 	TArray<int32> OutResults;
 	for (const int32 i : Inputs)
 	{
-		const int32 Result = UAVVMOnlineEncodingUtils::DecodeInt32(i, BitRange_Clamped, RShift);
+		const int32 Result = UAVVMOnlineEncodingUtils::DecodeInt32(i, BitRange, RShift);
 		if (false == (Result ^ SearchValue))
 		{
 			OutResults.Add(Result);

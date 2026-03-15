@@ -270,8 +270,10 @@ int32 UItemObject::GetStorageMaxCapacity() const
 	{
 		return INDEX_NONE;
 	}
-
-	return StorageMaxCapacity;
+	else
+	{
+		return StorageMaxCapacity;
+	}
 }
 
 int32 UItemObject::GetMaxStackCount() const
@@ -806,8 +808,11 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 		// allowed within the storage.
 		return (*SearchResult)->GetMaxStackCount();
 	}
-
-	return INDEX_NONE;
+	else
+	{
+		// TODO @gdemers theres a problem here! we need to get the storage size based on data alone, not on runtime representation.
+		return (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+	}
 }
 
 int32 UItemObjectUtils::GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

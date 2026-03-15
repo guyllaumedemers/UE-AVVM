@@ -25,21 +25,21 @@
 // within the {FAVVMPlayerProfile::InventoryIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING
 // @gdemers item
-#define GET_ITEM_ID_ENCODING_BIT_RANGE (10)
+#define GET_ITEM_ID_ENCODING_BIT_RANGE (8)
 #define GET_ITEM_ID_ENCODING_RSHIFT (0)
+// @gdemers passive items that are direct child of character require their bits encoding to set the first 10 bits to the max value
+// so to allow validation during the attachment process.
+#define CHECK_CHARACTER_DEPENDENT_ENCODING (1 << 9)
 // @gdemers item position
-#define GET_ITEM_POSITION_ENCODING_BIT_RANGE (6)
+#define GET_ITEM_POSITION_ENCODING_BIT_RANGE (5)
 #define GET_ITEM_POSITION_ENCODING_RSHIFT (10)
 // @gdemers item count
 #define GET_ITEM_COUNT_ENCODING_BIT_RANGE (5)
 #define GET_ITEM_COUNT_ENCODING_RSHIFT (16)
 // @gdemers storage
 #define GET_STORAGE_ID_ENCODING_BIT_RANGE (3)
-#define GET_STORAGE_ID_ENCODING_RSHIFT (21)
+#define GET_STORAGE_ID_ENCODING_RSHIFT (22)
 // @gdemers attachment
-#define GET_ATTACHMENT_ID_ENCODING_BIT_RANGE (8)
-#define GET_ATTACHMENT_ID_ENCODING_RSHIFT (24)
-// @gdemers passive items that are direct child of character require their bits encoding to set the first 10 bits to the max value
-// so to allow validation during the attachment process.
-#define CHECK_CHARACTER_DEPENDENT_ENCODING (1 << 10)
+#define GET_ATTACHMENT_ID_ENCODING_BIT_RANGE (5)
+#define GET_ATTACHMENT_ID_ENCODING_RSHIFT (26)
 #endif
