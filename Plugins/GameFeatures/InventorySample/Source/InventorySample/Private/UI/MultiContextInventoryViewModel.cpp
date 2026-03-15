@@ -45,12 +45,12 @@ void UMultiContextInventoryViewModel::SetPayload(const TInstancedStruct<FAVVMNot
 		UE_MVVM_SET_PROPERTY_VALUE(Src, NewSrc);
 	}
 
-	const AActor* Target = HandshakePayload->Instigator.Get();
-	const auto* TargetInventoryComponent = UActorInventoryComponent::GetActorComponent(HandshakePayload->Target.Get());
+	const AActor* Target = HandshakePayload->Target.Get();
+	const auto* TargetInventoryComponent = UActorInventoryComponent::GetActorComponent(Target);
 
-	if (IsValid(Target))
+	if (IsValid(TargetInventoryComponent))
 	{
-		ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetTargetLocalPlayer(Instigator);
+		ULocalPlayer* LocalPlayer = UAVVMToolkitUtils::GetTargetLocalPlayer(Target);
 		auto* NewOuter = IsValid(LocalPlayer) ? Cast<UObject>(LocalPlayer) : Cast<UObject>(this);
 
 		auto* NewDest = USingleContextInventoryViewModel::Make(TargetInventoryComponent->GetItems(), NewOuter);
