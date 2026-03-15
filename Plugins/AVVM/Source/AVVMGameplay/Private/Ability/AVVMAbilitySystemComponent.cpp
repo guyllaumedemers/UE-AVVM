@@ -51,14 +51,13 @@ void UAVVMAbilitySystemComponent::BeginPlay()
 	}
 
 	TRACE_COUNTER_INCREMENT(UAVVMAbilitySystemComponent_InstanceCounter);
+	AVVM_LOGGER_LOG(LogGameplay,
+					Outer,
+					Outer,
+					TEXT("Adding %s."),
+					*GetNameSafe(UAVVMAbilitySystemComponent::StaticClass()));
 
 	OwningOuter = Outer;
-
-	AVVM_LOGGER_LOG(LogGameplay,
-	                Outer,
-	                Outer,
-	                TEXT("Adding %s."),
-	                *GetNameSafe(UAVVMAbilitySystemComponent::StaticClass()));
 }
 
 void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -114,14 +113,13 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 
 			continue;
 		}
-
+		
+		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                Outer,
 		                TEXT("New Ability Recorded %s for deferred Granting."),
 		                *GetNameSafe(AbilityAsset));
-
-		DeferredGrantedAbilities.Add(AbilityAsset->GetGameplayAbilityClass().ToSoftObjectPath());
 	}
 
 	if (!DeferredGrantedAbilities.IsEmpty())
