@@ -147,15 +147,14 @@ void UAVVMResourceManagerComponent::BeginPlay()
 	}
 
 	OwningOuter = Outer;
-
+	
+	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_InstanceCounter);
+	LLM_SCOPE_BYTAG(AVVMTag);
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
 	                TEXT("Adding %s."),
 	                *GetNameSafe(UAVVMResourceManagerComponent::StaticClass()));
-
-	TRACE_COUNTER_INCREMENT(UAVVMResourceManagerComponent_InstanceCounter);
-	LLM_SCOPE_BYTAG(AVVMTag);
 
 #if WITH_SERVER_CODE
 	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
@@ -181,13 +180,13 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 		return;
 	}
 
+	LLM_SCOPE_BYTAG(AVVMTag);
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
 	                TEXT("Removing %s."),
 	                *GetNameSafe(UAVVMResourceManagerComponent::StaticClass()));
 
-	LLM_SCOPE_BYTAG(AVVMTag);
 	OwningOuter.Reset();
 }
 
@@ -242,13 +241,17 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	}
 
 	const auto* DataTableRow = Result.GetItem<FAVVMDataTableRow>();
-	check(DataTableRow != nullptr);
+	if (!ensureAlwaysMsgf(DataTableRow != nullptr,
+	                      TEXT("Resource loaded doesn't derive from %s."), *GetNameSafe(FAVVMDataTableRow::StaticStruct())))
+	{
+		return;
+	}
 
-	const auto RequestSoftObjectsAsync = [](TWeakObjectPtr<UAVVMResourceManagerComponent> NewResourceManagerComponent,
+	const auto RequestSoftObjectsAsync = [](const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
 	                                        TSharedPtr<FResourceQueueingMechanism> NewQueuingMechanism,
-	                                        TArray<FSoftObjectPath> ResourcePaths,
-	                                        FDataRegistryId NewRegistryId,
-	                                        FOnResourceAsyncLoadingComplete MainRequestCompletionCallback)
+	                                        const TArray<FSoftObjectPath>& ResourcePaths,
+	                                        const FDataRegistryId& NewRegistryId,
+	                                        const FOnResourceAsyncLoadingComplete& MainRequestCompletionCallback)
 	{
 		if (!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
 			!ensureAlwaysMsgf(NewQueuingMechanism.IsValid(), TEXT("SharedPtr to Queueing Mechanism Invalid!")))
@@ -274,7 +277,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 
 	const auto NewRequest = FOnAsyncLoadingRequestDeferred::CreateWeakLambda(this,
 	                                                                         RequestSoftObjectsAsync,
-	                                                                         TWeakObjectPtr<UAVVMResourceManagerComponent>(this),
+	                                                                         this,
 	                                                                         QueueingMechanism,
 	                                                                         DataTableRow->GetResourcesPaths(),
 	                                                                         Result.ItemId,

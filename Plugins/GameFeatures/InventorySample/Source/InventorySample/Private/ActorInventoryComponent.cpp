@@ -279,14 +279,13 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 
 			continue;
 		}
-
+		
+		DeferredItems.Add(ItemAsset->GetItemObjectClass().ToSoftObjectPath());
 		AVVM_LOGGER_LOG(LogInventorySample,
 		                Outer,
 		                Outer,
 		                TEXT("%s pending request queued."),
 		                *GetNameSafe(ItemAsset));
-
-		DeferredItems.Add(ItemAsset->GetItemObjectClass().ToSoftObjectPath());
 	}
 
 	if (!DeferredItems.IsEmpty())
@@ -362,10 +361,9 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 
 void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
 {
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, ComponentStateTags, this);
 	ComponentStateTags.RemoveTags(RemovedTags);
 	ComponentStateTags.AppendTags(AddedTags);
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, ComponentStateTags, this);
 }
 
 bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Compare) const
@@ -525,11 +523,10 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 			                                                        NewItem);
 		}
 
-		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE,
-		                     TEXT("Couldn't initialize Item with a valid ItemId.")))
+		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Item with a valid ItemId.")) ||
+			ensureAlwaysMsgf(!PrivateItemIds.Contains(PrivateItemId), TEXT("Attempting to initialized a UItemObject with duplicated PrivateItemId value.")))
 		{
-			PrivateItemIds.AddUnique(PrivateItemId);
-
+			PrivateItemIds.Add(PrivateItemId);
 			AddReplicatedSubObject(NewItem);
 			Items.Add(NewItem);
 		}
@@ -649,9 +646,9 @@ void UActorInventoryComponent::RequestItemActor(UAVVMResourceManagerComponent* R
 		return;
 	}
 
-	const auto RequestItemSpawning = [](TWeakObjectPtr<UActorInventoryComponent> NewActorInventoryComponent,
-	                                    TWeakObjectPtr<UAVVMResourceManagerComponent> NewResourceManagerComponent,
-	                                    TWeakObjectPtr<UItemObject> ItemToSpawn)
+	const auto RequestItemSpawning = [](const TWeakObjectPtr<UActorInventoryComponent>& NewActorInventoryComponent,
+	                                    const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
+	                                    const TWeakObjectPtr<UItemObject>& ItemToSpawn)
 	{
 		if (!ensureAlwaysMsgf(NewActorInventoryComponent.IsValid(), TEXT("WeakObjectPtr to Actor Inventory Component Invalid!")) ||
 			!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
@@ -672,9 +669,9 @@ void UActorInventoryComponent::RequestItemActor(UAVVMResourceManagerComponent* R
 
 	const auto NewRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
 	                                                                       RequestItemSpawning,
-	                                                                       TWeakObjectPtr<UActorInventoryComponent>(this),
-	                                                                       TWeakObjectPtr<UAVVMResourceManagerComponent>(ResourceManagerComponent),
-	                                                                       TWeakObjectPtr<UItemObject>(NewItem));
+	                                                                       this,
+	                                                                       ResourceManagerComponent,
+	                                                                       NewItem);
 
 	const bool bHasPendingRequest = QueueingMechanism->PushDeferredItem(NewItem, NewRequest);
 	if (bHasPendingRequest)
