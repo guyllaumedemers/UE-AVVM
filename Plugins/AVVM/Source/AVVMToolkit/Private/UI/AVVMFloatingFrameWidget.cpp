@@ -55,7 +55,7 @@ void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewMode
 
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
 	{
 		if (!IsValid(NewWidgetClass)) return;
 		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
@@ -64,7 +64,7 @@ void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewMode
 
 	Root->ClearChildren();
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	TSubclassOf<UCommonUserWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
 	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		for (UObject* NewViewModel : NewViewModels)

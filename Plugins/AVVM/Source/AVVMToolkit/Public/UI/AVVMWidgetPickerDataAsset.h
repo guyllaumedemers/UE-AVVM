@@ -26,7 +26,8 @@
 
 #include "AVVMWidgetPickerDataAsset.generated.h"
 
-class UAVVMFrameWidget;
+class UCommonUserWidget;
+class UMVVMViewModelBase;
 
 /**
  *	Class description:
@@ -43,9 +44,11 @@ class AVVMTOOLKIT_API UAVVMWidgetPickerDataAsset : public UDataAsset
 
 public:
 	UFUNCTION(BlueprintCallable)
-	TSubclassOf<UAVVMFrameWidget> GetWidgetClass(const UClass* ObjectClass);
+	TSubclassOf<UCommonUserWidget> GetWidgetClass(const UClass* ObjectClass);
 
 protected:
+	// @gdemers will load in memory CDO for the ViewModel class referenced. Make sure to not define
+	// any resources within the referenced class.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSubclassOf<UClass>, TSubclassOf<UAVVMFrameWidget>> ObjectClassToWidgetClass;
+	TMap<TSubclassOf<UMVVMViewModelBase>, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass;
 };
