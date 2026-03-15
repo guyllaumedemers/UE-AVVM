@@ -847,7 +847,7 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 		int32 TargetStorageId = (*SearchResult)->GetRuntimeStorageId();
 
 		// @gdemers check if there is still unique entries available within our bounds.
-		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_FULL);
+		static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_STATE_FULL);
 		// @gdemers add new entry in inventory with remaining stack count.
 		// Note : UItemObject::Stack already handled updating the internal count for the existing slot but the remainder
 		// held by the UItemObject may be greater than a new entry, so we need to split accordingly.
@@ -1111,7 +1111,7 @@ void UActorInventoryComponent::CheckBounds()
 		}
 	}
 
-	static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_FULL);
+	static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_STATE_FULL);
 	if (bHasStorageReachMaxCapacity)
 	{
 		ModifyRuntimeState(StorageFullTags, {});
