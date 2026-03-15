@@ -43,16 +43,16 @@ void UAVVMStaticFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewModels
 	const auto CreateWidgetAndBindViewModel = [](UAVVMStaticFrameWidget& NewParent,
 	                                             UDynamicEntryBox& NewDynamicBox,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
 	{
 		if (!IsValid(NewWidgetClass)) return;
-		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
+		auto* WidgetInstance = NewDynamicBox.CreateEntry<UCommonUserWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
 	};
 
 	Root->Reset(true);
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	TSubclassOf<UCommonUserWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
 	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		for (UObject* NewViewModel : NewViewModels)
@@ -81,14 +81,14 @@ void UAVVMStaticFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 	const auto CreateWidgetAndBindViewModel = [](UAVVMStaticFrameWidget& NewParent,
 	                                             UDynamicEntryBox& NewDynamicBox,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
 	{
 		if (!IsValid(NewWidgetClass)) return;
-		auto* WidgetInstance = NewDynamicBox.CreateEntry<UAVVMFrameWidget>(NewWidgetClass);
+		auto* WidgetInstance = NewDynamicBox.CreateEntry<UCommonUserWidget>(NewWidgetClass);
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
 	};
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	TSubclassOf<UCommonUserWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
 	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		CreateWidgetAndBindViewModel(*this, *Root, NewViewModel, NewWidgetClass);
@@ -113,7 +113,7 @@ void UAVVMStaticFrameWidget::RemoveFrame_Internal(UObject* NewViewModel)
 
 void UAVVMStaticFrameWidget::RegisterChild_Internal(UObject* NewViewModel, const FFrameZOrder& NewZOrder)
 {
-	auto* ChildFrame = NewZOrder.Frame.Get();
+	auto* ChildFrame = Cast<UAVVMFrameWidget>(NewZOrder.Frame.Get());
 	if (IsValid(ChildFrame))
 	{
 		ChildFrame->SetParent(this, NewViewModel);

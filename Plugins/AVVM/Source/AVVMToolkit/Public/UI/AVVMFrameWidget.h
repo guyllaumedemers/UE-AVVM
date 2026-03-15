@@ -46,10 +46,10 @@ struct AVVMTOOLKIT_API FFrameZOrder
 	GENERATED_BODY()
 
 	FFrameZOrder() = default;
-	explicit FFrameZOrder(UAVVMFrameWidget* NewFrame, const int32 NewZOrder);
+	explicit FFrameZOrder(UCommonUserWidget* NewFrame, const int32 NewZOrder);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<UAVVMFrameWidget> Frame = nullptr;
+	TWeakObjectPtr<UCommonUserWidget> Frame = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 ZOrder = INDEX_NONE;
@@ -158,7 +158,7 @@ protected:
 	bool bOverrideWidgetPicker = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bOverrideWidgetPicker"))
-	TSoftClassPtr<UAVVMFrameWidget> WidgetClass = nullptr;
+	TSoftClassPtr<UCommonUserWidget> WidgetClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	bool bSupportBorderClass = false;
@@ -177,7 +177,7 @@ protected:
 	TArray<TObjectPtr<UObject>> EditorPreviewObjects;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TSubclassOf<UAVVMFrameWidget> PreviousWidgetClass = nullptr;
+	TSubclassOf<UCommonUserWidget> PreviousWidgetClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	bool bPreviousBorderFlagStatus = false;

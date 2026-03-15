@@ -21,6 +21,6 @@
 
 TSubclassOf<UAVVMFrameWidget> UAVVMWidgetPickerDataAsset::GetWidgetClass(const UClass* ObjectClass)
 {
-	TSubclassOf<UAVVMFrameWidget>* SearchResult = ObjectClassToWidgetClass.Find(ObjectClass);
+	TSubclassOf<UAVVMFrameWidget>* SearchResult = ObjectClassToWidgetClass.Find(const_cast<UClass*>(ObjectClass));
 	return (SearchResult != nullptr) ? *SearchResult : nullptr;
 }

@@ -47,5 +47,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSoftClassPtr<UClass>, TSubclassOf<UAVVMFrameWidget>> ObjectClassToWidgetClass;
+	TMap<TSubclassOf<UClass>, TSubclassOf<UAVVMFrameWidget>> ObjectClassToWidgetClass;
 };

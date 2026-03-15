@@ -31,7 +31,7 @@
 #include "UI/AVVMEditorPreviewViewModel.h"
 #endif
 
-FFrameZOrder::FFrameZOrder(UAVVMFrameWidget* NewFrame, const int32 NewZOrder)
+FFrameZOrder::FFrameZOrder(UCommonUserWidget* NewFrame, const int32 NewZOrder)
 	: Frame(NewFrame)
 	, ZOrder(NewZOrder)
 {

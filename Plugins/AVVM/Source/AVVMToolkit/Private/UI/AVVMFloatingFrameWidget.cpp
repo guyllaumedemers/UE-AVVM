@@ -58,7 +58,7 @@ void UAVVMFloatingFrameWidget::SetupFrames_Internal(TArray<UObject*> NewViewMode
 	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
 	{
 		if (!IsValid(NewWidgetClass)) return;
-		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
+		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
 	};
 
@@ -92,14 +92,14 @@ void UAVVMFloatingFrameWidget::AddFrame_Internal(UObject* NewViewModel)
 {
 	const auto CreateWidgetAndBindViewModel = [](UAVVMFloatingFrameWidget& NewParent,
 	                                             UObject* NewViewModel,
-	                                             const TSubclassOf<UAVVMFrameWidget>& NewWidgetClass)
+	                                             const TSubclassOf<UCommonUserWidget>& NewWidgetClass)
 	{
 		if (!IsValid(NewWidgetClass)) return;
-		auto* WidgetInstance = Cast<UAVVMFrameWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
+		auto* WidgetInstance = Cast<UCommonUserWidget>(UUserWidget::CreateWidgetInstance(NewParent, NewWidgetClass, NAME_None));
 		NewParent.RegisterChild(NewViewModel, FFrameZOrder(WidgetInstance, NewParent.ZOrder + 1));
 	};
 
-	TSubclassOf<UAVVMFrameWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
+	TSubclassOf<UCommonUserWidget> NewWidgetClass = bOverrideWidgetPicker ? WidgetClass.Get() : nullptr;
 	if (bOverrideWidgetPicker || WidgetPickerDataAsset.IsNull())
 	{
 		CreateWidgetAndBindViewModel(*this, NewViewModel, NewWidgetClass);
@@ -129,13 +129,7 @@ void UAVVMFloatingFrameWidget::RegisterChild_Internal(UObject* NewViewModel, con
 		return;
 	}
 
-	auto* ChildFrame = NewZOrder.Frame.Get();
-	if (!IsValid(ChildFrame))
-	{
-		return;
-	}
-
-	auto* NewSlot = Cast<UCanvasPanelSlot>(Root->AddChild(ChildFrame));
+	auto* NewSlot = Cast<UCanvasPanelSlot>(Root->AddChild(NewZOrder.Frame.Get()));
 	if (IsValid(NewSlot))
 	{
 		// TODO @gdemers child placement have to be resolved here through some external means! (maybe some placement system)
@@ -143,8 +137,12 @@ void UAVVMFloatingFrameWidget::RegisterChild_Internal(UObject* NewViewModel, con
 		NewSlot->SetAnchors(OverrideAnchorData.Anchors);
 	}
 
-	// @gdemers orders matter here. SetParent handle PanelSlot swap. we expect to be already slotted to a parent.
-	ChildFrame->SetParent(this, NewViewModel);
+	auto* ChildFrame = Cast<UAVVMFrameWidget>(NewZOrder.Frame.Get());
+	if (IsValid(ChildFrame))
+	{
+		// @gdemers orders matter here. SetParent handle PanelSlot swap. we expect to be already slotted to a parent.
+		ChildFrame->SetParent(this, NewViewModel);
+	}
 }
 
 void UAVVMFloatingFrameWidget::UnRegisterChild_Internal(UObject* NewViewModel)
