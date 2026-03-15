@@ -25,10 +25,9 @@
 USingleContextInventoryViewModel* USingleContextInventoryViewModel::Make(const TArray<UItemObject*>& NewItems,
                                                                          UObject* NewOuter)
 {
-	USingleContextInventoryViewModel* NewViewModel = nullptr;
+	auto* NewViewModel = NewObject<USingleContextInventoryViewModel>(NewOuter);
 	if (!NewItems.IsEmpty())
 	{
-		NewViewModel = NewObject<USingleContextInventoryViewModel>(NewOuter);
 		NewViewModel->Init(NewItems);
 	}
 
