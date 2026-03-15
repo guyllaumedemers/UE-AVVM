@@ -76,6 +76,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const TMap<int32, FGameplayTag>& GetStorageCapacityTags();
+
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FGameplayTag& GetStorageCapacityTagById(const int32 StorageId);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="AVVMActorIdentifierDataTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
@@ -85,6 +91,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(ForceInlineRow))
 	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(ForceInlineRow))
+	TMap<int32/*StorageId*/, FGameplayTag/*Item Category*/> StorageCapacityTags;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
 	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;

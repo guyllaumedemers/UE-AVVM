@@ -494,7 +494,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	TArray<UItemObject*> OldItems = Items;
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
-		auto* ItemObjectClass = Cast<UClass>(StreamableAsset);
+		const auto* ItemObjectClass = Cast<UClass>(StreamableAsset);
 		if (!IsValid(ItemObjectClass))
 		{
 			continue;

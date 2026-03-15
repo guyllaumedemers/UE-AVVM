@@ -94,3 +94,21 @@ const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventor
 {
 	return GetDefault<UInventorySettings>()->DefaultProviderInventories;
 }
+
+const TMap<int32, FGameplayTag>& UInventorySettings::GetStorageCapacityTags()
+{
+	return GetDefault<UInventorySettings>()->StorageCapacityTags;
+}
+
+const FGameplayTag& UInventorySettings::GetStorageCapacityTagById(const int32 StorageId)
+{
+	const TMap<int32, FGameplayTag>& Tags = UInventorySettings::GetStorageCapacityTags();
+	if (ensureAlwaysMsgf(Tags.Contains(StorageId), TEXT("Invalid StorageId provided.")))
+	{
+		return Tags[StorageId];
+	}
+	else
+	{
+		return FGameplayTag::EmptyTag;
+	}
+}

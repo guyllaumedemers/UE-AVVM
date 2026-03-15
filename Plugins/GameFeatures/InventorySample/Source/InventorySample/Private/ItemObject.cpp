@@ -281,7 +281,7 @@ int32 UItemObject::GetMaxStackCount() const
 	// @gdemers shouldnt require async loading as this table will ever only contains integers.
 	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
 	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
-	if (!IsValid(MaxCountDataTable))
+	if (!ensureAlwaysMsgf(IsValid(MaxCountDataTable), TEXT("Missing valid StackCount Data Table in project Settings.")))
 	{
 		return INDEX_NONE;
 	}
@@ -783,9 +783,11 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
                                               const int32 StorageId)
 {
-	const int32 NewStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
-	// Remember that storage are also UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_cout,
-	// i.e the total of items they can fit in.
+	const int32 NewStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+	// @gdemers Remember that storage are also UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_count, i.e the total of items they can fit in.
+	// IMPORTANT : However, remember that when initializing data from file on disk, our item collection may or may not reference a storage, which means that retrieving its
+	// configuration from the runtime representation may be impossible at time, or ever. Example : A shop default inventory configuration set in the Data Table (proj. Settings)
+	// require capacity information for default initialization of its item layout, but doesn't care much about instancing the containers.
 	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = NewStorageId](const UItemObject* ItemObject)
 	{
 		if (!IsValid(ItemObject))
@@ -794,7 +796,7 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 		}
 		else
 		{
-			// @gdemers this PrivateItemId holds information about storage but isnt an Item, or an Attachment.
+			// @gdemers this PrivateItemId holds information about storage but isn't an Item, or an Attachment.
 			const bool bHoldStorageId = (ItemObject->PrivateItemId & SearchId);
 			const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
 			const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
@@ -802,16 +804,27 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 		}
 	});
 
+	// @gdemers runtime check on storage capacity.
 	if ((SearchResult != nullptr) && IsValid(*SearchResult))
 	{
 		// @gdemers the backend returned the UItemObject representing the Storage object, this Stack Count represent that number of entries
 		// allowed within the storage.
 		return (*SearchResult)->GetMaxStackCount();
 	}
+
+	// @gdemers offline check (when inventory isnt initialized) on storage capacity.
+	const TSoftObjectPtr<UDataTable>& DataTable = UInventorySettings::GetItemMaxStackCountDataTable();
+	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
+	if (ensureAlwaysMsgf(IsValid(MaxCountDataTable), TEXT("Missing valid StackCount Data Table in project Settings.")))
+	{
+		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		const FGameplayTag& StorageCapacityTag = UInventorySettings::GetStorageCapacityTagById(NewStorageId);
+		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, StorageCapacityTag);
+		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
+	}
 	else
 	{
-		// TODO @gdemers theres a problem here! we need to get the storage size based on data alone, not on runtime representation.
-		return (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		return INDEX_NONE;
 	}
 }
 
