@@ -19,8 +19,15 @@
 //SOFTWARE.
 #include "InventoryManagerSubsystem.h"
 
+#include "ItemRandomizerRule.h"
+#include "AVVMWorldSetting.h"
+#include "InventorySettings.h"
+#include "NativeGameplayTags.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+
+// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
+UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_ITEM_RANDOMIZER, "WorldRule.ItemRandomizer");
 
 bool UInventoryManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -34,11 +41,25 @@ bool UInventoryManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return false;
 }
 
+void UInventoryManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	GetItemRandomizerRuleOnAuthority();
+}
+
+void UInventoryManagerSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+	
+	StreamableHandle.Reset();
+}
+
 AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
                                                            const UClass* ItemActorClass,
                                                            AActor* Outer)
 {
-	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(World);
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::Get(World);
 	if (IsValid(InventoryManagerSubsystem))
 	{
 		FActorSpawnParameters Params;
@@ -52,14 +73,68 @@ AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
 void UInventoryManagerSubsystem::Static_Shutdown(const UWorld* World,
                                                  AActor* ItemActor)
 {
-	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::GetSubsystem(World);
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::Get(World);
 	if (IsValid(InventoryManagerSubsystem))
 	{
 		InventoryManagerSubsystem->Shutdown(ItemActor);
 	}
 }
 
-UInventoryManagerSubsystem* UInventoryManagerSubsystem::GetSubsystem(const UWorld* World)
+TArray<UItemObject*> UInventoryManagerSubsystem::Static_GetRandomItems(const UWorld* World,
+                                                                       const AActor* Actor,
+                                                                       const TArray<UItemObject*>& PoolItems)
+{
+	TArray<UItemObject*> OutResults;
+
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::Get(World);
+	if (IsValid(InventoryManagerSubsystem))
+	{
+		OutResults = InventoryManagerSubsystem->GetRandomItems(Actor, PoolItems);
+	}
+
+	return OutResults;
+}
+
+void UInventoryManagerSubsystem::GetItemRandomizerRuleOnAuthority()
+{
+	const auto OnAsyncLoadComplete = [](const TWeakObjectPtr<UInventoryManagerSubsystem>& NewInventorySubsystem,
+	                                    const TWeakObjectPtr<AAVVMWorldSetting>& NewWorldSettings)
+	{
+		if (!NewInventorySubsystem.IsValid() || !NewWorldSettings.IsValid())
+		{
+			return;
+		}
+
+		TSharedPtr<FStreamableHandle> Handle = NewInventorySubsystem->StreamableHandle;
+		if (!Handle.IsValid())
+		{
+			return;
+		}
+
+		const auto* RuleClass = Cast<UClass>(Handle->GetLoadedAsset());
+		if (!IsValid(RuleClass))
+		{
+			return;
+		}
+
+		NewInventorySubsystem->ItemRandomizerRule = NewWorldSettings->GetOrCreatePluginRule<UItemRandomizerRule>(TAG_WORLD_RULE_ITEM_RANDOMIZER, RuleClass);
+	};
+
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	auto* WorldSettings = Cast<AAVVMWorldSetting>(World->GetWorldSettings());
+	if (IsValid(WorldSettings))
+	{
+		const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this), TWeakObjectPtr(WorldSettings));
+		StreamableHandle = WorldSettings->AsyncLoadPluginRule(UInventorySettings::GetItemRandomizerRuleClass(), Callback);
+	}
+}
+
+UInventoryManagerSubsystem* UInventoryManagerSubsystem::Get(const UWorld* World)
 {
 	return UWorld::GetSubsystem<UInventoryManagerSubsystem>(World);
 }
@@ -89,5 +164,19 @@ void UInventoryManagerSubsystem::Shutdown(AActor* ItemActor)
 	if (IsValid(ItemActor))
 	{
 		ItemActor->Destroy();
+	}
+}
+
+TArray<UItemObject*> UInventoryManagerSubsystem::GetRandomItems(const AActor* Actor,
+                                                                const TArray<UItemObject*>& PoolItems)
+{
+	if (ItemRandomizerRule.IsValid())
+	{
+		const TArray<UItemObject*> OutResults = ItemRandomizerRule->GetRandomSubset(Actor, PoolItems);
+		return OutResults;
+	}
+	else
+	{
+		return {};
 	}
 }

@@ -27,6 +27,8 @@
 
 class AActor;
 struct FActorSpawnParameters;
+struct FStreamableHandle;
+class UItemRandomizerRule;
 
 /**
 *	Class description:
@@ -44,6 +46,8 @@ class INVENTORYSAMPLE_API UInventoryManagerSubsystem : public UWorldSubsystem
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	UFUNCTION(BlueprintCallable)
 	static AActor* Static_CreateItemActor(const UWorld* World,
@@ -54,8 +58,14 @@ public:
 	static void Static_Shutdown(const UWorld* World,
 	                            AActor* ItemActor);
 
+	UFUNCTION(BlueprintCallable)
+	static TArray<UItemObject*> Static_GetRandomItems(const UWorld* World,
+	                                                  const AActor* Actor,
+	                                                  const TArray<UItemObject*>& PoolItems);
+
 protected:
-	static UInventoryManagerSubsystem* GetSubsystem(const UWorld* World);
+	static UInventoryManagerSubsystem* Get(const UWorld* World);
+	void GetItemRandomizerRuleOnAuthority();
 
 	AActor* CreateItemActor(const UClass* ItemActorClass,
 	                        const FActorSpawnParameters& SpawnParams);
@@ -65,4 +75,12 @@ protected:
 
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(AActor* ItemActor);
+
+	TArray<UItemObject*> GetRandomItems(const AActor* Actor,
+	                                    const TArray<UItemObject*>& PoolItems);
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TWeakObjectPtr<const UItemRandomizerRule> ItemRandomizerRule = nullptr;
+
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

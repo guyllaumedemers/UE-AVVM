@@ -21,6 +21,11 @@
 
 #include "Misc/App.h"
 
+const TSoftClassPtr<UItemRandomizerRule>& UInventorySettings::GetItemRandomizerRuleClass()
+{
+	return GetDefault<UInventorySettings>()->ItemRandomizerRuleClass;
+}
+
 const FGameplayTagContainer& UInventorySettings::GetBlockingTagsWhenEmpty()
 {
 	return GetDefault<UInventorySettings>()->BlockingTagsWhenEmpty;

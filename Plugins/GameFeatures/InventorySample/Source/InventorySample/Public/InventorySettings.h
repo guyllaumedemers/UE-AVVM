@@ -26,6 +26,8 @@
 
 #include "InventorySettings.generated.h"
 
+class UItemRandomizerRule;
+
 /**
  *	Class description:
  *
@@ -37,6 +39,9 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	static const TSoftClassPtr<UItemRandomizerRule>& GetItemRandomizerRuleClass();
+	
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTagContainer& GetBlockingTagsWhenEmpty();
 
@@ -83,6 +88,9 @@ public:
 	static const FGameplayTag& GetStorageCapacityTagById(const int32 StorageId);
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="AVVMActorIdentifierDataTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 

@@ -27,6 +27,7 @@
 #include "AVVMScopedUtils.h"
 #include "AVVMToolkitUtils.h"
 #include "InventoryFileHelper.h"
+#include "InventoryManagerSubsystem.h"
 #include "InventoryProvider.h"
 #include "InventorySampleModule.h"
 #include "InventoryUtils.h"
@@ -1136,7 +1137,8 @@ void UActorInventoryComponent::OnOuterTagChanged(const FGameplayTagContainer& Ne
 		return IsValid(Item) && Item->DoesBehaviourHasPartialMatch(Compare);
 	});
 
-	for (UItemObject* PendingDropItem : PendingDropItems)
+	const TArray<UItemObject*> RandomSubset = UInventoryManagerSubsystem::Static_GetRandomItems(GetWorld(), GetTypedOuter<AActor>(), PendingDropItems);
+	for (UItemObject* PendingDropItem : RandomSubset)
 	{
 		Drop(PendingDropItem);
 	}
