@@ -26,7 +26,7 @@ EDataValidationResult UItemRandomizerRule::IsDataValid(class FDataValidationCont
 }
 #endif
 
-TArray<UItemObject*> UItemRandomizerRule::GetRandomSubset(const AActor* Actor,
+TArray<UItemObject*> UItemRandomizerRule::GetRandomSubset(const AActor* Outer,
                                                           const TArray<UItemObject*>& Items) const
 {
 	TArray<UItemObject*> OutResults;

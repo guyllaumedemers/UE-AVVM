@@ -70,6 +70,21 @@ AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
 	return nullptr;
 }
 
+TArray<UItemObject*> UInventoryManagerSubsystem::Static_GetRandomItems(const UWorld* World,
+                                                                       const AActor* Outer,
+                                                                       const TArray<UItemObject*>& PoolItems)
+{
+	TArray<UItemObject*> OutResults;
+
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::Get(World);
+	if (IsValid(InventoryManagerSubsystem))
+	{
+		OutResults = InventoryManagerSubsystem->GetRandomItems(Outer, PoolItems);
+	}
+
+	return OutResults;
+}
+
 void UInventoryManagerSubsystem::Static_Shutdown(const UWorld* World,
                                                  AActor* ItemActor)
 {
@@ -80,19 +95,9 @@ void UInventoryManagerSubsystem::Static_Shutdown(const UWorld* World,
 	}
 }
 
-TArray<UItemObject*> UInventoryManagerSubsystem::Static_GetRandomItems(const UWorld* World,
-                                                                       const AActor* Actor,
-                                                                       const TArray<UItemObject*>& PoolItems)
+UInventoryManagerSubsystem* UInventoryManagerSubsystem::Get(const UWorld* World)
 {
-	TArray<UItemObject*> OutResults;
-
-	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::Get(World);
-	if (IsValid(InventoryManagerSubsystem))
-	{
-		OutResults = InventoryManagerSubsystem->GetRandomItems(Actor, PoolItems);
-	}
-
-	return OutResults;
+	return UWorld::GetSubsystem<UInventoryManagerSubsystem>(World);
 }
 
 void UInventoryManagerSubsystem::GetItemRandomizerRuleOnAuthority()
@@ -134,15 +139,24 @@ void UInventoryManagerSubsystem::GetItemRandomizerRuleOnAuthority()
 	}
 }
 
-UInventoryManagerSubsystem* UInventoryManagerSubsystem::Get(const UWorld* World)
-{
-	return UWorld::GetSubsystem<UInventoryManagerSubsystem>(World);
-}
-
 AActor* UInventoryManagerSubsystem::CreateItemActor(const UClass* ItemActorClass,
                                                     const FActorSpawnParameters& SpawnParams)
 {
 	return Factory(ItemActorClass, SpawnParams);
+}
+
+TArray<UItemObject*> UInventoryManagerSubsystem::GetRandomItems(const AActor* Actor,
+																const TArray<UItemObject*>& PoolItems)
+{
+	if (ItemRandomizerRule.IsValid())
+	{
+		const TArray<UItemObject*> OutResults = ItemRandomizerRule->GetRandomSubset(Actor, PoolItems);
+		return OutResults;
+	}
+	else
+	{
+		return {};
+	}
 }
 
 AActor* UInventoryManagerSubsystem::Factory(const UClass* ItemActorClass,
@@ -164,19 +178,5 @@ void UInventoryManagerSubsystem::Shutdown(AActor* ItemActor)
 	if (IsValid(ItemActor))
 	{
 		ItemActor->Destroy();
-	}
-}
-
-TArray<UItemObject*> UInventoryManagerSubsystem::GetRandomItems(const AActor* Actor,
-                                                                const TArray<UItemObject*>& PoolItems)
-{
-	if (ItemRandomizerRule.IsValid())
-	{
-		const TArray<UItemObject*> OutResults = ItemRandomizerRule->GetRandomSubset(Actor, PoolItems);
-		return OutResults;
-	}
-	else
-	{
-		return {};
 	}
 }

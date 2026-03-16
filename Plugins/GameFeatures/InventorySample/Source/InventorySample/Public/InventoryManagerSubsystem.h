@@ -55,13 +55,13 @@ public:
 	                                      AActor* Outer);
 
 	UFUNCTION(BlueprintCallable)
-	static void Static_Shutdown(const UWorld* World,
-	                            AActor* ItemActor);
+	static TArray<UItemObject*> Static_GetRandomItems(const UWorld* World,
+	                                                  const AActor* Outer,
+	                                                  const TArray<UItemObject*>& PoolItems);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<UItemObject*> Static_GetRandomItems(const UWorld* World,
-	                                                  const AActor* Actor,
-	                                                  const TArray<UItemObject*>& PoolItems);
+	static void Static_Shutdown(const UWorld* World,
+	                            AActor* ItemActor);
 
 protected:
 	static UInventoryManagerSubsystem* Get(const UWorld* World);
@@ -70,14 +70,14 @@ protected:
 	AActor* CreateItemActor(const UClass* ItemActorClass,
 	                        const FActorSpawnParameters& SpawnParams);
 
+	TArray<UItemObject*> GetRandomItems(const AActor* Outer,
+	                                    const TArray<UItemObject*>& PoolItems);
+
 	// @gdemers factory method to support pooling or other instancing system specific to your project.
 	virtual AActor* Factory(const UClass* ItemActorClass, const FActorSpawnParameters& SpawnParams);
 
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(AActor* ItemActor);
-
-	TArray<UItemObject*> GetRandomItems(const AActor* Actor,
-	                                    const TArray<UItemObject*>& PoolItems);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UItemRandomizerRule> ItemRandomizerRule = nullptr;

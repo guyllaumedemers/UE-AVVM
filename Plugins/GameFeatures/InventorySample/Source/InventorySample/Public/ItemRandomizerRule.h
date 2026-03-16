@@ -47,6 +47,6 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	TArray<UItemObject*> GetRandomSubset(const AActor* Actor,
+	TArray<UItemObject*> GetRandomSubset(const AActor* Outer,
 	                                     const TArray<UItemObject*>& Items) const;
 };
