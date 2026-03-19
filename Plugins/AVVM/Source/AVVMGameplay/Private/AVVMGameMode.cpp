@@ -303,8 +303,8 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 		return nullptr;
 	}
 
-	const auto OnStartPosition = [](TWeakObjectPtr<AAVVMGameMode> GameMode,
-	                                TWeakObjectPtr<AController> RestartPlayer)
+	const auto OnStartPosition = [](const TWeakObjectPtr<AAVVMGameMode>& GameMode,
+	                                const TWeakObjectPtr<AController>& RestartPlayer)
 	{
 		if (GameMode.IsValid())
 		{
