@@ -234,7 +234,7 @@ void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(const APlayerStat
 	}
 
 	const FUniqueNetIdPtr UniqueNetIdPtr = NewPlayer->GetUniqueId().GetV1();
-	if (ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Attempting to Register with an invalid UniqueNetId.")))
+	if (ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Attempting to Unregister with an invalid UniqueNetId.")))
 	{
 		// @gdemers IMPORTANT UAVVMNotificationSubsystem cannot be used here as we are targeting Subsystems and not actors.
 		GetOnPlayerReadyForUnregistration().Broadcast(*UniqueNetIdPtr, NewPlayer);
