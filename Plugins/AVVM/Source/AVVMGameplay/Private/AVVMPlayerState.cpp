@@ -146,7 +146,7 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 
-AAVVMPlayerState::FOnPostNetClientSynchronizationCompleteDelegate& AAVVMPlayerState::GetOnPostNetClientSynchronizationComplete()
+FOnPostNetClientSynchronizationCompleteDelegate& AAVVMPlayerState::GetOnPostNetClientSynchronizationComplete()
 {
 	return OnPostNetClientSynchronizationComplete;
 }

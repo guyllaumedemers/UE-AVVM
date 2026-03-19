@@ -20,7 +20,6 @@
 #include "AVVMGameMode.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
 #include "AVVMLogger.h"
 #include "AVVMWorldSetting.h"
 #include "TimerManager.h"
@@ -32,6 +31,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Rules/AVVMPlayerRule.h"
 #include "Rules/AVVMSpawnPointRule.h"
+
+FOnPlayerReadyForUnregistrationDelegate AAVVMGameMode::OnPlayerReadyForUnregistration;
+FOnPlayerReadyForRegistrationDelegate AAVVMGameMode::OnPlayerReadyForRegistration;
 
 AAVVMGameMode::AAVVMGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -69,6 +71,16 @@ void AAVVMGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		World->GameStateSetEvent.RemoveAll(this);
 	}
+}
+
+FOnPlayerReadyForUnregistrationDelegate& AAVVMGameMode::GetOnPlayerReadyForUnregistration()
+{
+	return OnPlayerReadyForUnregistration;
+}
+
+FOnPlayerReadyForRegistrationDelegate& AAVVMGameMode::GetOnPlayerReadyForRegistration()
+{
+	return OnPlayerReadyForRegistration;
 }
 
 void AAVVMGameMode::Tick(float DeltaSeconds)
@@ -210,7 +222,7 @@ void AAVVMGameMode::RegisterPlayerWithAuthoritativeSubsystem(const APlayerState*
 	if (ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Attempting to Register with an invalid UniqueNetId.")))
 	{
 		// @gdemers IMPORTANT UAVVMNotificationSubsystem cannot be used here as we are targeting Subsystems and not actors.
-		OnPlayerReadyForRegistration.Broadcast(*UniqueNetIdPtr, NewPlayer);
+		GetOnPlayerReadyForRegistration().Broadcast(*UniqueNetIdPtr, NewPlayer);
 	}
 }
 
@@ -225,7 +237,7 @@ void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(const APlayerStat
 	if (ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Attempting to Register with an invalid UniqueNetId.")))
 	{
 		// @gdemers IMPORTANT UAVVMNotificationSubsystem cannot be used here as we are targeting Subsystems and not actors.
-		OnPlayerReadyForUnregistration.Broadcast(*UniqueNetIdPtr, NewPlayer);
+		GetOnPlayerReadyForUnregistration().Broadcast(*UniqueNetIdPtr, NewPlayer);
 	}
 }
 
@@ -284,6 +296,7 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 		UNetConnection* PlayerConnection = IsValid(Player) ? Player->GetNetConnection() : nullptr;
 		if (IsValid(PlayerConnection))
 		{
+			OutRetryCounter = 0;
 			PlayerConnection->Close();
 		}
 

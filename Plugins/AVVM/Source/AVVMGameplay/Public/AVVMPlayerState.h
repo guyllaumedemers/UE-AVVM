@@ -32,6 +32,8 @@
 class IAVVMDoesImplNetSynchronization;
 class UAVVMAbilitySystemComponent;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostNetClientSynchronizationCompleteDelegate, const AAVVMPlayerState* PlayerState);
+
 /**
  *	Class description:
  *
@@ -91,7 +93,6 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostNetClientSynchronizationCompleteDelegate, const AAVVMPlayerState* PlayerState);
 	FOnPostNetClientSynchronizationCompleteDelegate OnPostNetClientSynchronizationComplete;
 
 public:

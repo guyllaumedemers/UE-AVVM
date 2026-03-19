@@ -29,6 +29,9 @@
 class AAVVMWorldSetting;
 class AGameStateBase;
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForUnregistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForRegistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
+
 /**
  *	Class description:
  *
@@ -81,16 +84,16 @@ class AVVMGAMEPLAY_API AAVVMGameMode : public AModularGameMode,
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForRegistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
-	FOnPlayerReadyForRegistrationDelegate OnPlayerReadyForRegistration;
-
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForUnregistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
-	FOnPlayerReadyForUnregistrationDelegate OnPlayerReadyForUnregistration;
+	static FOnPlayerReadyForUnregistrationDelegate OnPlayerReadyForUnregistration;
+	static FOnPlayerReadyForRegistrationDelegate OnPlayerReadyForRegistration;
 
 public:
 	AAVVMGameMode(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	static FOnPlayerReadyForUnregistrationDelegate& GetOnPlayerReadyForUnregistration();
+	static FOnPlayerReadyForRegistrationDelegate& GetOnPlayerReadyForRegistration();
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;
