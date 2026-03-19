@@ -199,7 +199,7 @@ void AAVVMGameMode::Logout(AController* Exiting)
 	UnregisterPlayerFromAuthoritativeSubsystem(IsValid(Exiting) ? Exiting->GetPlayerState<APlayerState>() : nullptr);
 }
 
-void AAVVMGameMode::RegisterPlayerWithAuthoritativeSubsystem(APlayerState* NewPlayer)
+void AAVVMGameMode::RegisterPlayerWithAuthoritativeSubsystem(const APlayerState* NewPlayer) const
 {
 	if (!ensureAlwaysMsgf(IsValid(NewPlayer), TEXT("Attempting to Register with an invalid PlayerState.")))
 	{
@@ -214,7 +214,7 @@ void AAVVMGameMode::RegisterPlayerWithAuthoritativeSubsystem(APlayerState* NewPl
 	}
 }
 
-void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(APlayerState* NewPlayer)
+void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(const APlayerState* NewPlayer) const
 {
 	if (!ensureAlwaysMsgf(IsValid(NewPlayer), TEXT("Attempting to Unregister with an invalid PlayerState.")))
 	{

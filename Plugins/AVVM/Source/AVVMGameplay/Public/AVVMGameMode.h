@@ -106,9 +106,9 @@ protected:
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
-	
-	void RegisterPlayerWithAuthoritativeSubsystem(APlayerState* NewPlayer);
-	void UnregisterPlayerFromAuthoritativeSubsystem(APlayerState* NewPlayer);
+
+	void RegisterPlayerWithAuthoritativeSubsystem(const APlayerState* NewPlayer) const;
+	void UnregisterPlayerFromAuthoritativeSubsystem(const APlayerState* NewPlayer) const;
 	
 	// @gdemers handle pawn creation failure, and spawn location. (pawn configuration should be handled within component base systems)
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName = L"") override;
