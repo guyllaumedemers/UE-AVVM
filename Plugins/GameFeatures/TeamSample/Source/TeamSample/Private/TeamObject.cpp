@@ -128,9 +128,9 @@ void UTeamObject::OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlaye
 }
 
 void UTeamUtils::CreateOrAppendTeams(UObject* Outer,
-                                     const TArray<TWeakObjectPtr<const APlayerState>>& UnassignedPlayerStates,
                                      const TArray<FAVVMPartyProxy>& NewParties,
                                      const UTeamRule* Rule,
+                                     TArray<TWeakObjectPtr<const APlayerState>>& OutUnassignedPlayerStates,
                                      TArray<UTeamObject*>& OutTeams)
 {
 	if (!IsValid(Rule))
@@ -151,7 +151,7 @@ void UTeamUtils::CreateOrAppendTeams(UObject* Outer,
 	{
 		if (!bHasInitialized)
 		{
-			UTeamObject* NewTeam = UTeamUtils::CreateTeam(Outer, UnassignedPlayerStates, Party);
+			UTeamObject* NewTeam = UTeamUtils::CreateTeam(Outer, Party, OutUnassignedPlayerStates);
 			if (!IsValid(NewTeam))
 			{
 				continue;
@@ -171,32 +171,29 @@ void UTeamUtils::CreateOrAppendTeams(UObject* Outer,
 		else
 		{
 			UTeamObject* OldTeam = UTeamUtils::FindTeam(OutTeams, Party.UniqueId);
-			UTeamUtils::AppendTeam(UnassignedPlayerStates, Party.PlayerConnections, OldTeam);
+			UTeamUtils::AppendTeam(Party.PlayerConnections, OldTeam, OutUnassignedPlayerStates);
 		}
 	}
 }
 
 UTeamObject* UTeamUtils::CreateTeam(UObject* Outer,
-                                    const TArray<TWeakObjectPtr<const APlayerState>>& UnassignedPlayerStates,
-                                    const FAVVMPartyProxy& NewParty)
+                                    const FAVVMPartyProxy& NewParty,
+                                    TArray<TWeakObjectPtr<const APlayerState>>& OutUnassignedPlayerStates)
 {
 	UTeamObject* NewTeam = NewObject<UTeamObject>(Outer);
-	if (IsValid(NewTeam) && IsValid(Outer))
-	{
-		AVVM_LOGGER_LOG(LogTeamSample,
-		                Outer,
-		                Outer,
-		                TEXT("Creating new team %s."),
-		                *GetNameSafe(NewTeam));
-	}
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                Outer,
+	                Outer,
+	                TEXT("Creating new team %s."),
+	                *GetNameSafe(NewTeam));
 
-	AppendTeam(UnassignedPlayerStates, NewParty.PlayerConnections, NewTeam);
+	AppendTeam(NewParty.PlayerConnections, NewTeam, OutUnassignedPlayerStates);
 	return NewTeam;
 }
 
-void UTeamUtils::AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& UnassignedPlayerStates,
-                            const TArray<FString>& NewPlayerConnections,
-                            UTeamObject* NewTeam)
+void UTeamUtils::AppendTeam(const TArray<FString>& NewPlayerConnections,
+                            UTeamObject* NewTeam,
+                            TArray<TWeakObjectPtr<const APlayerState>>& OutUnassignedPlayerStates)
 {
 	if (!IsValid(NewTeam))
 	{
@@ -215,7 +212,7 @@ void UTeamUtils::AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& Un
 		FAVVMPlayerConnectionProxy OutPlayerProxy;
 		OnlineStringParser->FromString(PlayerConnection, OutPlayerProxy);
 
-		const TWeakObjectPtr<const APlayerState>* SearchResult = UnassignedPlayerStates.FindByPredicate([SearchNetId = OutPlayerProxy.UniqueNetId](const TWeakObjectPtr<const APlayerState>& Player)
+		const TWeakObjectPtr<const APlayerState>* SearchResult = OutUnassignedPlayerStates.FindByPredicate([SearchNetId = OutPlayerProxy.UniqueNetId](const TWeakObjectPtr<const APlayerState>& Player)
 		{
 			const FString UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(Player.Get());
 			return !UniqueNetId.IsEmpty() && UniqueNetId.Equals(SearchNetId);
@@ -224,6 +221,7 @@ void UTeamUtils::AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& Un
 		if (SearchResult != nullptr)
 		{
 			NewTeam->RegisterPlayerState(SearchResult->Get(), OutPlayerProxy.UniqueNetId);
+			OutUnassignedPlayerStates.RemoveSingleSwap(*SearchResult);
 		}
 	}
 }

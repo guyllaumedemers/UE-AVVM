@@ -129,18 +129,18 @@ class TEAMSAMPLE_API UTeamUtils : public UBlueprintFunctionLibrary
 
 public:
 	static void CreateOrAppendTeams(UObject* Outer,
-	                                const TArray<TWeakObjectPtr<const APlayerState>>& UnassignedPlayerStates,
 	                                const TArray<FAVVMPartyProxy>& NewParties,
 	                                const UTeamRule* Rule,
+	                                TArray<TWeakObjectPtr<const APlayerState>>& OutUnassignedPlayerStates,
 	                                TArray<UTeamObject*>& OutTeams);
 
 	static UTeamObject* CreateTeam(UObject* Outer,
-	                               const TArray<TWeakObjectPtr<const APlayerState>>& UnassignedPlayerStates,
-	                               const FAVVMPartyProxy& NewParty);
+	                               const FAVVMPartyProxy& NewParty,
+	                               TArray<TWeakObjectPtr<const APlayerState>>& OutUnassignedPlayerStates);
 
-	static void AppendTeam(const TArray<TWeakObjectPtr<const APlayerState>>& UnassignedPlayerStates,
-	                       const TArray<FString>& NewPlayerConnections,
-	                       UTeamObject* NewTeam);
+	static void AppendTeam(const TArray<FString>& NewPlayerConnections,
+	                       UTeamObject* NewTeam,
+	                       TArray<TWeakObjectPtr<const APlayerState>>& OutUnassignedPlayerStates);
 
 	static UTeamObject* FindTeam(const TArray<UTeamObject*>& NewTeams,
 	                             const int32 NewPartyUniqueId);

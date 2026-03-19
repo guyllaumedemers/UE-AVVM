@@ -20,6 +20,7 @@
 
 #include "GameStateTeamComponent.h"
 
+#include "AVVMGameMode.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMPlayerState.h"
@@ -93,6 +94,13 @@ void UGameStateTeamComponent::BeginPlay()
 		ContextArgs.ChannelTag = PlayerStateChannelTag;
 		ContextArgs.Callback = Callback;
 		UAVVMNotificationSubsystem::Static_RegisterObserver(this, ContextArgs);
+		
+		auto* GameMode = Cast<AAVVMGameMode>(Outer->AuthorityGameMode);
+		if (IsValid(GameMode))
+		{
+			GameMode->GetOnPlayerReadyForUnregistration().AddUObject(this, &UGameStateTeamComponent::OnPlayerStateLogout);
+			GameMode->GetOnPlayerReadyForRegistration().AddUObject(this, &UGameStateTeamComponent::OnPlayerStatePostLogin);
+		}
 
 		for (const APlayerState* NewPlayerState : Outer->PlayerArray)
 		{
@@ -132,6 +140,13 @@ void UGameStateTeamComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		FAVVMObserverContextArgs ContextArgs;
 		ContextArgs.ChannelTag = PlayerStateChannelTag;
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(this, ContextArgs);
+		
+		auto* GameMode = Cast<AAVVMGameMode>(Outer->AuthorityGameMode);
+		if (IsValid(GameMode))
+		{
+			GameMode->GetOnPlayerReadyForUnregistration().RemoveAll(this);
+			GameMode->GetOnPlayerReadyForRegistration().RemoveAll(this);
+		}
 	}
 #endif
 }
@@ -158,14 +173,11 @@ void UGameStateTeamComponent::OnPlayerStateAddedOrRemoved(const TInstancedStruct
 
 void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerState)
 {
-	if (IsValid(NewPlayerState))
-	{
-		AVVM_LOGGER_LOG(LogTeamSample,
-		                OwningOuter.Get(),
-		                OwningOuter.Get(),
-		                TEXT("Added %s."),
-		                *GetNameSafe(NewPlayerState));
-	}
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Added %s."),
+	                *GetNameSafe(NewPlayerState));
 	
 	// Problem : APlayerState is added by the game when a player attempt reaching the game, but
 	// we may have already requested from the backend the parties composing the game.
@@ -189,14 +201,11 @@ void UGameStateTeamComponent::OnPlayerStateAdded(const APlayerState* NewPlayerSt
 
 void UGameStateTeamComponent::OnPlayerStateRemoved(const APlayerState* NewPlayerState)
 {
-	if (IsValid(NewPlayerState))
-	{
-		AVVM_LOGGER_LOG(LogTeamSample,
-		                OwningOuter.Get(),
-		                OwningOuter.Get(),
-		                TEXT("Removed %s."),
-		                *GetNameSafe(NewPlayerState));
-	}
+	AVVM_LOGGER_LOG(LogTeamSample,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Removed %s."),
+	                *GetNameSafe(NewPlayerState));
 	
 	// @gdemers theres only one case here to cover :
 	// A) removal of a player who's already in game.
@@ -205,6 +214,24 @@ void UGameStateTeamComponent::OnPlayerStateRemoved(const APlayerState* NewPlayer
 	{
 		Team->UnRegisterPlayerState(NewPlayerState);
 	}
+}
+
+void UGameStateTeamComponent::OnPlayerStatePostLogin(const FUniqueNetId& NewPlayerId,
+                                                     const APlayerState* NewPlayerState)
+{
+	// @gdemers our UniqueNetId may have been initialized when first attempting team registration of this player,
+	// this ensure we don't process the same player twice.
+	UTeamObject* SearchResult = UTeamUtils::FindTeam(Teams, NewPlayerState);
+	if (false == IsValid(SearchResult))
+	{
+		OnPlayerStateAdded(NewPlayerState);
+	}
+}
+
+void UGameStateTeamComponent::OnPlayerStateLogout(const FUniqueNetId& NewPlayerId,
+                                                  const APlayerState* NewPlayerState)
+{
+	OnPlayerStateRemoved(NewPlayerState);
 }
 
 void UGameStateTeamComponent::GetTeamRuleOnAuthority()
@@ -324,7 +351,8 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 
 	TArray<UTeamObject*> OutTeam = MoveTemp(Teams);
 	TArray<TWeakObjectPtr<const APlayerState>> OldUnassignedPlayers = MoveTemp(PendingPlayerStates);
-	UTeamUtils::CreateOrAppendTeams(this, OldUnassignedPlayers, NewParties, TeamRule.Get(), OutTeam);
+	UTeamUtils::CreateOrAppendTeams(this, NewParties, TeamRule.Get(), OldUnassignedPlayers, OutTeam);
+	PendingPlayerStates.Append(OldUnassignedPlayers);
 
 	Teams.Reset(OutTeam.Num());
 	for (UTeamObject* NewTeam : OutTeam)

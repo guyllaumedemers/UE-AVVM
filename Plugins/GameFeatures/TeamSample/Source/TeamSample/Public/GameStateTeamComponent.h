@@ -32,6 +32,7 @@
 class APlayerState;
 struct FAVVMNotificationPayload;
 struct FAVVMPartyProxy;
+class FUniqueNetId;
 struct FStreamableHandle;
 class UTeamObject;
 class UTeamRule;
@@ -66,6 +67,9 @@ protected:
 
 	UFUNCTION()
 	void OnPlayerStateRemoved(const APlayerState* NewPlayerState);
+	
+	void OnPlayerStatePostLogin(const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
+	void OnPlayerStateLogout(const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
 
 	void GetTeamRuleOnAuthority();
 	void RequestTeams();
