@@ -231,6 +231,7 @@ void UGameStateTeamComponent::OnPlayerStatePostLogin(const FUniqueNetId& NewPlay
 void UGameStateTeamComponent::OnPlayerStateLogout(const FUniqueNetId& NewPlayerId,
                                                   const APlayerState* NewPlayerState)
 {
+	PendingPlayerStates.Remove(NewPlayerState);
 	OnPlayerStateRemoved(NewPlayerState);
 }
 
