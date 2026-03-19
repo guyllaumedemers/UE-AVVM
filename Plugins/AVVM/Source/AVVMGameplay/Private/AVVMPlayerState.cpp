@@ -90,9 +90,48 @@ void AAVVMPlayerState::ClientInitialize(class AController* C)
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
 
-	// @gdemers Notify Server that our local client has received a valid PC
-	// and is Ready to finalize any system visuals required for gameplay.
-	Server_OnClientPlayerControllerReceived();
+	// @gdemers enforce a single RPC execution between ClientInitialize, and OnSetUniqueId.
+	if (GetUniqueId().IsValid())
+	{
+		// @gdemers Notify Server that our local client has received a valid PC
+		// and is Ready to finalize any system visuals required for gameplay.
+		Server_OnAutonomousPlayerBackfilling();	
+	}
+}
+
+void AAVVMPlayerState::OnSetUniqueId()
+{
+	Super::OnSetUniqueId();
+
+	// @gdemers let each client handle their own update via RPC instead of
+	// executing from server, and back.
+	if (IsNetMode(NM_DedicatedServer))
+	{
+		return;
+	}
+
+	UE_AVVM_NOTIFY(this,
+	               RegisteredChannels.PostPlayerStateUniqueNetIdClientInitializedTag,
+	               this,
+	               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
+
+	if (GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		// @gdemers attempt refreshing a player state on a client that is simulated AFTER
+		// it has been initialized with a valid UniqueNetId which represent its identifier for gameplay.
+		HandleSimulatedPlayerBackfilling();
+	}
+	else
+	{
+		// @gdemers enforce a single RPC execution between OnSetUniqueId, and ClientInitialize.
+		AController* PC = GetPlayerController();
+		if (IsValid(PC))
+		{
+			// @gdemers Notify Server that our local client has received a valid UniqueNetId
+			// and is Ready to finalize any system visuals required for gameplay.
+			Server_OnAutonomousPlayerBackfilling();
+		}
+	}
 }
 
 UAbilitySystemComponent* AAVVMPlayerState::GetAbilitySystemComponent() const
@@ -107,7 +146,12 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 
-void AAVVMPlayerState::Server_OnClientPlayerControllerReceived_Implementation()
+AAVVMPlayerState::FOnPostNetClientSynchronizationCompleteDelegate& AAVVMPlayerState::GetOnPostNetClientSynchronizationComplete()
+{
+	return OnPostNetClientSynchronizationComplete;
+}
+
+void AAVVMPlayerState::Server_OnAutonomousPlayerBackfilling_Implementation()
 {
 	const UWorld* World = GetWorld();
 	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized = UAVVMNetSynchronizationManager::Static_GetAllNetFinalized(World);
@@ -142,7 +186,7 @@ void AAVVMPlayerState::Client_OnNetFinalized_Implementation(const TArray<TScript
 
 	// @gdemers event acting as a fence system, and notify ui of initialization phase
 	// being completed. allow for proper presentation to never display intermediate state.
-	OnPostNetClientSynchronizationComplete.Broadcast(this);
+	GetOnPostNetClientSynchronizationComplete().Broadcast(this);
 }
 
 void AAVVMPlayerState::HandleSimulatedPlayerBackfilling()
@@ -160,11 +204,6 @@ void AAVVMPlayerState::HandleSimulatedPlayerBackfilling()
 	{
 		LocalPlayerState->Server_OnPlayerBackfillingReceived(this);
 	}
-}
-
-void AAVVMPlayerState::OnSetUniqueId()
-{
-	Super::OnSetUniqueId();
 }
 
 void AAVVMPlayerState::Server_OnPlayerBackfillingReceived_Implementation(AAVVMPlayerState* SimulatedPlayerState)

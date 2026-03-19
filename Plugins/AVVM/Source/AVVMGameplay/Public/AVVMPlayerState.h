@@ -45,6 +45,9 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStateChannelAggregator
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag PostPlayerControllerClientInitializedTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag PostPlayerStateUniqueNetIdClientInitializedTag = FGameplayTag::EmptyTag;
 };
 
 /**
@@ -87,7 +90,7 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
                                           public IAVVMQuicktimeEventPlayerStateInterface
 {
 	GENERATED_BODY()
-	
+
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostNetClientSynchronizationCompleteDelegate, const AAVVMPlayerState* PlayerState);
 	FOnPostNetClientSynchronizationCompleteDelegate OnPostNetClientSynchronizationComplete;
 
@@ -98,6 +101,9 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void ClientInitialize(class AController* C) override;
+	
+	// TODO @gdemers handle refresh on player content with new unique id. (happens both server/client)
+	virtual void OnSetUniqueId() override;
 
 	// @gdemers PlayerState is the preferred place to host the ASC as OnPawnPosses can be used to modify the internal state of the
 	// ASC (good for state persistency between Pawn possession!).
@@ -106,12 +112,12 @@ public:
 	// IAVVMCanExposeActorPayload
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
 	
-	// @gdemers 
+	// @gdemers Delegate to register on the client side for capturing PlayerState NetSync completion.
 	FOnPostNetClientSynchronizationCompleteDelegate& GetOnPostNetClientSynchronizationComplete();
 
 protected:
 	UFUNCTION(Server, Reliable)
-	void Server_OnClientPlayerControllerReceived();
+	void Server_OnAutonomousPlayerBackfilling();
 	
 	UFUNCTION(Client, Reliable)
 	void Client_OnNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized);
@@ -124,9 +130,6 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void Client_OnSimulatedClientNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized,
 	                                          AAVVMPlayerState* SimulatedPlayerState);
-	
-	// TODO @gdemers handle refresh on player content with new unique id. (happens both server/client)
-	virtual void OnSetUniqueId() override;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
