@@ -187,18 +187,46 @@ void AAVVMGameMode::PostLogin(APlayerController* NewPlayer)
 
 	// @gdemers AGameMode::Login will assign a valid UniqueNetId to the APlayerState which means that it is safe to
 	// enforce data refresh on the server after this steps.
-	// example : any system handling caching of players using unique net id. 
+	// example : any system handling caching of players using unique net id.
+	RegisterPlayerWithAuthoritativeSubsystem(IsValid(NewPlayer) ? NewPlayer->GetPlayerState<APlayerState>() : nullptr);
 }
 
 void AAVVMGameMode::Logout(AController* Exiting)
 {
 	Super::Logout(Exiting);
-	
-	// TODO @gdemers Serialize Server sided information about the player leaving to
-	// the project specific backend, or local save file, or drop progression if forfeiting.
-	
-	// IMPORTANT APlayerState is safe for access as the invocation call is made before we destroy
-	// the player.
+
+	// @gdemers IMPORTANT APlayerState is safe for access as the invocation call is made before we destroy the player.
+	UnregisterPlayerFromAuthoritativeSubsystem(IsValid(Exiting) ? Exiting->GetPlayerState<APlayerState>() : nullptr);
+}
+
+void AAVVMGameMode::RegisterPlayerWithAuthoritativeSubsystem(APlayerState* NewPlayer)
+{
+	if (!ensureAlwaysMsgf(IsValid(NewPlayer), TEXT("Attempting to Register with an invalid PlayerState.")))
+	{
+		return;
+	}
+
+	const FUniqueNetIdPtr UniqueNetIdPtr = NewPlayer->GetUniqueId().GetV1();
+	if (ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Attempting to Register with an invalid UniqueNetId.")))
+	{
+		// @gdemers IMPORTANT UAVVMNotificationSubsystem cannot be used here as we are targeting Subsystems and not actors.
+		OnPlayerReadyForRegistration.Broadcast(*UniqueNetIdPtr, NewPlayer);
+	}
+}
+
+void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(APlayerState* NewPlayer)
+{
+	if (!ensureAlwaysMsgf(IsValid(NewPlayer), TEXT("Attempting to Unregister with an invalid PlayerState.")))
+	{
+		return;
+	}
+
+	const FUniqueNetIdPtr UniqueNetIdPtr = NewPlayer->GetUniqueId().GetV1();
+	if (ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Attempting to Register with an invalid UniqueNetId.")))
+	{
+		// @gdemers IMPORTANT UAVVMNotificationSubsystem cannot be used here as we are targeting Subsystems and not actors.
+		OnPlayerReadyForUnregistration.Broadcast(*UniqueNetIdPtr, NewPlayer);
+	}
 }
 
 AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)

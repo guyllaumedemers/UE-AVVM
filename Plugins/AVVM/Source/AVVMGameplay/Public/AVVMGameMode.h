@@ -81,6 +81,12 @@ class AVVMGAMEPLAY_API AAVVMGameMode : public AModularGameMode,
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForRegistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
+	FOnPlayerReadyForRegistrationDelegate OnPlayerReadyForRegistration;
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForUnregistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
+	FOnPlayerReadyForUnregistrationDelegate OnPlayerReadyForUnregistration;
+
 public:
 	AAVVMGameMode(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
@@ -100,6 +106,10 @@ protected:
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
+	
+	void RegisterPlayerWithAuthoritativeSubsystem(APlayerState* NewPlayer);
+	void UnregisterPlayerFromAuthoritativeSubsystem(APlayerState* NewPlayer);
+	
 	// @gdemers handle pawn creation failure, and spawn location. (pawn configuration should be handled within component base systems)
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName = L"") override;
 	virtual void FailedToRestartPlayer(AController* NewPlayer) override;

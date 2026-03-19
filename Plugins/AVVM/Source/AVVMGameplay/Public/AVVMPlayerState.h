@@ -101,8 +101,6 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void ClientInitialize(class AController* C) override;
-	
-	// TODO @gdemers handle refresh on player content with new unique id. (happens both server/client)
 	virtual void OnSetUniqueId() override;
 
 	// @gdemers PlayerState is the preferred place to host the ASC as OnPawnPosses can be used to modify the internal state of the
