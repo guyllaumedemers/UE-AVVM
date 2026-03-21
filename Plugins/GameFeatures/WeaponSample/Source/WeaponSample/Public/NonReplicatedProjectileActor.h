@@ -58,6 +58,7 @@ public:
 
 protected:
 	virtual const FCollisionQueryParams& GetCollisionParams() const;
+	virtual const FCollisionShape GetCollisionShape() const;
 	virtual const ECollisionChannel GetCollisionChannel() const;
 
 	void HandleHit(const FHitResult& HitResult);

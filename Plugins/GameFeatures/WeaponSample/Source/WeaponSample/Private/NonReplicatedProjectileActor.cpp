@@ -71,19 +71,46 @@ void ANonReplicatedProjectileActor::Tick(float DeltaSeconds)
 	}
 	else
 	{
+		const UWorld* World = GetWorld();
+		if (!IsValid(World))
+		{
+			return;
+		}
+
 		const FVector CurrentLocation = GetActorLocation();
 		const FVector NextLocation = CurrentLocation + ((PointData.Location - CurrentLocation) * DeltaSeconds);
-		SetActorLocation(NextLocation);
-		
-		// TODO @gdemers Require Rollback behaviour here on hit detection, or server/client reconciliation.
 
-		Timestamp += DeltaSeconds;
+		FHitResult OutHitResult;
+		const bool bIsBlockingHit = World->SweepSingleByChannel(OutHitResult,
+		                                                        CurrentLocation,
+		                                                        NextLocation,
+		                                                        FQuat::Identity,
+		                                                        GetCollisionChannel(),
+		                                                        GetCollisionShape(),
+		                                                        GetCollisionParams());
+
+		if (bIsBlockingHit)
+		{
+			HandleHit(OutHitResult);
+			Kill();
+		}
+		else
+		{
+			// TODO @gdemers Require Rollback behaviour here on hit detection, or server/client reconciliation.
+			SetActorLocation(NextLocation);
+			Timestamp += DeltaSeconds;
+		}
 	}
 }
 
 const FCollisionQueryParams& ANonReplicatedProjectileActor::GetCollisionParams() const
 {
 	return FCollisionQueryParams::DefaultQueryParam;
+}
+
+const FCollisionShape ANonReplicatedProjectileActor::GetCollisionShape() const
+{
+	return FCollisionShape::MakeSphere({});
 }
 
 const ECollisionChannel ANonReplicatedProjectileActor::GetCollisionChannel() const
