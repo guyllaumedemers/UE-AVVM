@@ -50,6 +50,9 @@ struct WEAPONSAMPLE_API FProjectileContextArgs
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FTransform AimTransform = FTransform::Identity;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<AActor*> IgnoredActors;
 };
 
 /**

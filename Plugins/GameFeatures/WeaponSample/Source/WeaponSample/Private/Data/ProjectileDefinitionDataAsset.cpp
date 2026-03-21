@@ -20,22 +20,32 @@
 #include "Data/ProjectileDefinitionDataAsset.h"
 
 #include "NonReplicatedProjectileActor.h"
+#include "Kismet/GameplayStatics.h"
 
-void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile) const
+void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile,
+                             const TArray<AActor*>& IgnoredActors) const
 {
 	if (!IsValid(Projectile))
 	{
 		return;
 	}
 
-	// @gdemers initialize actor velocity based on direction assigned during construction.
 	const FTransform& ProjectileWorldTransform = Projectile->GetTransform();
 	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
 
+	auto Params = FPredictProjectilePathParams(Radius, ProjectileWorldTransform.GetLocation(), (NormalizedDirection * Speed), 1.f, ECollisionChannel::ECC_Visibility);
+	Params.ActorsToIgnore.Append(IgnoredActors);
+
+	FPredictProjectilePathResult OutResult;
+	const bool bIsBlockingHit = UGameplayStatics::PredictProjectilePath(Projectile, Params, OutResult);
+
 	// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
 	Projectile->ProjectileTemplate = TInstancedStruct<FProjectileParams>::Make(*this);
-	Projectile->RuntimeVelocity = (NormalizedDirection * Speed);
-	Projectile->RuntimeMass = Mass;
+	Projectile->PredictedPathResult = OutResult;
+	Projectile->bDoesPredictBlockingHit = bIsBlockingHit;
+
+	// TODO @gdemers we may want to not tick and kill right away if theres no blocking hit.
+	Projectile->SetActorTickEnabled(true);
 }
 
 UScriptStruct* TBaseStructure<FProjectileParams>::Get()

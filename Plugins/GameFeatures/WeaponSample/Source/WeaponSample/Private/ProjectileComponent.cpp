@@ -61,12 +61,13 @@ void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
 	}
 
 	const FProjectileFiringMode& ProjectileMode = ProjectileTemplates[FiringModeTag];
-	
+
 	FProjectileContextArgs ContextArgs;
 	ContextArgs.ProjectileClass = ProjectileMode.ProjectileClass.Get();
 	ContextArgs.ProjectileParams = ProjectileMode.ProjectileParams;
 	ContextArgs.AimTransform = AimTransform;
-	
+	ContextArgs.IgnoredActors = {const_cast<AActor*>(OwningOuter.Get())};
+
 	UProjectileManagerSubsystem::Static_CreateProjectile(GetWorld(), ContextArgs);
 }
 

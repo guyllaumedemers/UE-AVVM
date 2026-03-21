@@ -35,7 +35,7 @@ ANonReplicatedProjectileActor::ANonReplicatedProjectileActor(const FObjectInitia
 {
 	// @gdemers Our current solution involve projectile simulation on both server, and client. (separate, later with validation)
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 	PrimaryActorTick.bAllowTickBatching = true;
 	PrimaryActorTick.bAllowTickOnDedicatedServer = true;
 	SetReplicateMovement(false);
@@ -58,82 +58,26 @@ void ANonReplicatedProjectileActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	const bool bHasExceededLifetime = HasExceededLifetime();
-	if (bHasExceededLifetime)
+	PointDataIndex = FMath::Clamp(PointDataIndex, 0, PredictedPathResult.PathData.Num() - 1);
+	const FPredictProjectilePathPointData& PointData = PredictedPathResult.PathData[PointDataIndex];
+	if (PointData.Time < Timestamp)
 	{
-		return;
-	}
+		++PointDataIndex;
 
-	const UWorld* World = GetWorld();
-	const FTransform& ProjectileWorldTransform = GetTransform();
-	const FVector DeltaVelocity = UProjectileFunctionLibrary::GetDeltaVelocity(RuntimeVelocity, RuntimeMass, DeltaSeconds);
-
-	FProjectileTraceArgs TraceArgs;
-	TraceArgs.World = World;
-	TraceArgs.TraceStart = ProjectileWorldTransform.GetLocation();
-	TraceArgs.TraceEnd = TraceArgs.TraceStart + DeltaVelocity;
-	TraceArgs.TraceColor = FColor::MakeRandomColor();
-	TraceArgs.bDoesTraceHavePersistentLines = UWeaponSettings::DoesDebugTraceShowPersistentLine();
-	TraceArgs.TraceLifeTime = UWeaponSettings::GetDebugTraceLifetime();
-	TraceArgs.CollisionChannel = GetCollisionChannel();
-	TraceArgs.CollisionQuery = GetCollisionParams();
-
-	// @gdemers update actor location/direction.
-	const FRotator NewDirection = DeltaVelocity.ToOrientationRotator();
-	SetActorLocationAndRotation(TraceArgs.TraceEnd, NewDirection);
-
-	// @gdemers update velocity based on force applied which is on the up-vector only.
-	ApplyForce(DeltaVelocity * FVector::UpVector);
-
-#if !UE_BUILD_SHIPPING
-	if (FWeaponSampleModule::GetCVarWeaponDebugTrace()->GetBool())
-	{
-		TraceDebug(TraceArgs);
-	}
-#endif
-
-	auto OutHit = FHitResult();
-	const bool bHasHit = Trace(TraceArgs, OutHit);
-	if (bHasHit)
-	{
-		HandleHit(OutHit);
-		Kill();
+		if (PointDataIndex >= PredictedPathResult.PathData.Num())
+		{
+			Kill();
+		}
 	}
 	else
 	{
-		UpdateLifetime(DeltaSeconds);
-	}
-}
+		const FVector CurrentLocation = GetActorLocation();
+		const FVector NextLocation = CurrentLocation + ((PointData.Location - CurrentLocation) * DeltaSeconds);
+		SetActorLocation(NextLocation);
+		
+		// TODO @gdemers Require Rollback behaviour here on hit detection, or server/client reconciliation.
 
-void ANonReplicatedProjectileActor::ApplyForce(const FVector& DeltaVelocity)
-{
-	RuntimeVelocity += DeltaVelocity;
-}
-
-void ANonReplicatedProjectileActor::TraceDebug(const FProjectileTraceArgs& TraceArgs)
-{
-	DrawDebugLine(TraceArgs.World,
-	              TraceArgs.TraceStart,
-	              TraceArgs.TraceEnd,
-	              TraceArgs.TraceColor,
-	              TraceArgs.bDoesTraceHavePersistentLines,
-	              TraceArgs.TraceLifeTime);
-}
-
-bool ANonReplicatedProjectileActor::Trace(const FProjectileTraceArgs& TraceArgs, FHitResult& OutHitResult)
-{
-	const UWorld* World = TraceArgs.World;
-	if (IsValid(World))
-	{
-		return World->LineTraceSingleByChannel(OutHitResult,
-		                                       TraceArgs.TraceStart,
-		                                       TraceArgs.TraceEnd,
-		                                       TraceArgs.CollisionChannel,
-		                                       TraceArgs.CollisionQuery);
-	}
-	else
-	{
-		return false;
+		Timestamp += DeltaSeconds;
 	}
 }
 
@@ -172,25 +116,10 @@ void ANonReplicatedProjectileActor::HandleHit(const FHitResult& HitResult)
 	}
 }
 
-bool ANonReplicatedProjectileActor::HasExceededLifetime() const
-{
-	return RuntimeLifetime <= 0.f;
-}
-
-void ANonReplicatedProjectileActor::UpdateLifetime(const float DeltaTime)
-{
-	RuntimeLifetime -= DeltaTime;
-
-	if (HasExceededLifetime())
-	{
-		Kill();
-	}
-}
-
 void ANonReplicatedProjectileActor::Kill()
 {
 	OnProjectileShutdown.Broadcast(this);
-	RuntimeLifetime = 0.f;
+	SetActorTickEnabled(false);
 }
 
 FVector UProjectileFunctionLibrary::GetDeltaVelocity(const FVector& Velocity,

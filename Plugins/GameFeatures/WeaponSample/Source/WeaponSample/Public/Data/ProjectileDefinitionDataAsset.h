@@ -47,7 +47,10 @@ struct WEAPONSAMPLE_API FProjectileParams
 	GENERATED_BODY()
 
 	virtual ~FProjectileParams() = default;
-	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
+	virtual void Init(ANonReplicatedProjectileActor* Projectile, const TArray<AActor*>& IgnoredActors) const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	float Radius = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float Speed = 0.f;

@@ -140,7 +140,7 @@ void UProjectileManagerSubsystem::CreateProjectile(const FProjectileContextArgs&
 	if (Params != nullptr)
 	{
 		ANonReplicatedProjectileActor* Instance = Factory(ContextArgs.ProjectileClass, ContextArgs.AimTransform);
-		Params->Init(Instance);
+		Params->Init(Instance, ContextArgs.IgnoredActors);
 	}
 }
 

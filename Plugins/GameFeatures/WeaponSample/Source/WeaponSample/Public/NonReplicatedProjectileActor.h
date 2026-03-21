@@ -25,6 +25,7 @@
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Kismet/GameplayStaticsTypes.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "NonReplicatedProjectileActor.generated.h"
@@ -56,29 +57,10 @@ public:
 	FOnProjectileShutdownRequestDelegate OnProjectileShutdown;
 
 protected:
-	void ApplyForce(const FVector& DeltaVelocity);
-
-	struct FProjectileTraceArgs
-	{
-		const UWorld* World = nullptr;
-		FVector TraceStart = FVector::ZeroVector;
-		FVector TraceEnd = FVector::ZeroVector;
-		FColor TraceColor = FColor::Red;
-		bool bDoesTraceHavePersistentLines = false;
-		float TraceLifeTime = 0.f;
-		FCollisionQueryParams CollisionQuery = FCollisionQueryParams::DefaultQueryParam;
-		ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic;
-	};
-
-	// @gdemers override trace behaviour for custom projectile type.
-	virtual void TraceDebug(const FProjectileTraceArgs& TraceArgs);
-	virtual bool Trace(const FProjectileTraceArgs& TraceArgs, FHitResult& OutHitResult);
 	virtual const FCollisionQueryParams& GetCollisionParams() const;
 	virtual const ECollisionChannel GetCollisionChannel() const;
 
 	void HandleHit(const FHitResult& HitResult);
-	bool HasExceededLifetime() const;
-	void UpdateLifetime(const float DeltaTime);
 	void Kill();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
@@ -91,13 +73,16 @@ protected:
 	TInstancedStruct<FExplosionParams> ExplosionTemplate;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FVector RuntimeVelocity = FVector::ZeroVector;
+	FPredictProjectilePathResult PredictedPathResult;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float RuntimeMass = 0.f;
+	bool bDoesPredictBlockingHit = false;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float RuntimeLifetime = 0.f;
+	int32 PointDataIndex = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	double Timestamp = 0.f;
 
 	friend struct FProjectileParams;
 	friend struct FExplosionParams;
