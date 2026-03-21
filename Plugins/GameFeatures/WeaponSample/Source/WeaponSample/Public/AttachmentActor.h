@@ -50,7 +50,7 @@ struct WEAPONSAMPLE_API FAttachmentSocketTargetingHelper : public FAVVMSocketTar
  *	AAttachmentActor is an attachment system that extends the Outer Actor and can be invalidated
  *	during Unequip phase if required (since they are children of the actor with Authoritative state).
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS()
 class WEAPONSAMPLE_API AAttachmentActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,

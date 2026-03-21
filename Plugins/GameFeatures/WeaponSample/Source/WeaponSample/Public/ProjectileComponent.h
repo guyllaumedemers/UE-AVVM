@@ -22,7 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
-#include "Components/ActorComponent.h"
+#include "Components/SplineComponent.h"
 #include "Engine/StreamableManager.h"
 #include "StructUtils/InstancedStruct.h"
 
@@ -37,7 +37,7 @@ struct FProjectileParams;
  *	UProjectileComponent is a system handling projectile instantiation, and initialization.
  */
 UCLASS(ClassGroup=("Weapon"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class WEAPONSAMPLE_API UProjectileComponent : public UActorComponent
+class WEAPONSAMPLE_API UProjectileComponent : public USplineComponent
 {
 	GENERATED_BODY()
 
