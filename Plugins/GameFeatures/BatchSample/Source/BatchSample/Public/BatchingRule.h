@@ -78,10 +78,10 @@ protected:
 	bool bShouldGarbageOnNextTick = true;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TSubclassOf<AActor>> ActorAllowedClasses;
+	TArray<TSubclassOf<AActor>> AllowedActorClasses;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TSubclassOf<AActor>> ActorIgnoredClasses;
+	TArray<TSubclassOf<AActor>> IgnoredActorClasses;
 
 	TSharedPtr<FStreamableHandle> AllowedClasses_StreamableHandle = nullptr;
 	TSharedPtr<FStreamableHandle> IgnoredClasses_StreamableHandle = nullptr;

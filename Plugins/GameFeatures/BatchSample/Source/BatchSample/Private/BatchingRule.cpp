@@ -47,8 +47,8 @@ void UBatchingRule::PostInitProperties()
 
 	AllowedClasses_StreamableHandle.Reset();
 	IgnoredClasses_StreamableHandle.Reset();
-	ActorAllowedClasses.Reset();
-	ActorIgnoredClasses.Reset();
+	AllowedActorClasses.Reset();
+	IgnoredActorClasses.Reset();
 
 	TArray<FSoftObjectPath> AllowedClasses_SoftObjectPaths;
 	for (const auto& ImplClass : AllowedClasses)
@@ -83,10 +83,10 @@ void UBatchingRule::PostInitProperties()
 		}
 	};
 
-	const auto CallbackA = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, &ActorAllowedClasses, &AllowedClasses_StreamableHandle);
+	const auto CallbackA = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, &AllowedActorClasses, &AllowedClasses_StreamableHandle);
 	AllowedClasses_StreamableHandle = UAssetManager::Get().LoadAssetList(AllowedClasses_SoftObjectPaths, CallbackA);
 
-	const auto CallbackB = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, &ActorIgnoredClasses, &IgnoredClasses_StreamableHandle);
+	const auto CallbackB = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, &IgnoredActorClasses, &IgnoredClasses_StreamableHandle);
 	IgnoredClasses_StreamableHandle = UAssetManager::Get().LoadAssetList(IgnoredClasses_SoftObjectPaths, CallbackB);
 }
 
@@ -105,19 +105,19 @@ bool UBatchingRule::DoesQualifyForBatchDestroy(const AActor* Actor) const
 
 	if (!bAllowBatchDestroyChildClasses)
 	{
-		const bool bIsIgnored = ActorIgnoredClasses.Contains(InspectClass);
+		const bool bIsIgnored = IgnoredActorClasses.Contains(InspectClass);
 		if (bIsIgnored)
 		{
 			return false;
 		}
 
-		return ActorAllowedClasses.Contains(InspectClass);
+		return AllowedActorClasses.Contains(InspectClass);
 	}
 	else
 	{
 		bool HasChild = false;
 
-		for (const auto& ActorClass : ActorIgnoredClasses)
+		for (const auto& ActorClass : IgnoredActorClasses)
 		{
 			HasChild |= InspectClass->IsChildOf(ActorClass);
 		}
@@ -127,7 +127,7 @@ bool UBatchingRule::DoesQualifyForBatchDestroy(const AActor* Actor) const
 			return false;
 		}
 
-		for (const auto& ActorClass : ActorAllowedClasses)
+		for (const auto& ActorClass : AllowedActorClasses)
 		{
 			HasChild |= InspectClass->IsChildOf(ActorClass);
 		}
