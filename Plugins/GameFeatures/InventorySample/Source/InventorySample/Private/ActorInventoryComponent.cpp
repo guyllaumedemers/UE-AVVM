@@ -217,7 +217,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		Iterator.RemoveCurrentSwap();
 	}
 
-	EItemSrcType OutSrcType = EItemSrcType::None;
+	EAVVMDataSourceType OutSrcType = EAVVMDataSourceType::None;
 	const bool bIsValid = UInventoryUtils::GetOuterSourceType(Outer, OutSrcType);
 	if (!bIsValid)
 	{
@@ -230,10 +230,10 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	                TEXT("Requesting item type %s."),
 	                EnumToString(OutSrcType));
 
-	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
+	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EAVVMDataSourceType::Static);
 	if (bIsItemSrcStatic)
 	{
-		IInventoryProvider::Execute_RequestItemsFromDataAsset(Outer);
+		IAVVMResourceProvider::Execute_RequestDataFromDataAsset(Outer);
 	}
 	else
 	{
@@ -242,7 +242,7 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 		// https://miro.com/app/board/uXjVJYdFx2Y=/?share_link_id=345226885183
 		// Note : I would suggest using Data Asset to define the scheme of gameplay actors that don't evolve over time, and
 		// keep the microservice request to be specific to your player account/character.
-		IInventoryProvider::Execute_RequestItemsFromMicroService(Outer);
+		IAVVMResourceProvider::Execute_RequestDataFromMicroService(Outer);
 	}
 }
 
@@ -478,7 +478,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		return;
 	}
 	
-	EItemSrcType OutSrcType = EItemSrcType::None;
+	EAVVMDataSourceType OutSrcType = EAVVMDataSourceType::None;
 	const bool bIsValid = UInventoryUtils::GetOuterSourceType(Outer, OutSrcType);
 	if (!bIsValid)
 	{
@@ -509,7 +509,7 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 		// information about storage, position within storage, item stack count, etc...
 		int32 PrivateItemId = INDEX_NONE;
 
-		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EAVVMDataSourceType::Static);
 		if (bIsItemSrcStatic)
 		{
 			PrivateItemId = UItemObjectUtils::RuntimeInitStaticItem(Outer,
@@ -772,11 +772,11 @@ void UActorInventoryComponent::OnDrop(UItemObject* ItemObject)
 	CheckBounds();
 
 	// @gdemers update our backend or file to disk.
-	EItemSrcType OutSrcType = EItemSrcType::None;
+	EAVVMDataSourceType OutSrcType = EAVVMDataSourceType::None;
 	const bool bIsValid = UInventoryUtils::GetOuterSourceType(OwningOuter.Get(), OutSrcType);
 	if (bIsValid)
 	{
-		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EAVVMDataSourceType::Static);
 		if (bIsItemSrcStatic)
 		{
 			// @gdemers update on disk representation of our inventory.
@@ -890,11 +890,11 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	}
 
 	// @gdemers update our backend or file to disk.
-	EItemSrcType OutSrcType = EItemSrcType::None;
+	EAVVMDataSourceType OutSrcType = EAVVMDataSourceType::None;
 	const bool bIsValid = UInventoryUtils::GetOuterSourceType(OwningOuter.Get(), OutSrcType);
 	if (bIsValid)
 	{
-		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
+		const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EAVVMDataSourceType::Static);
 		if (bIsItemSrcStatic)
 		{
 			// @gdemers update on disk representation of our inventory.

@@ -63,8 +63,6 @@ void AAVVMCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwningActor = GetPlayerState();
-
 #if WITH_EDITOR
 	if (!IsNetMode(NM_DedicatedServer))
 #endif
@@ -79,8 +77,6 @@ void AAVVMCharacter::BeginPlay()
 void AAVVMCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	OwningActor.Reset();
 
 #if WITH_EDITOR
 	if (!IsNetMode(NM_DedicatedServer))
@@ -101,13 +97,15 @@ UAVVMAbilitySystemComponent* AAVVMCharacter::BP_GetAbilitySystemComponent() cons
 UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 {
 	// @gdemers Note : Override for AI derived class and provide ASC directly.
-	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningActor.Get());
+	const APlayerState* NewPlayerState = GetPlayerState();
+	return UAVVMAbilityUtils::GetAbilitySystemComponent(NewPlayerState);
 }
 
 TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Implementation() const
 {
-	const bool bIsValid = UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMCanExposeActorPayload>(OwningActor.Get());
-	return bIsValid ? IAVVMCanExposeActorPayload::Execute_GetExposedActorContext(OwningActor.Get()) : IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
+	const APlayerState* NewPlayerState = GetPlayerState();
+	const bool bIsValid = UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMCanExposeActorPayload>(NewPlayerState);
+	return bIsValid ? IAVVMCanExposeActorPayload::Execute_GetExposedActorContext(NewPlayerState) : IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
 }
 
 void AAVVMCharacter::NotifyOnNewSocketParentAvailable(AActor* SocketTarget)
@@ -158,9 +156,8 @@ bool AAVVMCharacter::HasExactMatch(const FGameplayTagContainer& Compare) const
 
 void AAVVMCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)
 {
-	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
-	
-	// TODO @gdemers if ever server need to configure something based on PlayerState assignment.
+	// @gdemers ensure proper initialization of Outer actor be a valid PlayerState.
+	BP_PostPlayerStateSet();
 }
 
 void AAVVMCharacter::OnRep_Controller()

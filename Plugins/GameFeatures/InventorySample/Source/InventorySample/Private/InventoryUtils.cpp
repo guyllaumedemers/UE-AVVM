@@ -23,7 +23,6 @@
 #include "AVVMGameSession.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
-#include "InventoryProvider.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "StorageHelper.h"
@@ -32,6 +31,7 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/InventoryProviderTableRow.h"
 #include "Dom/JsonObject.h"
+#include "Resources/AVVMResourceProvider.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 #include "Tags/PrivateTags.h"
@@ -103,16 +103,16 @@ namespace NSJsonInventory
 	}
 }
 
-bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)
+bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EAVVMDataSourceType& OutSrcType)
 {
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
-		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<const UInventoryProvider>(Outer))
+		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<const UAVVMResourceProvider>(Outer))
 	{
 		return false;
 	}
 
-	OutSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
-	const bool bIsNone = EnumHasAnyFlags(OutSrcType, EItemSrcType::None);
+	OutSrcType = IAVVMResourceProvider::Execute_GetDataSourceType(Outer);
+	const bool bIsNone = EnumHasAnyFlags(OutSrcType, EAVVMDataSourceType::None);
 	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
 	{
 		return false;
