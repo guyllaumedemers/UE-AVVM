@@ -21,7 +21,8 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMNotificationSubsystem.h" // @gdemers fwd not supported, required due to UFUNCTION() / unreal reflection.
+#include "AVVMNotificationSubsystem.h"
+#include "Engine/World.h"
 #include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
 
@@ -41,6 +42,9 @@ USTRUCT(BlueprintType)
 struct WEAPONSAMPLE_API FProjectileContextArgs
 {
 	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	const AActor* Owner = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	const UClass* ProjectileClass = nullptr;
@@ -102,7 +106,10 @@ protected:
 	void OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile);
 
 	// @gdemers factory method to support pooling or other instancing system specific to your project.
-	virtual ANonReplicatedProjectileActor* Factory(const UClass* ProjectileClass, const FTransform& AimTransform) const;
+	virtual ANonReplicatedProjectileActor* Factory(const UClass* ProjectileClass,
+	                                               const FActorSpawnParameters& SpawnActorParameters,
+	                                               const FTransform& AimTransform) const;
+	
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(ANonReplicatedProjectileActor* Projectile);
 	

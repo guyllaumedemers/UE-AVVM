@@ -139,7 +139,10 @@ void UProjectileManagerSubsystem::CreateProjectile(const FProjectileContextArgs&
 	const auto* Params = ContextArgs.ProjectileParams.GetPtr<FProjectileParams>();
 	if (Params != nullptr)
 	{
-		ANonReplicatedProjectileActor* Instance = Factory(ContextArgs.ProjectileClass, ContextArgs.AimTransform);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = const_cast<AActor*>(ContextArgs.Owner);
+
+		ANonReplicatedProjectileActor* Instance = Factory(ContextArgs.ProjectileClass, SpawnParams, ContextArgs.AimTransform);
 		Params->Init(Instance, ContextArgs.IgnoredActors);
 	}
 }
@@ -197,7 +200,12 @@ void UProjectileManagerSubsystem::OnPlayerStateAdded(const APlayerState* PlayerS
 	}
 }
 
-ANonReplicatedProjectileActor* UProjectileManagerSubsystem::Factory(const UClass* ProjectileClass, const FTransform& AimTransform) const
+void UProjectileManagerSubsystem::OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile)
+{
+	Shutdown(Projectile);
+}
+
+ANonReplicatedProjectileActor* UProjectileManagerSubsystem::Factory(const UClass* ProjectileClass, const FActorSpawnParameters& SpawnActorParameters, const FTransform& AimTransform) const
 {
 	UWorld* World = GetWorld();
 	if (IsValid(World))
@@ -206,7 +214,7 @@ ANonReplicatedProjectileActor* UProjectileManagerSubsystem::Factory(const UClass
 		const FRotator Rotator = AimTransform.Rotator();
 		// @gdemers another good example of const-ness issue in the engine. theres no point in violating bitwise const-ness or logical const-ness and yet
 		// the engine require a UClass* to be non-const.
-		AActor* Instance = World->SpawnActor(const_cast<UClass*>(ProjectileClass), &Location, &Rotator, FActorSpawnParameters());
+		AActor* Instance = World->SpawnActor(const_cast<UClass*>(ProjectileClass), &Location, &Rotator, SpawnActorParameters);
 		return Cast<ANonReplicatedProjectileActor>(Instance);
 	}
 
@@ -219,9 +227,4 @@ void UProjectileManagerSubsystem::Shutdown(ANonReplicatedProjectileActor* Projec
 	{
 		Projectile->Destroy();
 	}
-}
-
-void UProjectileManagerSubsystem::OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile)
-{
-	Shutdown(Projectile);
 }

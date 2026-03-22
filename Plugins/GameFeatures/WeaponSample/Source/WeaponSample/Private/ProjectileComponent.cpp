@@ -26,6 +26,7 @@
 #include "WeaponSampleModule.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
+#include "GameFramework/Character.h"
 
 UProjectileComponent::UProjectileComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -54,6 +55,11 @@ void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
                                 const FTransform& AimTransform) const
 {
+	if (!OwningOuter.IsValid())
+	{
+		return;
+	}
+
 	const bool bDoesContains = ProjectileTemplates.Contains(FiringModeTag);
 	if (!bDoesContains)
 	{
@@ -63,10 +69,15 @@ void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
 	const FProjectileFiringMode& ProjectileMode = ProjectileTemplates[FiringModeTag];
 
 	FProjectileContextArgs ContextArgs;
+	ContextArgs.Owner = OwningOuter.Get();
 	ContextArgs.ProjectileClass = ProjectileMode.ProjectileClass.Get();
 	ContextArgs.ProjectileParams = ProjectileMode.ProjectileParams;
 	ContextArgs.AimTransform = AimTransform;
-	ContextArgs.IgnoredActors = {const_cast<AActor*>(OwningOuter.Get())};
+	ContextArgs.IgnoredActors =
+	{
+			const_cast<AActor*>(OwningOuter.Get()),
+			OwningOuter->GetTypedOuter<AActor>()
+	};
 
 	UProjectileManagerSubsystem::Static_CreateProjectile(GetWorld(), ContextArgs);
 }

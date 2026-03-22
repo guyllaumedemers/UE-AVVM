@@ -33,16 +33,15 @@ void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile,
 	const FTransform& ProjectileWorldTransform = Projectile->GetTransform();
 	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
 
-	auto Params = FPredictProjectilePathParams(Radius, ProjectileWorldTransform.GetLocation(), (NormalizedDirection * Speed), 1.f, ECollisionChannel::ECC_Visibility);
+	auto Params = FPredictProjectilePathParams(Radius, ProjectileWorldTransform.GetLocation(), (NormalizedDirection * Speed), MaxSimTime, ECollisionChannel::ECC_Visibility);
 	Params.ActorsToIgnore.Append(IgnoredActors);
 
 	FPredictProjectilePathResult OutResult;
 	const bool bIsBlockingHit = UGameplayStatics::PredictProjectilePath(Projectile, Params, OutResult);
 
-	// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
 	Projectile->ProjectileTemplate = TInstancedStruct<FProjectileParams>::Make(*this);
-	Projectile->PredictedPathResult = OutResult;
 	Projectile->bDoesPredictBlockingHit = bIsBlockingHit;
+	Projectile->PredictedPathResult = OutResult;
 
 	// TODO @gdemers we may want to not tick and kill right away if theres no blocking hit.
 	Projectile->SetActorTickEnabled(true);
@@ -57,7 +56,6 @@ void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const
 {
 	if (IsValid(Projectile))
 	{
-		// TODO @gdemers Update this later to reduce allocation made by TInstancedStruct.
 		Projectile->ExplosionTemplate = TInstancedStruct<FExplosionParams>::Make(*this);
 	}
 }

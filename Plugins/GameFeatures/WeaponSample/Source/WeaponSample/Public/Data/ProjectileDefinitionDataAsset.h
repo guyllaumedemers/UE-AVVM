@@ -56,10 +56,7 @@ struct WEAPONSAMPLE_API FProjectileParams
 	float Speed = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float Mass = 0.f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float Lifetime = 0.f;
+	float MaxSimTime = 0.f;
 };
 
 template<> struct TBaseStructure<FProjectileParams> 
