@@ -29,7 +29,31 @@
 
 #include "ItemRandomizerRule.generated.h"
 
+struct FStreamableHandle;
 class UItemObject;
+
+/**
+ *	Class description:
+ *	
+ *	UItemRandomizerImpl is an Impl Object that defines how an Actor in world should handle releasing from authority Items
+ *	with support for randomization.
+ *	
+ *	Example : Destructible crates may have high drop rate, and can randomly release from their inventory component
+ *	high value items, but over time support decreasing ratio of high value drop (or even return nothing) based on player progression.
+ */
+UCLASS(BlueprintType, Blueprintable)
+class UItemRandomizerImpl : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual TArray<UItemObject*> GetFilteredItems(const TArray<UItemObject*>& Items) const PURE_VIRTUAL(GetFilteredItems, return {};);
+	const FGameplayTag& GetImplTag() const;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag CategoryTag = FGameplayTag::EmptyTag;
+};
 
 /**
  *	Class description:
@@ -47,6 +71,16 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	virtual void PostInitProperties() override;
 	TArray<UItemObject*> GetRandomSubset(const AActor* Outer,
 	                                     const TArray<UItemObject*>& Items) const;
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TArray<TSoftClassPtr<UItemRandomizerImpl>> ImplClasses;
+
+	UPROPERTY(Transient)
+	TMap<FGameplayTag, TWeakObjectPtr<const UItemRandomizerImpl>/*CDO*/> Impls;
+
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

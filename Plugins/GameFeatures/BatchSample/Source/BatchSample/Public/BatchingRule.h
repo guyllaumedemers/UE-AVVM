@@ -30,6 +30,8 @@
 
 #include "BatchingRule.generated.h"
 
+struct FStreamableHandle;
+
 /**
  *	Class description:
  *
@@ -46,6 +48,7 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	virtual void PostInitProperties() override;
 	bool DoesQualifyForBatchDestroy(const AActor* Actor) const;
 	int32 GetMaxSizePerBatchDestroy() const;
 	float GetBatchInterval() const;
@@ -57,10 +60,10 @@ protected:
 	bool bAllowBatchDestroyChildClasses = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Base and Derived Classes subject to BatchDestroy."))
-	TArray<TSubclassOf<AActor>> Classes;
+	TArray<TSoftClassPtr<AActor>> AllowedClasses;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Classes excluded from BatchDestroy."))
-	TArray<TSubclassOf<AActor>> IgnoredClasses;
+	TArray<TSoftClassPtr<AActor>> IgnoredClasses;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	int32 MaxSizePerBatchDestroy = INDEX_NONE;
@@ -73,4 +76,17 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldGarbageOnNextTick = true;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TSubclassOf<AActor>> ActorAllowedClasses;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<TSubclassOf<AActor>> ActorIgnoredClasses;
+
+	TSharedPtr<FStreamableHandle> AllowedClasses_StreamableHandle = nullptr;
+	TSharedPtr<FStreamableHandle> IgnoredClasses_StreamableHandle = nullptr;
+	
+#if WITH_AUTOMATION_TESTS
+	friend class ABatchSampleTest;
+#endif
 };

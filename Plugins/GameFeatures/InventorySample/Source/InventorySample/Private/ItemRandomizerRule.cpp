@@ -19,20 +19,94 @@
 //SOFTWARE.
 #include "ItemRandomizerRule.h"
 
+#include "AVVMToolkitUtils.h"
+#include "InventoryProvider.h"
+#include "Engine/AssetManager.h"
+
+const FGameplayTag& UItemRandomizerImpl::GetImplTag() const
+{
+	return CategoryTag;
+}
+
 #if WITH_EDITOR
 EDataValidationResult UItemRandomizerRule::IsDataValid(class FDataValidationContext& Context) const
 {
-	return Super::IsDataValid(Context);
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (ImplClasses.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UItemRandomizerRule", "", "Item Randomizer Impl is empty!"));
+	}
+
+	return Result;
 }
 #endif
+
+void UItemRandomizerRule::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	if (IsTemplate())
+	{
+		return;
+	}
+	
+	StreamableHandle.Reset();
+	Impls.Reset();
+
+	TArray<FSoftObjectPath> SoftObjectPaths;
+	for (const auto& ImplClass : ImplClasses)
+	{
+		SoftObjectPaths.Add(ImplClass.ToSoftObjectPath());
+	}
+
+	const auto OnResourceAcquired = [](const TWeakObjectPtr<UItemRandomizerRule>& Rule)
+	{
+		if (!Rule.IsValid() || !Rule->StreamableHandle.IsValid())
+		{
+			return;
+		}
+
+		TArray<UObject*> OutResources;
+		Rule->StreamableHandle->GetLoadedAssets(OutResources);
+
+		for (UObject* Resource : OutResources)
+		{
+			auto* ImplClass = Cast<UClass>(Resource);
+			if (!IsValid(ImplClass))
+			{
+				continue;
+			}
+
+			const auto* CDO = ImplClass->GetDefaultObject<UItemRandomizerImpl>();
+			if (IsValid(CDO))
+			{
+				auto& OutResult = Rule->Impls.FindOrAdd(CDO->GetImplTag());
+				OutResult = CDO;
+			}
+		}
+	};
+
+	const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, this);
+	StreamableHandle = UAssetManager::Get().LoadAssetList(SoftObjectPaths, Callback);
+}
 
 TArray<UItemObject*> UItemRandomizerRule::GetRandomSubset(const AActor* Outer,
                                                           const TArray<UItemObject*>& Items) const
 {
-	TArray<UItemObject*> OutResults;
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(Outer);
+	if (!bResult)
+	{
+		return {};
+	}
 
-	// TODO @gdemers Define how randomization should be managed. Most-likely via an impl object thats specific care about the source
-	// actor dropping the items, and the current game state.
+	const FGameplayTag ImplCategory = IInventoryProvider::Execute_GetItemRandomizerRuleType(Outer);
+	const auto* OutResult = Impls.Find(ImplCategory);
+	if ((OutResult != nullptr) && OutResult->IsValid())
+	{
+		TArray<UItemObject*> OutResults = (*OutResult)->GetFilteredItems(Items);
+		return OutResults;
+	}
 
-	return OutResults;
+	return {};
 }

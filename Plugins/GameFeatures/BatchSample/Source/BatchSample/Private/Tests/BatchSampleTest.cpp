@@ -94,7 +94,13 @@ void ABatchSampleTest::RequestRuleUntilAvailable()
 	}
 
 	const auto* TestRule = TestSettings->GetRule<UBatchingRule>(AUTOMATED_TEST_TAG_WORLD_RULE_BATCHING);
+#if WITH_AUTOMATION_TESTS
+	if (IsValid(TestRule) &&
+		(TestRule->AllowedClasses.IsEmpty() || TestRule->AllowedClasses_StreamableHandle.IsValid()) &&
+		(TestRule->IgnoredClasses.IsEmpty() || TestRule->IgnoredClasses_StreamableHandle.IsValid()))
+#else
 	if (IsValid(TestRule))
+#endif
 	{
 		BatchRule = TestRule;
 	}

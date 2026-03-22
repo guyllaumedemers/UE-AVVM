@@ -23,6 +23,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "UObject/Interface.h"
 
 #include "InventoryProvider.generated.h"
@@ -94,4 +95,8 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool IsItemEquipped(const UItemObject* NewItem) const;
 	virtual bool IsItemEquipped_Implementation(const UItemObject* NewItem) const PURE_VIRTUAL(IsItemEquipped_Implementation, return false;);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	FGameplayTag GetItemRandomizerRuleType() const;
+	FGameplayTag GetItemRandomizerRuleType_Implementation() const PURE_VIRTUAL(GetItemRandomizerRuleType_Implementation, return FGameplayTag::EmptyTag;);
 };

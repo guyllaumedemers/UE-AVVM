@@ -22,7 +22,7 @@
 #include "AVVMAutomatedTestGameplayActor.h"
 
 #if WITH_AUTOMATION_TESTS
-#include "Tests/AutomationEditorCommon.h"
+#include "Tests/AutomationCommon.h"
 #endif
 
 class AAVVMAutomatedTestGameplayActor;
@@ -64,7 +64,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, "AutomatedTes
 bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
-	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+	FTestWorldWrapper WorldWrapper;
+	WorldWrapper.CreateTestWorld(EWorldType::Game);
+	UWorld* World = WorldWrapper.GetTestWorld();
 	UTEST_NOT_NULL("UWorld.", World)
 
 	const auto* TestActor = World->SpawnActor<AAVVMAutomatedTestGameplayActor>(AAVVMAutomatedTestGameplayActor::StaticClass());

@@ -42,7 +42,7 @@
  *		* Match Phase management.
  *		* etc...
  */
-UCLASS(Abstract, BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable)
 class AVVMGAMEPLAY_API UAVVMWorldRule : public UObject
 {
 	GENERATED_BODY()

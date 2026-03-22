@@ -20,11 +20,13 @@
 
 #include "BatchingRule.h"
 
+#include "Engine/AssetManager.h"
+
 #if WITH_EDITOR
 EDataValidationResult UBatchingRule::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (Classes.IsEmpty())
+	if (AllowedClasses.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UBatchingRule", "", "Classes is empty. You should remove this Rule to prevent Subsystem creation."));
@@ -33,6 +35,60 @@ EDataValidationResult UBatchingRule::IsDataValid(class FDataValidationContext& C
 	return Result;
 }
 #endif
+
+void UBatchingRule::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	if (IsTemplate())
+	{
+		return;
+	}
+
+	AllowedClasses_StreamableHandle.Reset();
+	IgnoredClasses_StreamableHandle.Reset();
+	ActorAllowedClasses.Reset();
+	ActorIgnoredClasses.Reset();
+
+	TArray<FSoftObjectPath> AllowedClasses_SoftObjectPaths;
+	for (const auto& ImplClass : AllowedClasses)
+	{
+		AllowedClasses_SoftObjectPaths.Add(ImplClass.ToSoftObjectPath());
+	}
+
+	TArray<FSoftObjectPath> IgnoredClasses_SoftObjectPaths;
+	for (const auto& ImplClass : IgnoredClasses)
+	{
+		IgnoredClasses_SoftObjectPaths.Add(ImplClass.ToSoftObjectPath());
+	}
+
+	const auto OnResourceAcquired = [](TArray<TSubclassOf<AActor>>* Resources, TSharedPtr<FStreamableHandle>* Handle)
+	{
+		if ((Resources == nullptr) || (Handle == nullptr) || !Handle->IsValid())
+		{
+			return;
+		}
+
+		TArray<UObject*> OutResources;
+		(*Handle)->GetLoadedAssets(OutResources);
+
+		Resources->Reserve(OutResources.Num());
+		for (UObject* Resource : OutResources)
+		{
+			auto* ImplClass = Cast<UClass>(Resource);
+			if (IsValid(ImplClass))
+			{
+				Resources->Add(ImplClass);
+			}
+		}
+	};
+
+	const auto CallbackA = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, &ActorAllowedClasses, &AllowedClasses_StreamableHandle);
+	AllowedClasses_StreamableHandle = UAssetManager::Get().LoadAssetList(AllowedClasses_SoftObjectPaths, CallbackA);
+
+	const auto CallbackB = FStreamableDelegate::CreateWeakLambda(this, OnResourceAcquired, &ActorIgnoredClasses, &IgnoredClasses_StreamableHandle);
+	IgnoredClasses_StreamableHandle = UAssetManager::Get().LoadAssetList(IgnoredClasses_SoftObjectPaths, CallbackB);
+}
 
 bool UBatchingRule::DoesQualifyForBatchDestroy(const AActor* Actor) const
 {
@@ -49,19 +105,19 @@ bool UBatchingRule::DoesQualifyForBatchDestroy(const AActor* Actor) const
 
 	if (!bAllowBatchDestroyChildClasses)
 	{
-		const bool bIsIgnored = IgnoredClasses.Contains(InspectClass);
+		const bool bIsIgnored = ActorIgnoredClasses.Contains(InspectClass);
 		if (bIsIgnored)
 		{
 			return false;
 		}
 
-		return Classes.Contains(InspectClass);
+		return ActorAllowedClasses.Contains(InspectClass);
 	}
 	else
 	{
 		bool HasChild = false;
 
-		for (const TSubclassOf<AActor>& ActorClass : IgnoredClasses)
+		for (const auto& ActorClass : ActorIgnoredClasses)
 		{
 			HasChild |= InspectClass->IsChildOf(ActorClass);
 		}
@@ -71,7 +127,7 @@ bool UBatchingRule::DoesQualifyForBatchDestroy(const AActor* Actor) const
 			return false;
 		}
 
-		for (const TSubclassOf<AActor>& ActorClass : Classes)
+		for (const auto& ActorClass : ActorAllowedClasses)
 		{
 			HasChild |= InspectClass->IsChildOf(ActorClass);
 		}

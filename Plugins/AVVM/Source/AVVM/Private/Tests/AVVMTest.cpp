@@ -27,7 +27,7 @@
 #include "Archetypes/AVVMPresenter.h"
 
 #if WITH_AUTOMATION_TESTS
-#include "Tests/AutomationEditorCommon.h"
+#include "Tests/AutomationCommon.h"
 #endif
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
@@ -43,7 +43,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMNotificationSubsystemTest, "AutomatedTest.C
 bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
-	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+	FTestWorldWrapper WorldWrapper;
+	WorldWrapper.CreateTestWorld(EWorldType::Game);
+	UWorld* World = WorldWrapper.GetTestWorld();
 	UTEST_NOT_NULL("UWorld.", World)
 
 	// @gdemers create test actors.
@@ -111,7 +113,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMSubsystemTest, "AutomatedTest.CustomGroup.A
 bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
-	UWorld* World = FAutomationEditorCommonUtils::CreateNewMap();
+	FTestWorldWrapper WorldWrapper;
+	WorldWrapper.CreateTestWorld(EWorldType::Game);
+	UWorld* World = WorldWrapper.GetTestWorld();
 	UTEST_NOT_NULL("UWorld.", World)
 
 	// @gdemers create test actors.
