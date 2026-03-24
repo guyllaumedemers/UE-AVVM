@@ -43,7 +43,7 @@ struct AVVM_API FAVVMUIExtensionContextArgs
 	UPROPERTY(Transient, BlueprintReadWrite)
 	UObject* ContextObject = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadWrite, meta=(MustImplement="NotifyFieldValueChanged"))
+	UPROPERTY(Transient, BlueprintReadWrite, meta=(MustImplement="/Script/FieldNotification.NotifyFieldValueChanged"))
 	UObject* ViewModel = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)

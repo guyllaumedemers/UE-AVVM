@@ -50,9 +50,12 @@ public class FencingSample : ModuleRules
 					"ImGui"
 				});
 
-			PrivateDefinitions.Add(
-				string.Format("IMPLOT_API=DLLIMPORT")
-			);
+			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
+			PrivateDefinitions.AddRange(
+				new string[]
+				{
+					"IMPLOT_API=DLLIMPORT"
+				});
 		}
 
 		PublicDependencyModuleNames.AddRange(

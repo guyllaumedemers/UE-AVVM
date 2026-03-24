@@ -25,6 +25,10 @@
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 
+#if !UE_BUILD_SHIPPING
+#include "Misc/AutomationTest.h"
+#endif
+
 #include "PlayerStateTeamComponent.generated.h"
 
 class APlayerState;

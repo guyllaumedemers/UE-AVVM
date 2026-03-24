@@ -26,11 +26,10 @@ public class UISampleServerTarget : TargetRules
 	public UISampleServerTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Server;
-		DefaultBuildSettings = BuildSettingsVersion.V5;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_5;
+		DefaultBuildSettings = BuildSettingsVersion.V6;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
 		ExtraModuleNames.Add("UISample");
-
-		bUseIris = true;
+		
 		bBuildDeveloperTools = false;
 		bAllowEnginePluginsEnabledByDefault = false;
 	}

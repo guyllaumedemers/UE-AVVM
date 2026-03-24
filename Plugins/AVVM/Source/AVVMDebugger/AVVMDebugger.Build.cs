@@ -34,9 +34,11 @@ public class AVVMDebugger : ModuleRules
 			});
 
 		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-		PrivateDefinitions.Add(
-			string.Format("IMPLOT_API=DLLIMPORT")
-		);
+		PrivateDefinitions.AddRange(
+			new string[]
+			{
+				"IMPLOT_API=DLLIMPORT"
+			});
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]

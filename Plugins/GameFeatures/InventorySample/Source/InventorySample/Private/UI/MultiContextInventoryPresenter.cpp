@@ -79,7 +79,7 @@ void UMultiContextInventoryPresenter::StartPresenting()
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->AddReplicatedLooseGameplayTags(GrantAbilityTags);
+		AbilityComponent->AddLooseGameplayTags(GrantAbilityTags);
 	}
 
 	FAVVMPrimaryGameLayoutContextArgs CtxArgs;
@@ -93,7 +93,7 @@ void UMultiContextInventoryPresenter::StopPresenting()
 	auto* AbilityComponent = OwnerASC.Get();
 	if (IsValid(AbilityComponent))
 	{
-		AbilityComponent->RemoveReplicatedLooseGameplayTags(GrantAbilityTags);
+		AbilityComponent->RemoveLooseGameplayTags(GrantAbilityTags);
 		OwnerASC.Reset();
 	}
 

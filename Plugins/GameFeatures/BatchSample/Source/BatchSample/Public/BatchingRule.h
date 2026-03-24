@@ -24,6 +24,10 @@
 
 #include "AVVMWorldSetting.h"
 
+#if !UE_BUILD_SHIPPING
+#include "Misc/AutomationTest.h"
+#endif
+
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
 #endif

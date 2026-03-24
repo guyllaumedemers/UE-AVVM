@@ -167,7 +167,7 @@ protected:
 	TSoftClassPtr<UAVVMFrameBorder> BorderWidgetClass = nullptr;
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Designers", meta=(Bitmask, BitmaskEnum="EFrameBitmask"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Designers", meta=(Bitmask, BitmaskEnum="/Script/AVVMToolkit.EFrameBitmask"))
 	int32 PreviewFrameFlags = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=1, UIMax=20))
