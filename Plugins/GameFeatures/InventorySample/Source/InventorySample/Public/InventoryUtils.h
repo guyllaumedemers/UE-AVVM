@@ -42,7 +42,7 @@ class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool GetOuterSourceType(const AActor* Outer, EAVVMDataSourceType& OutSrcType);
+	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 DecodeItem(const int32 EncodedBits);

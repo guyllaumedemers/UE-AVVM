@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMCharacter.h"
+#include "ModularCharacter.h"
 #include "Logging/LogMacros.h"
 
 #include "UISampleCharacter.generated.h"
@@ -35,7 +35,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AUISampleCharacter : public AAVVMCharacter
+class AUISampleCharacter : public AModularCharacter
 {
 	GENERATED_BODY()
 
@@ -64,7 +64,7 @@ class AUISampleCharacter : public AAVVMCharacter
 	UInputAction* LookAction;
 
 public:
-	AUISampleCharacter(const FObjectInitializer& ObjectInitializer);
+	AUISampleCharacter();
 	
 
 protected:

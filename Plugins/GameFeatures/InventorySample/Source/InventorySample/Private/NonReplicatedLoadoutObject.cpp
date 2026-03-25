@@ -117,7 +117,7 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 	{
 		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED}))
 		{
-			continue;
+			return;
 		}
 
 		const FGameplayTagContainer& ItemSlotTags = NewItemObject->GetItemSlotTags();

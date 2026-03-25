@@ -32,33 +32,6 @@ class UAVVMResourceHandlingImpl;
 
 /**
  *	Class description:
- *	
- *	EAVVMDataSourceType represent the Data source Type. I.e How was the data retrieved. Dynamically (as a collection list provided by the Backend) ? or
- *	Statically (from a collection list provided by a Data Asset reference) ?
- */
-UENUM(BlueprintType)
-enum class EAVVMDataSourceType : uint8
-{
-	None,
-	Static,
-	Dynamic,
-};
-
-inline const TCHAR* EnumToString(EAVVMDataSourceType State)
-{
-	switch (State)
-	{
-		case EAVVMDataSourceType::Static:
-			return TEXT("Static");
-		case EAVVMDataSourceType::Dynamic:
-			return TEXT("Dynamic");
-	}
-	ensure(false);
-	return TEXT("Unknown");
-}
-
-/**
- *	Class description:
  *
  *	UAVVMResourceProvider provide a resource definition via Registry id and support recursive request for loading nested resources.
  */
@@ -82,26 +55,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	int32 GetProviderUniqueId() const;
 	virtual int32 GetProviderUniqueId_Implementation() const PURE_VIRTUAL(GetProviderUniqueId_Implementation, return INDEX_NONE;);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	UAVVMResourceManagerComponent* GetResourceManagerComponent() const;
-	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const PURE_VIRTUAL(GetResourceManagerComponent_Implementation, return nullptr;);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	EAVVMDataSourceType GetDataSourceType() const;
-	virtual EAVVMDataSourceType GetDataSourceType_Implementation() const PURE_VIRTUAL(GetDataSourceType_Implementation, return EAVVMDataSourceType::None;);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RequestDataFromDataAsset() const;
-	virtual void RequestDataFromDataAsset_Implementation() const PURE_VIRTUAL(RequestDataFromDataAsset_Implementation, return;);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RequestDataFromMicroService() const;
-	virtual void RequestDataFromMicroService_Implementation() const PURE_VIRTUAL(RequestDataFromMicroService_Implementation, return;);
-	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	TArray<FDataRegistryId> CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources) const;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return TArray<FDataRegistryId>{};);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UAVVMResourceManagerComponent* GetResourceManagerComponent() const;
+	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const PURE_VIRTUAL(GetResourceManagerComponent_Implementation, return nullptr;);
 };
 
 /**
