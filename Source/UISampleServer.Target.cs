@@ -26,11 +26,17 @@ public class UISampleServerTarget : TargetRules
 	public UISampleServerTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Server;
-		DefaultBuildSettings = BuildSettingsVersion.V6;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
-		ExtraModuleNames.Add("UISample");
 		
-		bBuildDeveloperTools = false;
-		bAllowEnginePluginsEnabledByDefault = false;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
+		DefaultBuildSettings = BuildSettingsVersion.V6;
+		CppStandardEngine = CppStandardVersion.Cpp20;
+		CppStandard = CppStandardVersion.Cpp20;
+		BuildEnvironment = TargetBuildEnvironment.Unique;
+		
+		//StaticAnalyzer = StaticAnalyzer.PVSStudio;
+		bUseUnityBuild = false;
+		bUsePCHFiles = false;
+		
+		ExtraModuleNames.Add("UISample");
 	}
 }

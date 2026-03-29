@@ -20,22 +20,7 @@
 #include "UISampleGameUIPolicy.h"
 
 #include "CommonLocalPlayer.h"
-#include "GameUIManagerSubsystem.h"
-
-class UWorld* UUISampleGameUIPolicy::GetWorld() const
-{
-	auto* Subsystem = GetTypedOuter<UGameUIManagerSubsystem>();
-	if (IsValid(Subsystem))
-	{
-		UGameInstance* GameInstance = Subsystem->GetGameInstance();
-		if (IsValid(GameInstance))
-		{
-			return GameInstance->GetWorld();
-		}
-	}
-
-	return nullptr;
-}
+#include "Engine/GameInstance.h"
 
 void UUISampleGameUIPolicy::OnRootLayoutAddedToViewport(UCommonLocalPlayer* LocalPlayer, UPrimaryGameLayout* Layout)
 {

@@ -38,9 +38,6 @@ class UISAMPLE_API UUISampleGameUIPolicy : public UGameUIPolicy
 {
 	GENERATED_BODY()
 
-public:
-	virtual class UWorld* GetWorld() const override;
-
 protected:
 	virtual void OnRootLayoutAddedToViewport(UCommonLocalPlayer* LocalPlayer, UPrimaryGameLayout* Layout) override;
 	virtual void OnRootLayoutRemovedFromViewport(UCommonLocalPlayer* LocalPlayer, UPrimaryGameLayout* Layout) override;

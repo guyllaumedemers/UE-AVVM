@@ -26,11 +26,17 @@ public class UISampleGameTarget : TargetRules
 	public UISampleGameTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V6;
+		
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
+		DefaultBuildSettings = BuildSettingsVersion.V6;
+		CppStandardEngine = CppStandardVersion.Cpp20;
+		CppStandard = CppStandardVersion.Cpp20;
+		BuildEnvironment = TargetBuildEnvironment.Unique;
+		
+		//StaticAnalyzer = StaticAnalyzer.PVSStudio;
+		bUseUnityBuild = false;
+		bUsePCHFiles = false;
+		
 		ExtraModuleNames.Add("UISample");
-
-		bBuildDeveloperTools = true;
-		bAllowEnginePluginsEnabledByDefault = false;
 	}
 }
