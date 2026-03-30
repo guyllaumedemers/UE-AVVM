@@ -221,6 +221,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	{
 		const AActor* PlayerState = IsValid(Target) ? Target->PlayerState : nullptr;
 		ReplicatedTagComponent = UAVVMReplicatedTagComponent::GetActorComponent(IsValid(PlayerState) ? PlayerState : Target->GetPawn());
+		ensureAlwaysMsgf(IsValid(ReplicatedTagComponent), TEXT("Attempt to retrieve %s from invalid target."), *GetNameSafe(UAVVMReplicatedTagComponent::StaticClass()));
 	}
 
 	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, RequiredTags, BlockingTags))
@@ -263,6 +264,7 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	{
 		const AActor* PlayerState = IsValid(Target) ? Target->PlayerState : nullptr;
 		ReplicatedTagComponent = UAVVMReplicatedTagComponent::GetActorComponent(IsValid(PlayerState) ? PlayerState : Target->GetPawn());
+		ensureAlwaysMsgf(IsValid(ReplicatedTagComponent), TEXT("Attempt to retrieve %s from invalid target."), *GetNameSafe(UAVVMReplicatedTagComponent::StaticClass()));
 	}
 
 	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, RequiredTags, BlockingTags))
