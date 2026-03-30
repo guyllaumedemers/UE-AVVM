@@ -73,5 +73,6 @@ void UAVVMPSOPreloadManagerSubsystem::UnloadPSOHandle(const FAVVMPSOPreloadToken
 	if ((SearchResult != nullptr) && SearchResult->IsValid())
 	{
 		(*SearchResult)->ReleaseHandle();
+		PSOHandles.Remove(Token.UniqueId);
 	}
 }
