@@ -58,6 +58,9 @@ FAVVMPSOPreloadToken UAVVMPSOPreloadManagerSubsystem::PreloadPSO(const TArray<TS
 	{
 		OutPaths.Add(LevelInstance.ToSoftObjectPath());
 	}
+	
+	// TODO @gdemers We need a more thorough approach to triggering PSO compilation than just level loading, otherwise
+	// we will load in memory level instances EVERYTIME we make a request from the above call (which is only valid the first time).
 
 	const TSharedPtr<FStreamableHandle> NewHandle = UAssetManager::Get().LoadAssetList(OutPaths);
 	const FAVVMPSOPreloadToken NewToken = FAVVMPSOPreloadToken::Make();
