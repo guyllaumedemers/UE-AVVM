@@ -126,6 +126,9 @@ protected:
 	virtual void OnRep_Controller() override;
 	virtual void OnRep_PlayerState() override;
 	
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_PostPlayerStateSet();
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMCharacterChannelAggregator RegisteredChannels = FAVVMCharacterChannelAggregator();
 	
@@ -143,7 +146,4 @@ protected:
 	// would imply support on a per-tag basis, instead of our current Container approach we have.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwningActor = nullptr;
 };

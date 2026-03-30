@@ -22,6 +22,7 @@
 #include "GameFeaturesSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/PlayerController.h"
 
 void UAVVMGameFeatureAction_AddInputMappingContext::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -101,19 +102,49 @@ void UAVVMGameFeatureAction_AddInputMappingContext::AddToWorld(const FWorldConte
 		return;
 	}
 
+	const auto DeferredIMCBinding = [](const TWeakObjectPtr<ULocalPlayer>& NewLocalPlayer,
+	                                   const TArray<TSoftObjectPtr<UInputMappingContext>>& DeferredIMCs)
+	{
+		auto* GFIMCM = ULocalPlayer::GetSubsystem<UAVVMGameFrameworkInputMappingContextManager>(NewLocalPlayer.Get());
+		if (!IsValid(GFIMCM))
+		{
+			return;
+		}
+
+		const UWorld* NewWorld = NewLocalPlayer->GetWorld();
+		// TODO @gdemers push this further, and define a UAVVMWorldRule, for IMC
+		// that can be blocked per-world.
+		for (const TSoftObjectPtr<UInputMappingContext>& IMC : DeferredIMCs)
+		{
+			GFIMCM->AddIMCRequest(NewWorld, NewLocalPlayer.Get(), IMC);
+		}
+	};
+
+	const auto OnPlayerControllerBound = [PostPCAssignmentCallback = DeferredIMCBinding](APlayerController* NewPC,
+	                                                                                     const TWeakObjectPtr<ULocalPlayer>& NewLocalPlayer,
+	                                                                                     const TArray<TSoftObjectPtr<UInputMappingContext>>& DeferredIMCs)
+	{
+		PostPCAssignmentCallback(NewLocalPlayer, DeferredIMCs);
+	};
+
 	for (auto Iterator = GameInstance->GetLocalPlayerIterator(); Iterator; ++Iterator)
 	{
-		auto* GFIMCM = ULocalPlayer::GetSubsystem<UAVVMGameFrameworkInputMappingContextManager>(*Iterator);
-		if (!IsValid(GFIMCM))
+		ULocalPlayer* LocalPlayer = *Iterator;
+		if (!IsValid(LocalPlayer))
 		{
 			continue;
 		}
 
-		// TODO @gdemers push this further, and define a UAVVMWorldRule, for IMC
-		// that can be blocked per-world.
-		for (const TSoftObjectPtr<UInputMappingContext>& IMC : IMCs)
+		APlayerController* PC = LocalPlayer->GetPlayerController(World);
+		if (!IsValid(PC))
 		{
-			GFIMCM->AddIMCRequest(World, *Iterator, IMC);
+			LocalPlayer->OnPlayerControllerChanged().RemoveAll(this);
+			const auto Callback = ULocalPlayer::FOnPlayerControllerChanged::FDelegate::CreateWeakLambda(this, OnPlayerControllerBound, LocalPlayer, IMCs);
+			const FDelegateHandle Handle = LocalPlayer->OnPlayerControllerChanged().Add(Callback);
+		}
+		else
+		{
+			DeferredIMCBinding(LocalPlayer, IMCs);
 		}
 	}
 }
