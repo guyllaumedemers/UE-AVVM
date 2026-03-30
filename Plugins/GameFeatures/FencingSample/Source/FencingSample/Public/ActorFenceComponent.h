@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "LoadingProcessInterface.h"
 #include "Components/ActorComponent.h"
 
 #include "ActorFenceComponent.generated.h"
@@ -37,7 +38,8 @@ class UAVVMReplicatedTagComponent;
  *	Example : lowering loading screen when all players are ready.
  */
 UCLASS(ClassGroup=("Fence"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class FENCINGSAMPLE_API UActorFenceComponent : public UActorComponent
+class FENCINGSAMPLE_API UActorFenceComponent : public UActorComponent,
+                                               public ILoadingProcessInterface
 {
 	GENERATED_BODY()
 
@@ -45,6 +47,9 @@ public:
 	UActorFenceComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	// ILoadingProcessInterface
+	virtual bool ShouldShowLoadingScreen(FString& OutReason) const override;
 
 protected:
 	void TryRaise();
@@ -58,6 +63,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer FenceRequirements = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldKeepLoadingScreenUpUntilFenceIsLowered = false;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;

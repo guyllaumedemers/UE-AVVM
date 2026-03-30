@@ -24,6 +24,7 @@
 #include "AVVMReplicatedTagComponent.h"
 #include "FenceManagerSubsystem.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/KismetRenderingLibrary.h"
 
 UActorFenceComponent::UActorFenceComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -82,6 +83,13 @@ void UActorFenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 					*GetNameSafe(UActorFenceComponent::StaticClass()));
 
 	OwningOuter.Reset();
+}
+
+bool UActorFenceComponent::ShouldShowLoadingScreen(FString& OutReason) const
+{
+	// @gdemers Any fence involved in the blockage of game continuation will also take into consideration
+	// PSO cache, and prevent loading screen removal until ready.
+	return bShouldKeepLoadingScreenUpUntilFenceIsLowered || (UKismetRenderingLibrary::NumPrecompilingPSOsRemaining() > 0);
 }
 
 void UActorFenceComponent::TryRaise()

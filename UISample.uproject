@@ -28,6 +28,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "CommonLoadingScreen",
+			"Enabled": true
+		},
+		{
 			"Name": "CommonUI",
 			"Enabled": true
 		},

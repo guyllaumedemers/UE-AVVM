@@ -61,10 +61,11 @@ public class FencingSample : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"CommonLoadingScreen",
 				"Core",
 				"CoreUObject",
 				"Engine",
-				"GameplayTags"
+				"GameplayTags",
 			}
 		);
 
