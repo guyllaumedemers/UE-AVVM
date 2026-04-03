@@ -242,83 +242,6 @@ void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(const APlayerStat
 	}
 }
 
-APawn* AAVVMGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
-{
-	if (!bShouldDeferDefaultPawnCreation)
-	{
-		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
-	}
-
-	// @gdemers internal context object for tracking player attempts
-	// to spawning the default pawn tie to this PC.
-	struct FAVVMPlayerRetryTracker
-	{
-		TMap<TWeakObjectPtr<AController>/*Player*/, int32/*Counter*/> CounterPerPlayer;
-	};
-
-	static FAVVMPlayerRetryTracker PlayerRetryTracker;
-	int32& OutRetryCounter = PlayerRetryTracker.CounterPerPlayer.FindOrAdd(NewPlayer);
-
-	// @gdemers we expect users to implement their own spawn process based on project defined rules.
-	if (!ensureAlwaysMsgf(WorldSetting.IsValid(),
-	                      TEXT("Invalid %s."),
-	                      *GetNameSafe(AAVVMWorldSetting::StaticClass())))
-	{
-		return nullptr;
-	}
-
-	const auto* DefaultPawnSpawnRule = Cast<UAVVMDefaultPawnSpawnRule>(WorldSetting->GetRule(RuleTagAggregator.DefaultPawnSpawnConditionsTag));
-	if (!ensureAlwaysMsgf(IsValid(DefaultPawnSpawnRule),
-	                      TEXT("Invalid %s for tag %s."),
-	                      *GetNameSafe(UAVVMDefaultPawnSpawnRule::StaticClass()),
-	                      *RuleTagAggregator.DefaultPawnSpawnConditionsTag.ToString()))
-	{
-		return nullptr;
-	}
-
-	const bool bHasMetRequirements = DefaultPawnSpawnRule->Predicate_HasMetDefaultPawnSpawnRequirements(this, Cast<APlayerController>(NewPlayer));
-	if (bHasMetRequirements)
-	{
-		// @gdemers spawn the default pawn as normal. we have met all conditions, and are ready to play safely.
-		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
-	}
-
-	if (!ensureAlwaysMsgf(OutRetryCounter < DefaultPawnSpawnRule->GetMaxNumRetry(),
-	                      TEXT("Couldn't spawn the default pawn for %s. We have exceeded the allowed number of retry (%d). We are about to close the player net connection."),
-	                      *GetNameSafe(NewPlayer),
-	                      DefaultPawnSpawnRule->GetMaxNumRetry()))
-	{
-		UNetConnection* PlayerConnection = IsValid(NewPlayer) ? NewPlayer->GetNetConnection() : nullptr;
-		if (IsValid(PlayerConnection))
-		{
-			OutRetryCounter = 0;
-			PlayerConnection->Close();
-		}
-
-		return nullptr;
-	}
-
-	const auto OnRestartPlayerDeferred = [](const TWeakObjectPtr<AAVVMGameMode>& GameMode,
-	                                        const TWeakObjectPtr<AController>& RestartPlayer)
-	{
-		if (GameMode.IsValid())
-		{
-			GameMode->RestartPlayer(RestartPlayer.Get());
-		}
-	};
-
-	// @gdemers defer request until we have met all proper requirements.
-	FTimerHandle OutHandle;
-	GetWorldTimerManager().SetTimer(OutHandle,
-	                                FTimerDelegate::CreateWeakLambda(this, OnRestartPlayerDeferred, this, NewPlayer),
-	                                DefaultPawnSpawnRule->GetRetryRate(),
-	                                false);
-
-	// @gdemers increment counter so we can eventually timeout on failure.
-	OutRetryCounter += 1;
-	return nullptr;
-}
-
 AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
 {
 	if (!bShouldUseCustomPlayerStartPositionFilters)
@@ -410,6 +333,83 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 	GetWorldTimerManager().SetTimer(OutHandle,
 	                                FTimerDelegate::CreateWeakLambda(this, OnStartPosition, this, Player),
 	                                SpawnPointRule->GetRetryRate(),
+	                                false);
+
+	// @gdemers increment counter so we can eventually timeout on failure.
+	OutRetryCounter += 1;
+	return nullptr;
+}
+
+APawn* AAVVMGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+{
+	if (!bShouldDeferDefaultPawnCreation)
+	{
+		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+	}
+
+	// @gdemers internal context object for tracking player attempts
+	// to spawning the default pawn tie to this PC.
+	struct FAVVMPlayerRetryTracker
+	{
+		TMap<TWeakObjectPtr<AController>/*Player*/, int32/*Counter*/> CounterPerPlayer;
+	};
+
+	static FAVVMPlayerRetryTracker PlayerRetryTracker;
+	int32& OutRetryCounter = PlayerRetryTracker.CounterPerPlayer.FindOrAdd(NewPlayer);
+
+	// @gdemers we expect users to implement their own spawn process based on project defined rules.
+	if (!ensureAlwaysMsgf(WorldSetting.IsValid(),
+	                      TEXT("Invalid %s."),
+	                      *GetNameSafe(AAVVMWorldSetting::StaticClass())))
+	{
+		return nullptr;
+	}
+
+	const auto* DefaultPawnSpawnRule = Cast<UAVVMDefaultPawnSpawnRule>(WorldSetting->GetRule(RuleTagAggregator.DefaultPawnSpawnConditionsTag));
+	if (!ensureAlwaysMsgf(IsValid(DefaultPawnSpawnRule),
+	                      TEXT("Invalid %s for tag %s."),
+	                      *GetNameSafe(UAVVMDefaultPawnSpawnRule::StaticClass()),
+	                      *RuleTagAggregator.DefaultPawnSpawnConditionsTag.ToString()))
+	{
+		return nullptr;
+	}
+
+	const bool bHasMetRequirements = DefaultPawnSpawnRule->Predicate_HasMetDefaultPawnSpawnRequirements(this, Cast<APlayerController>(NewPlayer));
+	if (bHasMetRequirements)
+	{
+		// @gdemers spawn the default pawn as normal. we have met all conditions, and are ready to play safely.
+		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+	}
+
+	if (!ensureAlwaysMsgf(OutRetryCounter < DefaultPawnSpawnRule->GetMaxNumRetry(),
+	                      TEXT("Couldn't spawn the default pawn for %s. We have exceeded the allowed number of retry (%d). We are about to close the player net connection."),
+	                      *GetNameSafe(NewPlayer),
+	                      DefaultPawnSpawnRule->GetMaxNumRetry()))
+	{
+		UNetConnection* PlayerConnection = IsValid(NewPlayer) ? NewPlayer->GetNetConnection() : nullptr;
+		if (IsValid(PlayerConnection))
+		{
+			OutRetryCounter = 0;
+			PlayerConnection->Close();
+		}
+
+		return nullptr;
+	}
+
+	const auto OnRestartPlayerDeferred = [](const TWeakObjectPtr<AAVVMGameMode>& GameMode,
+	                                        const TWeakObjectPtr<AController>& RestartPlayer)
+	{
+		if (GameMode.IsValid())
+		{
+			GameMode->RestartPlayer(RestartPlayer.Get());
+		}
+	};
+
+	// @gdemers defer request until we have met all proper requirements.
+	FTimerHandle OutHandle;
+	GetWorldTimerManager().SetTimer(OutHandle,
+	                                FTimerDelegate::CreateWeakLambda(this, OnRestartPlayerDeferred, this, NewPlayer),
+	                                DefaultPawnSpawnRule->GetRetryRate(),
 	                                false);
 
 	// @gdemers increment counter so we can eventually timeout on failure.
