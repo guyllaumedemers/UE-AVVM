@@ -34,7 +34,7 @@ class UItemObject;
  *	Note : Pickup actor generated from drop action may simulate physics, or display visuals on client.
  */
 UCLASS()
-class INVENTORYSAMPLE_API APickupActor : public AActor
+class INVENTORYSAMPLE_API APickupActor final : public AActor
 {
 	GENERATED_BODY()
 

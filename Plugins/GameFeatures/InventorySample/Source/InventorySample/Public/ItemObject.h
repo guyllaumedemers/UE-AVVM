@@ -106,7 +106,7 @@ struct INVENTORYSAMPLE_API FItemActorSpawnContextArgs
  *			* etc...
  */
 UCLASS(BlueprintType, Blueprintable)
-class INVENTORYSAMPLE_API UItemObject : public UObject
+class INVENTORYSAMPLE_API UItemObject final : public UObject
 {
 	GENERATED_BODY()
 

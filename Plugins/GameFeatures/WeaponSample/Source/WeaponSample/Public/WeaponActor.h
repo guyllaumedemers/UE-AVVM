@@ -37,7 +37,7 @@ class USkeletalMeshComponent;
  *	AWeaponActor_Range is a system actor that handle behaviour specific to a magic weapon.
  */
 UCLASS()
-class WEAPONSAMPLE_API AWeaponActor_Range : public ATriggeringActor
+class WEAPONSAMPLE_API AWeaponActor_Range final : public ATriggeringActor
 {
 	GENERATED_BODY()
 
@@ -77,7 +77,7 @@ protected:
  *	AWeaponActor_Melee is a system actor that handle behaviour specific to a melee weapon.
  */
 UCLASS()
-class WEAPONSAMPLE_API AWeaponActor_Melee : public ATriggeringActor
+class WEAPONSAMPLE_API AWeaponActor_Melee final : public ATriggeringActor
 {
 	GENERATED_BODY()
 
