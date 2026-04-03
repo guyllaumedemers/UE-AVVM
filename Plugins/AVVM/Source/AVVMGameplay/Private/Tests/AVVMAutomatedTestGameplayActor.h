@@ -31,8 +31,8 @@ class UAVVMAutomatedTestResourceComponent;
 /**
  *	Class description:
  *
- *	AAVVMAutomatedTestGameplayActor is an Actor class to run behaviour during Automated Testing
- *	specific to testing the resource loading functionality.
+ *	AAVVMAutomatedTestGameplayActor is an Actor class that impl the required interface to run functional test
+ *	on the ResourceManagerComponent.
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMAutomatedTestGameplayActor : public AActor,
@@ -44,10 +44,21 @@ public:
 	AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer);
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
-
-	void Run() const;
+	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
+	
+	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
+	bool CheckContentIntegrality() const;
+	void ForceCompletion() const;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSubclassOf<UAVVMResourceHandlingImpl> ResourceHandlingImplClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMDataTableRow"))
+	FDataRegistryId TestRegistryId = FDataRegistryId();
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAutomatedTestResourceComponent> ResourceManagerComponent = nullptr;
+	
+	TSharedPtr<bool> bIsAsyncProcessCompleted;
 };

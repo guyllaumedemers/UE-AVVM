@@ -20,38 +20,24 @@
 #include "Misc/AutomationTest.h"
 
 #include "AVVMAutomatedTestGameplayActor.h"
+#include "AVVMToolkitUtils.h"
+#include "Resources/AVVMResourceManagerComponent.h"
 
 #if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
 #endif
 
-class AAVVMAutomatedTestGameplayActor;
-
-/**
- * 
- */
-struct FAVVMResourceManagerTestHelper
+// @gdemers from GameFeaturePluginTests.cpp
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForTrue, bool*, bVariableToWaitFor);
+bool FWaitForTrue::Update()
 {
-	~FAVVMResourceManagerTestHelper() = default;
-	
-	bool Update()
-	{
-		// TODO @gdemers define latent task. require tracking progress.
-		return true;
-	}
-	
-	TWeakObjectPtr<const AAVVMAutomatedTestGameplayActor> TestActor = nullptr;
-};
+	return *bVariableToWaitFor;
+}
 
-/**
- *	Class description:
- *
- *	FAVVMRunResourceManagerTestCommand is an Automated Test latent action to validate async process in an Automated Test scenario.
- */
-DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FAVVMRunResourceManagerTestCommand, TSharedPtr<FAVVMResourceManagerTestHelper>, TestHelper);
-bool FAVVMRunResourceManagerTestCommand::Update()
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FExecuteFunction, TFunction<bool()>, Function);
+bool FExecuteFunction::Update()
 {
-	return TestHelper->Update();
+	return Function();
 }
 
 /**
@@ -68,16 +54,42 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 	WorldWrapper.CreateTestWorld(EWorldType::Game);
 	UWorld* World = WorldWrapper.GetTestWorld();
 	UTEST_NOT_NULL("UWorld.", World)
-
-	const auto* TestActor = World->SpawnActor<AAVVMAutomatedTestGameplayActor>(AAVVMAutomatedTestGameplayActor::StaticClass());
+	
+	TSharedRef<bool> bIsAsyncCommandComplete = MakeShared<bool>(false);
+	auto* TestActor = World->SpawnActor<AAVVMAutomatedTestGameplayActor>(AAVVMAutomatedTestGameplayActor::StaticClass());
 	UTEST_NOT_NULL("AAVVMAutomatedTestGameplayActor.", TestActor)
+	TestActor->SetTestFlag(bIsAsyncCommandComplete);
+	
+	ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor), bIsAsyncCommandComplete]
+	{
+		if (!WeakTestActor.IsValid())
+		{
+			(*bIsAsyncCommandComplete) = true;
+		}
+		
+		UAVVMResourceManagerComponent* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(WeakTestActor.Get());
+		if (!IsValid(ResourceManagerComponent))
+		{
+			WeakTestActor->ForceCompletion();
+		}
+		
+		TArray<FDataRegistryId> ResourcesIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(WeakTestActor.Get());
+		if (ResourcesIds.IsEmpty())
+		{
+			WeakTestActor->ForceCompletion();
+		}
+		
+		for (const FDataRegistryId& ResourceId : ResourcesIds)
+		{
+			ResourceManagerComponent->RequestAsyncLoading(ResourceId, {});
+		}
+		
+		return true;
+	}));
 
-	const TSharedPtr<FAVVMResourceManagerTestHelper> TestHelper = MakeShared<FAVVMResourceManagerTestHelper>(TestActor);
-	UTEST_VALID("TSharedPtr<FAVVMResourceManagerTestHelper>", TestHelper)
-
-	ADD_LATENT_AUTOMATION_COMMAND(FAVVMRunResourceManagerTestCommand(TestHelper));
-
-	World->DestroyWorld(true);
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bIsAsyncCommandComplete.Get()));
+	const bool bResult = TestActor->CheckContentIntegrality();
+	return bResult;
 #endif
 	return true;
 }

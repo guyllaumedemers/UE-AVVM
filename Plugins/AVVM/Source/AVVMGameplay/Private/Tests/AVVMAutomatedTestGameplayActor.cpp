@@ -20,7 +20,6 @@
 #include "AVVMAutomatedTestGameplayActor.h"
 
 #include "AVVMAutomatedTestResourceComponent.h"
-#include "UObject/GarbageCollectionSchema.h"
 
 AAVVMAutomatedTestGameplayActor::AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -35,20 +34,38 @@ UAVVMResourceManagerComponent* AAVVMAutomatedTestGameplayActor::GetResourceManag
 
 TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::GetResourceDefinitionResourceIds_Implementation() const
 {
-	// @gdemers set 1x registry id per definition type this framework expose
-	return {};
+	return {TestRegistryId};
 }
 
-void AAVVMAutomatedTestGameplayActor::Run() const
+TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const
 {
-	UAVVMResourceManagerComponent* TestComponent = GetResourceManagerComponent();
-	if (!IsValid(TestComponent))
+	const TArray<FDataRegistryId> OutResults = UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(ResourceHandlingImplClass,
+	                                                                                                         nullptr,
+	                                                                                                         Resources);
+
+	// TODO @gdemers we may want to run more advance async loading, and have nested resource loading. This
+	// will require passing in ActorComponent of specific types.
+	if (OutResults.IsEmpty())
 	{
-		return;
+		// @gdemers Our async process is complete. All resources were loaded!
+		ForceCompletion();
 	}
 
-	for (const auto& ResourceId : GetResourceDefinitionResourceIds())
-	{
-		TestComponent->RequestAsyncLoading(ResourceId, {});
-	}
+	return OutResults;
+}
+
+void AAVVMAutomatedTestGameplayActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted)
+{
+	bIsAsyncProcessCompleted = bNewIsAsyncProcessCompleted;
+}
+
+bool AAVVMAutomatedTestGameplayActor::CheckContentIntegrality() const
+{
+	// TODO @gdemers we may want to valid our content integrity here...
+	return true;
+}
+
+void AAVVMAutomatedTestGameplayActor::ForceCompletion() const
+{
+	(*bIsAsyncProcessCompleted) = true;
 }
