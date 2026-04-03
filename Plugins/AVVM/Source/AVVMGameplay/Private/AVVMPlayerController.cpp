@@ -19,9 +19,12 @@
 //SOFTWARE.
 #include "AVVMPlayerController.h"
 
+#include "AVVMGameState.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "Ability/AVVMAbilityInputComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "Inputs/AVVMGameFrameworkInputMappingContextManager.h"
+#include "Kismet/GameplayStatics.h"
 
 AAVVMPlayerController::AAVVMPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -53,5 +56,18 @@ void AAVVMPlayerController::ReceivedPlayer()
 {
 	Super::ReceivedPlayer();
 
-	UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(this);
+	if (HasAuthority())
+	{
+		// @gdemers handle rejection of our player state following the reception of a valid UniqueNetId.
+		// IMPORTANT : Safe to call, our PlayerState is fully initialized with a valid UniqueNetId, and we have a valid UNetConnection tied to our PC.
+		auto* GameState = Cast<AAVVMGameState>(UGameplayStatics::GetGameState(this));
+		if (IsValid(GameState))
+		{
+			GameState->Server_HandleRejectedLogin(PlayerState);
+		}
+	}
+	else
+	{
+		UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(this);
+	}
 }

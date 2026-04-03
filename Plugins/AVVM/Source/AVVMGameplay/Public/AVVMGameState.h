@@ -56,4 +56,15 @@ public:
 	virtual void HandleMatchHasStarted() override;
 	virtual void HandleMatchHasEnded() override;
 	virtual void HandleLeavingMap() override;
+
+	void RejectPlayerUniqueNetId(const FUniqueNetIdRepl& UniqueNetId);
+	bool Server_HandleRejectedLogin(APlayerState* PlayerState);
+
+protected:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_NotifyPlayerStateRejection(APlayerState* PlayerState);
+
+	// @gdemers players requesting login in session where the backend isnt expecting them.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<FUniqueNetIdRepl> RejectedPlayers;
 };

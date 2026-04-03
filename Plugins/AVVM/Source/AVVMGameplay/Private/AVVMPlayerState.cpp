@@ -20,7 +20,7 @@
 #include "AVVMPlayerState.h"
 
 #include "Ability/AVVMAbilitySystemComponent.h"
-#include "GameFramework/GameState.h"
+#include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"
 #include "Net/AVVMNetSynchronizationManager.h"

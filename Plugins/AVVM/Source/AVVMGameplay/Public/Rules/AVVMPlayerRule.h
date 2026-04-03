@@ -28,17 +28,17 @@
 /**
  *	Class description:
  *
- *	UAVVMPlayerRule is a UObject instance that define a condition set specific to player behaviour.
- *	Server Authority is the sole owner of rules. User shouldnt attempt to modify the state on the Client.
+ *	UAVVMPlayerAcceptanceRule is a UObject instance that run validation on incoming player joining gameplay. Based on server authority,
+ *	we can approve, or reject this newly recorded player.
  */
 UCLASS()
-class AVVMGAMEPLAY_API UAVVMPlayerRule : public UAVVMWorldRule
+class AVVMGAMEPLAY_API UAVVMPlayerAcceptanceRule : public UAVVMWorldRule
 {
 	GENERATED_BODY()
 
 public:
 	// @gdemers validate information about player based on the referenced UniqueNetId.
 	UFUNCTION(BlueprintNativeEvent)
-	bool Predicate_UniqueNetId(const FUniqueNetIdRepl& UniqueId) const;
-	virtual bool Predicate_UniqueNetId_Implementation(const FUniqueNetIdRepl& UniqueId) const PURE_VIRTUAL(Predicate_UniqueNetId_Implementation, return false;);
+	bool Predicate_IsExpectedUniqueNetId(const FUniqueNetIdRepl& UniqueId) const;
+	virtual bool Predicate_IsExpectedUniqueNetId_Implementation(const FUniqueNetIdRepl& UniqueId) const PURE_VIRTUAL(Predicate_IsExpectedUniqueNetId_Implementation, return false;);
 };

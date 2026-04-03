@@ -19,8 +19,10 @@
 //SOFTWARE.
 #include "AVVMGameState.h"
 
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMPlayerState.h"
+#include "Engine/NetConnection.h"
 #include "Net/UnrealNetwork.h"
 #include "Tags/AVVMGameplayTags.h"
 
@@ -42,6 +44,7 @@ void AAVVMGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 void AAVVMGameState::AddPlayerState(APlayerState* PlayerState)
 {
+	// @gdemers IMPORTANT : player rejection cannot be handled here as we dont yet have a valid UniqueNetId.
 	Super::AddPlayerState(PlayerState);
 
 	FAVVMNotificationContextArgs ContextArgs;
@@ -104,4 +107,55 @@ void AAVVMGameState::HandleLeavingMap()
 	ContextArgs.Payload = FAVVMNotificationPayload::Empty;
 	ContextArgs.Target = this;
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
+}
+
+void AAVVMGameState::RejectPlayerUniqueNetId(const FUniqueNetIdRepl& UniqueNetId)
+{
+	// @gdemers we cache our UniqueNetId as the AGameState::PlayerArray only initialize later.
+	RejectedPlayers.Add(UniqueNetId.GetV1());
+}
+
+bool AAVVMGameState::Server_HandleRejectedLogin(APlayerState* PlayerState)
+{
+	if (!IsValid(PlayerState))
+	{
+		return false;
+	}
+
+	const FUniqueNetIdPtr UniqueNetIdPtr = PlayerState->GetUniqueId().GetV1();
+	if (!RejectedPlayers.Contains(UniqueNetIdPtr))
+	{
+		return false;
+	}
+
+	AVVM_LOGGER_LOG(LogGameplay,
+	                GetTypedOuter<AActor>(),
+	                this,
+	                TEXT("Unexpected login request from %s. Rejecting!"),
+	                *UniqueNetIdPtr->ToString());
+
+	const APlayerController* PC = PlayerState->GetPlayerController();
+	if (!IsValid(PC))
+	{
+		return false;
+	}
+
+	UNetConnection* NewConnection = PC->GetNetConnection();
+	if (IsValid(NewConnection))
+	{
+		NewConnection->Close();
+
+		// @gdemers remove our id from the list for subsequent attempt to re-log to this session.
+		// example : player wasn't initially expected, but a spot may be freed on retry.
+		RejectedPlayers.Remove(UniqueNetIdPtr);
+	}
+
+	return true;
+}
+
+void AAVVMGameState::Multicast_NotifyPlayerStateRejection_Implementation(APlayerState* PlayerState)
+{
+	// @gdemers : PlayerArray called within Super::RemovePlayerState is simulated, not replicated
+	// which require a RPC update.
+	RemovePlayerState(PlayerState);
 }
