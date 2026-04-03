@@ -135,13 +135,17 @@ bool AAVVMGameState::Server_HandleRejectedLogin(APlayerState* PlayerState)
 	                *UniqueNetIdPtr->ToString());
 
 	const APlayerController* PC = PlayerState->GetPlayerController();
-	if (!IsValid(PC))
+	if (!ensureAlwaysMsgf(IsValid(PC),
+	                      TEXT("Require a valid %s to reject a player."),
+	                      *GetNameSafe(APlayerController::StaticClass())))
 	{
 		return false;
 	}
 
 	UNetConnection* NewConnection = PC->GetNetConnection();
-	if (IsValid(NewConnection))
+	if (ensureAlwaysMsgf(IsValid(NewConnection),
+	                     TEXT("Require a valid %s to reject a player."),
+	                     *GetNameSafe(UNetConnection::StaticClass())))
 	{
 		NewConnection->Close();
 
