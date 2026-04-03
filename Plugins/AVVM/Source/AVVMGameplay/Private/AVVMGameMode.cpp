@@ -157,7 +157,7 @@ void AAVVMGameMode::PreLogin(const FString& Options, const FString& Address, con
 
 	// @gdemers Run validation on players that are joining a AGameSession, and kick out
 	// whomever isn't authorized to join this session.
-	bool bIsExpectedPlayer = true;
+	bool bIsExpectedPlayer = false;
 	if (ensureAlwaysMsgf(WorldSetting.IsValid(),
 	                     TEXT("Invalid %s"),
 	                     *GetNameSafe(AAVVMWorldSetting::StaticClass())))
