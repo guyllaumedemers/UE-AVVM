@@ -27,13 +27,13 @@ EDataValidationResult UAVVMDefaultPawnSpawnRule::IsDataValid(class FDataValidati
 	if (SpawnConditionTags.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMSpawnPointRule", "", "Default Pawn Spawn Conditions are undefined. You should review the dependent property values."));
+		Context.AddError(NSLOCTEXT("UAVVMDefaultPawnSpawnRule", "", "Default Pawn Spawn Conditions are undefined. You should review the dependent property values."));
 	}
 
 	if ((RetryRate <= 0.f) || (MaxNumRetry <= 0))
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("UAVVMSpawnPointRule", "", "Retry flag is enabled. You should review the dependent property values."));
+		Context.AddError(NSLOCTEXT("UAVVMDefaultPawnSpawnRule", "", "Retry flag is enabled. You should review the dependent property values."));
 	}
 
 	return Result;
