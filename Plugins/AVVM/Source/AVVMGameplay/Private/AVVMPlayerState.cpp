@@ -99,6 +99,21 @@ void AAVVMPlayerState::ClientInitialize(class AController* C)
 	}
 }
 
+void AAVVMPlayerState::OnRep_PlayerName()
+{
+	Super::OnRep_PlayerName();
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY(this,
+					   RegisteredChannels.PostPlayerStateNameClientInitializedTag,
+					   this,
+					   FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
+	}
+}
+
 void AAVVMPlayerState::OnSetUniqueId()
 {
 	Super::OnSetUniqueId();
