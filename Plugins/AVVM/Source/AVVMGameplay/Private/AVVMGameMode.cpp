@@ -29,6 +29,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Rules/AVVMDefaultPawnSpawnRule.h"
 #include "Rules/AVVMPlayerRule.h"
 #include "Rules/AVVMSpawnPointRule.h"
 
@@ -241,8 +242,90 @@ void AAVVMGameMode::UnregisterPlayerFromAuthoritativeSubsystem(const APlayerStat
 	}
 }
 
+APawn* AAVVMGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+{
+	if (!bShouldDeferDefaultPawnCreation)
+	{
+		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+	}
+
+	// @gdemers internal context object for tracking player attempts
+	// to spawning the default pawn tie to this PC.
+	struct FAVVMPlayerRetryTracker
+	{
+		TMap<TWeakObjectPtr<AController>/*Player*/, int32/*Counter*/> CounterPerPlayer;
+	};
+
+	static FAVVMPlayerRetryTracker PlayerRetryTracker;
+	int32& OutRetryCounter = PlayerRetryTracker.CounterPerPlayer.FindOrAdd(NewPlayer);
+
+	// @gdemers we expect users to implement their own spawn process based on project defined rules.
+	if (!ensureAlwaysMsgf(WorldSetting.IsValid(),
+	                      TEXT("Invalid %s."),
+	                      *GetNameSafe(AAVVMWorldSetting::StaticClass())))
+	{
+		return nullptr;
+	}
+
+	const auto* DefaultPawnSpawnRule = Cast<UAVVMDefaultPawnSpawnRule>(WorldSetting->GetRule(RuleTagAggregator.DefaultPawnSpawnConditionsTag));
+	if (!ensureAlwaysMsgf(IsValid(DefaultPawnSpawnRule),
+	                      TEXT("Invalid %s for tag %s."),
+	                      *GetNameSafe(UAVVMDefaultPawnSpawnRule::StaticClass()),
+	                      *RuleTagAggregator.DefaultPawnSpawnConditionsTag.ToString()))
+	{
+		return nullptr;
+	}
+
+	const bool bHasMetRequirements = DefaultPawnSpawnRule->Predicate_HasMetDefaultPawnSpawnRequirements(this, Cast<APlayerController>(NewPlayer));
+	if (bHasMetRequirements)
+	{
+		// @gdemers spawn the default pawn as normal. we have met all conditions, and are ready to play safely.
+		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+	}
+
+	if (!ensureAlwaysMsgf(OutRetryCounter < DefaultPawnSpawnRule->GetMaxNumRetry(),
+	                      TEXT("Couldn't spawn the default pawn for %s. We have exceeded the allowed number of retry (%d). We are about to close the player net connection."),
+	                      *GetNameSafe(NewPlayer),
+	                      DefaultPawnSpawnRule->GetMaxNumRetry()))
+	{
+		UNetConnection* PlayerConnection = IsValid(NewPlayer) ? NewPlayer->GetNetConnection() : nullptr;
+		if (IsValid(PlayerConnection))
+		{
+			OutRetryCounter = 0;
+			PlayerConnection->Close();
+		}
+
+		return nullptr;
+	}
+
+	const auto OnRestartPlayerDeferred = [](const TWeakObjectPtr<AAVVMGameMode>& GameMode,
+	                                        const TWeakObjectPtr<AController>& RestartPlayer)
+	{
+		if (GameMode.IsValid())
+		{
+			GameMode->RestartPlayer(RestartPlayer.Get());
+		}
+	};
+
+	// @gdemers defer request until we have met all proper requirements.
+	FTimerHandle OutHandle;
+	GetWorldTimerManager().SetTimer(OutHandle,
+	                                FTimerDelegate::CreateWeakLambda(this, OnRestartPlayerDeferred, this, NewPlayer),
+	                                DefaultPawnSpawnRule->GetRetryRate(),
+	                                false);
+
+	// @gdemers increment counter so we can eventually timeout on failure.
+	OutRetryCounter += 1;
+	return nullptr;
+}
+
 AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
 {
+	if (!bShouldUseCustomPlayerStartPositionFilters)
+	{
+		return Super::FindPlayerStart_Implementation(Player, IncomingName);
+	}
+	
 	// @gdemers internal context object for tracking player attempts
 	// to finding a valid start position.
 	struct FAVVMPlayerRetryTracker
@@ -253,15 +336,20 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 	static FAVVMPlayerRetryTracker PlayerRetryTracker;
 	int32& OutRetryCounter = PlayerRetryTracker.CounterPerPlayer.FindOrAdd(Player);
 
-	if (!WorldSetting.IsValid())
+	if (!ensureAlwaysMsgf(WorldSetting.IsValid(),
+	                      TEXT("Invalid %s."),
+	                      *GetNameSafe(AAVVMWorldSetting::StaticClass())))
 	{
-		return Super::FindPlayerStart_Implementation(Player, IncomingName);
+		return nullptr;
 	}
 
 	const auto* SpawnPointRule = Cast<UAVVMSpawnPointRule>(WorldSetting->GetRule(RuleTagAggregator.SpawnPointSelectionTag));
-	if (!IsValid(SpawnPointRule))
+	if (!ensureAlwaysMsgf(IsValid(SpawnPointRule),
+	                      TEXT("Invalid %s for tag %s."),
+	                      *GetNameSafe(UAVVMSpawnPointRule::StaticClass()),
+	                      *RuleTagAggregator.SpawnPointSelectionTag.ToString()))
 	{
-		return Super::FindPlayerStart_Implementation(Player, IncomingName);
+		return nullptr;
 	}
 
 	AActor* SpawnPoint = nullptr;
@@ -278,9 +366,15 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 		return SpawnPoint;
 	}
 
-	const bool bShouldClearPrevious = (false == SpawnPointRule->CanUsePreviousStartPositionOnFailure());
-	if (bShouldClearPrevious)
+	const bool bCanUsePreviousStartPositionOnFailure = SpawnPointRule->CanUsePreviousStartPositionOnFailure();
+	if (bCanUsePreviousStartPositionOnFailure && Player->StartSpot.IsValid())
 	{
+		return Player->StartSpot.Get();
+	}
+	else
+	{
+		// @gdemers returning nullptr will have AGameModeBase::RestartPlayer attempt assigning our
+		// cached value as the default spawn position. we want to prevent such case!
 		Player->StartSpot.Reset();
 	}
 
@@ -325,13 +419,20 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 
 void AAVVMGameMode::FailedToRestartPlayer(AController* NewPlayer)
 {
+	// @gdemers we only allow failure in the case where our project specific impl doesn't allow retries. Connection
+	// closure will be handled by the deferred case, where our attempt to multiple retries has timed out.
+	if (bShouldDeferDefaultPawnCreation)
+	{
+		return;
+	}
+	
 	Super::FailedToRestartPlayer(NewPlayer);
 
 	AVVM_LOGGER_ERROR(LogGameplay,
-	                  this,
-	                  NewPlayer,
-	                  TEXT("Couldn't spawn a valid Pawn."));
-	
+					  this,
+					  NewPlayer,
+					  TEXT("Couldn't spawn a valid Pawn."));
+
 	UNetConnection* PlayerConnection = IsValid(NewPlayer) ? NewPlayer->GetNetConnection() : nullptr;
 	if (IsValid(PlayerConnection))
 	{

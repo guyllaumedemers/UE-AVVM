@@ -27,16 +27,16 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "AVVMSpawnPointRule.generated.h"
+#include "AVVMDefaultPawnSpawnRule.generated.h"
 
 /**
  *	Class description:
  *
- *	UAVVMSpawnPointRule is a UObject instance that define a condition for searching valid SpawnPoint
- *	upon invoking AGameMode::RestartPlayer.
+ *	UAVVMDefaultPawnSpawnRule is a UObject instance that define the conditions required for the AGameMode
+ *	default Pawn creation.
  */
 UCLASS()
-class AVVMGAMEPLAY_API UAVVMSpawnPointRule : public UAVVMWorldRule
+class AVVMGAMEPLAY_API UAVVMDefaultPawnSpawnRule : public UAVVMWorldRule
 {
 	GENERATED_BODY()
 
@@ -44,34 +44,25 @@ public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
-	
-	// @gdemers validate information about player based on the referenced UniqueNetId.
+
+	// @gdemers validate this user login conditions for spawning a pawn.
 	UFUNCTION(BlueprintNativeEvent)
-	bool Predicate_GetSpawnPoint(const TArray<AActor*>& SpawnPoints, AActor*& OutActor) const;
-	virtual bool Predicate_GetSpawnPoint_Implementation(const TArray<AActor*>& SpawnPoints, AActor*& OutActor) const PURE_VIRTUAL(Predicate_GetSpawnPoint_Implementation, return false;);
-	
-	UFUNCTION(BlueprintCallable)
-	bool CanUsePreviousStartPositionOnFailure() const;
-	
-	UFUNCTION(BlueprintCallable)
-	bool CanRetrySearch() const;
-	
+	bool Predicate_HasMetDefaultPawnSpawnRequirements(const AGameModeBase* GameMode, const APlayerController* PC) const;
+	virtual bool Predicate_HasMetDefaultPawnSpawnRequirements_Implementation(const AGameModeBase* GameMode, const APlayerController* PC) const PURE_VIRTUAL(Predicate_HasMetDefaultPawnSpawnRequirements_Implementation, return false;);
+
 	UFUNCTION(BlueprintCallable)
 	float GetRetryRate() const;
-	
+
 	UFUNCTION(BlueprintCallable)
 	int32 GetMaxNumRetry() const;
-	
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanUsePreviousStartPositionOnFailure = false;
+	FGameplayTagContainer SpawnConditionTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanRetrySearch = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanRetrySearch", ClampMin="0", ClampMax="4"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="4"))
 	float RetryRate = 0.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanRetrySearch", ClampMin="0", ClampMax="25"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="25"))
 	int32 MaxNumRetry = INDEX_NONE;
 };

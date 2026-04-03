@@ -17,14 +17,20 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Rules/AVVMSpawnPointRule.h"
+#include "Rules/AVVMDefaultPawnSpawnRule.h"
 
 #if WITH_EDITOR
-EDataValidationResult UAVVMSpawnPointRule::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UAVVMDefaultPawnSpawnRule::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
-	if (bCanRetrySearch && ((RetryRate <= 0.f) || (MaxNumRetry <= 0)))
+	if (SpawnConditionTags.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMSpawnPointRule", "", "Default Pawn Spawn Conditions are undefined. You should review the dependent property values."));
+	}
+
+	if ((RetryRate <= 0.f) || (MaxNumRetry <= 0))
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMSpawnPointRule", "", "Retry flag is enabled. You should review the dependent property values."));
@@ -34,22 +40,12 @@ EDataValidationResult UAVVMSpawnPointRule::IsDataValid(class FDataValidationCont
 }
 #endif
 
-bool UAVVMSpawnPointRule::CanUsePreviousStartPositionOnFailure() const
-{
-	return bCanUsePreviousStartPositionOnFailure;
-}
-
-bool UAVVMSpawnPointRule::CanRetrySearch() const
-{
-	return bCanRetrySearch;
-}
-
-float UAVVMSpawnPointRule::GetRetryRate() const
+float UAVVMDefaultPawnSpawnRule::GetRetryRate() const
 {
 	return RetryRate;
 }
 
-int32 UAVVMSpawnPointRule::GetMaxNumRetry() const
+int32 UAVVMDefaultPawnSpawnRule::GetMaxNumRetry() const
 {
 	return MaxNumRetry;
 }

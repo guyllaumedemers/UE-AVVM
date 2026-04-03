@@ -40,5 +40,5 @@ public:
 	// @gdemers validate information about player based on the referenced UniqueNetId.
 	UFUNCTION(BlueprintNativeEvent)
 	bool Predicate_UniqueNetId(const FUniqueNetIdRepl& UniqueId) const;
-	bool Predicate_UniqueNetId_Implementation(const FUniqueNetIdRepl& UniqueId) const PURE_VIRTUAL(Predicate_UniqueNetId_Implementation, return false;);
+	virtual bool Predicate_UniqueNetId_Implementation(const FUniqueNetIdRepl& UniqueId) const PURE_VIRTUAL(Predicate_UniqueNetId_Implementation, return false;);
 };

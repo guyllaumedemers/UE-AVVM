@@ -59,6 +59,9 @@ struct AVVMGAMEPLAY_API FAVVMGameModeRuleTagAggregator
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTag SpawnPointSelectionTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTag DefaultPawnSpawnConditionsTag = FGameplayTag::EmptyTag;
 };
 
 /**
@@ -113,6 +116,7 @@ protected:
 	void RegisterPlayerWithAuthoritativeSubsystem(const APlayerState* NewPlayer) const;
 	void UnregisterPlayerFromAuthoritativeSubsystem(const APlayerState* NewPlayer) const;
 	
+	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 	// @gdemers handle pawn creation failure, and spawn location. (pawn configuration should be handled within component base systems)
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName = L"") override;
 	virtual void FailedToRestartPlayer(AController* NewPlayer) override;
@@ -122,6 +126,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bAllowServerProcessExit = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldUseCustomPlayerStartPositionFilters = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldDeferDefaultPawnCreation = false;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AAVVMWorldSetting> WorldSetting = nullptr;
