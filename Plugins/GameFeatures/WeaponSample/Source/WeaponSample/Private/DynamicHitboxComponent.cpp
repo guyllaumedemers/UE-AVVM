@@ -32,6 +32,7 @@ UDynamicHitboxComponent::UDynamicHitboxComponent(const FObjectInitializer& Objec
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 	PrimaryComponentTick.bAllowTickBatching = true;
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = true;
+	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
 	SetIsReplicatedByDefault(true);
 }
 
@@ -121,28 +122,9 @@ void UDynamicHitboxComponent::DeferredPhysicSwap()
 		return;
 	}
 
-	const UWorld* World = GetWorld();
-	if (!IsValid(World))
+	auto* NewSkeletalMeshComponent = GetSkeletalMeshComponent();
+	if (IsValid(NewSkeletalMeshComponent))
 	{
-		return;
+		NewSkeletalMeshComponent->SetPhysicsAsset(PhysicAssets[PreviousState], true);
 	}
-
-	const auto OnNextTick = [](const TWeakObjectPtr<USkeletalMeshComponent>& NewSkeletalMeshComponent,
-	                           const EPhysicState* ActivePhysicState,
-	                           const TMap<EPhysicState, TObjectPtr<UPhysicsAsset>>& NewPhysicAssets)
-	{
-		if (ActivePhysicState == nullptr || !NewSkeletalMeshComponent.IsValid())
-		{
-			return;
-		}
-
-		const bool bHasFound = NewPhysicAssets.Contains(*ActivePhysicState);
-		if (bHasFound)
-		{
-			NewSkeletalMeshComponent->SetPhysicsAsset(NewPhysicAssets[*ActivePhysicState], true);
-		}
-	};
-
-	const auto Callback = FTimerDelegate::CreateWeakLambda(this, OnNextTick, GetSkeletalMeshComponent(), &PreviousState, PhysicAssets);
-	World->GetTimerManager().SetTimerForNextTick(Callback);
 }
