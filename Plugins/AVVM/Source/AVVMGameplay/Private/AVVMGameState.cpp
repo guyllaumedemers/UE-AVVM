@@ -154,6 +154,7 @@ bool AAVVMGameState::Server_HandleRejectedLogin(APlayerState* PlayerState)
 		RejectedPlayers.Remove(UniqueNetIdPtr);
 	}
 
+	Multicast_NotifyPlayerStateRejection(PlayerState);
 	return true;
 }
 
