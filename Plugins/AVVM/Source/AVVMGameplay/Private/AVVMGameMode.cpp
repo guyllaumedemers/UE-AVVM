@@ -250,10 +250,10 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 		return nullptr;
 	}
 
-	const auto* SpawnPointRule = Cast<UAVVMSpawnPointRule>(WorldSetting->GetRule(RuleTagAggregator.SpawnPointSelectionTag));
+	const auto* SpawnPointRule = Cast<UAVVMSpawnPointRetrySearchRule>(WorldSetting->GetRule(RuleTagAggregator.SpawnPointSelectionTag));
 	if (!ensureAlwaysMsgf(IsValid(SpawnPointRule),
 	                      TEXT("Invalid %s for tag %s."),
-	                      *GetNameSafe(UAVVMSpawnPointRule::StaticClass()),
+	                      *GetNameSafe(UAVVMSpawnPointRetrySearchRule::StaticClass()),
 	                      *RuleTagAggregator.SpawnPointSelectionTag.ToString()))
 	{
 		return nullptr;

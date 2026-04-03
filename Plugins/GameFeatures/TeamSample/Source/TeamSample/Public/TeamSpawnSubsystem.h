@@ -61,6 +61,9 @@ public:
 	static void Static_RegisterPlayerStart(const UWorld* World,
 	                                       const UTeamStartComponent* Component);
 
+	// @gdemers IMPORTANT : UAVVMSpawnPointRetrySearchRule defines the virtual call that Predicate the Start location
+	// retrieval. As such, it's expected that Static_TryGetPlayerStart be called within the derived impl so both UTeamSpawnRule,
+	// and UAVVMSpawnPointRetrySearchRule be used as logic driving the spawn process of the player.
 	UFUNCTION(BlueprintCallable)
 	static const UTeamStartComponent* Static_TryGetPlayerStart(const UWorld* World,
 	                                                           const FWorldContextArgs& WorldContextArgs,

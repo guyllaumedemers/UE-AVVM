@@ -20,7 +20,7 @@
 #include "Rules/AVVMSpawnPointRule.h"
 
 #if WITH_EDITOR
-EDataValidationResult UAVVMSpawnPointRule::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UAVVMSpawnPointRetrySearchRule::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
@@ -34,22 +34,22 @@ EDataValidationResult UAVVMSpawnPointRule::IsDataValid(class FDataValidationCont
 }
 #endif
 
-bool UAVVMSpawnPointRule::CanUsePreviousStartPositionOnFailure() const
+bool UAVVMSpawnPointRetrySearchRule::CanUsePreviousStartPositionOnFailure() const
 {
 	return bCanUsePreviousStartPositionOnFailure;
 }
 
-bool UAVVMSpawnPointRule::CanRetrySearch() const
+bool UAVVMSpawnPointRetrySearchRule::CanRetrySearch() const
 {
 	return bCanRetrySearch;
 }
 
-float UAVVMSpawnPointRule::GetRetryRate() const
+float UAVVMSpawnPointRetrySearchRule::GetRetryRate() const
 {
 	return RetryRate;
 }
 
-int32 UAVVMSpawnPointRule::GetMaxNumRetry() const
+int32 UAVVMSpawnPointRetrySearchRule::GetMaxNumRetry() const
 {
 	return MaxNumRetry;
 }

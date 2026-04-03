@@ -32,11 +32,11 @@
 /**
  *	Class description:
  *
- *	UAVVMSpawnPointRule is a UObject instance that define a condition for searching valid SpawnPoint
- *	upon invoking AGameMode::RestartPlayer.
+ *	UAVVMSpawnPointRetrySearchRule is a UObject instance that attempt retrieval of a valid Start position, and define how failure to find such output
+ *	should behave following invocation call to AGameMode::RestartPlayer.
  */
 UCLASS()
-class AVVMGAMEPLAY_API UAVVMSpawnPointRule : public UAVVMWorldRule
+class AVVMGAMEPLAY_API UAVVMSpawnPointRetrySearchRule : public UAVVMWorldRule
 {
 	GENERATED_BODY()
 
