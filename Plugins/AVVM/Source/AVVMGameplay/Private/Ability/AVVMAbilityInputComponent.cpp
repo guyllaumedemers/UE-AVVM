@@ -331,7 +331,13 @@ void UAVVMAbilityInputComponent::UnRegisterGameFrameworkIMCs(const TArray<const 
 
 void UAVVMAbilityInputComponent::RegisterGameFrameworkIMCs(const TArray<const UInputMappingContext*>& IMCs)
 {
-	auto* PC = Cast<APlayerController>(OwningOuter.Get());
+	// @gdemers often suffer from race conditions as BeginPlay was not yet called.
+	if (!OwningOuter.IsValid())
+	{
+		OwningOuter = GetTypedOuter<APlayerController>();
+	}
+
+	auto* PC = OwningOuter.Get();
 	if (!IsValid(PC))
 	{
 		return;
