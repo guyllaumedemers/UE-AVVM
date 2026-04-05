@@ -61,7 +61,7 @@ TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject
 	TArray<int32> OutResults;
 
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
-	if (IsValid(Character))
+	if (IsValid(Character) && Character->IsPlayerControlled())
 	{
 		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer->GetWorld(), ElementId/*calling Player UniqueId*/);
 	}
