@@ -20,7 +20,6 @@
 #include "AVVMPositionSamplerSubsystem.h"
 
 #include "AVVMCharacter.h"
-#include "AVVMWorldSetting.h"
 #include "EngineUtils.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/GameStateBase.h"
