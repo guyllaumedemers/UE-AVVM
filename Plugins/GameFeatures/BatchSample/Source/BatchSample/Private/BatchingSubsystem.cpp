@@ -124,7 +124,7 @@ void UBatchingSubsystem::Tick(float DeltaTime)
 
 TStatId UBatchingSubsystem::GetStatId() const
 {
-	return TStatId();
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UBatchingSubsystem, STATGROUP_Tickables);
 }
 
 void UBatchingSubsystem::Static_Unregister(const UWorld* World, AActor* Actor)

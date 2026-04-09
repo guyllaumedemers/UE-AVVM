@@ -30,11 +30,30 @@ DEFINE_LOG_CATEGORY(LogGameplay);
 
 static const FString TagPath = (FPaths::ProjectPluginsDir() / TEXT("AVVM/Config/Tags"));
 
-TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarEnableTickSchedulerSubsystem = nullptr;
-TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarEnableOverrideTickSchedulerRule = nullptr;
-TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarOverrideTickSchedulerJobAllotment = nullptr;
-TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarOverrideTickSchedulerTickRate = nullptr;
-TSharedPtr<IConsoleVariable> FAVVMGameplayModule::CVarOverrideTickSchedulerResetTimeJobQueuePriority = nullptr;
+// @gdemers global console commands to be configured through user console cmd, or .ini file.
+static int32 CVarEnableOverrideTickSchedulerRule = 0;
+static FAutoConsoleVariableRef CEnableOverrideTickSchedulerRule(TEXT("c.SetTickSchedulerRule"),
+                                                                CVarEnableOverrideTickSchedulerRule,
+                                                                TEXT("0, or 1 for overwriting the WorldRule running"),
+                                                                ECVF_Default);
+
+static float CVarOverrideTickSchedulerJobAllotment = 0;
+static FAutoConsoleVariableRef COverrideTickSchedulerJobAllotment(TEXT("c.SetTickSchedulerJobAllotment"),
+                                                                  CVarOverrideTickSchedulerJobAllotment,
+                                                                  TEXT("Set job allotment time"),
+                                                                  ECVF_Default);
+
+static float CVarOverrideTickSchedulerTickRate = 0;
+static FAutoConsoleVariableRef COverrideTickSchedulerTickRate(TEXT("c.SetTickSchedulerTickRate"),
+                                                              CVarOverrideTickSchedulerTickRate,
+                                                              TEXT("Set tick rate"),
+                                                              ECVF_Default);
+
+static float CVarOverrideTickSchedulerResetTimeJobQueuePriority = 0;
+static FAutoConsoleVariableRef COverrideTickSchedulerResetTimeJobQueuePriority(TEXT("c.SetTickSchedulerResetTimeJobQueuePriority"),
+                                                                               CVarOverrideTickSchedulerResetTimeJobQueuePriority,
+                                                                               TEXT("Set time for priority queue reset. i.e put all jobs back to highest level."),
+                                                                               ECVF_Default);
 
 namespace NSAVVMFunctor
 {
@@ -63,59 +82,24 @@ void FAVVMGameplayModule::StartupModule()
 		UGameplayTagsManager::Get().AddTagIniSearchPath(TagPath);
 	}
 
-	IConsoleVariable* CVar_EnableTickSchedulerSubsystem = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("TickScheduler.EnableShouldCreateSubsystem"),
-			                         false,
-			                         TEXT("Enable Tick Scheduler Subsystem creation."));
-
-	IConsoleVariable* CVar_EnableOverrideTickSchedulerRule = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("TickScheduler.EnableRuleOverride"),
-			                         false,
-			                         TEXT("Enable Tick Scheduler Rule Override."));
-
-	IConsoleVariable* CVar_OverrideTickSchedulerJobAllotment = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideJobAllotment"),
-			                         0.f,
-			                         TEXT("Override Job Allotment Rate."));
-
-	IConsoleVariable* CVar_OverrideTickSchedulerTickRate = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideTickRate"),
-			                         0.f,
-			                         TEXT("Override TickRate."));
-
-	IConsoleVariable* CVar_OverrideTickSchedulerResetTimeJobQueuePriority = IConsoleManager::Get()
-			.RegisterConsoleVariable(TEXT("TickScheduler.OverrideResetTimeJobQueuePriority"),
-			                         0.f,
-			                         TEXT("Override ResetTime JobQueuePriority."));
-
-	CVarEnableTickSchedulerSubsystem = MakeShareable<IConsoleVariable>(CVar_EnableTickSchedulerSubsystem);
-	CVarEnableOverrideTickSchedulerRule = MakeShareable<IConsoleVariable>(CVar_EnableOverrideTickSchedulerRule);
-	CVarOverrideTickSchedulerJobAllotment = MakeShareable<IConsoleVariable>(CVar_OverrideTickSchedulerJobAllotment);
-	CVarOverrideTickSchedulerTickRate = MakeShareable<IConsoleVariable>(CVar_OverrideTickSchedulerTickRate);
-	CVarOverrideTickSchedulerResetTimeJobQueuePriority = MakeShareable<IConsoleVariable>(CVar_OverrideTickSchedulerResetTimeJobQueuePriority);
-
 #if !UE_BUILD_SHIPPING
-	if (CVarEnableOverrideTickSchedulerRule.IsValid())
 	{
-		auto& Delegate = CVarEnableOverrideTickSchedulerRule->OnChangedDelegate();
+		auto& Delegate = CEnableOverrideTickSchedulerRule->OnChangedDelegate();
 		HandleA = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
 	}
 
-	if (CVarOverrideTickSchedulerJobAllotment.IsValid())
 	{
-		auto& Delegate = CVarOverrideTickSchedulerJobAllotment->OnChangedDelegate();
+		auto& Delegate = COverrideTickSchedulerJobAllotment->OnChangedDelegate();
 		HandleB = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
 	}
 
-	if (CVarOverrideTickSchedulerTickRate.IsValid())
 	{
-		auto& Delegate = CVarOverrideTickSchedulerTickRate->OnChangedDelegate();
+		auto& Delegate = COverrideTickSchedulerTickRate->OnChangedDelegate();
 		HandleC = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
 	}
 
-	if (CVarOverrideTickSchedulerResetTimeJobQueuePriority.IsValid())
 	{
-		auto& Delegate = CVarOverrideTickSchedulerResetTimeJobQueuePriority->OnChangedDelegate();
+		auto& Delegate = COverrideTickSchedulerResetTimeJobQueuePriority->OnChangedDelegate();
 		HandleD = Delegate.AddStatic(NSAVVMFunctor::OnTickSchedulerCVarChanged);
 	}
 #endif
@@ -123,34 +107,24 @@ void FAVVMGameplayModule::StartupModule()
 
 void FAVVMGameplayModule::ShutdownModule()
 {
-	IConsoleManager::Get().UnregisterConsoleObject(CVarEnableTickSchedulerSubsystem.Get());
-	IConsoleManager::Get().UnregisterConsoleObject(CVarEnableOverrideTickSchedulerRule.Get());
-	IConsoleManager::Get().UnregisterConsoleObject(CVarOverrideTickSchedulerJobAllotment.Get());
-	IConsoleManager::Get().UnregisterConsoleObject(CVarOverrideTickSchedulerTickRate.Get());
-	IConsoleManager::Get().UnregisterConsoleObject(CVarOverrideTickSchedulerResetTimeJobQueuePriority.Get());
-
 #if !UE_BUILD_SHIPPING
-	if (CVarEnableOverrideTickSchedulerRule.IsValid())
 	{
-		auto& Delegate = CVarEnableOverrideTickSchedulerRule->OnChangedDelegate();
+		auto& Delegate = CEnableOverrideTickSchedulerRule->OnChangedDelegate();
 		Delegate.Remove(HandleA);
 	}
 
-	if (CVarOverrideTickSchedulerJobAllotment.IsValid())
 	{
-		auto& Delegate = CVarOverrideTickSchedulerJobAllotment->OnChangedDelegate();
+		auto& Delegate = COverrideTickSchedulerJobAllotment->OnChangedDelegate();
 		Delegate.Remove(HandleB);
 	}
 
-	if (CVarOverrideTickSchedulerTickRate.IsValid())
 	{
-		auto& Delegate = CVarOverrideTickSchedulerTickRate->OnChangedDelegate();
+		auto& Delegate = COverrideTickSchedulerTickRate->OnChangedDelegate();
 		Delegate.Remove(HandleC);
 	}
 
-	if (CVarOverrideTickSchedulerResetTimeJobQueuePriority.IsValid())
 	{
-		auto& Delegate = CVarOverrideTickSchedulerResetTimeJobQueuePriority->OnChangedDelegate();
+		auto& Delegate = COverrideTickSchedulerResetTimeJobQueuePriority->OnChangedDelegate();
 		Delegate.Remove(HandleD);
 	}
 #endif
@@ -180,29 +154,24 @@ UDataRegistry* FAVVMGameplayModule::GetSetAutomatedTestDataRegistry()
 	return AutomatedTestDataRegistry.Get();
 }
 
-TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarEnableTickSchedulerSubsystem()
+IConsoleVariable* FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()
 {
-	return CVarEnableTickSchedulerSubsystem.ToSharedRef();
+	return CEnableOverrideTickSchedulerRule->AsVariable();
 }
 
-TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()
+IConsoleVariable* FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()
 {
-	return CVarEnableOverrideTickSchedulerRule.ToSharedRef();
+	return COverrideTickSchedulerJobAllotment->AsVariable();
 }
 
-TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarOverrideTickSchedulerJobAllotment()
+IConsoleVariable* FAVVMGameplayModule::GetCVarOverrideTickSchedulerTickRate()
 {
-	return CVarOverrideTickSchedulerJobAllotment.ToSharedRef();
+	return COverrideTickSchedulerTickRate->AsVariable();
 }
 
-TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarOverrideTickSchedulerTickRate()
+IConsoleVariable* FAVVMGameplayModule::GetCVarOverrideTickSchedulerResetTimeJobQueuePriority()
 {
-	return CVarOverrideTickSchedulerTickRate.ToSharedRef();
-}
-
-TSharedRef<IConsoleVariable> FAVVMGameplayModule::GetCVarOverrideTickSchedulerResetTimeJobQueuePriority()
-{
-	return CVarOverrideTickSchedulerResetTimeJobQueuePriority.ToSharedRef();
+	return COverrideTickSchedulerResetTimeJobQueuePriority->AsVariable();
 }
 
 IMPLEMENT_MODULE(FAVVMGameplayModule, AVVMGameplay)

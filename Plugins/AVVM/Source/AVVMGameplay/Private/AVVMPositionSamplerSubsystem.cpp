@@ -25,6 +25,13 @@
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 
+// @gdemers global console commands to be configured through user console cmd, or .ini file.
+static int32 CVarEnablePositionSamplerSubsystem = 0;
+static FAutoConsoleVariableRef CEnablePositionSamplerSubsystem(TEXT("c.SetPositionSamplerSubsystem"),
+                                                               CVarEnablePositionSamplerSubsystem,
+                                                               TEXT("0, or 1 for configuring the position sampler subsystem state"),
+                                                               ECVF_Default);
+
 bool UAVVMPositionSamplerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const auto* World = Cast<UWorld>(Outer);
@@ -34,7 +41,8 @@ bool UAVVMPositionSamplerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 		return false;
 	}
 
-	return true;
+	const bool bShouldCreateSubsystem = CEnablePositionSamplerSubsystem->GetBool();
+	return bShouldCreateSubsystem;
 }
 
 void UAVVMPositionSamplerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -82,6 +90,11 @@ void UAVVMPositionSamplerSubsystem::Tick(float DeltaTime)
 		FAVVMPositionSampler& PositionSampler = AuthoritativePositionSamplers.FindOrAdd(Player);
 		PositionSampler.Sample(NewSample);
 	}
+}
+
+TStatId UAVVMPositionSamplerSubsystem::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UAVVMPositionSamplerSubsystem, STATGROUP_Tickables);
 }
 
 FBoxCenterAndExtent UAVVMPositionSamplerSubsystem::Static_GetSampleExtent(const UWorld* World,

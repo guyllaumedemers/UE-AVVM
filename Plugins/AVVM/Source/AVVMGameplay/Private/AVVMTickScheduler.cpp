@@ -20,7 +20,6 @@
 #include "AVVMTickScheduler.h"
 
 #include "AVVMDoesSupportManualTicking.h"
-#include "AVVMGameplayModule.h"
 #include "AVVMTickSchedulerRule.h"
 #include "AVVMToolkitUtils.h"
 #include "AVVMWorldSetting.h"
@@ -29,6 +28,13 @@
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_TICK_SCHEDULING, "WorldRule.TickScheduling");
+
+// @gdemers global console commands to be configured through user console cmd, or .ini file.
+static int32 CVarEnableTickSchedulerSubsystem = 0;
+static FAutoConsoleVariableRef CEnableTickSchedulerSubsystem(TEXT("c.SetTickSchedulerSubsystem"),
+                                                             CVarEnableTickSchedulerSubsystem,
+                                                             TEXT("0, or 1 for configuring the tick scheduler subsystem state"),
+                                                             ECVF_Default);
 
 bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -45,7 +51,7 @@ bool UAVVMTickScheduler::ShouldCreateSubsystem(UObject* Outer) const
 		return false;
 	}
 
-	const bool bShouldCreateSubsystem = FAVVMGameplayModule::GetCVarEnableTickSchedulerSubsystem()->GetBool();
+	const bool bShouldCreateSubsystem = CEnableTickSchedulerSubsystem->GetBool();
 	return bShouldCreateSubsystem;
 }
 
@@ -233,6 +239,11 @@ void UAVVMTickScheduler::Tick(float DeltaTime)
 			}
 		}
 	}
+}
+
+TStatId UAVVMTickScheduler::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UAVVMTickScheduler, STATGROUP_Tickables);
 }
 
 void UAVVMTickScheduler::Static_Register(const UWorld* World,

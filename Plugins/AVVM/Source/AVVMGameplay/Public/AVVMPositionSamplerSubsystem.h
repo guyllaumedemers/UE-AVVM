@@ -44,6 +44,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual TStatId GetStatId() const override;
 
 	static FBoxCenterAndExtent Static_GetSampleExtent(const UWorld* World, const AActor* Target, const double Timestamp);
 

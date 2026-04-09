@@ -83,7 +83,7 @@ void UProjectileManagerSubsystem::Tick(float DeltaTime)
 
 TStatId UProjectileManagerSubsystem::GetStatId() const
 {
-	return TStatId();
+	RETURN_QUICK_DECLARE_CYCLE_STAT(UProjectileManagerSubsystem, STATGROUP_Tickables);
 }
 
 void UProjectileManagerSubsystem::Static_Register(const UWorld* World,
