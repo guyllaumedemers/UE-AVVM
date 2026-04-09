@@ -25,6 +25,8 @@
 #include "AVVMToolkitUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Data/AVVMActorPayload.h"
 #include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
@@ -62,6 +64,24 @@ void AAVVMCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void AAVVMCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// @gdemers server don't run animation, unless listen server. so hit detection has to be run against
+	// the capsule. Otherwise, Hit Bone will most-likely mismatch between server-client.
+	USkeletalMeshComponent* NewMeshComponent = GetMesh();
+	if (IsValid(NewMeshComponent) && bCanOverrideServerCollision)
+	{
+		const auto NewCollisionEnabled = IsNetMode(NM_DedicatedServer) ? ECollisionEnabled::NoCollision : CollisionEnabled.GetValue();
+		NewMeshComponent->SetCollisionEnabled(NewCollisionEnabled);
+	}
+
+	// @gdemers which means our fallback for collision detection are capsules. We will be running a segment
+	// intersect against two lines from the center of our capsule, to the close-by instigating actor.
+	UCapsuleComponent* NewCapsuleComponent = GetCapsuleComponent();
+	if (IsValid(NewCapsuleComponent) && bCanOverrideServerCollision)
+	{
+		const auto NewCollisionEnabled = IsNetMode(NM_DedicatedServer) ? CollisionEnabled.GetValue() : ECollisionEnabled::NoCollision;
+		NewCapsuleComponent->SetCollisionEnabled(NewCollisionEnabled);
+	}
 
 #if WITH_EDITOR
 	if (!IsNetMode(NM_DedicatedServer))
