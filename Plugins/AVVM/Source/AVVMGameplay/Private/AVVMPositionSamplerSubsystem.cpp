@@ -166,3 +166,25 @@ void UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::Sample(const FAVVMPosi
 	Samples[CurrSampleIndex] = NewSample;
 	CurrSampleIndex = ((CurrSampleIndex + 1) % Samples.Num());
 }
+
+bool UAVVMTraceUtils::DoesTraceIntersectPositionSample(const UWorld* World, const FAVVMTraceContextArgs& Params)
+{
+	bool bResult = false;
+	const FBoxCenterAndExtent BoxExtentAtTime = UAVVMPositionSamplerSubsystem::Static_GetSampleExtent(World, Params.HitActor, Params.HitTime);
+	const FVector A1 = BoxExtentAtTime.Center - FVector(0, 0, BoxExtentAtTime.Extent.Z);
+	const FVector B1 = BoxExtentAtTime.Center + FVector(0, 0, BoxExtentAtTime.Extent.Z);
+
+	const FVector A2 = Params.TraceStart;
+	const FVector B2 = Params.TraceEnd;
+
+	FVector P1, P2;
+	FMath::SegmentDistToSegment(A1, B1, A2, B2, P1, P2);
+
+	const double Dist = (P2 - P1).Size() - BoxExtentAtTime.Extent.X;
+	if (Dist < Params.Tolerance)
+	{
+		bResult = true;
+	}
+
+	return bResult;
+}

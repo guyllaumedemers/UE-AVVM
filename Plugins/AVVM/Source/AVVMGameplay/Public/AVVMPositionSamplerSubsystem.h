@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "Math/GenericOctree.h"
 #include "Subsystems/WorldSubsystem.h"
@@ -73,4 +74,45 @@ protected:
 	};
 
 	TMap<TWeakObjectPtr<const AActor>, FAVVMPositionSampler> AuthoritativePositionSamplers;
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMTraceContextArgs is a context struct that simplify function signature.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMTraceContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	const AActor* HitActor = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	double HitTime = 0.f;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	double Tolerance = 0.f;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FVector TraceStart = FVector::ZeroVector;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FVector TraceEnd = FVector::ZeroVector;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMTraceUtils expose a set of reusable function for use with the Position Sampler subsystem during trace calculation.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMTraceUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool DoesTraceIntersectPositionSample(const UWorld* World, const FAVVMTraceContextArgs& Params);
 };
