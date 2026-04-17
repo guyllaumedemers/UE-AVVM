@@ -47,7 +47,7 @@ FAVVMImGuiDebugContext::~FAVVMImGuiDebugContext()
 
 void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	if (!Descriptor.GetObject())
+	if (!IsValid(Descriptor.GetObject()))
 	{
 		return;
 	}
@@ -61,7 +61,7 @@ void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDesc
 
 void FAVVMImGuiDebugContext::RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	if (!Descriptor.GetObject())
+	if (!IsValid(Descriptor.GetObject()))
 	{
 		return;
 	}
