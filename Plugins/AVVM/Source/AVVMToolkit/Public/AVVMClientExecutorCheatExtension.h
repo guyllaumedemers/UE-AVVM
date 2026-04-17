@@ -26,7 +26,13 @@
 #include "AVVMClientExecutorCheatExtension.generated.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMClientExecutorCheatExtension is the base impl for processing console cheats from a Client NetMode. It allows Server exec
+ *	of client sided console command execution without having to define Exec api on the PlayerController/PlayerState/or ACharacter.
+ *	
+ *	IMPORTANT : Dont define UFUNTION(Exec) in the above mentioned class. Just create new UCheatManagerExtension, and prevent code bloat in
+ *	relevant class such as APlayerController. (be smart! do the extra work for better scalability.)
  */
 UCLASS()
 class AVVMTOOLKIT_API UAVVMClientExecutorCheatExtension : public UCheatManagerExtension
