@@ -21,4 +21,4 @@
 
 #define LOCTEXT_NAMESPACE "FAVVMDebugModule"
 	
-IMPLEMENT_MODULE(FAVVMDebugModule, AVVMDebug)
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMDebug)
