@@ -16,6 +16,13 @@
 			"Enabled": true
 		},
 		{
+			"Name": "AVVMDebug",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			]
+		},
+		{
 			"Name": "AVVMSample",
 			"Enabled": true
 		},
