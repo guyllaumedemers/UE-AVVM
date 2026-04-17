@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "GameFramework/CheatManager.h"
+#include "AVVMClientExecutorCheatExtension.h"
 
 #ifdef UE_ENABLE_AVVM_DEBUGGER
 #include "AVVMDebuggerModule.h"
@@ -36,7 +36,7 @@
  *	See IAVVMQuicktimeEventGameStateInterface for project implementation details!
  */
 UCLASS()
-class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : public UCheatManagerExtension
+class AVVMGAMEPLAYSAMPLERUNTIME_API UAVVMGameplayGameStateCheatExtension : public UAVVMClientExecutorCheatExtension
 #if WITH_AVVM_DEBUGGER
                                                                            ,
                                                                            public IAVVMImGuiDescriptor

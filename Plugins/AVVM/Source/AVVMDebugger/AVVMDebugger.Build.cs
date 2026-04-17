@@ -27,10 +27,14 @@ public class AVVMDebugger : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 
+		// UE_WITH_CHEAT_MANAGER=1 enforce cheat being available on client. Which is a workaround around the constraint that the manager
+		// only spawn on Authoritative process.
+		// Note : This approach does require manually creating the CheatManager on the NetMode(Client) PC.
 		PublicDefinitions.AddRange(
 			new string[]
 			{
-				"UE_ENABLE_AVVM_DEBUGGER"
+				"UE_ENABLE_AVVM_DEBUGGER",
+				"UE_WITH_CHEAT_MANAGER=1"
 			});
 
 		// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 

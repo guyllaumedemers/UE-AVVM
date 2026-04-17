@@ -21,9 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMClientExecutorCheatExtension.h"
 #include "DataRegistryTypes.h"
 #include "Cheats/AVVMCheatData.h"
-#include "GameFramework/CheatManager.h"
 
 #ifdef UE_ENABLE_AVVM_DEBUGGER
 #include "AVVMDebuggerModule.h"
@@ -43,7 +43,7 @@ struct FStreamableHandle;
  *	interface with the UAVVMPresenter Model to "inject" stub data to derive types.
  */
 UCLASS()
-class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UCheatManagerExtension
+class AVVMSAMPLERUNTIME_API UAVVMCheatExtension : public UAVVMClientExecutorCheatExtension
 #if WITH_AVVM_DEBUGGER
                                                   ,
                                                   public IAVVMImGuiDescriptor

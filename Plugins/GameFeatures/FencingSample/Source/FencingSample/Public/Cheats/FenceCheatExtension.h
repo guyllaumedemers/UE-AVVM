@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AVVMClientExecutorCheatExtension.h"
 
 #include "GameFramework/CheatManager.h"
 
@@ -37,7 +38,7 @@ class UActorFenceComponent;
  *	UFenceCheatExtension expose basic functionalities for interfacing with the Fencing system.
  */
 UCLASS()
-class FENCINGSAMPLE_API UFenceCheatExtension : public UCheatManagerExtension
+class FENCINGSAMPLE_API UFenceCheatExtension : public UAVVMClientExecutorCheatExtension
 #if WITH_AVVM_DEBUGGER
                                                ,
                                                public IAVVMImGuiDescriptor

@@ -27,6 +27,30 @@ public class AVVMGameplay : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 
+		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
+		// is enabled. Set your project editor .target.cs to enable it!
+		if (Target.bBuildDeveloperTools)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMDebugger",
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"ImGui"
+				});
+
+			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
+			PrivateDefinitions.AddRange(
+				new string[]
+				{
+					"IMPLOT_API=DLLIMPORT"
+				});
+		}
+
 		if (Target.bBuildEditor)
 		{
 			PrivateDependencyModuleNames.AddRange(

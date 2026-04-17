@@ -22,6 +22,9 @@
 #include "AVVMGameState.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "Ability/AVVMAbilityInputComponent.h"
+#if UE_WITH_CHEAT_MANAGER
+#include "GameFramework/CheatManager.h"
+#endif
 #include "GameFramework/PlayerState.h"
 #include "Inputs/AVVMGameFrameworkInputMappingContextManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -69,5 +72,20 @@ void AAVVMPlayerController::ReceivedPlayer()
 	else
 	{
 		UAVVMGameFrameworkInputMappingContextManager::AddGameFrameworkInputMappingContextReceiver(this);
+	}
+}
+
+void AAVVMPlayerController::AddCheats(bool bForce)
+{
+#if UE_WITH_CHEAT_MANAGER
+	if (IsNetMode(NM_Client))
+	{
+		CheatManager = NewObject<UCheatManager>(this, CheatClass);
+		CheatManager->InitCheatManager();
+	}
+	else
+#endif
+	{
+		Super::AddCheats(bForce);
 	}
 }

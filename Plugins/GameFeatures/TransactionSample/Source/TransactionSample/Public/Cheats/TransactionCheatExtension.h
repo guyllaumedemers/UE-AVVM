@@ -21,8 +21,8 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMClientExecutorCheatExtension.h"
 #include "Transaction.h"
-#include "GameFramework/CheatManager.h"
 
 #ifdef UE_ENABLE_AVVM_DEBUGGER
 #include "AVVMDebuggerModule.h"
@@ -37,7 +37,7 @@
  *	during gameplay testing.
  */
 UCLASS()
-class TRANSACTIONSAMPLE_API UTransactionCheatExtension : public UCheatManagerExtension
+class TRANSACTIONSAMPLE_API UTransactionCheatExtension : public UAVVMClientExecutorCheatExtension
 #if WITH_AVVM_DEBUGGER
                                                          ,
                                                          public IAVVMImGuiDescriptor

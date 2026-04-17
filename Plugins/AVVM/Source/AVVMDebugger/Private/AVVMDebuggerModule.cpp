@@ -47,12 +47,30 @@ FAVVMImGuiDebugContext::~FAVVMImGuiDebugContext()
 
 void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	Descriptors.Add(Descriptor);
+	if (!Descriptor.GetObject())
+	{
+		return;
+	}
+
+	const UWorld* World = Descriptor.GetObject()->GetWorld();
+	if (IsValid(World) && !World->IsNetMode(NM_DedicatedServer))
+	{
+		Descriptors.Add(Descriptor);
+	}
 }
 
 void FAVVMImGuiDebugContext::RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	Descriptors.Remove(Descriptor);
+	if (!Descriptor.GetObject())
+	{
+		return;
+	}
+
+	const UWorld* World = Descriptor.GetObject()->GetWorld();
+	if (IsValid(World) && !World->IsNetMode(NM_DedicatedServer))
+	{
+		Descriptors.Remove(Descriptor);
+	}
 }
 
 void FAVVMImGuiDebugContext::Draw()
