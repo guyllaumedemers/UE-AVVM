@@ -29,7 +29,7 @@ bool UAVVMClientExecutorCheatExtension::ProcessConsoleExec(const TCHAR* Cmd, FOu
 	if (IsValid(Instigator) && Instigator->IsNetMode(NM_Client))
 	{
 		auto* PC = UGameplayStatics::GetPlayerController(this, 0);
-		if (ensureAlwaysMsgf(IsValid(PC), TEXT("%s missing."), *GetNameSafe(APlayerController::StateClass())))
+		if (ensureAlwaysMsgf(IsValid(PC), TEXT("%s missing."), *GetNameSafe(APlayerController::StaticClass())))
 		{
 			PC->ServerExec(Cmd);
 		}

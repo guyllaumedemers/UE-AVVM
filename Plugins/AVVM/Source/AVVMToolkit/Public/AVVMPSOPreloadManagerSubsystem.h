@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "AVVMPSOPreloadManagerSubsystem.generated.h"
 
