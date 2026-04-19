@@ -61,27 +61,5 @@ public class TransactionSample : ModuleRules
 				"NetCore"
 			}
 		);
-
-		if (Target.bBuildDeveloperTools)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMImGui",
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"ImGui"
-				});
-
-			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
-			PrivateDefinitions.AddRange(
-				new string[]
-				{
-					"IMPLOT_API=DLLIMPORT"
-				});
-		}
 	}
 }
