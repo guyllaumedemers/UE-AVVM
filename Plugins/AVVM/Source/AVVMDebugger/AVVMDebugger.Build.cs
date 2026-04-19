@@ -62,6 +62,7 @@ public class AVVMDebugger : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMToolkit"
 			}
 		);
 	}

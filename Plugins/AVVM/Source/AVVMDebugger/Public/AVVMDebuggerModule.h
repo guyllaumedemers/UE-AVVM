@@ -94,7 +94,8 @@ private:
 	FAVVMImGuiDebugProperties CustomProperties;
 
 	// @gdemers collection type of whats to be rendered in immediate mode.
-	TArray<TScriptInterface<IAVVMImGuiDescriptor>> Descriptors;
+	TArray<TScriptInterface<IAVVMImGuiDescriptor>> PIEOrGameDescriptors;
+	TMap<TWeakObjectPtr<const UClass>, TScriptInterface<IAVVMImGuiDescriptor>> FilteredDescriptors;
 };
 
 /**

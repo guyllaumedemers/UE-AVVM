@@ -22,6 +22,7 @@
 
 #include "AVVMDebuggerInputHandler.h"
 #include "AVVMDebuggerSettings.h"
+#include "AVVMToolkitUtils.h"
 #include "ImGuiDelegates.h"
 #include "ImGuiModule.h"
 #include "Engine/Engine.h"
@@ -47,29 +48,45 @@ FAVVMImGuiDebugContext::~FAVVMImGuiDebugContext()
 
 void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	if (!IsValid(Descriptor.GetObject()))
+	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMImGuiDescriptor>(Descriptor))
 	{
 		return;
 	}
 
 	const UWorld* World = Descriptor.GetObject()->GetWorld();
-	if (IsValid(World) && !World->IsNetMode(NM_DedicatedServer))
+	if (!IsValid(World) || World->IsNetMode(NM_DedicatedServer))
 	{
-		Descriptors.Add(Descriptor);
+		return;
+	}
+
+	const UClass* DescriptorClass = Descriptor.GetObject()->GetClass();
+	const auto* SearchResult = FilteredDescriptors.Find(DescriptorClass);
+	if (SearchResult == nullptr)
+	{
+		FilteredDescriptors.Add(DescriptorClass, Descriptor);
+		PIEOrGameDescriptors.Add(Descriptor);
 	}
 }
 
 void FAVVMImGuiDebugContext::RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	if (!IsValid(Descriptor.GetObject()))
+	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMImGuiDescriptor>(Descriptor))
 	{
 		return;
 	}
 
 	const UWorld* World = Descriptor.GetObject()->GetWorld();
-	if (IsValid(World) && !World->IsNetMode(NM_DedicatedServer))
+	if (!IsValid(World) || World->IsNetMode(NM_DedicatedServer))
 	{
-		Descriptors.Remove(Descriptor);
+		return;
+	}
+
+	const UClass* DescriptorClass = Descriptor.GetObject()->GetClass();
+	const auto* SearchResult = FilteredDescriptors.Find(DescriptorClass);
+	if (SearchResult != nullptr)
+	{
+		FilteredDescriptors.Remove(DescriptorClass);
+		PIEOrGameDescriptors.Remove(Descriptor);
 	}
 }
 
@@ -100,7 +117,7 @@ void FAVVMImGuiDebugContext::Draw()
 	static bool* bShouldCloseWindow = nullptr;
 	ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Debug Window", bShouldCloseWindow);
-	RenderAll(Descriptors);
+	RenderAll(PIEOrGameDescriptors);
 	ImGui::End();
 }
 
@@ -171,6 +188,8 @@ FAVVMImGuiDebugContext& FAVVMDebuggerModule::GetDebuggerContext()
 
 void FAVVMDebuggerModule::OnStartGameInstance(UGameInstance* Game)
 {
+	ClearInputHandler();
+	ClearImGuiDelegates();
 	CreateInputHandler();
 	RegisterImGuiDelegates();
 }
@@ -178,8 +197,7 @@ void FAVVMDebuggerModule::OnStartGameInstance(UGameInstance* Game)
 #if WITH_EDITOR
 void FAVVMDebuggerModule::OnPIEStart(UGameInstance* Game)
 {
-	CreateInputHandler();
-	RegisterImGuiDelegates();
+	OnStartGameInstance(Game);
 }
 
 void FAVVMDebuggerModule::OnPIEEnd(UGameInstance* Game)
@@ -206,6 +224,7 @@ void FAVVMDebuggerModule::RegisterImGuiDelegates()
 void FAVVMDebuggerModule::ClearImGuiDelegates()
 {
 	FImGuiDelegates::OnMultiContextDebug().Remove(ImGuiDelegateHandle);
+	ImGuiDelegateHandle.Reset();
 }
 
 void FAVVMDebuggerModule::CreateInputHandler()
