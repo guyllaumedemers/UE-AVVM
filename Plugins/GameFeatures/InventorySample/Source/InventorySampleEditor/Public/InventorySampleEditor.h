@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,41 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+
 #pragma once
 
 #include "CoreMinimal.h"
-
-#ifdef UE_ENABLE_AVVM_EDITORTOOLKIT
-#include "AVVMEditorToolkitBuilderObject.h"
-#endif
-
-#include "InventoryToolkitBuilderObject.generated.h"
-
-class FUICommandInfo;
-
-#if WITH_EDITORONLY_DATA
-
-/**
- *	Class description:
- *	
- *	UInventoryToolkitBuilderObject is a UObject type used to build editor slate Tool used by
- *	the InventorySample plugin.
- */
-UCLASS()
-class INVENTORYSAMPLE_API UInventoryToolkitBuilderObject : public UAVVMEditorToolkitBuilderObject
-{
-	GENERATED_BODY()
-
-public:
-	virtual TSharedPtr<SWidget> BuildWidget() override;
-	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) override;
-
-protected:
-	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const override;
-	// @gdemers data table editor commands
-	// Notes : it's expected that the following commands create a context object that's plugin specific
-	// so RowTable actions are following rules specific plugin implementation details.
-	TSharedPtr<FUICommandInfo> OpenTool = nullptr;
-};
-
-#endif
+#include "Modules/ModuleManager.h"

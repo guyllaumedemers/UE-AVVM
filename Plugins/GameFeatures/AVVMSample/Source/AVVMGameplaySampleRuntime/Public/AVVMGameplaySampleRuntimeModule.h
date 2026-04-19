@@ -22,34 +22,9 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-#include "AVVMQuicktimeEventInterface.h"
-
 /**
  *	Plugin Description :
  *
  *	AVVMGameplaySampleRuntime is a Sandbox for testing AVVMGameplay (IAVVMQuicktimeEventGameStateInterface & IAVVMQuicktimeEventPlayerStateInterface) UINTERFACE().
  *	It offers a set of cheats from which recurrent gameplay features can be tested from.
 */
-
-DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnExecuteDebugEvent, const TScriptInterface<IAVVMQuicktimeEventPlayerStateInterface>&, const UActorComponent*)
-
-#if !UE_BUILD_SHIPPING
-#define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 1
-
-#include "GameFramework/Pawn.h"
-
-struct FAVVMGameplayScopedDebugger
-{
-	FAVVMGameplayScopedDebugger() = default;
-
-	// TODO @gdemers Define how Gameplay testing should be debugged while being able to strip out symbols in SHIPPING_BUILD.
-};
-#else
-#define UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED 0
-#endif
-
-#if UE_AVVM_GAMEPLAY_DEBUGGER_ENABLED
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback)
-#else
-#define AVVM_EXECUTE_GAMEPLAY_SCOPED_DEBUGLOG(WorldContextObject, PlayerIndex, ComponentClass, Callback)
-#endif

@@ -21,7 +21,6 @@
 
 #define LOCTEXT_NAMESPACE "AVVMEditorToolkit"
 
-#if WITH_EDITORONLY_DATA
 #include "AVVMEditorToolkitModule.h"
 #include "InventoryToolkitWindow.h"
 #include "Framework/Commands/UICommandInfo.h"
@@ -80,6 +79,5 @@ TArray<TSharedPtr<FUICommandInfo>> UInventoryToolkitBuilderObject::GetUICommands
 			OpenTool
 	};
 }
-#endif
 
 #undef LOCTEXT_NAMESPACE

@@ -28,15 +28,6 @@ public class AVVMGameplay : ModuleRules
 		bUseUnity = false;
 		bWarningsAsErrors = true;
 
-		if (Target.bBuildEditor)
-		{
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"UnrealEd",
-				});
-		}
-
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

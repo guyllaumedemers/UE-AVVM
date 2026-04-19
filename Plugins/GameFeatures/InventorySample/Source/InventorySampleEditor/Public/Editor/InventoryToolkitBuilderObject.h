@@ -20,24 +20,32 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widgets/SCompoundWidget.h"
 
-#if WITH_EDITORONLY_DATA
+#include "AVVMEditorToolkitBuilderObject.h"
+
+#include "InventoryToolkitBuilderObject.generated.h"
+
+class FUICommandInfo;
 
 /**
  *	Class description:
  *	
- *	SInventoryToolkitWindow is a slate context for handling data table edits for the inventory
- *	system.
+ *	UInventoryToolkitBuilderObject is a UObject type used to build editor slate Tool used by
+ *	the InventorySample plugin.
  */
-class INVENTORYSAMPLE_API SInventoryToolkitWindow : public SCompoundWidget
+UCLASS()
+class INVENTORYSAMPLEEDITOR_API UInventoryToolkitBuilderObject : public UAVVMEditorToolkitBuilderObject
 {
+	GENERATED_BODY()
+
 public:
-	SLATE_BEGIN_ARGS(SInventoryToolkitWindow){};
-	SLATE_END_ARGS()
+	virtual TSharedPtr<SWidget> BuildWidget() override;
+	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) override;
 
-	/** Constructs this widget with InArgs */
-	void Construct(const FArguments& InArgs);
+protected:
+	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const override;
+	// @gdemers data table editor commands
+	// Notes : it's expected that the following commands create a context object that's plugin specific
+	// so RowTable actions are following rules specific plugin implementation details.
+	TSharedPtr<FUICommandInfo> OpenTool = nullptr;
 };
-
-#endif

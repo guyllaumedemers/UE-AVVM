@@ -17,9 +17,10 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMToolkit/Public/UI/AVVMFrameWidget.h"
+#include "UI/AVVMFrameWidget.h"
 
 #include "AVVMToolkitUtils.h"
+#include "AVVMViewModelFNameHelper.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"

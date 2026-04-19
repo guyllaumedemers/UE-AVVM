@@ -29,7 +29,13 @@
   "Plugins": [
     {
       "Name": "ImGui",
-      "Enabled": true
+      "Enabled": true,
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
     }
   ]
 }

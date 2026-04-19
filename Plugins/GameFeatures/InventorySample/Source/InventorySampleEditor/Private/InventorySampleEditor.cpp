@@ -18,39 +18,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-using UnrealBuildTool;
+#include "InventorySampleEditor.h"
 
-public class AVVMEditorToolkit : ModuleRules
-{
-	public AVVMEditorToolkit(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
-		bUseUnity = false;
-		bWarningsAsErrors = true;
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Blutility",
-				"Core",
-				"CoreUObject",
-				"EditorSubsystem",
-				"Engine",
-				"Slate",
-				"SlateCore",
-				"UMG",
-				"UnrealEd",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"InputCore",
-				"ToolMenus",
-				"TranslationEditor",
-				"WorkspaceMenuStructure",
-			}
-		);
-	}
-}
+IMPLEMENT_MODULE(FDefaultGameModuleImpl, InventorySampleEditor)

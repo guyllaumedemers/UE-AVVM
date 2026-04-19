@@ -27,7 +27,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 
 #if WITH_AUTOMATION_TESTS
-#include "Tests/AutomationEditorCommon.h"
+#include "Tests/AutomationCommon.h"
 #endif
 
 /**
