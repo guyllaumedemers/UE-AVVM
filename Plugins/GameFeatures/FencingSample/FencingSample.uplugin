@@ -30,6 +30,10 @@
       "Enabled": true
     },
     {
+      "Name": "AVVMDebug",
+      "Enabled": true
+    },
+    {
       "Name": "CommonLoadingScreen",
       "Enabled": true
     }

@@ -22,7 +22,6 @@
 
 #include "AVVMDebuggerInputHandler.h"
 #include "AVVMDebuggerSettings.h"
-#include "AVVMToolkitUtils.h"
 #include "ImGuiDelegates.h"
 #include "ImGuiModule.h"
 #include "Engine/Engine.h"
@@ -48,7 +47,8 @@ FAVVMImGuiDebugContext::~FAVVMImGuiDebugContext()
 
 void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMImGuiDescriptor>(Descriptor))
+	const bool bIsValidInterfaceObject = (Descriptor.GetInterface() != nullptr && IsValid(Descriptor.GetObject()));
+	if (!bIsValidInterfaceObject)
 	{
 		return;
 	}
@@ -70,7 +70,8 @@ void FAVVMImGuiDebugContext::AddDescriptor(const TScriptInterface<IAVVMImGuiDesc
 
 void FAVVMImGuiDebugContext::RemoveDescriptor(const TScriptInterface<IAVVMImGuiDescriptor>& Descriptor)
 {
-	if (!UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMImGuiDescriptor>(Descriptor))
+	const bool bIsValidInterfaceObject = (Descriptor.GetInterface() != nullptr && IsValid(Descriptor.GetObject()));
+	if (!bIsValidInterfaceObject)
 	{
 		return;
 	}
@@ -143,7 +144,7 @@ void FAVVMDebuggerModule::StartupModule()
 	{
 		return;
 	}
-	
+
 	// @gdemers I really don't like this approach. I feel like the ImGui plugin shouldn't hide the FImGuiModuleManager in the private access modifier.
 	// Doing so prevent any third party plugin from being made aware of the FImGuiContextProxy tied to a given ContextIndex/World
 	// and prevent directly binding to the FImGuiContextProxy::OnDraw delegate. (which is really the only thing I care about being hooked to here!)

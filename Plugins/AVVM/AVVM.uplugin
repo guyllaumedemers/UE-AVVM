@@ -20,11 +20,6 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "AVVMDebugger",
-			"Type": "DeveloperTool",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "AVVMEditorToolkit",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
@@ -68,10 +63,6 @@
 		},
 		{
 			"Name": "GameplayAbilities",
-			"Enabled": true
-		},
-		{
-			"Name": "ImGui",
 			"Enabled": true
 		},
 		{

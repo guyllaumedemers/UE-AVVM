@@ -3,9 +3,9 @@
   "Version": 1,
   "VersionName": "1.0",
   "FriendlyName": "AVVMDebug",
-  "Description": "",
-  "Category": "Other",
-  "CreatedBy": "",
+  "Description": "Collection of Debug tool for PIE, and Game",
+  "Category": "Plugin",
+  "CreatedBy": "@gdemers",
   "CreatedByURL": "",
   "DocsURL": "",
   "MarketplaceURL": "",
@@ -18,9 +18,18 @@
       "Name": "AVVMDebug",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "AVVMDebugger",
+      "Type": "DeveloperTool",
+      "LoadingPhase": "Default"
     }
   ],
   "Plugins": [
+    {
+      "Name": "ImGui",
+      "Enabled": true
+    },
     {
       "Name": "SlateIM",
       "Enabled": true

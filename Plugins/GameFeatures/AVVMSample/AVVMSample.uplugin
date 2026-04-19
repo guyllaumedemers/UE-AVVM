@@ -35,6 +35,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "AVVMDebug",
+			"Enabled": true
+		},
+		{
 			"Name": "CommonGame",
 			"Enabled": true
 		},
