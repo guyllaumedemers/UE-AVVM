@@ -21,8 +21,8 @@
 
 #include "AutomatedTestTransactionActor.h"
 #include "GameStateTransactionHistory.h"
-#include "TransactionFactoryImplTest.h"
 #include "GameFramework/GameStateBase.h"
+#include "Tests/TransactionFactoryImplTest.h"
 
 #if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"

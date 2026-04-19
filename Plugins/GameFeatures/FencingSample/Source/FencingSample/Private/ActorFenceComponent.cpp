@@ -19,10 +19,10 @@
 //SOFTWARE.
 #include "ActorFenceComponent.h"
 
-#include "AVVMGameplayModule.h"
 #include "AVVMLogger.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "FenceManagerSubsystem.h"
+#include "FencingSampleModule.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/KismetRenderingLibrary.h"
 
@@ -46,7 +46,7 @@ void UActorFenceComponent::BeginPlay()
 		return;
 	}
 
-	AVVM_LOGGER_LOG(LogGameplay,
+	AVVM_LOGGER_LOG(LogFencingSample,
 	                Outer,
 	                Outer,
 	                TEXT("Adding %s."),
@@ -76,11 +76,11 @@ void UActorFenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		return;
 	}
 
-	AVVM_LOGGER_LOG(LogGameplay,
-					Outer,
-					Outer,
-					TEXT("Removing %s."),
-					*GetNameSafe(UActorFenceComponent::StaticClass()));
+	AVVM_LOGGER_LOG(LogFencingSample,
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UActorFenceComponent::StaticClass()));
 
 	OwningOuter.Reset();
 }
@@ -122,7 +122,7 @@ void UActorFenceComponent::TryRaise()
 	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
 	if (!bDoesMeetAllRequirements)
 	{
-		AVVM_LOGGER_LOG(LogGameplay,
+		AVVM_LOGGER_LOG(LogFencingSample,
 		                Outer,
 		                Outer,
 		                TEXT("Adding Fence Requirements %s."),
@@ -133,7 +133,7 @@ void UActorFenceComponent::TryRaise()
 	}
 	else
 	{
-		AVVM_LOGGER_LOG(LogGameplay,
+		AVVM_LOGGER_LOG(LogFencingSample,
 		                Outer,
 		                Outer,
 		                TEXT("Execute immediate action."));
@@ -166,11 +166,11 @@ void UActorFenceComponent::TryLower()
 	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
 	if (bDoesMeetAllRequirements)
 	{
-		AVVM_LOGGER_LOG(LogGameplay,
+		AVVM_LOGGER_LOG(LogFencingSample,
 		                Outer,
 		                Outer,
 		                TEXT("Execute immediate action."));
-		
+
 		BP_Execute();
 
 		UFenceManagerSubsystem::Static_UnregisterFence(this, this);

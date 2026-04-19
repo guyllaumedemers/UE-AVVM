@@ -20,4 +20,6 @@
 
 #include "FencingSampleModule.h"
 
+DEFINE_LOG_CATEGORY(LogFencingSample);
+
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, FencingSample)

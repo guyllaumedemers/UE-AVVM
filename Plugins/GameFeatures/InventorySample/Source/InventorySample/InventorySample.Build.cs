@@ -26,6 +26,8 @@ public class InventorySample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
+		
 		SetupIrisSupport(Target);
 
 		if (Target.bBuildEditor)

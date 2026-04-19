@@ -22,7 +22,13 @@
 		{
 			"Name": "AVVMEditorToolkit",
 			"Type": "Editor",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
 		},
 		{
 			"Name": "AVVMGameplay",

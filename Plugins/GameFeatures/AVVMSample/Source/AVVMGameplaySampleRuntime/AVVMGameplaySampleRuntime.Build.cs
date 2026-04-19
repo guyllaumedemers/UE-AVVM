@@ -26,6 +26,7 @@ public class AVVMGameplaySampleRuntime : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
 		// is enabled. Set your project editor .target.cs to enable it!
@@ -34,7 +35,7 @@ public class AVVMGameplaySampleRuntime : ModuleRules
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
-					"AVVMDebugger",
+					"AVVMImGui",
 				});
 
 			PrivateDependencyModuleNames.AddRange(

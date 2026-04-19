@@ -26,6 +26,8 @@ public class InteractionSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
+		
 		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(

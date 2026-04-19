@@ -25,6 +25,26 @@
   ],
   "Plugins": [
     {
+      "Name": "AVVMImGui",
+      "Enabled": true,
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
+    },
+    {
+      "Name": "AVVMSlateIM",
+      "Enabled": true,
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
+    },
+    {
       "Name": "Iris",
       "Enabled": true
     }

@@ -26,6 +26,7 @@ public class AVVMEditorToolkit : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		PublicDefinitions.AddRange(
 			new string[]

@@ -26,6 +26,8 @@ public class InventoryCraftingSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
+		
 		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(

@@ -26,6 +26,7 @@ public class AVVM : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		if (Target.bBuildEditor)
 		{

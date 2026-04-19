@@ -16,15 +16,28 @@
 			"Enabled": true
 		},
 		{
-			"Name": "AVVMDebug",
+			"Name": "AVVMImGui",
 			"Enabled": true,
 			"TargetConfigurationDenyList": [
 				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
 			]
 		},
 		{
 			"Name": "AVVMSample",
 			"Enabled": true
+		},
+		{
+			"Name": "AVVMSlateIM",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
 		},
 		{
 			"Name": "BatchSample",

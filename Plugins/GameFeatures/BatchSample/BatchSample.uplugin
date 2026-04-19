@@ -1,32 +1,63 @@
 ﻿{
-  "FileVersion": 3,
-  "Version": 1,
-  "VersionName": "1.0",
-  "FriendlyName": "BatchSample",
-  "Description": "",
-  "Category": "Game Features",
-  "CreatedBy": "@gdemers",
-  "CreatedByURL": "",
-  "DocsURL": "",
-  "MarketplaceURL": "",
-  "EnabledByDefault": false,
-  "CanContainContent": true,
-  "IsBetaVersion": false,
-  "IsExperimentalVersion": false,
-  "Installed": false,
-  "ExplicitlyLoaded": true,
-  "BuiltInInitialFeatureState": "Active",
-  "Modules": [
-    {
-      "Name": "BatchSample",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "AVVM",
-      "Enabled": true
-    }
-  ]
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "BatchSample",
+	"Description": "",
+	"Category": "Game Features",
+	"CreatedBy": "@gdemers",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"ExplicitlyLoaded": true,
+	"BuiltInInitialFeatureState": "Active",
+	"Modules": [
+		{
+			"Name": "BatchSample",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "BatchSampleDebug",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "AVVM",
+			"Enabled": true
+		},
+		{
+			"Name": "AVVMImGui",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
+		},
+		{
+			"Name": "AVVMSlateIM",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
+		}
+	]
 }

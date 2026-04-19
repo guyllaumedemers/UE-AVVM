@@ -26,6 +26,8 @@ public class TransactionSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
+		
 		SetupIrisSupport(Target);
 
 		if (Target.bBuildEditor)
@@ -65,7 +67,7 @@ public class TransactionSample : ModuleRules
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
-					"AVVMDebugger",
+					"AVVMImGui",
 				});
 
 			PrivateDependencyModuleNames.AddRange(

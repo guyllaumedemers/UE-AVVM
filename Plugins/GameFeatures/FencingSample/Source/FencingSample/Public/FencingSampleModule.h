@@ -22,6 +22,8 @@
 
 #include "Modules/ModuleManager.h"
 
+FENCINGSAMPLE_API DECLARE_LOG_CATEGORY_EXTERN(LogFencingSample, Log, All);
+
 /**
  *	Plugin Description :
  *

@@ -26,6 +26,7 @@ public class DamageSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]

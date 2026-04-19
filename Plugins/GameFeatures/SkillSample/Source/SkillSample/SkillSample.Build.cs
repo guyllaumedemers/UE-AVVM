@@ -25,6 +25,7 @@ public class SkillSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]

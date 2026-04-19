@@ -26,6 +26,7 @@ public class FencingSample : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		if (Target.WithAutomationTests)
 		{
@@ -41,7 +42,7 @@ public class FencingSample : ModuleRules
 			PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
-					"AVVMDebugger",
+					"AVVMImGui",
 				});
 
 			PrivateDependencyModuleNames.AddRange(

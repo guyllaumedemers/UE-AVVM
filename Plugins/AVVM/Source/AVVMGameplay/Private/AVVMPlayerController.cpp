@@ -22,12 +22,14 @@
 #include "AVVMGameState.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "Ability/AVVMAbilityInputComponent.h"
-#if UE_WITH_CHEAT_MANAGER
-#include "GameFramework/CheatManager.h"
-#endif
+#include "GameFramework/CheatManagerDefines.h"
 #include "GameFramework/PlayerState.h"
 #include "Inputs/AVVMGameFrameworkInputMappingContextManager.h"
 #include "Kismet/GameplayStatics.h"
+
+#if UE_WITH_CHEAT_MANAGER
+#include "GameFramework/CheatManager.h"
+#endif
 
 AAVVMPlayerController::AAVVMPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
