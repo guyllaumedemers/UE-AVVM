@@ -211,7 +211,9 @@ tbd
 
 **Notes** : Automated Testing is in the work for existing GFP modules, and will keep being worked on so to ensure the api provided is put to the test. In the meantime, here's a list of the existing api that is validated!
 
-* AVVM
+* AVVM Subsystem
+* AVVM Notification Subsystem
+* AVVM Resource Manager Component (using latent command)
 * BatchSample
 * TransactionSample
 
