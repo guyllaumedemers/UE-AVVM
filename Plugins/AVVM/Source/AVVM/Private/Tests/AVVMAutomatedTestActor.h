@@ -87,7 +87,7 @@ protected:
 
 private:
 	// @gdemers pure lazyness here.
-	FScopedCounterNotify* ScopedCounterNotify;
+	FScopedCounterNotify* ScopedCounterNotify = nullptr;
 
 	friend class UAVVMAutomatedTestUtils;
 };

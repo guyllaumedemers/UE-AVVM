@@ -41,55 +41,129 @@ bool FExecuteFunction::Update()
 }
 
 /**
+ * 
+ */
+class FTestAVVMGameplayPluginBase : public FAutomationTestBase
+{
+public:
+	FTestAVVMGameplayPluginBase(const FString& InName, const bool bInComplexTask)
+		: FAutomationTestBase(InName, bInComplexTask)
+	{
+	}
+
+	~FTestAVVMGameplayPluginBase()
+	{
+		if (TestActor.IsValid())
+		{
+			TestActor->RouteEndPlay(EEndPlayReason::Destroyed);
+		}
+
+		if (World.IsValid())
+		{
+			World->DestroyWorld(true);
+		}
+
+		TestActor.Reset();
+		World.Reset();
+	}
+	
+	void Setup()
+	{
+		FTestWorldWrapper WorldWrapper;
+		WorldWrapper.CreateTestWorld(EWorldType::Game);
+		World = TStrongObjectPtr(WorldWrapper.GetTestWorld());
+		TestNotNull("UWorld.", World.Get());
+
+		TestActor = TStrongObjectPtr(World->SpawnActor<AAVVMAutomatedTestGameplayActor>());
+		TestNotNull("AAVVMAutomatedTestGameplayActor.", TestActor.Get());
+
+		// Restore initialization state
+		TestActor->PreInitializeComponents();
+		TestActor->InitializeComponents();
+		TestActor->PostInitializeComponents();
+		TestActor->DispatchBeginPlay();
+	
+		bAsyncCommandComplete = MakeShared<bool>(false);
+		TestActor->SetTestFlag(bAsyncCommandComplete);
+	}
+	
+	void LatentExecuteResourceLoading()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor.Get()), Flag = TSharedPtr<bool>(bAsyncCommandComplete)]
+		{
+			if (!WeakTestActor.IsValid())
+			{
+				(*Flag) = true;
+				return true;
+			}
+		
+			UAVVMResourceManagerComponent* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(WeakTestActor.Get());
+			if (!IsValid(ResourceManagerComponent))
+			{
+				WeakTestActor->ForceCompletion();
+				return true;
+			}
+		
+			TArray<FDataRegistryId> ResourcesIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(WeakTestActor.Get());
+			if (ResourcesIds.IsEmpty())
+			{
+				WeakTestActor->ForceCompletion();
+				return true;
+			}
+
+			for (const FDataRegistryId& ResourceId : ResourcesIds)
+			{
+				ResourceManagerComponent->RequestAsyncLoading(ResourceId, WeakTestActor->GetOnCompleteDelegate());
+			}
+		
+			return true;
+		}));
+	}
+	
+	void LatentWait()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
+	}
+	
+	void LatentCompare()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get()), WeakWorld = TWeakObjectPtr(World.Get())]
+		{
+			TestTrue("Resources loaded don't match the number requested!", WeakTestActor->CheckContentIntegrity());
+			if (WeakTestActor.IsValid())
+			{
+				WeakTestActor->RouteEndPlay(EEndPlayReason::Destroyed);
+			}
+
+			if (WeakWorld.IsValid())
+			{
+				WeakWorld->DestroyWorld(true);
+			}
+
+			return true;
+		}));
+	}
+	
+	TStrongObjectPtr<AAVVMAutomatedTestGameplayActor> TestActor = nullptr;
+	TStrongObjectPtr<UWorld> World = nullptr;
+	TSharedRef<bool> bAsyncCommandComplete = MakeShared<bool>(false);
+};
+
+/**
  *	Class description:
  *
  *	AVVMResourceManagerComponentTest is an Automated Test running validation on resource loading process.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, "AutomatedTest.CustomGroup.AVVMResourceManagerComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-
+IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, FTestAVVMGameplayPluginBase, "AutomatedTest.CustomGroup.AVVMResourceManagerComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter);
 bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
-	FTestWorldWrapper WorldWrapper;
-	WorldWrapper.CreateTestWorld(EWorldType::Game);
-	UWorld* World = WorldWrapper.GetTestWorld();
-	UTEST_NOT_NULL("UWorld.", World)
-	
-	TSharedRef<bool> bIsAsyncCommandComplete = MakeShared<bool>(false);
-	auto* TestActor = World->SpawnActor<AAVVMAutomatedTestGameplayActor>(AAVVMAutomatedTestGameplayActor::StaticClass());
-	UTEST_NOT_NULL("AAVVMAutomatedTestGameplayActor.", TestActor)
-	TestActor->SetTestFlag(bIsAsyncCommandComplete);
-	
-	ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor), bIsAsyncCommandComplete]
-	{
-		if (!WeakTestActor.IsValid())
-		{
-			(*bIsAsyncCommandComplete) = true;
-		}
-		
-		UAVVMResourceManagerComponent* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(WeakTestActor.Get());
-		if (!IsValid(ResourceManagerComponent))
-		{
-			WeakTestActor->ForceCompletion();
-		}
-		
-		TArray<FDataRegistryId> ResourcesIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(WeakTestActor.Get());
-		if (ResourcesIds.IsEmpty())
-		{
-			WeakTestActor->ForceCompletion();
-		}
-		
-		for (const FDataRegistryId& ResourceId : ResourcesIds)
-		{
-			ResourceManagerComponent->RequestAsyncLoading(ResourceId, {});
-		}
-		
-		return true;
-	}));
+	Setup();
+	LatentExecuteResourceLoading();
+	LatentWait();
+	LatentCompare();
 
-	ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bIsAsyncCommandComplete.Get()));
-	const bool bResult = TestActor->CheckContentIntegrality();
-	return bResult;
+	return true;
 #endif
 	return true;
 }

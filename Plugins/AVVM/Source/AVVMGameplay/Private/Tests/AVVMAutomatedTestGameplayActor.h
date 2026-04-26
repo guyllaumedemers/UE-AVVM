@@ -22,10 +22,12 @@
 #include "CoreMinimal.h"
 
 #include "GameFramework/Actor.h"
+#include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
 
 #include "AVVMAutomatedTestGameplayActor.generated.h"
 
+class UAVVMAbilitySystemComponent;
 class UAVVMAutomatedTestResourceComponent;
 
 /**
@@ -47,18 +49,20 @@ public:
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
 	
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
-	bool CheckContentIntegrality() const;
+	bool CheckContentIntegrity() const;
 	void ForceCompletion() const;
-
+	
+	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
+	
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSubclassOf<UAVVMResourceHandlingImpl> ResourceHandlingImplClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMDataTableRow"))
-	FDataRegistryId TestRegistryId = FDataRegistryId();
+	UFUNCTION(CallInEditor)
+	void OnRequestCompleted();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAutomatedTestResourceComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
 	
 	TSharedPtr<bool> bIsAsyncProcessCompleted;
 };

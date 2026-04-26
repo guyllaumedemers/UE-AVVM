@@ -29,6 +29,11 @@ const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
 	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
 }
 
+const FDataRegistryType& UAVVMGameplaySettings::GetActorDefinitionRegistryType()
+{
+	return GetDefault<UAVVMGameplaySettings>()->ActorDefinitionRegistryType;
+}
+
 const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerActionBlockingTags()
 {
 	return GetDefault<UAVVMGameplaySettings>()->PlayerActionBlockingTags;

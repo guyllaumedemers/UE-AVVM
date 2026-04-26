@@ -60,6 +60,13 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	{
 		FAVVMObserverContextArgs ObserverContextArgs;
 		ObserverContextArgs.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
+
+		// Restore initialization state
+		TestActor->PreInitializeComponents();
+		TestActor->InitializeComponents();
+		TestActor->PostInitializeComponents();
+		TestActor->DispatchBeginPlay();
+		
 		TestActor->GetSetDelegate(&ScopedInstance, ObserverContextArgs.Callback);
 		UAVVMNotificationSubsystem::Static_RegisterObserver(TestActor, ObserverContextArgs);
 	}
@@ -92,6 +99,7 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 		FAVVMObserverContextArgs ObserverContextArgs;
 		ObserverContextArgs.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(TestActor, ObserverContextArgs);
+		TestActor->RouteEndPlay(EEndPlayReason::Destroyed);
 	}
 
 	// @gdemers test unregister.

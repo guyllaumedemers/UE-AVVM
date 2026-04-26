@@ -74,7 +74,7 @@ public:
 	void UnRegisterAttributeSet(const AActor* AttributeSetOwner);
 
 protected:
-	UFUNCTION()
+	UFUNCTION(CallInEditor)
 	void OnAbilityGrantingDeferred(FAbilityToken AbilityToken);
 
 	virtual void OnTagUpdated(const FGameplayTag& Tag, bool TagExists) override;

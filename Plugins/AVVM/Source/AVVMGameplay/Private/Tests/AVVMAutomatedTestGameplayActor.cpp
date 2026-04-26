@@ -20,11 +20,16 @@
 #include "AVVMAutomatedTestGameplayActor.h"
 
 #include "AVVMAutomatedTestResourceComponent.h"
+#include "AVVMGameplaySettings.h"
+#include "Ability/AVVMAbilityResourceHandlingImpl.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Data/AVVMActorResourceHandlingImpl.h"
 
 AAVVMAutomatedTestGameplayActor::AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAutomatedTestResourceComponent>(this, TEXT("ResourceManagerComponent"));
+	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
 }
 
 UAVVMResourceManagerComponent* AAVVMAutomatedTestGameplayActor::GetResourceManagerComponent_Implementation() const
@@ -34,22 +39,23 @@ UAVVMResourceManagerComponent* AAVVMAutomatedTestGameplayActor::GetResourceManag
 
 TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::GetResourceDefinitionResourceIds_Implementation() const
 {
+	const auto TestRegistryId = FDataRegistryId(UAVVMGameplaySettings::GetActorDefinitionRegistryType(), TEXT("DEMO_AutomatedTest"));
+	ensureAlwaysMsgf(TestRegistryId.IsValid(), TEXT("RegistryType or ItemName arent valid. Please validate your Data Registry."));
 	return {TestRegistryId};
 }
 
 TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const
 {
-	const TArray<FDataRegistryId> OutResults = UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(ResourceHandlingImplClass,
-	                                                                                                         nullptr,
-	                                                                                                         Resources);
+	TArray<FDataRegistryId> OutResults;
+	OutResults.Append(UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(
+	                                                                                UAVVMActorResourceHandlingImpl::StaticClass(),
+	                                                                                nullptr/*expected*/,
+	                                                                                Resources));
 
-	// TODO @gdemers we may want to run more advance async loading, and have nested resource loading. This
-	// will require passing in ActorComponent of specific types.
-	if (OutResults.IsEmpty())
-	{
-		// @gdemers Our async process is complete. All resources were loaded!
-		ForceCompletion();
-	}
+	OutResults.Append(UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(
+	                                                                                UAVVMAbilityResourceHandlingImpl::StaticClass(),
+	                                                                                AbilitySystemComponent,
+	                                                                                Resources));
 
 	return OutResults;
 }
@@ -59,13 +65,27 @@ void AAVVMAutomatedTestGameplayActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncPr
 	bIsAsyncProcessCompleted = bNewIsAsyncProcessCompleted;
 }
 
-bool AAVVMAutomatedTestGameplayActor::CheckContentIntegrality() const
+bool AAVVMAutomatedTestGameplayActor::CheckContentIntegrity() const
 {
-	// TODO @gdemers we may want to valid our content integrity here...
-	return true;
+	return IsValid(ResourceManagerComponent)
+			? ResourceManagerComponent->AreResourcesIntegral()
+			: false;
 }
 
 void AAVVMAutomatedTestGameplayActor::ForceCompletion() const
 {
 	(*bIsAsyncProcessCompleted) = true;
+}
+
+FOnResourceAsyncLoadingComplete AAVVMAutomatedTestGameplayActor::GetOnCompleteDelegate()
+{
+	FOnResourceAsyncLoadingComplete Callback;
+	Callback.BindDynamic(this, &AAVVMAutomatedTestGameplayActor::OnRequestCompleted);
+	return Callback;
+}
+
+void AAVVMAutomatedTestGameplayActor::OnRequestCompleted()
+{
+	// @gdemers Our async process is complete. All resources were loaded!
+	ForceCompletion();
 }

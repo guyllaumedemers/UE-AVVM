@@ -47,20 +47,20 @@ class AVVMGAMEPLAY_API IAVVMResourceProvider
 
 public:
 	// @gdemers allow retrieval of RegistryId relevant to Provider type.
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(CallInEditor, BlueprintCallable, BlueprintNativeEvent)
 	TArray<FDataRegistryId> GetResourceDefinitionResourceIds() const;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const PURE_VIRTUAL(GetResourceDefinitionResourceIds_Implementation, return TArray<FDataRegistryId>(););
 	
 	// @gdemers allow retrieval of RegistryId from backend {FActorContent.UniqueId} relevant to Provider type.
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(CallInEditor, BlueprintCallable, BlueprintNativeEvent)
 	int32 GetProviderUniqueId() const;
 	virtual int32 GetProviderUniqueId_Implementation() const PURE_VIRTUAL(GetProviderUniqueId_Implementation, return INDEX_NONE;);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(CallInEditor, BlueprintCallable, BlueprintNativeEvent)
 	TArray<FDataRegistryId> CheckIsDoneAcquiringResources(const TArray<UObject*>& Resources) const;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const PURE_VIRTUAL(CheckIsDoneAcquiringResources_Implementation, return TArray<FDataRegistryId>{};);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UFUNCTION(CallInEditor, BlueprintCallable, BlueprintNativeEvent)
 	UAVVMResourceManagerComponent* GetResourceManagerComponent() const;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const PURE_VIRTUAL(GetResourceManagerComponent_Implementation, return nullptr;);
 };

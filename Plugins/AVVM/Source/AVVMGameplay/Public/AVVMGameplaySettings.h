@@ -44,11 +44,17 @@ public:
 	static const FDataRegistryType& GetActorIdentifierRegistryType();
 	
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const FDataRegistryType& GetActorDefinitionRegistryType();
+	
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FGameplayTagContainer& GetPlayerActionBlockingTags();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType ActorDefinitionRegistryType = FDataRegistryType();
 
 	// @gdemers defined tags that are able to prevent user from executing actions based on conditions. (i.e Stasis, Down, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
