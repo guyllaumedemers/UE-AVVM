@@ -68,9 +68,28 @@ void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	{
 		ClearAbility(AbilitySpecHandle);
 	}
+
+	// @gdemers enforce cancelling running async process during actor destruction.
+	for (auto Iterator = AbilityHandleSystem.CreateIterator(); Iterator; ++Iterator)
+	{
+		const TSharedPtr<FStreamableHandle>& Tuple = Iterator->Value;
+		if (Tuple.IsValid())
+		{
+			Tuple->CancelHandle();
+		}
+	}
+
+	for (auto Iterator = AttributeSetHandles.CreateIterator(); Iterator; ++Iterator)
+	{
+		const TSharedPtr<FStreamableHandle>& Tuple = Iterator->Value;
+		if (Tuple.IsValid())
+		{
+			Tuple->CancelHandle();
+		}
+	}
 	
 	AbilityHandleSystem.Reset();
-	AttributeSetHandle.Reset();
+	AttributeSetHandles.Reset();
 	AbilitySpecHandles.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
@@ -152,14 +171,14 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 			return;
 		}
 
-		TSharedPtr<FStreamableHandle> StreamableHandle = ASC->AttributeSetHandle;
-		if (!StreamableHandle.IsValid())
+		TSharedPtr<FStreamableHandle>* StreamableHandle = ASC->AttributeSetHandles.Find(NewAttributeSetOwner);
+		if (StreamableHandle == nullptr || !StreamableHandle->IsValid())
 		{
 			return;
 		}
 
 		TArray<UObject*> OutResources;
-		StreamableHandle->GetLoadedAssets(OutResources);
+		(*StreamableHandle)->GetLoadedAssets(OutResources);
 
 		for (UObject* Resource : OutResources)
 		{
@@ -196,7 +215,9 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 
 	FStreamableDelegate Callback;
 	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this), TWeakObjectPtr(AttributeSetOwner));
-	AttributeSetHandle = UAssetManager::Get().LoadAssetList({AttributeSetSoftObjectPath}, Callback);
+
+	TSharedPtr<FStreamableHandle>& OutResult = AttributeSetHandles.FindOrAdd(AttributeSetOwner);
+	OutResult = UAssetManager::Get().LoadAssetList({AttributeSetSoftObjectPath}, Callback);
 }
 
 void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner)
@@ -225,17 +246,21 @@ void UAVVMAbilitySystemComponent::UnRegisterAttributeSet(const AActor* Attribute
 		return;
 	}
 
-	if (ensureAlwaysMsgf(OutResult.IsValid(), TEXT("AttributeSet Owner not found")))
+	TSharedPtr<FStreamableHandle>& StreamableHandle = AttributeSetHandles[AttributeSetOwner];
+	if (StreamableHandle.IsValid())
 	{
-		RemoveSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
-		OwnerToAttributeSet.Remove(AttributeSetOwner);
+		StreamableHandle->ReleaseHandle();
 	}
+
+	OwnerToAttributeSet.Remove(AttributeSetOwner);
+	AttributeSetHandles.Remove(AttributeSetOwner);
+	RemoveSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
 }
 
 void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken AbilityToken)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = AbilityHandleSystem.Find(AbilityToken.UniqueId);
-	if (!ensure(OutResult != nullptr && OutResult->IsValid()))
+	if (!ensureAlwaysMsgf(OutResult != nullptr && OutResult->IsValid(), TEXT("Callback executed during destruction.")))
 	{
 		return;
 	}

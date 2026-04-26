@@ -20,7 +20,6 @@
 #include "Resources/AVVMResourceManagerComponent.h"
 
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
 #include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
@@ -40,6 +39,16 @@ TRACE_DECLARE_INT_COUNTER(UAVVMResourceManagerComponent_InstanceCounter, TEXT("R
 
 UAVVMResourceManagerComponent::FResourceQueueingMechanism::~FResourceQueueingMechanism()
 {
+	// @gdemers enforce cancelling running async process during actor destruction.
+	for (auto Iterator = StreamableHandles.CreateIterator(); Iterator; ++Iterator)
+	{
+		const TSharedPtr<FStreamableHandle>& Tuple = Iterator->Key;
+		if (Tuple.IsValid())
+		{
+			Tuple->CancelHandle();
+		}
+	}
+	
 	StreamableHandles.Reset();
 	PendingRequests.Empty();
 	CompletionDelegate.Clear();

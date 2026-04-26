@@ -21,6 +21,7 @@
 
 #include "AVVMAutomatedTestGameplayActor.h"
 #include "AVVMToolkitUtils.h"
+#include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
 #if WITH_AUTOMATION_TESTS
@@ -31,7 +32,9 @@
 DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForTrue, bool*, bVariableToWaitFor);
 bool FWaitForTrue::Update()
 {
-	return *bVariableToWaitFor;
+	// @gdemers : careful, we want to ensure all dependent resources are loaded without being affected by unrelated loading logic. if you have some external system doing async
+	// load, and waiting, this will create throttling.
+	return *bVariableToWaitFor && UAssetManager::GetStreamableManager().AreAllAsyncLoadsComplete();
 }
 
 DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FExecuteFunction, TFunction<bool()>, Function);
@@ -41,7 +44,10 @@ bool FExecuteFunction::Update()
 }
 
 /**
- * 
+ *	Class description:
+ *	
+ *	FTestAVVMGameplayPluginBase define the base impl of an Automation Test, storing heap allocated data relevant for the running
+ *	automation test.
  */
 class FTestAVVMGameplayPluginBase : public FAutomationTestBase
 {
@@ -51,7 +57,7 @@ public:
 	{
 	}
 
-	~FTestAVVMGameplayPluginBase()
+	virtual ~FTestAVVMGameplayPluginBase() override
 	{
 		if (TestActor.IsValid())
 		{
@@ -87,7 +93,7 @@ public:
 		TestActor->SetTestFlag(bAsyncCommandComplete);
 	}
 	
-	void LatentExecuteResourceLoading()
+	void LatentExecuteResourceLoading() const
 	{
 		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor.Get()), Flag = TSharedPtr<bool>(bAsyncCommandComplete)]
 		{
@@ -120,16 +126,26 @@ public:
 		}));
 	}
 	
-	void LatentWait()
+	void LatentWait() const
 	{
 		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
 	}
 	
 	void LatentCompare()
 	{
+		// @gdemers validate our resource loading request integrity
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckContentIntegrity() : false);
+			return true;
+		}));
+		
+		// @gdemers wait for our ASC to load all UObjects before cleanup
+		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
+		
+		// @gdemers cleanup
 		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get()), WeakWorld = TWeakObjectPtr(World.Get())]
 		{
-			TestTrue("Resources loaded don't match the number requested!", WeakTestActor->CheckContentIntegrity());
 			if (WeakTestActor.IsValid())
 			{
 				WeakTestActor->RouteEndPlay(EEndPlayReason::Destroyed);
@@ -173,8 +189,7 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
  *
  *	AVVMAbilitySystemComponentTest is an Automated Test running validation on ability loading process and attribute initialization.
  */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, "AutomatedTest.CustomGroup.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-
+IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, FTestAVVMGameplayPluginBase, "AutomatedTest.CustomGroup.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter);
 bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
 {
 	// Make the test pass by returning true, or fail by returning false.
@@ -187,7 +202,6 @@ bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
  *	AVVMTickSchedulerTest is an Automated Test running validation on ability loading process and attribute initialization.
  */
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMTickSchedulerTest, "AutomatedTest.CustomGroup.AVVMTickSchedulerTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-
 bool AVVMTickSchedulerTest::RunTest(const FString& Parameters)
 {
 	// Make the test pass by returning true, or fail by returning false.

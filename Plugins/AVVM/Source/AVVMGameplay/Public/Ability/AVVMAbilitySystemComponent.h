@@ -89,7 +89,7 @@ protected:
 	TMap<TWeakObjectPtr<const AActor>, TWeakObjectPtr<const UAttributeSet>> OwnerToAttributeSet;
 
 	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
-	TSharedPtr<FStreamableHandle> AttributeSetHandle = nullptr;
+	TMap<TWeakObjectPtr<const AActor>, TSharedPtr<FStreamableHandle>> AttributeSetHandles;
 
 private:
 	void SetupAbilities(const TArray<UObject*>& Resources);
