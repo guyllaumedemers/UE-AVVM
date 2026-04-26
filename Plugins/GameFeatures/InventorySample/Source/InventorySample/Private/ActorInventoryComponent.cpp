@@ -154,9 +154,25 @@ void UActorInventoryComponent::BeginPlay()
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	
+	// @gdemers enforce cancelling running async process during actor destruction.
+	for (auto Iterator = ItemHandleSystem.CreateIterator(); Iterator; ++Iterator)
+	{
+		const TSharedPtr<FStreamableHandle>& Tuple = Iterator->Value;
+		if (Tuple.IsValid())
+		{
+			Tuple->CancelHandle();
+		}
+	}
+
+	if (LoadoutHandle.IsValid())
+	{
+		LoadoutHandle->CancelHandle();
+	}
 
 	QueueingMechanism.Reset();
 	ItemHandleSystem.Reset();
+	LoadoutHandle.Reset();
 	PrivateItemIds.Reset();
 
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)

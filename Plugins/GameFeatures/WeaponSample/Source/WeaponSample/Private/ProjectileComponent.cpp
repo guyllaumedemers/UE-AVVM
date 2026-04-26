@@ -47,6 +47,12 @@ void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
+	// @gdemers enforce cancelling running async process during actor destruction.
+	if (StreamableHandle.IsValid())
+	{
+		StreamableHandle->CancelHandle();
+	}
+
 	ProjectileTemplates.Reset();
 	StreamableHandle.Reset();
 	OwningOuter.Reset();

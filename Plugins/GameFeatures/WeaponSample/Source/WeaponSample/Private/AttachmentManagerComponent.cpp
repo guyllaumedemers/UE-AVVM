@@ -67,6 +67,17 @@ void UAttachmentManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 {
 	Super::EndPlay(EndPlayReason);
 
+	// @gdemers enforce cancelling running async process during actor destruction.
+	for (auto Iterator = AttachmentHandleSystem.CreateIterator(); Iterator; ++Iterator)
+	{
+		const TSharedPtr<FStreamableHandle>& Tuple = Iterator->Value;
+		if (Tuple.IsValid())
+		{
+			Tuple->CancelHandle();
+		}
+	}
+
+	AttachmentHandleSystem.Reset();
 	BatchingMechanism.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
