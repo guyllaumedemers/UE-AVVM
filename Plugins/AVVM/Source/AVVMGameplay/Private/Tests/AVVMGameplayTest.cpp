@@ -59,28 +59,20 @@ public:
 
 	virtual ~FTestAVVMGameplayPluginBase() override
 	{
-		if (TestActor.IsValid())
-		{
-			TestActor->RouteEndPlay(EEndPlayReason::Destroyed);
-		}
-
-		if (World.IsValid())
-		{
-			World->DestroyWorld(true);
-		}
-
 		TestActor.Reset();
-		World.Reset();
+		TestWorld.Reset();
 	}
 	
 	void Setup()
 	{
-		FTestWorldWrapper WorldWrapper;
-		WorldWrapper.CreateTestWorld(EWorldType::Game);
-		World = TStrongObjectPtr(WorldWrapper.GetTestWorld());
-		TestNotNull("UWorld.", World.Get());
+		TestWorld = MakeShared<FTestWorldWrapper>();
+		TestWorld->CreateTestWorld(EWorldType::Game);
+		TestWorld->BeginPlayInTestWorld();
+		
+		UWorld* ProxyWorld = TestWorld->GetTestWorld();
+		TestNotNull("UWorld.", ProxyWorld);
 
-		TestActor = TStrongObjectPtr(World->SpawnActor<AAVVMAutomatedTestGameplayActor>());
+		TestActor = TStrongObjectPtr(ProxyWorld->SpawnActor<AAVVMAutomatedTestGameplayActor>());
 		TestNotNull("AAVVMAutomatedTestGameplayActor.", TestActor.Get());
 
 		// Restore initialization state
@@ -142,27 +134,32 @@ public:
 		
 		// @gdemers wait for our ASC to load all UObjects before cleanup
 		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
-		
+	}
+	
+	void LatentCleanup()
+	{
 		// @gdemers cleanup
-		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get()), WeakWorld = TWeakObjectPtr(World.Get())]
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this]
 		{
-			if (WeakTestActor.IsValid())
+			if (TestActor.IsValid())
 			{
-				WeakTestActor->RouteEndPlay(EEndPlayReason::Destroyed);
+				TestActor->RouteEndPlay(EEndPlayReason::RemovedFromWorld);
+			}
+	
+			if (TestWorld.IsValid())
+			{
+				TestWorld->EndPlayInTestWorld();
 			}
 
-			if (WeakWorld.IsValid())
-			{
-				WeakWorld->DestroyWorld(true);
-			}
-
+			TestActor.Reset();
+			TestWorld.Reset();
 			return true;
 		}));
 	}
 	
 	TStrongObjectPtr<AAVVMAutomatedTestGameplayActor> TestActor = nullptr;
-	TStrongObjectPtr<UWorld> World = nullptr;
 	TSharedRef<bool> bAsyncCommandComplete = MakeShared<bool>(false);
+	TSharedPtr<FTestWorldWrapper> TestWorld = nullptr;
 };
 
 /**
@@ -178,8 +175,7 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 	LatentExecuteResourceLoading();
 	LatentWait();
 	LatentCompare();
-
-	return true;
+	LatentCleanup();
 #endif
 	return true;
 }
@@ -192,7 +188,8 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, FTestAVVMGameplayPluginBase, "AutomatedTest.CustomGroup.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter);
 bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
 {
-	// Make the test pass by returning true, or fail by returning false.
+#if WITH_AUTOMATION_TESTS
+#endif
 	return true;
 }
 

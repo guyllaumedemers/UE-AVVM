@@ -23,6 +23,7 @@
 #include "AVVMGameplaySettings.h"
 #include "Ability/AVVMAbilityResourceHandlingImpl.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #include "Data/AVVMActorResourceHandlingImpl.h"
 
 AAVVMAutomatedTestGameplayActor::AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer)
@@ -67,9 +68,7 @@ void AAVVMAutomatedTestGameplayActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncPr
 
 bool AAVVMAutomatedTestGameplayActor::CheckContentIntegrity() const
 {
-	return IsValid(ResourceManagerComponent)
-			? ResourceManagerComponent->AreResourcesIntegral()
-			: false;
+	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), ResourceManagerComponent);
 }
 
 void AAVVMAutomatedTestGameplayActor::ForceCompletion() const

@@ -23,6 +23,7 @@
 #include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -95,63 +96,6 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasPendingReques
 	return !PendingRequests.IsEmpty();
 }
 
-UAVVMResourceManagerComponent::FNonTSResourceValidationMechanism::FNonTSResourceValidationMechanism()
-	: NumRegistryIdRequested(0)
-	, NumRegistryIdLoaded(0)
-	, NumUObjectRequested(0)
-	, NumUObjectLoaded(0)
-{
-}
-
-void UAVVMResourceManagerComponent::FNonTSResourceValidationMechanism::IncrementRegistryIdRequested(FNonTSResourceValidationMechanism* Src)
-{
-	if (Src != nullptr)
-	{
-		++Src->NumRegistryIdRequested;
-	}
-}
-
-void UAVVMResourceManagerComponent::FNonTSResourceValidationMechanism::IncrementRegistryIdLoaded(FNonTSResourceValidationMechanism* Src)
-{
-	if (Src != nullptr)
-	{
-		++Src->NumRegistryIdLoaded;
-	}
-}
-
-void UAVVMResourceManagerComponent::FNonTSResourceValidationMechanism::IncrementUObjectRequested(FNonTSResourceValidationMechanism* Src,
-                                                                                            const int32 NumResourcesRequested)
-{
-	if (Src != nullptr)
-	{
-		Src->NumUObjectRequested += NumResourcesRequested;
-	}
-}
-
-void UAVVMResourceManagerComponent::FNonTSResourceValidationMechanism::IncrementUObjectLoaded(FNonTSResourceValidationMechanism* Src,
-                                                                                         const int32 NumResourcesLoaded)
-{
-	if (Src != nullptr)
-	{
-		Src->NumUObjectLoaded += NumResourcesLoaded;
-	}
-}
-
-bool UAVVMResourceManagerComponent::FNonTSResourceValidationMechanism::IsIntegral(FNonTSResourceValidationMechanism* Src)
-{
-	if (Src != nullptr)
-	{
-		return (Src->NumRegistryIdRequested > 0)
-				&& (Src->NumUObjectRequested > 0)
-				&& (Src->NumRegistryIdRequested == Src->NumRegistryIdLoaded)
-				&& (Src->NumUObjectRequested == Src->NumUObjectLoaded);
-	}
-	else
-	{
-		return false;
-	}
-}
-
 void UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle)
 {
 	StreamableHandles.Add({NewStreamableHandle, false/*IsDoneStreaming*/});
@@ -205,7 +149,7 @@ void UAVVMResourceManagerComponent::BeginPlay()
 	Super::BeginPlay();
 
 #if WITH_AUTOMATION_TESTS
-	NonTSValidationMechanism = MakeShared<FNonTSResourceValidationMechanism>();
+	UAVVMAutomatedTestResourceValidationManager::Static_RegisterComponent(GetWorld(), this);
 #endif
 
 	QueueingMechanism = MakeShared<FResourceQueueingMechanism>();
@@ -244,7 +188,10 @@ void UAVVMResourceManagerComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 {
 	Super::EndPlay(EndPlayReason);
 
-	NonTSValidationMechanism.Reset();
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_UnregisterComponent(GetWorld(), this);
+#endif
+	
 	QueueingMechanism.Reset();
 
 	const AActor* Outer = OwningOuter.Get();
@@ -281,19 +228,12 @@ void UAVVMResourceManagerComponent::RequestAsyncLoading(const FDataRegistryId& N
 	                *NewRegistryId.ToString());
 
 #if WITH_AUTOMATION_TESTS
-	FNonTSResourceValidationMechanism::IncrementRegistryIdRequested(NonTSValidationMechanism.Get());
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdRequested(GetWorld(), this);
 #endif
 
 	const auto OnDataAcquiredCallback = FDataRegistryItemAcquiredCallback::CreateUObject(this, &UAVVMResourceManagerComponent::OnRegistryIdAcquired, OnRequestCompleteCallback);
 	ensureAlwaysMsgf(DataRegistrySubsystem->AcquireItem(NewRegistryId, OnDataAcquiredCallback), TEXT("Resource Acquisition Callback failed to schedule Completion Delegate!"));
 }
-
-#if WITH_AUTOMATION_TESTS
-bool UAVVMResourceManagerComponent::AreResourcesIntegral() const
-{
-	return FNonTSResourceValidationMechanism::IsIntegral(NonTSValidationMechanism.Get());
-}
-#endif
 
 void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result,
                                                          FOnResourceAsyncLoadingComplete OnRequestCompleteCallback)
@@ -332,12 +272,11 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	}
 
 #if WITH_AUTOMATION_TESTS
-	FNonTSResourceValidationMechanism::IncrementRegistryIdLoaded(NonTSValidationMechanism.Get());
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdLoaded(GetWorld(), this);
 #endif
 
 	const auto RequestSoftObjectsAsync = [](const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
 	                                        TSharedPtr<FResourceQueueingMechanism> NewQueuingMechanism,
-	                                        TSharedPtr<FNonTSResourceValidationMechanism> NewValidationMechanism,
 	                                        const TArray<FSoftObjectPath>& ResourcePaths,
 	                                        const FDataRegistryId& NewRegistryId,
 	                                        const FOnResourceAsyncLoadingComplete& MainRequestCompletionCallback)
@@ -360,7 +299,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		CompletionCallback.BindUObject(NewResourceManagerComponent.Get(), &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
 
 #if WITH_AUTOMATION_TESTS
-		FNonTSResourceValidationMechanism::IncrementUObjectRequested(NewValidationMechanism.Get(), ResourcePaths.Num());
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(NewResourceManagerComponent->GetWorld(), NewResourceManagerComponent.Get());
 #endif
 
 		const TSharedPtr<FStreamableHandle> NewStreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, CompletionCallback);
@@ -372,7 +311,6 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	                                                                         RequestSoftObjectsAsync,
 	                                                                         this,
 	                                                                         QueueingMechanism,
-	                                                                         NonTSValidationMechanism,
 	                                                                         DataTableRow->GetResourcesPaths(),
 	                                                                         Result.ItemId,
 	                                                                         OnRequestCompleteCallback);
@@ -412,7 +350,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	QueueingMechanism->ModifyStreamableHandle();
 
 #if WITH_AUTOMATION_TESTS
-	FNonTSResourceValidationMechanism::IncrementUObjectLoaded(NonTSValidationMechanism.Get(), OutStreamedAssets.Num());
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this);
 #endif
 
 	// @gdemers recurse on nested registry id until our object is fully loaded.

@@ -66,10 +66,6 @@ public:
 	void RequestAsyncLoading(const FDataRegistryId& NewRegistryId,
 	                         const FOnResourceAsyncLoadingComplete& OnRequestCompleteCallback);
 
-#if WITH_AUTOMATION_TESTS
-	bool AreResourcesIntegral() const;
-#endif
-
 protected:
 	void OnRegistryIdAcquired(const FDataRegistryAcquireResult& Result,
 	                          FOnResourceAsyncLoadingComplete OnRequestCompleteCallback);
@@ -107,20 +103,4 @@ protected:
 	};
 
 	TSharedPtr<FResourceQueueingMechanism> QueueingMechanism = nullptr;
-
-	struct FNonTSResourceValidationMechanism
-	{
-		FNonTSResourceValidationMechanism();
-		static void IncrementRegistryIdRequested(FNonTSResourceValidationMechanism* Src);
-		static void IncrementRegistryIdLoaded(FNonTSResourceValidationMechanism* Src);
-		static void IncrementUObjectRequested(FNonTSResourceValidationMechanism* Src, const int32 NumResourcesRequested = 1);
-		static void IncrementUObjectLoaded(FNonTSResourceValidationMechanism* Src, const int32 NumResourcesLoaded = 1);
-		static bool IsIntegral(FNonTSResourceValidationMechanism* Src);
-		int32 NumRegistryIdRequested = INDEX_NONE;
-		int32 NumRegistryIdLoaded = INDEX_NONE;
-		int32 NumUObjectRequested = INDEX_NONE;
-		int32 NumUObjectLoaded = INDEX_NONE;
-	};
-
-	TSharedPtr<FNonTSResourceValidationMechanism> NonTSValidationMechanism = nullptr;
 };
