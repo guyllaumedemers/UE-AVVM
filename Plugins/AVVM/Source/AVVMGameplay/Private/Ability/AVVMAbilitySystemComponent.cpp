@@ -28,6 +28,11 @@
 #include "Engine/AssetManager.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
+#if !UE_BUILD_SHIPPING
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Misc/AutomationTest.h"
+#endif
+
 TRACE_DECLARE_INT_COUNTER(UAVVMAbilitySystemComponent_InstanceCounter, TEXT("Ability System Component Instance Counter"));
 
 UAVVMAbilitySystemComponent::UAVVMAbilitySystemComponent(const FObjectInitializer& ObjectInitializer)
@@ -43,6 +48,10 @@ UAVVMAbilitySystemComponent::UAVVMAbilitySystemComponent(const FObjectInitialize
 void UAVVMAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_RegisterComponent(GetWorld(), this);
+#endif
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -63,6 +72,10 @@ void UAVVMAbilitySystemComponent::BeginPlay()
 void UAVVMAbilitySystemComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_UnregisterComponent(GetWorld(), this);
+#endif
 
 	for (const FGameplayAbilitySpecHandle& AbilitySpecHandle : AbilitySpecHandles)
 	{
@@ -141,16 +154,22 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 		                *GetNameSafe(AbilityAsset));
 	}
 
-	if (!DeferredGrantedAbilities.IsEmpty())
+	if (DeferredGrantedAbilities.IsEmpty())
 	{
-		const auto Token = FAbilityToken::MakeToken();
-		
-		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred, Token);
-
-		TSharedPtr<FStreamableHandle>& OutResult = AbilityHandleSystem.FindOrAdd(Token.UniqueId);
-		OutResult = UAssetManager::Get().LoadAssetList(DeferredGrantedAbilities, Callback);
+		return;
 	}
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(GetWorld(), this, DeferredGrantedAbilities.Num());
+#endif
+	
+	const auto Token = FAbilityToken::MakeToken();
+		
+	FStreamableDelegate Callback;
+	Callback.BindUObject(this, &UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred, Token);
+
+	TSharedPtr<FStreamableHandle>& OutResult = AbilityHandleSystem.FindOrAdd(Token.UniqueId);
+	OutResult = UAssetManager::Get().LoadAssetList(DeferredGrantedAbilities, Callback);
 }
 
 void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath,
@@ -179,6 +198,10 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 
 		TArray<UObject*> OutResources;
 		(*StreamableHandle)->GetLoadedAssets(OutResources);
+
+#if WITH_AUTOMATION_TESTS
+		UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(AttributeSetOwner->GetWorld(), Caller.Get(), OutResources.Num());
+#endif
 
 		for (UObject* Resource : OutResources)
 		{
@@ -212,6 +235,10 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 
 		return;
 	}
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(GetWorld(), this);
+#endif
 
 	FStreamableDelegate Callback;
 	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this), TWeakObjectPtr(AttributeSetOwner));
@@ -273,6 +300,10 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 
 	TArray<UObject*> OutStreamedAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamedAssets);
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this, OutStreamedAssets.Num());
+#endif
 
 	for (UObject* StreamableAsset : OutStreamedAssets)
 	{

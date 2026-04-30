@@ -23,13 +23,17 @@
 #include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
-#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceProvider.h"
+
+#if !UE_BUILD_SHIPPING
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Misc/AutomationTest.h"
+#endif
 
 // @gdemers extern symbol for global access to custom LLM_tag
 AVVM_API extern FLLMTagDeclaration LLMTagDeclaration_AVVMTag;
@@ -299,7 +303,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 		CompletionCallback.BindUObject(NewResourceManagerComponent.Get(), &UAVVMResourceManagerComponent::OnSoftObjectAcquired);
 
 #if WITH_AUTOMATION_TESTS
-	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(NewResourceManagerComponent->GetWorld(), NewResourceManagerComponent.Get());
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(NewResourceManagerComponent->GetWorld(), NewResourceManagerComponent.Get(), ResourcePaths.Num());
 #endif
 
 		const TSharedPtr<FStreamableHandle> NewStreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, CompletionCallback);
@@ -350,7 +354,7 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	QueueingMechanism->ModifyStreamableHandle();
 
 #if WITH_AUTOMATION_TESTS
-	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this);
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this, OutStreamedAssets.Num());
 #endif
 
 	// @gdemers recurse on nested registry id until our object is fully loaded.

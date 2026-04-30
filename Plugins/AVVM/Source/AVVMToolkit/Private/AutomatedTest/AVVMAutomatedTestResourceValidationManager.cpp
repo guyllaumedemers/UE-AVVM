@@ -58,39 +58,47 @@ void UAVVMAutomatedTestResourceValidationManager::Static_UnregisterComponent(con
 	}
 }
 
-void UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdRequested(const UWorld* World, const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdRequested(const UWorld* World,
+                                                                                      const UActorComponent* SrcComponent,
+                                                                                      const int32 NewValue)
 {
 	auto* Subsystem = UAVVMAutomatedTestResourceValidationManager::Get(World);
 	if (IsValid(Subsystem))
 	{
-		Subsystem->IncrementRegistryIdRequested(SrcComponent);
+		Subsystem->IncrementRegistryIdRequested(SrcComponent, NewValue);
 	}
 }
 
-void UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdLoaded(const UWorld* World, const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdLoaded(const UWorld* World,
+                                                                                   const UActorComponent* SrcComponent,
+                                                                                   const int32 NewValue)
 {
 	auto* Subsystem = UAVVMAutomatedTestResourceValidationManager::Get(World);
 	if (IsValid(Subsystem))
 	{
-		Subsystem->IncrementRegistryIdLoaded(SrcComponent);
+		Subsystem->IncrementRegistryIdLoaded(SrcComponent, NewValue);
 	}
 }
 
-void UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(const UWorld* World, const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(const UWorld* World,
+                                                                                   const UActorComponent* SrcComponent,
+                                                                                   const int32 NewValue)
 {
 	auto* Subsystem = UAVVMAutomatedTestResourceValidationManager::Get(World);
 	if (IsValid(Subsystem))
 	{
-		Subsystem->IncrementUObjectRequested(SrcComponent);
+		Subsystem->IncrementUObjectRequested(SrcComponent, NewValue);
 	}
 }
 
-void UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(const UWorld* World, const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(const UWorld* World,
+                                                                                const UActorComponent* SrcComponent,
+                                                                                const int32 NewValue)
 {
 	auto* Subsystem = UAVVMAutomatedTestResourceValidationManager::Get(World);
 	if (IsValid(Subsystem))
 	{
-		Subsystem->IncrementUObjectLoaded(SrcComponent);
+		Subsystem->IncrementUObjectLoaded(SrcComponent, NewValue);
 	}
 }
 
@@ -121,28 +129,28 @@ void UAVVMAutomatedTestResourceValidationManager::UnregisterComponent(const UAct
 	}
 }
 
-void UAVVMAutomatedTestResourceValidationManager::IncrementRegistryIdRequested(const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::IncrementRegistryIdRequested(const UActorComponent* SrcComponent, const int32 NewValue)
 {
 	FAVVMNonTSResourceValidationMechanism& OutSearchResult = ValidationMechanisms.FindOrAdd(SrcComponent);
-	++OutSearchResult.RegistryIdRequested;
+	OutSearchResult.RegistryIdRequested += NewValue;
 }
 
-void UAVVMAutomatedTestResourceValidationManager::IncrementRegistryIdLoaded(const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::IncrementRegistryIdLoaded(const UActorComponent* SrcComponent, const int32 NewValue)
 {
 	FAVVMNonTSResourceValidationMechanism& OutSearchResult = ValidationMechanisms.FindOrAdd(SrcComponent);
-	++OutSearchResult.RegistryIdLoaded;
+	OutSearchResult.RegistryIdLoaded += NewValue;
 }
 
-void UAVVMAutomatedTestResourceValidationManager::IncrementUObjectRequested(const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::IncrementUObjectRequested(const UActorComponent* SrcComponent, const int32 NewValue)
 {
 	FAVVMNonTSResourceValidationMechanism& OutSearchResult = ValidationMechanisms.FindOrAdd(SrcComponent);
-	++OutSearchResult.UObjectRequested;
+	OutSearchResult.UObjectRequested += NewValue;
 }
 
-void UAVVMAutomatedTestResourceValidationManager::IncrementUObjectLoaded(const UActorComponent* SrcComponent)
+void UAVVMAutomatedTestResourceValidationManager::IncrementUObjectLoaded(const UActorComponent* SrcComponent, const int32 NewValue)
 {
 	FAVVMNonTSResourceValidationMechanism& OutSearchResult = ValidationMechanisms.FindOrAdd(SrcComponent);
-	++OutSearchResult.UObjectLoaded;
+	OutSearchResult.UObjectLoaded += NewValue;
 }
 
 bool UAVVMAutomatedTestResourceValidationManager::IsIntegral(const UActorComponent* SrcComponent)

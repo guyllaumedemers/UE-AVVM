@@ -26,10 +26,6 @@
 #include "Components/ActorComponent.h"
 #include "Containers/Queue.h"
 
-#if !UE_BUILD_SHIPPING
-#include "Misc/AutomationTest.h"
-#endif
-
 #include "AVVMResourceManagerComponent.generated.h"
 
 struct FStreamableHandle;

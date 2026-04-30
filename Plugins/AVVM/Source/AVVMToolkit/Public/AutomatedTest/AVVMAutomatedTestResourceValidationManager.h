@@ -71,16 +71,16 @@ public:
 	static void Static_UnregisterComponent(const UWorld* World, const UActorComponent* SrcComponent);
 	
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementRegistryIdRequested(const UWorld* World, const UActorComponent* SrcComponent);
+	static void Static_IncrementRegistryIdRequested(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
 	
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementRegistryIdLoaded(const UWorld* World, const UActorComponent* SrcComponent);
+	static void Static_IncrementRegistryIdLoaded(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
 	
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementUObjectRequested(const UWorld* World, const UActorComponent* SrcComponent);
+	static void Static_IncrementUObjectRequested(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
 	
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementUObjectLoaded(const UWorld* World, const UActorComponent* SrcComponent);
+	static void Static_IncrementUObjectLoaded(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
 	
 	UFUNCTION(BlueprintCallable)
 	static bool Static_IsIntegral(const UWorld* World, const UActorComponent* SrcComponent);
@@ -89,10 +89,10 @@ protected:
 	static UAVVMAutomatedTestResourceValidationManager* Get(const UWorld* World);
 	void RegisterComponent(const UActorComponent* SrcComponent);
 	void UnregisterComponent(const UActorComponent* SrcComponent);
-	void IncrementRegistryIdRequested(const UActorComponent* SrcComponent);
-	void IncrementRegistryIdLoaded(const UActorComponent* SrcComponent);
-	void IncrementUObjectRequested(const UActorComponent* SrcComponent);
-	void IncrementUObjectLoaded(const UActorComponent* SrcComponent);
+	void IncrementRegistryIdRequested(const UActorComponent* SrcComponent, const int32 NewValue);
+	void IncrementRegistryIdLoaded(const UActorComponent* SrcComponent, const int32 NewValue);
+	void IncrementUObjectRequested(const UActorComponent* SrcComponent, const int32 NewValue);
+	void IncrementUObjectLoaded(const UActorComponent* SrcComponent, const int32 NewValue);
 	bool IsIntegral(const UActorComponent* SrcComponent);
 	
 	UPROPERTY(Transient)
