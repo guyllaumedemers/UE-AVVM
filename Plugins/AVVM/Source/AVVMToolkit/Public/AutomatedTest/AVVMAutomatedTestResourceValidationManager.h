@@ -62,6 +62,8 @@ class AVVMTOOLKIT_API UAVVMAutomatedTestResourceValidationManager : public UWorl
 	GENERATED_BODY()
 
 public:
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+	
 	UFUNCTION(BlueprintCallable)
 	static void Static_RegisterComponent(const UWorld* World, const UActorComponent* SrcComponent);
 	

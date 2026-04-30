@@ -20,6 +20,7 @@
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 
 #include "Engine/World.h"
+#include "Misc/AutomationTest.h"
 
 FAVVMNonTSResourceValidationMechanism::FAVVMNonTSResourceValidationMechanism()
 	: RegistryIdRequested(0)
@@ -27,6 +28,16 @@ FAVVMNonTSResourceValidationMechanism::FAVVMNonTSResourceValidationMechanism()
 	, UObjectRequested(0)
 	, UObjectLoaded(0)
 {
+}
+
+bool UAVVMAutomatedTestResourceValidationManager::ShouldCreateSubsystem(UObject* Outer) const
+{
+#if WITH_AUTOMATION_TESTS
+	const auto* World = Cast<UWorld>(Outer);
+	return IsValid(World) ? World->IsGameWorld() : false;
+#else
+	return false;
+#endif
 }
 
 void UAVVMAutomatedTestResourceValidationManager::Static_RegisterComponent(const UWorld* World, const UActorComponent* SrcComponent)
