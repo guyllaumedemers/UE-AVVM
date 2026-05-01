@@ -17,8 +17,60 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "Misc/AutomationTest.h"
 
-// TODO @gdemers Impl Functional Test.
-// Test must work with multi-user session, i.e one Server and two clients.
-// End Goal : Test should be launch through Gauntlet Automation Framework and be executed from command line
-// either manually or via BuildGraph.
+#include "Engine/AssetManager.h"
+
+#if WITH_AUTOMATION_TESTS
+#include "Tests/AutomationCommon.h"
+#endif
+
+// @gdemers from GameFeaturePluginTests.cpp
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForTrue, bool*, bVariableToWaitFor);
+bool FWaitForTrue::Update()
+{
+	// @gdemers : careful, we want to ensure all dependent resources are loaded without being affected by unrelated loading logic. if you have some external system doing async
+	// load, and waiting, this will create throttling.
+	return *bVariableToWaitFor && UAssetManager::GetStreamableManager().AreAllAsyncLoadsComplete();
+}
+
+DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FExecuteFunction, TFunction<bool()>, Function);
+bool FExecuteFunction::Update()
+{
+	return Function();
+}
+
+/**
+ *	Class description:
+ *	
+ *	FTestInventorySamplePluginBase define the base impl of an Automation Test, storing heap allocated data relevant for the running
+ *	automation test.
+ */
+class FTestInventorySamplePluginBase : public FAutomationTestBase
+{
+public:
+	FTestInventorySamplePluginBase(const FString& InName, const bool bInComplexTask)
+		: FAutomationTestBase(InName, bInComplexTask)
+	{
+	}
+
+	virtual ~FTestInventorySamplePluginBase() override
+	{
+	}
+
+	TSharedRef<bool> bIsResourceManagerAsyncCommandComplete = MakeShared<bool>(false);
+	TSharedPtr<FTestWorldWrapper> TestWorld = nullptr;
+};
+
+/**
+ *	Class description:
+ *	
+ *	InventorySampleTest is an Automated Test running validation on resource loading process, and spawning/socketing of items using data provided
+ *	from Data Asset and/or Backend.
+ */
+IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(InventorySampleTest, FTestInventorySamplePluginBase, "AutomatedTest.CustomGroup.InventorySampleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool InventorySampleTest::RunTest(const FString& Parameters)
+{
+	// Make the test pass by returning true, or fail by returning false.
+	return true;
+}
