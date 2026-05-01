@@ -124,6 +124,9 @@ protected:
 	UFUNCTION()
 	void OnTriggeringAbilityClassAcquired();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
 	bool bShouldAsyncLoadOnBeginPlay = true;
 

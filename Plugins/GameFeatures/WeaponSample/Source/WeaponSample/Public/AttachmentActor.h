@@ -81,6 +81,9 @@ protected:
 	                               AActor* Target,
 	                               const FAVVMSocketTargetingDeferralContextArgs ContextArgs);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 

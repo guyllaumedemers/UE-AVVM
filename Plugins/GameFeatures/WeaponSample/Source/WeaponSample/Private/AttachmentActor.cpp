@@ -30,6 +30,7 @@
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
+#include "Components/SkeletalMeshComponent.h"
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
@@ -209,7 +210,7 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	                *NewSocketName.ToString());
 
 	// @gdemers detach actor + remove AttributeSet registered
-	Detach();
+	IAVVMDoesSupportSocketTargeting::Execute_Detach(this);
 
 	// @gdemers attach actor + add AttributeSet
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
@@ -229,6 +230,13 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	if (IsValid(ASC))
 	{
 		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+	}
+	
+	// @gdemers allow linking anim instance to driving anim instance.
+	auto* TargetSkeletalMeshComponent = Target->GetComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(TargetSkeletalMeshComponent))
+	{
+		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
 	}
 }
 
@@ -259,6 +267,13 @@ void AAttachmentActor::Detach_Implementation()
 	if (IsValid(ASC))
 	{
 		ASC->UnRegisterAttributeSet(this);
+	}
+
+	// @gdemers allow unlinking anim instance from driving anim instance.
+	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(TargetSkeletalMeshComponent))
+	{
+		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(LinkedAnimInstanceClass);
 	}
 }
 

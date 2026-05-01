@@ -31,6 +31,7 @@
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
@@ -224,6 +225,13 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	{
 		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
 	}
+	
+	// @gdemers allow linking anim instance to driving anim instance.
+	auto* TargetSkeletalMeshComponent = Target->GetComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(TargetSkeletalMeshComponent))
+	{
+		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
+	}
 }
 
 void ATriggeringActor::Detach_Implementation()
@@ -249,6 +257,13 @@ void ATriggeringActor::Detach_Implementation()
 	if (IsValid(ASC))
 	{
 		ASC->UnRegisterAttributeSet(this);
+	}
+
+	// @gdemers allow unlinking anim instance from driving anim instance.
+	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(TargetSkeletalMeshComponent))
+	{
+		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(LinkedAnimInstanceClass);
 	}
 }
 
