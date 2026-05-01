@@ -31,7 +31,7 @@ TArray<FDataRegistryId> UAVVMActorResourceHandlingImpl::ProcessResources(UActorC
 		const auto* ActorDefinitionDataAsset = Cast<UAVVMActorDefinitionDataAsset>(Resource);
 		if (IsValid(ActorDefinitionDataAsset))
 		{
-			OutResources.Append(ActorDefinitionDataAsset->GetActorTraitIds());
+			OutResources.Append(ActorDefinitionDataAsset->GetAbilityRegistryIds());
 		}
 	}
 

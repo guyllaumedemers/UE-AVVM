@@ -48,7 +48,7 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	TArray<FDataRegistryId> GetActorTraitIds() const;
+	TArray<FDataRegistryId> GetAbilityRegistryIds() const;
 	const FSoftObjectPath& GetActorClassSoftObjectPath() const;
 	const FSoftObjectPath& GetActorAttributeSetClassSoftObjectPath() const;
 

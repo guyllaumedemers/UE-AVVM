@@ -56,7 +56,7 @@ EDataValidationResult UAVVMActorDefinitionDataAsset::IsDataValid(class FDataVali
 }
 #endif
 
-TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetActorTraitIds() const
+TArray<FDataRegistryId> UAVVMActorDefinitionDataAsset::GetAbilityRegistryIds() const
 {
 	TArray<FDataRegistryId> Result;
 
