@@ -25,6 +25,12 @@
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 #include "Tags/PrivateTags.h"
 
+UTriggeringActorAnimInstance::UTriggeringActorAnimInstance(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bUseMultiThreadedAnimationUpdate = true;
+}
+
 void UTriggeringActorAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
@@ -75,6 +81,13 @@ void UTriggeringActorAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UTriggeringActorAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
+	
+	// @gdemers do work here!
+}
+
+bool UTriggeringActorAnimInstance::PCV_ShouldWarnAboutNodesNotUsingFastPath() const
+{
+	return true;
 }
 
 void UTriggeringActorAnimInstance::OnTriggeringActorStateTagChanged(const FGameplayTagContainer& NewStateTags)

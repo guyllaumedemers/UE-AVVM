@@ -24,6 +24,12 @@
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 #include "Tags/AVVMGameplayTags.h"
 
+UAVVMCharacterAnimInstance::UAVVMCharacterAnimInstance(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bUseMultiThreadedAnimationUpdate = true;
+}
+
 void UAVVMCharacterAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
@@ -69,11 +75,18 @@ void UAVVMCharacterAnimInstance::NativeUninitializeAnimation()
 void UAVVMCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-}
+} 
 
 void UAVVMCharacterAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
+	
+	// @gdemers do work here!
+}
+
+bool UAVVMCharacterAnimInstance::PCV_ShouldWarnAboutNodesNotUsingFastPath() const
+{
+	return true;
 }
 
 void UAVVMCharacterAnimInstance::OnCharacterStateTagChanged(const FGameplayTagContainer& NewStateTags)

@@ -115,11 +115,13 @@ class AVVMGAMEPLAY_API UAVVMCharacterAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
+	UAVVMCharacterAnimInstance(const FObjectInitializer& ObjectInitializer);
 	virtual void NativeBeginPlay() override;
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUninitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
+	virtual bool PCV_ShouldWarnAboutNodesNotUsingFastPath() const override;
 
 protected:
 	// @gdemers only update state flags based on events triggered following local client state change or
