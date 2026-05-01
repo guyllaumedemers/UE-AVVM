@@ -180,7 +180,7 @@ void UAVVMResourceManagerComponent::BeginPlay()
 		return;
 	}
 
-	const TArray<FDataRegistryId> ResourceIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(Outer);
+	const TArray<FDataRegistryId> ResourceIds = IAVVMResourceProvider::Execute_GetResourceDefinitionRegistryIds(Outer);
 	for (const auto& ResourceId : ResourceIds)
 	{
 		RequestAsyncLoading(ResourceId, FOnResourceAsyncLoadingComplete{});
@@ -368,20 +368,20 @@ void UAVVMResourceManagerComponent::OnSoftObjectAcquired()
 	                bIsDoneAcquiringResources ? TEXT("True") : TEXT("False"));
 }
 
-bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId)
+bool UAVVMResourceManagerComponent::OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistryIds)
 {
 	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
 	{
 		return false;
 	}
 
-	const bool bIsEmpty = PendingRegistriesId.IsEmpty();
+	const bool bIsEmpty = PendingRegistryIds.IsEmpty();
 	if (bIsEmpty)
 	{
 		return QueueingMechanism->TryExecuteNextRequest();
 	}
 
-	for (const FDataRegistryId& RegistryId : PendingRegistriesId)
+	for (const FDataRegistryId& RegistryId : PendingRegistryIds)
 	{
 		RequestAsyncLoading(RegistryId, QueueingMechanism->GetCompletionDelegate());
 	}

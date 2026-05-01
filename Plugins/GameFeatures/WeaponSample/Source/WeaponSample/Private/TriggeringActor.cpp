@@ -262,7 +262,7 @@ UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Imp
 	return ResourceManagerComponent;
 }
 
-TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionResourceIds_Implementation() const
+TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
 	return {TriggeringDefinitionId};
 }

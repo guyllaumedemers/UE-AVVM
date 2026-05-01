@@ -38,7 +38,7 @@ UAVVMResourceManagerComponent* AAVVMAutomatedTestGameplayActor::GetResourceManag
 	return ResourceManagerComponent;
 }
 
-TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::GetResourceDefinitionResourceIds_Implementation() const
+TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
 	const auto TestRegistryId = FDataRegistryId(UAVVMGameplaySettings::GetActorDefinitionRegistryType(), TEXT("DEMO_AutomatedTest"));
 	ensureAlwaysMsgf(TestRegistryId.IsValid(), TEXT("RegistryType or ItemName arent valid. Please validate your Data Registry."));
@@ -69,6 +69,11 @@ void AAVVMAutomatedTestGameplayActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncPr
 bool AAVVMAutomatedTestGameplayActor::CheckContentIntegrity() const
 {
 	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), ResourceManagerComponent);
+}
+
+bool AAVVMAutomatedTestGameplayActor::CheckASCIntegrity() const
+{
+	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), AbilitySystemComponent);
 }
 
 void AAVVMAutomatedTestGameplayActor::ForceCompletion() const

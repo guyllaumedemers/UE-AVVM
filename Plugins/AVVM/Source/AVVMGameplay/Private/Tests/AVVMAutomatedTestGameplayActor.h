@@ -45,11 +45,12 @@ class AVVMGAMEPLAY_API AAVVMAutomatedTestGameplayActor : public AActor,
 public:
 	AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer);
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
-	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
 	
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
+	bool CheckASCIntegrity() const;
 	void ForceCompletion() const;
 	
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();

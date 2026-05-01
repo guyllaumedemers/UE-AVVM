@@ -148,7 +148,7 @@ int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
 	}
 }
 
-TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionResourceIds_Implementation() const
+TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionRegistryIds_Implementation() const
 {
 	return {ActorDefinitionId};
 }

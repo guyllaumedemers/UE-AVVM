@@ -250,8 +250,7 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* AttributeSet, AActor* AttributeSetOwner)
 {
 	const bool bResult = UAVVMToolkitUtils::IsNativeScriptInterfaceValid<IAVVMDoesOwnAttributeSet>(AttributeSetOwner);
-	if (!ensureAlwaysMsgf(bResult,
-	                      TEXT("AttributeSetOwner should inherit from the IAVVMDoesOwnAttributeSet interface.")))
+	if (!ensureAlwaysMsgf(bResult, TEXT("AttributeSetOwner should inherit from the IAVVMDoesOwnAttributeSet interface.")))
 	{
 		return;
 	}

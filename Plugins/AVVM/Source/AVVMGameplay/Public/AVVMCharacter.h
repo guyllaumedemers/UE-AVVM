@@ -109,7 +109,7 @@ public:
 
 	// IAVVMResourceProvider
 	virtual int32 GetProviderUniqueId_Implementation() const override;
-	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const override;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	
 	// @gdemers Data Resolver for backend representation of a ACharacter. 

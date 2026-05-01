@@ -48,8 +48,8 @@ class AVVMGAMEPLAY_API IAVVMResourceProvider
 public:
 	// @gdemers allow retrieval of RegistryId relevant to Provider type.
 	UFUNCTION(CallInEditor, BlueprintCallable, BlueprintNativeEvent)
-	TArray<FDataRegistryId> GetResourceDefinitionResourceIds() const;
-	virtual TArray<FDataRegistryId> GetResourceDefinitionResourceIds_Implementation() const PURE_VIRTUAL(GetResourceDefinitionResourceIds_Implementation, return TArray<FDataRegistryId>(););
+	TArray<FDataRegistryId> GetResourceDefinitionRegistryIds() const;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const PURE_VIRTUAL(GetResourceDefinitionRegistryIds_Implementation, return TArray<FDataRegistryId>(););
 	
 	// @gdemers allow retrieval of RegistryId from backend {FActorContent.UniqueId} relevant to Provider type.
 	UFUNCTION(CallInEditor, BlueprintCallable, BlueprintNativeEvent)

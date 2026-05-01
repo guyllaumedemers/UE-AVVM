@@ -102,7 +102,7 @@ public:
 				return true;
 			}
 		
-			TArray<FDataRegistryId> ResourcesIds = IAVVMResourceProvider::Execute_GetResourceDefinitionResourceIds(WeakTestActor.Get());
+			TArray<FDataRegistryId> ResourcesIds = IAVVMResourceProvider::Execute_GetResourceDefinitionRegistryIds(WeakTestActor.Get());
 			if (ResourcesIds.IsEmpty())
 			{
 				WeakTestActor->ForceCompletion();
@@ -123,12 +123,25 @@ public:
 		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
 	}
 	
-	void LatentCompare()
+	void LatentResourceManagerCompare()
 	{
 		// @gdemers validate our resource loading request integrity
 		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
 		{
 			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckContentIntegrity() : false);
+			return true;
+		}));
+		
+		// @gdemers wait for our ASC to load all UObjects before cleanup
+		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
+	}
+	
+	void LatentASCCompare()
+	{
+		// @gdemers validate our resource loading request integrity
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckASCIntegrity() : false);
 			return true;
 		}));
 		
@@ -174,7 +187,7 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 	Setup();
 	LatentExecuteResourceLoading();
 	LatentWait();
-	LatentCompare();
+	LatentResourceManagerCompare();
 	LatentCleanup();
 #endif
 	return true;
@@ -189,6 +202,11 @@ IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, FTestAVV
 bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
+	Setup();
+	LatentExecuteResourceLoading();
+	LatentWait();
+	LatentASCCompare();
+	LatentCleanup();
 #endif
 	return true;
 }

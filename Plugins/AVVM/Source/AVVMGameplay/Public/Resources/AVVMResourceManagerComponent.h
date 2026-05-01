@@ -70,7 +70,7 @@ protected:
 	void OnSoftObjectAcquired();
 
 	UFUNCTION()
-	bool OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistriesId);
+	bool OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistryIds);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = true;
