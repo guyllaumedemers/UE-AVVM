@@ -81,13 +81,13 @@ public:
 		TestActor->PostInitializeComponents();
 		TestActor->DispatchBeginPlay();
 	
-		bAsyncCommandComplete = MakeShared<bool>(false);
-		TestActor->SetTestFlag(bAsyncCommandComplete);
+		bIsResourceManagerAsyncCommandComplete = MakeShared<bool>(false);
+		TestActor->SetTestFlag(bIsResourceManagerAsyncCommandComplete);
 	}
 	
 	void LatentExecuteResourceLoading() const
 	{
-		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor.Get()), Flag = TSharedPtr<bool>(bAsyncCommandComplete)]
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor.Get()), Flag = TSharedPtr<bool>(bIsResourceManagerAsyncCommandComplete)]
 		{
 			if (!WeakTestActor.IsValid())
 			{
@@ -120,7 +120,7 @@ public:
 	
 	void LatentWait() const
 	{
-		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
+		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bIsResourceManagerAsyncCommandComplete.Get()));
 	}
 	
 	void LatentResourceManagerCompare()
@@ -131,9 +131,14 @@ public:
 			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckContentIntegrity() : false);
 			return true;
 		}));
-		
-		// @gdemers wait for our ASC to load all UObjects before cleanup
-		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
+	}
+	
+	void LatentWaitASCStreamingHandleComplete()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			return WeakTestActor.IsValid() && WeakTestActor->HasASCFinishedAllStreaming();
+		}));
 	}
 	
 	void LatentASCCompare()
@@ -144,9 +149,6 @@ public:
 			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckASCIntegrity() : false);
 			return true;
 		}));
-		
-		// @gdemers wait for our ASC to load all UObjects before cleanup
-		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bAsyncCommandComplete.Get()));
 	}
 	
 	void LatentCleanup()
@@ -171,7 +173,7 @@ public:
 	}
 	
 	TStrongObjectPtr<AAVVMAutomatedTestGameplayActor> TestActor = nullptr;
-	TSharedRef<bool> bAsyncCommandComplete = MakeShared<bool>(false);
+	TSharedRef<bool> bIsResourceManagerAsyncCommandComplete = MakeShared<bool>(false);
 	TSharedPtr<FTestWorldWrapper> TestWorld = nullptr;
 };
 
@@ -188,23 +190,7 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 	LatentExecuteResourceLoading();
 	LatentWait();
 	LatentResourceManagerCompare();
-	LatentCleanup();
-#endif
-	return true;
-}
-
-/**
- *	Class description:
- *
- *	AVVMAbilitySystemComponentTest is an Automated Test running validation on ability loading process and attribute initialization.
- */
-IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(AVVMAbilitySystemComponentTest, FTestAVVMGameplayPluginBase, "AutomatedTest.CustomGroup.AVVMAbilitySystemComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter);
-bool AVVMAbilitySystemComponentTest::RunTest(const FString& Parameters)
-{
-#if WITH_AUTOMATION_TESTS
-	Setup();
-	LatentExecuteResourceLoading();
-	LatentWait();
+	LatentWaitASCStreamingHandleComplete();
 	LatentASCCompare();
 	LatentCleanup();
 #endif

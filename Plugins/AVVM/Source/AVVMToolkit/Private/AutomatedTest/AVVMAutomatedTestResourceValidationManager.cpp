@@ -156,8 +156,6 @@ void UAVVMAutomatedTestResourceValidationManager::IncrementUObjectLoaded(const U
 bool UAVVMAutomatedTestResourceValidationManager::IsIntegral(const UActorComponent* SrcComponent)
 {
 	FAVVMNonTSResourceValidationMechanism& OutSearchResult = ValidationMechanisms.FindOrAdd(SrcComponent);
-	return (OutSearchResult.RegistryIdRequested > 0)
-			&& (OutSearchResult.UObjectRequested > 0)
-			&& (OutSearchResult.RegistryIdRequested == OutSearchResult.RegistryIdLoaded)
+	return (OutSearchResult.RegistryIdRequested == OutSearchResult.RegistryIdLoaded)
 			&& (OutSearchResult.UObjectRequested == OutSearchResult.UObjectLoaded);
 }

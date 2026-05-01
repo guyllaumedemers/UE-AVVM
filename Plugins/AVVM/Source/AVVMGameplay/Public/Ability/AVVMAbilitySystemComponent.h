@@ -94,5 +94,6 @@ protected:
 private:
 	void SetupAbilities(const TArray<UObject*>& Resources);
 
+	friend class AAVVMAutomatedTestGameplayActor;
 	friend class UAVVMAbilityResourceHandlingImpl;
 };

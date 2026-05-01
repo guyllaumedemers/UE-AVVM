@@ -76,6 +76,22 @@ bool AAVVMAutomatedTestGameplayActor::CheckASCIntegrity() const
 	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), AbilitySystemComponent);
 }
 
+bool AAVVMAutomatedTestGameplayActor::HasASCFinishedAllStreaming() const
+{
+	if (!IsValid(AbilitySystemComponent) || AbilitySystemComponent->AbilityHandleSystem.IsEmpty())
+	{
+		return true;
+	}
+
+	bool bHasFinishedStreaming = true;
+	for (const auto& [TokenId, StreamingHandle] : AbilitySystemComponent->AbilityHandleSystem)
+	{
+		bHasFinishedStreaming &= (StreamingHandle.IsValid() && StreamingHandle->HasLoadCompleted());
+	}
+
+	return bHasFinishedStreaming && (AbilitySystemComponent->AbilitySpecHandles.Num() == AbilitySystemComponent->AbilityHandleSystem.Num());
+}
+
 void AAVVMAutomatedTestGameplayActor::ForceCompletion() const
 {
 	(*bIsAsyncProcessCompleted) = true;
