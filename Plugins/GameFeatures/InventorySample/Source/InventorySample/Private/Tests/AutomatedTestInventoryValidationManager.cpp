@@ -20,6 +20,8 @@
 #include "AutomatedTestInventoryValidationManager.h"
 
 #include "ActorInventoryComponent.h"
+#include "AVVMCharacter.h"
+#include "AVVMPlayerState.h"
 #include "Engine/World.h"
 #include "Misc/AutomationTest.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -72,12 +74,33 @@ UAutomatedTestInventoryValidationManager* UAutomatedTestInventoryValidationManag
 
 void UAutomatedTestInventoryValidationManager::RegisterComponent(const UActorInventoryComponent* SrcComponent)
 {
-	if (IsValid(SrcComponent))
+	if (!IsValid(SrcComponent))
 	{
-		const UObject* Outer = SrcComponent->GetOuter();
-		FInventoryValidationMechanism& OutResult = ValidationMechanisms.FindOrAdd(SrcComponent);
-		OutResult.ResourceProviderId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+		return;
 	}
+
+	int32 ResourceProviderId = INDEX_NONE;
+
+	// @gdemers characters are most-likely players, which means that we are using their UniqueNetId to identify them.
+	// the execution flow require deferral so to be initialized correctly!
+	const auto* Character = Cast<AAVVMCharacter>(SrcComponent->GetOuter());
+	if (IsValid(Character))
+	{
+		auto* PlayerState = Character->GetPlayerState<AAVVMPlayerState>();
+		if (IsValid(PlayerState))
+		{
+			PlayerState->GetOnSetPlayerUniqueNetIdDelegate().AddUObject(this, &UAutomatedTestInventoryValidationManager::OnPlayerStateUniqueNetIdReady, SrcComponent);
+			OnPlayerStateUniqueNetIdReady(PlayerState->GetUniqueId(), SrcComponent);
+		}
+	}
+	else
+	{
+		const auto* Outer = SrcComponent->GetOuter();
+		ResourceProviderId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	}
+
+	FInventoryValidationMechanism& OutResult = ValidationMechanisms.FindOrAdd(SrcComponent);
+	OutResult.ResourceProviderId = ResourceProviderId;
 }
 
 void UAutomatedTestInventoryValidationManager::UnregisterComponent(const UActorInventoryComponent* SrcComponent)
@@ -94,4 +117,15 @@ void UAutomatedTestInventoryValidationManager::PushPrivateItemId(const UActorInv
 {
 	FInventoryValidationMechanism& OutResult = ValidationMechanisms.FindOrAdd(SrcComponent);
 	OutResult.PrivateItemIds.Add(NewPrivateItemId);
+}
+
+void UAutomatedTestInventoryValidationManager::OnPlayerStateUniqueNetIdReady(const FUniqueNetIdRepl& UniqueNetIdRepl,
+                                                                             const UActorInventoryComponent* SrcComponent)
+{
+	if (IsValid(SrcComponent) && UniqueNetIdRepl.IsValid())
+	{
+		const UObject* Outer = SrcComponent->GetOuter();
+		FInventoryValidationMechanism& OutResult = ValidationMechanisms.FindOrAdd(SrcComponent);
+		OutResult.ResourceProviderId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	}
 }

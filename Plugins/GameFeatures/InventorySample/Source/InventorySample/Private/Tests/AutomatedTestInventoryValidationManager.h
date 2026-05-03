@@ -75,6 +75,10 @@ protected:
 	void UnregisterComponent(const UActorInventoryComponent* SrcComponent);
 	void PushPrivateItemId(const UActorInventoryComponent* SrcComponent, const int32 NewPrivateItemId);
 	
+	UFUNCTION(CallInEditor)
+	void OnPlayerStateUniqueNetIdReady(const FUniqueNetIdRepl& UniqueNetIdRepl,
+	                                   const UActorInventoryComponent* SrcComponent);
+	
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const UActorInventoryComponent>, FInventoryValidationMechanism> ValidationMechanisms;
 };

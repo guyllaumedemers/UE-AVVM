@@ -33,6 +33,7 @@ class IAVVMDoesImplNetSynchronization;
 class UAVVMAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostNetClientSynchronizationCompleteDelegate, const AAVVMPlayerState* PlayerState);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetPlayerUniqueNetIdDelegate, const FUniqueNetIdRepl& UniqueNetIdRepl);
 
 /**
  *	Class description:
@@ -97,6 +98,7 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
 	GENERATED_BODY()
 
 	FOnPostNetClientSynchronizationCompleteDelegate OnPostNetClientSynchronizationComplete;
+	FOnSetPlayerUniqueNetIdDelegate OnSetPlayerUniqueNetIdDelegate;
 
 public:
 	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
@@ -117,6 +119,7 @@ public:
 	
 	// @gdemers Delegate to register on the client side for capturing PlayerState NetSync completion.
 	FOnPostNetClientSynchronizationCompleteDelegate& GetOnPostNetClientSynchronizationComplete();
+	FOnSetPlayerUniqueNetIdDelegate& GetOnSetPlayerUniqueNetIdDelegate();
 
 protected:
 	UFUNCTION(Server, Reliable)

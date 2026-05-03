@@ -118,6 +118,8 @@ void AAVVMPlayerState::OnSetUniqueId()
 {
 	Super::OnSetUniqueId();
 
+	GetOnSetPlayerUniqueNetIdDelegate().Broadcast(GetUniqueId());
+
 	// @gdemers let each client handle their own update via RPC instead of
 	// executing from server, and back.
 	if (IsNetMode(NM_DedicatedServer))
@@ -164,6 +166,11 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 FOnPostNetClientSynchronizationCompleteDelegate& AAVVMPlayerState::GetOnPostNetClientSynchronizationComplete()
 {
 	return OnPostNetClientSynchronizationComplete;
+}
+
+FOnSetPlayerUniqueNetIdDelegate& AAVVMPlayerState::GetOnSetPlayerUniqueNetIdDelegate()
+{
+	return OnSetPlayerUniqueNetIdDelegate;
 }
 
 void AAVVMPlayerState::Server_OnAutonomousPlayerBackfilling_Implementation()
