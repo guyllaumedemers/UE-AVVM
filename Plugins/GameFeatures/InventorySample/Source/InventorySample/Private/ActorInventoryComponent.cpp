@@ -263,6 +263,9 @@ void UActorInventoryComponent::RequestItems(const AActor* Outer)
 	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, EItemSrcType::Static);
 	if (bIsItemSrcStatic)
 	{
+		// @gdemers for standalone game (example : story mode), we want to be able to load from save file
+		// which just means that, on ftue, we load the Data Asset once, and serialize to disk. The next time, based on progression,
+		// we load registries previously serialized from disk using our {IAVVMResourceProvider::GetResourceProviderId}.
 		IInventoryProvider::Execute_RequestItemsFromDataAsset(Outer);
 	}
 	else
