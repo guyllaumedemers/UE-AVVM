@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "InventoryUtils.h"
 
+#include "AVVMCharacter.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameSession.h"
 #include "AVVMToolkitUtils.h"
@@ -289,6 +290,32 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 	{
 		return INDEX_NONE;
 	}
+}
+
+FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
+                                             const int32 ProviderId,
+                                             const int32 PrivateItemId)
+{
+	if (!IsValid(Outer))
+	{
+		return FGameplayTag::EmptyTag;
+	}
+
+	auto OutResult = FGameplayTag::EmptyTag;
+
+	const auto* Character = Cast<AAVVMCharacter>(Outer);
+	if (IsValid(Character) && Character->IsPlayerControlled())
+	{
+		OutResult = AAVVMGameSession::Static_GetPlayerPresetSlot(Outer->GetWorld(), ProviderId/*calling Player UniqueId*/, PrivateItemId);
+	}
+	else
+	{
+		// @gdemers we may attempt retrieving the inventory for an NPC actor
+		// (or any other actor type) that are defined in backend.
+		OutResult = AAVVMGameSession::Static_GetActorPresetSlot(Outer->GetWorld(), ProviderId/*calling Actor UniqueId*/, PrivateItemId);
+	}
+
+	return OutResult;
 }
 
 FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,

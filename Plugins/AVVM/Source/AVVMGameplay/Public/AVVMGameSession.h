@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "GameFramework/GameSession.h"
 
 #include "AVVMGameSession.generated.h"
@@ -71,6 +72,16 @@ public:
 	                                                   const int32 ProfileId,
 	                                                   const TArray<int32>& NewItems);
 
+	UFUNCTION(BlueprintCallable)
+	static FGameplayTag Static_GetPlayerPresetSlot(const UWorld* World,
+	                                               const int32 ProfileId,
+	                                               const int32 PrivateItemId);
+
+	UFUNCTION(BlueprintCallable)
+	static FGameplayTag Static_GetActorPresetSlot(const UWorld* World,
+	                                              const int32 ProfileId,
+	                                              const int32 PrivateItemId);
+
 protected:
 	static AAVVMGameSession* Get(const UWorld* World);
 	int32 GetPlayerConnectionId(const APlayerState* PlayerState) const;
@@ -82,6 +93,12 @@ protected:
 
 	FString ModifyPlayerProfileInventory(const int32 ProfileId,
 	                                     const TArray<int32>& NewItems);
+
+	FGameplayTag GetPlayerPresetSlot(const int32 ProfileId,
+	                                 const int32 PrivateItemId);
+
+	FGameplayTag GetActorPresetSlot(const int32 ProfileId,
+	                                const int32 PrivateItemId);
 
 	// @gdemers {FAVVMParty::UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)

@@ -590,10 +590,11 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
 		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
 		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
+		const FGameplayTag SlotTag = UInventoryUtils::GetItemSlotTag(Outer, TargetUniqueId, PrivateItemId);
 		UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
 		UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
 		UnInitializedItemObject->ModifyRuntimeStoragePosition(StoragePosition);
-		UnInitializedItemObject->ModifyRuntimeSlotTag({}/*Some Tags*/);
+		UnInitializedItemObject->ModifyRuntimeSlotTag(SlotTag);
 		UnInitializedItemObject->PrivateItemId = PrivateItemId;
 
 		return PrivateItemId;

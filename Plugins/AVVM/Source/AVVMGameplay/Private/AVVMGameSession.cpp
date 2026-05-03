@@ -75,6 +75,22 @@ FString AAVVMGameSession::Static_ModifyPlayerProfileInventory(const UWorld* Worl
 	return IsValid(GameSession) ? GameSession->ModifyPlayerProfileInventory(ProfileId, NewItems) : FString();
 }
 
+FGameplayTag AAVVMGameSession::Static_GetPlayerPresetSlot(const UWorld* World,
+                                                          const int32 ProfileId,
+                                                          const int32 PrivateItemId)
+{
+	AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->GetPlayerPresetSlot(ProfileId, PrivateItemId) : FGameplayTag::EmptyTag;
+}
+
+FGameplayTag AAVVMGameSession::Static_GetActorPresetSlot(const UWorld* World,
+                                                         const int32 ProfileId,
+                                                         const int32 PrivateItemId)
+{
+	AAVVMGameSession* GameSession = Get(World);
+	return IsValid(GameSession) ? GameSession->GetActorPresetSlot(ProfileId, PrivateItemId) : FGameplayTag::EmptyTag;
+}
+
 void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
                                       const FUniqueNetIdRepl& UniqueId,
                                       bool bWasFromInvite)
@@ -261,6 +277,52 @@ FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,
 	JsonParser->ToString(OutOldProfile, OldProfile);
 
 	return OldProfile;
+}
+
+FGameplayTag AAVVMGameSession::GetPlayerPresetSlot(const int32 ProfileId,
+                                                   const int32 PrivateItemId)
+{
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return FGameplayTag::EmptyTag;
+	}
+
+	const bool bHasResolvedProfile = ResolvedProfiles.Contains(ProfileId);
+	if (!ensureAlwaysMsgf(bHasResolvedProfile,
+	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+	{
+		return FGameplayTag::EmptyTag;
+	}
+
+	const FString ProfilePayload = ResolvedProfiles[ProfileId];
+
+	FAVVMPlayerProfile OutPlayerProfile;
+	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
+
+	const bool bHasResolvedPreset = ResolvedPresets.Contains(OutPlayerProfile.EquippedPresetId);
+	if (!ensureAlwaysMsgf(bHasResolvedPreset,
+	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+	{
+		return FGameplayTag::EmptyTag;
+	}
+
+	const FString PresetPayload = ResolvedPresets[OutPlayerProfile.EquippedPresetId];
+
+	FAVVMPlayerPreset OutPlayerPreset;
+	JsonParser->FromString(PresetPayload, OutPlayerPreset);
+
+	const FGameplayTag* SearchResult = OutPlayerPreset.EquippedItems.FindKey(PrivateItemId);
+	return (SearchResult != nullptr) ? *SearchResult : FGameplayTag::EmptyTag;
+}
+
+FGameplayTag AAVVMGameSession::GetActorPresetSlot(const int32 ProfileId,
+                                                  const int32 PrivateItemId)
+{
+	// TODO @gdemers access backend representation of our actor, and their inventory
+	// this may apply to NPC types, Shops, Boxes, etc...
+	return FGameplayTag::EmptyTag;
 }
 
 void AAVVMGameSession::AddPlayer(const FString& UniqueNetId)
