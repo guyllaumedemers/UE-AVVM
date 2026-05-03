@@ -78,13 +78,18 @@ bool AAVVMAutomatedTestGameplayActor::CheckASCIntegrity() const
 
 bool AAVVMAutomatedTestGameplayActor::HasASCFinishedAllStreaming() const
 {
-	if (!IsValid(AbilitySystemComponent) || AbilitySystemComponent->AbilityHandleSystem.IsEmpty())
+	if (!IsValid(AbilitySystemComponent))
 	{
 		return true;
 	}
 
 	bool bHasFinishedStreaming = true;
 	for (const auto& [TokenId, StreamingHandle] : AbilitySystemComponent->AbilityHandleSystem)
+	{
+		bHasFinishedStreaming &= (StreamingHandle.IsValid() && StreamingHandle->HasLoadCompleted());
+	}
+
+	for (const auto& [TokenId, StreamingHandle] : AbilitySystemComponent->AttributeSetHandles)
 	{
 		bHasFinishedStreaming &= (StreamingHandle.IsValid() && StreamingHandle->HasLoadCompleted());
 	}
