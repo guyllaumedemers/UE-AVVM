@@ -26,7 +26,9 @@
 #include "AutomatedTestInventoryValidationManager.generated.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	FInventoryValidationMechanism is a context struct that encapsulate information about the inventory system of a single entity.
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FInventoryValidationMechanism
