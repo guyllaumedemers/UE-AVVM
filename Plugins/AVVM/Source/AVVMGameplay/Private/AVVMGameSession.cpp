@@ -192,7 +192,10 @@ TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) cons
 		FAVVMPlayerPreset OutPlayerPreset;
 		JsonParser->FromString(PresetPayload, OutPlayerPreset);
 
-		return OutPlayerPreset.EquippedItems;
+		TArray<int32> OutEquippedItems;
+		OutPlayerPreset.EquippedItems.GenerateValueArray(OutEquippedItems);
+
+		return OutEquippedItems;
 	}
 	else
 	{

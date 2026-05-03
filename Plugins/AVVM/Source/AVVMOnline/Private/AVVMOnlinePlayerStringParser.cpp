@@ -23,6 +23,7 @@
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -334,7 +335,15 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 	const TArray<TSharedPtr<FJsonValue>> JsonValues = JsonData->GetArrayField(TEXT("EquippedItems"));
 	for (const auto& JsonValue : JsonValues)
 	{
-		NewPlayerPreset.EquippedItems.Add(JsonValue->AsNumber());
+		const TSharedPtr<FJsonObject>* OutKVPJsonObject = nullptr;
+		JsonValue->TryGetObject(OutKVPJsonObject);
+
+		if ((OutKVPJsonObject != nullptr) && OutKVPJsonObject->IsValid())
+		{
+			const FString GameplayTag = (*OutKVPJsonObject)->GetStringField(TEXT("SlotTag"));
+			const int32 ItemId = (*OutKVPJsonObject)->GetIntegerField(TEXT("ItemId"));
+			NewPlayerPreset.EquippedItems.FindOrAdd(FGameplayTag::RequestGameplayTag(FName(GameplayTag)), ItemId);
+		}
 	}
 
 	OutPlayerPreset = NewPlayerPreset;
@@ -343,15 +352,19 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerPreset& NewPlayerPreset,
                                              FString& OutFormat) const
 {
-	TArray<TSharedPtr<FJsonValue>> EquippedItems;
-	for (const int32 EquippedItem : NewPlayerPreset.EquippedItems)
-	{
-		EquippedItems.Add(MakeShareable(new FJsonValueNumber(EquippedItem)));
-	}
-
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerPreset.UniqueId);
 	JsonData->SetStringField(TEXT("PresetId"), NewPlayerPreset.PresetId);
+
+	TArray<TSharedPtr<FJsonValue>> EquippedItems;
+	for (const auto& [SlotTag, ItemId] : NewPlayerPreset.EquippedItems)
+	{
+		TSharedPtr<FJsonObject> KVPJsonObject = MakeShareable(new FJsonObject);
+		KVPJsonObject->SetStringField(TEXT("SlotTag"), SlotTag.ToString());
+		KVPJsonObject->SetNumberField("ItemId", ItemId);
+		EquippedItems.Add(MakeShareable(new FJsonValueObject(KVPJsonObject)));
+	}
+
 	JsonData->SetArrayField(TEXT("EquippedItems"), EquippedItems);
 
 	FString JsonOutput;

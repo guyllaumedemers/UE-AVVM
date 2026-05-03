@@ -127,6 +127,9 @@ public:
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 
 	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeSlotTag(const FGameplayTag& NewSlotTag);
+
+	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeStorageId(const int32 NewStorageId);
 
 	UFUNCTION(BlueprintCallable)

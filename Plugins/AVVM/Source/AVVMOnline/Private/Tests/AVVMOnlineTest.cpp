@@ -23,12 +23,16 @@
 #include "AVVMOnlineModule.h"
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlinePlayerStringParser.h"
+#include "NativeGameplayTags.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 
 #if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
 #endif
+
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_AVVMONLINE_TEST_A, "AVVMOnline.AutomatedTest.A");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_AVVMONLINE_TEST_B, "AVVMOnline.AutomatedTest.B");
 
 /**
  *	Class description:
@@ -130,7 +134,12 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		FAVVMPlayerPreset A;
 		A.UniqueId = FMath::Rand32();
 		A.PresetId = TEXT("MyPreset");
-		A.EquippedItems = {FMath::Rand32(), FMath::Rand32()};
+
+		A.EquippedItems = TMap<FGameplayTag, int32>{
+				{TAG_AVVMONLINE_TEST_A, FMath::Rand32()},
+				{TAG_AVVMONLINE_TEST_B, FMath::Rand32()}
+		};
+
 		Parser->ToString(A, OutPayload);
 
 		FAVVMPlayerPreset B;

@@ -89,7 +89,7 @@ bool FAVVMPlayerPreset::operator==(const FAVVMPlayerPreset& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (PresetId.Equals(Rhs.PresetId))
-			&& (EquippedItems == Rhs.EquippedItems);
+			&& (EquippedItems.OrderIndependentCompareEqual(Rhs.EquippedItems));
 }
 
 bool FAVVMPlayerPreset::operator!=(const FAVVMPlayerPreset& Rhs) const

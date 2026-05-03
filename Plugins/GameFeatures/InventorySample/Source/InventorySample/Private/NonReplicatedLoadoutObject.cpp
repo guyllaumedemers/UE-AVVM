@@ -79,7 +79,7 @@ void UNonReplicatedLoadoutObject::RemoveOldItems(const TArray<UItemObject*>& New
 			continue;
 		}
 
-		const FGameplayTag ActiveSlotTag = OldItemObject->GetRuntimeItemSlotTag();
+		const FGameplayTag& ActiveSlotTag = OldItemObject->GetRuntimeItemSlotTag();
 		if (!ActiveSlotTag.IsValid()/*we may not be attached to a slot, and is being dropped*/)
 		{
 			continue;
@@ -117,7 +117,7 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		}
 
 		// @gdemers a new item being registered with this system should ALWAYS have a valid slot tag.
-		const FGameplayTag ActiveSlotTag = NewItemObject->GetRuntimeItemSlotTag();
+		const FGameplayTag& ActiveSlotTag = NewItemObject->GetRuntimeItemSlotTag();
 		if (!ensureAlwaysMsgf(ActiveSlotTag.IsValid(), TEXT("Active Item is missing a valid slot tag.")))
 		{
 			continue;

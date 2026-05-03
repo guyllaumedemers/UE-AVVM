@@ -179,7 +179,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> ChallengeIds;
 
-	// @gdemers {FAVVMPlayerPreset.UniqueId}
+	// @gdemers currently equipped Loadout {FAVVMPlayerPreset.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 EquippedPresetId = INDEX_NONE;
 };
@@ -210,7 +210,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 
 	// @gdemers aggregate a subset of {FAVVMPlayerProfile::InventoryIds}.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> EquippedItems;
+	TMap<FGameplayTag/*slot tag*/, int32> EquippedItems;
 };
 
 /**

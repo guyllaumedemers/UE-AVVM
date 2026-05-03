@@ -77,6 +77,14 @@ void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, con
 	OnRep_ItemStateModified(RuntimeItemState);
 }
 
+void UItemObject::ModifyRuntimeSlotTag(const FGameplayTag& NewSlotTag)
+{
+	RuntimeItemState.ActiveSlotTag = NewSlotTag;
+	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
+
+	OnRep_ItemStateModified(RuntimeItemState);
+}
+
 void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 {
 	static constexpr int32 MaxStorageId = (1 << GET_STORAGE_ID_ENCODING_BIT_RANGE);
@@ -526,6 +534,7 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
 	UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
 	UnInitializedItemObject->ModifyRuntimeStoragePosition(StoragePosition);
+	UnInitializedItemObject->ModifyRuntimeSlotTag({}/*Some Tags*/);
 	UnInitializedItemObject->PrivateItemId = PrivateItemId;
 	return PrivateItemId;
 }
@@ -584,6 +593,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
 		UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
 		UnInitializedItemObject->ModifyRuntimeStoragePosition(StoragePosition);
+		UnInitializedItemObject->ModifyRuntimeSlotTag({}/*Some Tags*/);
 		UnInitializedItemObject->PrivateItemId = PrivateItemId;
 
 		return PrivateItemId;
