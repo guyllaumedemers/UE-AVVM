@@ -34,18 +34,18 @@ USTRUCT(BlueprintType)
 struct AVVMTOOLKIT_API FAVVMNonTSResourceValidationMechanism
 {
 	GENERATED_BODY()
-	
+
 	FAVVMNonTSResourceValidationMechanism();
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 RegistryIdRequested = INDEX_NONE;
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 RegistryIdLoaded = INDEX_NONE;
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UObjectRequested = INDEX_NONE;
-	
+
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UObjectLoaded = INDEX_NONE;
 };
@@ -63,28 +63,39 @@ class AVVMTOOLKIT_API UAVVMAutomatedTestResourceValidationManager : public UWorl
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
-	
+
 	UFUNCTION(BlueprintCallable)
-	static void Static_RegisterComponent(const UWorld* World, const UActorComponent* SrcComponent);
-	
+	static void Static_RegisterComponent(const UWorld* World,
+	                                     const UActorComponent* SrcComponent);
+
 	UFUNCTION(BlueprintCallable)
-	static void Static_UnregisterComponent(const UWorld* World, const UActorComponent* SrcComponent);
-	
+	static void Static_UnregisterComponent(const UWorld* World,
+	                                       const UActorComponent* SrcComponent);
+
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementRegistryIdRequested(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
-	
+	static void Static_IncrementRegistryIdRequested(const UWorld* World,
+	                                                const UActorComponent* SrcComponent,
+	                                                const int32 NewValue = 1);
+
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementRegistryIdLoaded(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
-	
+	static void Static_IncrementRegistryIdLoaded(const UWorld* World,
+	                                             const UActorComponent* SrcComponent,
+	                                             const int32 NewValue = 1);
+
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementUObjectRequested(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
-	
+	static void Static_IncrementUObjectRequested(const UWorld* World,
+	                                             const UActorComponent* SrcComponent,
+	                                             const int32 NewValue = 1);
+
 	UFUNCTION(BlueprintCallable)
-	static void Static_IncrementUObjectLoaded(const UWorld* World, const UActorComponent* SrcComponent, const int32 NewValue = 1);
-	
+	static void Static_IncrementUObjectLoaded(const UWorld* World,
+	                                          const UActorComponent* SrcComponent,
+	                                          const int32 NewValue = 1);
+
 	UFUNCTION(BlueprintCallable)
-	static bool Static_IsIntegral(const UWorld* World, const UActorComponent* SrcComponent);
-	
+	static bool Static_IsIntegral(const UWorld* World,
+	                              const UActorComponent* SrcComponent);
+
 protected:
 	static UAVVMAutomatedTestResourceValidationManager* Get(const UWorld* World);
 	void RegisterComponent(const UActorComponent* SrcComponent);
@@ -94,7 +105,7 @@ protected:
 	void IncrementUObjectRequested(const UActorComponent* SrcComponent, const int32 NewValue);
 	void IncrementUObjectLoaded(const UActorComponent* SrcComponent, const int32 NewValue);
 	bool IsIntegral(const UActorComponent* SrcComponent);
-	
+
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const UActorComponent>, FAVVMNonTSResourceValidationMechanism> ValidationMechanisms;
 };

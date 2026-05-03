@@ -49,6 +49,12 @@
 #include "Tags/PrivateTags.h"
 #include "UI/InventoryNotificationPayload.h"
 
+#if !UE_BUILD_SHIPPING
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Misc/AutomationTest.h"
+#include "Tests/AutomatedTestInventoryValidationManager.h"
+#endif
+
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
@@ -102,6 +108,10 @@ void UActorInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+#if WITH_AUTOMATION_TESTS
+	UAutomatedTestInventoryValidationManager::Static_RegisterComponent(GetWorld(), this);
+#endif
+
 	QueueingMechanism = MakeShared<FItemSpawnerQueuingMechanism>();
 
 	const auto* Outer = GetTypedOuter<AActor>();
@@ -154,6 +164,10 @@ void UActorInventoryComponent::BeginPlay()
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+#if WITH_AUTOMATION_TESTS
+	UAutomatedTestInventoryValidationManager::Static_UnregisterComponent(GetWorld(), this);
+#endif
 	
 	// @gdemers enforce cancelling running async process during actor destruction.
 	for (auto Iterator = ItemHandleSystem.CreateIterator(); Iterator; ++Iterator)
@@ -305,16 +319,22 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 		                *GetNameSafe(ItemAsset));
 	}
 
-	if (!DeferredItems.IsEmpty())
+	if (DeferredItems.IsEmpty())
 	{
-		const auto Token = FItemToken::MakeToken();
-		
-		FStreamableDelegate Callback;
-		Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved, Token);
-
-		TSharedPtr<FStreamableHandle>& OutResult = ItemHandleSystem.FindOrAdd(Token.UniqueId);
-		OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+		return;
 	}
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(GetWorld(), this, DeferredItems.Num());
+#endif
+
+	const auto Token = FItemToken::MakeToken();
+
+	FStreamableDelegate Callback;
+	Callback.BindUObject(this, &UActorInventoryComponent::OnItemsRetrieved, Token);
+
+	TSharedPtr<FStreamableHandle>& OutResult = ItemHandleSystem.FindOrAdd(Token.UniqueId);
+	OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
 }
 
 void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResources)
@@ -344,6 +364,11 @@ void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResour
 	{
 		return;
 	}
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdLoaded(GetWorld(), this);
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(GetWorld(), this);
+#endif
 
 	FOnRequestItemActorClassComplete Callback;
 	Callback.BindDynamic(this, &UActorInventoryComponent::OnItemActorClassRetrieved);
@@ -504,6 +529,10 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 	TArray<UObject*> OutStreamableAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this, OutStreamableAssets.Num());
+#endif
+
 	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, Items, this);
 	// @gdemers cache array before to invoke OnRep on server.
 	TArray<UItemObject*> OldItems = Items;
@@ -539,6 +568,10 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 			                                                        UActorInventoryComponent::GetInventoryDataResolverHelper(),
 			                                                        NewItem);
 		}
+
+#if WITH_AUTOMATION_TESTS
+		UAutomatedTestInventoryValidationManager::Static_PushPrivateItemId(GetWorld(), this, PrivateItemId);
+#endif
 
 		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Item with a valid ItemId.")) ||
 			ensureAlwaysMsgf(!PrivateItemIds.Contains(PrivateItemId), TEXT("Attempting to initialized a UItemObject with duplicated PrivateItemId value.")))
@@ -681,6 +714,10 @@ void UActorInventoryComponent::RequestItemActor(UAVVMResourceManagerComponent* R
 		                TEXT("Executing Spawn Item Request for %s"),
 		                *GetNameSafe(ItemToSpawn.Get()));
 
+#if WITH_AUTOMATION_TESTS
+		UAVVMAutomatedTestResourceValidationManager::Static_IncrementRegistryIdRequested(NewActorInventoryComponent->GetWorld(), NewActorInventoryComponent.Get());
+#endif
+
 		NewResourceManagerComponent->RequestAsyncLoading(ItemToSpawn->GetItemActorId(), {});
 	};
 
@@ -729,6 +766,10 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 	{
 		return;
 	}
+
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this);
+#endif
 
 	FItemActorSpawnContextArgs Params;
 	Params.ActorClass = NewActorClass;
