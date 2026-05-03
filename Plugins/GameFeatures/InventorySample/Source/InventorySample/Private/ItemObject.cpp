@@ -88,7 +88,7 @@ void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 
 void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 {
-	const int32 MaxStorageCapacity = GetStorageMaxCapacity();
+	const int32 MaxStorageCapacity = GetRuntimeStorageMaxCapacity();
 	RuntimeItemState.StoragePosition = FMath::Clamp<int32>(NewStoragePosition, 0, MaxStorageCapacity);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
@@ -247,6 +247,11 @@ bool UItemObject::Stack(UItemObject* Item)
 	return bDoesStackOverflow;
 }
 
+const FGameplayTag& UItemObject::GetRuntimeItemSlotTag() const
+{
+	return RuntimeItemState.ActiveSlotTag;
+}
+
 int32 UItemObject::GetRuntimeCount() const
 {
 	return RuntimeItemState.StackCount;
@@ -262,7 +267,7 @@ int32 UItemObject::GetRuntimeStoragePosition() const
 	return RuntimeItemState.StoragePosition;
 }
 
-int32 UItemObject::GetStorageMaxCapacity() const
+int32 UItemObject::GetRuntimeStorageMaxCapacity() const
 {
 	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(GetTypedOuter<UActorInventoryComponent>(), RuntimeItemState.StorageId);
 	if (!ensureAlwaysMsgf((StorageMaxCapacity != INDEX_NONE),

@@ -61,6 +61,10 @@ struct INVENTORYSAMPLE_API FItemState
 	// @gdemers Complex state. Example : CanBeConsumed & IsAccessible & PendingForTrade
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
+	
+	// @gdemers the slot tag that reference us NOW.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTag ActiveSlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
 	int32 StackCount = 1;
@@ -177,6 +181,9 @@ public:
 	bool Stack(UItemObject* Item);
 
 	UFUNCTION(BlueprintCallable)
+	const FGameplayTag& GetRuntimeItemSlotTag() const;
+
+	UFUNCTION(BlueprintCallable)
 	int32 GetRuntimeCount() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -186,7 +193,7 @@ public:
 	int32 GetRuntimeStoragePosition() const;
 
 	UFUNCTION(BlueprintCallable)
-	int32 GetStorageMaxCapacity() const;
+	int32 GetRuntimeStorageMaxCapacity() const;
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetMaxStackCount() const;
@@ -234,6 +241,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
 	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
 
+	// @gdemers its important to enforce that the tag order be from highest priority to lowest. Example : PrimarySlot, SecondarySlot, etc...
+	// an Item can be placed interchangeably in Primary or secondary, and allow context switching between both entries
+	// (but! that's only relevant for the UI, not for gameplay)(Gameplay only care about setting the active slot).
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
 	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
 

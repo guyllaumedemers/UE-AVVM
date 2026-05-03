@@ -46,6 +46,15 @@ public class InventorySample : ModuleRules
 				});
 		}
 
+		if (Target.WithAutomationTests)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"FunctionalTesting",
+				});
+		}
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

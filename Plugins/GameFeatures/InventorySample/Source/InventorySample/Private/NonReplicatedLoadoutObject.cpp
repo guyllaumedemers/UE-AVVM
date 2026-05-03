@@ -67,40 +67,34 @@ void UNonReplicatedLoadoutObject::RemoveOldItems(const TArray<UItemObject*>& New
 {
 	for (const UItemObject* OldItemObject : OldItemObjects)
 	{
-		if (!IsValid(OldItemObject))
+		if (!IsValid(OldItemObject) || NewItemObjects.Contains(OldItemObject)/*persist between collection change*/)
 		{
 			continue;
 		}
 
-		const bool bDoesContains = NewItemObjects.Contains(OldItemObject);
-		if (bDoesContains)
+		// @gdemers we only care about items that are active. i.e slotted with our loadout system. other items that are "Equipped"
+		// are not participating in this system behaviour.
+		if (!OldItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE}))
 		{
 			continue;
 		}
 
-		const FGameplayTagContainer& ItemSlotTags = OldItemObject->GetItemSlotTags();
-		if (!ensureAlwaysMsgf(!ItemSlotTags.IsEmpty(),
-		                      TEXT("ItemSlotTag missing. Validate your Item configuration.")))
-		{
-			continue;
-		}
-		
-		// @gdemers its important to enforce that the tag order be from highest priority to lowest.
-		// example : PrimarySlot, SecondarySlot, etc...
-		// an Item can be placed in both Primary, and secondary so to allow context switch between both entry
-		// but thats only relevant for the UI, not for gameplay. game play only care about setting the active slot
-		// to the user selection, they dont need to modify the object reference attached to the slot tag.
-		const FGameplayTag ItemSlotTag_HighestPriority = ItemSlotTags.First();
-		const bool bHasKey = Loadout.Contains(ItemSlotTag_HighestPriority);
-		if (!bHasKey)
+		const FGameplayTag ActiveSlotTag = OldItemObject->GetRuntimeItemSlotTag();
+		if (!ActiveSlotTag.IsValid()/*we may not be attached to a slot, and is being dropped*/)
 		{
 			continue;
 		}
 
-		const bool bAreEqual = (Loadout[ItemSlotTag_HighestPriority] == OldItemObject);
+		const bool bHasKey = Loadout.Contains(ActiveSlotTag);
+		if (!ensureAlwaysMsgf(bHasKey, TEXT("Invalid Key search. Make sure we have a valid RuntimeSlotTag.")))
+		{
+			continue;
+		}
+
+		const bool bAreEqual = (Loadout[ActiveSlotTag] == OldItemObject);
 		if (bAreEqual)
 		{
-			Loadout[ItemSlotTag_HighestPriority].Reset();
+			Loadout[ActiveSlotTag].Reset();
 		}
 	}
 }
@@ -115,25 +109,21 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 
 	for (UItemObject* NewItemObject : NewItemObjects)
 	{
-		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED}))
-		{
-			return;
-		}
-
-		const FGameplayTagContainer& ItemSlotTags = NewItemObject->GetItemSlotTags();
-		if (!ensureAlwaysMsgf(!ItemSlotTags.IsEmpty(),
-		                      TEXT("ItemSlotTag missing. Validate your Item configuration.")))
+		// @gdemers we only care about items that are active. i.e slotted with our loadout system. other items that are "Equipped"
+		// are not participating in this system behaviour.
+		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE}))
 		{
 			continue;
 		}
 
-		// @gdemers its important to enforce that the tag order be from highest priority to lowest.
-		// example : PrimarySlot, SecondarySlot, etc...
-		// an Item can be placed in both Primary, and secondary so to allow context switch between both entry
-		// but thats only relevant for the UI, not for gameplay. game play only care about setting the active slot
-		// to the user selection, they dont need to modify the object reference attached to the slot tag.
-		const FGameplayTag ItemSlotTag_HighestPriority = ItemSlotTags.First();
-		auto& OutValue = Loadout.FindOrAdd(ItemSlotTag_HighestPriority);
+		// @gdemers a new item being registered with this system should ALWAYS have a valid slot tag.
+		const FGameplayTag ActiveSlotTag = NewItemObject->GetRuntimeItemSlotTag();
+		if (!ensureAlwaysMsgf(ActiveSlotTag.IsValid(), TEXT("Active Item is missing a valid slot tag.")))
+		{
+			continue;
+		}
+
+		auto& OutValue = Loadout.FindOrAdd(ActiveSlotTag);
 		OutValue = NewItemObject;
 
 		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_SPAWN_ACTOR}))
@@ -142,10 +132,10 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		}
 
 		// @gdemers we need to initialize our loadout with the default element in hand represented by the highest priority tag.
-		const bool bDoesActiveItemHasHighestPriority = UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, ItemSlotTag_HighestPriority);
+		const bool bDoesActiveItemHasHighestPriority = UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, ActiveSlotTag);
 		if (!bDoesActiveItemHasHighestPriority)
 		{
-			Cycle(ItemSlotTag_HighestPriority);
+			Cycle(ActiveSlotTag);
 		}
 	}
 }
