@@ -76,6 +76,10 @@ public:
 	                                   const int32 PrivateItemId);
 
 	UFUNCTION(BlueprintCallable)
+	static FGameplayTag GetItemSlotTagFromPayload(const FString& NewPayload,
+	                                              const int32 PrivateItemId);
+
+	UFUNCTION(BlueprintCallable)
 	static FString ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
 	                                       const int32 ProviderId,
 	                                       const TArray<int32>& NewPrivateIds);

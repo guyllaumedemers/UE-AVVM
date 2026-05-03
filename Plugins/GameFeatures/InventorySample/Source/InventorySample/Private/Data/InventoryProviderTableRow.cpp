@@ -28,7 +28,13 @@ EDataValidationResult FInventoryProviderTableRow::IsDataValid(class FDataValidat
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
 	}
-	
+
+	if (bCanInventoryProviderEquipItems && DefaultSlotTags.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "Slot Tags empty. No valid Slot Tags specified!"));
+	}
+
 	if (DefaultInventory.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;

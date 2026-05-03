@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "GameplayTagContainer.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 
 #if WITH_EDITOR
@@ -53,6 +54,13 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	// @gdemers the unique identifier that represent the inventory provider actor. example : a shop.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
 	FDataRegistryId InventoryProviderActorIdentifierId = FDataRegistryId();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bCanInventoryProviderEquipItems = false;
+
+	// @gdemers slot tags used to bind an item to an abstract location within the loadout system.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanInventoryProviderEquipItems"))
+	TArray<FGameplayTag> DefaultSlotTags;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
 	TMap<TSoftClassPtr<UItemObject>, int32/*DefaultStackCount*/> DefaultInventory;

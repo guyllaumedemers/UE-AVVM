@@ -47,6 +47,7 @@ namespace NSJsonInventory
 	struct FJsonInventoryProvider
 	{
 		int32 Id = INDEX_NONE;
+		TMap<FGameplayTag, int32> Loadout;
 		TArray<int32> PrivateItemIds;
 	};
 
@@ -55,6 +56,17 @@ namespace NSJsonInventory
 	{
 		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 		JsonData->SetNumberField(TEXT("Id"), NewInventoryProvider.Id);
+
+		TArray<TSharedPtr<FJsonValue>> Loadout;
+		for (const auto& [SlotTag, PrivateItemId] : NewInventoryProvider.Loadout)
+		{
+			TSharedPtr<FJsonObject> KVPJsonObject = MakeShareable(new FJsonObject);
+			KVPJsonObject->SetStringField(TEXT("SlotTag"), SlotTag.ToString());
+			KVPJsonObject->SetNumberField("PrivateItemId", PrivateItemId);
+			Loadout.Add(MakeShareable(new FJsonValueObject(KVPJsonObject)));
+		}
+
+		JsonData->SetArrayField(TEXT("Loadout"), Loadout);
 
 		TArray<TSharedPtr<FJsonValue>> PrivateItemIds;
 		for (const int32 PrivateItemId : NewInventoryProvider.PrivateItemIds)
@@ -93,6 +105,20 @@ namespace NSJsonInventory
 
 		FJsonInventoryProvider InventoryProvider;
 		InventoryProvider.Id = JsonData->GetIntegerField(TEXT("Id"));
+
+		const TArray<TSharedPtr<FJsonValue>> Loadout = JsonData->GetArrayField(TEXT("Loadout"));
+		for (const auto& Item : Loadout)
+		{
+			const TSharedPtr<FJsonObject>* OutKVPJsonObject = nullptr;
+			Item->TryGetObject(OutKVPJsonObject);
+
+			if ((OutKVPJsonObject != nullptr) && OutKVPJsonObject->IsValid())
+			{
+				const FString GameplayTag = (*OutKVPJsonObject)->GetStringField(TEXT("SlotTag"));
+				const int32 PrivateItemId = (*OutKVPJsonObject)->GetIntegerField(TEXT("PrivateItemId"));
+				InventoryProvider.Loadout.FindOrAdd(FGameplayTag::RequestGameplayTag(FName(GameplayTag)), PrivateItemId);
+			}
+		}
 
 		const TArray<TSharedPtr<FJsonValue>> PrivateItemIds = JsonData->GetArrayField(TEXT("PrivateItemIds"));
 		for (const auto& PrivateItemId : PrivateItemIds)
@@ -318,6 +344,23 @@ FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
 	return OutResult;
 }
 
+FGameplayTag UInventoryUtils::GetItemSlotTagFromPayload(const FString& NewPayload,
+                                                        const int32 PrivateItemId)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	const auto* SearchResult = OutProvider.Loadout.FindKey(PrivateItemId);
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return FGameplayTag::EmptyTag;
+	}
+}
+
 FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
                                                  const int32 ProviderId,
                                                  const TArray<int32>& NewPrivateIds)
@@ -401,7 +444,9 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		}
 
 		TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
+		TMap<FGameplayTag, int32> Loadout;
 		TArray<int32> Items;
+		
 		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset
 		// are Blueprints, not elements dynamically composed. A complex entry is configured based on an Item Actor definition.
 		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
@@ -413,12 +458,30 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 
 			// TODO @gdemers Improve on this. I dont like that its synchronous.
 			const UClass* Class = ItemObjectClass.LoadSynchronous();
-			if (IsValid(Class))
+			if (!IsValid(Class))
 			{
-				const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
-				const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, StackCount);
-				ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
-				Items.Add(PrivateItemId);
+				continue;
+			}
+
+			const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
+			const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, StackCount);
+			ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
+			Items.Add(PrivateItemId);
+
+			if (!Row->bCanInventoryProviderEquipItems)
+			{
+				continue;
+			}
+
+			const auto* SearchResult = Row->DefaultSlotTags.FindByPredicate([AllowedSlots = ItemObjectCDO->GetItemSlotTags()](const FGameplayTag& Tag)
+			{
+				return AllowedSlots.HasTagExact(Tag);
+			});
+
+			if ((SearchResult != nullptr) && ensureAlwaysMsgf(!Items.Contains(PrivateItemId),
+			                                                  TEXT("Duplicated assignment for the current Inventory Provider.")))
+			{
+				Loadout.FindOrAdd(*SearchResult, PrivateItemId);
 			}
 		}
 
@@ -428,6 +491,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 
 		NSJsonInventory::FJsonInventoryProvider InventoryProvider;
 		InventoryProvider.Id = ProviderId;
+		InventoryProvider.Loadout = Loadout;
 		InventoryProvider.PrivateItemIds = Items;
 
 		FString OutProvider;
