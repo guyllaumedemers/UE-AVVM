@@ -32,7 +32,7 @@ class AAVVMCharacter;
 /**
  *	Class description:
  *	
- *	FAVVMMovementProperties_TS is a context struct to be updated based on the AVVMCharacter movement state tags,
+ *	FAVVMMovementProperties is a context struct to be updated based on the AVVMCharacter movement state tags,
  *	and allow running AnimInstance logic on worker thread.
  */
 USTRUCT(BlueprintType)
@@ -83,7 +83,7 @@ struct AVVMGAMEPLAY_API FAVVMMovementProperties
 /**
  *	Class description:
  *	
- *	FAVVMStateProperties_TS is a context struct to be updated based on the AVVMCharacter status tags,
+ *	FAVVMStatusProperties is a context struct to be updated based on the AVVMCharacter status tags,
  *	and allow running AnimInstance logic on worker thread.
  */
 USTRUCT(BlueprintType)

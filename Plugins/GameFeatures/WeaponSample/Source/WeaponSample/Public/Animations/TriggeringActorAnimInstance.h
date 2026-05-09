@@ -31,7 +31,7 @@ class ATriggeringActor;
 /**
  *	Class description:
  *	
- *	FTriggeringActorStateProperties_TS is a context struct to be updated based on the Triggering Actor status tags,
+ *	FTriggeringActorStatusProperties is a context struct to be updated based on the Triggering Actor status tags,
  *	and allow running AnimInstance logic on worker thread.
  */
 USTRUCT(BlueprintType)
