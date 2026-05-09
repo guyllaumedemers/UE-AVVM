@@ -63,7 +63,7 @@ struct WEAPONSAMPLE_API FTriggeringActorStatusProperties
 /**
  *	Class description:
  *	
- *	
+ *	FAVVMTriggeringActorAnimInstanceProxy is a Proxy struct that copy data over the worker thread.
  */
 USTRUCT(BlueprintType)
 struct WEAPONSAMPLE_API FAVVMTriggeringActorAnimInstanceProxy : public FAnimInstanceProxy

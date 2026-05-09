@@ -107,7 +107,7 @@ struct AVVMGAMEPLAY_API FAVVMStatusProperties
 /**
  *	Class description:
  *	
- *	
+ *	FAVVMCharacterAnimInstanceProxy is a Proxy struct that copy data over the worker thread.
  */
 USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMCharacterAnimInstanceProxy : public FAnimInstanceProxy
