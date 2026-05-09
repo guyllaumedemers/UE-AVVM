@@ -23,6 +23,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimInstanceProxy.h"
 
 #include "AVVMCharacterAnimInstance.generated.h"
 
@@ -35,7 +36,7 @@ class AAVVMCharacter;
  *	and allow running AnimInstance logic on worker thread.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMMovementProperties_TS
+struct AVVMGAMEPLAY_API FAVVMMovementProperties
 {
 	GENERATED_BODY()
 	
@@ -86,7 +87,7 @@ struct AVVMGAMEPLAY_API FAVVMMovementProperties_TS
  *	and allow running AnimInstance logic on worker thread.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMStatusProperties_TS
+struct AVVMGAMEPLAY_API FAVVMStatusProperties
 {
 	GENERATED_BODY()
 
@@ -101,6 +102,27 @@ struct AVVMGAMEPLAY_API FAVVMStatusProperties_TS
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
 	bool bIsRagdoll = false;
+};
+
+/**
+ *	Class description:
+ *	
+ *	
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMCharacterAnimInstanceProxy : public FAnimInstanceProxy
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FAVVMMovementProperties Movement = FAVVMMovementProperties();
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FAVVMStatusProperties Status = FAVVMStatusProperties();
+
+protected:
+	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
+	virtual void PostUpdate(UAnimInstance* InAnimInstance) const override;
 };
 
 /**
@@ -129,11 +151,11 @@ protected:
 	UFUNCTION()
 	void OnCharacterStateTagChanged(const FGameplayTagContainer& NewStateTags);
 	
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) override;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMMovementProperties_TS MovementProperties_TS = FAVVMMovementProperties_TS();
-	
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMStatusProperties_TS StatusProperties_TS = FAVVMStatusProperties_TS();
+	FAVVMCharacterAnimInstanceProxy AnyThreadProxy = FAVVMCharacterAnimInstanceProxy();
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AAVVMCharacter> OwningCharacter = nullptr;

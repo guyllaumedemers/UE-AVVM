@@ -25,6 +25,20 @@
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 #include "Tags/PrivateTags.h"
 
+void FAVVMTriggeringActorAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds)
+{
+	FAnimInstanceProxy::PreUpdate(InAnimInstance, DeltaSeconds);
+	
+	// @gdemers TODO update anim proxy with game thread specific calculation
+}
+
+void FAVVMTriggeringActorAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
+{
+	FAnimInstanceProxy::PostUpdate(InAnimInstance);
+	
+	// @gdemers TODO update progress calculation when coming back from worker thread.
+}
+
 UTriggeringActorAnimInstance::UTriggeringActorAnimInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -92,11 +106,27 @@ bool UTriggeringActorAnimInstance::PCV_ShouldWarnAboutNodesNotUsingFastPath() co
 
 void UTriggeringActorAnimInstance::OnTriggeringActorStateTagChanged(const FGameplayTagContainer& NewStateTags)
 {
-	// @gdemers status
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsDraw, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_DRAW, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRelaxed, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RELAXED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRaised, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RAISED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsTriggered, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_TRIGGERED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsExhausted, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_EXHAUSTED, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRecharging, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RECHARGING, NewStateTags);
+	auto* GameThreadProxy = GetProxyOnGameThreadStatic<FAVVMTriggeringActorAnimInstanceProxy>(this);
+	if (!ensureAlwaysMsgf(GameThreadProxy != nullptr, TEXT("Invalid Anim Proxy")))
+	{
+		return;
+	}
+
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsDraw, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_DRAW, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsRelaxed, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RELAXED, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsRaised, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RAISED, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsTriggered, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_TRIGGERED, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsExhausted, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_EXHAUSTED, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsRecharging, TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_RECHARGING, NewStateTags);
+}
+
+FAnimInstanceProxy* UTriggeringActorAnimInstance::CreateAnimInstanceProxy()
+{
+	return &AnyThreadProxy;
+}
+
+void UTriggeringActorAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy)
+{
+	// @gdemers our proxy is not heap allocated.
+	// Super::DestroyAnimInstanceProxy(InProxy);
 }

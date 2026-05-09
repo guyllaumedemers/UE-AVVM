@@ -24,6 +24,20 @@
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 #include "Tags/AVVMGameplayTags.h"
 
+void FAVVMCharacterAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds)
+{
+	FAnimInstanceProxy::PreUpdate(InAnimInstance, DeltaSeconds);
+	
+	// @gdemers TODO update anim proxy with game thread specific calculation
+}
+
+void FAVVMCharacterAnimInstanceProxy::PostUpdate(UAnimInstance* InAnimInstance) const
+{
+	FAnimInstanceProxy::PostUpdate(InAnimInstance);
+	
+	// @gdemers TODO update progress calculation when coming back from worker thread.
+}
+
 UAVVMCharacterAnimInstance::UAVVMCharacterAnimInstance(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -91,24 +105,41 @@ bool UAVVMCharacterAnimInstance::PCV_ShouldWarnAboutNodesNotUsingFastPath() cons
 
 void UAVVMCharacterAnimInstance::OnCharacterStateTagChanged(const FGameplayTagContainer& NewStateTags)
 {
+	auto* GameThreadProxy = GetProxyOnGameThreadStatic<FAVVMCharacterAnimInstanceProxy>(this);
+	if (!ensureAlwaysMsgf(GameThreadProxy != nullptr, TEXT("Invalid Anim Proxy")))
+	{
+		return;
+	}
+
 	// @gdemers movements
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsIdle, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_IDLE, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsWalking, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_WALK, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSprinting, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SPRINT, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsRunning, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_RUN, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSliding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SLIDING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsCharging, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_CHARGING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsSwimming, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SWIMMING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsGliding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_GLIDING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsMantling, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_MANTLING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsVaulting, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_VAULTING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsProne, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_PRONE, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsCrouching, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_CROUCHING, NewStateTags);
-	UPDATE_TS_PROPERTY(MovementProperties_TS, bIsStanding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_STANDING, NewStateTags);
-	
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsIdle, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_IDLE, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsWalking, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_WALK, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsSprinting, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SPRINT, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsRunning, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_RUN, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsSliding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SLIDING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsCharging, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_CHARGING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsSwimming, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_SWIMMING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsGliding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_GLIDING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsMantling, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_MANTLING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsVaulting, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_VAULTING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsProne, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_PRONE, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsCrouching, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_CROUCHING, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Movement, bIsStanding, TAG_AVVMGAMEPLAY_PLAYER_MOVEMENT_STATE_STANDING, NewStateTags);
+
 	// @gdemers status
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsGrounded, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_GROUND, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsAired, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_AIR, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsDown, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_DOWN, NewStateTags);
-	UPDATE_TS_PROPERTY(StatusProperties_TS, bIsRagdoll, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_RAGDOLL, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsGrounded, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_GROUND, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsAired, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_AIR, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsDown, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_DOWN, NewStateTags);
+	UPDATE_TS_PROPERTY(GameThreadProxy->Status, bIsRagdoll, TAG_AVVMGAMEPLAY_PLAYER_STATUS_STATE_RAGDOLL, NewStateTags);
+}
+
+FAnimInstanceProxy* UAVVMCharacterAnimInstance::CreateAnimInstanceProxy()
+{
+	return &AnyThreadProxy;
+}
+
+void UAVVMCharacterAnimInstance::DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy)
+{
+	// @gdemers our proxy is not heap allocated.
+	// Super::DestroyAnimInstanceProxy(InProxy);
 }

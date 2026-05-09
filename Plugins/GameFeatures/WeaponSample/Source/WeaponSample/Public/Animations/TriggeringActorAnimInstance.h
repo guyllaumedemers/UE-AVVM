@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimInstanceProxy.h"
 
 #include "TriggeringActorAnimInstance.generated.h"
 
@@ -34,7 +35,7 @@ class ATriggeringActor;
  *	and allow running AnimInstance logic on worker thread.
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FTriggeringActorStatusProperties_TS
+struct WEAPONSAMPLE_API FTriggeringActorStatusProperties
 {
 	GENERATED_BODY()
 	
@@ -57,6 +58,24 @@ struct WEAPONSAMPLE_API FTriggeringActorStatusProperties_TS
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
 	bool bIsRecharging = false;
+};
+
+/**
+ *	Class description:
+ *	
+ *	
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FAVVMTriggeringActorAnimInstanceProxy : public FAnimInstanceProxy
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FTriggeringActorStatusProperties Status = FTriggeringActorStatusProperties();
+
+protected:
+	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
+	virtual void PostUpdate(UAnimInstance* InAnimInstance) const override;
 };
 
 /**
@@ -85,8 +104,11 @@ protected:
 	UFUNCTION()
 	void OnTriggeringActorStateTagChanged(const FGameplayTagContainer& NewStateTags);
 	
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
+	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) override;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FTriggeringActorStatusProperties_TS StatusProperties_TS = FTriggeringActorStatusProperties_TS();
+	FAVVMTriggeringActorAnimInstanceProxy AnyThreadProxy = FAVVMTriggeringActorAnimInstanceProxy();
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const ATriggeringActor> OwningActor = nullptr;
