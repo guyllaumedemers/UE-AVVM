@@ -80,7 +80,7 @@ struct AVVMTOOLKIT_API FAVVMGameThreadLock
 
 		FAVVMScopedLock(FAVVMGameThreadLock* NewHandle, const FSimpleDelegate& NewCallback)
 			: Handle(NewHandle)
-			  , Callback(NewCallback)
+			, Callback(NewCallback)
 		{
 			if (Handle != nullptr) { Handle->Lock(); }
 		}
@@ -97,14 +97,14 @@ struct AVVMTOOLKIT_API FAVVMGameThreadLock
 		FSimpleDelegate Callback;
 	};
 
-	FAVVMScopedLock Make() const
+	FAVVMScopedLock Make()
 	{
-		return FAVVMScopedLock(const_cast<FAVVMGameThreadLock*>(this));
+		return FAVVMScopedLock(this);
 	}
 
-	FAVVMScopedLock Make(const FSimpleDelegate& NewCallback) const
+	FAVVMScopedLock Make(const FSimpleDelegate& NewCallback)
 	{
-		return FAVVMScopedLock(const_cast<FAVVMGameThreadLock*>(this), NewCallback);
+		return FAVVMScopedLock(this, NewCallback);
 	}
 
 private:
