@@ -79,6 +79,48 @@ struct INVENTORYSAMPLE_API FItemState
 /**
  *	Class description:
  *	
+ *	FItemSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FItemSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
+	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
+	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
+
+	// @gdemers its important to enforce that the tag order be from highest priority to lowest. Example : PrimarySlot, SecondarySlot, etc...
+	// an Item can be placed interchangeably in Primary or secondary, and allow context switching between both entries
+	// (but! that's only relevant for the UI, not for gameplay)(Gameplay only care about setting the active slot).
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
+	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Slot Tags that compose this item. Usefull when attaching Modifiers at Runtime."))
+	FGameplayTagContainer ItemAttachmentSlotTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Points to a global mapping of tag to int32."))
+	FGameplayTag MaxStackCount_CategoryTag = FGameplayTag::EmptyTag;
+
+	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
+	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorDefinitionDataTableRow"))
+	FDataRegistryId ItemActorId = FDataRegistryId();
+
+	// @gdemers reference the ui definition of the referenced actor this UItemObject owns.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorUIDefinitionDataTableRow"))
+	FDataRegistryId ItemActorUIId = FDataRegistryId();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	FName SocketName = NAME_None;
+};
+
+/**
+ *	Class description:
+ *	
  *	FItemActorSpawnContextArgs is a context struct that encapsulate information required for Spawning an Actor class
  *	in the inventory system.
  */
@@ -109,7 +151,7 @@ struct INVENTORYSAMPLE_API FItemActorSpawnContextArgs
  *			* ItemState::InGameWorld may also imply we are previewing an item for purchased from a Shop.
  *			* etc...
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, SparseClassDataTypes="ItemSparseData")
 class INVENTORYSAMPLE_API UItemObject final : public UObject
 {
 	GENERATED_BODY()
@@ -122,6 +164,11 @@ public:
 	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context,
 	                                          UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
 #endif // UE_WITH_IRIS
+
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
@@ -202,13 +249,13 @@ public:
 	int32 GetMaxStackCount() const;
 
 	UFUNCTION(BlueprintCallable)
-	const FGameplayTagContainer& GetItemSlotTags() const;
+	const FGameplayTagContainer& BP_GetItemSlotTags() const;
 
 	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& GetItemActorId() const;
+	const FDataRegistryId& BP_GetItemActorId() const;
 
 	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& GetItemActorUIId() const;
+	const FDataRegistryId& BP_GetItemActorUIId() const;
 
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
@@ -238,36 +285,6 @@ protected:
 	UFUNCTION()
 	void OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
-	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
-	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
-
-	// @gdemers its important to enforce that the tag order be from highest priority to lowest. Example : PrimarySlot, SecondarySlot, etc...
-	// an Item can be placed interchangeably in Primary or secondary, and allow context switching between both entries
-	// (but! that's only relevant for the UI, not for gameplay)(Gameplay only care about setting the active slot).
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
-	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Define the Slot Tags that compose this item. Usefull when attaching Modifiers at Runtime."))
-	FGameplayTagContainer ItemAttachmentSlotTags = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Points to a global mapping of tag to int32."))
-	FGameplayTag MaxStackCount_CategoryTag = FGameplayTag::EmptyTag;
-
-	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
-	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
-	FDataRegistryId ItemActorId = FDataRegistryId();
-
-	// @gdemers reference the ui definition of the referenced actor this UItemObject owns.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorUIDefinitionDataTableRow"))
-	FDataRegistryId ItemActorUIId = FDataRegistryId();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FName SocketName = NAME_None;
-
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<AActor> RuntimeItemActor = nullptr;
 
@@ -291,6 +308,33 @@ private:
 	// representation. (we do nullify during drop action but that imply we have already released our handle from backend.)
 	int32 PrivateItemId = INDEX_NONE;
 	friend class UItemObjectUtils;
+
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	FGameplayTagContainer ItemBehaviourTypeTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY()
+	FGameplayTagContainer ItemTypeTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY()
+	FGameplayTagContainer ItemSlotTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY()
+	FGameplayTagContainer ItemAttachmentSlotTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY()
+	FGameplayTag MaxStackCount_CategoryTag_DEPRECATED = FGameplayTag::EmptyTag;
+
+	UPROPERTY()
+	FDataRegistryId ItemActorId_DEPRECATED = FDataRegistryId();
+
+	UPROPERTY()
+	FDataRegistryId ItemActorUIId_DEPRECATED = FDataRegistryId();
+
+	UPROPERTY()
+	FName SocketName_DEPRECATED = NAME_None;
+#endif
 };
 
 /**

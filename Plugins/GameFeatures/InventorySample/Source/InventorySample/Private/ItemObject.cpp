@@ -38,6 +38,7 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ItemStackTableRow.h"
 #include "Engine/AssetManager.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
@@ -67,6 +68,35 @@ void UItemObject::RegisterReplicationFragments(UE::Net::FFragmentRegistrationCon
 	UE::Net::FReplicationFragmentUtil::CreateAndRegisterFragmentsForObject(this, Context, RegistrationFlags);
 }
 #endif // UE_WITH_IRIS
+
+#if WITH_EDITOR
+void UItemObject::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FItemSparseData* SparseClassData = GetMutableItemSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->ItemBehaviourTypeTags = ItemBehaviourTypeTags_DEPRECATED;
+	SparseClassData->ItemTypeTags = ItemTypeTags_DEPRECATED;
+	SparseClassData->ItemSlotTags = ItemSlotTags_DEPRECATED;
+	SparseClassData->ItemAttachmentSlotTags = ItemAttachmentSlotTags_DEPRECATED;
+	SparseClassData->MaxStackCount_CategoryTag = MaxStackCount_CategoryTag_DEPRECATED;
+	SparseClassData->ItemActorId = ItemActorId_DEPRECATED;
+	SparseClassData->ItemActorUIId = ItemActorUIId_DEPRECATED;
+	SparseClassData->SocketName = SocketName_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif // WITH_EDITOR
 
 void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
 {
@@ -150,42 +180,42 @@ bool UItemObject::DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) c
 
 bool UItemObject::DoesTypeHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAnyExact(ItemTypeTags);
+	return Compare.HasAnyExact(GetItemTypeTags());
 }
 
 bool UItemObject::DoesTypeHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAllExact(ItemTypeTags);
+	return Compare.HasAllExact(GetItemTypeTags());
 }
 
 bool UItemObject::DoesBehaviourHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAnyExact(ItemBehaviourTypeTags);
+	return Compare.HasAnyExact(GetItemBehaviourTypeTags());
 }
 
 bool UItemObject::DoesBehaviourHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAllExact(ItemBehaviourTypeTags);
+	return Compare.HasAllExact(GetItemBehaviourTypeTags());
 }
 
 bool UItemObject::DoesAttachmentSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAnyExact(ItemAttachmentSlotTags);
+	return Compare.HasAnyExact(GetItemAttachmentSlotTags());
 }
 
 bool UItemObject::DoesAttachmentSlotHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAllExact(ItemAttachmentSlotTags);
+	return Compare.HasAllExact(GetItemAttachmentSlotTags());
 }
 
 bool UItemObject::DoesSlotHasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAnyExact(ItemSlotTags);
+	return Compare.HasAnyExact(GetItemSlotTags());
 }
 
 bool UItemObject::DoesSlotHasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return Compare.HasAllExact(ItemSlotTags);
+	return Compare.HasAllExact(GetItemSlotTags());
 }
 
 const FGameplayTagContainer& UItemObject::GetRuntimeState() const
@@ -211,7 +241,7 @@ bool UItemObject::IsEmpty() const
 bool UItemObject::CanStack(const UItemObject* Item) const
 {
 	// @gdemers validate if both items are of same types.
-	if (!IsValid(Item) || (Item->GetItemActorId() != GetItemActorId()))
+	if (!IsValid(Item) || (Item->BP_GetItemActorId() != BP_GetItemActorId()))
 	{
 		return false;
 	}
@@ -303,7 +333,7 @@ int32 UItemObject::GetMaxStackCount() const
 	if (bIsStorage)
 	{
 		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
 	}
 
@@ -317,24 +347,24 @@ int32 UItemObject::GetMaxStackCount() const
 	else
 	{
 		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
-		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, MaxStackCount_CategoryTag);
+		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
 	}
 }
 
-const FGameplayTagContainer& UItemObject::GetItemSlotTags() const
+const FGameplayTagContainer& UItemObject::BP_GetItemSlotTags() const
 {
-	return ItemSlotTags;
+	return GetItemSlotTags();
 }
 
-const FDataRegistryId& UItemObject::GetItemActorId() const
+const FDataRegistryId& UItemObject::BP_GetItemActorId() const
 {
-	return ItemActorId;
+	return GetItemActorId();
 }
 
-const FDataRegistryId& UItemObject::GetItemActorUIId() const
+const FDataRegistryId& UItemObject::BP_GetItemActorUIId() const
 {
-	return ItemActorUIId;
+	return GetItemActorUIId();
 }
 
 void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
@@ -397,10 +427,10 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	{
 		FAVVMSocketTargetingDeferralContextArgs Params;
 		Params.Parent = Outer;
-		Params.SocketName = SocketName;
+		Params.SocketName = GetSocketName();
 		// TODO @gdemers : will require proper tag handling later. keep gameplay tag container for now until requirements
 		// changes.
-		Params.AttachmentSlotTag = ItemAttachmentSlotTags.First();
+		Params.AttachmentSlotTag = GetItemAttachmentSlotTags().First();
 		Params.SrcAttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
 
 		// @gdemers We use this so we can handle more complex case that require traversal of our root actor

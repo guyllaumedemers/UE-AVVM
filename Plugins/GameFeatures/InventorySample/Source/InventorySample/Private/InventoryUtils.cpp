@@ -209,7 +209,7 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 	}
 	else
 	{
-		return UInventoryUtils::GetItemActorUniqueIdentifier({UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->GetItemActorId().ItemName});
+		return UInventoryUtils::GetItemActorUniqueIdentifier({UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName});
 	}
 }
 
@@ -473,7 +473,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 				continue;
 			}
 
-			const auto* SearchResult = Row->DefaultSlotTags.FindByPredicate([AllowedSlots = ItemObjectCDO->GetItemSlotTags()](const FGameplayTag& Tag)
+			const auto* SearchResult = Row->DefaultSlotTags.FindByPredicate([AllowedSlots = ItemObjectCDO->BP_GetItemSlotTags()](const FGameplayTag& Tag)
 			{
 				return AllowedSlots.HasTagExact(Tag);
 			});
