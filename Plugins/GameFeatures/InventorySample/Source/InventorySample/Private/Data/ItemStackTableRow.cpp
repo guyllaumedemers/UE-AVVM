@@ -34,7 +34,7 @@ EDataValidationResult FItemStackTableRow::IsDataValid(class FDataValidationConte
 
 	if (bShouldRepresentStorageCapacity)
 	{
-		if (MaxStackCount > UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE))
+		if (MaxStackCount > UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE))
 		{
 			Result = EDataValidationResult::Invalid;
 			Context.AddError(NSLOCTEXT("FItemStackTableRow", "", "Invalid Storage Capacity."));
@@ -42,7 +42,7 @@ EDataValidationResult FItemStackTableRow::IsDataValid(class FDataValidationConte
 	}
 	else
 	{
-		if (MaxStackCount > UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE))
+		if (MaxStackCount > UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_COUNT_ENCODING_BIT_RANGE))
 		{
 			Result = EDataValidationResult::Invalid;
 			Context.AddError(NSLOCTEXT("FItemStackTableRow", "", "Invalid Stack Count."));

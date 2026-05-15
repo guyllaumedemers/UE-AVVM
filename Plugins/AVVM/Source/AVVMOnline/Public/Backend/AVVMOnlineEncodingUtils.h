@@ -58,5 +58,5 @@ public:
 	                                  const int32 SearchValue);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 GetBitMask(const int32 BitRange);
+	static int32 GetRangeAsBitMask(const int32 BitRange);
 };

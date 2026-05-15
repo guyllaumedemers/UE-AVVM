@@ -32,7 +32,7 @@ int32 UAVVMOnlineEncodingUtils::EncodeInt32(const int32 Input,
                                             const int32 BitRange,
                                             const int32 LShift)
 {
-	if (!ensureAlwaysMsgf(Input >= 1 && (Input < (1 << BitRange)),
+	if (!ensureAlwaysMsgf((Input >= 1) && (Input < UAVVMOnlineEncodingUtils::GetRangeAsBitMask(BitRange)),
 	                      TEXT("Invalid Input. Outside provided Range.")))
 	{
 		return INDEX_NONE;
@@ -46,7 +46,7 @@ int32 UAVVMOnlineEncodingUtils::FilterInt32(const int32 Input,
                                             const int32 BitRange,
                                             const int32 LShift)
 {
-	const int32 FilteringRange = (UAVVMOnlineEncodingUtils::GetBitMask(BitRange) << LShift);
+	const int32 FilteringRange = (UAVVMOnlineEncodingUtils::GetRangeAsBitMask(BitRange) << LShift);
 	const int32 Result = (Input & FilteringRange);
 	return Result;
 }
@@ -69,7 +69,7 @@ TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs
 	return OutResults;
 }
 
-int32 UAVVMOnlineEncodingUtils::GetBitMask(const int32 BitRange)
+int32 UAVVMOnlineEncodingUtils::GetRangeAsBitMask(const int32 BitRange)
 {
 	TFunction<int32(const int32 NewInput)> Recurse;
 	Recurse = [&](const int32 NewInput)
