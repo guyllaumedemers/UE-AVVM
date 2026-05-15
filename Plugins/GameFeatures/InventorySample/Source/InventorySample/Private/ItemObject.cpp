@@ -123,7 +123,7 @@ void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 {
 	const FItemState OldState = RuntimeItemState;
 	
-	static constexpr int32 MaxStorageId = (1 << GET_STORAGE_ID_ENCODING_BIT_RANGE);
+	static const int32 MaxStorageId = UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_STORAGE_ID_ENCODING_BIT_RANGE);
 	RuntimeItemState.StorageId = FMath::Clamp<int32>(NewStorageId, 0, MaxStorageId);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
@@ -356,7 +356,7 @@ int32 UItemObject::GetMaxStackCount() const
 	}
 	else
 	{
-		static constexpr int32 MaxStackCountBounds = (1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+		static const int32 MaxStackCountBounds = UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_COUNT_ENCODING_BIT_RANGE);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
 	}
