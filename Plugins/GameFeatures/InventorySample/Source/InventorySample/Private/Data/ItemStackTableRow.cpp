@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Data/ItemStackTableRow.h"
 
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 
 #if WITH_EDITOR
@@ -33,7 +34,7 @@ EDataValidationResult FItemStackTableRow::IsDataValid(class FDataValidationConte
 
 	if (bShouldRepresentStorageCapacity)
 	{
-		if (MaxStackCount > (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE))
+		if (MaxStackCount > UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE))
 		{
 			Result = EDataValidationResult::Invalid;
 			Context.AddError(NSLOCTEXT("FItemStackTableRow", "", "Invalid Storage Capacity."));

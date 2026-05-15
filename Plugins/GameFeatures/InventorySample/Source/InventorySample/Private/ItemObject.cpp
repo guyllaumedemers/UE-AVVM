@@ -342,7 +342,7 @@ int32 UItemObject::GetMaxStackCount() const
 	const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE));
 	if (bIsStorage)
 	{
-		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
 	}
@@ -821,7 +821,7 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 {
 	// @gdemers our count has reach our encoding hard limit. this 100% imply that the storage is full.
 	// if theres an overflow from what design configured in DataAsset, theres a problem at the user level!
-	const bool bDoesCountReachMaxCapacity = (Count >= (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE));
+	const bool bDoesCountReachMaxCapacity = (Count >= UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE));
 	if (bDoesCountReachMaxCapacity)
 	{
 		return true;
@@ -840,6 +840,11 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
                                               const int32 StorageId)
 {
+	if (!IsValid(InventoryComponent))
+	{
+		return INDEX_NONE;
+	}
+	
 	const int32 NewStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
 	// @gdemers Remember that storage are also UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_count, i.e the total of items they can fit in.
 	// IMPORTANT : However, remember that when initializing data from file on disk, our item collection may or may not reference a storage, which means that retrieving its
@@ -874,7 +879,7 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
 	if (ensureAlwaysMsgf(IsValid(MaxCountDataTable), TEXT("Missing valid StackCount Data Table in project Settings.")))
 	{
-		static constexpr int32 MaxStorageCapacityBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
 		const FGameplayTag& StorageCapacityTag = UInventorySettings::GetStorageCapacityTagById(NewStorageId);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, StorageCapacityTag);
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);

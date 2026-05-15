@@ -46,20 +46,7 @@ int32 UAVVMOnlineEncodingUtils::FilterInt32(const int32 Input,
                                             const int32 BitRange,
                                             const int32 LShift)
 {
-	TFunction<int32(const int32 NewInput)> Recurse;
-	Recurse = [&](const int32 NewInput)
-	{
-		if (NewInput == 0)
-		{
-			return 1;
-		}
-		else
-		{
-			return (1 << NewInput) + Recurse(NewInput - 1);
-		}
-	};
-
-	const int32 FilteringRange = (Recurse(BitRange) << LShift);
+	const int32 FilteringRange = (UAVVMOnlineEncodingUtils::GetBitMask(BitRange) << LShift);
 	const int32 Result = (Input & FilteringRange);
 	return Result;
 }
@@ -80,4 +67,22 @@ TArray<int32> UAVVMOnlineEncodingUtils::SearchValues(const TArray<int32>& Inputs
 	}
 
 	return OutResults;
+}
+
+int32 UAVVMOnlineEncodingUtils::GetBitMask(const int32 BitRange)
+{
+	TFunction<int32(const int32 NewInput)> Recurse;
+	Recurse = [&](const int32 NewInput)
+		{
+			if (NewInput == 0)
+			{
+				return 1;
+			}
+			else
+			{
+				return (1 << NewInput) + Recurse(NewInput - 1);
+			}
+		};
+
+	return Recurse(BitRange);
 }

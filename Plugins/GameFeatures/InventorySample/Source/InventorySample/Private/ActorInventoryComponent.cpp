@@ -35,6 +35,7 @@
 #include "NonReplicatedLoadoutObject.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
@@ -870,8 +871,8 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	});
 
 	// @gdemers hard limit set by bit encoding to possible storage positions, and Ids.
-	static constexpr int32 StoragePositionBounds = (1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-	static constexpr int32 StorageIdBounds = (1 << GET_ITEM_ID_ENCODING_BIT_RANGE);
+	static const int32 StoragePositionBounds = UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+	static const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetBitMask(1 << GET_ITEM_ID_ENCODING_BIT_RANGE);
 	bool bDoesStackOverflow = false;
 
 	// @gdemers an entry already exist for us to support stacking.
