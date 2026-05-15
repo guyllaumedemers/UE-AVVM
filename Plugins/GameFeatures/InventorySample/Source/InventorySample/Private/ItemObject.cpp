@@ -100,46 +100,56 @@ void UItemObject::MoveDataToSparseClassDataStruct() const
 
 void UItemObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
 {
+	const FItemState OldState = RuntimeItemState;
+	
 	RuntimeItemState.StateTags.RemoveTags(RemovedTags);
 	RuntimeItemState.StateTags.AppendTags(AddedTags);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
-	OnRep_ItemStateModified(RuntimeItemState);
+	OnRep_ItemStateModified(OldState);
 }
 
 void UItemObject::ModifyRuntimeSlotTag(const FGameplayTag& NewSlotTag)
 {
+	const FItemState OldState = RuntimeItemState;
+	
 	RuntimeItemState.ActiveSlotTag = NewSlotTag;
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
-	OnRep_ItemStateModified(RuntimeItemState);
+	OnRep_ItemStateModified(OldState);
 }
 
 void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 {
+	const FItemState OldState = RuntimeItemState;
+	
 	static constexpr int32 MaxStorageId = (1 << GET_STORAGE_ID_ENCODING_BIT_RANGE);
 	RuntimeItemState.StorageId = FMath::Clamp<int32>(NewStorageId, 0, MaxStorageId);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
-	OnRep_ItemStateModified(RuntimeItemState);
+	OnRep_ItemStateModified(OldState);
 }
 
 void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 {
+	const FItemState OldState = RuntimeItemState;
+	
 	const int32 MaxStorageCapacity = GetRuntimeStorageMaxCapacity();
 	RuntimeItemState.StoragePosition = FMath::Clamp<int32>(NewStoragePosition, 0, MaxStorageCapacity);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
-	OnRep_ItemStateModified(RuntimeItemState);
+	OnRep_ItemStateModified(OldState);
 }
 
 void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount)
 {
+	const FItemState OldState = RuntimeItemState;
+	
 	const int32 MaxStackCount = GetMaxStackCount();
 	RuntimeItemState.StackCount = FMath::Clamp<int32>(NewStackCount, 0, MaxStackCount);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
-	OnRep_ItemStateModified(RuntimeItemState);
+	OnRep_ItemStateModified(OldState);
 
 	// @gdemers early out on non-empty stack.
 	if (!!RuntimeItemState.StackCount)
