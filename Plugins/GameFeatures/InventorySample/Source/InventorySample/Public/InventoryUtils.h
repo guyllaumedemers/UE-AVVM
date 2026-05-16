@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "InventoryUtils.generated.h"
@@ -83,6 +84,17 @@ public:
 	static FString ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
 	                                       const int32 ProviderId,
 	                                       const TArray<int32>& NewPrivateIds);
+
+	UFUNCTION(BlueprintCallable)
+	static FString CreateInventoryProvider(const int32 ProviderId,
+										   const TMap<FGameplayTag, int32> Loadout,
+										   const TArray<int32>& PrivateItemIds);
+
+	UFUNCTION(BlueprintCallable)
+	static void GetInventoryProvider(const FString& NewPayload,
+	                                 int32& OutProviderId,
+	                                 TMap<FGameplayTag, int32>& OutLoadout,
+	                                 TArray<int32>& OutPrivateItemIds);
 
 	UFUNCTION(BlueprintCallable)
 	static FString CreateDefaultInventoryProviders();

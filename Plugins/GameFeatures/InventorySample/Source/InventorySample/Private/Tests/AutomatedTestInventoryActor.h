@@ -17,15 +17,19 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InventoryFunctionTest.h"
+#pragma once
 
-bool AInventorySampleFunctionTest::RunTest(const TArray<FString>& Params)
+#include "CoreMinimal.h"
+
+#include "GameFramework/Actor.h"
+
+#include "AutomatedTestInventoryActor.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class INVENTORYSAMPLE_API AAutomatedTestInventoryActor : public AActor
 {
-	// other test, such as Actor spawning should be done in the Functional test.
-	
-	// test attachment logic
-	
-	// test pickup, drop, swap
-	
-	return Super::RunTest(Params);
-}
+	GENERATED_BODY()
+};

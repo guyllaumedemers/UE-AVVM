@@ -32,4 +32,7 @@ UCLASS()
 class INVENTORYSAMPLE_API AInventorySampleFunctionTest : public AScreenshotFunctionalTest
 {
 	GENERATED_BODY()
+	
+protected:
+	virtual bool RunTest(const TArray<FString>& Params = TArray<FString>()) override;
 };

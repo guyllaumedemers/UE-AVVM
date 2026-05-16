@@ -28,16 +28,16 @@
 
 TStrongObjectPtr<UInventoryFileHelper> UInventoryFileHelper::gInventoryFileHelper = nullptr;
 
-FStringView UInventoryFileHelper::Static_GetSetFileContent()
+FStringView UInventoryFileHelper::Static_GetSetFileContent(const bool bShouldDelete)
 {
 	auto* FileHelper = UInventoryFileHelper::Get();
 	if (IsValid(FileHelper))
 	{
-		return FileHelper->GetSetFileContent(UInventorySettings::GetAppDataDirPath());
+		return FileHelper->GetSetFileContent(UInventorySettings::GetAppDataDirPath(), bShouldDelete);
 	}
 	else
 	{
-		static FStringView Empty;
+		static FStringView Empty = TEXT("");
 		return Empty;
 	}
 }
@@ -77,15 +77,21 @@ UInventoryFileHelper* UInventoryFileHelper::Get()
 	return gInventoryFileHelper.Get();
 }
 
-FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePath)
+FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePath, const bool bShouldDelete)
 {
-	const auto GetFileFromDisk = [](const FStringView NewPath)
+	const auto GetFileFromDisk = [bShouldDelete](const FStringView NewPath)
 	{
 		IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
 		const TCHAR* FilePath = NewPath.GetData();
 
 		FString OutFileContent;
-		if (FileManager.FileExists(FilePath))
+
+		const bool bDoesFileExist = FileManager.FileExists(FilePath);
+		if (bDoesFileExist && bShouldDelete)
+		{
+			FileManager.DeleteFile(FilePath);
+		}
+		else if (bDoesFileExist)
 		{
 			FFileHelper::LoadFileToString(OutFileContent, FilePath);
 			AVVM_LOGGER_LOG(LogInventorySample,

@@ -409,6 +409,34 @@ FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
 	}
 }
 
+FString UInventoryUtils::CreateInventoryProvider(const int32 ProviderId,
+                                                 const TMap<FGameplayTag, int32> Loadout,
+                                                 const TArray<int32>& PrivateItemIds)
+{
+	NSJsonInventory::FJsonInventoryProvider InventoryProvider;
+	InventoryProvider.Id = ProviderId;
+	InventoryProvider.Loadout = Loadout;
+	InventoryProvider.PrivateItemIds = PrivateItemIds;
+
+	FString OutProvider;
+	NSJsonInventory::ToString(InventoryProvider, OutProvider);
+
+	return OutProvider;
+}
+
+void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
+                                           int32& OutProviderId,
+                                           TMap<FGameplayTag, int32>& OutLoadout,
+                                           TArray<int32>& OutPrivateItemIds)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	OutProviderId = OutProvider.Id;
+	OutLoadout = OutProvider.Loadout;
+	OutPrivateItemIds = OutProvider.PrivateItemIds;
+}
+
 FString UInventoryUtils::CreateDefaultInventoryProviders()
 {
 	const TSoftObjectPtr<UDataTable>& ProviderDataTable = UInventorySettings::GetDefaultProviderInventories();
@@ -489,13 +517,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		// a valid storage object, or more are available for referencing on relevant items.
 		FStorageHelper::HandleStorageAssignment(ItemCDOs, Items);
 
-		NSJsonInventory::FJsonInventoryProvider InventoryProvider;
-		InventoryProvider.Id = ProviderId;
-		InventoryProvider.Loadout = Loadout;
-		InventoryProvider.PrivateItemIds = Items;
-
-		FString OutProvider;
-		NSJsonInventory::ToString(InventoryProvider, OutProvider);
+		const FString OutProvider = UInventoryUtils::CreateInventoryProvider(ProviderId, Loadout, Items);
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
 	}
 

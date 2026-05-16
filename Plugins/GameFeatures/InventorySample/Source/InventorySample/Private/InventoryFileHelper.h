@@ -36,12 +36,12 @@ class INVENTORYSAMPLE_API UInventoryFileHelper : public UObject
 	GENERATED_BODY()
 	
 public:
-	static FStringView Static_GetSetFileContent();
+	static FStringView Static_GetSetFileContent(const bool bShouldDelete = false);
 	static void Static_Serialize(const FString& NewFileContent);
 	
 protected:
 	static UInventoryFileHelper* Get();
-	FStringView GetSetFileContent(const FStringView NewFilePath);
+	FStringView GetSetFileContent(const FStringView NewFilePath, const bool bShouldDelete);
 	// @gdemers _v2 prevent function name shadowing in base UObject class.
 	void Serialize_v2(const FString& NewFileContent);
 	void MarkFileDirty();
