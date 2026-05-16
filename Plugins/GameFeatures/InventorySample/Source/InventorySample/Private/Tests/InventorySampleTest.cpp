@@ -155,24 +155,24 @@ public:
 
 	void Setup()
 	{
-		// TestWorld = MakeShared<FTestWorldWrapper>();
-		// TestWorld->CreateTestWorld(EWorldType::Game);
-		// TestWorld->BeginPlayInTestWorld();
-		//
-		// UWorld* ProxyWorld = TestWorld->GetTestWorld();
-		// TestNotNull("UWorld.", ProxyWorld);
-		//
-		// TestActor = TStrongObjectPtr(ProxyWorld->SpawnActor<AAutomatedTestInventoryActor>());
-		// TestNotNull("AAVVMAutomatedTestGameplayActor.", TestActor.Get());
-		//
-		// // Restore initialization state
-		// TestActor->PreInitializeComponents();
-		// TestActor->InitializeComponents();
-		// TestActor->PostInitializeComponents();
-		// TestActor->DispatchBeginPlay();
-		//
-		// bIsResourceManagerAsyncCommandComplete = MakeShared<bool>(false);
-		// TestActor->SetTestFlag(bIsResourceManagerAsyncCommandComplete);
+		TestWorld = MakeShared<FTestWorldWrapper>();
+		TestWorld->CreateTestWorld(EWorldType::Game);
+		TestWorld->BeginPlayInTestWorld();
+
+		UWorld* ProxyWorld = TestWorld->GetTestWorld();
+		TestNotNull("UWorld.", ProxyWorld);
+
+		TestActor = TStrongObjectPtr(ProxyWorld->SpawnActor<AAutomatedTestInventoryActor>());
+		TestNotNull("AAVVMAutomatedTestGameplayActor.", TestActor.Get());
+
+		// Restore initialization state
+		TestActor->PreInitializeComponents();
+		TestActor->InitializeComponents();
+		TestActor->PostInitializeComponents();
+		TestActor->DispatchBeginPlay();
+
+		bIsResourceManagerAsyncCommandComplete = MakeShared<bool>(false);
+		TestActor->SetTestFlag(bIsResourceManagerAsyncCommandComplete);
 	}
 
 	void LatentExecuteResourceLoading() const
@@ -198,23 +198,23 @@ public:
 
 	void LatentCleanup()
 	{
-		// // @gdemers cleanup
-		// ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this]
-		// {
-		// 	if (TestActor.IsValid())
-		// 	{
-		// 		TestActor->RouteEndPlay(EEndPlayReason::RemovedFromWorld);
-		// 	}
-		//
-		// 	if (TestWorld.IsValid())
-		// 	{
-		// 		TestWorld->EndPlayInTestWorld();
-		// 	}
-		//
-		// 	TestActor.Reset();
-		// 	TestWorld.Reset();
-		// 	return true;
-		// }));
+		// @gdemers cleanup
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this]
+		{
+			if (TestActor.IsValid())
+			{
+				TestActor->RouteEndPlay(EEndPlayReason::RemovedFromWorld);
+			}
+		
+			if (TestWorld.IsValid())
+			{
+				TestWorld->EndPlayInTestWorld();
+			}
+		
+			TestActor.Reset();
+			TestWorld.Reset();
+			return true;
+		}));
 	}
 
 	TStrongObjectPtr<AAutomatedTestInventoryActor> TestActor = nullptr;
@@ -244,14 +244,14 @@ bool InventorySampleTest::RunTest(const FString& Parameters)
 	// Note : Test related to gameplay behaviour should be run on the functional test
 
 #if WITH_AUTOMATION_TESTS
-	// Setup();
+	Setup();
 	RunUnitTests();
 	// LatentExecuteResourceLoading();
 	// LatentWait();
 	// LatentResourceManagerCompare();
 	// LatentWaitInventoryStreamingHandleComplete();
 	// LatentInventoryCompare();
-	// LatentCleanup();
+	LatentCleanup();
 #endif
 	return true;
 }

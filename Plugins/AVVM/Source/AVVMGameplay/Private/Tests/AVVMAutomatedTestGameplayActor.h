@@ -28,7 +28,6 @@
 #include "AVVMAutomatedTestGameplayActor.generated.h"
 
 class UAVVMAbilitySystemComponent;
-class UAVVMAutomatedTestResourceComponent;
 
 /**
  *	Class description:
@@ -62,7 +61,7 @@ protected:
 	void OnRequestCompleted();
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAVVMAutomatedTestResourceComponent> ResourceManagerComponent = nullptr;
+	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;

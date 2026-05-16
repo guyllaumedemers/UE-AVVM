@@ -73,7 +73,7 @@ protected:
 	bool OnProcessAdditionalResources(const TArray<FDataRegistryId>& PendingRegistryIds);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldAsyncLoadOnBeginPlay = true;
+	bool bShouldAsyncLoadOnBeginPlay = false;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

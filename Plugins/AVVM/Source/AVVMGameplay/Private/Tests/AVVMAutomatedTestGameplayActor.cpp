@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "AVVMAutomatedTestGameplayActor.h"
 
-#include "AVVMAutomatedTestResourceComponent.h"
 #include "AVVMGameplaySettings.h"
 #include "Ability/AVVMAbilityResourceHandlingImpl.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -29,7 +28,7 @@
 AAVVMAutomatedTestGameplayActor::AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAutomatedTestResourceComponent>(this, TEXT("ResourceManagerComponent"));
+	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
 	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
 }
 

@@ -22,14 +22,49 @@
 #include "CoreMinimal.h"
 
 #include "GameFramework/Actor.h"
+#include "Resources/AVVMResourceManagerComponent.h"
+#include "Resources/AVVMResourceProvider.h"
 
 #include "AutomatedTestInventoryActor.generated.h"
 
+class UActorInventoryComponent;
+
 /**
- * 
+ *	Class description:
+ *
+ *	AAutomatedTestInventoryActor is an Actor class that impl the required interface to run functional test
+ *	on the ActorInventoryComponent.
  */
 UCLASS()
-class INVENTORYSAMPLE_API AAutomatedTestInventoryActor : public AActor
+class INVENTORYSAMPLE_API AAutomatedTestInventoryActor : public AActor,
+                                                         public IAVVMResourceProvider
 {
 	GENERATED_BODY()
+
+public:
+	AAutomatedTestInventoryActor(const FObjectInitializer& ObjectInitializer);
+	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
+	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
+	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
+
+	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
+	bool CheckContentIntegrity() const;
+	bool CheckInventoryIntegrity() const;
+
+	bool HasInventoryFinishedAllStreaming() const;
+	void ForceCompletion() const;
+
+	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
+
+protected:
+	UFUNCTION(CallInEditor)
+	void OnRequestCompleted();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UActorInventoryComponent> InventoryComponent = nullptr;
+
+	TSharedPtr<bool> bIsAsyncProcessCompleted;
 };
