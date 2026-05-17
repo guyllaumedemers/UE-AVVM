@@ -21,9 +21,10 @@
 
 #include "ActorInventoryComponent.h"
 #include "InventorySettings.h"
-#include "InventoryUtils.h"
 #include "ItemObject.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/StreamableManager.h"
 #include "Resources/InventoryResourceHandlingImpl.h"
@@ -119,7 +120,7 @@ FOnResourceAsyncLoadingComplete AAutomatedTestInventoryActor::GetOnCompleteDeleg
 
 bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
 {
-	if (!IsValid(InventoryComponent))
+	if (!IsValid(InventoryComponent) || InventoryComponent->GetItems().IsEmpty())
 	{
 		return false;
 	}
@@ -142,8 +143,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVM
 			continue;
 		}
 
-		const int32 ItemId = UItemObjectUtils::DecodeItem(ItemObject);
-		bResult &= CheckActorIdentifier(ItemId, ActorIdentifiers);
+		const int32 ItemUniqueId = UItemObjectUtils::DecodeItem(ItemObject);
+		bResult &= CheckActorIdentifier(ItemUniqueId/*non-shifted*/, ActorIdentifiers);
 	}
 
 	return bResult;
@@ -151,17 +152,48 @@ bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVM
 
 bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
 {
-	if (!IsValid(InventoryComponent))
+	if (!IsValid(InventoryComponent) || InventoryComponent->GetItems().IsEmpty())
 	{
 		return false;
 	}
 
-	return true;
+	const auto CheckActorIdentifier = [](const int32 ActorIdentifier, const TArray<const FAVVMActorIdentifierDataTableRow*>& Rows)
+	{
+		const auto* SearchResult = Rows.FindByPredicate([ActorIdentifier](const FAVVMActorIdentifierDataTableRow* Row)
+		{
+			return (Row != nullptr) && (Row->UniqueId == ActorIdentifier);
+		});
+
+		return (SearchResult != nullptr);
+	};
+
+	const auto CheckItemStorageReference = [](const int32 PrivateItemId)
+	{
+		// @gdemers we are looking for a storage id that is non-shifted so we can properly reference the UniqueId defined
+		// in the Actor Identifier Data Table.
+		const int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		return StorageId;
+	};
+
+	bool bResult = true;
+	for (const UItemObject* ItemObject : InventoryComponent->GetItems())
+	{
+		if (!IsValid(ItemObject))
+		{
+			continue;
+		}
+
+		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+		const int32 StorageId = CheckItemStorageReference(PrivateItemId);
+		bResult &= CheckActorIdentifier(StorageId, ActorIdentifiers);
+	}
+
+	return bResult;
 }
 
 bool AAutomatedTestInventoryActor::RunTest_ItemStacking(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
 {
-	if (!IsValid(InventoryComponent))
+	if (!IsValid(InventoryComponent) || InventoryComponent->GetItems().IsEmpty())
 	{
 		return false;
 	}

@@ -438,6 +438,9 @@ public:
 	                                   UItemObject* UnInitializedItemObject);
 	
 	UFUNCTION(BlueprintCallable)
+	static int32 GetPrivateItemId(const UItemObject* ItemObject);
+	
+	UFUNCTION(BlueprintCallable)
 	static int32 DecodeItem(const UItemObject* ItemObject);
 	
 	UFUNCTION(BlueprintCallable)

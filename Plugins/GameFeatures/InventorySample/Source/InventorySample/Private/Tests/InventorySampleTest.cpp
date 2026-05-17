@@ -75,13 +75,6 @@ public:
 		RWDataTableInventory();
 	}
 
-	void UnitTest_PostResourceLoaded()
-	{
-		RWPrivateItem();
-		RWInventory();
-		RWLoadout();
-	}
-
 	void RWStubInventory()
 	{
 		// @gdemers test data serialization/deserialization to disk using stub data.
@@ -161,7 +154,7 @@ public:
 		}
 	}
 
-	void RWPrivateItem()
+	void RWItemPrivateId()
 	{
 		auto* Subsystem = UDataRegistrySubsystem::Get();
 		TestNotNull("DataRegistry Subsystem", Subsystem);
@@ -279,6 +272,17 @@ public:
 		}));
 	}
 
+	void LatentUnitTests()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this]
+		{
+			RWItemPrivateId();
+			RWInventory();
+			RWLoadout();
+			return true;
+		}));
+	}
+
 	void LatentCleanup()
 	{
 		// @gdemers cleanup
@@ -330,7 +334,7 @@ bool InventorySampleTest::RunTest(const FString& Parameters)
 	LatentResourceManagerCompare();
 	LatentWaitInventoryStreamingHandleComplete();
 	LatentInventoryCompare();
-	UnitTest_PostResourceLoaded();
+	LatentUnitTests();
 	LatentCleanup();
 #endif
 	return true;

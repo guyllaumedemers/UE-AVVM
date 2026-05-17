@@ -646,10 +646,16 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 }
 
+int32 UItemObjectUtils::GetPrivateItemId(const UItemObject* ItemObject)
+{
+	return IsValid(ItemObject) ? ItemObject->PrivateItemId : INDEX_NONE;
+}
+
 int32 UItemObjectUtils::DecodeItem(const UItemObject* ItemObject)
 {
 	if (IsValid(ItemObject))
 	{
+		// @gdemers return a shifted version of the ItemId. i.e between 1 & ((2^(GET_ATTACHMENT_ID_ENCODING_BIT_RANGE+1)) - 1)
 		return UItemObjectUtils::DecodeItemPrivateId(ItemObject->PrivateItemId);
 	}
 	else
