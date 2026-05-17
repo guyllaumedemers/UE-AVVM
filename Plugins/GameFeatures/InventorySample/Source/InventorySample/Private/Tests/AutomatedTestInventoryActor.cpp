@@ -34,12 +34,8 @@ AAutomatedTestInventoryActor::AAutomatedTestInventoryActor(const FObjectInitiali
 
 int32 AAutomatedTestInventoryActor::GetProviderUniqueId_Implementation() const
 {
-	if (RandomProviderId == INDEX_NONE)
-	{
-		RandomProviderId = FMath::Rand();
-	}
-
-	return RandomProviderId;
+	// @gdemers Hard coded in our ActorIdentifier Data Table.
+	return 0;
 }
 
 UAVVMResourceManagerComponent* AAutomatedTestInventoryActor::GetResourceManagerComponent_Implementation() const
@@ -49,7 +45,7 @@ UAVVMResourceManagerComponent* AAutomatedTestInventoryActor::GetResourceManagerC
 
 TArray<FDataRegistryId> AAutomatedTestInventoryActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
-	const auto TestRegistryId = FDataRegistryId(UInventorySettings::GetItemGroupRegistryType(), TEXT("DEMO_AutomatedTest_ItemGroup"));
+	const auto TestRegistryId = FDataRegistryId(UInventorySettings::GetItemGroupRegistryType(), TEXT("DEMO_InventorySample_AutomatedTest_C"));
 	ensureAlwaysMsgf(TestRegistryId.IsValid(), TEXT("RegistryType or ItemName arent valid. Please validate your Data Registry."));
 	return {TestRegistryId};
 }
@@ -68,6 +64,11 @@ TArray<FDataRegistryId> AAutomatedTestInventoryActor::CheckIsDoneAcquiringResour
 EItemSrcType AAutomatedTestInventoryActor::GetItemSrcType_Implementation() const
 {
 	return EItemSrcType::Static;
+}
+
+bool AAutomatedTestInventoryActor::DoesSupportSpawnOnLoad_Implementation() const
+{
+	return false;
 }
 
 void AAutomatedTestInventoryActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted)

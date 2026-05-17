@@ -54,6 +54,7 @@ public:
 	
 	// IInventoryProvider
 	virtual EItemSrcType GetItemSrcType_Implementation() const override;
+	virtual bool DoesSupportSpawnOnLoad_Implementation() const override;
 
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
