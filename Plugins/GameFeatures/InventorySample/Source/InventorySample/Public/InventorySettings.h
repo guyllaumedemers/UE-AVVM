@@ -21,8 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "InventorySettings.generated.h"
 
@@ -39,6 +41,12 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	static const FDataRegistryType& GetItemGroupRegistryType();
+	
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	static const FDataRegistryType& GetItemRegistryType();
+	
 	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static const TSoftClassPtr<UItemRandomizerRule>& GetItemRandomizerRuleClass();
 	
@@ -88,6 +96,12 @@ public:
 	static const FGameplayTag& GetStorageCapacityTagById(const int32 StorageId);
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType ItemGroupRegistryType = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType ItemRegistryType = NAME_None;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;
 	

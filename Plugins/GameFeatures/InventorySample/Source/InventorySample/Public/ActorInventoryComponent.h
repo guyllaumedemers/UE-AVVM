@@ -174,7 +174,7 @@ protected:
 	void CheckBounds();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldAsyncLoadOnBeginPlay = true;
+	bool bShouldAsyncLoadOnBeginPlay = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadoutClass = nullptr;
@@ -223,6 +223,7 @@ private:
 	// phase of our inventory. This address the problem of uniqueness for entries with identical type.
 	TArray<int32> PrivateItemIds;
 	
+	friend class AAutomatedTestInventoryActor;
 	friend class UInventoryResourceHandlingImpl;
 	friend class UItemObjectUtils;
 };

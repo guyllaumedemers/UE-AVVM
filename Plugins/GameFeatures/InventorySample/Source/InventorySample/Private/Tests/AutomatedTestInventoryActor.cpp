@@ -20,9 +20,9 @@
 #include "AutomatedTestInventoryActor.h"
 
 #include "ActorInventoryComponent.h"
-#include "AVVMGameplaySettings.h"
+#include "InventorySettings.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
-#include "Data/AVVMActorResourceHandlingImpl.h"
+#include "Engine/StreamableManager.h"
 #include "Resources/InventoryResourceHandlingImpl.h"
 
 AAutomatedTestInventoryActor::AAutomatedTestInventoryActor(const FObjectInitializer& ObjectInitializer)
@@ -32,6 +32,16 @@ AAutomatedTestInventoryActor::AAutomatedTestInventoryActor(const FObjectInitiali
 	InventoryComponent = ObjectInitializer.CreateDefaultSubobject<UActorInventoryComponent>(this, TEXT("InventoryComponent"));
 }
 
+int32 AAutomatedTestInventoryActor::GetProviderUniqueId_Implementation() const
+{
+	if (RandomProviderId == INDEX_NONE)
+	{
+		RandomProviderId = FMath::Rand();
+	}
+
+	return RandomProviderId;
+}
+
 UAVVMResourceManagerComponent* AAutomatedTestInventoryActor::GetResourceManagerComponent_Implementation() const
 {
 	return ResourceManagerComponent;
@@ -39,7 +49,7 @@ UAVVMResourceManagerComponent* AAutomatedTestInventoryActor::GetResourceManagerC
 
 TArray<FDataRegistryId> AAutomatedTestInventoryActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
-	const auto TestRegistryId = FDataRegistryId(UAVVMGameplaySettings::GetActorDefinitionRegistryType(), TEXT("DEMO_AutomatedTest_InventoryActor"));
+	const auto TestRegistryId = FDataRegistryId(UInventorySettings::GetItemGroupRegistryType(), TEXT("DEMO_AutomatedTest_ItemGroup"));
 	ensureAlwaysMsgf(TestRegistryId.IsValid(), TEXT("RegistryType or ItemName arent valid. Please validate your Data Registry."));
 	return {TestRegistryId};
 }
@@ -48,16 +58,16 @@ TArray<FDataRegistryId> AAutomatedTestInventoryActor::CheckIsDoneAcquiringResour
 {
 	TArray<FDataRegistryId> OutResults;
 	OutResults.Append(UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(
-	                                                                                UAVVMActorResourceHandlingImpl::StaticClass(),
-	                                                                                nullptr/*expected*/,
-	                                                                                Resources));
-
-	OutResults.Append(UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(
 	                                                                                UInventoryResourceHandlingImpl::StaticClass(),
 	                                                                                InventoryComponent,
 	                                                                                Resources));
 
 	return OutResults;
+}
+
+EItemSrcType AAutomatedTestInventoryActor::GetItemSrcType_Implementation() const
+{
+	return EItemSrcType::Static;
 }
 
 void AAutomatedTestInventoryActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted)
@@ -72,12 +82,23 @@ bool AAutomatedTestInventoryActor::CheckContentIntegrity() const
 
 bool AAutomatedTestInventoryActor::CheckInventoryIntegrity() const
 {
-	return true;
+	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), InventoryComponent);
 }
 
 bool AAutomatedTestInventoryActor::HasInventoryFinishedAllStreaming() const
 {
-	return true;
+	if (!IsValid(InventoryComponent))
+	{
+		return true;
+	}
+
+	bool bHasFinishedStreaming = true;
+	for (const auto& [TokenId, StreamingHandle] : InventoryComponent->ItemHandleSystem)
+	{
+		bHasFinishedStreaming &= (StreamingHandle.IsValid() && StreamingHandle->HasLoadCompleted());
+	}
+
+	return bHasFinishedStreaming && (InventoryComponent->Items.Num() == InventoryComponent->ItemHandleSystem.Num());
 }
 
 void AAutomatedTestInventoryActor::ForceCompletion() const

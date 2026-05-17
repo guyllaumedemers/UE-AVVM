@@ -21,6 +21,16 @@
 
 #include "Misc/App.h"
 
+const FDataRegistryType& UInventorySettings::GetItemGroupRegistryType()
+{
+	return GetDefault<UInventorySettings>()->ItemGroupRegistryType;
+}
+
+const FDataRegistryType& UInventorySettings::GetItemRegistryType()
+{
+	return GetDefault<UInventorySettings>()->ItemRegistryType;
+}
+
 const TSoftClassPtr<UItemRandomizerRule>& UInventorySettings::GetItemRandomizerRuleClass()
 {
 	return GetDefault<UInventorySettings>()->ItemRandomizerRuleClass;

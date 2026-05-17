@@ -163,7 +163,7 @@ public:
 		TestNotNull("UWorld.", ProxyWorld);
 
 		TestActor = TStrongObjectPtr(ProxyWorld->SpawnActor<AAutomatedTestInventoryActor>());
-		TestNotNull("AAVVMAutomatedTestGameplayActor.", TestActor.Get());
+		TestNotNull("AAutomatedTestInventoryActor.", TestActor.Get());
 
 		// Restore initialization state
 		TestActor->PreInitializeComponents();
@@ -177,23 +177,68 @@ public:
 
 	void LatentExecuteResourceLoading() const
 	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([WeakTestActor = TWeakObjectPtr(TestActor.Get()), Flag = TSharedPtr<bool>(bIsResourceManagerAsyncCommandComplete)]
+		{
+			if (!WeakTestActor.IsValid())
+			{
+				(*Flag) = true;
+				return true;
+			}
+		
+			UAVVMResourceManagerComponent* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(WeakTestActor.Get());
+			if (!IsValid(ResourceManagerComponent))
+			{
+				WeakTestActor->ForceCompletion();
+				return true;
+			}
+		
+			TArray<FDataRegistryId> ResourcesIds = IAVVMResourceProvider::Execute_GetResourceDefinitionRegistryIds(WeakTestActor.Get());
+			if (ResourcesIds.IsEmpty())
+			{
+				WeakTestActor->ForceCompletion();
+				return true;
+			}
+
+			for (const FDataRegistryId& ResourceId : ResourcesIds)
+			{
+				ResourceManagerComponent->RequestAsyncLoading(ResourceId, WeakTestActor->GetOnCompleteDelegate());
+			}
+		
+			return true;
+		}));
 	}
 
 	void LatentWait() const
 	{
-		// ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bIsResourceManagerAsyncCommandComplete.Get()));
+		ADD_LATENT_AUTOMATION_COMMAND(FWaitForTrue(&bIsResourceManagerAsyncCommandComplete.Get()));
 	}
 
 	void LatentResourceManagerCompare()
 	{
+		// @gdemers validate our resource loading request integrity
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckContentIntegrity() : false);
+			return true;
+		}));
 	}
 
 	void LatentWaitInventoryStreamingHandleComplete()
 	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			return WeakTestActor.IsValid() && WeakTestActor->HasInventoryFinishedAllStreaming();
+		}));
 	}
 
 	void LatentInventoryCompare()
 	{
+		// @gdemers validate our resource loading request integrity
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckInventoryIntegrity() : false);
+			return true;
+		}));
 	}
 
 	void LatentCleanup()
@@ -246,11 +291,11 @@ bool InventorySampleTest::RunTest(const FString& Parameters)
 #if WITH_AUTOMATION_TESTS
 	Setup();
 	RunUnitTests();
-	// LatentExecuteResourceLoading();
-	// LatentWait();
-	// LatentResourceManagerCompare();
-	// LatentWaitInventoryStreamingHandleComplete();
-	// LatentInventoryCompare();
+	LatentExecuteResourceLoading();
+	LatentWait();
+	LatentResourceManagerCompare();
+	LatentWaitInventoryStreamingHandleComplete();
+	LatentInventoryCompare();
 	LatentCleanup();
 #endif
 	return true;

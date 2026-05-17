@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "InventoryProvider.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -37,15 +38,22 @@ class UActorInventoryComponent;
  */
 UCLASS()
 class INVENTORYSAMPLE_API AAutomatedTestInventoryActor : public AActor,
-                                                         public IAVVMResourceProvider
+                                                         public IAVVMResourceProvider,
+                                                         public IInventoryProvider
 {
 	GENERATED_BODY()
 
 public:
 	AAutomatedTestInventoryActor(const FObjectInitializer& ObjectInitializer);
+	
+	// IAVVMResourceProvider
+	virtual int32 GetProviderUniqueId_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
+	
+	// IInventoryProvider
+	virtual EItemSrcType GetItemSrcType_Implementation() const override;
 
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
@@ -65,6 +73,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UActorInventoryComponent> InventoryComponent = nullptr;
+
+	// @gdemers exception. I never use mutable as it violate constness.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	mutable int32 RandomProviderId = INDEX_NONE;
 
 	TSharedPtr<bool> bIsAsyncProcessCompleted;
 };
