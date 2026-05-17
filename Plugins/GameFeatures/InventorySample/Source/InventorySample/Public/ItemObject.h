@@ -436,6 +436,12 @@ public:
 	                                   const TArray<int32>& NewPrivateIds,
 	                                   const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                                   UItemObject* UnInitializedItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 DecodeItem(const UItemObject* ItemObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 DecodeItemPrivateId(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);

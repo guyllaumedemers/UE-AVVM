@@ -620,7 +620,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	{
 		// @gdemers decode Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
-		const int32 OutValue = UInventoryUtils::DecodeItem(Value);
+		const int32 OutValue = UItemObjectUtils::DecodeItemPrivateId(Value);
 		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
@@ -643,6 +643,54 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	else
 	{
 		return INDEX_NONE;
+	}
+}
+
+int32 UItemObjectUtils::DecodeItem(const UItemObject* ItemObject)
+{
+	if (IsValid(ItemObject))
+	{
+		return UItemObjectUtils::DecodeItemPrivateId(ItemObject->PrivateItemId);
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 UItemObjectUtils::DecodeItemPrivateId(const int32 EncodedBits)
+{
+	// @gdemers our bit encoding is telling us that the element we are looking at
+	// require socket support, and target our character actor.
+	const bool bDoesReferenceCharacter = !!(EncodedBits & CHECK_CHARACTER_DEPENDENT_ENCODING);
+	if (bDoesReferenceCharacter)
+	{
+		// @gdemers the above imply, we are either an attachment, or a storage.
+		const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+		if (!!AttachmentId)
+		{
+			return AttachmentId;
+		}
+		else
+		{
+			const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);;
+			return StorageId;
+		}
+	}
+	else
+	{
+		// @gdemers here, we may be bound to another actor who isn't a character, maybe ATriggeringActor (Weapon), or we are simply just an item.
+		// regular Items such as weapons do not require referencing the CHECK_CHARACTER_DEPENDENT_ENCODING in their bit encoding as it's implicitly referencing one possible Actor.
+		const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+		if (!!AttachmentId)
+		{
+			return AttachmentId;
+		}
+		else
+		{
+			const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+			return ItemId;
+		}
 	}
 }
 

@@ -28,6 +28,7 @@
 
 #include "AutomatedTestInventoryActor.generated.h"
 
+struct FAVVMActorIdentifierDataTableRow;
 class UActorInventoryComponent;
 
 /**
@@ -64,6 +65,10 @@ public:
 	void ForceCompletion() const;
 
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
+	
+	bool RunTest_ItemUniqueId(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const;
+	bool RunTest_ItemStorageReference(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const;
+	bool RunTest_ItemStacking(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const;
 
 protected:
 	UFUNCTION(CallInEditor)

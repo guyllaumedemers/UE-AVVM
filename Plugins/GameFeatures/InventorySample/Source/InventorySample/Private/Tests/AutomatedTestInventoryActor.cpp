@@ -21,7 +21,10 @@
 
 #include "ActorInventoryComponent.h"
 #include "InventorySettings.h"
+#include "InventoryUtils.h"
+#include "ItemObject.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/StreamableManager.h"
 #include "Resources/InventoryResourceHandlingImpl.h"
 
@@ -112,6 +115,58 @@ FOnResourceAsyncLoadingComplete AAutomatedTestInventoryActor::GetOnCompleteDeleg
 	FOnResourceAsyncLoadingComplete Callback;
 	Callback.BindDynamic(this, &AAutomatedTestInventoryActor::OnRequestCompleted);
 	return Callback;
+}
+
+bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
+{
+	if (!IsValid(InventoryComponent))
+	{
+		return false;
+	}
+
+	const auto CheckActorIdentifier = [](const int32 ActorIdentifier, const TArray<const FAVVMActorIdentifierDataTableRow*>& Rows)
+	{
+		const auto* SearchResult = Rows.FindByPredicate([ActorIdentifier](const FAVVMActorIdentifierDataTableRow* Row)
+		{
+			return (Row != nullptr) && (Row->UniqueId == ActorIdentifier);
+		});
+
+		return (SearchResult != nullptr);
+	};
+
+	bool bResult = true;
+	for (const UItemObject* ItemObject : InventoryComponent->GetItems())
+	{
+		if (!IsValid(ItemObject))
+		{
+			continue;
+		}
+
+		const int32 ItemId = UItemObjectUtils::DecodeItem(ItemObject);
+		bResult &= CheckActorIdentifier(ItemId, ActorIdentifiers);
+	}
+
+	return bResult;
+}
+
+bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
+{
+	if (!IsValid(InventoryComponent))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool AAutomatedTestInventoryActor::RunTest_ItemStacking(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
+{
+	if (!IsValid(InventoryComponent))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void AAutomatedTestInventoryActor::OnRequestCompleted()

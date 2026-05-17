@@ -21,6 +21,10 @@
 
 bool AInventorySampleFunctionTest::RunTest(const TArray<FString>& Params)
 {
+	// test b : validating the loading process of a collection set provided by the FromDataAsset api call. With tag blocking loading process, and without.
+	
+	// test c : validating the loading process of a collection set provided by the FromMicroService api call. With tag blocking loading process, and without.
+	
 	// other test, such as Actor spawning should be done in the Functional test.
 	
 	// test attachment logic

@@ -46,9 +46,6 @@ public:
 	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 DecodeItem(const int32 EncodedBits);
-	
-	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetRuntimeUniqueIds(const TArray<UItemObject*>& Items);
 	
 	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle

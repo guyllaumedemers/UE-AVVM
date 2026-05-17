@@ -1075,9 +1075,9 @@ void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDr
 	Drop(PendingDropItemObject);
 }
 
-void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* PendingDropItemObject)
+void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* PendingPickupItemObject)
 {
-	Pickup(PendingDropItemObject);
+	Pickup(PendingPickupItemObject);
 }
 
 void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemObject, UItemObject* DestItemObject)

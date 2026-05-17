@@ -164,7 +164,7 @@ protected:
 	void Server_Drop(UItemObject* PendingDropItemObject);
 	
 	UFUNCTION(Server, Reliable)
-	void Server_Pickup(UItemObject* PendingDropItemObject);
+	void Server_Pickup(UItemObject* PendingPickupItemObject);
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);

@@ -17,6 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "ActorInventoryComponent.h"
 #include "AutomatedTestInventoryActor.h"
 #include "AVVMGameplaySettings.h"
 #include "DataRegistrySubsystem.h"
@@ -67,11 +68,18 @@ public:
 	virtual ~FTestInventorySamplePluginBase() override
 	{
 	}
-	
-	void RunUnitTests()
+
+	void UnitTest_PreResourceLoaded()
 	{
 		RWStubInventory();
 		RWDataTableInventory();
+	}
+
+	void UnitTest_PostResourceLoaded()
+	{
+		RWPrivateItem();
+		RWInventory();
+		RWLoadout();
 	}
 
 	void RWStubInventory()
@@ -151,6 +159,36 @@ public:
 			const bool bResult = CheckActorIdentifier(OutProviderId, OutActorIdentifiers);
 			TestTrue("ActorIdentifier missing", bResult);
 		}
+	}
+
+	void RWPrivateItem()
+	{
+		auto* Subsystem = UDataRegistrySubsystem::Get();
+		TestNotNull("DataRegistry Subsystem", Subsystem);
+
+		const UDataRegistry* SearchResult = Subsystem->GetRegistryForType(UAVVMGameplaySettings::GetActorIdentifierRegistryType());
+		TestNotNull("DataRegistry Asset", SearchResult);
+
+		TArray<const FAVVMActorIdentifierDataTableRow*> OutActorIdentifiers;
+		SearchResult->GetAllItems<FAVVMActorIdentifierDataTableRow>(TEXT(""), OutActorIdentifiers);
+
+		const bool bResult_RunTest_ItemUniqueId = TestActor->RunTest_ItemUniqueId(OutActorIdentifiers);
+		TestTrue("bResult_RunTest_ItemUniqueId", bResult_RunTest_ItemUniqueId);
+
+		const bool bResult_RunTest_ItemStorageReference = TestActor->RunTest_ItemStorageReference(OutActorIdentifiers);
+		TestTrue("RunTest_ItemStorageReference", bResult_RunTest_ItemStorageReference);
+
+		const bool bResult_RunTest_ItemStacking = TestActor->RunTest_ItemStacking(OutActorIdentifiers);
+		TestTrue("RunTest_ItemStacking", bResult_RunTest_ItemStacking);
+	}
+
+	void RWInventory()
+	{
+		// check bounds
+	}
+
+	void RWLoadout()
+	{
 	}
 
 	void Setup()
@@ -276,10 +314,6 @@ public:
 IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(InventorySampleTest, FTestInventorySamplePluginBase, "AutomatedTest.CustomGroup.InventorySampleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool InventorySampleTest::RunTest(const FString& Parameters)
 {
-	// test b : validating the loading process of a collection set provided by the FromDataAsset api call. With tag blocking loading process, and without.
-	
-	// test c : validating the loading process of a collection set provided by the FromMicroService api call. With tag blocking loading process, and without.
-	
 	// test d : test the private id actions being applied. Adding storage/removing storage, parsing encoding, etc... test backend, and disk
 	
 	// test e : test stacking item into the inventory. test bounds check
@@ -290,12 +324,13 @@ bool InventorySampleTest::RunTest(const FString& Parameters)
 
 #if WITH_AUTOMATION_TESTS
 	Setup();
-	RunUnitTests();
+	UnitTest_PreResourceLoaded();
 	LatentExecuteResourceLoading();
 	LatentWait();
 	LatentResourceManagerCompare();
 	LatentWaitInventoryStreamingHandleComplete();
 	LatentInventoryCompare();
+	UnitTest_PostResourceLoaded();
 	LatentCleanup();
 #endif
 	return true;
