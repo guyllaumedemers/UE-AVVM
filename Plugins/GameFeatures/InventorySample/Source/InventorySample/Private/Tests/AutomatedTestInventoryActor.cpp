@@ -198,7 +198,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		}
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
-		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::FilterInt32(PrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
+		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
 		bResult &= (ItemStackCount > 0);
 	}
 
