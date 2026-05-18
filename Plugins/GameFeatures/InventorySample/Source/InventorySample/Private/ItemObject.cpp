@@ -983,17 +983,37 @@ int32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)
 		return INDEX_NONE;
 	}
 
-	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(), GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
-	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStorageId(), GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStoragePosition(), GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(),
+	                                                               GET_ITEM_COUNT_ENCODING_BIT_RANGE,
+	                                                               GET_ITEM_COUNT_ENCODING_RSHIFT);
+
+	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStorageId(),
+	                                                              GET_STORAGE_ID_ENCODING_BIT_RANGE,
+	                                                              GET_STORAGE_ID_ENCODING_RSHIFT);
+
+	// TODO @gdemers storage are edge cases, and do not support positioning atm.
+	const int32 OldPrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+	if (UItemObjectUtils::IsStorage(OldPrivateItemId))
+	{
+		return (StackCount + StorageId);
+	}
 
 	// TODO @gdemers theres a problem here !
 	// MakeRuntimePrivateItemId is called from within CheckBackend, and indirectly from OnDrop, and OnPickup. This means that our inventory
 	// updates in those two cases. We may have an Actor in World representing this UItemObject, or not. If our UItemObject is an attachment, its dependent on another
 	// actor being dropped, but also being picked up. Attachment can be drop as a unique element, or parented by an outer. The encoding as to reflect all those cases, and
 	// update accordingly.
-	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
-	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId,
+	                                                           GET_ITEM_ID_ENCODING_BIT_RANGE,
+	                                                           GET_ITEM_ID_ENCODING_RSHIFT);
+
+	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId,
+	                                                                 GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
+	                                                                 GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+
+	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStoragePosition(),
+	                                                                    GET_ITEM_POSITION_ENCODING_BIT_RANGE,
+	                                                                    GET_ITEM_POSITION_ENCODING_RSHIFT);
 
 	return (ItemId + StackCount + StorageId + StoragePosition + AttachmentId);
 }
@@ -1087,9 +1107,9 @@ bool UItemObjectUtils::IsStorage(const int32 EncodedBits)
 	return bIsStorage;
 }
 
-UItemObject* UItemObjectUtils::MakeZeroInitItemObject()
+UItemObject* UItemObjectUtils::MakeZeroInitItemObject(UObject* Outer)
 {
-	auto* TestObject = NewObject<UItemObject>();
-	TestObject->PrivateItemId = 0;
+	auto* TestObject = NewObject<UItemObject>(Outer);
+	TestObject->PrivateItemId = (UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE) - 1);
 	return TestObject;
 }

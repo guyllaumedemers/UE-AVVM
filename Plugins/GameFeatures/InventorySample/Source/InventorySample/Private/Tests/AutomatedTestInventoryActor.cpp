@@ -20,7 +20,9 @@
 #include "AutomatedTestInventoryActor.h"
 
 #include "ActorInventoryComponent.h"
+#include "InventoryFileHelper.h"
 #include "InventorySettings.h"
+#include "InventoryUtils.h"
 #include "ItemObject.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
@@ -180,7 +182,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 	}
 	
 	// @gdemers create test object (is unreferenced when going out of scope implying gc will eventually release memory)
-	auto* TestObject = UItemObjectUtils::MakeZeroInitItemObject();
+	auto* TestObject = UItemObjectUtils::MakeZeroInitItemObject(InventoryComponent.Get());
 	
 	{
 		// @gdemers test setting storage on an item in world.
@@ -197,6 +199,9 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(TestObject);
 		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
 		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+		
+		TestObject->ModifyRuntimeStorageId(ShiftedStorageId);
+		TestObject->ModifyRuntimeStoragePosition(ShiftedStoragePosition);
 
 		// @gdemers test assigned storage id.
 		const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE);
@@ -225,7 +230,26 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 	}
 	
 	{
-		// @gdemers test nulifying storage on an item.
+		// @gdemers test serializing to disk changes made to the inventory system.
+		InventoryComponent->Items.Add(TestObject);
+		InventoryComponent->CheckDisk();
+
+		// @gdemers get-set file from disk caching all inventory providers representation.
+		const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+
+		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(this);
+		const FString OutInventoryProviders = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
+
+		const int32 NonShiftedItemId = UItemObjectUtils::FilterItem(TestObject);
+		const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(OutInventoryProviders, {}, NonShiftedItemId);
+		bResult &= (PrivateItemId != INDEX_NONE);
+
+		// @gdemers revert changes made to the inventory system for subsequent cases.
+		InventoryComponent->Items.Remove(TestObject);
+	}
+	
+	{
+		// @gdemers test nullifying storage on an item.
 		UItemObjectUtils::NullifyStorage(TestObject);
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(TestObject);

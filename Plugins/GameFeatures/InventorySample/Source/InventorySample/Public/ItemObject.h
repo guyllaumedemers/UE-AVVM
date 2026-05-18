@@ -509,5 +509,5 @@ public:
 	static bool IsStorage(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
-	static UItemObject* MakeZeroInitItemObject();
+	static UItemObject* MakeZeroInitItemObject(UObject* Outer);
 };

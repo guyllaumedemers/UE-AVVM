@@ -318,17 +318,13 @@ public:
 IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(InventorySampleTest, FTestInventorySamplePluginBase, "AutomatedTest.CustomGroup.InventorySampleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool InventorySampleTest::RunTest(const FString& Parameters)
 {
-	// test d : test the private id actions being applied. Adding storage/removing storage, parsing encoding, etc... test backend, and disk
-	
-	// test e : test stacking item into the inventory. test bounds check
-	
 	// test f : testing the loadout object
 	
 	// Note : Test related to gameplay behaviour should be run on the functional test
 
 #if WITH_AUTOMATION_TESTS
-	Setup();
 	UnitTest_PreResourceLoaded();
+	Setup();
 	LatentExecuteResourceLoading();
 	LatentWait();
 	LatentResourceManagerCompare();
