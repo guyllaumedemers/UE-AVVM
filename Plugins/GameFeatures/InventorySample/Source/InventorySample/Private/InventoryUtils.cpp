@@ -266,7 +266,7 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
-		// @gdemers decode Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
+		// @gdemers filter Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
 		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
 		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;

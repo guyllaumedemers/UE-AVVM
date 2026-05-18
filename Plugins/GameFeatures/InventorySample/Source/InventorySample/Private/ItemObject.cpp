@@ -618,7 +618,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
 	{
-		// @gdemers decode Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
+		// @gdemers filter Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
 		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
 		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
@@ -655,7 +655,8 @@ int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 {
 	if (IsValid(ItemObject))
 	{
-		// @gdemers return a shifted version of the ItemId. i.e between 1 & ((2^(GET_ATTACHMENT_ID_ENCODING_BIT_RANGE+1)) - 1)
+		// @gdemers return a non-shifted version of the ItemId. Keep in mind that the range of the bit encoding define
+		// the item category manipulated!
 		return UItemObjectUtils::FilterItemPrivateId(ItemObject->PrivateItemId);
 	}
 	else
