@@ -205,6 +205,23 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		// @gdemers test assigned storage position.
 		const int32 StoragePositionBounds = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent.Get(), ShiftedStorageId);
 		bResult &= (ShiftedStoragePosition < StoragePositionBounds) && (ShiftedStoragePosition > 0);
+
+		// @gdemers validate if theres two items with the same positions. Note : Our test item
+		// isnt part of the existing Item collection, each position entry should be unique.
+		for (const UItemObject* ItemObject : InventoryComponent->GetItems())
+		{
+			const int32 NewPrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+			if (UItemObjectUtils::IsStorage(NewPrivateItemId))
+			{
+				continue;
+			}
+
+			const int32 NewShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+			if (false == (NewShiftedStoragePosition ^ ShiftedStoragePosition))
+			{
+				bResult &= false;
+			}
+		}
 	}
 	
 	{
