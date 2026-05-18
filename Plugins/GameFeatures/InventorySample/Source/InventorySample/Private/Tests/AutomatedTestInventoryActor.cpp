@@ -150,7 +150,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVM
 	return bResult;
 }
 
-bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
+bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 {
 	if (!IsValid(InventoryComponent) || InventoryComponent->GetItems().IsEmpty())
 	{
@@ -179,7 +179,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference(const TArray<con
 	return bResult;
 }
 
-bool AAutomatedTestInventoryActor::RunTest_ItemStacking(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const
+bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 {
 	if (!IsValid(InventoryComponent) || InventoryComponent->GetItems().IsEmpty())
 	{

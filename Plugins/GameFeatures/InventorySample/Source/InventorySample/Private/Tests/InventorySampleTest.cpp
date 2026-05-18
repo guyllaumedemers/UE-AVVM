@@ -168,10 +168,10 @@ public:
 		const bool bResult_RunTest_ItemUniqueId = TestActor->RunTest_ItemUniqueId(OutActorIdentifiers);
 		TestTrue("bResult_RunTest_ItemUniqueId", bResult_RunTest_ItemUniqueId);
 
-		const bool bResult_RunTest_ItemStorageReference = TestActor->RunTest_ItemStorageReference(OutActorIdentifiers);
+		const bool bResult_RunTest_ItemStorageReference = TestActor->RunTest_ItemStorageReference();
 		TestTrue("RunTest_ItemStorageReference", bResult_RunTest_ItemStorageReference);
 
-		const bool bResult_RunTest_ItemStacking = TestActor->RunTest_ItemStacking(OutActorIdentifiers);
+		const bool bResult_RunTest_ItemStacking = TestActor->RunTest_ItemStacking();
 		TestTrue("RunTest_ItemStacking", bResult_RunTest_ItemStacking);
 	}
 
