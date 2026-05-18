@@ -178,6 +178,34 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		bResult &= (UItemObjectUtils::HasStorageReachMaxCapacity(InventoryComponent.Get(), ShiftedStorageId, MaxStorageCapacity));
 		bResult &= (MaxStorageCapacity > 0);
 	}
+	
+	// @gdemers create test object.
+	auto* TestObject = UItemObjectUtils::MakeZeroInitItemObject();
+	
+	{
+		// @gdemers test setting storage on an item in world.
+		FStorageQualifierContextArgs Params;
+		Params.PrivateItemIds = InventoryComponent->PrivateItemIds;
+		Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+		Params.CurrentStoragePosition = INDEX_NONE;
+		Params.CurrentStorageId = INDEX_NONE;
+
+		// @gdemers encode new storage position into UItemObject based on inventory available layout.
+		UItemObjectUtils::QualifyStorage(InventoryComponent.Get(), Params, TestObject);
+
+		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(TestObject);
+		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+
+		// @gdemers test assigned storage id.
+		const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE);
+		bResult &= ((ShiftedStorageId < StorageIdBounds) && (ShiftedStorageId > 0));
+
+		// @gdemers test assigned storage position.
+		const int32 StoragePositionBounds = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent.Get(), ShiftedStorageId);
+		bResult &= (ShiftedStoragePosition < StoragePositionBounds) && (ShiftedStoragePosition > 0);
+	}
 
 	return bResult;
 }

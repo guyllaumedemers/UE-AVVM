@@ -831,6 +831,7 @@ bool UItemObjectUtils::GetFreeStorageFromPosition(const FStorageContextArgs& Par
 
 	TArray<int32> Temp;
 	Temp.Reserve(StorageMaxCapacity);
+	Temp.Init(0, StorageMaxCapacity);
 
 	// @gdemers place already allocated space within set.
 	for (int32 StoragePosition : Params.StoragePositions)
@@ -1082,4 +1083,11 @@ bool UItemObjectUtils::IsStorage(const int32 EncodedBits)
 {
 	const bool bIsStorage = (!IsItem(EncodedBits) && !IsAttachment(EncodedBits));
 	return bIsStorage;
+}
+
+UItemObject* UItemObjectUtils::MakeZeroInitItemObject()
+{
+	auto* TestObject = NewObject<UItemObject>();
+	TestObject->PrivateItemId = 0;
+	return TestObject;
 }
