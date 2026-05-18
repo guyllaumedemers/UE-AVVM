@@ -179,7 +179,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		bResult &= (MaxStorageCapacity > 0);
 	}
 	
-	// @gdemers create test object.
+	// @gdemers create test object (is unreferenced when going out of scope implying gc will eventually release memory)
 	auto* TestObject = UItemObjectUtils::MakeZeroInitItemObject();
 	
 	{
@@ -205,6 +205,18 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		// @gdemers test assigned storage position.
 		const int32 StoragePositionBounds = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent.Get(), ShiftedStorageId);
 		bResult &= (ShiftedStoragePosition < StoragePositionBounds) && (ShiftedStoragePosition > 0);
+	}
+	
+	{
+		// @gdemers test nulifying storage on an item.
+		UItemObjectUtils::NullifyStorage(TestObject);
+
+		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(TestObject);
+		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+
+		bResult &= (ShiftedStorageId == 0);
+		bResult &= (ShiftedStoragePosition == 0);
 	}
 
 	return bResult;

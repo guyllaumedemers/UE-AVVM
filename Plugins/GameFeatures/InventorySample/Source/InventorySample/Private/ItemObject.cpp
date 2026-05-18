@@ -727,8 +727,10 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
 	{
-		const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(PendingDropItemObject);
-		PendingDropItemObject->PrivateItemId &= ItemId;
+		const int32 StorageIdBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE) << GET_STORAGE_ID_ENCODING_RSHIFT;
+		const int32 ItemPositionBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE) << GET_ITEM_POSITION_ENCODING_RSHIFT;
+		PendingDropItemObject->PrivateItemId &= ~StorageIdBitmask;
+		PendingDropItemObject->PrivateItemId &= ~ItemPositionBitmask;
 	}
 }
 
