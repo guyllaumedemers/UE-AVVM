@@ -128,7 +128,7 @@ Note : Two things!
 * Telemetry could make use of this system! (and only publish at the very end of gameplay, or before doing a crash dump)
 * This system is mostly for global gathering of data, and may be inefficient if parse for visual updates that are frequent. 
 
-### Inventory Sample [WIP - 80%]
+### Inventory Sample [WIP - 90%]
 
 This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. **Edit** : Through GFP_AddComponent, your target actors will support resource loading, actor socketing, and AttributeSet registration in an asynchronous fashion. With the required interfaces, the User will be able to interface with backend or DataAsset, retrieve relevant information, and let the system parse the data configuration to fully initialized their runtime represention.
 
@@ -215,6 +215,7 @@ tbd
 * AVVM Notification Subsystem
 * AVVM Resource Manager Component (using latent command)
 * BatchSample
+* InventorySample (support Unit Tests)(Missing Functional test with server-client)
 * TransactionSample
 
 ### Stay tuned!
