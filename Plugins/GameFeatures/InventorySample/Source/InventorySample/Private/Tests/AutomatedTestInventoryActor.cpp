@@ -173,6 +173,9 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 
 		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
 		const int32 MaxStorageCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent.Get(), ShiftedStorageId);
+		
+		// @gdemers test that the max storage capacity retrieved for this storage item is indeed handling correctly being maxed out.
+		bResult &= (UItemObjectUtils::HasStorageReachMaxCapacity(InventoryComponent.Get(), ShiftedStorageId, MaxStorageCapacity));
 		bResult &= (MaxStorageCapacity > 0);
 	}
 
