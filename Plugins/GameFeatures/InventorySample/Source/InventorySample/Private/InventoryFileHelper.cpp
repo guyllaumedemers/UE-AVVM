@@ -117,7 +117,7 @@ FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePat
 		return OutFileContent;
 	};
 
-	if (FileContent.IsEmpty() || bIsMarkedDirty)
+	if (FileContent.IsEmpty() || bIsMarkedDirty || bShouldDelete)
 	{
 		FileContent = GetFileFromDisk(NewFilePath);
 		bIsMarkedDirty = false;

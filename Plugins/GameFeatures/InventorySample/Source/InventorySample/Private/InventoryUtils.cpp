@@ -268,7 +268,7 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 	{
 		// @gdemers decode Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
-		const int32 OutValue = UItemObjectUtils::DecodeItemPrivateId(Value);
+		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
 		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 

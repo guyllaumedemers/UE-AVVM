@@ -143,8 +143,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVM
 			continue;
 		}
 
-		const int32 ItemUniqueId = UItemObjectUtils::DecodeItem(ItemObject);
-		bResult &= CheckActorIdentifier(ItemUniqueId/*non-shifted*/, ActorIdentifiers);
+		const int32 ItemUniqueId = UItemObjectUtils::FilterItem(ItemObject);
+		bResult &= CheckActorIdentifier(ItemUniqueId/*shifted id*/, ActorIdentifiers);
 	}
 
 	return bResult;
@@ -167,14 +167,6 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference(const TArray<con
 		return (SearchResult != nullptr);
 	};
 
-	const auto CheckItemStorageReference = [](const int32 PrivateItemId)
-	{
-		// @gdemers we are looking for a storage id that is non-shifted so we can properly reference the UniqueId defined
-		// in the Actor Identifier Data Table.
-		const int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-		return StorageId;
-	};
-
 	bool bResult = true;
 	for (const UItemObject* ItemObject : InventoryComponent->GetItems())
 	{
@@ -184,7 +176,9 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference(const TArray<con
 		}
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
-		const int32 StorageId = CheckItemStorageReference(PrivateItemId);
+		// @gdemers we are looking for a storage id that is non-shifted so we can properly reference the UniqueId defined
+		// in the Actor Identifier Data Table.
+		const int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
 		bResult &= CheckActorIdentifier(StorageId, ActorIdentifiers);
 	}
 
@@ -198,7 +192,20 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking(const TArray<const FAVVM
 		return false;
 	}
 
-	return true;
+	bool bResult = true;
+	for (const UItemObject* ItemObject : InventoryComponent->GetItems())
+	{
+		if (!IsValid(ItemObject))
+		{
+			continue;
+		}
+
+		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::FilterInt32(PrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
+		bResult &= (ItemStackCount > 0);
+	}
+
+	return bResult;
 }
 
 void AAutomatedTestInventoryActor::OnRequestCompleted()

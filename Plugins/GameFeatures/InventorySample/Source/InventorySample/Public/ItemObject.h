@@ -441,10 +441,10 @@ public:
 	static int32 GetPrivateItemId(const UItemObject* ItemObject);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 DecodeItem(const UItemObject* ItemObject);
+	static int32 FilterItem(const UItemObject* ItemObject);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 DecodeItemPrivateId(const int32 EncodedBits);
+	static int32 FilterItemPrivateId(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
@@ -498,4 +498,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void DestroyWorldItemActor(const UItemObject* SrcItem);
+	
+	UFUNCTION(BlueprintCallable)
+	static bool IsItem(const int32 EncodedBits);
+	
+	UFUNCTION(BlueprintCallable)
+	static bool IsAttachment(const int32 EncodedBits);
+	
+	UFUNCTION(BlueprintCallable)
+	static bool IsStorage(const int32 EncodedBits);
 };

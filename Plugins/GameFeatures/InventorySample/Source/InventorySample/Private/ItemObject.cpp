@@ -620,7 +620,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	{
 		// @gdemers decode Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
-		const int32 OutValue = UItemObjectUtils::DecodeItemPrivateId(Value);
+		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
 		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
@@ -651,12 +651,12 @@ int32 UItemObjectUtils::GetPrivateItemId(const UItemObject* ItemObject)
 	return IsValid(ItemObject) ? ItemObject->PrivateItemId : INDEX_NONE;
 }
 
-int32 UItemObjectUtils::DecodeItem(const UItemObject* ItemObject)
+int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 {
 	if (IsValid(ItemObject))
 	{
 		// @gdemers return a shifted version of the ItemId. i.e between 1 & ((2^(GET_ATTACHMENT_ID_ENCODING_BIT_RANGE+1)) - 1)
-		return UItemObjectUtils::DecodeItemPrivateId(ItemObject->PrivateItemId);
+		return UItemObjectUtils::FilterItemPrivateId(ItemObject->PrivateItemId);
 	}
 	else
 	{
@@ -664,40 +664,30 @@ int32 UItemObjectUtils::DecodeItem(const UItemObject* ItemObject)
 	}
 }
 
-int32 UItemObjectUtils::DecodeItemPrivateId(const int32 EncodedBits)
+int32 UItemObjectUtils::FilterItemPrivateId(const int32 EncodedBits)
 {
-	// @gdemers our bit encoding is telling us that the element we are looking at
-	// require socket support, and target our character actor.
-	const bool bDoesReferenceCharacter = !!(EncodedBits & CHECK_CHARACTER_DEPENDENT_ENCODING);
-	if (bDoesReferenceCharacter)
+	int32 BitRange = INDEX_NONE;
+	int32 BitShift = INDEX_NONE;
+
+	// @gdemers order dependent since attachment may be tied to an item 
+	if (UItemObjectUtils::IsAttachment(EncodedBits))
 	{
-		// @gdemers the above imply, we are either an attachment, or a storage.
-		const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-		if (!!AttachmentId)
-		{
-			return AttachmentId;
-		}
-		else
-		{
-			const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);;
-			return StorageId;
-		}
+		BitRange = GET_ATTACHMENT_ID_ENCODING_BIT_RANGE;
+		BitShift = GET_ATTACHMENT_ID_ENCODING_RSHIFT;
+	}
+	else if (UItemObjectUtils::IsStorage(EncodedBits))
+	{
+		BitRange = GET_STORAGE_ID_ENCODING_BIT_RANGE;
+		BitShift = GET_STORAGE_ID_ENCODING_RSHIFT;
 	}
 	else
 	{
-		// @gdemers here, we may be bound to another actor who isn't a character, maybe ATriggeringActor (Weapon), or we are simply just an item.
-		// regular Items such as weapons do not require referencing the CHECK_CHARACTER_DEPENDENT_ENCODING in their bit encoding as it's implicitly referencing one possible Actor.
-		const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-		if (!!AttachmentId)
-		{
-			return AttachmentId;
-		}
-		else
-		{
-			const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
-			return ItemId;
-		}
+		BitRange = GET_ITEM_ID_ENCODING_BIT_RANGE;
+		BitShift = GET_ITEM_ID_ENCODING_RSHIFT;
 	}
+
+	const int32 NonShiftedItemId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, BitRange, BitShift);
+	return NonShiftedItemId;
 }
 
 void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
@@ -912,11 +902,10 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 		}
 		else
 		{
-			// @gdemers this PrivateItemId holds information about storage but isn't an Item, or an Attachment.
-			const bool bHoldStorageId = (ItemObject->PrivateItemId & SearchId);
-			const int32 ItemId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
-			const int32 AttachmentId = UAVVMOnlineEncodingUtils::DecodeInt32(ItemObject->PrivateItemId, GET_ATTACHMENT_ID_ENCODING_BIT_RANGE, GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-			return (!!(ItemId & CHECK_CHARACTER_DEPENDENT_ENCODING)) && (false == !!AttachmentId) && (bHoldStorageId);
+			// @gdemers get the PrivateId, and validate storage item (Not ownership).
+			const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+			const bool bResult = UItemObjectUtils::IsStorage(PrivateItemId);
+			return bResult;
 		}
 	});
 
@@ -1033,7 +1022,7 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		SrcItem->ModifyRuntimeStackCount(SrcCount - SplitResources);
 		OutItem->ModifyRuntimeStackCount(SplitResources);
 		// @gdemers storage is qualified next. this shouldnt be transient between instance. only id should be!
-		OutItem->PrivateItemId = UAVVMOnlineEncodingUtils::DecodeInt32(SrcItem->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+		OutItem->PrivateItemId = UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
 	}
 
 	return OutItem;
@@ -1066,4 +1055,30 @@ void UItemObjectUtils::DestroyWorldItemActor(const UItemObject* SrcItem)
 		// is overloaded.
 		UInventoryManagerSubsystem::Static_Shutdown(OwningOuter->GetWorld(), OwningOuter);
 	}
+}
+
+bool UItemObjectUtils::IsItem(const int32 EncodedBits)
+{
+	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
+	                                                           GET_ITEM_ID_ENCODING_BIT_RANGE,
+	                                                           GET_ITEM_ID_ENCODING_RSHIFT);
+
+	const bool bResult = !!ItemId;
+	return bResult;
+}
+
+bool UItemObjectUtils::IsAttachment(const int32 EncodedBits)
+{
+	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
+																	 GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
+																	 GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+
+	const bool bResult = !!AttachmentId;
+	return bResult;
+}
+
+bool UItemObjectUtils::IsStorage(const int32 EncodedBits)
+{
+	const bool bIsStorage = (!IsItem(EncodedBits) && !IsAttachment(EncodedBits));
+	return bIsStorage;
 }
