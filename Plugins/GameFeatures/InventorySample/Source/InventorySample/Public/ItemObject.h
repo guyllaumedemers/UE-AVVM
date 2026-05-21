@@ -183,7 +183,7 @@ public:
 	void ModifyRuntimeStoragePosition(const int32 NewStoragePosition);
 
 	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeStackCount(const int32 NewStackCount);
+	void ModifyRuntimeStackCount(const int32 NewStackCount, const bool bShouldAlwaysClamp = true);
 
 	UFUNCTION(BlueprintCallable)
 	bool DoesRuntimeStateEquals(const FGameplayTagContainer& Compare) const;
@@ -225,10 +225,10 @@ public:
 	bool IsEmpty() const;
 
 	UFUNCTION(BlueprintCallable)
-	bool CanStack(const UItemObject* Item) const;
+	bool CanStack(const UItemObject* Src) const;
 
 	UFUNCTION(BlueprintCallable)
-	bool Stack(UItemObject* Item);
+	bool Stack(UItemObject* Src);
 
 	UFUNCTION(BlueprintCallable)
 	const FGameplayTag& GetRuntimeItemSlotTag() const;

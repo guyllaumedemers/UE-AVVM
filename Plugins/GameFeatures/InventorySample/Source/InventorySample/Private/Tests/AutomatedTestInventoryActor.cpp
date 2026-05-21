@@ -271,7 +271,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 	}
 
 	bool bResult = true;
-	for (const UItemObject* ItemObject : InventoryComponent->GetItems())
+	for (UItemObject* ItemObject : InventoryComponent->GetItems())
 	{
 		if (!IsValid(ItemObject))
 		{
@@ -279,8 +279,26 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		}
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+		
+		// @gdemers test referencing a valid stack count. i.e non-zero.
 		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
 		bResult &= (ItemStackCount > 0);
+		
+		// @gdemers test splitting an object with count overflow.
+		const int32 StackBounds = ItemObject->GetMaxStackCount();
+		ItemObject->ModifyRuntimeStackCount(FMath::CeilToInt(StackBounds * 1.5), false/*enforce not clamping*/);
+
+		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
+		bResult &= (NumSplits > 0);
+
+		const UItemObject* SingleSplit = UItemObjectUtils::SplitObject(InventoryComponent.Get(), ItemObject);
+		if (IsValid(SingleSplit))
+		{
+			bResult &= (SingleSplit->GetRuntimeCount() == StackBounds);
+			bResult &= (ItemObject->GetRuntimeCount() == FMath::CeilToInt(SingleSplit->GetRuntimeCount() * 1.5) - StackBounds);
+		}
+		
+		// TODO @gdemers test serializing split objects back to disk, and read from them.
 	}
 
 	return bResult;

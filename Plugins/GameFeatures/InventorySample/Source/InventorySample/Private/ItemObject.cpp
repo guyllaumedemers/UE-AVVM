@@ -141,12 +141,12 @@ void UItemObject::ModifyRuntimeStoragePosition(const int32 NewStoragePosition)
 	OnRep_ItemStateModified(OldState);
 }
 
-void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount)
+void UItemObject::ModifyRuntimeStackCount(const int32 NewStackCount, const bool bShouldAlwaysClamp/*Mostly bypassed during Object Init phase*/)
 {
 	const FItemState OldState = RuntimeItemState;
 	
 	const int32 MaxStackCount = GetMaxStackCount();
-	RuntimeItemState.StackCount = FMath::Clamp<int32>(NewStackCount, 0, MaxStackCount);
+	RuntimeItemState.StackCount = bShouldAlwaysClamp ? FMath::Clamp<int32>(NewStackCount, 0, MaxStackCount) : NewStackCount;
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
 	OnRep_ItemStateModified(OldState);
@@ -275,20 +275,20 @@ bool UItemObject::CanStack(const UItemObject* Item) const
 	return true;
 }
 
-bool UItemObject::Stack(UItemObject* Item)
+bool UItemObject::Stack(UItemObject* Src)
 {
-	if (!IsValid(Item))
+	if (!IsValid(Src))
 	{
 		return false;
 	}
 
 	// @gdemers get stack count from sum between both objects.
-	const int32 TotalStackCount = (Item->GetRuntimeCount() + GetRuntimeCount());
+	const int32 TotalStackCount = (Src->GetRuntimeCount() + GetRuntimeCount());
 	const int32 ClampedStackCount = FMath::Clamp(TotalStackCount, 0, GetMaxStackCount());
 
 	// @gdemers update stack internal representation. Note : the function input may overflow the stack
 	// 'this' UItemObject reference.
-	Item->ModifyRuntimeStackCount((TotalStackCount - ClampedStackCount)/*handle left-over*/);
+	Src->ModifyRuntimeStackCount((TotalStackCount - ClampedStackCount)/*handle left-over*/);
 	ModifyRuntimeStackCount(ClampedStackCount);
 
 	const bool bDoesStackOverflow = (TotalStackCount > ClampedStackCount);
@@ -907,8 +907,7 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 		else
 		{
 			// @gdemers get the PrivateId, and validate storage item (Not ownership).
-			const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
-			const bool bResult = UItemObjectUtils::IsStorage(PrivateItemId);
+			const bool bResult = (false == (UItemObjectUtils::FilterItem(ItemObject)/*NonShiftedItemId*/ ^ SearchId));
 			return bResult;
 		}
 	});
@@ -1037,7 +1036,7 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		return nullptr;
 	}
 
-	UItemObject* OutItem = NewObject<UItemObject>(Outer, SrcItem->GetFName(), RF_NoFlags, SrcItem);
+	UItemObject* OutItem = NewObject<UItemObject>(Outer, SrcItem->GetClass());
 	if (IsValid(OutItem))
 	{
 		const int32 MaxCount = SrcItem->GetMaxStackCount();
@@ -1045,8 +1044,10 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		const int32 SplitResources = FMath::Min(SrcCount, MaxCount);
 		SrcItem->ModifyRuntimeStackCount(SrcCount - SplitResources);
 		OutItem->ModifyRuntimeStackCount(SplitResources);
-		// @gdemers storage is qualified next. this shouldnt be transient between instance. only id should be!
-		OutItem->PrivateItemId = UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_ITEM_ID_ENCODING_BIT_RANGE, GET_ITEM_ID_ENCODING_RSHIFT);
+		OutItem->PrivateItemId = SrcItem->PrivateItemId;
+		// @gdemers we need to invalidate storage so we can correctly qualify it next!
+		OutItem->PrivateItemId &= ~UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		OutItem->PrivateItemId &= ~UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
 	}
 
 	return OutItem;
