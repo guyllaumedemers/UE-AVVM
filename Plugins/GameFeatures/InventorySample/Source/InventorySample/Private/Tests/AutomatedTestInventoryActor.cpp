@@ -291,12 +291,19 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
 		bResult &= (NumSplits > 0);
 
-		const UItemObject* SingleSplit = UItemObjectUtils::SplitObject(InventoryComponent.Get(), ItemObject);
+		UItemObject* SingleSplit = UItemObjectUtils::SplitObject(InventoryComponent.Get(), ItemObject);
 		if (IsValid(SingleSplit))
 		{
 			bResult &= (SingleSplit->GetRuntimeCount() == StackBounds);
 			bResult &= (ItemObject->GetRuntimeCount() == FMath::CeilToInt(SingleSplit->GetRuntimeCount() * 1.5) - StackBounds);
 		}
+		
+		// @gdemers test the api for stacking.
+		const bool bHasOverflow = ItemObject->Stack(SingleSplit);
+		bResult &= bHasOverflow;
+		// @gdemers validate output for the swap operation last executed.
+		bResult &= (ItemObject->GetRuntimeCount() == StackBounds);
+		bResult &= (SingleSplit->GetRuntimeCount() == FMath::CeilToInt(ItemObject->GetRuntimeCount() * 1.5) - StackBounds);
 		
 		// TODO @gdemers test serializing split objects back to disk, and read from them.
 	}
