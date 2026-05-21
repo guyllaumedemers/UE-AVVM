@@ -270,6 +270,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		return false;
 	}
 
+	UItemObject* SingleSplit = nullptr;
+
 	bool bResult = true;
 	for (UItemObject* ItemObject : InventoryComponent->GetItems())
 	{
@@ -279,11 +281,11 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		}
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
-		
+
 		// @gdemers test referencing a valid stack count. i.e non-zero.
 		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
 		bResult &= (ItemStackCount > 0);
-		
+
 		// @gdemers test splitting an object with count overflow.
 		const int32 StackBounds = ItemObject->GetMaxStackCount();
 		ItemObject->ModifyRuntimeStackCount(FMath::CeilToInt(StackBounds * 1.5), false/*enforce not clamping*/);
@@ -291,21 +293,52 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
 		bResult &= (NumSplits > 0);
 
-		UItemObject* SingleSplit = UItemObjectUtils::SplitObject(InventoryComponent.Get(), ItemObject);
+		SingleSplit = UItemObjectUtils::SplitObject(InventoryComponent.Get(), ItemObject);
 		if (IsValid(SingleSplit))
 		{
 			bResult &= (SingleSplit->GetRuntimeCount() == StackBounds);
 			bResult &= (ItemObject->GetRuntimeCount() == FMath::CeilToInt(SingleSplit->GetRuntimeCount() * 1.5) - StackBounds);
 		}
-		
+
 		// @gdemers test the api for stacking.
 		const bool bHasOverflow = ItemObject->Stack(SingleSplit);
 		bResult &= bHasOverflow;
 		// @gdemers validate output for the swap operation last executed.
 		bResult &= (ItemObject->GetRuntimeCount() == StackBounds);
 		bResult &= (SingleSplit->GetRuntimeCount() == FMath::CeilToInt(ItemObject->GetRuntimeCount() * 1.5) - StackBounds);
-		
-		// TODO @gdemers test serializing split objects back to disk, and read from them.
+	}
+
+	{
+		// @gdemers test serializing split objects back to disk, and read from them.
+		FStorageQualifierContextArgs Params;
+		Params.PrivateItemIds = InventoryComponent->PrivateItemIds;
+		Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+		Params.CurrentStoragePosition = INDEX_NONE;
+		Params.CurrentStorageId = INDEX_NONE;
+
+		// @gdemers encode new storage position into UItemObject based on inventory latest layout.
+		UItemObjectUtils::QualifyStorage(InventoryComponent.Get(), Params, SingleSplit);
+
+		InventoryComponent->Items.Add(SingleSplit);
+		InventoryComponent->CheckDisk();
+
+		// @gdemers get-set file from disk caching all inventory providers representation.
+		const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+
+		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(this);
+		const FString OutInventoryProviders = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
+
+		if (IsValid(SingleSplit))
+		{
+			// @gdemers item types share the same ItemId, as such, our only way of differentiating is through storage position.
+			const int32 NonShiftedPrivateItemId = UItemObjectUtils::GetPrivateItemId(SingleSplit);
+			const int32 NonShiftedStoragePosition = UItemObjectUtils::FilterStoragePosition(NonShiftedPrivateItemId);
+			const int32 NewPrivateItemId = UInventoryUtils::GetItemStoragePosition(OutInventoryProviders, {}, NonShiftedStoragePosition);
+			const int32 NewItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
+			bResult &= (NewPrivateItemId != INDEX_NONE);
+			bResult &= (NewItemStackCount == SingleSplit->GetRuntimeCount());
+		}
 	}
 
 	return bResult;

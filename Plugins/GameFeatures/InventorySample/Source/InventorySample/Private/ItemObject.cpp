@@ -677,6 +677,15 @@ int32 UItemObjectUtils::FilterItemPrivateId(const int32 EncodedBits)
 	return NonShiftedItemId;
 }
 
+int32 UItemObjectUtils::FilterStoragePosition(const int32 EncodedBits)
+{
+	const int32 NonShiftedStoragePosition = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
+	                                                                              GET_ITEM_POSITION_ENCODING_BIT_RANGE,
+	                                                                              GET_ITEM_POSITION_ENCODING_RSHIFT);
+
+	return NonShiftedStoragePosition;
+}
+
 void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
 {
 	if (!IsValid(PendingDestroyItemObject))
@@ -715,6 +724,9 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 	{
 		const int32 StorageIdBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE) << GET_STORAGE_ID_ENCODING_RSHIFT;
 		const int32 ItemPositionBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE) << GET_ITEM_POSITION_ENCODING_RSHIFT;
+		// @gdemers IMPORTANT - Order matter here!
+		PendingDropItemObject->ModifyRuntimeStoragePosition(INDEX_NONE);
+		PendingDropItemObject->ModifyRuntimeStorageId(INDEX_NONE);
 		PendingDropItemObject->PrivateItemId &= ~StorageIdBitmask;
 		PendingDropItemObject->PrivateItemId &= ~ItemPositionBitmask;
 	}
@@ -800,9 +812,11 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 
 	if (IsValid(PendingPickupItemObject))
 	{
-		const int32 StorageId_Shifted = (OutMin_StorageId << GET_STORAGE_ID_ENCODING_RSHIFT/*bit shift is mirrored here*/);
-		const int32 StoragePosition_Shifted = (OutMin_StoragePosition << GET_ITEM_POSITION_ENCODING_RSHIFT/*same here*/);
-		PendingPickupItemObject->PrivateItemId |= (StorageId_Shifted | StoragePosition_Shifted);
+		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(OutMin_StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(OutMin_StoragePosition, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+		PendingPickupItemObject->ModifyRuntimeStorageId(OutMin_StorageId);
+		PendingPickupItemObject->ModifyRuntimeStoragePosition(OutMin_StoragePosition);
+		PendingPickupItemObject->PrivateItemId |= (ShiftedStorageId | ShiftedStoragePosition);
 	}
 }
 
@@ -1024,7 +1038,7 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 
 	// @gdemers could provide Template Object to initialize our new UItemObject but we would have to NOT provide
 	// a Name, otherwise, if provided our Src->GetFName(), we would end up invalidating the Src object.
-	UItemObject* OutItem = NewObject<UItemObject>(Outer, SrcItem->GetClass());
+	auto* OutItem = NewObject<UItemObject>(Outer, SrcItem->GetClass());
 	if (IsValid(OutItem))
 	{
 		const int32 MaxCount = SrcItem->GetMaxStackCount();

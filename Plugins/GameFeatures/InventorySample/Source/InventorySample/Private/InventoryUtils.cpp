@@ -282,6 +282,35 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 	}
 }
 
+int32 UInventoryUtils::GetItemStoragePosition(const FString& NewPayload,
+                                              const TArray<int32>& NewPrivateIds,
+                                              const int32 ItemStoragePosition)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
+	for (const int32 PrivateId : NewPrivateIds)
+	{
+		FilteredSet.Remove(PrivateId);
+	}
+
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchStorage = ItemStoragePosition](const int32 Value)
+	{
+		const int32 OutValue = UItemObjectUtils::FilterStoragePosition(Value);
+		return (false == (OutValue ^ SearchStorage))/*if both bits are identical, return 0.*/;
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
 FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
                                              const int32 ProviderId,
                                              const int32 PrivateItemId)

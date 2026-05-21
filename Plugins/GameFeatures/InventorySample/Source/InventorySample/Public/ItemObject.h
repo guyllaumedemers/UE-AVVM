@@ -445,6 +445,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 FilterItemPrivateId(const int32 EncodedBits);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 FilterStoragePosition(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
