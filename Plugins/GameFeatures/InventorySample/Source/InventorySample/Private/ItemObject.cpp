@@ -1036,6 +1036,8 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		return nullptr;
 	}
 
+	// @gdemers could provide Template Object to initialize our new UItemObject but we would have to NOT provide
+	// a Name, otherwise, if provided our Src->GetFName(), we would end up invalidating the Src object.
 	UItemObject* OutItem = NewObject<UItemObject>(Outer, SrcItem->GetClass());
 	if (IsValid(OutItem))
 	{
