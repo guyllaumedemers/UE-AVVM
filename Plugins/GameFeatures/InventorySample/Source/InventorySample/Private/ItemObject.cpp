@@ -248,31 +248,17 @@ bool UItemObject::IsEmpty() const
 	return (false == !!RuntimeItemState.StackCount);
 }
 
-bool UItemObject::CanStack(const UItemObject* Item) const
+bool UItemObject::CanStack(const UItemObject* Src) const
 {
 	// @gdemers validate if both items are of same types.
-	if (!IsValid(Item) || (Item->BP_GetItemActorId() != BP_GetItemActorId()))
+	if (!IsValid(Src) || (Src->BP_GetItemActorId() != BP_GetItemActorId()))
 	{
 		return false;
 	}
 
 	static const auto StackableTagContainer = FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_STACK);
 	const bool bDoesItemStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
-	if (!bDoesItemStack)
-	{
-		return false;
-	}
-
-	const int32 MaxStackCount = GetMaxStackCount();
-	const int32 TotalStackCount = (Item->GetRuntimeCount() + GetRuntimeCount());
-
-	// @gdemers validate if the total count is lesser than the MaxStackCount.
-	if (TotalStackCount > MaxStackCount)
-	{
-		return false;
-	}
-
-	return true;
+	return bDoesItemStack;
 }
 
 bool UItemObject::Stack(UItemObject* Src)

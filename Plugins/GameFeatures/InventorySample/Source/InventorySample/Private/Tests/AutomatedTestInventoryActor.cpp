@@ -273,7 +273,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 	bool bResult = true;
 	for (UItemObject* ItemObject : InventoryComponent->GetItems())
 	{
-		if (!IsValid(ItemObject))
+		if (!IsValid(ItemObject) || !ItemObject->CanStack(ItemObject))
 		{
 			continue;
 		}
