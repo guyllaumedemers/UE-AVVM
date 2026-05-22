@@ -130,306 +130,6 @@ namespace NSJsonInventory
 	}
 }
 
-bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)
-{
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
-		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<const UInventoryProvider>(Outer))
-	{
-		return false;
-	}
-
-	OutSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
-	const bool bIsNone = EnumHasAnyFlags(OutSrcType, EItemSrcType::None);
-	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
-	{
-		return false;
-	}
-
-	return true;
-}
-
-TArray<int32> UInventoryUtils::GetRuntimeUniqueIds(const TArray<UItemObject*>& Items)
-{
-	TArray<int32> OutResults;
-	for (const UItemObject* Item : Items)
-	{
-		// @gdemers return the runtime version of our UItemObject::PrivateItemId
-		// so we can compare against the version serialized with our backend.
-		const int32 ItemId = UItemObjectUtils::MakeRuntimePrivateItemId(Item);
-		if (ensureAlwaysMsgf(ItemId != INDEX_NONE, TEXT("Couldn't generate a valid PrivateItemId using runtime information.")))
-		{
-			OutResults.AddUnique(ItemId);
-		}
-	}
-
-	return OutResults;
-}
-
-int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
-{
-	if (!IsValid(Item))
-	{
-		return INDEX_NONE;
-	}
-	else
-	{
-		return UInventoryUtils::GetItemActorUniqueIdentifier({UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName});
-	}
-}
-
-int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId)
-{
-	if (!ensureAlwaysMsgf(ItemActorId.IsValid(),
-	                      TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the Actor Identifier RegistryType.")))
-	{
-		return INDEX_NONE;
-	}
-
-	auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
-	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ItemActorId);
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
-	{
-		return RowValue->UniqueId;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
-}
-
-TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
-{
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
-	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
-	{
-		return TArray<FString>();
-	}
-
-	TArray<FString> OutProviders;
-
-	const TArray<TSharedPtr<FJsonValue>> InventoryProviders = JsonData->GetArrayField(TEXT("InventoryProviders"));
-	for (const auto& InventoryProvider : InventoryProviders)
-	{
-		OutProviders.Add(InventoryProvider->AsString());
-	}
-
-	return OutProviders;
-}
-
-FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
-                                                  const int32 NewProviderId)
-{
-	const TArray<FString> InventoryProviders = GetInventoryProviderPayloads(NewPayload);
-	if (InventoryProviders.IsEmpty())
-	{
-		return FString();
-	}
-
-	const FString* SearchResult = InventoryProviders.FindByPredicate([SearchId = NewProviderId](const FString& Payload)
-	{
-		NSJsonInventory::FJsonInventoryProvider OutProvider;
-		NSJsonInventory::FromString(Payload, OutProvider);
-		return (false == (OutProvider.Id ^ SearchId));
-	});
-
-	if (SearchResult != nullptr)
-	{
-		return *SearchResult;
-	}
-	else
-	{
-		return TEXT("");
-	}
-}
-
-int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
-                                        const TArray<int32>& NewPrivateIds,
-                                        const int32 ItemId)
-{
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
-	NSJsonInventory::FromString(NewPayload, OutProvider);
-
-	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
-	for (const int32 PrivateId : NewPrivateIds)
-	{
-		FilteredSet.Remove(PrivateId);
-	}
-
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
-	{
-		// @gdemers filter Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
-		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
-		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
-		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
-	});
-
-	if (SearchResult != nullptr)
-	{
-		return *SearchResult;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
-}
-
-int32 UInventoryUtils::GetItemPrivateIdUsingStoragePosition(const FString& NewPayload,
-                                                            const TArray<int32>& NewPrivateIds,
-                                                            const int32 ItemStoragePosition)
-{
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
-	NSJsonInventory::FromString(NewPayload, OutProvider);
-
-	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
-	for (const int32 PrivateId : NewPrivateIds)
-	{
-		FilteredSet.Remove(PrivateId);
-	}
-
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchStorage = ItemStoragePosition](const int32 Value)
-	{
-		const int32 OutValue = UItemObjectUtils::FilterStoragePosition(Value);
-		return (false == (OutValue ^ SearchStorage))/*if both bits are identical, return 0.*/;
-	});
-
-	if (SearchResult != nullptr)
-	{
-		return *SearchResult;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
-}
-
-FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
-                                             const int32 ProviderId,
-                                             const int32 PrivateItemId)
-{
-	if (!IsValid(Outer))
-	{
-		return FGameplayTag::EmptyTag;
-	}
-
-	auto OutResult = FGameplayTag::EmptyTag;
-
-	const auto* Character = Cast<AAVVMCharacter>(Outer);
-	if (IsValid(Character) && Character->IsPlayerControlled())
-	{
-		OutResult = AAVVMGameSession::Static_GetPlayerPresetSlot(Outer->GetWorld(), ProviderId/*calling Player UniqueId*/, PrivateItemId);
-	}
-	else
-	{
-		// @gdemers we may attempt retrieving the inventory for an NPC actor
-		// (or any other actor type) that are defined in backend.
-		OutResult = AAVVMGameSession::Static_GetActorPresetSlot(Outer->GetWorld(), ProviderId/*calling Actor UniqueId*/, PrivateItemId);
-	}
-
-	return OutResult;
-}
-
-FGameplayTag UInventoryUtils::GetItemSlotTagFromPayload(const FString& NewPayload,
-                                                        const int32 PrivateItemId)
-{
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
-	NSJsonInventory::FromString(NewPayload, OutProvider);
-
-	const auto* SearchResult = OutProvider.Loadout.FindKey(PrivateItemId);
-	if (SearchResult != nullptr)
-	{
-		return *SearchResult;
-	}
-	else
-	{
-		return FGameplayTag::EmptyTag;
-	}
-}
-
-FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
-                                                 const int32 ProviderId,
-                                                 const TArray<int32>& NewPrivateIds)
-{
-	TArray<NSJsonInventory::FJsonInventoryProvider> InventoryProviders;
-	for (const FString& Payload : GetInventoryProviderPayloads(NewPayload))
-	{
-		NSJsonInventory::FJsonInventoryProvider OutProvider;
-		NSJsonInventory::FromString(Payload, OutProvider);
-
-		InventoryProviders.Add(OutProvider);
-	}
-
-	auto* SearchResult = InventoryProviders.FindByPredicate([SearchId = ProviderId](const NSJsonInventory::FJsonInventoryProvider& Provider)
-	{
-		return (false == (Provider.Id ^ SearchId));
-	});
-
-	if (SearchResult != nullptr)
-	{
-		// @gdemers overwrite all item entries within this provider.
-		SearchResult->PrivateItemIds = NewPrivateIds;
-	}
-
-	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
-	for (const auto& ModifiedProvider : InventoryProviders)
-	{
-		FString OutFormat;
-		NSJsonInventory::ToString(ModifiedProvider, OutFormat);
-		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
-	}
-
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
-
-	FString JsonOutput;
-
-	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
-	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
-	{
-		return FString();
-	}
-	else
-	{
-		return JsonOutput;
-	}
-}
-
-FString UInventoryUtils::CreateInventoryProvider(const int32 ProviderId,
-                                                 const TMap<FGameplayTag, int32> Loadout,
-                                                 const TArray<int32>& PrivateItemIds)
-{
-	NSJsonInventory::FJsonInventoryProvider InventoryProvider;
-	InventoryProvider.Id = ProviderId;
-	InventoryProvider.Loadout = Loadout;
-	InventoryProvider.PrivateItemIds = PrivateItemIds;
-
-	FString OutProvider;
-	NSJsonInventory::ToString(InventoryProvider, OutProvider);
-
-	return OutProvider;
-}
-
-void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
-                                           int32& OutProviderId,
-                                           TMap<FGameplayTag, int32>& OutLoadout,
-                                           TArray<int32>& OutPrivateItemIds)
-{
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
-	NSJsonInventory::FromString(NewPayload, OutProvider);
-
-	OutProviderId = OutProvider.Id;
-	OutLoadout = OutProvider.Loadout;
-	OutPrivateItemIds = OutProvider.PrivateItemIds;
-}
-
 FString UInventoryUtils::CreateDefaultInventoryProviders()
 {
 	const TSoftObjectPtr<UDataTable>& ProviderDataTable = UInventorySettings::GetDefaultProviderInventories();
@@ -467,7 +167,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
 		TMap<FGameplayTag, int32> Loadout;
 		TArray<int32> Items;
-		
+
 		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset
 		// are Blueprints, not elements dynamically composed. A complex entry is configured based on an Item Actor definition.
 		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
@@ -530,6 +230,129 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 	}
 }
 
+FString UInventoryUtils::CreateInventoryProvider(const int32 ProviderId,
+                                                 const TMap<FGameplayTag, int32>& Loadout,
+                                                 const TArray<int32>& PrivateItemIds)
+{
+	NSJsonInventory::FJsonInventoryProvider InventoryProvider;
+	InventoryProvider.Id = ProviderId;
+	InventoryProvider.Loadout = Loadout;
+	InventoryProvider.PrivateItemIds = PrivateItemIds;
+
+	FString OutProvider;
+	NSJsonInventory::ToString(InventoryProvider, OutProvider);
+
+	return OutProvider;
+}
+
+FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
+                                                 const int32 ProviderId,
+                                                 const TArray<int32>& NewPrivateIds)
+{
+	TArray<NSJsonInventory::FJsonInventoryProvider> InventoryProviders;
+	for (const FString& Payload : GetInventoryProviderPayloads(NewPayload))
+	{
+		NSJsonInventory::FJsonInventoryProvider OutProvider;
+		NSJsonInventory::FromString(Payload, OutProvider);
+
+		InventoryProviders.Add(OutProvider);
+	}
+
+	auto* SearchResult = InventoryProviders.FindByPredicate([SearchId = ProviderId](const NSJsonInventory::FJsonInventoryProvider& Provider)
+	{
+		return (false == (Provider.Id ^ SearchId));
+	});
+
+	if (SearchResult != nullptr)
+	{
+		// @gdemers overwrite all item entries within this provider.
+		SearchResult->PrivateItemIds = NewPrivateIds;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	for (const auto& ModifiedProvider : InventoryProviders)
+	{
+		FString OutFormat;
+		NSJsonInventory::ToString(ModifiedProvider, OutFormat);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return FString();
+	}
+	else
+	{
+		return JsonOutput;
+	}
+}
+
+TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& NewPayload)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return TArray<FString>();
+	}
+
+	TArray<FString> OutProviders;
+
+	const TArray<TSharedPtr<FJsonValue>> InventoryProviders = JsonData->GetArrayField(TEXT("InventoryProviders"));
+	for (const auto& InventoryProvider : InventoryProviders)
+	{
+		OutProviders.Add(InventoryProvider->AsString());
+	}
+
+	return OutProviders;
+}
+
+FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
+                                                  const int32 NewProviderId)
+{
+	const TArray<FString> InventoryProviders = GetInventoryProviderPayloads(NewPayload);
+	if (InventoryProviders.IsEmpty())
+	{
+		return FString();
+	}
+
+	const FString* SearchResult = InventoryProviders.FindByPredicate([SearchId = NewProviderId](const FString& Payload)
+	{
+		NSJsonInventory::FJsonInventoryProvider OutProvider;
+		NSJsonInventory::FromString(Payload, OutProvider);
+		return (false == (OutProvider.Id ^ SearchId));
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return TEXT("");
+	}
+}
+
+void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
+                                           int32& OutProviderId,
+                                           TMap<FGameplayTag, int32>& OutLoadout,
+                                           TArray<int32>& OutPrivateItemIds)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	OutProviderId = OutProvider.Id;
+	OutLoadout = OutProvider.Loadout;
+	OutPrivateItemIds = OutProvider.PrivateItemIds;
+}
+
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
                                                   const int32 StackCount)
 {
@@ -544,4 +367,181 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 	// @gdemers we do not assign storage as we are still unaware of which storage type is referenced
 	// on the Inventory Provider we are trying to initialize. This information will be handled from within the calling function.
 	return (ItemId + NewStackCount);
+}
+
+int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
+                                        const TArray<int32>& NewPrivateIds,
+                                        const int32 ItemId)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
+	for (const int32 PrivateId : NewPrivateIds)
+	{
+		FilteredSet.Remove(PrivateId);
+	}
+
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
+	{
+		// @gdemers filter Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
+		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
+		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
+		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 UInventoryUtils::GetItemPrivateIdUsingStoragePosition(const FString& NewPayload,
+                                                            const TArray<int32>& NewPrivateIds,
+                                                            const int32 ItemStoragePosition)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
+	for (const int32 PrivateId : NewPrivateIds)
+	{
+		FilteredSet.Remove(PrivateId);
+	}
+
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchStorage = ItemStoragePosition](const int32 Value)
+	{
+		const int32 OutValue = UItemObjectUtils::FilterStoragePosition(Value);
+		return (false == (OutValue ^ SearchStorage))/*if both bits are identical, return 0.*/;
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
+{
+	if (!IsValid(Item))
+	{
+		return INDEX_NONE;
+	}
+	else
+	{
+		return UInventoryUtils::GetItemActorUniqueIdentifier({UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName});
+	}
+}
+
+int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId)
+{
+	if (!ensureAlwaysMsgf(ItemActorId.IsValid(),
+	                      TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the Actor Identifier RegistryType.")))
+	{
+		return INDEX_NONE;
+	}
+
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ItemActorId);
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)
+{
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
+		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<const UInventoryProvider>(Outer))
+	{
+		return false;
+	}
+
+	OutSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
+	const bool bIsNone = EnumHasAnyFlags(OutSrcType, EItemSrcType::None);
+	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
+                                             const int32 ProviderId,
+                                             const int32 PrivateItemId)
+{
+	if (!IsValid(Outer))
+	{
+		return FGameplayTag::EmptyTag;
+	}
+
+	auto OutResult = FGameplayTag::EmptyTag;
+
+	const auto* Character = Cast<AAVVMCharacter>(Outer);
+	if (IsValid(Character) && Character->IsPlayerControlled())
+	{
+		OutResult = AAVVMGameSession::Static_GetPlayerPresetSlot(Outer->GetWorld(), ProviderId/*calling Player UniqueId*/, PrivateItemId);
+	}
+	else
+	{
+		// @gdemers we may attempt retrieving the inventory for an NPC actor
+		// (or any other actor type) that are defined in backend.
+		OutResult = AAVVMGameSession::Static_GetActorPresetSlot(Outer->GetWorld(), ProviderId/*calling Actor UniqueId*/, PrivateItemId);
+	}
+
+	return OutResult;
+}
+
+FGameplayTag UInventoryUtils::GetItemSlotTagFromPayload(const FString& NewPayload,
+                                                        const int32 PrivateItemId)
+{
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	const auto* SearchResult = OutProvider.Loadout.FindKey(PrivateItemId);
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return FGameplayTag::EmptyTag;
+	}
+}
+
+TArray<int32> UInventoryUtils::GetRuntimeUniqueIds(const TArray<UItemObject*>& Items)
+{
+	TArray<int32> OutResults;
+	for (const UItemObject* Item : Items)
+	{
+		// @gdemers return the runtime version of our UItemObject::PrivateItemId
+		// so we can compare against the version serialized with our backend.
+		const int32 ItemId = UItemObjectUtils::MakeRuntimePrivateItemId(Item);
+		if (ensureAlwaysMsgf(ItemId != INDEX_NONE, TEXT("Couldn't generate a valid PrivateItemId using runtime information.")))
+		{
+			OutResults.AddUnique(ItemId);
+		}
+	}
+
+	return OutResults;
 }

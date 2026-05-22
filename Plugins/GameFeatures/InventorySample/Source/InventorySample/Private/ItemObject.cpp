@@ -752,7 +752,7 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 	                               int32& OutStoragePosition,
 	                               int32& OutStorageId)
 	{
-		for (auto& [StorageId, StoragePositions] : NewStorages)
+		for (const auto& [StorageId, StoragePositions] : NewStorages)
 		{
 			FStorageContextArgs SearchParams;
 			SearchParams.InventoryComponent = NewInventoryComponent;

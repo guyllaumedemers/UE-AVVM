@@ -40,28 +40,37 @@ UCLASS()
 class INVENTORYSAMPLE_API UInventoryUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	UFUNCTION(BlueprintCallable)
-	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);
-	
-	UFUNCTION(BlueprintCallable)
-	static TArray<int32> GetRuntimeUniqueIds(const TArray<UItemObject*>& Items);
-	
-	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle
-	// shifting following user defined rules.
-	UFUNCTION(BlueprintCallable)
-	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
-	
-	UFUNCTION(BlueprintCallable)
-	static int32 GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId);
+	static FString CreateDefaultInventoryProviders();
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FString> GetInventoryProviderPayloads(const FString& NewPayload/*FileContent*/);
+	static FString CreateInventoryProvider(const int32 ProviderId,
+	                                       const TMap<FGameplayTag, int32>& Loadout,
+	                                       const TArray<int32>& PrivateItemIds);
 
 	UFUNCTION(BlueprintCallable)
-	static FString GetInventoryProviderById(const FString& NewPayload/*FileContent*/,
+	static FString ModifyInventoryProvider(const FString& NewPayload,
+	                                       const int32 ProviderId,
+	                                       const TArray<int32>& NewPrivateIds);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FString> GetInventoryProviderPayloads(const FString& NewPayload);
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetInventoryProviderById(const FString& NewPayload,
 	                                        const int32 NewProviderId);
+
+	UFUNCTION(BlueprintCallable)
+	static void GetInventoryProvider(const FString& NewPayload,
+	                                 int32& OutProviderId,
+	                                 TMap<FGameplayTag, int32>& OutLoadout,
+	                                 TArray<int32>& OutPrivateItemIds);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
+	                                        const int32 StackCount);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetItemPrivateId(const FString& NewPayload,
@@ -73,6 +82,17 @@ public:
 	                                                  const TArray<int32>& NewPrivateIds,
 	                                                  const int32 ItemStoragePosition);
 
+	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle
+	// shifting following user defined rules.
+	UFUNCTION(BlueprintCallable)
+	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId);
+
+	UFUNCTION(BlueprintCallable)
+	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);
+
 	UFUNCTION(BlueprintCallable)
 	static FGameplayTag GetItemSlotTag(const UObject* Outer,
 	                                   const int32 ProviderId,
@@ -83,25 +103,5 @@ public:
 	                                              const int32 PrivateItemId);
 
 	UFUNCTION(BlueprintCallable)
-	static FString ModifyInventoryProvider(const FString& NewPayload/*FileContent*/,
-	                                       const int32 ProviderId,
-	                                       const TArray<int32>& NewPrivateIds);
-
-	UFUNCTION(BlueprintCallable)
-	static FString CreateInventoryProvider(const int32 ProviderId,
-										   const TMap<FGameplayTag, int32> Loadout,
-										   const TArray<int32>& PrivateItemIds);
-
-	UFUNCTION(BlueprintCallable)
-	static void GetInventoryProvider(const FString& NewPayload,
-	                                 int32& OutProviderId,
-	                                 TMap<FGameplayTag, int32>& OutLoadout,
-	                                 TArray<int32>& OutPrivateItemIds);
-
-	UFUNCTION(BlueprintCallable)
-	static FString CreateDefaultInventoryProviders();
-
-	UFUNCTION(BlueprintCallable)
-	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-	                                        const int32 StackCount);
+	static TArray<int32> GetRuntimeUniqueIds(const TArray<UItemObject*>& Items);
 };
