@@ -30,6 +30,7 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/StreamableManager.h"
 #include "Resources/InventoryResourceHandlingImpl.h"
+#include "Tags/PrivateTags.h"
 
 AAutomatedTestInventoryActor::AAutomatedTestInventoryActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -341,6 +342,62 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		}
 	}
 
+	return bResult;
+}
+
+bool AAutomatedTestInventoryActor::RunTest_InventoryBounds() const
+{
+	if (!IsValid(InventoryComponent) || InventoryComponent->GetItems().IsEmpty())
+	{
+		return false;
+	}
+
+	int32 NumStoragePositionsAllowed = 0;
+	for (const UItemObject* ItemObject : InventoryComponent->GetItems())
+	{
+		const int32 NewPrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
+		if (UItemObjectUtils::IsStorage(NewPrivateItemId))
+		{
+			NumStoragePositionsAllowed += ItemObject->GetMaxStackCount();
+		}
+	}
+
+	TArray<UItemObject*> StubItems;
+	for (UItemObject* ItemObject : InventoryComponent->GetItems())
+	{
+		if (!IsValid(ItemObject) || !ItemObject->CanStack(ItemObject))
+		{
+			continue;
+		}
+
+		// @gdemers test splitting an object with count overflow.
+		const int32 StackBounds = ItemObject->GetMaxStackCount();
+		ItemObject->ModifyRuntimeStackCount(StackBounds * NumStoragePositionsAllowed, false/*enforce not clamping*/);
+
+		const int32 NumSplits = UItemObjectUtils::GetNumSplits(ItemObject);
+		for (int32 i = 0; i < NumSplits; ++i)
+		{
+			UItemObject* SingleSplit = UItemObjectUtils::SplitObject(InventoryComponent.Get(), ItemObject);
+
+			// @gdemers setup storage information so we can 
+			FStorageQualifierContextArgs Params;
+			Params.PrivateItemIds = InventoryComponent->PrivateItemIds;
+			Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+			Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+			Params.CurrentStoragePosition = INDEX_NONE;
+			Params.CurrentStorageId = INDEX_NONE;
+
+			// @gdemers encode new storage position into UItemObject based on inventory latest layout.
+			UItemObjectUtils::QualifyStorage(InventoryComponent.Get(), Params, SingleSplit);
+			StubItems.Add(SingleSplit);
+		}
+	}
+
+	InventoryComponent->Items.Append(StubItems);
+	InventoryComponent->CheckBounds();
+
+	static const auto StorageFullTags = FGameplayTagContainer(TAG_INVENTORYSAMPLE_STORAGE_STATE_FULL);
+	const bool bResult = InventoryComponent->HasPartialMatch(StorageFullTags);
 	return bResult;
 }
 

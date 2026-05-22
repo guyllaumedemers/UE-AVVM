@@ -69,6 +69,7 @@ public:
 	bool RunTest_ItemUniqueId(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const;
 	bool RunTest_ItemStorageReference() const;
 	bool RunTest_ItemStacking() const;
+	bool RunTest_InventoryBounds() const;
 
 protected:
 	UFUNCTION(CallInEditor)

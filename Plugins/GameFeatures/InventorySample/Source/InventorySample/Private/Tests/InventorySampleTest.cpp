@@ -177,7 +177,8 @@ public:
 
 	void RWInventory()
 	{
-		// check bounds
+		const bool bResult_RunTest_InventoryBounds = TestActor->RunTest_InventoryBounds();
+		TestTrue("bResult_RunTest_InventoryBounds", bResult_RunTest_InventoryBounds);
 	}
 
 	void RWLoadout()
