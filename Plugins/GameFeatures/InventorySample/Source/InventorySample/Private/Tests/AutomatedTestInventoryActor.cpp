@@ -323,6 +323,9 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 
 		InventoryComponent->Items.Add(SingleSplit);
 		InventoryComponent->CheckDisk();
+		// @gdemers revert our state after serialization so subsequent test only rely on data
+		// defined in our Inventory provider default definition.
+		InventoryComponent->Items.Remove(SingleSplit);
 
 		// @gdemers get-set file from disk caching all inventory providers representation.
 		const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
