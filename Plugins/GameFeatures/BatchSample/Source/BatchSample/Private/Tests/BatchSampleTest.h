@@ -34,6 +34,8 @@ class UBatchingRule;
  *
  *	ABatchSampleTest is a functional test run in a level blueprint that expect ULevel::WorldSetting to be
  *	configured in order to allow subsystem initialization of the BatchSample plugin and execute Tests.
+ *	
+ *	TODO @gdemers Convert the following functional test into a server-client test.
  */
 UCLASS()
 class BATCHSAMPLE_API ABatchSampleTest : public AFunctionalTest
