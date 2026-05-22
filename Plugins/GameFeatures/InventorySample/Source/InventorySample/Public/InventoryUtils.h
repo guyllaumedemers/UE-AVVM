@@ -69,9 +69,9 @@ public:
 	                              const int32 ItemId);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 GetItemStoragePosition(const FString& NewPayload,
-	                                    const TArray<int32>& NewPrivateIds,
-	                                    const int32 ItemStoragePosition);
+	static int32 GetItemPrivateIdUsingStoragePosition(const FString& NewPayload,
+	                                                  const TArray<int32>& NewPrivateIds,
+	                                                  const int32 ItemStoragePosition);
 
 	UFUNCTION(BlueprintCallable)
 	static FGameplayTag GetItemSlotTag(const UObject* Outer,

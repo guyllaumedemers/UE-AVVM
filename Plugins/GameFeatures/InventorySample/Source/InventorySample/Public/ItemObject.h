@@ -452,11 +452,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void RuntimeDestroy(UItemObject* PendingDestroyItemObject);
 
-	// @gdemers util function for UI usage during drag/drop action.
-	UFUNCTION(BlueprintCallable)
-	static void Insert(const FInsertionContextArgs& Params,
-	                   UItemObject* PendingInsertItemObject);
-
 	UFUNCTION(BlueprintCallable)
 	static void NullifyStorage(UItemObject* PendingDropItemObject);
 

@@ -282,9 +282,9 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 	}
 }
 
-int32 UInventoryUtils::GetItemStoragePosition(const FString& NewPayload,
-                                              const TArray<int32>& NewPrivateIds,
-                                              const int32 ItemStoragePosition)
+int32 UInventoryUtils::GetItemPrivateIdUsingStoragePosition(const FString& NewPayload,
+                                                            const TArray<int32>& NewPrivateIds,
+                                                            const int32 ItemStoragePosition)
 {
 	NSJsonInventory::FJsonInventoryProvider OutProvider;
 	NSJsonInventory::FromString(NewPayload, OutProvider);

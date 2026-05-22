@@ -334,7 +334,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 			// @gdemers item types share the same ItemId, as such, our only way of differentiating is through storage position.
 			const int32 NonShiftedPrivateItemId = UItemObjectUtils::GetPrivateItemId(SingleSplit);
 			const int32 NonShiftedStoragePosition = UItemObjectUtils::FilterStoragePosition(NonShiftedPrivateItemId);
-			const int32 NewPrivateItemId = UInventoryUtils::GetItemStoragePosition(OutInventoryProviders, {}, NonShiftedStoragePosition);
+			const int32 NewPrivateItemId = UInventoryUtils::GetItemPrivateIdUsingStoragePosition(OutInventoryProviders, {}, NonShiftedStoragePosition);
 			const int32 NewItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
 			bResult &= (NewPrivateItemId != INDEX_NONE);
 			bResult &= (NewItemStackCount == SingleSplit->GetRuntimeCount());

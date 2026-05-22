@@ -712,12 +712,6 @@ void UItemObjectUtils::RuntimeDestroy(UItemObject* PendingDestroyItemObject)
 	}
 }
 
-void UItemObjectUtils::Insert(const FInsertionContextArgs& Params,
-                              UItemObject* PendingInsertItemObject)
-{
-	// TODO @gdemers Make impl.
-}
-
 void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
