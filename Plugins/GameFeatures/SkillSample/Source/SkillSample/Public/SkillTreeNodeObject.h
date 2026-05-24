@@ -22,6 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "SkillTreeNodeObject.generated.h"
@@ -67,4 +69,28 @@ private:
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
 	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 
 	int32 PrivateTreeNodeId = INDEX_NONE;
+	friend class USkillTreeNodeObjectUtils;
+};
+
+/**
+ *	Class description:
+ *	
+ *	USkillTreeNodeObjectUtils is a blueprint function library that expose reusable api.
+ */
+UCLASS()
+class SKILLSAMPLE_API USkillTreeNodeObjectUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static int32 RuntimeInitStaticItem(const UObject* Outer,
+	                                   const TArray<int32>& NewPrivateIds,
+	                                   USkillTreeNodeObject* UnInitializedSkillTreeNodeObject);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 RuntimeInitOnlineItem(const UObject* Outer,
+	                                   const TArray<int32>& NewPrivateIds,
+	                                   const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
+	                                   USkillTreeNodeObject* UnInitializedSkillTreeNodeObject);
 };

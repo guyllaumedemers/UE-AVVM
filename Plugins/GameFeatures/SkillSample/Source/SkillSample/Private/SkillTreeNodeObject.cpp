@@ -28,3 +28,18 @@ const FDataRegistryId& USkillTreeNodeObject::BP_GetItemEffectUIId() const
 {
 	return GetSkillTreeEffectUIId();
 }
+
+int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
+                                                       const TArray<int32>& NewPrivateIds,
+                                                       USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
+{
+	return INDEX_NONE;
+}
+
+int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
+                                                       const TArray<int32>& NewPrivateIds,
+                                                       const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
+                                                       USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
+{
+	return INDEX_NONE;
+}

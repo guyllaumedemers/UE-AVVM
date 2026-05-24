@@ -22,11 +22,53 @@
 #include "CoreMinimal.h"
 
 #include "ActiveGameplayEffectHandle.h"
+#include "GameplayTagContainer.h"
+#include "Backend/AVVMDataResolverHelper.h"
 #include "Components/ActorComponent.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "ActorSkillTreeComponent.generated.h"
 
+struct FStreamableHandle;
 class USkillTreeNodeObject;
+
+/**
+ *	Class description:
+ *	
+ *	FSkillTreeDataResolverHelper is a context struct that resolve backend information about an Actor Skill Tree.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FSkillTreeDataResolverHelper : public FAVVMDataResolverHelper
+{
+	GENERATED_BODY()
+
+	virtual TArray<int32> GetElementDependencies(const UObject* Outer, const int32 ElementId) const override;
+};
+
+/**
+ *	Class description:
+ *
+ *	FSkillTreeNodeToken describe a unique identifier that increment only when default construct. Can be safely
+ *	passed by copy around.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FSkillTreeNodeToken
+{
+	GENERATED_BODY()
+
+	static FSkillTreeNodeToken MakeToken()
+	{
+		static uint32 GlobalUniqueId = 0;
+
+		FSkillTreeNodeToken NewToken;
+		NewToken.UniqueId = ++GlobalUniqueId;
+
+		return NewToken;
+	}
+
+	UPROPERTY()
+	uint32 UniqueId = INDEX_NONE;
+};
 
 /**
  *	Class description:
@@ -53,6 +95,9 @@ public:
 	
 protected:
 	UFUNCTION()
+	void OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken);
+	
+	UFUNCTION()
 	void OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
@@ -60,21 +105,29 @@ protected:
 
 	// @gdemers : set of GE granted from CDO objects referenced based on backend or data asset. Can be accessed from within
 	// ability by referencing the handle tied to the GE.
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FActiveGameplayEffectHandle, TObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/> NonReplicatedSkillTreeNodes;
+	UPROPERTY(Transient)
+	TMap<FActiveGameplayEffectHandle, TWeakObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/> NonReplicatedSkillTreeNodes;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_SkillTreeNodeCollectionChanged")
 	TArray<TObjectPtr<USkillTreeNodeObject>> SkillTreeNodes;
+	
+	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
+	FGameplayTagContainer NonReplicatedComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	
+	TMap<uint32, TSharedPtr<FStreamableHandle>> SkillTreeNodeHandleSystem;
 
 private:
 	void SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources);
+	
+	// @gdemers Data Resolver for backend representation of an actor skill tree. 
+	static const TInstancedStruct<FAVVMDataResolverHelper>& GetSkillTreeDataResolverHelper();
 
 	// @gdemers cached representation of what has been attributed during the initialization
-	// phase of our Skill Tree. This address the problem of uniqueness for entries with identical type.
-	// example : Perks/Traits that are allowed to Stack.
+	// phase of our Skill Tree. This address the problem of uniqueness for entries with identical type, and/or owned by different entity.
+	// example : Perks/Traits that are allowed to Stack. Or, shotgun +15% damage vs pistol +15% damage.
 	TArray<int32> PrivateSkillTreeNodeIds;
 
 	friend class USkillTreeResourceHandlingImpl;
