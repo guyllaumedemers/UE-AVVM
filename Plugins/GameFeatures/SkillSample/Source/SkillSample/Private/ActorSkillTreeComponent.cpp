@@ -176,8 +176,8 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 	                TEXT("Requesting skill tree type %s."),
 	                EnumToString(OutSrcType));
 
-	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
-	if (bIsItemSrcStatic)
+	const bool bIsTreeNodeSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
+	if (bIsTreeNodeSrcStatic)
 	{
 		ISkillTreeProvider::Execute_RequestItemsFromDataAsset(Outer);
 	}
@@ -394,9 +394,9 @@ void UActorSkillTreeComponent::RequestGameplayEffect(UAVVMResourceManagerCompone
 		return;
 	}
 
-	const auto RequestItemSpawning = [](const TWeakObjectPtr<UActorSkillTreeComponent>& NewActorSkillTreeComponent,
-	                                    const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
-	                                    const TWeakObjectPtr<USkillTreeNodeObject>& SkillTreeNode)
+	const auto RequestGameplayEffectSpawning = [](const TWeakObjectPtr<UActorSkillTreeComponent>& NewActorSkillTreeComponent,
+	                                              const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
+	                                              const TWeakObjectPtr<USkillTreeNodeObject>& SkillTreeNode)
 	{
 		if (!ensureAlwaysMsgf(NewActorSkillTreeComponent.IsValid(), TEXT("WeakObjectPtr to Actor Skill Tree Component Invalid!")) ||
 			!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
@@ -416,7 +416,7 @@ void UActorSkillTreeComponent::RequestGameplayEffect(UAVVMResourceManagerCompone
 	};
 
 	const auto NewRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
-	                                                                       RequestItemSpawning,
+	                                                                       RequestGameplayEffectSpawning,
 	                                                                       this,
 	                                                                       ResourceManagerComponent,
 	                                                                       NewSkillTreeNode);

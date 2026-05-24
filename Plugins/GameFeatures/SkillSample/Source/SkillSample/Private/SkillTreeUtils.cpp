@@ -33,7 +33,7 @@ bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType&
 
 	OutSrcType = ISkillTreeProvider::Execute_GetSkillTreeSrcType(Outer);
 	const bool bIsNone = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::None);
-	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	if (!ensureAlwaysMsgf(!bIsNone, TEXT("ISkillTreeProvider::GetSkillTreeSrcType is None. Check if it was properly overriden.")))
 	{
 		return false;
 	}

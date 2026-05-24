@@ -478,7 +478,7 @@ bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutS
 
 	OutSrcType = IInventoryProvider::Execute_GetItemSrcType(Outer);
 	const bool bIsNone = EnumHasAnyFlags(OutSrcType, EItemSrcType::None);
-	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IHasItemCollection::GetItemSrcType is None. Check if it was properly overriden.")))
+	if (!ensureAlwaysMsgf(!bIsNone, TEXT("IInventoryProvider::GetItemSrcType is None. Check if it was properly overriden.")))
 	{
 		return false;
 	}

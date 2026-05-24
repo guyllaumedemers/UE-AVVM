@@ -171,6 +171,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	TArray<int32> CharmsIds;
 
 	// @gdemers Bits encoding allow users to retrieve {Skill_Id, Category_Id, Position_Index, Level}
+	// by bit shifting the integer retrieved from our collection (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
 	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Ability, Perks, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> SkillIds;

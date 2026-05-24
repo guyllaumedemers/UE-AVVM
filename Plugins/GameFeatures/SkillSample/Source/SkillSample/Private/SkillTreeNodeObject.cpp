@@ -19,9 +19,29 @@
 //SOFTWARE.
 #include "SkillTreeNodeObject.h"
 
+#include "AbilitySystemComponent.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+
+void USkillTreeNodeObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
+{
+	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	if (!AddedTags.IsEmpty())
+	{
+		ASC->AddLooseGameplayTags(AddedTags);
+	}
+
+	if (!RemovedTags.IsEmpty())
+	{
+		ASC->RemoveLooseGameplayTags(AddedTags);
+	}
+}
 
 const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
 {
@@ -31,11 +51,6 @@ const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
 const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectUIId() const
 {
 	return GetSkillTreeEffectUIId();
-}
-
-void USkillTreeNodeObject::SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle)
-{
-	ActiveGameplayEffectHandle = NewActiveGameplayEffectHandle;
 }
 
 void USkillTreeNodeObject::GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
@@ -50,6 +65,11 @@ void USkillTreeNodeObject::GetGameplayEffectClassAsync(const UObject* NewGamepla
 	FStreamableDelegate OnRequestItemActorClassComplete;
 	OnRequestItemActorClassComplete.BindUObject(this, &USkillTreeNodeObject::OnGameplayEffectClassAcquired, Callback);
 	StreamingHandle = UAssetManager::Get().LoadAssetList({GameplayEffectDefinitionDataAsset->GetGameplayEffectClass().ToSoftObjectPath()}, OnRequestItemActorClassComplete);
+}
+
+void USkillTreeNodeObject::SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle)
+{
+	ActiveGameplayEffectHandle = NewActiveGameplayEffectHandle;
 }
 
 void USkillTreeNodeObject::OnGameplayEffectClassAcquired(FOnRequestGameplayEffectClassComplete Callback)

@@ -65,16 +65,19 @@ class SKILLSAMPLE_API USkillTreeNodeObject final : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+	
+	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& BP_GetSkillTreeEffectId() const;
 
 	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& BP_GetSkillTreeEffectUIId() const;
 
-	UFUNCTION(BlueprintCallable)
-	void SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle);
-
 	void GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
 	                                 const FOnRequestGameplayEffectClassComplete& OnRequestGameplayEffectClassComplete);
+
+	UFUNCTION(BlueprintCallable)
+	void SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle);
 
 protected:
 	UFUNCTION()
