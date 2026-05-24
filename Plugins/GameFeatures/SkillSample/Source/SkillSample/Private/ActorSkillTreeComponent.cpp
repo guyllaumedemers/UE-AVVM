@@ -32,6 +32,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "ProfilingDebugging/CountersTrace.h"
+#include "Resources/AVVMResourceManagerComponent.h"
+#include "Resources/AVVMResourceProvider.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
 
@@ -309,8 +311,44 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 			SkillTreeNodes.Add(NewSkillTreeNode);
 		}
 	}
+
+	// @gdemers try to apply gameplay effect on actor based on outer representation.
+	TryApplyGameplayEffect(Outer);
 }
 
 void UActorSkillTreeComponent::OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects)
 {
+}
+
+void UActorSkillTreeComponent::TryApplyGameplayEffect(const AActor* Outer)
+{
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<USkillTreeProvider>(Outer);
+	if (!bResult)
+	{
+		return;
+	}
+
+	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(Outer);
+	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer doesn't return valid AVVMResourceManagerComponent!")))
+	{
+		return;
+	}
+
+	USkillTreeNodeObject* NewSkillTreeNodeObject = nullptr;
+	if (!SkillTreeNodes.IsEmpty())
+	{
+		NewSkillTreeNodeObject = SkillTreeNodes.Last();
+	}
+
+	if (!IsValid(NewSkillTreeNodeObject))
+	{
+		return;
+	}
+
+	// @gdemers configure runtime state of the item based on if it's held by the outer or just sits in the inventory.
+	const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItem);
+	if (bIsItemEquipped)
+	{
+		RequestItemActor(ResourceManagerComponent, NewItem);
+	}
 }

@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,42 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-
-using UnrealBuildTool;
-
-public class AVVMOnline : ModuleRules
-{
-	public AVVMOnline(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
-		bUseUnity = false;
-		bWarningsAsErrors = true;
-
-		PublicDefinitions.AddRange(
-			new string[]
-			{
-				"AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING",
-				"AVVMONLINE_USE_DEFAULT_SKILL_TREE_ENCODING"
-			});
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMToolkit",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"GameplayTags",
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Json",
-			}
-		);
-	}
-}
+#include "Backend/AVVMOnlineSkillTree.h"

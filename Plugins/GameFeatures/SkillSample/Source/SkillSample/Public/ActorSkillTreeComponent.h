@@ -99,6 +99,8 @@ protected:
 	
 	UFUNCTION()
 	void OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects);
+
+	void TryApplyGameplayEffect(const AActor* Outer);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
