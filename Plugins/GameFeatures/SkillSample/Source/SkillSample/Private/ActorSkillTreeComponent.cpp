@@ -339,16 +339,6 @@ void UActorSkillTreeComponent::TryApplyGameplayEffect(const AActor* Outer)
 	{
 		NewSkillTreeNodeObject = SkillTreeNodes.Last();
 	}
-
-	if (!IsValid(NewSkillTreeNodeObject))
-	{
-		return;
-	}
-
-	// @gdemers configure runtime state of the item based on if it's held by the outer or just sits in the inventory.
-	const bool bIsItemEquipped = IInventoryProvider::Execute_IsItemEquipped(Outer, NewItem);
-	if (bIsItemEquipped)
-	{
-		RequestItemActor(ResourceManagerComponent, NewItem);
-	}
+	
+	// TODO @gdemers figure out whats required here
 }
