@@ -68,7 +68,7 @@ public:
 	const FDataRegistryId& BP_GetSkillTreeEffectId() const;
 
 	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& BP_GetItemEffectUIId() const;
+	const FDataRegistryId& BP_GetSkillTreeEffectUIId() const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle);

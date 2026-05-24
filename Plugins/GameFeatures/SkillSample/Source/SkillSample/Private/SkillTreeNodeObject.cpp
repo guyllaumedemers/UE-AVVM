@@ -28,7 +28,7 @@ const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
 	return GetSkillTreeEffectId();
 }
 
-const FDataRegistryId& USkillTreeNodeObject::BP_GetItemEffectUIId() const
+const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectUIId() const
 {
 	return GetSkillTreeEffectUIId();
 }
