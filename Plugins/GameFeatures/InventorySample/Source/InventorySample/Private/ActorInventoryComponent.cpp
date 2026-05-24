@@ -100,6 +100,7 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
+	Params.Condition = COND_AutonomousOnly;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, Items, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, ComponentStateTags, Params);

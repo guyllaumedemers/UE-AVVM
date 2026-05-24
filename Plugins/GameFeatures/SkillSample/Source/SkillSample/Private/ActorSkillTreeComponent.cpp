@@ -103,7 +103,7 @@ void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 			Tuple->CancelHandle();
 		}
 	}
-	
+
 	SkillTreeNodeHandleSystem.Reset();
 	PrivateSkillTreeNodeIds.Reset();
 
@@ -178,6 +178,69 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 	}
 }
 
+void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
+	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
+	                      *Outer->GetName()))
+	{
+		return;
+	}
+
+	TArray<FSoftObjectPath> DeferredItems;
+	for (const UObject* Resource : NewResources)
+	{
+		const auto* SkillTreeNodeAsset = Cast<USkillTreeNodeDefinitionDataAsset>(Resource);
+		if (!IsValid(SkillTreeNodeAsset))
+		{
+			continue;
+		}
+
+		if (!SkillTreeNodeAsset->CanAccessSkillTreeNodeObject(NonReplicatedComponentStateTags, NonReplicatedComponentStateTags))
+		{
+			AVVM_LOGGER_LOG(LogSkillSample,
+			                Outer,
+			                Outer,
+			                TEXT("Failed to meet %s Requirements."),
+			                *GetNameSafe(SkillTreeNodeAsset));
+
+			continue;
+		}
+
+		DeferredItems.Add(SkillTreeNodeAsset->GetSkillTreeNodeObjectClass().ToSoftObjectPath());
+		AVVM_LOGGER_LOG(LogSkillSample,
+		                Outer,
+		                Outer,
+		                TEXT("%s pending request queued."),
+		                *GetNameSafe(SkillTreeNodeAsset));
+	}
+
+	if (DeferredItems.IsEmpty())
+	{
+		return;
+	}
+
+	const auto Token = FSkillTreeNodeToken::MakeToken();
+
+	FStreamableDelegate Callback;
+	Callback.BindUObject(this, &UActorSkillTreeComponent::OnSkillTreeNodeRetrieved, Token);
+
+	TSharedPtr<FStreamableHandle>& OutResult = SkillTreeNodeHandleSystem.FindOrAdd(Token.UniqueId);
+	OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
+}
+
+const TInstancedStruct<FAVVMDataResolverHelper>& UActorSkillTreeComponent::GetSkillTreeDataResolverHelper()
+{
+	static auto Helper = FAVVMDataResolverHelper::Make<FSkillTreeDataResolverHelper>();
+	return Helper;
+}
+
 void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken)
 {
 	const TSharedPtr<FStreamableHandle>* OutResult = SkillTreeNodeHandleSystem.Find(SkillTreeNodeToken.UniqueId);
@@ -250,67 +313,4 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 
 void UActorSkillTreeComponent::OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects)
 {
-}
-
-void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources)
-{
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
-	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
-	                      *Outer->GetName()))
-	{
-		return;
-	}
-
-	TArray<FSoftObjectPath> DeferredItems;
-	for (const UObject* Resource : NewResources)
-	{
-		const auto* SkillTreeNodeAsset = Cast<USkillTreeNodeDefinitionDataAsset>(Resource);
-		if (!IsValid(SkillTreeNodeAsset))
-		{
-			continue;
-		}
-
-		if (!SkillTreeNodeAsset->CanAccessSkillTreeNodeObject(NonReplicatedComponentStateTags, NonReplicatedComponentStateTags))
-		{
-			AVVM_LOGGER_LOG(LogSkillSample,
-			                Outer,
-			                Outer,
-			                TEXT("Failed to meet %s Requirements."),
-			                *GetNameSafe(SkillTreeNodeAsset));
-
-			continue;
-		}
-
-		DeferredItems.Add(SkillTreeNodeAsset->GetSkillTreeNodeObjectClass().ToSoftObjectPath());
-		AVVM_LOGGER_LOG(LogSkillSample,
-		                Outer,
-		                Outer,
-		                TEXT("%s pending request queued."),
-		                *GetNameSafe(SkillTreeNodeAsset));
-	}
-
-	if (DeferredItems.IsEmpty())
-	{
-		return;
-	}
-
-	const auto Token = FSkillTreeNodeToken::MakeToken();
-
-	FStreamableDelegate Callback;
-	Callback.BindUObject(this, &UActorSkillTreeComponent::OnSkillTreeNodeRetrieved, Token);
-
-	TSharedPtr<FStreamableHandle>& OutResult = SkillTreeNodeHandleSystem.FindOrAdd(Token.UniqueId);
-	OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
-}
-
-const TInstancedStruct<FAVVMDataResolverHelper>& UActorSkillTreeComponent::GetSkillTreeDataResolverHelper()
-{
-	static auto Helper = FAVVMDataResolverHelper::Make<FSkillTreeDataResolverHelper>();
-	return Helper;
 }
