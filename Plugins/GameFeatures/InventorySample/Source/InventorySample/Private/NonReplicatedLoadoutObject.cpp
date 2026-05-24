@@ -65,6 +65,10 @@ void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItem
 void UNonReplicatedLoadoutObject::RemoveOldItems(const TArray<UItemObject*>& NewItemObjects,
                                                  const TArray<UItemObject*>& OldItemObjects)
 {
+	FGameplayTagContainer Requirements;
+	Requirements.AddTag(TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN);
+	Requirements.AddTag(TAG_INVENTORYSAMPLE_ITEM_STATE_INSTANCED);
+
 	for (const UItemObject* OldItemObject : OldItemObjects)
 	{
 		if (!IsValid(OldItemObject) || NewItemObjects.Contains(OldItemObject)/*persist between collection change*/)
@@ -72,9 +76,11 @@ void UNonReplicatedLoadoutObject::RemoveOldItems(const TArray<UItemObject*>& New
 			continue;
 		}
 
-		// @gdemers we only care about items that are active. i.e slotted with our loadout system. other items that are "Equipped"
-		// are not participating in this system behaviour.
-		if (!OldItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE}))
+		// @gdemers we only care about items that are Instanced. i.e with physical representation in world, and slotted with our loadout system.
+		// other items in our inventory are not participating in this system behaviour.
+		// Note : Holstered items are still instanced. to prevent visual problem, item spawned in world that support quick swap
+		// should only be hidden/shown based on their active state.
+		if (!OldItemObject->DoesRuntimeStateHasPartialMatch(Requirements))
 		{
 			continue;
 		}
@@ -107,35 +113,41 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		return;
 	}
 
+	FGameplayTagContainer Requirements;
+	Requirements.AddTag(TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN);
+	Requirements.AddTag(TAG_INVENTORYSAMPLE_ITEM_STATE_INSTANCED);
+
 	for (UItemObject* NewItemObject : NewItemObjects)
 	{
-		// @gdemers we only care about items that are active. i.e slotted with our loadout system. other items that are "Equipped"
-		// are not participating in this system behaviour.
-		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE}))
+		// @gdemers we only care about items that are Instanced. i.e with physical representation in world, and slotted with our loadout system.
+		// other items in our inventory are not participating in this system behaviour.
+		// Note : Holstered items are still instanced. to prevent visual problem, item spawned in world that support quick swap
+		// should only be hidden/shown based on their active state.
+		if (!IsValid(NewItemObject) || !NewItemObject->DoesRuntimeStateHasPartialMatch(Requirements))
 		{
 			continue;
 		}
 
 		// @gdemers a new item being registered with this system should ALWAYS have a valid slot tag.
-		const FGameplayTag& ActiveSlotTag = NewItemObject->GetRuntimeItemSlotTag();
-		if (!ensureAlwaysMsgf(ActiveSlotTag.IsValid(), TEXT("Active Item is missing a valid slot tag.")))
+		const FGameplayTag& TargetSlotTag = NewItemObject->GetRuntimeItemSlotTag();
+		if (!ensureAlwaysMsgf(TargetSlotTag.IsValid(), TEXT("Active Item is missing a valid slot tag.")))
 		{
 			continue;
 		}
 
-		auto& OutValue = Loadout.FindOrAdd(ActiveSlotTag);
+		auto& OutValue = Loadout.FindOrAdd(TargetSlotTag);
 		OutValue = NewItemObject;
 
-		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_BEHAVIOUR_CAN_SPAWN_ACTOR}))
+		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE}))
 		{
 			continue;
 		}
 
 		// @gdemers we need to initialize our loadout with the default element in hand represented by the highest priority tag.
-		const bool bDoesActiveItemHasHighestPriority = UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, ActiveSlotTag);
+		const bool bDoesActiveItemHasHighestPriority = UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, TargetSlotTag);
 		if (!bDoesActiveItemHasHighestPriority)
 		{
-			Cycle(ActiveSlotTag);
+			Cycle(TargetSlotTag);
 		}
 	}
 }

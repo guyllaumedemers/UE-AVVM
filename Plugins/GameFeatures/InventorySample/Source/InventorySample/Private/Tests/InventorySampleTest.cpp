@@ -166,7 +166,7 @@ public:
 		SearchResult->GetAllItems<FAVVMActorIdentifierDataTableRow>(TEXT(""), OutActorIdentifiers);
 
 		const bool bResult_RunTest_ItemUniqueId = TestActor->RunTest_ItemUniqueId(OutActorIdentifiers);
-		TestTrue("bResult_RunTest_ItemUniqueId", bResult_RunTest_ItemUniqueId);
+		TestTrue("RunTest_ItemUniqueId", bResult_RunTest_ItemUniqueId);
 
 		const bool bResult_RunTest_ItemStorageReference = TestActor->RunTest_ItemStorageReference();
 		TestTrue("RunTest_ItemStorageReference", bResult_RunTest_ItemStorageReference);
@@ -178,7 +178,7 @@ public:
 	void RWInventory()
 	{
 		const bool bResult_RunTest_InventoryBounds = TestActor->RunTest_InventoryBounds();
-		TestTrue("bResult_RunTest_InventoryBounds", bResult_RunTest_InventoryBounds);
+		TestTrue("RunTest_InventoryBounds", bResult_RunTest_InventoryBounds);
 	}
 
 	void RWLoadout()
