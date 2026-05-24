@@ -21,12 +21,15 @@
 
 #include "CoreMinimal.h"
 
+#include "ActiveGameplayEffectHandle.h"
 #include "DataRegistryId.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "SkillTreeNodeObject.generated.h"
+
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestGameplayEffectClassComplete, const UClass*, NewActorClass, USkillTreeNodeObject*, NewSkillTreeNodeObject);
 
 /**
  *	Class description:
@@ -64,6 +67,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& BP_GetItemEffectUIId() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle);
+
+	void GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
+	                                 const FOnRequestGameplayEffectClassComplete& OnRequestGameplayEffectClassComplete);
+
+protected:
+	// @gdemers : cached handle to support adding/removing effects based on user interaction.
+	UPROPERTY(Transient)
+	FActiveGameplayEffectHandle ActiveGameplayEffectHandle = FActiveGameplayEffectHandle();
 
 private:
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.

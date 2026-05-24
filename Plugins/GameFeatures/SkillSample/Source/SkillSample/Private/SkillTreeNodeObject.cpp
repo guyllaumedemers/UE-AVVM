@@ -29,6 +29,16 @@ const FDataRegistryId& USkillTreeNodeObject::BP_GetItemEffectUIId() const
 	return GetSkillTreeEffectUIId();
 }
 
+void USkillTreeNodeObject::SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle)
+{
+	ActiveGameplayEffectHandle = NewActiveGameplayEffectHandle;
+}
+
+void USkillTreeNodeObject::GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
+                                                       const FOnRequestGameplayEffectClassComplete& OnRequestGameplayEffectClassComplete)
+{
+}
+
 int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                                        const TArray<int32>& NewPrivateIds,
                                                        USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)

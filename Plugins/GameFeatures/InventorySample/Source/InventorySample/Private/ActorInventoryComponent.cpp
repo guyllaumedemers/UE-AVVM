@@ -365,7 +365,7 @@ void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResour
 	UItemObject* ItemObject = QueueingMechanism->PeekItem();
 	if (!IsValid(ItemObject) || !ensureAlwaysMsgf(!NewResources.IsEmpty(),
 	                                              TEXT("Attempting to load invalid Actor Definition on Item \"%s\"."),
-	                                              *ItemObject->GetName()))
+	                                              *GetNameSafe(ItemObject)))
 	{
 		return;
 	}

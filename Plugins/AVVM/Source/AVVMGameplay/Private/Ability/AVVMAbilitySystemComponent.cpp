@@ -174,7 +174,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 
 void UAVVMAbilitySystemComponent::SetupEffects(const TArray<UObject*>& Resources)
 {
-	// TODO @gdemers Handle applying GE
+	// TODO @gdemers Handle support for GE granting from data defined in Data Asset.
 }
 
 void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath,

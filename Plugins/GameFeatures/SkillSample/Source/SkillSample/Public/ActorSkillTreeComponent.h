@@ -111,6 +111,10 @@ protected:
 	void RequestGameplayEffect(UAVVMResourceManagerComponent* ResourceManagerComponent,
 	                           USkillTreeNodeObject* NewSkillTreeNode);
 
+	UFUNCTION()
+	void OnGameplayEffectClassRetrieved(const UClass* NewGameplayEffectClass,
+	                                    USkillTreeNodeObject* NewSkillTreeNode);
+
 	struct FGameplayEffectSpawnerQueuingMechanism
 	{
 		~FGameplayEffectSpawnerQueuingMechanism();
@@ -126,11 +130,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
 
-	// @gdemers : set of GE granted from CDO objects referenced based on backend or data asset. Can be accessed from within
-	// ability by referencing the handle tied to the GE.
-	UPROPERTY(Transient)
-	TMap<FActiveGameplayEffectHandle, TWeakObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/> NonReplicatedSkillTreeNodes;
-
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_SkillTreeNodeCollectionChanged")
 	TArray<TObjectPtr<USkillTreeNodeObject>> SkillTreeNodes;
 	
@@ -145,6 +144,7 @@ protected:
 
 private:
 	void SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources);
+	void SetupSkillTreeNodeEffects(const TArray<UObject*>& NewResources);
 	
 	// @gdemers Data Resolver for backend representation of an actor skill tree. 
 	static const TInstancedStruct<FAVVMDataResolverHelper>& GetSkillTreeDataResolverHelper();
