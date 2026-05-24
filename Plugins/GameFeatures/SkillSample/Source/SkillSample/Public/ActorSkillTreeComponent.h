@@ -47,16 +47,35 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static UActorSkillTreeComponent* GetActorComponent(const AActor* NewActor);
+
+	UFUNCTION(BlueprintCallable)
+	void RequestSkillTree(const AActor* Outer);
 	
 protected:
+	UFUNCTION()
+	void OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
 
 	// @gdemers : set of GE granted from CDO objects referenced based on backend or data asset. Can be accessed from within
 	// ability by referencing the handle tied to the GE.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FActiveGameplayEffectHandle, TObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/> SkillTreeNodes;
+	TMap<FActiveGameplayEffectHandle, TObjectPtr<USkillTreeNodeObject>/*SkillTree Node derived CDO*/> NonReplicatedSkillTreeNodes;
+
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_SkillTreeNodeCollectionChanged")
+	TArray<TObjectPtr<USkillTreeNodeObject>> SkillTreeNodes;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+private:
+	void SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources);
+
+	// @gdemers cached representation of what has been attributed during the initialization
+	// phase of our Skill Tree. This address the problem of uniqueness for entries with identical type.
+	// example : Perks/Traits that are allowed to Stack.
+	TArray<int32> PrivateSkillTreeNodeIds;
+
+	friend class USkillTreeResourceHandlingImpl;
 };

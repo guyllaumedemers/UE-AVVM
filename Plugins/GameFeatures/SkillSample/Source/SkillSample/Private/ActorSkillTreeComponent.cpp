@@ -20,9 +20,14 @@
 #include "ActorSkillTreeComponent.h"
 
 #include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "SkillSampleModule.h"
+#include "SkillTreeNodeObject.h"
+#include "SkillTreeProvider.h"
+#include "SkillTreeUtils.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
@@ -45,6 +50,9 @@ void UActorSkillTreeComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
+	Params.Condition = COND_AutonomousOnly;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UActorSkillTreeComponent, SkillTreeNodes, Params);
 }
 
 void UActorSkillTreeComponent::BeginPlay()
@@ -59,12 +67,19 @@ void UActorSkillTreeComponent::BeginPlay()
 
 	TRACE_COUNTER_INCREMENT(UActorSkillTreeComponent_InstanceCounter);
 	AVVM_LOGGER_LOG(LogSkillSample,
-					Outer,
-					Outer,
-					TEXT("Adding %s."),
-					*GetNameSafe(UActorSkillTreeComponent::StaticClass()));
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(UActorSkillTreeComponent::StaticClass()));
 
 	OwningOuter = Outer;
+
+#if WITH_SERVER_CODE
+	if (bShouldAsyncLoadOnBeginPlay && Outer->HasAuthority())
+	{
+		RequestSkillTree(Outer);
+	}
+#endif
 }
 
 void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -89,4 +104,57 @@ void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 UActorSkillTreeComponent* UActorSkillTreeComponent::GetActorComponent(const AActor* NewActor)
 {
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UActorSkillTreeComponent>() : nullptr;
+}
+
+void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
+{
+	if (!IsValid(Outer) || !ensureAlwaysMsgf(Outer->HasAuthority(),
+	                                         TEXT("Outer isn't Authoritative and cannot request loading items!")))
+	{
+		return;
+	}
+
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<USkillTreeProvider>(Outer);
+	if (!bResult)
+	{
+		return;
+	}
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorSkillTreeComponent, SkillTreeNodes, this);
+	for (auto Iterator = SkillTreeNodes.CreateIterator(); Iterator; ++Iterator)
+	{
+		RemoveReplicatedSubObject(Iterator->Get());
+		Iterator.RemoveCurrentSwap();
+	}
+
+	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
+	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
+	if (!bIsValid)
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogSkillSample,
+	                Outer,
+	                Outer,
+	                TEXT("Requesting item type %s."),
+	                EnumToString(OutSrcType));
+
+	const bool bIsItemSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
+	if (bIsItemSrcStatic)
+	{
+		ISkillTreeProvider::Execute_RequestItemsFromDataAsset(Outer);
+	}
+	else
+	{
+		ISkillTreeProvider::Execute_RequestItemsFromMicroService(Outer);
+	}
+}
+
+void UActorSkillTreeComponent::OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects)
+{
+}
+
+void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources)
+{
 }
