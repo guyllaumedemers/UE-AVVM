@@ -56,6 +56,11 @@ bool UAVVMAbilityDefinitionDataAsset::CanGrantGameplayEffect(const FGameplayTagC
 	return bShouldGrantGameplayEffect && bIsntBlocked && bMeetRequirements;
 }
 
+bool UAVVMAbilityDefinitionDataAsset::DoesInitializeViaExternalPlugin() const
+{
+	return bShouldInitializeViaExternalPlugin;
+}
+
 const TSoftClassPtr<UGameplayAbility> UAVVMAbilityDefinitionDataAsset::GetGameplayAbilityClass() const
 {
 	return (false == bShouldGrantGameplayEffect) ? GameplayAbilityClass : nullptr;

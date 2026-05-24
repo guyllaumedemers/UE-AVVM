@@ -19,6 +19,10 @@
 //SOFTWARE.
 #include "SkillTreeNodeObject.h"
 
+#include "Ability/AVVMAbilityDefinitionDataAsset.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
+
 const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
 {
 	return GetSkillTreeEffectId();
@@ -35,8 +39,38 @@ void USkillTreeNodeObject::SetActiveGameplayEffectHandle(const FActiveGameplayEf
 }
 
 void USkillTreeNodeObject::GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
-                                                       const FOnRequestGameplayEffectClassComplete& OnRequestGameplayEffectClassComplete)
+                                                       const FOnRequestGameplayEffectClassComplete& Callback)
 {
+	const auto* GameplayEffectDefinitionDataAsset = Cast<UAVVMAbilityDefinitionDataAsset>(NewGameplayEffectDefinitionDataAsset);
+	if (!IsValid(GameplayEffectDefinitionDataAsset))
+	{
+		return;
+	}
+
+	FStreamableDelegate OnRequestItemActorClassComplete;
+	OnRequestItemActorClassComplete.BindUObject(this, &USkillTreeNodeObject::OnGameplayEffectClassAcquired, Callback);
+	StreamingHandle = UAssetManager::Get().LoadAssetList({GameplayEffectDefinitionDataAsset->GetGameplayEffectClass().ToSoftObjectPath()}, OnRequestItemActorClassComplete);
+}
+
+void USkillTreeNodeObject::OnGameplayEffectClassAcquired(FOnRequestGameplayEffectClassComplete Callback)
+{
+	if (!StreamingHandle.IsValid())
+	{
+		Callback.ExecuteIfBound(nullptr, this);
+		return;
+	}
+
+	TArray<UObject*> OutStreamableAssets;
+	StreamingHandle->GetLoadedAssets(OutStreamableAssets);
+
+	if (!OutStreamableAssets.IsEmpty())
+	{
+		Callback.ExecuteIfBound(Cast<UClass>(OutStreamableAssets[0]), this);
+	}
+	else
+	{
+		Callback.ExecuteIfBound(nullptr, this);
+	}
 }
 
 int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,

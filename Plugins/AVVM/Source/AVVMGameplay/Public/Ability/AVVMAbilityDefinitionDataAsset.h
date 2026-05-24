@@ -56,10 +56,15 @@ public:
 	bool CanGrantGameplayEffect(const FGameplayTagContainer& RequirementTags,
 	                            const FGameplayTagContainer& BlockingTags) const;
 
+	bool DoesInitializeViaExternalPlugin() const;
+
 	const TSoftClassPtr<UGameplayAbility> GetGameplayAbilityClass() const;
 	const TSoftClassPtr<UGameplayEffect> GetGameplayEffectClass() const;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldInitializeViaExternalPlugin = false;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldGrantGameplayEffect = false;
 

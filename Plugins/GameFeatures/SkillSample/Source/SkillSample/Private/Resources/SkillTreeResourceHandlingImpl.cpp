@@ -54,7 +54,7 @@ TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorC
 		}
 
 		const auto* SkillTreeNodeEffectAsset = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
-		if (IsValid(SkillTreeNodeEffectAsset))
+		if (IsValid(SkillTreeNodeEffectAsset) && SkillTreeNodeEffectAsset->DoesInitializeViaExternalPlugin())
 		{
 			OutSkillTreeNodeEffects.Add(Resource);
 			continue;
@@ -68,7 +68,7 @@ TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorC
 
 	if (!OutSkillTreeNodeEffects.IsEmpty())
 	{
-		SkillTreeComponent->SetupSkillTreeNodeEffects(OutSkillTreeNodes);
+		SkillTreeComponent->SetupSkillTreeNodeEffects(OutSkillTreeNodeEffects);
 	}
 
 	return OutResources;

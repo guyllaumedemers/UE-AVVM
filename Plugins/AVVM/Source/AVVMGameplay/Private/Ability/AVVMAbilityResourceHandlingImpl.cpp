@@ -46,7 +46,7 @@ TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActo
 		}
 
 		const auto* Ability = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
-		if (!IsValid(Ability))
+		if (!IsValid(Ability) || Ability->DoesInitializeViaExternalPlugin())
 		{
 			continue;
 		}

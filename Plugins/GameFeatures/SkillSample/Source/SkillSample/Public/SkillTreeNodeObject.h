@@ -29,6 +29,8 @@
 
 #include "SkillTreeNodeObject.generated.h"
 
+struct FStreamableHandle;
+
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestGameplayEffectClassComplete, const UClass*, NewActorClass, USkillTreeNodeObject*, NewSkillTreeNodeObject);
 
 /**
@@ -75,9 +77,14 @@ public:
 	                                 const FOnRequestGameplayEffectClassComplete& OnRequestGameplayEffectClassComplete);
 
 protected:
+	UFUNCTION()
+	void OnGameplayEffectClassAcquired(FOnRequestGameplayEffectClassComplete Callback);
+
 	// @gdemers : cached handle to support adding/removing effects based on user interaction.
 	UPROPERTY(Transient)
 	FActiveGameplayEffectHandle ActiveGameplayEffectHandle = FActiveGameplayEffectHandle();
+
+	TSharedPtr<FStreamableHandle> StreamingHandle = nullptr;
 
 private:
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.

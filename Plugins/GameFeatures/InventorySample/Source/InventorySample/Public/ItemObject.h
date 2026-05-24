@@ -273,7 +273,8 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath);
+	void OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback,
+	                              const FSoftObjectPath NewActorAttributeSetSoftObjectPath);
 
 	UFUNCTION()
 	void OnRep_ItemStateModified(const FItemState& OldItemState);
@@ -298,7 +299,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemStateModified")
 	FItemState RuntimeItemState = FItemState();
 
-	TSharedPtr<FStreamableHandle> ItemActorHandle = nullptr;
+	TSharedPtr<FStreamableHandle> StreamingHandle = nullptr;
 	FDelegateHandle OnNewSocketAttachedHandle;
 	FDelegateHandle OnNewSocketDetachedHandle;
 

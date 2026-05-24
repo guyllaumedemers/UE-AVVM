@@ -376,7 +376,7 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 
 	FStreamableDelegate OnRequestItemActorClassComplete;
 	OnRequestItemActorClassComplete.BindUObject(this, &UItemObject::OnItemActorClassAcquired, Callback, ActorDefinitionDataAsset->GetActorAttributeSetClassSoftObjectPath());
-	ItemActorHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorClassSoftObjectPath()}, OnRequestItemActorClassComplete);
+	StreamingHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorClassSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
 void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
@@ -458,14 +458,14 @@ const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& UItemObject::GetNonRepli
 
 void UItemObject::OnItemActorClassAcquired(FOnRequestItemActorClassComplete Callback, const FSoftObjectPath NewActorAttributeSetSoftObjectPath)
 {
-	if (!ItemActorHandle.IsValid())
+	if (!StreamingHandle.IsValid())
 	{
 		Callback.ExecuteIfBound(nullptr, FSoftObjectPath(), this);
 		return;
 	}
 
 	TArray<UObject*> OutStreamableAssets;
-	ItemActorHandle->GetLoadedAssets(OutStreamableAssets);
+	StreamingHandle->GetLoadedAssets(OutStreamableAssets);
 
 	if (!OutStreamableAssets.IsEmpty())
 	{
