@@ -69,6 +69,8 @@ void UActorSkillTreeComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	QueueingMechanism = MakeShared<FGameplayEffectSpawnerQueuingMechanism>();
+
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
@@ -106,6 +108,7 @@ void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
+	QueueingMechanism.Reset();
 	SkillTreeNodeHandleSystem.Reset();
 	PrivateSkillTreeNodeIds.Reset();
 
@@ -339,6 +342,116 @@ void UActorSkillTreeComponent::TryApplyGameplayEffect(const AActor* Outer)
 	{
 		NewSkillTreeNodeObject = SkillTreeNodes.Last();
 	}
-	
-	// TODO @gdemers figure out whats required here
+
+	if (IsValid(NewSkillTreeNodeObject))
+	{
+		RequestGameplayEffect(ResourceManagerComponent, NewSkillTreeNodeObject);
+	}
+}
+
+void UActorSkillTreeComponent::RequestGameplayEffect(UAVVMResourceManagerComponent* ResourceManagerComponent,
+                                                     USkillTreeNodeObject* NewSkillTreeNode)
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
+	{
+		return;
+	}
+
+	const auto RequestItemSpawning = [](const TWeakObjectPtr<UActorSkillTreeComponent>& NewActorSkillTreeComponent,
+	                                    const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
+	                                    const TWeakObjectPtr<USkillTreeNodeObject>& SkillTreeNode)
+	{
+		if (!ensureAlwaysMsgf(NewActorSkillTreeComponent.IsValid(), TEXT("WeakObjectPtr to Actor Skill Tree Component Invalid!")) ||
+			!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
+			!ensureAlwaysMsgf(SkillTreeNode.IsValid(), TEXT("WeakObjectPtr to SkillTreeObject Invalid!")))
+		{
+			return;
+		}
+
+		const AActor* NewOuter = NewActorSkillTreeComponent->OwningOuter.Get();
+		AVVM_LOGGER_LOG(LogSkillSample,
+		                NewOuter,
+		                NewOuter,
+		                TEXT("Executing Spawn Item Request for %s"),
+		                *GetNameSafe(SkillTreeNode.Get()));
+
+		NewResourceManagerComponent->RequestAsyncLoading(SkillTreeNode->GetSkillTreeEffectId(), {});
+	};
+
+	const auto NewRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
+	                                                                       RequestItemSpawning,
+	                                                                       this,
+	                                                                       ResourceManagerComponent,
+	                                                                       NewSkillTreeNode);
+
+	const bool bHasPendingRequest = QueueingMechanism->PushDeferredItem(NewSkillTreeNode, NewRequest);
+	if (bHasPendingRequest)
+	{
+		AVVM_LOGGER_LOG(LogSkillSample,
+		                Outer,
+		                Outer,
+		                TEXT("Grant GameplayEffect Request for %s was Deferred."),
+		                *GetNameSafe(NewSkillTreeNode));
+	}
+}
+
+UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::~FGameplayEffectSpawnerQueuingMechanism()
+{
+	PendingSpawnRequests.Empty();
+	QueuedSkillTreeNodes.Empty();
+}
+
+bool UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::PushDeferredItem(USkillTreeNodeObject* NewSkillTreeNode,
+                                                                                        const UActorSkillTreeComponent::FOnAsyncSpawnRequestDeferred& NewRequest)
+{
+	QueuedSkillTreeNodes.Add(NewSkillTreeNode);
+	PendingSpawnRequests.Add(NewRequest);
+	TryExecuteNextRequest();
+	return HasPendingRequest();
+}
+
+bool UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::TryExecuteNextRequest(const bool bCanDequeueFrontItem)
+{
+	if (bCanDequeueFrontItem && !QueuedSkillTreeNodes.IsEmpty())
+	{
+		QueuedSkillTreeNodes.RemoveAtSwap(0);
+	}
+
+	if (!HasPendingRequest())
+	{
+		return true;
+	}
+
+	const bool bAreContainerEquals = QueuedSkillTreeNodes.Num() == PendingSpawnRequests.Num();
+	if (bAreContainerEquals)
+	{
+		// @gdemers TQueues dont support size...
+		FOnAsyncSpawnRequestDeferred NextRequest = PendingSpawnRequests[0];
+		PendingSpawnRequests.RemoveAtSwap(0);
+		NextRequest.ExecuteIfBound();
+	}
+
+	return false;
+}
+
+bool UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::HasPendingRequest() const
+{
+	return !PendingSpawnRequests.IsEmpty();
+}
+
+USkillTreeNodeObject* UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::PeekItem() const
+{
+	TWeakObjectPtr<USkillTreeNodeObject> SkillTreeNodeObject = nullptr;
+	if (!QueuedSkillTreeNodes.IsEmpty())
+	{
+		SkillTreeNodeObject = QueuedSkillTreeNodes[0].Get();
+	}
+
+	return SkillTreeNodeObject.Get();
 }

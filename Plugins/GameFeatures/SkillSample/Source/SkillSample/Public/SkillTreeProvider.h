@@ -82,7 +82,4 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	ESkillTreeSrcType GetSkillTreeSrcType() const;
 	virtual ESkillTreeSrcType GetSkillTreeSrcType_Implementation() const PURE_VIRTUAL(GetSkillTreeSrcType_Implementation, return ESkillTreeSrcType::None;);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	bool IsDependentOnActor();
 };

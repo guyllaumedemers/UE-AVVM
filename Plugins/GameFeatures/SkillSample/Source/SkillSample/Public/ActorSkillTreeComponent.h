@@ -30,6 +30,7 @@
 #include "ActorSkillTreeComponent.generated.h"
 
 struct FStreamableHandle;
+class UAVVMResourceManagerComponent;
 class USkillTreeNodeObject;
 
 /**
@@ -75,11 +76,16 @@ struct SKILLSAMPLE_API FSkillTreeNodeToken
  *	
  *	UActorSkillTreeComponent is a component object that handle granting modifiers based on a list of {FDataRegistryId} provided by its owning outer
  *	following a backend request, or Data Asset referencing. Progression is expected to be supported for USkillTreeNodeObject upgrades!
+ *	
+ *	Note : This component should exist on Character, and/or weapons, items, etc... any element that require data progression, and reference an ASC
+ *	on itself, or it's owning Outer.
  */
 UCLASS()
 class SKILLSAMPLE_API UActorSkillTreeComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
+	DECLARE_DELEGATE(FOnAsyncSpawnRequestDeferred);
 
 public:
 	UActorSkillTreeComponent(const FObjectInitializer& ObjectInitializer);
@@ -101,6 +107,21 @@ protected:
 	void OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects);
 
 	void TryApplyGameplayEffect(const AActor* Outer);
+
+	void RequestGameplayEffect(UAVVMResourceManagerComponent* ResourceManagerComponent,
+	                           USkillTreeNodeObject* NewSkillTreeNode);
+
+	struct FGameplayEffectSpawnerQueuingMechanism
+	{
+		~FGameplayEffectSpawnerQueuingMechanism();
+		bool PushDeferredItem(USkillTreeNodeObject* NewSkillTreeNode, const UActorSkillTreeComponent::FOnAsyncSpawnRequestDeferred& NewRequest);
+		bool TryExecuteNextRequest(const bool bCanDequeueFrontItem = false);
+		bool HasPendingRequest() const;
+		USkillTreeNodeObject* PeekItem() const;
+
+		TArray<UActorSkillTreeComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests;
+		TArray<TWeakObjectPtr<USkillTreeNodeObject>> QueuedSkillTreeNodes;
+	};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
@@ -120,6 +141,7 @@ protected:
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 	
 	TMap<uint32, TSharedPtr<FStreamableHandle>> SkillTreeNodeHandleSystem;
+	TSharedPtr<FGameplayEffectSpawnerQueuingMechanism> QueueingMechanism = nullptr;
 
 private:
 	void SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources);
