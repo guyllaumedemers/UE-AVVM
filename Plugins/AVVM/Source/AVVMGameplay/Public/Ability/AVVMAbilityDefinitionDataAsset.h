@@ -33,6 +33,7 @@
 #include "AVVMAbilityDefinitionDataAsset.generated.h"
 
 class UGameplayAbility;
+class UGameplayEffect;
 
 /**
  *	Class description:
@@ -49,24 +50,37 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	bool CanGrantAbility(const FGameplayTagContainer& RequirementTags,
-	                     const FGameplayTagContainer& BlockingTags) const;
+	bool CanGrantGameplayAbility(const FGameplayTagContainer& RequirementTags,
+	                             const FGameplayTagContainer& BlockingTags) const;
 
-	const TSoftClassPtr<UGameplayAbility>& GetGameplayAbilityClass() const;
+	bool CanGrantGameplayEffect(const FGameplayTagContainer& RequirementTags,
+	                            const FGameplayTagContainer& BlockingTags) const;
+
+	const TSoftClassPtr<UGameplayAbility> GetGameplayAbilityClass() const;
+	const TSoftClassPtr<UGameplayEffect> GetGameplayEffectClass() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldGrantGameplayEffect = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bShouldGrantGameplayEffect"))
 	TSoftClassPtr<UGameplayAbility> GameplayAbilityClass = nullptr;
 
-	// @gdemers tags that define if this ability can be granted to the actor type.
+	// @gdemers IMPORTANT : This represents whatever your Skill, Perk or Traits wants. Learn how to use it!
+	// GameplayEffect support conditional GE, and GameplayAbility granting when registered. This cover the whole case
+	// for handling Skills, Perks, and Traits. No custom implementation needed!
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bShouldGrantGameplayEffect"))
+	TSoftClassPtr<UGameplayEffect> GameplayEffectClass = nullptr;
+
+	// @gdemers tags that define if this entity can be granted to the actor type.
 	// Example : Tag.IsPlayer, Tag.IsFlyingType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RequiredTagsForGrantingAbility = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTagsForGranting = FGameplayTagContainer::EmptyContainer;
 
-	// @gdemers tags that define if this ability should not be granted.
+	// @gdemers tags that define if this entity should not be granted.
 	// Example : Tag.IsWorldWaterLevel -> Blocks Tag.IsFlyingType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer BlockingTagsForGrantingAbility = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsForGranting = FGameplayTagContainer::EmptyContainer;
 };
 
 /**

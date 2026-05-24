@@ -135,7 +135,7 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 			continue;
 		}
 
-		if (!AbilityAsset->CanGrantAbility(OwnedTags, OwnedTags))
+		if (!AbilityAsset->CanGrantGameplayAbility(OwnedTags, OwnedTags))
 		{
 			AVVM_LOGGER_LOG(LogGameplay,
 			                Outer,

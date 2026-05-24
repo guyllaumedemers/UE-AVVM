@@ -21,12 +21,29 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "UObject/Object.h"
-#include "UObject/SoftObjectPtr.h"
 
 #include "SkillTreeNodeObject.generated.h"
 
-class UGameplayEffect;
+/**
+ *	Class description:
+ *	
+ *	FSkillTreeSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FSkillTreeSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMAbilityDefinitionDataTableRow"))
+	FDataRegistryId SkillTreeEffectId = FDataRegistryId();
+
+	// @gdemers reference the ui definition of the referenced Effect this USkillTreeNodeObject owns.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorUIDefinitionDataTableRow"))
+	FDataRegistryId SkillTreeEffectUIId = FDataRegistryId();
+};
 
 /**
  *	Class description:
@@ -34,17 +51,17 @@ class UGameplayEffect;
  *	USkillTreeNodeObject is a generic UObject type that allow granting a gameplay effect to the Owning outer referencing
  *	a UActorSkillTreeComponent.
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, SparseClassDataTypes="SkillTreeSparseData")
 class SKILLSAMPLE_API USkillTreeNodeObject : public UObject
 {
 	GENERATED_BODY()
 
-protected:
-	// @gdemers IMPORTANT : This represents whatever your Skill, Perk or Traits wants. Learn how to use it!
-	// GameplayerEffect support conditional GE, and GameplayAbility granting when registered. This cover the whole case
-	// for handling Skills, Perks, and Traits. No custom implementation needed!
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<UGameplayEffect> GrantEffect = nullptr;
+public:
+	UFUNCTION(BlueprintCallable)
+	const FDataRegistryId& BP_GetSkillTreeEffectId() const;
+
+	UFUNCTION(BlueprintCallable)
+	const FDataRegistryId& BP_GetItemEffectUIId() const;
 
 private:
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.

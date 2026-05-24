@@ -19,7 +19,13 @@
 //SOFTWARE.
 #include "ActorSkillTreeComponent.h"
 
+#include "AVVMLogger.h"
+#include "SkillSampleModule.h"
 #include "GameFramework/Actor.h"
+#include "Net/UnrealNetwork.h"
+#include "ProfilingDebugging/CountersTrace.h"
+
+TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
 
 UActorSkillTreeComponent::UActorSkillTreeComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -36,16 +42,48 @@ UActorSkillTreeComponent::UActorSkillTreeComponent(const FObjectInitializer& Obj
 void UActorSkillTreeComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
 }
 
 void UActorSkillTreeComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	TRACE_COUNTER_INCREMENT(UActorSkillTreeComponent_InstanceCounter);
+	AVVM_LOGGER_LOG(LogSkillSample,
+					Outer,
+					Outer,
+					TEXT("Adding %s."),
+					*GetNameSafe(UActorSkillTreeComponent::StaticClass()));
+
+	OwningOuter = Outer;
 }
 
 void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogSkillSample,
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UActorSkillTreeComponent::StaticClass()));
+
+	OwningOuter.Reset();
 }
 
 UActorSkillTreeComponent* UActorSkillTreeComponent::GetActorComponent(const AActor* NewActor)

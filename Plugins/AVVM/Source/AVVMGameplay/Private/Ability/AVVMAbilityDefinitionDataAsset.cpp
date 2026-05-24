@@ -24,27 +24,46 @@ EDataValidationResult UAVVMAbilityDefinitionDataAsset::IsDataValid(class FDataVa
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
-	if (GameplayAbilityClass.IsNull())
+	if ((false == bShouldGrantGameplayEffect) && GameplayAbilityClass.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "GameplayAbility missing. No valid TSoftClassPtr<T> specified!"));
+	}
+
+	if (bShouldGrantGameplayEffect && GameplayAbilityClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UAVVMAbilityDataAsset", "", "GameplayEffect missing. No valid TSoftClassPtr<T> specified!"));
 	}
 
 	return Result;
 }
 #endif
 
-bool UAVVMAbilityDefinitionDataAsset::CanGrantAbility(const FGameplayTagContainer& RequirementTags,
-                                                      const FGameplayTagContainer& BlockingTags) const
+bool UAVVMAbilityDefinitionDataAsset::CanGrantGameplayAbility(const FGameplayTagContainer& RequirementTags,
+                                                              const FGameplayTagContainer& BlockingTags) const
 {
-	const bool bMeetRequirements = RequiredTagsForGrantingAbility.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsForGrantingAbility);
-	const bool bIsntBlocked = BlockingTagsForGrantingAbility.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsForGrantingAbility);
-	return bIsntBlocked && bMeetRequirements;
+	const bool bMeetRequirements = RequiredTagsForGranting.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsForGranting);
+	const bool bIsntBlocked = BlockingTagsForGranting.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsForGranting);
+	return (false == bShouldGrantGameplayEffect) && bIsntBlocked && bMeetRequirements;
 }
 
-const TSoftClassPtr<UGameplayAbility>& UAVVMAbilityDefinitionDataAsset::GetGameplayAbilityClass() const
+bool UAVVMAbilityDefinitionDataAsset::CanGrantGameplayEffect(const FGameplayTagContainer& RequirementTags,
+                                                             const FGameplayTagContainer& BlockingTags) const
 {
-	return GameplayAbilityClass;
+	const bool bMeetRequirements = RequiredTagsForGranting.IsEmpty() || RequirementTags.HasAllExact(RequiredTagsForGranting);
+	const bool bIsntBlocked = BlockingTagsForGranting.IsEmpty() || !BlockingTags.HasAnyExact(BlockingTagsForGranting);
+	return bShouldGrantGameplayEffect && bIsntBlocked && bMeetRequirements;
+}
+
+const TSoftClassPtr<UGameplayAbility> UAVVMAbilityDefinitionDataAsset::GetGameplayAbilityClass() const
+{
+	return (false == bShouldGrantGameplayEffect) ? GameplayAbilityClass : nullptr;
+}
+
+const TSoftClassPtr<UGameplayEffect> UAVVMAbilityDefinitionDataAsset::GetGameplayEffectClass() const
+{
+	return bShouldGrantGameplayEffect ? GameplayEffectClass : nullptr;
 }
 
 #if WITH_EDITOR

@@ -18,3 +18,13 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "SkillTreeNodeObject.h"
+
+const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
+{
+	return GetSkillTreeEffectId();
+}
+
+const FDataRegistryId& USkillTreeNodeObject::BP_GetItemEffectUIId() const
+{
+	return GetSkillTreeEffectUIId();
+}
