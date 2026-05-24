@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "UObject/Object.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "SkillTreeNodeObject.generated.h"
 

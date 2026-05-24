@@ -26,20 +26,58 @@ public class SkillSample : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 		bWarningsAsErrors = true;
+		
+		SetupIrisSupport(Target);
+
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMEditorToolkit"
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"Slate",
+					"SlateCore",
+				});
+		}
+
+		if (Target.WithAutomationTests)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"FunctionalTesting",
+				});
+		}
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
+				"AVVMGameplay",
+				"AVVMOnline",
+				"AVVMToolkit",
+				"CommonUI",
 				"Core",
 				"CoreUObject",
+				"DataRegistry",
+				"DeveloperSettings",
 				"Engine",
+				"GameplayAbilities",
+				"GameplayTags",
+				"ModelViewViewModel"
 			}
 		);
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"GameplayAbilities"
+				"Json",
+				"NetCore"
 			}
 		);
 	}
