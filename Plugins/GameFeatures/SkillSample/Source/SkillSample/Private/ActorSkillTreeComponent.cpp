@@ -197,7 +197,7 @@ void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>&
 
 	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
 	                      TEXT("Attempting to load invalid Skill Tree Node set on Outer \"%s\"."),
-	                      *Outer->GetName()))
+	                      *GetNameSafe(Outer)))
 	{
 		return;
 	}
@@ -246,15 +246,9 @@ void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>&
 
 void UActorSkillTreeComponent::SetupSkillTreeNodeEffects(const TArray<UObject*>& NewResources)
 {
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
 	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
-	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
-	                      *Outer->GetName()))
+	                      TEXT("Attempting to load invalid Skill Tree Node set on Outer \"%s\"."),
+	                      *GetNameSafe(OwningOuter.Get())))
 	{
 		return;
 	}

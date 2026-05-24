@@ -100,7 +100,7 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
-	Params.Condition = COND_AutonomousOnly;
+	Params.Condition = COND_InitialOrOwner;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, Items, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, ComponentStateTags, Params);
@@ -291,7 +291,7 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 
 	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
 	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
-	                      *Outer->GetName()))
+	                      *GetNameSafe(Outer)))
 	{
 		return;
 	}
@@ -344,15 +344,9 @@ void UActorInventoryComponent::SetupItemObjects(const TArray<UObject*>& NewResou
 
 void UActorInventoryComponent::SetupItemActors(const TArray<UObject*>& NewResources)
 {
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
 	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
 	                      TEXT("Attempting to load invalid Item set on Outer \"%s\"."),
-	                      *Outer->GetName()))
+	                      *GetNameSafe(OwningOuter.Get())))
 	{
 		return;
 	}
@@ -1101,7 +1095,7 @@ void UActorInventoryComponent::CheckBackend() const
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
-	                      *Outer->GetName()))
+	                      *GetNameSafe(Outer)))
 	{
 		return;
 	}
@@ -1131,7 +1125,7 @@ void UActorInventoryComponent::CheckDisk() const
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
-	                      *Outer->GetName()))
+	                      *GetNameSafe(Outer)))
 	{
 		return;
 	}
