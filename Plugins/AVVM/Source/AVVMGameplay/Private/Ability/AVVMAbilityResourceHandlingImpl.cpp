@@ -34,6 +34,7 @@ TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActo
 
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutAbilities;
+	TArray<UObject*> OutEffects;
 
 	for (UObject* Resource : Resources)
 	{
@@ -45,16 +46,29 @@ TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActo
 		}
 
 		const auto* Ability = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
-		if (IsValid(Ability))
+		if (!IsValid(Ability))
+		{
+			continue;
+		}
+
+		if (!Ability->GetGameplayAbilityClass().IsNull())
 		{
 			OutAbilities.Add(Resource);
-			continue;
+		}
+		else if (!Ability->GetGameplayEffectClass().IsNull())
+		{
+			OutEffects.Add(Resource);
 		}
 	}
 
 	if (!OutAbilities.IsEmpty())
 	{
 		AbilitySystemComponent->SetupAbilities(OutAbilities);
+	}
+
+	if (!OutEffects.IsEmpty())
+	{
+		AbilitySystemComponent->SetupEffects(OutEffects);
 	}
 
 	return OutResources;

@@ -172,6 +172,11 @@ void UAVVMAbilitySystemComponent::SetupAbilities(const TArray<UObject*>& Resourc
 	OutResult = UAssetManager::Get().LoadAssetList(DeferredGrantedAbilities, Callback);
 }
 
+void UAVVMAbilitySystemComponent::SetupEffects(const TArray<UObject*>& Resources)
+{
+	// TODO @gdemers Handle applying GE
+}
+
 void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& AttributeSetSoftObjectPath,
                                                     AActor* AttributeSetOwner)
 {

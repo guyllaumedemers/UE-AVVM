@@ -52,7 +52,7 @@ struct SKILLSAMPLE_API FSkillTreeSparseData
  *	a UActorSkillTreeComponent.
  */
 UCLASS(BlueprintType, Blueprintable, SparseClassDataTypes="SkillTreeSparseData")
-class SKILLSAMPLE_API USkillTreeNodeObject : public UObject
+class SKILLSAMPLE_API USkillTreeNodeObject final : public UObject
 {
 	GENERATED_BODY()
 
