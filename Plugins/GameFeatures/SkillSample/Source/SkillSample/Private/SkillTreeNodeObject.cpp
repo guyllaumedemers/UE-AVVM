@@ -42,7 +42,7 @@ void USkillTreeNodeObject::ModifyRuntimeState(const FGameplayTagContainer& Added
 
 	if (!RemovedTags.IsEmpty())
 	{
-		ASC->RemoveLooseGameplayTags(AddedTags);
+		ASC->RemoveLooseGameplayTags(RemovedTags);
 	}
 }
 
