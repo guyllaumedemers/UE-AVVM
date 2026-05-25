@@ -46,6 +46,15 @@ void USkillTreeNodeObject::ModifyRuntimeState(const FGameplayTagContainer& Added
 	}
 }
 
+void USkillTreeNodeObject::ModifyRuntimeLevel(const int32 NewLevel)
+{
+	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		ASC->SetActiveGameplayEffectLevel(ActiveGameplayEffectHandle, NewLevel);
+	}
+}
+
 const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
 {
 	return GetSkillTreeEffectId();

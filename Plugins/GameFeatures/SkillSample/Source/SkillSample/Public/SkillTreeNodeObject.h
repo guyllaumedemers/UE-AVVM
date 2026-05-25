@@ -66,6 +66,9 @@ class SKILLSAMPLE_API USkillTreeNodeObject final : public UObject
 public:
 	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeLevel(const int32 NewLevel);
 	
 	UFUNCTION(BlueprintCallable)
 	const FDataRegistryId& BP_GetSkillTreeEffectId() const;
