@@ -156,15 +156,6 @@ int32 USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(const int32 EncodedBits
 	return NonShiftedTreeNodeId;
 }
 
-int32 USkillTreeNodeObjectUtils::FilterSkillTreeNodeLevel(const int32 EncodedBits)
-{
-	const int32 ShiftedLevel = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
-	                                                                 GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE,
-	                                                                 GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
-
-	return ShiftedLevel;
-}
-
 bool USkillTreeNodeObjectUtils::IsAttachment(const int32 EncodedBits)
 {
 	return !!(EncodedBits & CHECK_ATTACHMENT_DEPENDENT_ENCODING);

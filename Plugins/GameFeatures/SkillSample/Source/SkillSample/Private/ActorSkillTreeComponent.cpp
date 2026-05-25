@@ -29,6 +29,8 @@
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineSkillTree.h"
 #include "Data/SkillTreeDefinitionDataAsset.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
@@ -472,7 +474,7 @@ void UActorSkillTreeComponent::OnGameplayEffectClassRetrieved(const UClass* NewG
 
 	// @gdemers filter the level bitmask of our encoded bitmask so we can support progression scaling using GAS.
 	const int32 PrivateId = USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(NewSkillTreeNode);
-	const int32 Level = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(PrivateId);
+	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateId, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
 	// @gdemers manually grant the GameplayEffect to the ASC, and store the ActiveHandle so we can remove the effect when the owning Outer is no longer referenced
 	// within the outer chain of ACharacter, or when a user swap Skill Node entries in UI.
 	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
