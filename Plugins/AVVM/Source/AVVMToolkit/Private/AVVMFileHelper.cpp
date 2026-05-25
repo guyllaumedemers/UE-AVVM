@@ -17,23 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "InventoryFileHelper.h"
+#include "AVVMFileHelper.h"
 
 #include "AVVMLogger.h"
-#include "InventorySampleModule.h"
-#include "InventorySettings.h"
-#include "InventoryUtils.h"
+#include "AVVMToolkitModule.h"
+#include "AVVMToolkitSettings.h"
 #include "HAL/PlatformFileManager.h"
 #include "Misc/FileHelper.h"
 
-TStrongObjectPtr<UInventoryFileHelper> UInventoryFileHelper::gInventoryFileHelper = nullptr;
+TStrongObjectPtr<UAVVMFileHelper> UAVVMFileHelper::gFileHelper = nullptr;
 
-FStringView UInventoryFileHelper::Static_GetSetFileContent(const bool bShouldDelete)
+FStringView UAVVMFileHelper::Static_GetSetFileContent(const TFunction<FString()>& GenerateDefaultContent, const bool bShouldDelete)
 {
-	auto* FileHelper = UInventoryFileHelper::Get();
+	auto* FileHelper = UAVVMFileHelper::Get();
 	if (IsValid(FileHelper))
 	{
-		return FileHelper->GetSetFileContent(UInventorySettings::GetAppDataDirPath(), bShouldDelete);
+		return FileHelper->GetSetFileContent(UAVVMToolkitSettings::GetAppDataDirPath(),
+		                                     GenerateDefaultContent,
+		                                     bShouldDelete);
 	}
 	else
 	{
@@ -42,18 +43,18 @@ FStringView UInventoryFileHelper::Static_GetSetFileContent(const bool bShouldDel
 	}
 }
 
-void UInventoryFileHelper::Static_Serialize(const FString& NewFileContent)
+void UAVVMFileHelper::Static_Serialize(const FString& NewFileContent)
 {
-	auto* FileHelper = UInventoryFileHelper::Get();
+	auto* FileHelper = UAVVMFileHelper::Get();
 	if (IsValid(FileHelper))
 	{
 		FileHelper->Serialize_v2(NewFileContent);
 	}
 }
 
-void UInventoryFileHelper::Serialize_v2(const FString& NewFileContent)
+void UAVVMFileHelper::Serialize_v2(const FString& NewFileContent)
 {
-	const FStringView NewPath = UInventorySettings::GetAppDataDirPath();
+	const FStringView NewPath = UAVVMToolkitSettings::GetAppDataDirPath();
 	const TCHAR* FilePath = NewPath.GetData();
 
 	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
@@ -66,20 +67,24 @@ void UInventoryFileHelper::Serialize_v2(const FString& NewFileContent)
 	MarkFileDirty();
 }
 
-UInventoryFileHelper* UInventoryFileHelper::Get()
+UAVVMFileHelper* UAVVMFileHelper::Get()
 {
-	if (!gInventoryFileHelper.IsValid())
+	if (!gFileHelper.IsValid())
 	{
-		auto* Instance = NewObject<UInventoryFileHelper>();
-		gInventoryFileHelper.Reset(Instance);
+		auto* Instance = NewObject<UAVVMFileHelper>();
+		gFileHelper.Reset(Instance);
 	}
 
-	return gInventoryFileHelper.Get();
+	return gFileHelper.Get();
 }
 
-FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePath, const bool bShouldDelete)
+FStringView UAVVMFileHelper::GetSetFileContent(const FStringView NewFilePath,
+                                               const TFunction<FString()>& GenerateDefaultContent,
+                                               const bool bShouldDelete)
 {
-	const auto GetFileFromDisk = [bShouldDelete](const FStringView NewPath)
+	const auto GetFileFromDisk = [](const FStringView NewPath,
+	                                const TFunction<FString()>& NewGenerateDefaultContent,
+	                                const bool bNewShouldDelete)
 	{
 		IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
 		const TCHAR* FilePath = NewPath.GetData();
@@ -87,16 +92,16 @@ FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePat
 		FString OutFileContent;
 
 		const bool bDoesFileExist = FileManager.FileExists(FilePath);
-		if (bDoesFileExist && bShouldDelete)
+		if (bDoesFileExist && bNewShouldDelete)
 		{
 			FileManager.DeleteFile(FilePath);
 		}
 		else if (bDoesFileExist)
 		{
 			FFileHelper::LoadFileToString(OutFileContent, FilePath);
-			AVVM_LOGGER_LOG(LogInventorySample,
+			AVVM_LOGGER_LOG(LogToolkit,
 			                nullptr,
-			                GetDefault<UInventoryFileHelper>(),
+			                GetDefault<UAVVMFileHelper>(),
 			                TEXT("I/O action on Disk. FFileHelper::LoadFileToString. DirPath: %s \n %s"),
 			                FilePath,
 			                *OutFileContent);
@@ -104,11 +109,11 @@ FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePat
 
 		if (OutFileContent.IsEmpty())
 		{
-			OutFileContent = UInventoryUtils::CreateDefaultInventoryProviders();
+			OutFileContent = NewGenerateDefaultContent();
 			FFileHelper::SaveStringToFile(OutFileContent, FilePath);
-			AVVM_LOGGER_LOG(LogInventorySample,
+			AVVM_LOGGER_LOG(LogToolkit,
 			                nullptr,
-			                GetDefault<UInventoryFileHelper>(),
+			                GetDefault<UAVVMFileHelper>(),
 			                TEXT("I/O action on Disk. FFileHelper::SaveStringToFile. DirPath: %s \n %s"),
 			                FilePath,
 			                *OutFileContent);
@@ -119,14 +124,14 @@ FStringView UInventoryFileHelper::GetSetFileContent(const FStringView NewFilePat
 
 	if (FileContent.IsEmpty() || bIsMarkedDirty || bShouldDelete)
 	{
-		FileContent = GetFileFromDisk(NewFilePath);
+		FileContent = GetFileFromDisk(NewFilePath, GenerateDefaultContent, bShouldDelete);
 		bIsMarkedDirty = false;
 	}
 
 	return FileContent;
 }
 
-void UInventoryFileHelper::MarkFileDirty()
+void UAVVMFileHelper::MarkFileDirty()
 {
 	bIsMarkedDirty = true;
 }

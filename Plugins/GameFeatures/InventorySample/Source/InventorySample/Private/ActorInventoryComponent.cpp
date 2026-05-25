@@ -20,13 +20,13 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMCharacter.h"
+#include "AVVMFileHelper.h"
 #include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMToolkitUtils.h"
-#include "InventoryFileHelper.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventoryProvider.h"
 #include "InventorySampleModule.h"
@@ -1131,7 +1131,7 @@ void UActorInventoryComponent::CheckDisk() const
 	}
 
 	// @gdemers get-set file from disk caching all inventory providers representation.
-	const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
 
 	// @gdemers serialize runtime values so we can write to disk.
 	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
@@ -1140,7 +1140,7 @@ void UActorInventoryComponent::CheckDisk() const
 	const FString DirtyFileContent = UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), TargetUniqueId, NewDependencies);
 
 	// @gdemers : serialize new file content.
-	UInventoryFileHelper::Static_Serialize(DirtyFileContent);
+	UAVVMFileHelper::Static_Serialize(DirtyFileContent);
 }
 
 void UActorInventoryComponent::CheckBounds()

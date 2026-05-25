@@ -125,7 +125,7 @@ public:
 	static int32 GetPrivateTreeNodeId(const USkillTreeNodeObject* SkillTreeNodeObject);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 GetFilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject);
+	static int32 FilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject);
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 FilterTreeNodePrivateId(const int32 EncodedBits);

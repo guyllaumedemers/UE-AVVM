@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,19 +17,25 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
 
-AVVMTOOLKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogToolkit, Log, All);
+#include "Engine/DeveloperSettings.h"
+
+#include "AVVMToolkitSettings.generated.h"
 
 /**
- *	Plugin Description :
+ *	Class description:
  *
- *	AVVMToolkit is a utility system that define a set of UI elements that are built to quickly iterate your design.
- *	This plugin will be packaged with your client build!
- *
- *		TODO @gdemers do a rundown of all available utilities here as you go!
+ *	UAVVMToolkitSettings is a DeveloperSettings that expose toolkit related information.
  */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMToolkitSettings"))
+class AVVMTOOLKIT_API UAVVMToolkitSettings : public UDeveloperSettings
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Toolkit|Settings")
+	static const FString& GetAppDataDirPath();
+};

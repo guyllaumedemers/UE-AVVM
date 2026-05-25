@@ -20,6 +20,7 @@
 #include "SkillTreeNodeObject.h"
 
 #include "AbilitySystemComponent.h"
+#include "AVVMFileHelper.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
@@ -113,6 +114,46 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                                        const TArray<int32>& NewPrivateIds,
                                                        USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
 {
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	if (!bResult)
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *GetNameSafe(Outer)))
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 NonShiftedItemId = USkillTreeUtils::GetObjectUniqueIdentifier(UnInitializedSkillTreeNodeObject);
+	if (!ensureAlwaysMsgf(NonShiftedItemId != INDEX_NONE,
+	                      TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
+	{
+		return INDEX_NONE;
+	}
+
+	// static const auto GenerateDefaultContent = []()
+	// {
+	// 	return UInventoryUtils::CreateDefaultInventoryProviders();
+	// };
+	//
+	// // @gdemers get-set file from disk caching all inventory providers representation.
+	// const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
+	//
+	// // @gdemers fetch provider payload from disk representation.
+	// const FString SkillTreeProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
+	// if (SkillTreeProviderPayload.IsEmpty())
+	// {
+	// 	return INDEX_NONE;
+	// }
+	//
+	// // @gdemers read private tree node id from payload.
+	// const int32 PrivateItemId = USkillTreeUtils::GetItemPrivateId(SkillTreeProviderPayload, NewPrivateIds, NonShiftedItemId);
+	// UnInitializedSkillTreeNodeObject->PrivateTreeNodeId = PrivateItemId;
+	// return PrivateItemId;
 	return INDEX_NONE;
 }
 
@@ -179,7 +220,7 @@ int32 USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(const USkillTreeNodeObject
 	return IsValid(SkillTreeNodeObject) ? SkillTreeNodeObject->PrivateTreeNodeId : INDEX_NONE;
 }
 
-int32 USkillTreeNodeObjectUtils::GetFilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject)
+int32 USkillTreeNodeObjectUtils::FilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject)
 {
 	if (IsValid(SkillTreeNodeObject))
 	{

@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "InventorySettings.h"
 
-#include "Misc/App.h"
-
 const FDataRegistryType& UInventorySettings::GetItemGroupRegistryType()
 {
 	return GetDefault<UInventorySettings>()->ItemGroupRegistryType;
@@ -97,12 +95,6 @@ const FGameplayTagContainer& UInventorySettings::GetDefensiveRuleset()
 const FGameplayTagContainer& UInventorySettings::GetConsumableRuleset()
 {
 	return GetDefault<UInventorySettings>()->ConsumableRuleset;
-}
-
-const FString& UInventorySettings::GetAppDataDirPath()
-{
-	static const FString Path = (FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA")) /= FApp::GetProjectName());
-	return Path;
 }
 
 const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventories()

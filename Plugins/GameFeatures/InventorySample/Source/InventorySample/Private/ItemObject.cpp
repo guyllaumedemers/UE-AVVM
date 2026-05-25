@@ -23,7 +23,7 @@
 #include "AVVMLogger.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "AVVMToolkitUtils.h"
-#include "InventoryFileHelper.h"
+#include "AVVMFileHelper.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySampleModule.h"
 #include "InventorySettings.h"
@@ -542,8 +542,15 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return UInventoryUtils::CreateDefaultInventoryProviders();
+	};
+
 	// @gdemers get-set file from disk caching all inventory providers representation.
-	const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent);
 
 	// @gdemers fetch provider payload from disk representation.
 	const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);

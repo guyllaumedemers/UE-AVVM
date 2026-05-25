@@ -19,9 +19,9 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 #include "AutomatedTestInventoryActor.h"
+#include "AVVMFileHelper.h"
 #include "AVVMGameplaySettings.h"
 #include "DataRegistrySubsystem.h"
-#include "InventoryFileHelper.h"
 #include "InventoryUtils.h"
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
@@ -114,8 +114,15 @@ public:
 
 	void RWDataTableInventory()
 	{
+		// @gdemers lambda to conditionally generate our default provider content
+		// for serialization to disk.
+		static const auto GenerateDefaultContent = []()
+		{
+			return UInventoryUtils::CreateDefaultInventoryProviders();
+		};
+		
 		// @gdemers test data serialization/deserialization to disk using Data Table data.
-		const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent(true/*always test from scratch*/);
+		const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent, true/*always test from scratch*/);
 		TestFalse("Write to disk with empty content.", FileContent.IsEmpty());
 
 		const TArray<FString> OutInventoryProviders = UInventoryUtils::GetInventoryProviderPayloads(FileContent.GetData());

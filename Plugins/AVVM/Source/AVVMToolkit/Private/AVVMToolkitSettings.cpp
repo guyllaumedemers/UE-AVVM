@@ -17,40 +17,12 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AVVMToolkitSettings.h"
 
-#include "CoreMinimal.h"
+#include "Misc/App.h"
 
-#include "UObject/Object.h"
-
-#include "InventoryFileHelper.generated.h"
-
-/**
- *	Class description:
- *	
- *	UInventoryFileHelper is a singleton helper object that allow global access to inventory content serialized to disk.
- */
-UCLASS()
-class INVENTORYSAMPLE_API UInventoryFileHelper : public UObject
+const FString& UAVVMToolkitSettings::GetAppDataDirPath()
 {
-	GENERATED_BODY()
-	
-public:
-	static FStringView Static_GetSetFileContent(const bool bShouldDelete = false);
-	static void Static_Serialize(const FString& NewFileContent);
-	
-protected:
-	static UInventoryFileHelper* Get();
-	FStringView GetSetFileContent(const FStringView NewFilePath, const bool bShouldDelete);
-	// @gdemers _v2 prevent function name shadowing in base UObject class.
-	void Serialize_v2(const FString& NewFileContent);
-	void MarkFileDirty();
-	
-	UPROPERTY(Transient,  BlueprintReadOnly)
-	bool bIsMarkedDirty = false;
-	
-	UPROPERTY(Transient,  BlueprintReadOnly)
-	FString FileContent = FString();
-	
-	static TStrongObjectPtr<UInventoryFileHelper> gInventoryFileHelper;
-};
+	static const FString Path = (FPlatformMisc::GetEnvironmentVariable(TEXT("LOCALAPPDATA")) /= FApp::GetProjectName());
+	return Path;
+}

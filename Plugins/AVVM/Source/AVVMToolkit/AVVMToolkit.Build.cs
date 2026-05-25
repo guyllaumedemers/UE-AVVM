@@ -34,6 +34,7 @@ public class AVVMToolkit : ModuleRules
 				"Core",
 				"CoreUObject",
 				"CommonUI",
+				"DeveloperSettings",
 				"Engine",
 				"FieldNotification",
 				"GameplayTags",
@@ -48,6 +49,8 @@ public class AVVMToolkit : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"IrisCore",
+				"NetCore",
 			}
 		);
 	}

@@ -84,9 +84,6 @@ public:
 	static const FGameplayTagContainer& GetConsumableRuleset();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FString& GetAppDataDirPath();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")

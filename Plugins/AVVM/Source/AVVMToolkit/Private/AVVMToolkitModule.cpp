@@ -20,4 +20,6 @@
 
 #include "AVVMToolkitModule.h"
 
+DEFINE_LOG_CATEGORY(LogToolkit);
+
 IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMToolkit)

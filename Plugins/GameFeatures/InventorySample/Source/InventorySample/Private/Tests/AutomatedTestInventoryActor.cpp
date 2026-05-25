@@ -20,7 +20,7 @@
 #include "AutomatedTestInventoryActor.h"
 
 #include "ActorInventoryComponent.h"
-#include "InventoryFileHelper.h"
+#include "AVVMFileHelper.h"
 #include "InventorySettings.h"
 #include "InventoryUtils.h"
 #include "ItemObject.h"
@@ -236,7 +236,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		InventoryComponent->CheckDisk();
 
 		// @gdemers get-set file from disk caching all inventory providers representation.
-		const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+		const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
 
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(this);
 		const FString OutInventoryProviders = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
@@ -328,7 +328,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		InventoryComponent->Items.Remove(SingleSplit);
 
 		// @gdemers get-set file from disk caching all inventory providers representation.
-		const FStringView FileContent = UInventoryFileHelper::Static_GetSetFileContent();
+		const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
 
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(this);
 		const FString OutInventoryProviders = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
