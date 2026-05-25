@@ -20,12 +20,16 @@
 #include "SkillTreeNodeObject.h"
 
 #include "AbilitySystemComponent.h"
+#include "AVVMToolkitUtils.h"
+#include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
+#include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "Resources/AVVMResourceProvider.h"
 
 void USkillTreeNodeObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
 {
@@ -117,7 +121,57 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
                                                        const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
                                                        USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
 {
-	return INDEX_NONE;
+	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
+	if (!bResult)
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
+	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
+	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
+	                      *GetNameSafe(Outer)))
+	{
+		return INDEX_NONE;
+	}
+
+	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
+	const int32 NonShiftedTreeNodeId = USkillTreeUtils::GetObjectUniqueIdentifier(UnInitializedSkillTreeNodeObject);
+
+	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
+	                                                     TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers filter the backend set to ensure we dont reallocate an item that was already configured.
+	TArray<int32> FilteredSet = OuterDependencies;
+	for (const int32 ReservedItemId : NewPrivateIds)
+	{
+		FilteredSet.Remove(ReservedItemId);
+	}
+
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = NonShiftedTreeNodeId](const int32 Value)
+	{
+		// @gdemers filter Value (PrivateTreeNodeId) of the backend item, and returning an output value
+		// that respect our initial bit encoding defined under AVVMOnlineSkillTree.h
+		const int32 OutValue = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
+		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+	});
+
+	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldn't retrieve the TreeNodeId.")))
+	{
+		// @gdemers your backend private id that represent the allocated USkillTreeNodeObject.
+		const int32 PrivateItemId = (*SearchResult);
+		UnInitializedSkillTreeNodeObject->PrivateTreeNodeId = PrivateItemId;
+
+		return PrivateItemId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
 }
 
 int32 USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(const USkillTreeNodeObject* SkillTreeNodeObject)

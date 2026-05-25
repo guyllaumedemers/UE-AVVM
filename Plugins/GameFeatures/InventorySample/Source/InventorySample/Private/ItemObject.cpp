@@ -535,8 +535,8 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
-	if (!ensureAlwaysMsgf(ItemId != INDEX_NONE,
+	const int32 NonShiftedItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
+	if (!ensureAlwaysMsgf(NonShiftedItemId != INDEX_NONE,
 	                      TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
@@ -553,7 +553,7 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers read private item id from payload.
-	const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, ItemId);
+	const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, NonShiftedItemId);
 	const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
 	const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
 	const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
@@ -587,9 +587,9 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
+	const int32 NonShiftedItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
 
-	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(ItemId != INDEX_NONE,
+	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(NonShiftedItemId != INDEX_NONE,
 	                                                     TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
@@ -602,7 +602,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		FilteredSet.Remove(ReservedItemId);
 	}
 
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = NonShiftedItemId](const int32 Value)
 	{
 		// @gdemers filter Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
 		// that respect our initial bit encoding defined under AVVMOnlineInventory.h

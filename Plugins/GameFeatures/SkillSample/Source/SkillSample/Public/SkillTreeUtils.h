@@ -25,6 +25,8 @@
 
 #include "SkillTreeUtils.generated.h"
 
+class USkillTreeNodeObject;
+
 /**
  *	Class description:
  *
@@ -37,6 +39,11 @@ class SKILLSAMPLE_API USkillTreeUtils : public UObject
 	GENERATED_BODY()
 
 public:
+	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle
+	// shifting following user defined rules.
+	UFUNCTION(BlueprintCallable)
+	static int32 GetObjectUniqueIdentifier(const USkillTreeNodeObject* SkillTreeNodeObject);
+	
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);
 };

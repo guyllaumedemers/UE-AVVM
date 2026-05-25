@@ -23,6 +23,12 @@
 #include "SkillTreeProvider.h"
 #include "GameFramework/Actor.h"
 
+int32 USkillTreeUtils::GetObjectUniqueIdentifier(const USkillTreeNodeObject* SkillTreeNodeObject)
+{
+	// TODO @gdemers Define how we store our unique id, and how we handle uniqueness, and level variation.
+	return INDEX_NONE;
+}
+
 bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType)
 {
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")) ||
