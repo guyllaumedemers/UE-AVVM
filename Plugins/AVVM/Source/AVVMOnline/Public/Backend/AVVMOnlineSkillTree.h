@@ -25,11 +25,14 @@
 // within the {FAVVMPlayerProfile::SkillIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_SKILL_TREE_ENCODING
 // @gdemers tree node (number of possible skills/perks/traits across all classes)
-#define GET_SKILL_TREE_NODE_ID_ENCODING_BIT_RANGE (11)
+#define GET_SKILL_TREE_NODE_ID_ENCODING_BIT_RANGE (9)
 #define GET_SKILL_TREE_NODE_ID_ENCODING_RSHIFT (0)
+// @gdemers 
+#define GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE (3)
+#define GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT (10)
 // @gdemers tree node position index (number of possible slots within a skill tree)
-#define GET_SKILL_TREE_NODE_POSITION_ENCODING_BIT_RANGE (7)
-#define GET_SKILL_TREE_NODE_POSITION_ENCODING_RSHIFT (12)
+#define GET_SKILL_TREE_NODE_POSITION_ENCODING_BIT_RANGE (5)
+#define GET_SKILL_TREE_NODE_POSITION_ENCODING_RSHIFT (14)
 // @gdemers see AVVMOnlineInventory for our items hard limit for Id range. Keep in mind, we can handle shifting
 // using our validation bits below!
 #define GET_SKILL_TREE_NODE_OWNER_ID_ENCODING_BIT_RANGE (8)

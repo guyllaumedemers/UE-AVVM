@@ -466,13 +466,16 @@ void UActorSkillTreeComponent::OnGameplayEffectClassRetrieved(const UClass* NewG
 	{
 		return;
 	}
-
+	
 	TSubclassOf<UGameplayEffect> GameplayEffectClass = const_cast<UClass*>(NewGameplayEffectClass);
 	AActor* NonConstOuter = const_cast<AActor*>(Outer);
 
+	// @gdemers filter the level bitmask of our encoded bitmask so we can support progression scaling using GAS.
+	const int32 PrivateId = USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(NewSkillTreeNode);
+	const int32 Level = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(PrivateId);
 	// @gdemers manually grant the GameplayEffect to the ASC, and store the ActiveHandle so we can remove the effect when the owning Outer is no longer referenced
-	// within the outer chain of ACharacter, or when a user swap Skill Node entries in UI. 
-	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter);
+	// within the outer chain of ACharacter, or when a user swap Skill Node entries in UI.
+	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
 	const FActiveGameplayEffectHandle ActiveGEHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
 	NewSkillTreeNode->SetActiveGameplayEffectHandle(ActiveGEHandle);
 }

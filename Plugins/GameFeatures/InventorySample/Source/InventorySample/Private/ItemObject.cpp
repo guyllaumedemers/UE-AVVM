@@ -641,8 +641,8 @@ int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 {
 	if (IsValid(ItemObject))
 	{
-		// @gdemers return a non-shifted version of the ItemId. Keep in mind that the range of the bit encoding define
-		// the item category manipulated!
+		// @gdemers return a non-shifted version of the ItemId.
+		// Keep in mind that the range of the bit encoding define the item category manipulated!
 		return UItemObjectUtils::FilterItemPrivateId(ItemObject->PrivateItemId);
 	}
 	else

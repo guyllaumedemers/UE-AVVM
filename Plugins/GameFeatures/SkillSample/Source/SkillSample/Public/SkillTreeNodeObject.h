@@ -117,4 +117,22 @@ public:
 	                                   const TArray<int32>& NewPrivateIds,
 	                                   const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                                   USkillTreeNodeObject* UnInitializedSkillTreeNodeObject);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetPrivateTreeNodeId(const USkillTreeNodeObject* SkillTreeNodeObject);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetFilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject);
+	
+	UFUNCTION(BlueprintCallable)
+	static int32 FilterTreeNodePrivateId(const int32 EncodedBits);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 FilterSkillTreeNodeLevel(const int32 EncodedBits);
+	
+	UFUNCTION(BlueprintCallable)
+	static bool IsAttachment(const int32 EncodedBits);
+	
+	UFUNCTION(BlueprintCallable)
+	static bool IsWeapon(const int32 EncodedBits);
 };

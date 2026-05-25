@@ -21,6 +21,9 @@
 
 #include "AbilitySystemComponent.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
+#include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 
@@ -106,4 +109,68 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
                                                        USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
 {
 	return INDEX_NONE;
+}
+
+int32 USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(const USkillTreeNodeObject* SkillTreeNodeObject)
+{
+	return IsValid(SkillTreeNodeObject) ? SkillTreeNodeObject->PrivateTreeNodeId : INDEX_NONE;
+}
+
+int32 USkillTreeNodeObjectUtils::GetFilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject)
+{
+	if (IsValid(SkillTreeNodeObject))
+	{
+		// @gdemers return a non-shifted version of the TreeNodeId.
+		// Keep in mind that the range of the bit encoding define the item category manipulated!
+		return USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(SkillTreeNodeObject->PrivateTreeNodeId);
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(const int32 EncodedBits)
+{
+	// TODO @gdemers Comeback to this later.
+	int32 BitRange = INDEX_NONE;
+	int32 BitShift = INDEX_NONE;
+
+	if (USkillTreeNodeObjectUtils::IsAttachment(EncodedBits))
+	{
+		BitRange = GET_ATTACHMENT_ID_ENCODING_BIT_RANGE;
+		BitShift = GET_ATTACHMENT_ID_ENCODING_RSHIFT;
+	}
+	else if (USkillTreeNodeObjectUtils::IsWeapon(EncodedBits))
+	{
+		BitRange = GET_ITEM_ID_ENCODING_BIT_RANGE;
+		BitShift = GET_ITEM_ID_ENCODING_RSHIFT;
+	}
+	else
+	{
+		BitRange = GET_ITEM_ID_ENCODING_BIT_RANGE;
+		BitShift = GET_ITEM_ID_ENCODING_RSHIFT;
+	}
+
+	const int32 NonShiftedTreeNodeId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, BitRange, BitShift);
+	return NonShiftedTreeNodeId;
+}
+
+int32 USkillTreeNodeObjectUtils::FilterSkillTreeNodeLevel(const int32 EncodedBits)
+{
+	const int32 ShiftedLevel = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
+	                                                                 GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE,
+	                                                                 GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
+
+	return ShiftedLevel;
+}
+
+bool USkillTreeNodeObjectUtils::IsAttachment(const int32 EncodedBits)
+{
+	return !!(EncodedBits & CHECK_ATTACHMENT_DEPENDENT_ENCODING);
+}
+
+bool USkillTreeNodeObjectUtils::IsWeapon(const int32 EncodedBits)
+{
+	return !!(EncodedBits & CHECK_WEAPON_DEPENDENT_ENCODING);
 }
