@@ -39,11 +39,23 @@ class SKILLSAMPLE_API USkillTreeUtils : public UObject
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	static FString CreateDefaultSkillTreeProviders();
+
+	UFUNCTION(BlueprintCallable)
+	static FString GetSkillTreeProviderById(const FString& NewPayload,
+	                                        const int32 NewProviderId);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetSkillTreePrivateId(const FString& NewPayload,
+	                                   const TArray<int32>& NewPrivateIds,
+	                                   const int32 SkillTreeId);
+
 	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle
 	// shifting following user defined rules.
 	UFUNCTION(BlueprintCallable)
 	static int32 GetObjectUniqueIdentifier(const USkillTreeNodeObject* SkillTreeNodeObject);
-	
+
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);
 };
