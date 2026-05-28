@@ -76,6 +76,24 @@ struct SKILLSAMPLE_API FSkillTreeNodeToken
 /**
  *	Class description:
  *	
+ *	FSkillTreeModificationContextParams is a struct context encapsulating information
+ *	about an action being executed, and modifying some properties specific to the TreeNode Object.
+ */
+USTRUCT(BLueprintType)
+struct SKILLSAMPLE_API FSkillTreeModificationContextParams
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 ActionType = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FInstancedStruct Value = FInstancedStruct();
+};
+
+/**
+ *	Class description:
+ *	
  *	UActorSkillTreeComponent is a component object that handle granting modifiers based on a list of {FDataRegistryId} provided by its owning outer
  *	following a backend request, or Data Asset referencing. Progression is expected to be supported for USkillTreeNodeObject upgrades!
  *	
@@ -114,6 +132,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash);
 
+	UFUNCTION(BlueprintCallable)
+	void ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
+
 protected:
 	UFUNCTION()
 	void OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken);
@@ -129,6 +150,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash);
+
+	UFUNCTION(Server, Reliable)
+	void Server_ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
@@ -155,10 +179,12 @@ private:
 
 	virtual TInstancedStruct<FExecutionContextRule> GetGrantRule() const;
 	virtual TInstancedStruct<FExecutionContextRule> GetRevokeRule() const;
+	virtual TInstancedStruct<FExecutionContextRule> GetModifyRule() const;
 
 	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject);
 	virtual void OnRevoke(const int32 SkillTreeNodeTypeHash);
+	virtual void OnModify(const FSkillTreeModificationContextParams& Params);
 
 	// @gdemers cached representation of what has been attributed during the initialization
 	// phase of our Skill Tree. This address the problem of uniqueness for entries with identical type, and/or owned by different entity.

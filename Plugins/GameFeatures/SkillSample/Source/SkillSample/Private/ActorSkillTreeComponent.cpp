@@ -256,6 +256,24 @@ void UActorSkillTreeComponent::RevokeTreeNodeObject(const int32 SkillTreeNodeTyp
 	}
 }
 
+void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params)
+{
+	const auto Ctx = FExecutionContextParams::Make<FModifyContextParams>(Params.ActionType, Params.Value);
+	const auto Rule = GetModifyRule();
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	if (bWasSuccess)
+	{
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnModify(Params);
+		}
+		else
+		{
+			Server_ModifyTreeNodeObject(Params);
+		}
+	}
+}
+
 void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
@@ -329,12 +347,22 @@ TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetRevokeRule(
 	return FExecutionContextRule::Make<FRevokeRule>();
 }
 
+TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetModifyRule() const
+{
+	return FExecutionContextRule::Make<FModifyRule>();
+}
+
 void UActorSkillTreeComponent::OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
 	// TODO @gdemers
 }
 
 void UActorSkillTreeComponent::OnRevoke(const int32 SkillTreeNodeTypeHash)
+{
+	// TODO @gdemers
+}
+
+void UActorSkillTreeComponent::OnModify(const FSkillTreeModificationContextParams& Params)
 {
 	// TODO @gdemers
 }
@@ -449,6 +477,11 @@ bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FExecutionConte
 
 	const bool bPredicate = ContextRule->Predicate(this, Params);
 	return bPredicate;
+}
+
+void UActorSkillTreeComponent::Server_ModifyTreeNodeObject_Implementation(const FSkillTreeModificationContextParams& Params)
+{
+	ModifyTreeNodeObject(Params);
 }
 
 void UActorSkillTreeComponent::Server_GrantTreeNodeObject_Implementation(const FSkillTreeNodeObject& NewTreeNodeObject)

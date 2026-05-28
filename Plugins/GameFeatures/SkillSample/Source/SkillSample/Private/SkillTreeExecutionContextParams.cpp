@@ -28,3 +28,10 @@ FRevokeContextParams::FRevokeContextParams(const int32 NewSkillTreeNodeTypeHash)
 	: SkillTreeNodeTypeHash(NewSkillTreeNodeTypeHash)
 {
 }
+
+FModifyContextParams::FModifyContextParams(const int32 NewActionType,
+                                           const FInstancedStruct& NewValue)
+	: ActionType(NewActionType),
+	  Value(NewValue)
+{
+}

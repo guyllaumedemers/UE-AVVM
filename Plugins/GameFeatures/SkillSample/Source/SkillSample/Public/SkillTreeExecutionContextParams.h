@@ -23,6 +23,7 @@
 
 #include "ExecutionContextParams.h"
 #include "SkillTreeNodeObject.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "SkillTreeExecutionContextParams.generated.h"
 
@@ -60,4 +61,25 @@ struct SKILLSAMPLE_API FRevokeContextParams : public FExecutionContextParams
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 SkillTreeNodeTypeHash = INDEX_NONE;
+};
+
+/**
+ *	Class description:
+ *
+ *	FModifyContextParams is a context struct that defines the properties to be
+ *	involved in executing a modification to a tree node.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FModifyContextParams : public FExecutionContextParams
+{
+	GENERATED_BODY()
+
+	FModifyContextParams() = default;
+	FModifyContextParams(const int32 NewActionType, const FInstancedStruct& NewValue);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 ActionType = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FInstancedStruct Value = FInstancedStruct();
 };

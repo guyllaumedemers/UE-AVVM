@@ -30,3 +30,9 @@ bool FRevokeRule::Predicate(const UActorComponent* Component,
 {
 	return FExecutionContextRule::Predicate(Component, Params);
 }
+
+bool FModifyRule::Predicate(const UActorComponent* Component,
+                            const TInstancedStruct<FExecutionContextParams>& Params) const
+{
+	return FExecutionContextRule::Predicate(Component, Params);
+}

@@ -59,3 +59,19 @@ struct SKILLSAMPLE_API FRevokeRule : public FExecutionContextRule
 	virtual bool Predicate(const UActorComponent* Component,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
+
+/**
+ *	Class description:
+ *
+ *	FModifyRule is a context struct that define the parameters of a modify action executed on an existing skill tree node,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FModifyRule : public FExecutionContextRule
+{
+	GENERATED_BODY()
+
+	FModifyRule() = default;
+	virtual bool Predicate(const UActorComponent* Component,
+	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+};
