@@ -21,7 +21,6 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMLogger.h"
-#include "AVVMScopedUtils.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillSampleModule.h"
 #include "SkillTreeNodeObject.h"
@@ -36,10 +35,8 @@
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
-#include "Net/Core/PushModel/PushModel.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
-#include "Resources/AVVMResourceProvider.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
 
@@ -57,7 +54,7 @@ UActorSkillTreeComponent::UActorSkillTreeComponent(const FObjectInitializer& Obj
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 	SetIsReplicatedByDefault(true);
 
-	bReplicateUsingRegisteredSubObjectList = true;
+	bReplicateUsingRegisteredSubObjectList = false;
 }
 
 void UActorSkillTreeComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -68,14 +65,12 @@ void UActorSkillTreeComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 	Params.bIsPushBased = true;
 	Params.Condition = COND_AutonomousOnly;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(UActorSkillTreeComponent, SkillTreeNodes, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UActorSkillTreeComponent, SkillTree, Params);
 }
 
 void UActorSkillTreeComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	QueueingMechanism = MakeShared<FGameplayEffectSpawnerQueuingMechanism>();
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -114,15 +109,9 @@ void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
-	QueueingMechanism.Reset();
+	SkillTree.SkillTreeNodeObjects.Reset();
 	SkillTreeNodeHandleSystem.Reset();
 	PrivateSkillTreeNodeIds.Reset();
-
-	for (auto Iterator = SkillTreeNodes.CreateIterator(); Iterator; ++Iterator)
-	{
-		RemoveReplicatedSubObject(Iterator->Get());
-		Iterator.RemoveCurrentSwap();
-	}
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -158,12 +147,8 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 		return;
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorSkillTreeComponent, SkillTreeNodes, this);
-	for (auto Iterator = SkillTreeNodes.CreateIterator(); Iterator; ++Iterator)
-	{
-		RemoveReplicatedSubObject(Iterator->Get());
-		Iterator.RemoveCurrentSwap();
-	}
+	SkillTree.SkillTreeNodeObjects.Reset();
+	SkillTree.MarkArrayDirty();
 
 	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
 	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
@@ -186,6 +171,50 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 	else
 	{
 		ISkillTreeProvider::Execute_RequestItemsFromMicroService(Outer);
+	}
+}
+
+void UActorSkillTreeComponent::ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
+                                                  const FGameplayTagContainer& AddedTags,
+                                                  const FGameplayTagContainer& RemovedTags)
+{
+	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
+	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
+	{
+		return;
+	}
+
+	auto* ASC = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash].GetOwningAbilitySystemComponent();
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	if (!AddedTags.IsEmpty())
+	{
+		ASC->AddLooseGameplayTags(AddedTags);
+	}
+
+	if (!RemovedTags.IsEmpty())
+	{
+		ASC->RemoveLooseGameplayTags(RemovedTags);
+	}
+}
+
+void UActorSkillTreeComponent::ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
+                                                  const int32 NewLevel)
+{
+	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
+	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
+	{
+		return;
+	}
+
+	auto& ActiveGameplayEffectHandle = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash];
+	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		ASC->SetActiveGameplayEffectLevel(ActiveGameplayEffectHandle, NewLevel);
 	}
 }
 
@@ -213,7 +242,7 @@ void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>&
 			continue;
 		}
 
-		if (!SkillTreeNodeAsset->CanAccessSkillTreeNodeObject(NonReplicatedComponentStateTags, NonReplicatedComponentStateTags))
+		if (!SkillTreeNodeAsset->CanAccessSkillTreeNodeEffect(NonReplicatedComponentStateTags, NonReplicatedComponentStateTags))
 		{
 			AVVM_LOGGER_LOG(LogSkillSample,
 			                Outer,
@@ -224,7 +253,7 @@ void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>&
 			continue;
 		}
 
-		DeferredItems.Add(SkillTreeNodeAsset->GetSkillTreeNodeObjectClass().ToSoftObjectPath());
+		DeferredItems.Add(SkillTreeNodeAsset->GetSkillTreeNodeEffectClass().ToSoftObjectPath());
 		AVVM_LOGGER_LOG(LogSkillSample,
 		                Outer,
 		                Outer,
@@ -244,33 +273,6 @@ void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>&
 
 	TSharedPtr<FStreamableHandle>& OutResult = SkillTreeNodeHandleSystem.FindOrAdd(Token.UniqueId);
 	OutResult = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
-}
-
-void UActorSkillTreeComponent::SetupSkillTreeNodeEffects(const TArray<UObject*>& NewResources)
-{
-	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
-	                      TEXT("Attempting to load invalid Skill Tree Node set on Outer \"%s\"."),
-	                      *GetNameSafe(OwningOuter.Get())))
-	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
-	{
-		return;
-	}
-
-	USkillTreeNodeObject* SkillTreeNodeObject = QueueingMechanism->PeekItem();
-	if (!IsValid(SkillTreeNodeObject) || !ensureAlwaysMsgf(!NewResources.IsEmpty(),
-	                                                       TEXT("Attempting to load invalid Ability Definition on SkillTreeNode \"%s\"."),
-	                                                       *GetNameSafe(SkillTreeNodeObject)))
-	{
-		return;
-	}
-
-	FOnRequestGameplayEffectClassComplete Callback;
-	Callback.BindDynamic(this, &UActorSkillTreeComponent::OnGameplayEffectClassRetrieved);
-	SkillTreeNodeObject->GetGameplayEffectClassAsync(NewResources[0], Callback);
 }
 
 const TInstancedStruct<FAVVMDataResolverHelper>& UActorSkillTreeComponent::GetSkillTreeDataResolverHelper()
@@ -303,19 +305,16 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 	TArray<UObject*> OutStreamableAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorSkillTreeComponent, SkillTreeNodes, this);
-	// @gdemers cache array before to invoke OnRep on server.
-	TArray<USkillTreeNodeObject*> OldItems = SkillTreeNodes;
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
-		const auto* SkillTreeNodeObjectClass = Cast<UClass>(StreamableAsset);
-		if (!IsValid(SkillTreeNodeObjectClass))
+		const auto* SkillTreeNodeEffectClass = Cast<UClass>(StreamableAsset);
+		if (!IsValid(SkillTreeNodeEffectClass))
 		{
 			continue;
 		}
 
-		auto* NewSkillTreeNode = NewObject<USkillTreeNodeObject>(this, SkillTreeNodeObjectClass);
-		if (!IsValid(NewSkillTreeNode))
+		const auto* GameplayEffectCDO = SkillTreeNodeEffectClass->GetDefaultObject<UGameplayEffect>();
+		if (!IsValid(GameplayEffectCDO))
 		{
 			continue;
 		}
@@ -329,210 +328,54 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 		{
 			PrivateItemId = USkillTreeNodeObjectUtils::RuntimeInitStaticItem(Outer,
 			                                                                 PrivateSkillTreeNodeIds,
-			                                                                 NewSkillTreeNode);
+			                                                                 GameplayEffectCDO);
 		}
 		else
 		{
 			PrivateItemId = USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(Outer,
 			                                                                 PrivateSkillTreeNodeIds,
 			                                                                 UActorSkillTreeComponent::GetSkillTreeDataResolverHelper(),
-			                                                                 NewSkillTreeNode);
+			                                                                 GameplayEffectCDO);
 		}
 
 		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Tree Node with a valid PrivateId.")) ||
-			ensureAlwaysMsgf(!PrivateSkillTreeNodeIds.Contains(PrivateItemId), TEXT("Attempting to initialized a USkillTreeNodeObject with duplicated PrivateItemId value.")))
+			ensureAlwaysMsgf(!PrivateSkillTreeNodeIds.Contains(PrivateItemId), TEXT("Attempting to initialized a FSkillTreeNodeObject with duplicated PrivateItemId value.")))
 		{
+			const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TryApplyGameplayEffect(SkillTreeNodeEffectClass, PrivateItemId);
+			const int32 TypeHash = GetTypeHash(ActiveGameplayEffectHandle);
+			SkillTree.SkillTreeNodeObjects.Add(FSkillTreeNodeObject(PrivateItemId, TypeHash)/*rvalue*/);
+			NonReplicatedActiveGameplayEffectHandles.Add(TypeHash, ActiveGameplayEffectHandle);
 			PrivateSkillTreeNodeIds.Add(PrivateItemId);
-			AddReplicatedSubObject(NewSkillTreeNode);
-			SkillTreeNodes.Add(NewSkillTreeNode);
 		}
 	}
 
-	// @gdemers try to apply gameplay effect on actor based on outer representation.
-	TryApplyGameplayEffect(Outer);
+	SkillTree.MarkArrayDirty();
 }
 
-void UActorSkillTreeComponent::OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects)
-{
-}
-
-void UActorSkillTreeComponent::TryApplyGameplayEffect(const AActor* Outer)
-{
-	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<USkillTreeProvider>(Outer);
-	if (!bResult)
-	{
-		return;
-	}
-
-	auto* ResourceManagerComponent = IAVVMResourceProvider::Execute_GetResourceManagerComponent(Outer);
-	if (!ensureAlwaysMsgf(IsValid(ResourceManagerComponent), TEXT("Outer doesn't return valid AVVMResourceManagerComponent!")))
-	{
-		return;
-	}
-
-	USkillTreeNodeObject* NewSkillTreeNodeObject = nullptr;
-	if (!SkillTreeNodes.IsEmpty())
-	{
-		NewSkillTreeNodeObject = SkillTreeNodes.Last();
-	}
-
-	if (IsValid(NewSkillTreeNodeObject))
-	{
-		RequestGameplayEffect(ResourceManagerComponent, NewSkillTreeNodeObject);
-	}
-}
-
-void UActorSkillTreeComponent::RequestGameplayEffect(UAVVMResourceManagerComponent* ResourceManagerComponent,
-                                                     USkillTreeNodeObject* NewSkillTreeNode)
+FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
+                                                                             const int32 PrivateTreeNodeId)
 {
 	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
 	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(QueueingMechanism.IsValid(), TEXT("QueueingMechanism invalid!")))
-	{
-		return;
-	}
-
-	const auto RequestGameplayEffectSpawning = [](const TWeakObjectPtr<UActorSkillTreeComponent>& NewActorSkillTreeComponent,
-	                                              const TWeakObjectPtr<UAVVMResourceManagerComponent>& NewResourceManagerComponent,
-	                                              const TWeakObjectPtr<USkillTreeNodeObject>& SkillTreeNode)
-	{
-		if (!ensureAlwaysMsgf(NewActorSkillTreeComponent.IsValid(), TEXT("WeakObjectPtr to Actor Skill Tree Component Invalid!")) ||
-			!ensureAlwaysMsgf(NewResourceManagerComponent.IsValid(), TEXT("WeakObjectPtr to Resource Manager Component Invalid!")) ||
-			!ensureAlwaysMsgf(SkillTreeNode.IsValid(), TEXT("WeakObjectPtr to SkillTreeObject Invalid!")))
-		{
-			return;
-		}
-
-		const AActor* NewOuter = NewActorSkillTreeComponent->OwningOuter.Get();
-		AVVM_LOGGER_LOG(LogSkillSample,
-		                NewOuter,
-		                NewOuter,
-		                TEXT("Executing GameplayEffect Request for %s"),
-		                *GetNameSafe(SkillTreeNode.Get()));
-
-		NewResourceManagerComponent->RequestAsyncLoading(SkillTreeNode->GetSkillTreeEffectId(), {});
-	};
-
-	const auto NewRequest = FOnAsyncSpawnRequestDeferred::CreateWeakLambda(this,
-	                                                                       RequestGameplayEffectSpawning,
-	                                                                       this,
-	                                                                       ResourceManagerComponent,
-	                                                                       NewSkillTreeNode);
-
-	const bool bHasPendingRequest = QueueingMechanism->PushDeferredItem(NewSkillTreeNode, NewRequest);
-	if (bHasPendingRequest)
-	{
-		AVVM_LOGGER_LOG(LogSkillSample,
-		                Outer,
-		                Outer,
-		                TEXT("Grant GameplayEffect Request for %s was Deferred."),
-		                *GetNameSafe(NewSkillTreeNode));
-	}
-}
-
-void UActorSkillTreeComponent::OnGameplayEffectClassRetrieved(const UClass* NewGameplayEffectClass,
-                                                              USkillTreeNodeObject* NewSkillTreeNode)
-{
-	const auto ScopedSafety = [](TSharedPtr<FGameplayEffectSpawnerQueuingMechanism> NewQueueingMechanism)
-	{
-		if (ensureAlwaysMsgf(NewQueueingMechanism.IsValid(),
-		                     TEXT("QueueingMechanism invalid!")))
-		{
-			NewQueueingMechanism->TryExecuteNextRequest(true);
-		}
-	};
-
-	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, ScopedSafety, QueueingMechanism);
-	FAVVMScopedDelegate ScopedDelegate(Callback);
-
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer),
-	                      TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(IsValid(NewSkillTreeNode),
-	                      TEXT("Trying to access invalid USkillTreeNodeObject during initialization process.")))
-	{
-		return;
+		return {};
 	}
 
 	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Outer);
 	if (!ensureAlwaysMsgf(IsValid(ASC),
 	                      TEXT("Missing a valid ASC on the owning outer of the current SkillTreeComponent!")))
 	{
-		return;
+		return {};
 	}
-	
+
 	TSubclassOf<UGameplayEffect> GameplayEffectClass = const_cast<UClass*>(NewGameplayEffectClass);
 	AActor* NonConstOuter = const_cast<AActor*>(Outer);
 
 	// @gdemers filter the level bitmask of our encoded bitmask so we can support progression scaling using GAS.
-	const int32 PrivateId = USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(NewSkillTreeNode);
-	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateId, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
+	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateTreeNodeId, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
 	// @gdemers manually grant the GameplayEffect to the ASC, and store the ActiveHandle so we can remove the effect when the owning Outer is no longer referenced
 	// within the outer chain of ACharacter, or when a user swap Skill Node entries in UI.
 	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
 	const FActiveGameplayEffectHandle ActiveGEHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
-	NewSkillTreeNode->SetActiveGameplayEffectHandle(ActiveGEHandle);
-}
-
-UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::~FGameplayEffectSpawnerQueuingMechanism()
-{
-	PendingSpawnRequests.Empty();
-	QueuedSkillTreeNodes.Empty();
-}
-
-bool UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::PushDeferredItem(USkillTreeNodeObject* NewSkillTreeNode,
-                                                                                        const UActorSkillTreeComponent::FOnAsyncSpawnRequestDeferred& NewRequest)
-{
-	QueuedSkillTreeNodes.Add(NewSkillTreeNode);
-	PendingSpawnRequests.Add(NewRequest);
-	TryExecuteNextRequest();
-	return HasPendingRequest();
-}
-
-bool UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::TryExecuteNextRequest(const bool bCanDequeueFrontItem)
-{
-	if (bCanDequeueFrontItem && !QueuedSkillTreeNodes.IsEmpty())
-	{
-		QueuedSkillTreeNodes.RemoveAtSwap(0);
-	}
-
-	if (!HasPendingRequest())
-	{
-		return true;
-	}
-
-	const bool bAreContainerEquals = QueuedSkillTreeNodes.Num() == PendingSpawnRequests.Num();
-	if (bAreContainerEquals)
-	{
-		// @gdemers TQueues dont support size...
-		FOnAsyncSpawnRequestDeferred NextRequest = PendingSpawnRequests[0];
-		PendingSpawnRequests.RemoveAtSwap(0);
-		NextRequest.ExecuteIfBound();
-	}
-
-	return false;
-}
-
-bool UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::HasPendingRequest() const
-{
-	return !PendingSpawnRequests.IsEmpty();
-}
-
-USkillTreeNodeObject* UActorSkillTreeComponent::FGameplayEffectSpawnerQueuingMechanism::PeekItem() const
-{
-	TWeakObjectPtr<USkillTreeNodeObject> SkillTreeNodeObject = nullptr;
-	if (!QueuedSkillTreeNodes.IsEmpty())
-	{
-		SkillTreeNodeObject = QueuedSkillTreeNodes[0].Get();
-	}
-
-	return SkillTreeNodeObject.Get();
+	return ActiveGEHandle;
 }

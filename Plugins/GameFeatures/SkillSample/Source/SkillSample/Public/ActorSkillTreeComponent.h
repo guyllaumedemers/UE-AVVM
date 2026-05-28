@@ -23,6 +23,7 @@
 
 #include "ActiveGameplayEffectHandle.h"
 #include "GameplayTagContainer.h"
+#include "SkillTreeNodeObject.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
@@ -31,7 +32,6 @@
 
 struct FStreamableHandle;
 class UAVVMResourceManagerComponent;
-class USkillTreeNodeObject;
 
 /**
  *	Class description:
@@ -85,8 +85,6 @@ class SKILLSAMPLE_API UActorSkillTreeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE(FOnAsyncSpawnRequestDeferred);
-
 public:
 	UActorSkillTreeComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -98,54 +96,43 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void RequestSkillTree(const AActor* Outer);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
+	                        const FGameplayTagContainer& AddedTags,
+	                        const FGameplayTagContainer& RemovedTags);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
+	                        const int32 NewLevel);
+
 protected:
 	UFUNCTION()
 	void OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken);
-	
-	UFUNCTION()
-	void OnRep_SkillTreeNodeCollectionChanged(const TArray<USkillTreeNodeObject*>& OldSkillTreeNodeObjects);
 
-	void TryApplyGameplayEffect(const AActor* Outer);
+	FActiveGameplayEffectHandle TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
+	                                                   const int32 PrivateTreeNodeId);
 
-	void RequestGameplayEffect(UAVVMResourceManagerComponent* ResourceManagerComponent,
-	                           USkillTreeNodeObject* NewSkillTreeNode);
-
-	UFUNCTION()
-	void OnGameplayEffectClassRetrieved(const UClass* NewGameplayEffectClass,
-	                                    USkillTreeNodeObject* NewSkillTreeNode);
-
-	struct FGameplayEffectSpawnerQueuingMechanism
-	{
-		~FGameplayEffectSpawnerQueuingMechanism();
-		bool PushDeferredItem(USkillTreeNodeObject* NewSkillTreeNode, const UActorSkillTreeComponent::FOnAsyncSpawnRequestDeferred& NewRequest);
-		bool TryExecuteNextRequest(const bool bCanDequeueFrontItem = false);
-		bool HasPendingRequest() const;
-		USkillTreeNodeObject* PeekItem() const;
-
-		TArray<UActorSkillTreeComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests;
-		TArray<TWeakObjectPtr<USkillTreeNodeObject>> QueuedSkillTreeNodes;
-	};
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
 
-	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_SkillTreeNodeCollectionChanged")
-	TArray<TObjectPtr<USkillTreeNodeObject>> SkillTreeNodes;
-	
+	UPROPERTY(Transient)
+	TMap<uint32/*FActiveGameplayEffectHandle::GetTypeHash*/, FActiveGameplayEffectHandle> NonReplicatedActiveGameplayEffectHandles;
+
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer NonReplicatedComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	FSkillTreeNodeObjectFastArray SkillTree;
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-	
+
 	TMap<uint32, TSharedPtr<FStreamableHandle>> SkillTreeNodeHandleSystem;
-	TSharedPtr<FGameplayEffectSpawnerQueuingMechanism> QueueingMechanism = nullptr;
 
 private:
 	void SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources);
-	void SetupSkillTreeNodeEffects(const TArray<UObject*>& NewResources);
-	
+
 	// @gdemers Data Resolver for backend representation of an actor skill tree. 
 	static const TInstancedStruct<FAVVMDataResolverHelper>& GetSkillTreeDataResolverHelper();
 

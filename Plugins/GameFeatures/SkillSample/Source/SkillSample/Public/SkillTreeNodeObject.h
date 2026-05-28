@@ -21,82 +21,74 @@
 
 #include "CoreMinimal.h"
 
-#include "ActiveGameplayEffectHandle.h"
-#include "DataRegistryId.h"
+#include "Iris/ReplicationState/IrisFastArraySerializer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
-#include "UObject/Object.h"
 
 #include "SkillTreeNodeObject.generated.h"
 
+class UGameplayEffect;
 struct FStreamableHandle;
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestGameplayEffectClassComplete, const UClass*, NewActorClass, USkillTreeNodeObject*, NewSkillTreeNodeObject);
+
 
 /**
  *	Class description:
  *	
- *	FSkillTreeSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
- *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ *	USkillTreeNodeObject is a generic type that allow granting a gameplay effect to the Owning outer referencing
+ *	a UActorSkillTreeComponent.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeSparseData
+struct SKILLSAMPLE_API FSkillTreeNodeObject : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMAbilityDefinitionDataTableRow"))
-	FDataRegistryId SkillTreeEffectId = FDataRegistryId();
+	FSkillTreeNodeObject() = default;
+	FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
+	                     const int32 NewActiveGameplayEffectHandleTypeHash);
+	
+	const int32 GetActiveEffectHandleTypeHash() const;
+	const int32 GetSkillTreeNodePrivateId() const;
 
-	// @gdemers reference the ui definition of the referenced Effect this USkillTreeNodeObject owns.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorUIDefinitionDataTableRow"))
-	FDataRegistryId SkillTreeEffectUIId = FDataRegistryId();
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 ActiveGameplayEffectHandleTypeHash = INDEX_NONE;
+
+	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
+	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 
+	UPROPERTY(Transient, BlueprintReadOnly)
+	int32 PrivateTreeNodeId = INDEX_NONE;
+	
+	friend class USkillTreeNodeObjectUtils;
 };
 
 /**
  *	Class description:
  *	
- *	USkillTreeNodeObject is a generic UObject type that allow granting a gameplay effect to the Owning outer referencing
- *	a UActorSkillTreeComponent.
+ *	FSkillTreeNodeObjectFastArray is a FastArraySerializer derived class that pack data sequentially, and
+ *	is optimized for network serialization.
  */
-UCLASS(BlueprintType, Blueprintable, SparseClassDataTypes="SkillTreeSparseData")
-class SKILLSAMPLE_API USkillTreeNodeObject final : public UObject
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FSkillTreeNodeObjectFastArray : public FIrisFastArraySerializer
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+	{
+		return FIrisFastArraySerializer::FastArrayDeltaSerialize<FSkillTreeNodeObject, FSkillTreeNodeObjectFastArray>(SkillTreeNodeObjects, DeltaParms, *this);
+	}
 
-	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeLevel(const int32 NewLevel);
-	
-	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& BP_GetSkillTreeEffectId() const;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<FSkillTreeNodeObject> SkillTreeNodeObjects;
+};
 
-	UFUNCTION(BlueprintCallable)
-	const FDataRegistryId& BP_GetSkillTreeEffectUIId() const;
-
-	void GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
-	                                 const FOnRequestGameplayEffectClassComplete& OnRequestGameplayEffectClassComplete);
-
-	UFUNCTION(BlueprintCallable)
-	void SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle);
-
-protected:
-	UFUNCTION()
-	void OnGameplayEffectClassAcquired(FOnRequestGameplayEffectClassComplete Callback);
-
-	// @gdemers : cached handle to support adding/removing effects based on user interaction.
-	UPROPERTY(Transient)
-	FActiveGameplayEffectHandle ActiveGameplayEffectHandle = FActiveGameplayEffectHandle();
-
-	TSharedPtr<FStreamableHandle> StreamingHandle = nullptr;
-
-private:
-	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
-	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 
-	int32 PrivateTreeNodeId = INDEX_NONE;
-	friend class USkillTreeNodeObjectUtils;
+template <>
+struct TStructOpsTypeTraits<FSkillTreeNodeObjectFastArray> : public TStructOpsTypeTraitsBase2<FSkillTreeNodeObjectFastArray>
+{
+	enum
+	{
+		WithNetDeltaSerializer = true,
+	};
 };
 
 /**
@@ -113,19 +105,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static int32 RuntimeInitStaticItem(const UObject* Outer,
 	                                   const TArray<int32>& NewPrivateIds,
-	                                   USkillTreeNodeObject* UnInitializedSkillTreeNodeObject);
+	                                   const UGameplayEffect* SkillTreeNodeEffectCDO);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 RuntimeInitOnlineItem(const UObject* Outer,
 	                                   const TArray<int32>& NewPrivateIds,
 	                                   const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
-	                                   USkillTreeNodeObject* UnInitializedSkillTreeNodeObject);
-
-	UFUNCTION(BlueprintCallable)
-	static int32 GetPrivateTreeNodeId(const USkillTreeNodeObject* SkillTreeNodeObject);
-
-	UFUNCTION(BlueprintCallable)
-	static int32 FilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject);
+	                                   const UGameplayEffect* SkillTreeNodeEffectCDO);
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 FilterTreeNodePrivateId(const int32 EncodedBits);

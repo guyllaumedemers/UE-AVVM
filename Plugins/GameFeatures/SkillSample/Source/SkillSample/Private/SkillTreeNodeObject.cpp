@@ -29,90 +29,28 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
 #include "Resources/AVVMResourceProvider.h"
 
-void USkillTreeNodeObject::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
+FSkillTreeNodeObject::FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
+                                           const int32 NewActiveGameplayEffectHandleTypeHash)
+	: ActiveGameplayEffectHandleTypeHash(NewActiveGameplayEffectHandleTypeHash),
+	  PrivateTreeNodeId(NewPrivateTreeNodeId)
 {
-	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
-	if (!IsValid(ASC))
-	{
-		return;
-	}
-
-	if (!AddedTags.IsEmpty())
-	{
-		ASC->AddLooseGameplayTags(AddedTags);
-	}
-
-	if (!RemovedTags.IsEmpty())
-	{
-		ASC->RemoveLooseGameplayTags(RemovedTags);
-	}
 }
 
-void USkillTreeNodeObject::ModifyRuntimeLevel(const int32 NewLevel)
+const int32 FSkillTreeNodeObject::GetActiveEffectHandleTypeHash() const
 {
-	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
-	if (IsValid(ASC))
-	{
-		ASC->SetActiveGameplayEffectLevel(ActiveGameplayEffectHandle, NewLevel);
-	}
+	return ActiveGameplayEffectHandleTypeHash;
 }
 
-const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectId() const
+const int32 FSkillTreeNodeObject::GetSkillTreeNodePrivateId() const
 {
-	return GetSkillTreeEffectId();
-}
-
-const FDataRegistryId& USkillTreeNodeObject::BP_GetSkillTreeEffectUIId() const
-{
-	return GetSkillTreeEffectUIId();
-}
-
-void USkillTreeNodeObject::GetGameplayEffectClassAsync(const UObject* NewGameplayEffectDefinitionDataAsset,
-                                                       const FOnRequestGameplayEffectClassComplete& Callback)
-{
-	const auto* GameplayEffectDefinitionDataAsset = Cast<UAVVMAbilityDefinitionDataAsset>(NewGameplayEffectDefinitionDataAsset);
-	if (!IsValid(GameplayEffectDefinitionDataAsset))
-	{
-		return;
-	}
-
-	FStreamableDelegate OnRequestItemActorClassComplete;
-	OnRequestItemActorClassComplete.BindUObject(this, &USkillTreeNodeObject::OnGameplayEffectClassAcquired, Callback);
-	StreamingHandle = UAssetManager::Get().LoadAssetList({GameplayEffectDefinitionDataAsset->GetGameplayEffectClass().ToSoftObjectPath()}, OnRequestItemActorClassComplete);
-}
-
-void USkillTreeNodeObject::SetActiveGameplayEffectHandle(const FActiveGameplayEffectHandle& NewActiveGameplayEffectHandle)
-{
-	ActiveGameplayEffectHandle = NewActiveGameplayEffectHandle;
-}
-
-void USkillTreeNodeObject::OnGameplayEffectClassAcquired(FOnRequestGameplayEffectClassComplete Callback)
-{
-	if (!StreamingHandle.IsValid())
-	{
-		Callback.ExecuteIfBound(nullptr, this);
-		return;
-	}
-
-	TArray<UObject*> OutStreamableAssets;
-	StreamingHandle->GetLoadedAssets(OutStreamableAssets);
-
-	if (!OutStreamableAssets.IsEmpty())
-	{
-		Callback.ExecuteIfBound(Cast<UClass>(OutStreamableAssets[0]), this);
-	}
-	else
-	{
-		Callback.ExecuteIfBound(nullptr, this);
-	}
+	return PrivateTreeNodeId;
 }
 
 int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
                                                        const TArray<int32>& NewPrivateIds,
-                                                       USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
+                                                       const UGameplayEffect* SkillTreeNodeEffectCDO)
 {
 	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
@@ -128,8 +66,8 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	const int32 NonShiftedSkillTreeId = USkillTreeUtils::GetObjectUniqueIdentifier(UnInitializedSkillTreeNodeObject);
-	if (!ensureAlwaysMsgf(NonShiftedSkillTreeId != INDEX_NONE,
+	const int32 NonShiftedTreeNodeId = USkillTreeUtils::GetObjectUniqueIdentifier(SkillTreeNodeEffectCDO);
+	if (!ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
 	                      TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
@@ -151,15 +89,14 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers read private tree node id from payload.
-	const int32 PrivateItemId = USkillTreeUtils::GetSkillTreePrivateId(SkillTreeProviderPayload, NewPrivateIds, NonShiftedSkillTreeId);
-	UnInitializedSkillTreeNodeObject->PrivateTreeNodeId = PrivateItemId;
+	const int32 PrivateItemId = USkillTreeUtils::GetSkillTreeNodePrivateId(SkillTreeProviderPayload, NewPrivateIds, NonShiftedTreeNodeId);
 	return PrivateItemId;
 }
 
 int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
                                                        const TArray<int32>& NewPrivateIds,
                                                        const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
-                                                       USkillTreeNodeObject* UnInitializedSkillTreeNodeObject)
+                                                       const UGameplayEffect* SkillTreeNodeEffectCDO)
 {
 	const bool bResult = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(Outer);
 	if (!bResult)
@@ -177,7 +114,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 NonShiftedTreeNodeId = USkillTreeUtils::GetObjectUniqueIdentifier(UnInitializedSkillTreeNodeObject);
+	const int32 NonShiftedTreeNodeId = USkillTreeUtils::GetObjectUniqueIdentifier(SkillTreeNodeEffectCDO);
 
 	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
 	                                                     TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
@@ -204,28 +141,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	{
 		// @gdemers your backend private id that represent the allocated USkillTreeNodeObject.
 		const int32 PrivateItemId = (*SearchResult);
-		UnInitializedSkillTreeNodeObject->PrivateTreeNodeId = PrivateItemId;
-
 		return PrivateItemId;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
-}
-
-int32 USkillTreeNodeObjectUtils::GetPrivateTreeNodeId(const USkillTreeNodeObject* SkillTreeNodeObject)
-{
-	return IsValid(SkillTreeNodeObject) ? SkillTreeNodeObject->PrivateTreeNodeId : INDEX_NONE;
-}
-
-int32 USkillTreeNodeObjectUtils::FilterTreeNode(const USkillTreeNodeObject* SkillTreeNodeObject)
-{
-	if (IsValid(SkillTreeNodeObject))
-	{
-		// @gdemers return a non-shifted version of the TreeNodeId.
-		// Keep in mind that the range of the bit encoding define the item category manipulated!
-		return USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(SkillTreeNodeObject->PrivateTreeNodeId);
 	}
 	else
 	{

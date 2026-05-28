@@ -23,22 +23,22 @@
 EDataValidationResult USkillTreeNodeDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (SkillTreeNodeObjectClass.IsNull())
+	if (SkillTreeGameplayEffectClass.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("USkillTreeNodeDefinitionDataAsset", "", "USkillTreeNodeObject missing. No valid TSoftClassPtr specified!"));
+		Context.AddError(NSLOCTEXT("USkillTreeNodeDefinitionDataAsset", "", "UGameplayEffect missing. No valid TSoftClassPtr specified!"));
 	}
 
 	return Result;
 }
 #endif
 
-const TSoftClassPtr<USkillTreeNodeObject>& USkillTreeNodeDefinitionDataAsset::GetSkillTreeNodeObjectClass() const
+const TSoftClassPtr<UGameplayEffect>& USkillTreeNodeDefinitionDataAsset::GetSkillTreeNodeEffectClass() const
 {
-	return SkillTreeNodeObjectClass;
+	return SkillTreeGameplayEffectClass;
 }
 
-bool USkillTreeNodeDefinitionDataAsset::CanAccessSkillTreeNodeObject(const FGameplayTagContainer& RequirementTags,
+bool USkillTreeNodeDefinitionDataAsset::CanAccessSkillTreeNodeEffect(const FGameplayTagContainer& RequirementTags,
                                                                      const FGameplayTagContainer& BlockingTags) const
 {
 	const bool bHasRequiredTags = RequirementTags.HasAllExact(RequiredTagsForAccess);

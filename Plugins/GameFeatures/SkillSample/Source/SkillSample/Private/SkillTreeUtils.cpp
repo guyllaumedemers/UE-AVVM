@@ -34,14 +34,14 @@ FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
 	return FString();
 }
 
-int32 USkillTreeUtils::GetSkillTreePrivateId(const FString& NewPayload,
-                                             const TArray<int32>& NewPrivateIds,
-                                             const int32 SkillTreeId)
+int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
+                                                 const TArray<int32>& NewPrivateIds,
+                                                 const int32 SkillTreeId)
 {
 	return INDEX_NONE;
 }
 
-int32 USkillTreeUtils::GetObjectUniqueIdentifier(const USkillTreeNodeObject* SkillTreeNodeObject)
+int32 USkillTreeUtils::GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect)
 {
 	// TODO @gdemers Define how we store our unique id, and how we handle uniqueness, and level variation.
 	return INDEX_NONE;

@@ -32,7 +32,7 @@
 
 #include "SkillTreeDefinitionDataAsset.generated.h"
 
-class USkillTreeNodeObject;
+class UGameplayEffect;
 
 /**
  *	Class description:
@@ -57,14 +57,21 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	const TSoftClassPtr<USkillTreeNodeObject>& GetSkillTreeNodeObjectClass() const;
+	const TSoftClassPtr<UGameplayEffect>& GetSkillTreeNodeEffectClass() const;
 
-	bool CanAccessSkillTreeNodeObject(const FGameplayTagContainer& RequirementTags,
+	bool CanAccessSkillTreeNodeEffect(const FGameplayTagContainer& RequirementTags,
 	                                  const FGameplayTagContainer& BlockingTags) const;
 
 protected:
+	// @gdemers IMPORTANT : This represents whatever your Skill, Perk or Traits wants. Learn how to use it!
+	// GameplayEffect support conditional GE, and GameplayAbility granting when registered. This cover the whole case
+	// for handling Skills, Perks, and Traits. No custom implementation needed!
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<USkillTreeNodeObject> SkillTreeNodeObjectClass = nullptr;
+	TSoftClassPtr<UGameplayEffect> SkillTreeGameplayEffectClass = nullptr;
+
+	// @gdemers reference the ui definition of the referenced Effect this USkillTreeNodeObject owns.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorUIDefinitionDataTableRow"))
+	FDataRegistryId SkillTreeEffectUIId = FDataRegistryId();
 
 	// @gdemers tags that define if this entity can be accessed by the actor type.
 	// Example : PlayerClass.Warrior -> Cannot use non-warrior abilities.

@@ -21,7 +21,6 @@
 
 #include "ActorSkillTreeComponent.h"
 #include "AVVMGameplayUtils.h"
-#include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Data/SkillTreeDefinitionDataAsset.h"
 #include "GameFramework/Actor.h"
 
@@ -35,7 +34,6 @@ TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorC
 
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutSkillTreeNodes;
-	TArray<UObject*> OutSkillTreeNodeEffects;
 
 	for (UObject* Resource : Resources)
 	{
@@ -52,23 +50,11 @@ TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorC
 			OutSkillTreeNodes.Add(Resource);
 			continue;
 		}
-
-		const auto* SkillTreeNodeEffectAsset = Cast<UAVVMAbilityDefinitionDataAsset>(Resource);
-		if (IsValid(SkillTreeNodeEffectAsset) && SkillTreeNodeEffectAsset->DoesInitializeViaExternalPlugin())
-		{
-			OutSkillTreeNodeEffects.Add(Resource);
-			continue;
-		}
 	}
 
 	if (!OutSkillTreeNodes.IsEmpty())
 	{
 		SkillTreeComponent->SetupSkillTreeNodeObjects(OutSkillTreeNodes);
-	}
-
-	if (!OutSkillTreeNodeEffects.IsEmpty())
-	{
-		SkillTreeComponent->SetupSkillTreeNodeEffects(OutSkillTreeNodeEffects);
 	}
 
 	return OutResources;
