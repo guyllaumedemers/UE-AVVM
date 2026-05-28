@@ -21,43 +21,11 @@
 
 #include "CoreMinimal.h"
 
-#include "StructUtils/InstancedStruct.h"
+#include "ExecutionContextParams.h"
 
-#include "ExecutionContextParams.generated.h"
+#include "InventoryExecutionContextParams.generated.h"
 
 class UItemObject;
-
-/**
- *	Class description:
- *
- *	FExecutionContextParams is a context struct that defines the properties to be
- *	involved in executing an action, as well as the execution implementation details itself.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FExecutionContextParams
-{
-	GENERATED_BODY()
-
-	virtual ~FExecutionContextParams() = default;
-
-	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextParams>::Make<T>
-	template <typename TChild, typename... TArgs>
-	static TInstancedStruct<FExecutionContextParams> Make(TArgs&&... Args);
-
-	static TInstancedStruct<FExecutionContextParams> Empty;
-};
-
-template <typename TChild, typename... TArgs>
-TInstancedStruct<FExecutionContextParams> FExecutionContextParams::Make(TArgs&&... Args)
-{
-	return TInstancedStruct<FExecutionContextParams>::Make<TChild>(Forward<TArgs>(Args)...);
-}
-
-template <>
-struct TBaseStructure<FExecutionContextParams>
-{
-	static INVENTORYSAMPLE_API UScriptStruct* Get();
-};
 
 /**
  *	Class description:

@@ -21,12 +21,12 @@
 
 #include "CoreMinimal.h"
 
+#include "ExecutionContextParams.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "ExecutionContextRule.generated.h"
 
-struct FExecutionContextParams;
-class UActorInventoryComponent;
+class UActorComponent;
 
 /**
 *	Class description:
@@ -34,19 +34,17 @@ class UActorInventoryComponent;
  *	FExecutionContextRule is a context struct that define the conditions required for executing an action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FExecutionContextRule
+struct AVVMGAMEPLAY_API FExecutionContextRule
 {
 	GENERATED_BODY()
 
 	virtual ~FExecutionContextRule() = default;
-	virtual bool Predicate(const UActorInventoryComponent* InventoryComponent,
+	virtual bool Predicate(const UActorComponent* Component,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextRule>::Make<T>
 	template <typename TChild, typename... TArgs>
 	static TInstancedStruct<FExecutionContextRule> Make(TArgs&&... Args);
-
-	static TInstancedStruct<FExecutionContextRule> Empty;
 };
 
 template <typename TChild, typename... TArgs>
@@ -58,53 +56,5 @@ TInstancedStruct<FExecutionContextRule> FExecutionContextRule::Make(TArgs&&... A
 template <>
 struct TBaseStructure<FExecutionContextRule>
 {
-	static INVENTORYSAMPLE_API UScriptStruct* Get();
-};
-
-/**
- *	Class description:
- *
- *	FDropRule is a context struct that define the parameters of a dropping content action,
- *	and it's requirements to be successful.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FDropRule : public FExecutionContextRule
-{
-	GENERATED_BODY()
-
-	FDropRule() = default;
-	virtual bool Predicate(const UActorInventoryComponent* InventoryComponent,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
-};
-
-/**
- *	Class description:
- *
- *	FPickupRule is a context struct that define the parameters of a pickup content action,
- *	and it's requirements to be successful.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FPickupRule : public FExecutionContextRule
-{
-	GENERATED_BODY()
-
-	FPickupRule() = default;
-	virtual bool Predicate(const UActorInventoryComponent* InventoryComponent,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
-};
-
-/**
- *	Class description:
- *
- *	FSwapRule is a context struct that define the parameters of a swapping action,
- *	and it's requirements to be successful.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FSwapRule : public FExecutionContextRule
-{
-	GENERATED_BODY()
-
-	FSwapRule() = default;
-	virtual bool Predicate(const UActorInventoryComponent* InventoryComponent,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	static AVVMGAMEPLAY_API UScriptStruct* Get();
 };

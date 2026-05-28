@@ -17,24 +17,21 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "ExecutionContextRule.h"
+#include "InventoryExecutionContextRule.h"
 
 #include "ActorInventoryComponent.h"
 #include "AVVMCharacter.h"
 #include "AVVMGameplaySettings.h"
 #include "ExecutionContextParams.h"
+#include "InventoryExecutionContextParams.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "Tags/PrivateTags.h"
 
-UScriptStruct* TBaseStructure<FExecutionContextRule>::Get()
-{
-	return FExecutionContextRule::StaticStruct();
-}
-
-bool FDropRule::Predicate(const UActorInventoryComponent* InventoryComponent,
+bool FDropRule::Predicate(const UActorComponent* Component,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(Component);
 	if (!IsValid(InventoryComponent))
 	{
 		return false;
@@ -75,9 +72,10 @@ bool FDropRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 	return true;
 }
 
-bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
+bool FPickupRule::Predicate(const UActorComponent* Component,
                             const TInstancedStruct<FExecutionContextParams>& Params) const
 {
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(Component);
 	if (!IsValid(InventoryComponent))
 	{
 		return false;
@@ -129,9 +127,10 @@ bool FPickupRule::Predicate(const UActorInventoryComponent* InventoryComponent,
 	return true;
 }
 
-bool FSwapRule::Predicate(const UActorInventoryComponent* InventoryComponent,
+bool FSwapRule::Predicate(const UActorComponent* Component,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(Component);
 	if (!IsValid(InventoryComponent))
 	{
 		return false;

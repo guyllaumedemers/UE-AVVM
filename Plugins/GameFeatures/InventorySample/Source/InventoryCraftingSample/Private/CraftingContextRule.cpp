@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "CraftingContextRule.h"
 
-bool FCraftingContextRule::Predicate(const UActorInventoryComponent* InventoryComponent,
+bool FCraftingContextRule::Predicate(const UActorComponent* Component,
                                      const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(InventoryComponent, Params);
+	return FExecutionContextRule::Predicate(Component, Params);
 }

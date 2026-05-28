@@ -21,21 +21,43 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "ExecutionContextParams.h"
+#include "SkillTreeNodeObject.h"
 
-#include "CraftingContextRule.generated.h"
+#include "SkillTreeExecutionContextParams.generated.h"
 
 /**
  *	Class description:
  *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
+ *	FGrantContextParams is a context struct that defines the properties to be
+ *	involved in executing a granting of a tree node.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+struct SKILLSAMPLE_API FGrantContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
 
-	virtual bool Predicate(const UActorComponent* Component,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	FGrantContextParams() = default;
+	FGrantContextParams(const FSkillTreeNodeObject& NewTreeNodeObject);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
+};
+
+/**
+ *	Class description:
+ *
+ *	FRevokeContextParams is a context struct that defines the properties to be
+ *	involved in executing a revoking of a tree node.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FRevokeContextParams : public FExecutionContextParams
+{
+	GENERATED_BODY()
+
+	FRevokeContextParams() = default;
+	FRevokeContextParams(const int32 NewSkillTreeNodeTypeHash);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 SkillTreeNodeTypeHash = INDEX_NONE;
 };

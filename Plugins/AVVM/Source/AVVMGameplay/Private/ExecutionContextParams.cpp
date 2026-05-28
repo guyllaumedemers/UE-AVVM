@@ -19,26 +19,7 @@
 //SOFTWARE.
 #include "ExecutionContextParams.h"
 
-#include "ItemObject.h"
-
 UScriptStruct* TBaseStructure<FExecutionContextParams>::Get()
 {
 	return FExecutionContextParams::StaticStruct();
-}
-
-FDropContextParams::FDropContextParams(UItemObject* NewItemObject)
-	: ItemObject(NewItemObject)
-{
-}
-
-FPickupContextParams::FPickupContextParams(UItemObject* NewItemObject)
-	: ItemObject(NewItemObject)
-{
-}
-
-FSwapContextParams::FSwapContextParams(UItemObject* NewSrcItemObject,
-                                       UItemObject* NewDestItemObject)
-	: SrcItemObject(NewSrcItemObject),
-	  DestItemObject(NewDestItemObject)
-{
 }

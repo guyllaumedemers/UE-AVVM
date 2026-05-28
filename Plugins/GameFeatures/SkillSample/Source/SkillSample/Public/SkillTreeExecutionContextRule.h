@@ -23,19 +23,39 @@
 
 #include "ExecutionContextRule.h"
 
-#include "CraftingContextRule.generated.h"
+#include "SkillTreeExecutionContextRule.generated.h"
+
+struct FExecutionContextParams;
+class UActorComponent;
 
 /**
  *	Class description:
  *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
+ *	FGrantRule is a context struct that define the parameters of a granting a new skill tree node,
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+struct SKILLSAMPLE_API FGrantRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
 
+	FGrantRule() = default;
+	virtual bool Predicate(const UActorComponent* Component,
+	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+};
+
+/**
+ *	Class description:
+ *
+ *	FRevokeRule is a context struct that define the parameters of a revoking an existing skill tree node,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FRevokeRule : public FExecutionContextRule
+{
+	GENERATED_BODY()
+
+	FRevokeRule() = default;
 	virtual bool Predicate(const UActorComponent* Component,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

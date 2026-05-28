@@ -22,6 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "ActiveGameplayEffectHandle.h"
+#include "ExecutionContextParams.h"
+#include "ExecutionContextRule.h"
 #include "GameplayTagContainer.h"
 #include "SkillTreeNodeObject.h"
 #include "Backend/AVVMDataResolverHelper.h"
@@ -106,12 +108,27 @@ public:
 	void ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
 	                        const int32 NewLevel);
 
+	UFUNCTION(BlueprintCallable)
+	void GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
+
+	UFUNCTION(BlueprintCallable)
+	void RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash);
+
 protected:
 	UFUNCTION()
 	void OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken);
 
 	FActiveGameplayEffectHandle TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
 	                                                   const int32 PrivateTreeNodeId);
+
+	bool CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+	                const TInstancedStruct<FExecutionContextRule>& Rule) const;
+
+	UFUNCTION(Server, Reliable)
+	void Server_GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
@@ -135,6 +152,13 @@ private:
 
 	// @gdemers Data Resolver for backend representation of an actor skill tree. 
 	static const TInstancedStruct<FAVVMDataResolverHelper>& GetSkillTreeDataResolverHelper();
+
+	virtual TInstancedStruct<FExecutionContextRule> GetGrantRule() const;
+	virtual TInstancedStruct<FExecutionContextRule> GetRevokeRule() const;
+
+	// @gdemers virtual overrides are available. respect property access modifiers.
+	virtual void OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject);
+	virtual void OnRevoke(const int32 SkillTreeNodeTypeHash);
 
 	// @gdemers cached representation of what has been attributed during the initialization
 	// phase of our Skill Tree. This address the problem of uniqueness for entries with identical type, and/or owned by different entity.

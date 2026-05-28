@@ -23,6 +23,8 @@
 #include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillSampleModule.h"
+#include "SkillTreeExecutionContextParams.h"
+#include "SkillTreeExecutionContextRule.h"
 #include "SkillTreeNodeObject.h"
 #include "SkillTreeProvider.h"
 #include "SkillTreeUtils.h"
@@ -218,6 +220,42 @@ void UActorSkillTreeComponent::ModifyRuntimeLevel(const int32 SkillTreeNodeTypeH
 	}
 }
 
+void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject)
+{
+	const auto Ctx = FExecutionContextParams::Make<FGrantContextParams>(NewTreeNodeObject);
+	const auto Rule = GetGrantRule();
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	if (bWasSuccess)
+	{
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnGrant(NewTreeNodeObject);
+		}
+		else
+		{
+			Server_GrantTreeNodeObject(NewTreeNodeObject);
+		}
+	}
+}
+
+void UActorSkillTreeComponent::RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash)
+{
+	const auto Ctx = FExecutionContextParams::Make<FRevokeContextParams>(SkillTreeNodeTypeHash);
+	const auto Rule = GetRevokeRule();
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	if (bWasSuccess)
+	{
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnRevoke(SkillTreeNodeTypeHash);
+		}
+		else
+		{
+			Server_RevokeTreeNodeObject(SkillTreeNodeTypeHash);
+		}
+	}
+}
+
 void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources)
 {
 	const AActor* Outer = OwningOuter.Get();
@@ -279,6 +317,26 @@ const TInstancedStruct<FAVVMDataResolverHelper>& UActorSkillTreeComponent::GetSk
 {
 	static auto Helper = FAVVMDataResolverHelper::Make<FSkillTreeDataResolverHelper>();
 	return Helper;
+}
+
+TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetGrantRule() const
+{
+	return FExecutionContextRule::Make<FGrantRule>();
+}
+
+TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetRevokeRule() const
+{
+	return FExecutionContextRule::Make<FRevokeRule>();
+}
+
+void UActorSkillTreeComponent::OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject)
+{
+	// TODO @gdemers
+}
+
+void UActorSkillTreeComponent::OnRevoke(const int32 SkillTreeNodeTypeHash)
+{
+	// TODO @gdemers
 }
 
 void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken)
@@ -378,4 +436,27 @@ FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(con
 	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
 	const FActiveGameplayEffectHandle ActiveGEHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
 	return ActiveGEHandle;
+}
+
+bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+                                          const TInstancedStruct<FExecutionContextRule>& Rule) const
+{
+	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
+	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
+	{
+		return false;
+	}
+
+	const bool bPredicate = ContextRule->Predicate(this, Params);
+	return bPredicate;
+}
+
+void UActorSkillTreeComponent::Server_GrantTreeNodeObject_Implementation(const FSkillTreeNodeObject& NewTreeNodeObject)
+{
+	GrantTreeNodeObject(NewTreeNodeObject);
+}
+
+void UActorSkillTreeComponent::Server_RevokeTreeNodeObject_Implementation(const int32 SkillTreeNodeTypeHash)
+{
+	RevokeTreeNodeObject(SkillTreeNodeTypeHash);
 }

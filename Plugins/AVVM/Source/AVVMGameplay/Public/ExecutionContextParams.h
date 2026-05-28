@@ -21,21 +21,36 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "StructUtils/InstancedStruct.h"
 
-#include "CraftingContextRule.generated.h"
+#include "ExecutionContextParams.generated.h"
 
 /**
  *	Class description:
  *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
+ *	FExecutionContextParams is a context struct that defines the properties to be
+ *	involved in executing an action, as well as the execution implementation details itself.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+struct AVVMGAMEPLAY_API FExecutionContextParams
 {
 	GENERATED_BODY()
 
-	virtual bool Predicate(const UActorComponent* Component,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	virtual ~FExecutionContextParams() = default;
+
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextParams>::Make<T>
+	template <typename TChild, typename... TArgs>
+	static TInstancedStruct<FExecutionContextParams> Make(TArgs&&... Args);
+};
+
+template <typename TChild, typename... TArgs>
+TInstancedStruct<FExecutionContextParams> FExecutionContextParams::Make(TArgs&&... Args)
+{
+	return TInstancedStruct<FExecutionContextParams>::Make<TChild>(Forward<TArgs>(Args)...);
+}
+
+template <>
+struct TBaseStructure<FExecutionContextParams>
+{
+	static AVVMGAMEPLAY_API UScriptStruct* Get();
 };

@@ -30,13 +30,11 @@
 class UGameplayEffect;
 struct FStreamableHandle;
 
-
-
 /**
  *	Class description:
  *	
- *	USkillTreeNodeObject is a generic type that allow granting a gameplay effect to the Owning outer referencing
- *	a UActorSkillTreeComponent.
+ *	FSkillTreeNodeObject is a generic type that reference the handle of a gameplay effect granted
+ *	to the Owning UActorSkillTreeComponent.
  */
 USTRUCT(BlueprintType)
 struct SKILLSAMPLE_API FSkillTreeNodeObject : public FFastArraySerializerItem

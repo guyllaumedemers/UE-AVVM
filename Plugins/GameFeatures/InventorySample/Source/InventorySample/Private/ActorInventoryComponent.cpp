@@ -27,6 +27,8 @@
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMToolkitUtils.h"
+#include "InventoryExecutionContextParams.h"
+#include "InventoryExecutionContextRule.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventoryProvider.h"
 #include "InventorySampleModule.h"

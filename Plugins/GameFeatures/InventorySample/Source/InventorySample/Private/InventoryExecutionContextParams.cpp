@@ -17,25 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "InventoryExecutionContextParams.h"
 
-#include "CoreMinimal.h"
+#include "ItemObject.h"
 
-#include "ExecutionContextRule.h"
-
-#include "CraftingContextRule.generated.h"
-
-/**
- *	Class description:
- *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+FDropContextParams::FDropContextParams(UItemObject* NewItemObject)
+	: ItemObject(NewItemObject)
 {
-	GENERATED_BODY()
+}
 
-	virtual bool Predicate(const UActorComponent* Component,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
-};
+FPickupContextParams::FPickupContextParams(UItemObject* NewItemObject)
+	: ItemObject(NewItemObject)
+{
+}
+
+FSwapContextParams::FSwapContextParams(UItemObject* NewSrcItemObject,
+                                       UItemObject* NewDestItemObject)
+	: SrcItemObject(NewSrcItemObject),
+	  DestItemObject(NewDestItemObject)
+{
+}
