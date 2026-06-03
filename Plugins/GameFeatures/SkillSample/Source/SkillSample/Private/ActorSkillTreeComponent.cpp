@@ -176,50 +176,6 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 	}
 }
 
-void UActorSkillTreeComponent::ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
-                                                  const FGameplayTagContainer& AddedTags,
-                                                  const FGameplayTagContainer& RemovedTags)
-{
-	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
-	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
-	{
-		return;
-	}
-
-	auto* ASC = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash].GetOwningAbilitySystemComponent();
-	if (!IsValid(ASC))
-	{
-		return;
-	}
-
-	if (!AddedTags.IsEmpty())
-	{
-		ASC->AddLooseGameplayTags(AddedTags);
-	}
-
-	if (!RemovedTags.IsEmpty())
-	{
-		ASC->RemoveLooseGameplayTags(RemovedTags);
-	}
-}
-
-void UActorSkillTreeComponent::ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
-                                                  const int32 NewLevel)
-{
-	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
-	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
-	{
-		return;
-	}
-
-	auto& ActiveGameplayEffectHandle = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash];
-	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
-	if (IsValid(ASC))
-	{
-		ASC->SetActiveGameplayEffectLevel(ActiveGameplayEffectHandle, NewLevel);
-	}
-}
-
 void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
 	const auto Ctx = FExecutionContextParams::Make<FGrantContextParams>(NewTreeNodeObject);
@@ -479,11 +435,6 @@ bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FExecutionConte
 	return bPredicate;
 }
 
-void UActorSkillTreeComponent::Server_ModifyTreeNodeObject_Implementation(const FSkillTreeModificationContextParams& Params)
-{
-	ModifyTreeNodeObject(Params);
-}
-
 void UActorSkillTreeComponent::Server_GrantTreeNodeObject_Implementation(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
 	GrantTreeNodeObject(NewTreeNodeObject);
@@ -492,4 +443,53 @@ void UActorSkillTreeComponent::Server_GrantTreeNodeObject_Implementation(const F
 void UActorSkillTreeComponent::Server_RevokeTreeNodeObject_Implementation(const int32 SkillTreeNodeTypeHash)
 {
 	RevokeTreeNodeObject(SkillTreeNodeTypeHash);
+}
+
+void UActorSkillTreeComponent::Server_ModifyTreeNodeObject_Implementation(const FSkillTreeModificationContextParams& Params)
+{
+	ModifyTreeNodeObject(Params);
+}
+
+void UActorSkillTreeComponent::ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
+                                                  const FGameplayTagContainer& AddedTags,
+                                                  const FGameplayTagContainer& RemovedTags)
+{
+	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
+	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
+	{
+		return;
+	}
+
+	auto* ASC = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash].GetOwningAbilitySystemComponent();
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	if (!AddedTags.IsEmpty())
+	{
+		ASC->AddLooseGameplayTags(AddedTags);
+	}
+
+	if (!RemovedTags.IsEmpty())
+	{
+		ASC->RemoveLooseGameplayTags(RemovedTags);
+	}
+}
+
+void UActorSkillTreeComponent::ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
+                                                  const int32 NewLevel)
+{
+	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
+	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
+	{
+		return;
+	}
+
+	auto& ActiveGameplayEffectHandle = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash];
+	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		ASC->SetActiveGameplayEffectLevel(ActiveGameplayEffectHandle, NewLevel);
+	}
 }

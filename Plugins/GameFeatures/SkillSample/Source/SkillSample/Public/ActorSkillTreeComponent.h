@@ -118,15 +118,6 @@ public:
 	void RequestSkillTree(const AActor* Outer);
 
 	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
-	                        const FGameplayTagContainer& AddedTags,
-	                        const FGameplayTagContainer& RemovedTags);
-
-	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
-	                        const int32 NewLevel);
-
-	UFUNCTION(BlueprintCallable)
 	void GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UFUNCTION(BlueprintCallable)
@@ -153,6 +144,15 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
+							const FGameplayTagContainer& AddedTags,
+							const FGameplayTagContainer& RemovedTags);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
+							const int32 NewLevel);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
