@@ -142,6 +142,9 @@ bool FSwapRule::Predicate(const UActorComponent* Component,
 	{
 		return false;
 	}
+	
+	// TODO @gdemers check if we are able to swap item, from within two entries in the inventory,
+	// or from something in world and what we have in hand.
 
 	return true;
 }
