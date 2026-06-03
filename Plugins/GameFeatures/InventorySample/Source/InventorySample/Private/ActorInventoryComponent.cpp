@@ -402,13 +402,6 @@ const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 	return Items;
 }
 
-void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
-{
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, ComponentStateTags, this);
-	ComponentStateTags.RemoveTags(RemovedTags);
-	ComponentStateTags.AppendTags(AddedTags);
-}
-
 bool UActorInventoryComponent::HasPartialMatch(const FGameplayTagContainer& Compare) const
 {
 	return Compare.HasAnyExact(ComponentStateTags);
@@ -1080,6 +1073,13 @@ void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* Pending
 void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemObject, UItemObject* DestItemObject)
 {
 	Swap(SrcItemObject, DestItemObject);
+}
+
+void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, ComponentStateTags, this);
+	ComponentStateTags.RemoveTags(RemovedTags);
+	ComponentStateTags.AppendTags(AddedTags);
 }
 
 void UActorInventoryComponent::CheckBackend() const

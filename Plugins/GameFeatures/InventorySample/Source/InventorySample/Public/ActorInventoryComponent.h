@@ -108,9 +108,6 @@ public:
 	const TArray<UItemObject*>& GetItems() const;
 
 	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
-
-	UFUNCTION(BlueprintCallable)
 	bool HasPartialMatch(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
@@ -168,6 +165,9 @@ protected:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+
+	UFUNCTION(BlueprintCallable)
+	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 
 	void CheckBackend() const;
 	void CheckDisk() const;
