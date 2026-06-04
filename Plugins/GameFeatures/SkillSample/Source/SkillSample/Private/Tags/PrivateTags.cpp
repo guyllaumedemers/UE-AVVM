@@ -17,29 +17,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplaySettings.h"
+#include "PrivateTags.h"
 
-UAVVMGameplaySettings::UAVVMGameplaySettings()
-{
-	CategoryName = TEXT("Game");
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetActorDefinitionRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorDefinitionRegistryType;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerActionBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerActionBlockingTags;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerAbilityBlockingTags;
-}
+// @gdemers SkillSample.TreeNode.Notification
+UE_DEFINE_GAMEPLAY_TAG(TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_GRANT, TEXT("SkillSample.UIChannel.HUDNotification.Grant"));
+UE_DEFINE_GAMEPLAY_TAG(TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_REVOKE, TEXT("SkillSample.UIChannel.HUDNotification.Revoke"));
+UE_DEFINE_GAMEPLAY_TAG(TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_MODIFY, TEXT("SkillSample.UIChannel.HUDNotification.Modify"));

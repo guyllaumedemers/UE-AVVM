@@ -21,11 +21,13 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMLogger.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillSampleModule.h"
 #include "SkillTreeExecutionContextParams.h"
 #include "SkillTreeExecutionContextRule.h"
 #include "SkillTreeNodeObject.h"
+#include "SkillTreeNotificationPayload.h"
 #include "SkillTreeProvider.h"
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -36,9 +38,11 @@
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
+#include "Tags/PrivateTags.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
 
@@ -192,6 +196,17 @@ void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& N
 			Server_GrantTreeNodeObject(NewTreeNodeObject);
 		}
 	}
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_GRANT,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>());
+	}
 }
 
 void UActorSkillTreeComponent::RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash)
@@ -210,6 +225,17 @@ void UActorSkillTreeComponent::RevokeTreeNodeObject(const int32 SkillTreeNodeTyp
 			Server_RevokeTreeNodeObject(SkillTreeNodeTypeHash);
 		}
 	}
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_REVOKE,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>());
+	}
 }
 
 void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params)
@@ -227,6 +253,17 @@ void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModification
 		{
 			Server_ModifyTreeNodeObject(Params);
 		}
+	}
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_MODIFY,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        GetTypedOuter<AActor>(),
+		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>());
 	}
 }
 
@@ -310,17 +347,22 @@ TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetModifyRule(
 
 void UActorSkillTreeComponent::OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	// TODO @gdemers
+	// TODO @gdemers we are given a context thats already active, but blocked by a tag. granting will
+	// remove that blocking tag, serialize the object with our backend as default loaded (and not previewed
+	// by ui).
 }
 
 void UActorSkillTreeComponent::OnRevoke(const int32 SkillTreeNodeTypeHash)
 {
-	// TODO @gdemers
+	// TODO @gdemers we are given a context thats already active, provided by backend or last purchase.
+	// revoking will apply a blocking tag, and serialize the object with our backend as no longer part of
+	// the default loaded entity (outside ui).
 }
 
 void UActorSkillTreeComponent::OnModify(const FSkillTreeModificationContextParams& Params)
 {
-	// TODO @gdemers
+	// TODO @gdemers we are given a context thats already active, provided by backend or last purchase.
+	// modifying will apply changes to the level of the effect, and serialize the object with our backend.
 }
 
 void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken)

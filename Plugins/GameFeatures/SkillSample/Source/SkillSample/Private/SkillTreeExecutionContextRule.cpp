@@ -19,20 +19,79 @@
 //SOFTWARE.
 #include "SkillTreeExecutionContextRule.h"
 
+#include "ActorSkillTreeComponent.h"
+#include "AVVMCharacter.h"
+#include "AVVMGameplaySettings.h"
+#include "SkillTreeExecutionContextParams.h"
+
 bool FGrantRule::Predicate(const UActorComponent* Component,
                            const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Component, Params);
+	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(Component);
+	if (!IsValid(SkillTreeComponent))
+	{
+		return false;
+	}
+
+	// @gdemers first, validate if our actor is in a state where they can act on a skill tree node.
+	const auto* Player = SkillTreeComponent->GetTypedOuter<AAVVMCharacter>();
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()))
+	{
+		return false;
+	}
+
+	const auto* GrantParams = Params.GetPtr<FGrantContextParams>();
+	if (!ensureAlwaysMsgf(GrantParams != nullptr,
+	                      TEXT("FExecutionContextParams couldn't be cast to FGrantContextParams.")))
+	{
+		return false;
+	}
 }
 
 bool FRevokeRule::Predicate(const UActorComponent* Component,
                             const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Component, Params);
+	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(Component);
+	if (!IsValid(SkillTreeComponent))
+	{
+		return false;
+	}
+
+	// @gdemers first, validate if our actor is in a state where they can act on a skill tree node.
+	const auto* Player = SkillTreeComponent->GetTypedOuter<AAVVMCharacter>();
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()))
+	{
+		return false;
+	}
+
+	const auto* RevokeParams = Params.GetPtr<FRevokeContextParams>();
+	if (!ensureAlwaysMsgf(RevokeParams != nullptr,
+	                      TEXT("FExecutionContextParams couldn't be cast to FRevokeContextParams.")))
+	{
+		return false;
+	}
 }
 
 bool FModifyRule::Predicate(const UActorComponent* Component,
                             const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(Component, Params);
+	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(Component);
+	if (!IsValid(SkillTreeComponent))
+	{
+		return false;
+	}
+
+	// @gdemers first, validate if our actor is in a state where they can act on a skill tree node.
+	const auto* Player = SkillTreeComponent->GetTypedOuter<AAVVMCharacter>();
+	if (IsValid(Player) && Player->HasPartialMatch(UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()))
+	{
+		return false;
+	}
+
+	const auto* ModifyParams = Params.GetPtr<FModifyContextParams>();
+	if (!ensureAlwaysMsgf(ModifyParams != nullptr,
+	                      TEXT("FExecutionContextParams couldn't be cast to FModifyContextParams.")))
+	{
+		return false;
+	}
 }

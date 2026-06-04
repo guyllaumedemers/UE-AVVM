@@ -17,29 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplaySettings.h"
-
-UAVVMGameplaySettings::UAVVMGameplaySettings()
-{
-	CategoryName = TEXT("Game");
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetActorDefinitionRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorDefinitionRegistryType;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerActionBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerActionBlockingTags;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerAbilityBlockingTags;
-}
+#include "SkillTreeNotificationPayload.h"

@@ -48,6 +48,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FGameplayTagContainer& GetPlayerActionBlockingTags();
+	
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const FGameplayTagContainer& GetPlayerAbilityBlockingTags();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -59,4 +62,8 @@ protected:
 	// @gdemers defined tags that are able to prevent user from executing actions based on conditions. (i.e Stasis, Down, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer PlayerActionBlockingTags = FGameplayTagContainer::EmptyContainer;
+
+	// @gdemers defined tags that are able to prevent user from modifying a player ability selection based on conditions. (i.e Tutorial, Departing, etc...)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FGameplayTagContainer PlayerAbilityBlockingTags = FGameplayTagContainer::EmptyContainer;
 };

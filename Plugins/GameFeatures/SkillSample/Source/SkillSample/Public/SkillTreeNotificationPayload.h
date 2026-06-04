@@ -17,29 +17,21 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplaySettings.h"
+#pragma once
 
-UAVVMGameplaySettings::UAVVMGameplaySettings()
-{
-	CategoryName = TEXT("Game");
-}
+#include "CoreMinimal.h"
 
-const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
-}
+#include "AVVMNotificationSubsystem.h"
 
-const FDataRegistryType& UAVVMGameplaySettings::GetActorDefinitionRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorDefinitionRegistryType;
-}
+#include "SkillTreeNotificationPayload.generated.h"
 
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerActionBlockingTags()
+/**
+ *	Class description:
+ *
+ *	FSkillTreeNotificationPayload is a context payload encapsulating action end-points for UI updates.
+ */
+USTRUCT()
+struct SKILLSAMPLE_API FSkillTreeNotificationPayload : public FAVVMNotificationPayload
 {
-	return GetDefault<UAVVMGameplaySettings>()->PlayerActionBlockingTags;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerAbilityBlockingTags;
-}
+	GENERATED_BODY()
+};
