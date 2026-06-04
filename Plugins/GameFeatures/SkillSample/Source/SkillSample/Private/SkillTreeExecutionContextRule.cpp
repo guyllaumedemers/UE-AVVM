@@ -46,6 +46,10 @@ bool FGrantRule::Predicate(const UActorComponent* Component,
 	{
 		return false;
 	}
+	
+	// todo @gdemers add missing impl for validating cost on grant action.
+	
+	return true;
 }
 
 bool FRevokeRule::Predicate(const UActorComponent* Component,
@@ -70,6 +74,10 @@ bool FRevokeRule::Predicate(const UActorComponent* Component,
 	{
 		return false;
 	}
+	
+	// todo @gdemers add missing impl for validating cost on revoke action.
+	
+	return true;
 }
 
 bool FModifyRule::Predicate(const UActorComponent* Component,
@@ -94,4 +102,8 @@ bool FModifyRule::Predicate(const UActorComponent* Component,
 	{
 		return false;
 	}
+	
+	// todo @gdemers add missing impl for validating cost on modify action.
+	
+	return true;
 }
