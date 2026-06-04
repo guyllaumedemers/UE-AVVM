@@ -205,24 +205,24 @@ void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& N
 		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_GRANT,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>());
+		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>(bWasSuccess));
 	}
 }
 
-void UActorSkillTreeComponent::RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash)
+void UActorSkillTreeComponent::RevokeTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	const auto Ctx = FExecutionContextParams::Make<FRevokeContextParams>(SkillTreeNodeTypeHash);
+	const auto Ctx = FExecutionContextParams::Make<FRevokeContextParams>(NewTreeNodeObject);
 	const auto Rule = GetRevokeRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
 	{
 		if ((GetOwnerRole() == ROLE_Authority))
 		{
-			OnRevoke(SkillTreeNodeTypeHash);
+			OnRevoke(NewTreeNodeObject);
 		}
 		else
 		{
-			Server_RevokeTreeNodeObject(SkillTreeNodeTypeHash);
+			Server_RevokeTreeNodeObject(NewTreeNodeObject);
 		}
 	}
 
@@ -234,13 +234,13 @@ void UActorSkillTreeComponent::RevokeTreeNodeObject(const int32 SkillTreeNodeTyp
 		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_REVOKE,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>());
+		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>(bWasSuccess));
 	}
 }
 
 void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params)
 {
-	const auto Ctx = FExecutionContextParams::Make<FModifyContextParams>(Params.ActionType, Params.Value);
+	const auto Ctx = FExecutionContextParams::Make<FModifyContextParams>(Params.TreeNodeObject, Params.ModifiedLevel);
 	const auto Rule = GetModifyRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
@@ -263,7 +263,7 @@ void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModification
 		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_MODIFY,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>());
+		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>(bWasSuccess));
 	}
 }
 
@@ -347,22 +347,96 @@ TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetModifyRule(
 
 void UActorSkillTreeComponent::OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	// TODO @gdemers we are given a context thats already active, but blocked by a tag. granting will
-	// remove that blocking tag, serialize the object with our backend as default loaded (and not previewed
-	// by ui).
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
+	{
+		return;
+	}
+
+	// @gdemers we remove the blocking tag of an already granted GameplayEffect. How is it already granted ?
+	// Answer : when opening a menu context, we load them all (based on a Graph Asset definition), and disable
+	// what isn't registered with our backend/or disk definition.
+	const FGameplayTag BlockingTag = USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(NewTreeNodeObject.GetSkillTreeNodePrivateId());
+	ModifyRuntimeState(NewTreeNodeObject.GetActiveEffectHandleTypeHash(), {}, FGameplayTagContainer{BlockingTag});
+
+	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
+	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
+	if (!bIsValid)
+	{
+		return;
+	}
+
+	const bool bIsTreeNodeSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
+	if (bIsTreeNodeSrcStatic)
+	{
+		CheckDisk();
+	}
+	else
+	{
+		CheckBackend();
+	}
 }
 
-void UActorSkillTreeComponent::OnRevoke(const int32 SkillTreeNodeTypeHash)
+void UActorSkillTreeComponent::OnRevoke(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	// TODO @gdemers we are given a context thats already active, provided by backend or last purchase.
-	// revoking will apply a blocking tag, and serialize the object with our backend as no longer part of
-	// the default loaded entity (outside ui).
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
+	{
+		return;
+	}
+
+	// @gdemers we add the blocking tag of an already granted GameplayEffect. How is it already granted ?
+	// Answer : when opening a menu context, we load them all (based on a Graph Asset definition), and disable
+	// what isn't registered with our backend/or disk definition.
+	const FGameplayTag BlockingTag = USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(NewTreeNodeObject.GetSkillTreeNodePrivateId());
+	ModifyRuntimeState(NewTreeNodeObject.GetActiveEffectHandleTypeHash(), FGameplayTagContainer{BlockingTag}, {});
+
+	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
+	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
+	if (!bIsValid)
+	{
+		return;
+	}
+
+	const bool bIsTreeNodeSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
+	if (bIsTreeNodeSrcStatic)
+	{
+		CheckDisk();
+	}
+	else
+	{
+		CheckBackend();
+	}
 }
 
 void UActorSkillTreeComponent::OnModify(const FSkillTreeModificationContextParams& Params)
 {
-	// TODO @gdemers we are given a context thats already active, provided by backend or last purchase.
-	// modifying will apply changes to the level of the effect, and serialize the object with our backend.
+	const AActor* Outer = OwningOuter.Get();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
+	{
+		return;
+	}
+
+	// @gdemers Modify the GameplayEffect level, scaling property values, etc...
+	// Level bounds are expected to be handled from within the caller.
+	ModifyRuntimeLevel(Params.TreeNodeObject.GetActiveEffectHandleTypeHash(), Params.ModifiedLevel);
+
+	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
+	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
+	if (!bIsValid)
+	{
+		return;
+	}
+
+	const bool bIsTreeNodeSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
+	if (bIsTreeNodeSrcStatic)
+	{
+		CheckDisk();
+	}
+	else
+	{
+		CheckBackend();
+	}
 }
 
 void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken)
@@ -482,9 +556,9 @@ void UActorSkillTreeComponent::Server_GrantTreeNodeObject_Implementation(const F
 	GrantTreeNodeObject(NewTreeNodeObject);
 }
 
-void UActorSkillTreeComponent::Server_RevokeTreeNodeObject_Implementation(const int32 SkillTreeNodeTypeHash)
+void UActorSkillTreeComponent::Server_RevokeTreeNodeObject_Implementation(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	RevokeTreeNodeObject(SkillTreeNodeTypeHash);
+	RevokeTreeNodeObject(NewTreeNodeObject);
 }
 
 void UActorSkillTreeComponent::Server_ModifyTreeNodeObject_Implementation(const FSkillTreeModificationContextParams& Params)
@@ -534,4 +608,12 @@ void UActorSkillTreeComponent::ModifyRuntimeLevel(const int32 SkillTreeNodeTypeH
 	{
 		ASC->SetActiveGameplayEffectLevel(ActiveGameplayEffectHandle, NewLevel);
 	}
+}
+
+void UActorSkillTreeComponent::CheckBackend() const
+{
+}
+
+void UActorSkillTreeComponent::CheckDisk() const
+{
 }

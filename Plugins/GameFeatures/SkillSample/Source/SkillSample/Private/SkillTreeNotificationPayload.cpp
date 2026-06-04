@@ -18,3 +18,8 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "SkillTreeNotificationPayload.h"
+
+FSkillTreeNotificationPayload::FSkillTreeNotificationPayload(const bool bNewWasSuccess)
+	: bWasSuccess(bNewWasSuccess)
+{
+}

@@ -77,7 +77,7 @@ struct SKILLSAMPLE_API FSkillTreeNodeToken
  *	Class description:
  *	
  *	FSkillTreeModificationContextParams is a struct context encapsulating information
- *	about an action being executed, and modifying some properties specific to the TreeNode Object.
+ *	about the tree node modified level.
  */
 USTRUCT(BLueprintType)
 struct SKILLSAMPLE_API FSkillTreeModificationContextParams
@@ -85,10 +85,12 @@ struct SKILLSAMPLE_API FSkillTreeModificationContextParams
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ActionType = INDEX_NONE;
+	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
 
+	// @gdemers level should be clamped by the caller before being provided,
+	// and should handle progression (specific to your project).
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FInstancedStruct Value = FInstancedStruct();
+	int32 ModifiedLevel = INDEX_NONE;
 };
 
 /**
@@ -121,7 +123,7 @@ public:
 	void GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UFUNCTION(BlueprintCallable)
-	void RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash);
+	void RevokeTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
@@ -140,7 +142,7 @@ protected:
 	void Server_GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RevokeTreeNodeObject(const int32 SkillTreeNodeTypeHash);
+	void Server_RevokeTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UFUNCTION(Server, Reliable)
 	void Server_ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
@@ -153,6 +155,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
 							const int32 NewLevel);
+	
+	void CheckBackend() const;
+	void CheckDisk() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
@@ -183,7 +188,7 @@ private:
 
 	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject);
-	virtual void OnRevoke(const int32 SkillTreeNodeTypeHash);
+	virtual void OnRevoke(const FSkillTreeNodeObject& NewTreeNodeObject);
 	virtual void OnModify(const FSkillTreeModificationContextParams& Params);
 
 	// @gdemers cached representation of what has been attributed during the initialization

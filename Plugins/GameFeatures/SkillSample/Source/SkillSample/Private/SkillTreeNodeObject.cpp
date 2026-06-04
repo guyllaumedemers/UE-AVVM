@@ -184,3 +184,8 @@ bool USkillTreeNodeObjectUtils::IsWeapon(const int32 EncodedBits)
 {
 	return !!(EncodedBits & CHECK_WEAPON_DEPENDENT_ENCODING);
 }
+
+FGameplayTag USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(const int32 EncodedBits)
+{
+	return FGameplayTag::EmptyTag;
+}

@@ -34,4 +34,10 @@ USTRUCT()
 struct SKILLSAMPLE_API FSkillTreeNotificationPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	FSkillTreeNotificationPayload() = default;
+	FSkillTreeNotificationPayload(const bool bNewWasSuccess);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bWasSuccess = false;
 };

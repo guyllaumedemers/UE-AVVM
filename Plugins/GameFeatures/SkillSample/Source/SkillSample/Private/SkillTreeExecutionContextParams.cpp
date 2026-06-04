@@ -24,14 +24,14 @@ FGrantContextParams::FGrantContextParams(const FSkillTreeNodeObject& NewTreeNode
 {
 }
 
-FRevokeContextParams::FRevokeContextParams(const int32 NewSkillTreeNodeTypeHash)
-	: SkillTreeNodeTypeHash(NewSkillTreeNodeTypeHash)
+FRevokeContextParams::FRevokeContextParams(const FSkillTreeNodeObject& NewTreeNodeObject)
+	: TreeNodeObject(NewTreeNodeObject)
 {
 }
 
-FModifyContextParams::FModifyContextParams(const int32 NewActionType,
-                                           const FInstancedStruct& NewValue)
-	: ActionType(NewActionType),
-	  Value(NewValue)
+FModifyContextParams::FModifyContextParams(const FSkillTreeNodeObject& NewTreeNodeObject,
+                                           const int32 NewModifiedLevel)
+	: TreeNodeObject(NewTreeNodeObject),
+	  ModifiedLevel(NewModifiedLevel)
 {
 }

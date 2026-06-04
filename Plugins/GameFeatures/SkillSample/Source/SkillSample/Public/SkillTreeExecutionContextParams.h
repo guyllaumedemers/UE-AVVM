@@ -23,7 +23,6 @@
 
 #include "ExecutionContextParams.h"
 #include "SkillTreeNodeObject.h"
-#include "StructUtils/InstancedStruct.h"
 
 #include "SkillTreeExecutionContextParams.generated.h"
 
@@ -57,10 +56,10 @@ struct SKILLSAMPLE_API FRevokeContextParams : public FExecutionContextParams
 	GENERATED_BODY()
 
 	FRevokeContextParams() = default;
-	FRevokeContextParams(const int32 NewSkillTreeNodeTypeHash);
+	FRevokeContextParams(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 SkillTreeNodeTypeHash = INDEX_NONE;
+	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
 };
 
 /**
@@ -75,11 +74,12 @@ struct SKILLSAMPLE_API FModifyContextParams : public FExecutionContextParams
 	GENERATED_BODY()
 
 	FModifyContextParams() = default;
-	FModifyContextParams(const int32 NewActionType, const FInstancedStruct& NewValue);
+	FModifyContextParams(const FSkillTreeNodeObject& NewTreeNodeObject,
+	                     const int32 NewModifiedLevel);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ActionType = INDEX_NONE;
+	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FInstancedStruct Value = FInstancedStruct();
+	int32 ModifiedLevel = INDEX_NONE;
 };
