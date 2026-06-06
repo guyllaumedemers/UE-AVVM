@@ -27,19 +27,21 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "AVVMActorIdentifierTableRow.generated.h"
+#include "AVVMGameplayEffectIdentifierDataTableRow.generated.h"
 
 /**
  *	Class description:
  *	
- *	FAVVMActorIdentifierDataTableRow is a table row entry thet define a unique identifier for a given Actor type. Doing so allows
- *	our Backend encoding system to reference elements, and create complex encoding scheme for tightly packing data. (See. AVVMOnline & InventorySample)
+ *	FAVVMGameplayEffectIdentifierDataTableRow is a table row entry thet define a unique identifier for a given GameplayEffect type. Doing so allows
+ *	our Backend encoding system to reference elements, and create complex encoding scheme for tightly packing data. (See. AVVMOnline & SkillSample)
  *	
- *	Note : We do expect some rules to be followed. Make sure the RowName define for this entry match the Actor Class FName, and if you are
- *	using the InventorySample system, make sure the FDataRegistryId::ItemName is identical to the Actor Class FName referenced.
+ *	Note : We do expect some rules to be followed. Make sure the RowName define for this entry match the GameplayEffect Class FName, and if you are
+ *	using the SkillSample system, make sure the FDataRegistryId::ItemName is identical to the GameplayEffect Class FName referenced.
+ *	
+ *	IMPORTANT : This separation is for clarity of design. I understand this is identical to FAVVMActorIdentifierDataTableRow.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMGameplayEffectIdentifierDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -47,7 +49,7 @@ struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can target Attachment bits, Storage bits, and items.
+	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can filter by user class type. (example : warrior, mage, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0"))
 	int32 UniqueId = INDEX_NONE;
 };

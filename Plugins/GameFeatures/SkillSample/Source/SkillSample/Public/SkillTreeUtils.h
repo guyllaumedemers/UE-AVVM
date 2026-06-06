@@ -57,5 +57,8 @@ public:
 	static int32 GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect);
 
 	UFUNCTION(BlueprintCallable)
+	static int32 GetSkillTreeNodeUniqueIdentifier(const FDataRegistryId& SkillTreeNodeId);
+
+	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);
 };

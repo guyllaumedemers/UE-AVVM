@@ -20,7 +20,11 @@
 #include "SkillTreeUtils.h"
 
 #include "AVVMToolkitUtils.h"
+#include "DataRegistrySubsystem.h"
+#include "GameplayEffect.h"
 #include "SkillTreeProvider.h"
+#include "SkillTreeSettings.h"
+#include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "GameFramework/Actor.h"
 
 FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
@@ -43,8 +47,41 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 
 int32 USkillTreeUtils::GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect)
 {
-	// TODO @gdemers Define how we store our unique id, and how we handle uniqueness, and level variation.
-	return INDEX_NONE;
+	if (!IsValid(SkillTreeNodeEffect))
+	{
+		return INDEX_NONE;
+	}
+	else
+	{
+		return USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier({USkillTreeSettings::GetGameplayEffectIdentifierRegistryType(), SkillTreeNodeEffect->GetFName()});
+	}
+}
+
+int32 USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier(const FDataRegistryId& SkillTreeNodeId)
+{
+	if (!ensureAlwaysMsgf(SkillTreeNodeId.IsValid(),
+						  TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the TreeNode Identifier RegistryType.")))
+	{
+		return INDEX_NONE;
+	}
+
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(SkillTreeNodeId);
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+						 TEXT("Invalid Row Entry. Make sure FAVVMGameplayEffectIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
 }
 
 bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType)

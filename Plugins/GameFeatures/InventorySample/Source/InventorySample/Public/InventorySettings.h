@@ -102,7 +102,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="AVVMActorIdentifierDataTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="InventoryProviderTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(RowType="ItemStackTableRow"))
