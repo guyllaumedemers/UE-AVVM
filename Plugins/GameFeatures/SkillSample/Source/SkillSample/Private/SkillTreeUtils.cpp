@@ -22,27 +22,164 @@
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "GameplayEffect.h"
+#include "SkillTreeNodeObject.h"
 #include "SkillTreeProvider.h"
 #include "SkillTreeSettings.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "GameFramework/Actor.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+
+/**
+ *	Class description:
+ *	
+ *	NSJsonSkillTree is a private namespace for class that should be hidden from project.
+ */
+namespace NSJsonSkillTree
+{
+	struct FJsonSkillTreeProvider
+	{
+		int32 Id = INDEX_NONE;
+		TArray<int32> PrivateTreeNodeIds;
+	};
+
+	void ToString(const FJsonSkillTreeProvider& NewSkillTreeProvider,
+	              FString& OutFormat)
+	{
+		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+		JsonData->SetNumberField(TEXT("Id"), NewSkillTreeProvider.Id);
+
+		TArray<TSharedPtr<FJsonValue>> PrivateTreeNodeIds;
+		for (const int32 PrivateTreeNodeId : NewSkillTreeProvider.PrivateTreeNodeIds)
+		{
+			PrivateTreeNodeIds.Add(MakeShareable(new FJsonValueNumber(PrivateTreeNodeId)));
+		}
+
+		JsonData->SetArrayField(TEXT("PrivateTreeNodeIds"), PrivateTreeNodeIds);
+
+		FString JsonOutput;
+
+		auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+		if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+		{
+			return;
+		}
+
+		OutFormat = JsonOutput;
+	}
+
+	void FromString(const FString& NewPayload,
+	                FJsonSkillTreeProvider& OutSkillTreeProvider)
+	{
+		if (NewPayload.IsEmpty())
+		{
+			return;
+		}
+
+		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+		auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+		if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+		{
+			return;
+		}
+
+		FJsonSkillTreeProvider SkillTreeProvider;
+		SkillTreeProvider.Id = JsonData->GetIntegerField(TEXT("Id"));
+
+		const TArray<TSharedPtr<FJsonValue>> PrivateTreeNodeIds = JsonData->GetArrayField(TEXT("PrivateTreeNodeIds"));
+		for (const auto& PrivateTreeNodeId : PrivateTreeNodeIds)
+		{
+			SkillTreeProvider.PrivateTreeNodeIds.Add(PrivateTreeNodeId->AsNumber());
+		}
+
+		OutSkillTreeProvider = SkillTreeProvider;
+	}
+}
 
 FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 {
 	return FString();
 }
 
+TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& NewPayload)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
+	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
+	{
+		return TArray<FString>();
+	}
+
+	TArray<FString> OutProviders;
+
+	const TArray<TSharedPtr<FJsonValue>> SkillTreeProviders = JsonData->GetArrayField(TEXT("SkillTreeProviders"));
+	for (const auto& SkillTreeProvider : SkillTreeProviders)
+	{
+		OutProviders.Add(SkillTreeProvider->AsString());
+	}
+
+	return OutProviders;
+}
+
 FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
                                                   const int32 NewProviderId)
 {
-	return FString();
+	const TArray<FString> SkillTreeProviders = GetSkillTreeProviderPayloads(NewPayload);
+	if (SkillTreeProviders.IsEmpty())
+	{
+		return FString();
+	}
+
+	const FString* SearchResult = SkillTreeProviders.FindByPredicate([SearchId = NewProviderId](const FString& Payload)
+	{
+		NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
+		NSJsonSkillTree::FromString(Payload, OutProvider);
+		return (false == (OutProvider.Id ^ SearchId));
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return TEXT("");
+	}
 }
 
 int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
                                                  const TArray<int32>& NewPrivateIds,
                                                  const int32 SkillTreeId)
 {
-	return INDEX_NONE;
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
+	NSJsonSkillTree::FromString(NewPayload, OutProvider);
+
+	TArray<int32> FilteredSet = OutProvider.PrivateTreeNodeIds;
+	for (const int32 PrivateId : NewPrivateIds)
+	{
+		FilteredSet.Remove(PrivateId);
+	}
+
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = SkillTreeId](const int32 Value)
+	{
+		// @gdemers filter Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
+		// that respect our initial bit encoding defined under AVVMOnlineSkillTree.h
+		const int32 OutValue = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
+		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+	});
+
+	if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
 }
 
 int32 USkillTreeUtils::GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect)

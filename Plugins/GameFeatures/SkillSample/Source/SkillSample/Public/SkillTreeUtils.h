@@ -43,6 +43,9 @@ public:
 	static FString CreateDefaultSkillTreeProviders();
 
 	UFUNCTION(BlueprintCallable)
+	static TArray<FString> GetSkillTreeProviderPayloads(const FString& NewPayload);
+
+	UFUNCTION(BlueprintCallable)
 	static FString GetSkillTreeProviderById(const FString& NewPayload,
 	                                        const int32 NewProviderId);
 
@@ -51,7 +54,7 @@ public:
 	                                       const TArray<int32>& NewPrivateIds,
 	                                       const int32 SkillTreeId);
 
-	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the inventory system handle
+	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the skill tree system handle
 	// shifting following user defined rules.
 	UFUNCTION(BlueprintCallable)
 	static int32 GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect);
