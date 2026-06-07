@@ -185,7 +185,7 @@ FString USkillTreeUtils::CreateSkillTreeProvider(const int32 ProviderId,
 	return OutProvider;
 }
 
-FString USkillTreeUtils::ModifyInventoryProvider(const FString& NewPayload,
+FString USkillTreeUtils::ModifySkillTreeProvider(const FString& NewPayload,
                                                  const int32 ProviderId,
                                                  const TArray<int32>& NewPrivateTreeNodeIds)
 {

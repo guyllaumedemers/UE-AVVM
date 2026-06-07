@@ -49,7 +49,7 @@ public:
 	                                       const TArray<int32>& NewPrivateTreeNodeIds);
 
 	UFUNCTION(BlueprintCallable)
-	static FString ModifyInventoryProvider(const FString& NewPayload,
+	static FString ModifySkillTreeProvider(const FString& NewPayload,
 	                                       const int32 ProviderId,
 	                                       const TArray<int32>& NewPrivateTreeNodeIds);
 
