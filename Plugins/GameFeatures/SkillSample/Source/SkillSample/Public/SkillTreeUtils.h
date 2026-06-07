@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DataRegistryId.h"
 
 #include "UObject/Object.h"
 
@@ -45,10 +46,19 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FString CreateSkillTreeProvider(const int32 ProviderId,
-	                                       const TArray<FSkillTreeNodePhase>& SkillTreeNodePhases);
+	                                       const TArray<int32>& NewPrivateTreeNodeIds);
+
+	UFUNCTION(BlueprintCallable)
+	static FString ModifyInventoryProvider(const FString& NewPayload,
+	                                       const int32 ProviderId,
+	                                       const TArray<int32>& NewPrivateTreeNodeIds);
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<FString> GetSkillTreeProviderPayloads(const FString& NewPayload);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 CreateDefaultPrivateTreeNodeId(const FDataRegistryId& TreeNodeEffectRegistryId,
+	                                            const int32 EffectLevel);
 
 	UFUNCTION(BlueprintCallable)
 	static FString GetSkillTreeProviderById(const FString& NewPayload,

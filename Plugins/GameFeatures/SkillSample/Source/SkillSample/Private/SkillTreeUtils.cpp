@@ -25,6 +25,8 @@
 #include "SkillTreeNodeObject.h"
 #include "SkillTreeProvider.h"
 #include "SkillTreeSettings.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineSkillTree.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Data/SkillTreeProviderTableRow.h"
 #include "Dom/JsonObject.h"
@@ -43,6 +45,8 @@ namespace NSJsonSkillTree
 	struct FJsonSkillTreeProvider
 	{
 		int32 Id = INDEX_NONE;
+		// @gdemers IMPORTANT we only care about tracking the current set of tree node effects
+		// applied at the given phase.
 		TArray<int32> PrivateTreeNodeIds;
 	};
 
@@ -133,8 +137,22 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		{
 			continue;
 		}
+		
+		if (Row->SkillTreeNodePerPhases.IsEmpty())
+		{
+			continue;
+		}
 
-		const FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, Row->SkillTreeNodePerPhases);
+		TArray<int32> PrivateTreeNodeIds;
+		// @gdemers Only phase 0 matter during initialization. progression tracking will handle replacing data
+		// during player playthrough.
+		for (const auto& [RegistryId, EffectLevel] : Row->SkillTreeNodePerPhases[0].SkillTreeNodeIds)
+		{
+			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(RegistryId, EffectLevel);
+			PrivateTreeNodeIds.Add(PrivateTreeNodeId);
+		}
+
+		const FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, PrivateTreeNodeIds);
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
 	}
 
@@ -155,9 +173,64 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 }
 
 FString USkillTreeUtils::CreateSkillTreeProvider(const int32 ProviderId,
-                                                 const TArray<FSkillTreeNodePhase>& SkillTreeNodePhases)
+                                                 const TArray<int32>& NewPrivateTreeNodeIds)
 {
-	return FString();
+	NSJsonSkillTree::FJsonSkillTreeProvider SkillTreeProvider;
+	SkillTreeProvider.Id = ProviderId;
+	SkillTreeProvider.PrivateTreeNodeIds = NewPrivateTreeNodeIds;
+
+	FString OutProvider;
+	NSJsonSkillTree::ToString(SkillTreeProvider, OutProvider);
+
+	return OutProvider;
+}
+
+FString USkillTreeUtils::ModifyInventoryProvider(const FString& NewPayload,
+                                                 const int32 ProviderId,
+                                                 const TArray<int32>& NewPrivateTreeNodeIds)
+{
+	TArray<NSJsonSkillTree::FJsonSkillTreeProvider> SkillTreeProviders;
+	for (const FString& Payload : GetSkillTreeProviderPayloads(NewPayload))
+	{
+		NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
+		NSJsonSkillTree::FromString(Payload, OutProvider);
+
+		SkillTreeProviders.Add(OutProvider);
+	}
+
+	auto* SearchResult = SkillTreeProviders.FindByPredicate([SearchId = ProviderId](const NSJsonSkillTree::FJsonSkillTreeProvider& Provider)
+	{
+		return (false == (Provider.Id ^ SearchId));
+	});
+
+	if (SearchResult != nullptr)
+	{
+		// @gdemers overwrite all item entries within this provider.
+		SearchResult->PrivateTreeNodeIds = NewPrivateTreeNodeIds;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	for (const auto& ModifiedProvider : SkillTreeProviders)
+	{
+		FString OutFormat;
+		NSJsonSkillTree::ToString(ModifiedProvider, OutFormat);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetArrayField(TEXT("SkillTreeProviders"), OutModifiedPayloads);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return FString();
+	}
+	else
+	{
+		return JsonOutput;
+	}
 }
 
 TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& NewPayload)
@@ -179,6 +252,15 @@ TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& New
 	}
 
 	return OutProviders;
+}
+
+int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& TreeNodeEffectRegistryId,
+                                                      const int32 EffectLevel)
+{
+	const int32 TreeNodeId = USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier(TreeNodeEffectRegistryId);
+	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(EffectLevel, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
+	// TODO @gdemers add whatever information is required in the tree node encoding later
+	return (TreeNodeId + NewEffectLevel);
 }
 
 FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,

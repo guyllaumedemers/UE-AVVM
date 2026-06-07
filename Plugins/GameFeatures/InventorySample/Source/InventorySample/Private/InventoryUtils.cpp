@@ -62,7 +62,7 @@ namespace NSJsonInventory
 		{
 			TSharedPtr<FJsonObject> KVPJsonObject = MakeShareable(new FJsonObject);
 			KVPJsonObject->SetStringField(TEXT("SlotTag"), SlotTag.ToString());
-			KVPJsonObject->SetNumberField("PrivateItemId", PrivateItemId);
+			KVPJsonObject->SetNumberField(TEXT("PrivateItemId"), PrivateItemId);
 			Loadout.Add(MakeShareable(new FJsonValueObject(KVPJsonObject)));
 		}
 
