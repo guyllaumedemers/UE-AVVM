@@ -500,7 +500,7 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 			ensureAlwaysMsgf(!PrivateSkillTreeNodeIds.Contains(PrivateItemId), TEXT("Attempting to initialized a FSkillTreeNodeObject with duplicated PrivateItemId value.")))
 		{
 			const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TryApplyGameplayEffect(SkillTreeNodeEffectClass, PrivateItemId);
-			const int32 TypeHash = GetTypeHash(ActiveGameplayEffectHandle);
+			const uint32 TypeHash = GetTypeHash(ActiveGameplayEffectHandle);
 			SkillTree.SkillTreeNodeObjects.Add(FSkillTreeNodeObject(PrivateItemId, TypeHash)/*rvalue*/);
 			NonReplicatedActiveGameplayEffectHandles.Add(TypeHash, ActiveGameplayEffectHandle);
 			PrivateSkillTreeNodeIds.Add(PrivateItemId);

@@ -26,6 +26,7 @@
 #include "SkillTreeProvider.h"
 #include "SkillTreeSettings.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
+#include "Data/SkillTreeProviderTableRow.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "GameFramework/Actor.h"
@@ -100,6 +101,61 @@ namespace NSJsonSkillTree
 }
 
 FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
+{
+	const TSoftObjectPtr<UDataTable>& ProviderDataTable = USkillTreeSettings::GetDefaultProviderSkillTrees();
+	if (!ensureAlwaysMsgf(!ProviderDataTable.IsNull(),
+	                      TEXT("Project doesn't reference a valid Data Table to initialize the Provider Skill Tree on Disk.")))
+	{
+		return FString();
+	}
+
+	// TODO @gdemers Improve on this. I dont like that its synchronous.
+	const UDataTable* DataTable = ProviderDataTable.LoadSynchronous();
+	if (!IsValid(DataTable))
+	{
+		return FString();
+	}
+
+	TArray<FSkillTreeProviderTableRow*> OutRows;
+	DataTable->GetAllRows<FSkillTreeProviderTableRow>(TEXT(""), OutRows);
+
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	for (const FSkillTreeProviderTableRow* Row : OutRows)
+	{
+		if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row entry.")))
+		{
+			continue;
+		}
+
+		const int32 ProviderId = USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier(Row->SkillTreeProviderActorIdentifierId);
+		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
+		                      TEXT("Missing valid Id for Provider entry.")))
+		{
+			continue;
+		}
+
+		const FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, Row->SkillTreeNodePerPhases);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
+	}
+
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetArrayField(TEXT("SkillTreeProviders"), OutModifiedPayloads);
+
+	FString JsonOutput;
+
+	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
+	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
+	{
+		return FString();
+	}
+	else
+	{
+		return JsonOutput;
+	}
+}
+
+FString USkillTreeUtils::CreateSkillTreeProvider(const int32 ProviderId,
+                                                 const TArray<FSkillTreeNodePhase>& SkillTreeNodePhases)
 {
 	return FString();
 }

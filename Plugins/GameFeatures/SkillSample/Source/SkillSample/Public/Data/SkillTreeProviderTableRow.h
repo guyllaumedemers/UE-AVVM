@@ -29,21 +29,32 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include "InventoryProviderTableRow.generated.h"
-
-class UItemObject;
+#include "SkillTreeProviderTableRow.generated.h"
 
 /**
  *	Class description:
  *	
- *	FInventoryProviderTableRow is a Row type that define the default values used to initialize an
- *	Inventory Provider entry on disk (based on Data Asset).
+ *	FSkillTreeNodePhase define the Tree Node GameplayEffects an actor owns during a given phase.
  *	
- *	Notes : Item defined in this Row Table are unique elements. Complex scheme, such as a weapon with attachments
- *	are pre-baked from the Item Actor definition a UItemObject reference. There shouldn't be any relationship between items here!
+ *	Note : Here we expect designers to manage properly Tree Node referencing, and respect class specific
+ *	skills. Example : Don't reference a Mage skill onto a warrior, unless your project support sub-classing.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
+struct SKILLSAMPLE_API FSkillTreeNodePhase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeDefinitionDataTableRow"))
+	TMap<FDataRegistryId, int32 /*GameplayEffect level*/> SkillTreeNodeIds;
+};
+
+/**
+ *	Class description:
+ *	
+ *	FSkillTreeProviderTableRow define the GameplayEffects the reference actor owns, on a per-phase basis.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -51,17 +62,10 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers the unique identifier that represent the inventory provider actor. example : a shop.
+	// @gdemers the unique identifier that represent the skill tree provider actor. example : a shop.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
-	FDataRegistryId InventoryProviderActorIdentifierId = FDataRegistryId();
+	FDataRegistryId SkillTreeProviderActorIdentifierId = FDataRegistryId();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanInventoryProviderEquipItems = false;
-
-	// @gdemers slot tags used to bind an item to an abstract location within the loadout system.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanInventoryProviderEquipItems"))
-	TArray<FGameplayTag> DefaultSlotTags;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
-	TMap<TSoftClassPtr<UItemObject>, int32/*DefaultStackCount*/> DefaultInventory;
+	TArray<FSkillTreeNodePhase> SkillTreeNodePerPhases;
 };

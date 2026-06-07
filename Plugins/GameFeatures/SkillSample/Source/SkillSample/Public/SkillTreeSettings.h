@@ -44,7 +44,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static const FDataRegistryType& GetGameplayEffectIdentifierRegistryType();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderSkillTrees();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType GameplayEffectIdentifierRegistryType = NAME_None;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="SkillTreeProviderTableRow"))
+	TSoftObjectPtr<UDataTable> DefaultProviderSkillTrees;
 };

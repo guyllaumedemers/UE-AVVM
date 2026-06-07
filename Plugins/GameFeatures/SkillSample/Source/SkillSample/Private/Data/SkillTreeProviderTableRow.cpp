@@ -17,14 +17,24 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "SkillTreeSettings.h"
+#include "Data/SkillTreeProviderTableRow.h"
 
-const FDataRegistryType& USkillTreeSettings::GetGameplayEffectIdentifierRegistryType()
+#if WITH_EDITOR
+EDataValidationResult FSkillTreeProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	return GetDefault<USkillTreeSettings>()->GameplayEffectIdentifierRegistryType;
-}
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (!SkillTreeProviderActorIdentifierId.IsValid())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FSkillTreeProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
+	}
 
-const TSoftObjectPtr<UDataTable>& USkillTreeSettings::GetDefaultProviderSkillTrees()
-{
-	return GetDefault<USkillTreeSettings>()->DefaultProviderSkillTrees;
+	if (SkillTreeNodePerPhases.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FSkillTreeProviderTableRow", "", "Empty Skill referencing."));
+	}
+
+	return Result;
 }
+#endif

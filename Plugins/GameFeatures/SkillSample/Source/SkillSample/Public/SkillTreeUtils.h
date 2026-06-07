@@ -25,6 +25,7 @@
 
 #include "SkillTreeUtils.generated.h"
 
+struct FSkillTreeNodePhase;
 class UGameplayEffect;
 
 /**
@@ -41,6 +42,10 @@ class SKILLSAMPLE_API USkillTreeUtils : public UObject
 public:
 	UFUNCTION(BlueprintCallable)
 	static FString CreateDefaultSkillTreeProviders();
+
+	UFUNCTION(BlueprintCallable)
+	static FString CreateSkillTreeProvider(const int32 ProviderId,
+	                                       const TArray<FSkillTreeNodePhase>& SkillTreeNodePhases);
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<FString> GetSkillTreeProviderPayloads(const FString& NewPayload);
