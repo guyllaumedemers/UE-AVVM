@@ -26,9 +26,8 @@
 #include "ItemObject.h"
 #include "NativeGameplayTags.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
-#include "Misc/AutomationTest.h"
-
 #include "Engine/AssetManager.h"
+#include "Misc/AutomationTest.h"
 
 #if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
