@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,21 +17,21 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Ability/TriggerAbility.h"
+#include "Ability/ButtstrokeAbility.h"
 
-void UTriggerAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                    const FGameplayAbilitySpec& Spec)
+void UButtstrokeAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                       const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 }
 
-void UTriggerAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+void UButtstrokeAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                          const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
-bool UTriggerAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+bool UButtstrokeAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                             const FGameplayAbilityActorInfo* ActorInfo,
                                             const FGameplayTagContainer* SourceTags,
                                             const FGameplayTagContainer* TargetTags,
@@ -40,7 +40,7 @@ bool UTriggerAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
-void UTriggerAbility::PreActivate(const FGameplayAbilitySpecHandle Handle,
+void UButtstrokeAbility::PreActivate(const FGameplayAbilitySpecHandle Handle,
                                      const FGameplayAbilityActorInfo* ActorInfo,
                                      const FGameplayAbilityActivationInfo ActivationInfo,
                                      FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
@@ -49,7 +49,7 @@ void UTriggerAbility::PreActivate(const FGameplayAbilitySpecHandle Handle,
 	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
 }
 
-void UTriggerAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+void UButtstrokeAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                          const FGameplayAbilityActorInfo* ActorInfo,
                                          const FGameplayAbilityActivationInfo ActivationInfo,
                                          const FGameplayEventData* TriggerEventData)
@@ -57,7 +57,7 @@ void UTriggerAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UTriggerAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle,
+void UButtstrokeAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle,
                                        const FGameplayAbilityActorInfo* ActorInfo,
                                        const FGameplayAbilityActivationInfo ActivationInfo,
                                        bool bReplicateCancelAbility)
@@ -65,7 +65,7 @@ void UTriggerAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 }
 
-void UTriggerAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+void UButtstrokeAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
                                     const FGameplayAbilityActorInfo* ActorInfo,
                                     const FGameplayAbilityActivationInfo ActivationInfo,
                                     bool bReplicateEndAbility,
@@ -74,7 +74,7 @@ void UTriggerAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-bool UTriggerAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle,
+bool UButtstrokeAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle,
                                        const FGameplayAbilityActorInfo* ActorInfo,
                                        const FGameplayAbilityActivationInfo ActivationInfo,
                                        FGameplayTagContainer* OptionalRelevantTags)

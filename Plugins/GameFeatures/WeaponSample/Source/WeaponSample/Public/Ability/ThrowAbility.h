@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -22,19 +22,19 @@
 #include "CoreMinimal.h"
 
 #include "Abilities/GameplayAbility.h"
+#include "Ability/AVVMGameplayAbility.h"
 
-#include "TriggeringAbility.generated.h"
+#include "ThrowAbility.generated.h"
 
 class ATriggeringActor;
 
 /**
  *	Class description:
  *
- *	UTriggeringAbility is the ability that enables user to execute firing/triggering behaviour based on the owning actor that
- *	granted the ability.
+ *	UThrowAbility is the ability that enables user to throw the reference actor equipped.
  */
 UCLASS()
-class WEAPONSAMPLE_API UTriggeringAbility : public UGameplayAbility
+class WEAPONSAMPLE_API UThrowAbility : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

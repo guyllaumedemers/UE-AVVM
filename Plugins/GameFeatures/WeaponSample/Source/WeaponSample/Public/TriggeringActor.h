@@ -36,7 +36,7 @@
 struct FStreamableHandle;
 class UAVVMAbilitySystemComponent;
 class UAVVMReplicatedTagComponent;
-class UTriggeringAbility;
+class UTriggerAbility;
 
 /**
  *	Class description:
@@ -131,7 +131,7 @@ protected:
 	bool bShouldAsyncLoadOnBeginPlay = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<UTriggeringAbility> TriggeringAbilityClass = nullptr;
+	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="TriggeringDefinitionDataTableRow"))
 	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
