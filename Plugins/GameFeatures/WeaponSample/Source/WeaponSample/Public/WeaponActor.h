@@ -53,6 +53,14 @@ public:
 	void ToggleFiringMode(const FGameplayTag& NewFiringMode);
 
 protected:
+	UFUNCTION(BlueprintNativeEvent)
+	void MeleeTrigger() const;
+	virtual void MeleeTrigger_Implementation() const;
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void RangeTrigger() const;
+	virtual void RangeTrigger_Implementation() const;
+	
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
 

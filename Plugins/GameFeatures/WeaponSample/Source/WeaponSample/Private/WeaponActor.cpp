@@ -25,6 +25,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "Tags/PrivateTags.h"
 
 AWeaponActor_Range::AWeaponActor_Range(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -59,23 +60,47 @@ void AWeaponActor_Range::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AWeaponActor_Range::Trigger_Implementation() const
 {
+	const bool bUseMeleeMode = CurrentFiringMode.MatchesAnyExact(FGameplayTagContainer{TAG_WEAPONSAMPLE_TRIGGER_TYPE_MELEE});
+	if (bUseMeleeMode)
+	{
+		// @gdemers from an attachment hook onto your weapon.
+		// this is different from the buttstock ability which require usage of a unique keybinding.
+		MeleeTrigger();
+	}
+	else
+	{
+		// @gdemers either running from an attachment such as a grenade launcher, or
+		// the normal mode the weapon use. example : full auto, vs single shot, vs burst.
+		RangeTrigger();
+	}
+}
+
+void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, CurrentFiringMode, this);
+	CurrentFiringMode = NewFiringMode;
+}
+
+void AWeaponActor_Range::MeleeTrigger_Implementation() const
+{
+	// TODO @gdemers Define what melee triggger imply at this level.
+	// i.e those the attachment have durability ? BP impl will handle the VFX/and FX. 
+}
+
+void AWeaponActor_Range::RangeTrigger_Implementation() const
+{
 	const UArrowComponent* ProxyComponent = WeaponProxyComponent.Get();
-	if (!IsValid(ProxyComponent))
+	if (!ensureAlwaysMsgf(IsValid(ProxyComponent), TEXT("Missing Proxy Component")))
 	{
 		return;
 	}
 
 	if (IsValid(ProjectileComponent))
 	{
-		// TODO @gdemers Require more work to better define Client-Server-OtherClient interaction.
-		// check Unreal ShooterGame.
+		// @gdemers CurrentFiringMode define the projectile type fired,
+		// and/or alternate animation sequence we execute.
 		ProjectileComponent->Fire(CurrentFiringMode, ProxyComponent->GetComponentTransform());
 	}
-}
-
-void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
-{
-	// TODO @gdemers Do impl.
 }
 
 AWeaponActor_Melee::AWeaponActor_Melee(const FObjectInitializer& ObjectInitializer)

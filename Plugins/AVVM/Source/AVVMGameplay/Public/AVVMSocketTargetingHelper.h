@@ -138,11 +138,11 @@ public:
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnNewSocketAttachedDelegate, const FGameplayTag& NewItemAttachmentSlotTag, const AActor* NewChild);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnNewSocketDetachedDelegate, const FGameplayTag& NewItemAttachmentSlotTag);
 
-	void NotifyOnNewSocketAttached(const FGameplayTag& NewItemAttachmentSlotTag, const AActor* NewChild) const;
+	virtual void NotifyOnNewSocketAttached(const FGameplayTag& NewItemAttachmentSlotTag, const AActor* NewChild) const;
 	FDelegateHandle OnNewSocketAttachedDelegate_Add(const FOnNewSocketAttachedDelegate::FDelegate& Callback);
 	void OnNewSocketAttachedDelegate_Remove(const FDelegateHandle& Handle);
 
-	void NotifyOnNewSocketDetached(const FGameplayTag& NewItemAttachmentSlotTag) const;
+	virtual void NotifyOnNewSocketDetached(const FGameplayTag& NewItemAttachmentSlotTag) const;
 	FDelegateHandle OnNewSocketDetachedDelegate_Add(const FOnNewSocketDetachedDelegate::FDelegate& Callback);
 	void OnNewSocketDetachedDelegate_Remove(const FDelegateHandle& Handle);
 
