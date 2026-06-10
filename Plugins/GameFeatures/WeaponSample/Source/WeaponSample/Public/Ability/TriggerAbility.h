@@ -33,6 +33,12 @@ class ATriggeringActor;
  *
  *	UTriggerAbility is the ability that enables user to fire/trigger behaviour based on the owning actor that
  *	granted the ability.
+ *	
+ *	IMPORTANT : TriggerAbility has to execute a context action thats specific to the mode in which the weapon is
+ *	currently set in. wdim ?
+ *	
+ *	* Is bayonet mode enabled, grenade launcher, etc... Modes that are attachment dependent.
+ *	* Normal firing (Automatic, Single-Shot), or Alt firing (Burst), etc...
  */
 UCLASS()
 class WEAPONSAMPLE_API UTriggerAbility : public UAVVMGameplayAbility
