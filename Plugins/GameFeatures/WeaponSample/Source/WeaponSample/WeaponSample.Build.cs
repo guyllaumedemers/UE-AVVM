@@ -27,6 +27,8 @@ public class WeaponSample : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 		bWarningsAsErrors = true;
+		
+		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]
@@ -49,6 +51,7 @@ public class WeaponSample : ModuleRules
 			new string[]
 			{
 				"AVVMOnline",
+				"NetCore"
 			}
 		);
 	}

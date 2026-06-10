@@ -34,7 +34,6 @@
 #include "TriggeringActor.generated.h"
 
 struct FStreamableHandle;
-class UAmmunitionManagerComponent;
 class UAVVMAbilitySystemComponent;
 class UAVVMReplicatedTagComponent;
 class UTriggerAbility;

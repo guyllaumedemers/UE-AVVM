@@ -39,7 +39,10 @@ void AWeaponActor_Range::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, CurrentFiringMode, FDoRepLifetimeParams());
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+	
+	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, CurrentFiringMode, Params);
 }
 
 void AWeaponActor_Range::BeginPlay()
