@@ -22,7 +22,9 @@
 #include "ActorSkillTreeComponent.h"
 #include "AVVMFileHelper.h"
 #include "SkillTreeSettings.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Engine/StreamableManager.h"
 #include "Resources/SkillTreeResourceHandlingImpl.h"
 #include "Tags/PrivateTags.h"
@@ -31,6 +33,7 @@ AAutomatedTestSkillActor::AAutomatedTestSkillActor(const FObjectInitializer& Obj
 	: Super(ObjectInitializer)
 {
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
+	AbilitySystemComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMAbilitySystemComponent>(this, TEXT("AbilitySystemComponent"));
 	SkillTreeComponent = ObjectInitializer.CreateDefaultSubobject<UActorSkillTreeComponent>(this, TEXT("SkillTreeComponent"));
 }
 
@@ -61,6 +64,16 @@ TArray<FDataRegistryId> AAutomatedTestSkillActor::CheckIsDoneAcquiringResources_
 	                                                                                Resources));
 
 	return OutResults;
+}
+
+UAbilitySystemComponent* AAutomatedTestSkillActor::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+ESkillTreeSrcType AAutomatedTestSkillActor::GetSkillTreeSrcType_Implementation() const
+{
+	return ESkillTreeSrcType::Static;
 }
 
 void AAutomatedTestSkillActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted)
@@ -104,6 +117,33 @@ FOnResourceAsyncLoadingComplete AAutomatedTestSkillActor::GetOnCompleteDelegate(
 	FOnResourceAsyncLoadingComplete Callback;
 	Callback.BindDynamic(this, &AAutomatedTestSkillActor::OnRequestCompleted);
 	return Callback;
+}
+
+bool AAutomatedTestSkillActor::RunTest_SkillTreeNodeUniqueId(const TArray<const FAVVMGameplayEffectIdentifierDataTableRow*>& GameplayEffectIdentifiers) const
+{
+	if (!IsValid(SkillTreeComponent) || SkillTreeComponent->SkillTree.SkillTreeNodeObjects.IsEmpty())
+	{
+		return false;
+	}
+
+	const auto CheckGameplayEffectIdentifier = [](const int32 GameplayEffectIdentifier, const TArray<const FAVVMGameplayEffectIdentifierDataTableRow*>& Rows)
+	{
+		const auto* SearchResult = Rows.FindByPredicate([GameplayEffectIdentifier](const FAVVMGameplayEffectIdentifierDataTableRow* Row)
+		{
+			return (Row != nullptr) && (Row->UniqueId == GameplayEffectIdentifier);
+		});
+
+		return (SearchResult != nullptr);
+	};
+
+	bool bResult = true;
+	for (const FSkillTreeNodeObject& SkillTreeObject : SkillTreeComponent->SkillTree.SkillTreeNodeObjects)
+	{
+		const int32 NonShiftedItemId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(SkillTreeObject.GetSkillTreeNodePrivateId());
+		bResult &= CheckGameplayEffectIdentifier(NonShiftedItemId, GameplayEffectIdentifiers);
+	}
+
+	return bResult;
 }
 
 void AAutomatedTestSkillActor::OnRequestCompleted()

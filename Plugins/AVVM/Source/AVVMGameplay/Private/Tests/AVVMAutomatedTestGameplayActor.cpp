@@ -60,6 +60,11 @@ TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::CheckIsDoneAcquiringRes
 	return OutResults;
 }
 
+UAbilitySystemComponent* AAVVMAutomatedTestGameplayActor::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
 void AAVVMAutomatedTestGameplayActor::SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted)
 {
 	bIsAsyncProcessCompleted = bNewIsAsyncProcessCompleted;

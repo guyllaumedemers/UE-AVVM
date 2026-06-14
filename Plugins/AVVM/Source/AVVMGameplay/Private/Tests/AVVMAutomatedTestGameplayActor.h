@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AbilitySystemInterface.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -37,15 +38,21 @@ class UAVVMAbilitySystemComponent;
  */
 UCLASS()
 class AVVMGAMEPLAY_API AAVVMAutomatedTestGameplayActor : public AActor,
+                                                         public IAbilitySystemInterface,
                                                          public IAVVMResourceProvider
 {
 	GENERATED_BODY()
 
 public:
 	AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer);
+	
+	// IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
+	
+	// IAbilitySystemInterface
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;

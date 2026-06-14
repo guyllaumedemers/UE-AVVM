@@ -24,6 +24,7 @@
 #include "NativeGameplayTags.h"
 #include "SkillTreeUtils.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Misc/AutomationTest.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceManagerComponent.h"
@@ -147,6 +148,17 @@ public:
 
 	void RWSkillTreeNodePrivateId()
 	{
+		const auto* Subsystem = UDataRegistrySubsystem::Get();
+		TestNotNull("DataRegistry Subsystem", Subsystem);
+
+		const UDataRegistry* SearchResult = Subsystem->GetRegistryForType(UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType());
+		TestNotNull("DataRegistry Asset", SearchResult);
+
+		TArray<const FAVVMGameplayEffectIdentifierDataTableRow*> OutGameplayEffectIdentifiers;
+		SearchResult->GetAllItems<FAVVMGameplayEffectIdentifierDataTableRow>(TEXT(""), OutGameplayEffectIdentifiers);
+
+		const bool bResult_RunTest_SkillTreeNodeUniqueId = TestActor->RunTest_SkillTreeNodeUniqueId(OutGameplayEffectIdentifiers);
+		TestTrue("RunTest_SkillTreeNodeUniqueId", bResult_RunTest_SkillTreeNodeUniqueId);
 	}
 
 	void Setup()
@@ -159,7 +171,7 @@ public:
 		TestNotNull("UWorld.", ProxyWorld);
 
 		TestActor = TStrongObjectPtr(ProxyWorld->SpawnActor<AAutomatedTestSkillActor>());
-		TestNotNull("AAutomatedTestInventoryActor.", TestActor.Get());
+		TestNotNull("AAutomatedTestSkillActor.", TestActor.Get());
 
 		// Restore initialization state
 		TestActor->PreInitializeComponents();

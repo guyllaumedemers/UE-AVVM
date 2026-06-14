@@ -21,14 +21,17 @@
 
 #include "CoreMinimal.h"
 
+#include "AbilitySystemInterface.h"
+#include "SkillTreeProvider.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
 
 #include "AutomatedTestSkillActor.generated.h"
 
-struct FAVVMActorIdentifierDataTableRow;
+struct FAVVMGameplayEffectIdentifierDataTableRow;
 class UActorSkillTreeComponent;
+class UAVVMAbilitySystemComponent;
 
 /**
  *	Class description:
@@ -38,7 +41,9 @@ class UActorSkillTreeComponent;
  */
 UCLASS()
 class SKILLSAMPLE_API AAutomatedTestSkillActor : public AActor,
-                                                 public IAVVMResourceProvider
+                                                 public IAbilitySystemInterface,
+                                                 public IAVVMResourceProvider,
+                                                 public ISkillTreeProvider
 {
 	GENERATED_BODY()
 
@@ -50,6 +55,12 @@ public:
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
+	
+	// IAbilitySystemInterface
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	// ISkillTreeProvider
+	virtual ESkillTreeSrcType GetSkillTreeSrcType_Implementation() const override;
 
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
@@ -59,6 +70,8 @@ public:
 	void ForceCompletion() const;
 
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
+	
+	bool RunTest_SkillTreeNodeUniqueId(const TArray<const FAVVMGameplayEffectIdentifierDataTableRow*>& GameplayEffectIdentifiers) const;
 
 protected:
 	UFUNCTION(CallInEditor)
@@ -66,6 +79,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UActorSkillTreeComponent> SkillTreeComponent = nullptr;
