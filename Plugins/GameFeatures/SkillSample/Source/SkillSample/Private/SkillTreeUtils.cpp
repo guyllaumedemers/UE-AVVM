@@ -328,7 +328,7 @@ int32 USkillTreeUtils::GetObjectUniqueIdentifier(const UGameplayEffect* SkillTre
 	}
 	else
 	{
-		return USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier({USkillTreeSettings::GetGameplayEffectIdentifierRegistryType(), SkillTreeNodeEffect->GetFName()});
+		return USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier({USkillTreeSettings::GetSkillTreeRegistryType(), SkillTreeNodeEffect->GetFName()});
 	}
 }
 

@@ -19,9 +19,14 @@
 //SOFTWARE.
 #include "SkillTreeSettings.h"
 
-const FDataRegistryType& USkillTreeSettings::GetGameplayEffectIdentifierRegistryType()
+const FDataRegistryType& USkillTreeSettings::GetSkillTreeRegistryType()
 {
-	return GetDefault<USkillTreeSettings>()->GameplayEffectIdentifierRegistryType;
+	return GetDefault<USkillTreeSettings>()->SkillTreeRegistryType;
+}
+
+const FDataRegistryType& USkillTreeSettings::GetSkillTreeNodeRegistryType()
+{
+	return GetDefault<USkillTreeSettings>()->SkillTreeNodeRegistryType;
 }
 
 const TSoftObjectPtr<UDataTable>& USkillTreeSettings::GetDefaultProviderSkillTrees()

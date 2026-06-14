@@ -102,10 +102,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="InventoryProviderTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RequiredAssetDataTags="RowStructure=/Script/InventorySample.InventoryProviderTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(RowType="ItemStackTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(RequiredAssetDataTags="RowStructure=/Script/InventorySample.ItemStackTableRow"))
 	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(ForceInlineRow))

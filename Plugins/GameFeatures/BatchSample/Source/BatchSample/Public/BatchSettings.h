@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "Engine/DeveloperSettings.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "BatchSettings.generated.h"
 

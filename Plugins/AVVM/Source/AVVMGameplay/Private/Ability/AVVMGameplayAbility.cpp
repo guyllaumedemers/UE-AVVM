@@ -23,6 +23,6 @@
 
 int32 UAVVMGameplayAbility::GetInputId() const
 {
-	UAVVMAbilityInputAction* IA = InputAction.IsNull() ? nullptr : InputAction.LoadSynchronous();
+	const UAVVMAbilityInputAction* IA = InputAction.IsNull() ? nullptr : InputAction.LoadSynchronous();
 	return IsValid(IA) ? IA->GetInputId() : INDEX_NONE;
 }

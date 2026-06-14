@@ -51,7 +51,11 @@ struct SKILLSAMPLE_API FSkillTreeNodePhase
 /**
  *	Class description:
  *	
- *	FSkillTreeProviderTableRow define the GameplayEffects the reference actor owns, on a per-phase basis.
+ *	FSkillTreeProviderTableRow is a Row type that define the default values used to initialize an
+ *	SkillTree Provider entry on disk.
+ *	
+ *	Note : This is used to default initialize an actor representation Skill Tree based on design configuration.
+ *	Example : A boss in elden ring.
  */
 USTRUCT(BlueprintType)
 struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FTableRowBase

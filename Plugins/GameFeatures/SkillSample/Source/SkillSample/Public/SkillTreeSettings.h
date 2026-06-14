@@ -22,7 +22,6 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
-#include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
 #include "UObject/SoftObjectPtr.h"
 
@@ -42,15 +41,21 @@ class SKILLSAMPLE_API USkillTreeSettings : public UDeveloperSettings
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Team|Settings")
-	static const FDataRegistryType& GetGameplayEffectIdentifierRegistryType();
+	static const FDataRegistryType& GetSkillTreeRegistryType();
+
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	static const FDataRegistryType& GetSkillTreeNodeRegistryType();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderSkillTrees();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType GameplayEffectIdentifierRegistryType = NAME_None;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RowType="SkillTreeProviderTableRow"))
+	FDataRegistryType SkillTreeRegistryType = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType SkillTreeNodeRegistryType = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RequiredAssetDataTags="RowStructure=/Script/SkillSample.SkillTreeProviderTableRow"))
 	TSoftObjectPtr<UDataTable> DefaultProviderSkillTrees;
 };

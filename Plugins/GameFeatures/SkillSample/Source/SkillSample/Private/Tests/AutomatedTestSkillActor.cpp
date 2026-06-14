@@ -47,7 +47,7 @@ UAVVMResourceManagerComponent* AAutomatedTestSkillActor::GetResourceManagerCompo
 
 TArray<FDataRegistryId> AAutomatedTestSkillActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
-	const auto TestRegistryId = FDataRegistryId(USkillTreeSettings::GetGameplayEffectIdentifierRegistryType(), TEXT("DEMO_SkillSample_AutomatedTest_C"));
+	const auto TestRegistryId = FDataRegistryId(USkillTreeSettings::GetSkillTreeRegistryType(), TEXT("DEMO_SkillSample_AutomatedTest_C"));
 	ensureAlwaysMsgf(TestRegistryId.IsValid(), TEXT("RegistryType or ItemName arent valid. Please validate your Data Registry."));
 	return {TestRegistryId};
 }
