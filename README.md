@@ -475,10 +475,6 @@ Engine\Build\BatchFiles\RunUAT.bat BuildCookRun ^
 
 ---
 
-### 📄 License
-
-#### Distributed under the MIT License. See LICENSE for more information.
-
 ## ✉️ Contact & Acknowledgments
 
 If you want to discuss architectural design patterns in Unreal, have questions about this implementation, or wish to reach out regarding professional opportunities, feel free to connect:
@@ -488,4 +484,6 @@ If you want to discuss architectural design patterns in Unreal, have questions a
 * **LinkedIn:** [click me](https://www.linkedin.com/in/guyllaume-demers-4960033b1/)
 * **Project Link:** [click me](https://github.com/guyllaumedemers/UE-AVVM)
 
-### Stay tuned!
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
