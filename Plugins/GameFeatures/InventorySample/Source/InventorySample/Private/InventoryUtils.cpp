@@ -21,6 +21,7 @@
 
 #include "AVVMCharacter.h"
 #include "AVVMGameplaySettings.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
@@ -157,7 +158,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
-		const int32 ProviderId = UInventoryUtils::GetItemActorUniqueIdentifier(Row->InventoryProviderActorIdentifierId);
+		const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->InventoryProviderActorIdentifierId);
 		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
 		                      TEXT("Missing valid Id for Provider entry.")))
 		{
@@ -437,34 +438,8 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 	}
 	else
 	{
-		return UInventoryUtils::GetItemActorUniqueIdentifier({UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName});
-	}
-}
-
-int32 UInventoryUtils::GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId)
-{
-	if (!ensureAlwaysMsgf(ItemActorId.IsValid(),
-	                      TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the Actor Identifier RegistryType.")))
-	{
-		return INDEX_NONE;
-	}
-
-	auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
-	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ItemActorId);
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
-	{
-		return RowValue->UniqueId;
-	}
-	else
-	{
-		return INDEX_NONE;
+		const FDataRegistryId RegistryId = {UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName};
+		return UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(RegistryId);
 	}
 }
 

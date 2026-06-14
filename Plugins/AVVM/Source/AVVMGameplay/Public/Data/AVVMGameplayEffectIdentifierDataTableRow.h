@@ -38,7 +38,8 @@
  *	Note : We do expect some rules to be followed. Make sure the RowName define for this entry match the GameplayEffect Class FName, and if you are
  *	using the SkillSample system, make sure the FDataRegistryId::ItemName is identical to the GameplayEffect Class FName referenced.
  *	
- *	IMPORTANT : This separation is for clarity of design. I understand this is identical to FAVVMActorIdentifierDataTableRow.
+ *	IMPORTANT : This separation is for clarity of design. I understand this is identical to FAVVMActorIdentifierDataTableRow, but allowing proper
+ *	separation ensure clean organization of our data, and expose editor tooling to parsing data table per unique types.
  */
 USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMGameplayEffectIdentifierDataTableRow : public FTableRowBase

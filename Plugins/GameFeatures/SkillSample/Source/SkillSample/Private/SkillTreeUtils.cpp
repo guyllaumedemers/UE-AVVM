@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "SkillTreeUtils.h"
 
+#include "AVVMGameplayUtils.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "GameplayEffect.h"
@@ -27,6 +28,7 @@
 #include "SkillTreeSettings.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Data/SkillTreeProviderTableRow.h"
 #include "Dom/JsonObject.h"
@@ -131,7 +133,7 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 			continue;
 		}
 
-		const int32 ProviderId = USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier(Row->SkillTreeProviderActorIdentifierId);
+		const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->SkillTreeProviderActorIdentifierId);
 		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
 		                      TEXT("Missing valid Id for Provider entry.")))
 		{
@@ -257,7 +259,7 @@ TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& New
 int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& TreeNodeEffectRegistryId,
                                                       const int32 EffectLevel)
 {
-	const int32 TreeNodeId = USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier(TreeNodeEffectRegistryId);
+	const int32 TreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(TreeNodeEffectRegistryId);
 	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(EffectLevel, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
 	// TODO @gdemers add whatever information is required in the tree node encoding later
 	return (TreeNodeId + NewEffectLevel);
@@ -289,6 +291,17 @@ FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
 	}
 }
 
+void USkillTreeUtils::GetSkillTreeProvider(const FString& NewPayload,
+                                           int32& OutProviderId,
+                                           TArray<int32>& OutPrivateTreeNodeIds)
+{
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
+	NSJsonSkillTree::FromString(NewPayload, OutProvider);
+
+	OutProviderId = OutProvider.Id;
+	OutPrivateTreeNodeIds = OutProvider.PrivateTreeNodeIds;
+}
+
 int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
                                                  const TArray<int32>& NewPrivateIds,
                                                  const int32 SkillTreeId)
@@ -313,45 +326,6 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 	if (SearchResult != nullptr)
 	{
 		return *SearchResult;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
-}
-
-int32 USkillTreeUtils::GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect)
-{
-	if (!IsValid(SkillTreeNodeEffect))
-	{
-		return INDEX_NONE;
-	}
-	else
-	{
-		return USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier({USkillTreeSettings::GetSkillTreeRegistryType(), SkillTreeNodeEffect->GetFName()});
-	}
-}
-
-int32 USkillTreeUtils::GetSkillTreeNodeUniqueIdentifier(const FDataRegistryId& SkillTreeNodeId)
-{
-	if (!ensureAlwaysMsgf(SkillTreeNodeId.IsValid(),
-						  TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the TreeNode Identifier RegistryType.")))
-	{
-		return INDEX_NONE;
-	}
-
-	auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
-	const auto* RowValue = Subsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(SkillTreeNodeId);
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-						 TEXT("Invalid Row Entry. Make sure FAVVMGameplayEffectIdentifierDataTableRow match the Data Table.")))
-	{
-		return RowValue->UniqueId;
 	}
 	else
 	{

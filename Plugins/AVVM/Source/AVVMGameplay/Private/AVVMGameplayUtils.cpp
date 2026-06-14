@@ -21,7 +21,9 @@
 
 #include "AVVMGameplaySettings.h"
 #include "DataRegistrySubsystem.h"
+#include "GameplayEffect.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Engine/NetConnection.h"
 #include "GameFramework/Actor.h"
 
@@ -71,14 +73,14 @@ bool UAVVMGameplayUtils::HasNetworkAuthority(const AActor* Actor)
 	return Actor->HasAuthority();
 }
 
-int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
+int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(const AActor* Actor)
 {
 	if (!IsValid(Actor))
 	{
 		return INDEX_NONE;
 	}
 
-	auto* Subsystem = UDataRegistrySubsystem::Get();
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
 	{
 		return INDEX_NONE;
@@ -100,6 +102,92 @@ int32 UAVVMGameplayUtils::GetActorUniqueIdentifier(const AActor* Actor)
 	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ActorUniqueId);
 	if (ensureAlwaysMsgf(RowValue != nullptr,
 	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(const FDataRegistryId& ActorIdentifierId)
+{
+	if (!ensureAlwaysMsgf(ActorIdentifierId.IsValid(),
+	                      TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the Actor Identifier RegistryType.")))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ActorIdentifierId);
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(const UGameplayEffect* GameplayEffect)
+{
+	if (!IsValid(GameplayEffect))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	const FDataRegistryId GameplayEffectUniqueId =
+	{
+			UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(),
+			GameplayEffect->GetFName()
+	};
+
+	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(GameplayEffectUniqueId);
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+	                     TEXT("Invalid Row Entry. Make sure FAVVMGameplayEffectIdentifierDataTableRow match the Data Table.")))
+	{
+		return RowValue->UniqueId;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+int32 UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(const FDataRegistryId& GameplayEffectIdentifierId)
+{
+	if (!ensureAlwaysMsgf(GameplayEffectIdentifierId.IsValid(),
+	                      TEXT("Composed RegistryId isn't valid. You may be missing a reference in DeveloperSettings for the TreeNode Identifier RegistryType.")))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	// @gdemers unique identifier that represent a GameplayEffect
+	const auto* RowValue = Subsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(GameplayEffectIdentifierId);
+	if (ensureAlwaysMsgf(RowValue != nullptr,
+	                     TEXT("Invalid Row Entry. Make sure FAVVMGameplayEffectIdentifierDataTableRow match the Data Table.")))
 	{
 		return RowValue->UniqueId;
 	}

@@ -88,9 +88,6 @@ public:
 	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 GetItemActorUniqueIdentifier(const FDataRegistryId& ItemActorId);
-
-	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);
 
 	UFUNCTION(BlueprintCallable)

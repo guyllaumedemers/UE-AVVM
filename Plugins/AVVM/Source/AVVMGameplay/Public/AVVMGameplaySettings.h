@@ -39,23 +39,29 @@ class AVVMGAMEPLAY_API UAVVMGameplaySettings : public UDeveloperSettings
 
 public:
 	UAVVMGameplaySettings();
-	
+
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FDataRegistryType& GetActorIdentifierRegistryType();
-	
+
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const FDataRegistryType& GetGameplayEffectIdentifierRegistryType();
+
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FDataRegistryType& GetActorDefinitionRegistryType();
-	
+
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FGameplayTagContainer& GetPlayerActionBlockingTags();
-	
+
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FGameplayTagContainer& GetPlayerAbilityBlockingTags();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType GameplayEffectIdentifierRegistryType = FDataRegistryType();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ActorDefinitionRegistryType = FDataRegistryType();
 

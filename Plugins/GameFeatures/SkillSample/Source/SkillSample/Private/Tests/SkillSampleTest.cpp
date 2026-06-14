@@ -20,7 +20,10 @@
 #include "AutomatedTestSkillActor.h"
 #include "AVVMFileHelper.h"
 #include "AVVMGameplaySettings.h"
+#include "DataRegistrySubsystem.h"
 #include "NativeGameplayTags.h"
+#include "SkillTreeUtils.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Misc/AutomationTest.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceManagerComponent.h"
@@ -71,10 +74,75 @@ public:
 
 	void RWStubSkillTree()
 	{
+		// @gdemers test data serialization/deserialization to disk using stub data.
+		const int32 StubProviderId_A = FMath::Rand32();
+		const TArray<int32> StubTreeNodes_A = {FMath::Rand32()};
+
+		const FString Payload = USkillTreeUtils::CreateSkillTreeProvider(StubProviderId_A,
+		                                                                 StubTreeNodes_A);
+
+		int32 OutStubProviderId_B = INDEX_NONE;
+		TArray<int32> OutStubTreeNodes_B;
+
+		USkillTreeUtils::GetSkillTreeProvider(Payload,
+		                                      OutStubProviderId_B,
+		                                      OutStubTreeNodes_B);
+
+		TestEqual("Skill ProviderId Equality",
+		          StubProviderId_A,
+		          OutStubProviderId_B);
+
+		TestEqual("Skill Tree Equality",
+		          StubTreeNodes_A,
+		          OutStubTreeNodes_B);
 	}
 
 	void RWDataTableSkillTree()
 	{
+		// @gdemers lambda to conditionally generate our default provider content
+		// for serialization to disk.
+		static const auto GenerateDefaultContent = []()
+		{
+			return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+		};
+
+		// @gdemers test data serialization/deserialization to disk using Data Table data.
+		const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent, true/*always test from scratch*/);
+		TestFalse("Write to disk with empty content.", FileContent.IsEmpty());
+
+		const TArray<FString> OutSkillTreeProviders = USkillTreeUtils::GetSkillTreeProviderPayloads(FileContent.GetData());
+		TestFalse("Read from Payload on Empty set.", OutSkillTreeProviders.IsEmpty());
+
+		const auto* Subsystem = UDataRegistrySubsystem::Get();
+		TestNotNull("DataRegistry Subsystem", Subsystem);
+
+		const UDataRegistry* SearchResult = Subsystem->GetRegistryForType(UAVVMGameplaySettings::GetActorIdentifierRegistryType());
+		TestNotNull("DataRegistry Asset", SearchResult);
+
+		TArray<const FAVVMActorIdentifierDataTableRow*> OutActorIdentifiers;
+		SearchResult->GetAllItems<FAVVMActorIdentifierDataTableRow>(TEXT(""), OutActorIdentifiers);
+
+		const auto CheckActorIdentifier = [](const int32 ActorIdentifier, const TArray<const FAVVMActorIdentifierDataTableRow*>& Rows)
+		{
+			const auto* SearchResult = Rows.FindByPredicate([ActorIdentifier](const FAVVMActorIdentifierDataTableRow* Row)
+			{
+				return (Row != nullptr) && (Row->UniqueId == ActorIdentifier);
+			});
+
+			return (SearchResult != nullptr);
+		};
+
+		// @gdemers validate that our providers from data table exist in the ActorIdentifier Data Table.
+		for (const FString& Payload : OutSkillTreeProviders)
+		{
+			int32 OutProviderId = INDEX_NONE;
+			TArray<int32> OutSkillTreeNodes;
+
+			USkillTreeUtils::GetSkillTreeProvider(Payload, OutProviderId, OutSkillTreeNodes);
+
+			const bool bResult = CheckActorIdentifier(OutProviderId, OutActorIdentifiers);
+			TestTrue("ActorIdentifier missing", bResult);
+		}
 	}
 
 	void RWSkillTreeNodePrivateId()

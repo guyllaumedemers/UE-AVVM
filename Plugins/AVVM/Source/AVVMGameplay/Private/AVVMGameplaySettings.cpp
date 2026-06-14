@@ -29,6 +29,11 @@ const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
 	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
 }
 
+const FDataRegistryType& UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType()
+{
+	return GetDefault<UAVVMGameplaySettings>()->GameplayEffectIdentifierRegistryType;
+}
+
 const FDataRegistryType& UAVVMGameplaySettings::GetActorDefinitionRegistryType()
 {
 	return GetDefault<UAVVMGameplaySettings>()->ActorDefinitionRegistryType;

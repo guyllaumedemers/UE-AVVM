@@ -21,6 +21,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AVVMFileHelper.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
@@ -66,7 +67,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	const int32 NonShiftedTreeNodeId = USkillTreeUtils::GetObjectUniqueIdentifier(SkillTreeNodeEffectCDO);
+	const int32 NonShiftedTreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
 	if (!ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
 	                      TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
@@ -114,7 +115,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 NonShiftedTreeNodeId = USkillTreeUtils::GetObjectUniqueIdentifier(SkillTreeNodeEffectCDO);
+	const int32 NonShiftedTreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
 
 	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
 	                                                     TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))

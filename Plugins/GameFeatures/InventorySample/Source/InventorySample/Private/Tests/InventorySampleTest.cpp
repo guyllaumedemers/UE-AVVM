@@ -79,12 +79,12 @@ public:
 		// @gdemers test data serialization/deserialization to disk using stub data.
 		const int32 StubProviderId_A = FMath::Rand32();
 
-		TMap<FGameplayTag, int32> StubLoadout_A =
+		const TMap<FGameplayTag, int32> StubLoadout_A =
 		{
 				{TAG_INVENTORYSAMPLE_AUTOMATED_TEST, FMath::Rand32()}
 		};
 
-		TArray<int32> StubItems_A = {FMath::Rand32()};
+		const TArray<int32> StubItems_A = {FMath::Rand32()};
 
 		const FString Payload = UInventoryUtils::CreateInventoryProvider(StubProviderId_A,
 		                                                                 StubLoadout_A,
@@ -127,7 +127,7 @@ public:
 		const TArray<FString> OutInventoryProviders = UInventoryUtils::GetInventoryProviderPayloads(FileContent.GetData());
 		TestFalse("Read from Payload on Empty set.", OutInventoryProviders.IsEmpty());
 
-		auto* Subsystem = UDataRegistrySubsystem::Get();
+		const auto* Subsystem = UDataRegistrySubsystem::Get();
 		TestNotNull("DataRegistry Subsystem", Subsystem);
 
 		const UDataRegistry* SearchResult = Subsystem->GetRegistryForType(UAVVMGameplaySettings::GetActorIdentifierRegistryType());
@@ -162,7 +162,7 @@ public:
 
 	void RWItemPrivateId()
 	{
-		auto* Subsystem = UDataRegistrySubsystem::Get();
+		const auto* Subsystem = UDataRegistrySubsystem::Get();
 		TestNotNull("DataRegistry Subsystem", Subsystem);
 
 		const UDataRegistry* SearchResult = Subsystem->GetRegistryForType(UAVVMGameplaySettings::GetActorIdentifierRegistryType());

@@ -269,7 +269,7 @@ void ATriggeringActor::Detach_Implementation()
 
 int32 ATriggeringActor::GetProviderUniqueId_Implementation() const
 {
-	return UAVVMGameplayUtils::GetActorUniqueIdentifier(this);
+	return UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(this);
 }
 
 UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Implementation() const

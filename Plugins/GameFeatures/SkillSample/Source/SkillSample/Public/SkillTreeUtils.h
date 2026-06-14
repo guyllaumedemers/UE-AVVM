@@ -20,8 +20,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DataRegistryId.h"
 
+#include "DataRegistryId.h"
 #include "UObject/Object.h"
 
 #include "SkillTreeUtils.generated.h"
@@ -65,17 +65,14 @@ public:
 	                                        const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
+	static void GetSkillTreeProvider(const FString& NewPayload,
+	                                 int32& OutProviderId,
+	                                 TArray<int32>& OutPrivateTreeNodeIds);
+
+	UFUNCTION(BlueprintCallable)
 	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,
 	                                       const TArray<int32>& NewPrivateIds,
 	                                       const int32 SkillTreeId);
-
-	// @gdemers IMPORTANT : the Unique Identifier is not a shifted value. the skill tree system handle
-	// shifting following user defined rules.
-	UFUNCTION(BlueprintCallable)
-	static int32 GetObjectUniqueIdentifier(const UGameplayEffect* SkillTreeNodeEffect);
-
-	UFUNCTION(BlueprintCallable)
-	static int32 GetSkillTreeNodeUniqueIdentifier(const FDataRegistryId& SkillTreeNodeId);
 
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);

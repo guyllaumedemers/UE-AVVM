@@ -21,9 +21,12 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "AVVMGameplayUtils.generated.h"
+
+class UGameplayEffect;
 
 /**
  *	Class Description :
@@ -45,5 +48,14 @@ public:
 	static bool HasNetworkAuthority(const AActor* Actor);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 GetActorUniqueIdentifier(const AActor* Actor);
+	static int32 GetActorUniqueIdentifierByActor(const AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetActorUniqueIdentifierByRegistryId(const FDataRegistryId& ActorIdentifierId);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetGameplayEffectUniqueIdentifierByGameplayEffect(const UGameplayEffect* GameplayEffect);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetGameplayEffectUniqueIdentifierByRegistryId(const FDataRegistryId& GameplayEffectIdentifierId);
 };
