@@ -262,7 +262,7 @@ int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& Tre
 {
 	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
 	const int32 TreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
-	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(EffectLevel, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
+	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
 	// TODO @gdemers add whatever information is required in the tree node encoding later
 	return (TreeNodeId + NewEffectLevel);
 }
