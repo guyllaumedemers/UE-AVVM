@@ -44,6 +44,12 @@
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Tags/PrivateTags.h"
 
+#if !UE_BUILD_SHIPPING
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Misc/AutomationTest.h"
+#include "Tests/AutomatedTestSkillTreeValidationManager.h"
+#endif
+
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
 
 TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
@@ -315,6 +321,10 @@ void UActorSkillTreeComponent::SetupSkillTreeNodeObjects(const TArray<UObject*>&
 		return;
 	}
 
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectRequested(GetWorld(), this, DeferredItems.Num());
+#endif
+
 	const auto Token = FSkillTreeNodeToken::MakeToken();
 
 	FStreamableDelegate Callback;
@@ -463,6 +473,10 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 	TArray<UObject*> OutStreamableAssets;
 	(*OutResult)->GetLoadedAssets(OutStreamableAssets);
 
+#if WITH_AUTOMATION_TESTS
+	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this, OutStreamableAssets.Num());
+#endif
+
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
 		const auto* SkillTreeNodeEffectClass = Cast<UClass>(StreamableAsset);
@@ -495,6 +509,10 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 			                                                                 UActorSkillTreeComponent::GetSkillTreeDataResolverHelper(),
 			                                                                 GameplayEffectCDO);
 		}
+
+#if WITH_AUTOMATION_TESTS
+		UAutomatedTestSkillTreeValidationManager::Static_PushPrivateItemId(GetWorld(), this, PrivateItemId);
+#endif
 
 		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Tree Node with a valid PrivateId.")) ||
 			ensureAlwaysMsgf(!PrivateSkillTreeNodeIds.Contains(PrivateItemId), TEXT("Attempting to initialized a FSkillTreeNodeObject with duplicated PrivateItemId value.")))

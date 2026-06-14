@@ -196,5 +196,6 @@ private:
 	// example : Perks/Traits that are allowed to Stack. Or, shotgun +15% damage vs pistol +15% damage.
 	TArray<int32> PrivateSkillTreeNodeIds;
 
+	friend class AAutomatedTestSkillActor;
 	friend class USkillTreeResourceHandlingImpl;
 };

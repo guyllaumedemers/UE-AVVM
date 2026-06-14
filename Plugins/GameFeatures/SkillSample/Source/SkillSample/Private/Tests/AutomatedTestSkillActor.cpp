@@ -73,6 +73,27 @@ bool AAutomatedTestSkillActor::CheckContentIntegrity() const
 	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), ResourceManagerComponent);
 }
 
+bool AAutomatedTestSkillActor::CheckSkillTreeIntegrity() const
+{
+	return UAVVMAutomatedTestResourceValidationManager::Static_IsIntegral(GetWorld(), SkillTreeComponent);
+}
+
+bool AAutomatedTestSkillActor::HasSkillTreeFinishedAllStreaming() const
+{
+	if (!IsValid(SkillTreeComponent))
+	{
+		return true;
+	}
+
+	bool bHasFinishedStreaming = true;
+	for (const auto& [TokenId, StreamingHandle] : SkillTreeComponent->SkillTreeNodeHandleSystem)
+	{
+		bHasFinishedStreaming &= (StreamingHandle.IsValid() && StreamingHandle->HasLoadCompleted());
+	}
+
+	return bHasFinishedStreaming && (SkillTreeComponent->NonReplicatedActiveGameplayEffectHandles.Num() == SkillTreeComponent->SkillTreeNodeHandleSystem.Num());
+}
+
 void AAutomatedTestSkillActor::ForceCompletion() const
 {
 	(*bIsAsyncProcessCompleted) = true;

@@ -65,6 +65,20 @@ public:
 
 	void UnitTest_PreResourceLoaded()
 	{
+		RWStubSkillTree();
+		RWDataTableSkillTree();
+	}
+
+	void RWStubSkillTree()
+	{
+	}
+
+	void RWDataTableSkillTree()
+	{
+	}
+
+	void RWSkillTreeNodePrivateId()
+	{
 	}
 
 	void Setup()
@@ -137,6 +151,33 @@ public:
 		}));
 	}
 
+	void LatentWaitSkillTreeStreamingHandleComplete()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			return WeakTestActor.IsValid() && WeakTestActor->HasSkillTreeFinishedAllStreaming();
+		}));
+	}
+
+	void LatentSkillTreeCompare()
+	{
+		// @gdemers validate our resource loading request integrity
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this, WeakTestActor = TWeakObjectPtr(TestActor.Get())]
+		{
+			TestTrue("Resources loaded don't match the number requested!", WeakTestActor.IsValid() ? WeakTestActor->CheckSkillTreeIntegrity() : false);
+			return true;
+		}));
+	}
+
+	void LatentUnitTests()
+	{
+		ADD_LATENT_AUTOMATION_COMMAND(FExecuteFunction([this]
+		{
+			RWSkillTreeNodePrivateId();
+			return true;
+		}));
+	}
+
 	void LatentCleanup()
 	{
 		// @gdemers cleanup
@@ -178,6 +219,9 @@ bool SkillSampleTest::RunTest(const FString& Parameters)
 	LatentExecuteResourceLoading();
 	LatentWait();
 	LatentResourceManagerCompare();
+	LatentWaitSkillTreeStreamingHandleComplete();
+	LatentSkillTreeCompare();
+	LatentUnitTests();
 	LatentCleanup();
 #endif
 	return true;

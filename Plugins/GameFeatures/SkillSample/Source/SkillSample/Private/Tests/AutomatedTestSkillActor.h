@@ -53,7 +53,9 @@ public:
 
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
+	bool CheckSkillTreeIntegrity() const;
 	
+	bool HasSkillTreeFinishedAllStreaming() const;
 	void ForceCompletion() const;
 
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();

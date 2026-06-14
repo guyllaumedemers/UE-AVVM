@@ -189,6 +189,7 @@ public:
 
 	void RWLoadout()
 	{
+		// TODO @gdemers impl loadout unit test
 	}
 
 	void Setup()
