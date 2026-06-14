@@ -13,7 +13,6 @@ A lightweight, modular, and performance-driven framework for Unreal Engine desig
 ## 🚀 Key Features
 
 * **Modular Architecture:** Easily plug and play core systems without tight coupling.
-* **Enhanced State Management:** A robust, event-driven state machine handling [e.g., player states / game phases].
 * **Performance First:** Core heavy-lifting handled in highly optimized C++, utilizing data-oriented design where applicable.
 * **Developer Tooling:** Built-in debug imgui/draw tools and comprehensive logging categories for painless troubleshooting.
 * **Blueprint Friendly:** Clean `@Gameplay` macros and strictly validated `BlueprintCallable` / `BlueprintNativeEvent` structures.
@@ -204,7 +203,7 @@ By utilizing modular configurations (GFP_AddComponent), target actors are automa
 
 Depending on your project scale, standard object replication for massive inventories can become a bottleneck. It is highly recommended to implement a FFastArraySerializer proxy layer to mirror the internal state of your replicated UItemObject data. Ensure all data forwarding and state updates hook directly into the existing API to maintain architectural consistency.
 
-## 🛠️ Implementation Guide (How-To
+## 🛠️ Implementation Guide (How-To)
 
 The system operates on an optimized bit-encoded data scheme and decouples runtime state from visual representations:
 
@@ -283,7 +282,7 @@ Once the server updates the UAVVMReplicatedTagComponent and all required tags ar
 
 ## Batch Action & Content Processing System
 
-This GameFeature Plugin (GFP) provides a highly optimized, scalable framework for executing batch actions on registered game content. Designed to mitigate performance spikes during heavy collection management, the system allows developers to aggregate actors or data objects and process them simultaneously based on custom, user-defined execution conditions.
+This GameFeature Plugin (GFP) provides a scalable framework for executing batch actions on registered game content. Designed to mitigate performance spikes during heavy collection management, the system allows developers to aggregate actors or data objects and process them simultaneously based on custom, user-defined execution conditions.
 
 ## 🚀 Key Capabilities
 
@@ -299,15 +298,7 @@ The Batch System acts as a central registry to decouple what content needs an ac
 
 Target objects or actors register themselves with the central batch management subsystem. This places them into an un-tracked, lightweight pool, removing the need for individual actors to independently monitor or poll for state updates.
 
-### 2. Generalizing Batch Actions
-
-While currently implemented with native support for optimized AActor::Destroy batching calls, the underlying architecture is entirely generic. The API is built to be easily extended to support other bulk operations, such as:
-
-* Mass component toggling or visibility updates.
-* Batch network replication dormancy changes.
-* Collective data flushing/serialization back to disk or backend APIs.
-
-### 3. Conditional Execution
+### 2. Conditional Execution
 
 Instead of executing operations immediately upon request, the manager evaluates user-defined conditions. For example, a bulk Destroy command on a group of discarded world loot drops can be queued and executed over multiple frames, or deferred until the player looks away, ensuring a seamless, stutter-free gameplay experience.
 
@@ -439,43 +430,6 @@ Because the structure matches the inventory API, you can easily implement valida
 
 Upon successful runtime verification of a skill bitmask change (such as a player allocating a point into a new talent node), the system instantly triggers a copy update. It then automatically communicates with the player's AVVMAbilitySystemComponent to asynchronously load, cache, and grant the newly unlocked ability or attribute modifiers.
 
-## 🔗 UI & Viewmodel Integration
-
-Just as the UI layout expects a UItemObject to handle 2D item graphics, the skill system uses an equivalent stateful USkillObject runtime representation. ViewModels can query these objects directly, utilizing the bitmask layout to cleanly map out active nodes, locked paths, and dynamic tooltip numbers in the user interface.
-
----
-
-# 🤖 Automation Testing (Functional Test / Gauntlet)
-
-Current Status Note: Automated testing is actively under development across all core modules and GameFeature Plugins (GFPs) to ensure the API remains bulletproof against regression. The following matrix outlines the current validation coverage.
-
-| System / Module | Test Type | Coverage Status | Notes / Methodology |
-| :--- | :--- | :--- | :--- |
-| **AVVM Subsystem** | Functional | 🟢 **Passing** | Validates core subsystem life-cycle, initialization, and shutdown sequences. |
-| **AVVM Notification Subsystem** | Functional | 🟢 **Passing** | Tests payload routing reliability and Presenter registration callbacks. |
-| **AVVM Resource Manager Component** | Functional | 🟢 **Passing** | Utilizes **Latent Commands** to thoroughly validate asynchronous asset streaming from the `DataRegistry`. |
-| **BatchSample** | Functional | 🟢 **Passing** | Verifies conditional aggregation and bulk optimization paths (e.g., mass `AActor::Destroy`). |
-| **TransactionSample** | Functional | 🟢 **Passing** | Validates JSON parsing stability, string serialization, and historical data logging. |
-| **InventorySample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Server-client networking and multiplayer handshake testing under Gauntlet are currently being implemented. |
-| **SkillSample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Multi-client synchronization tests for bit-encoded node unlocks are currently being implemented. |
-
-## 🛠️ Running the Tests
-
-### 1. Via the Unreal Editor (Unreal Automation Tool)
-
-To execute the suite locally within the editor:
-
-* Open the Test Automation window (Window > Developer Tools > Session Frontend).
-* Navigate to the Automation tab.
-* Filter by the AVVM category prefix.
-* Select your desired tests and click Start Tests.
-
-### 2. Via Command Line (CI/CD & Gauntlet)
-
-For headless verification or build-machine integration, execute the Unreal Automation Tool via the CLI:
-
-Here is a clean, professional, and scannable automation section tailored for your GitHub README. It transforms your raw list into a clear, visual matrix that highlights exactly what is covered and what is currently planned.
-
 ---
 
 ## 🤖 Automation Testing (Functional Test / Gauntlet)
@@ -489,8 +443,8 @@ Here is a clean, professional, and scannable automation section tailored for you
 | **AVVM Resource Manager Component** | Functional | 🟢 **Passing** | Utilizes **Latent Commands** to thoroughly validate asynchronous asset streaming from the `DataRegistry`. |
 | **BatchSample** | Functional | 🟢 **Passing** | Verifies conditional aggregation and bulk optimization paths (e.g., mass `AActor::Destroy`). |
 | **TransactionSample** | Functional | 🟢 **Passing** | Validates JSON parsing stability, string serialization, and historical data logging. |
-| **InventorySample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Server-client networking and multiplayer handshake testing under Gauntlet are currently being implemented. |
-| **SkillSample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Multi-client synchronization tests for bit-encoded node unlocks are currently being implemented. |
+| **InventorySample** | Unit / Functional | 🟢 **Passing** | Unit Tests are fully operational. **WIP:** Server-client networking and multiplayer handshake testing under Gauntlet are currently being implemented. |
+| **SkillSample** | Unit / Functional | 🟢 **Passing** | Unit Tests are fully operational. **WIP:** Multi-client synchronization tests for bit-encoded node unlocks are currently being implemented. |
 
 ---
 
