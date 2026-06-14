@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "SkillTreeUtils.h"
 
+#include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
@@ -259,7 +260,8 @@ TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& New
 int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& TreeNodeEffectRegistryId,
                                                       const int32 EffectLevel)
 {
-	const int32 TreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(TreeNodeEffectRegistryId);
+	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
+	const int32 TreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
 	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(EffectLevel, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
 	// TODO @gdemers add whatever information is required in the tree node encoding later
 	return (TreeNodeId + NewEffectLevel);

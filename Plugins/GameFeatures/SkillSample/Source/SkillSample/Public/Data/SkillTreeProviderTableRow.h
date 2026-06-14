@@ -44,7 +44,7 @@ struct SKILLSAMPLE_API FSkillTreeNodePhase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeDefinitionDataTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
 	TMap<FDataRegistryId, int32 /*GameplayEffect level*/> SkillTreeNodeIds;
 };
 
