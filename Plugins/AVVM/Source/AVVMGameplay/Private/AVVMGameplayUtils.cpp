@@ -75,18 +75,7 @@ bool UAVVMGameplayUtils::HasNetworkAuthority(const AActor* Actor)
 
 int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(const AActor* Actor)
 {
-	if (!IsValid(Actor))
-	{
-		return INDEX_NONE;
-	}
-
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
-	{
-		return INDEX_NONE;
-	}
-
-	const UClass* ActorClass = Actor->GetClass();
+	const UClass* ActorClass = IsValid(Actor) ? Actor->GetClass() : nullptr;
 	if (!IsValid(ActorClass))
 	{
 		return INDEX_NONE;
@@ -98,17 +87,7 @@ int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(const AActor* Actor)
 			ActorClass->GetFName()
 	};
 
-	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
-	const auto* RowValue = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(ActorUniqueId);
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-	                     TEXT("Invalid Row Entry. Make sure FAVVMActorIdentifierDataTableRow match the Data Table.")))
-	{
-		return RowValue->UniqueId;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
+	return UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(ActorUniqueId);
 }
 
 int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(const FDataRegistryId& ActorIdentifierId)
@@ -140,13 +119,8 @@ int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(const FDataRegist
 
 int32 UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(const UGameplayEffect* GameplayEffect)
 {
-	if (!IsValid(GameplayEffect))
-	{
-		return INDEX_NONE;
-	}
-
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
+	const UClass* GameplayEffectClass = IsValid(GameplayEffect) ? GameplayEffect->GetClass() : nullptr;
+	if (!IsValid(GameplayEffectClass))
 	{
 		return INDEX_NONE;
 	}
@@ -154,20 +128,10 @@ int32 UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(cons
 	const FDataRegistryId GameplayEffectUniqueId =
 	{
 			UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(),
-			GameplayEffect->GetFName()
+			GameplayEffectClass->GetFName()
 	};
 
-	// @gdemers imply we pre-cache our DT (which is fine! we can set that in editor, and is lightweight)
-	const auto* RowValue = Subsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(GameplayEffectUniqueId);
-	if (ensureAlwaysMsgf(RowValue != nullptr,
-	                     TEXT("Invalid Row Entry. Make sure FAVVMGameplayEffectIdentifierDataTableRow match the Data Table.")))
-	{
-		return RowValue->UniqueId;
-	}
-	else
-	{
-		return INDEX_NONE;
-	}
+	return UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueId);
 }
 
 int32 UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(const FDataRegistryId& GameplayEffectIdentifierId)
