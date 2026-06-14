@@ -1,221 +1,537 @@
 # UE-AVVM (Framework)
 
-UE-AVVM. Actor, View, ViewModel. Based on the **RAII** principle, define an **Actor** on which we add runtime components using Unreal **GameFeaturePlugin**. Our runtime component, **AVVMComponent**, expose a collection of **Presenter** UObject that define the architecture of a single/multiplayer game. It's lifecycle depends on it's owning typed **Outer**! Each **Presenter** UObject, **AVVMPresenter** is responsible for it's own **Manual** ViewModel instance and is **ref-count**.
+[![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7%20%2B-blue?logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-PC%20%20%7C%20Console-lightgrey.svg)]()
+[![GitHub issues](https://img.shields.io/github/issues/guyllaumedemers/UE-AVVM?style=flat-square)](https://github.com/guyllaumedemers/UE-AVVM/issues)
+[![GitHub stars](https://img.shields.io/github/stars/guyllaumedemers/UE-AVVM?style=flat-square)](https://github.com/guyllaumedemers/UE-AVVM/stargazers)
 
-Additionnally, this system is paired with a generic notification system, **AVVMNotificationSubsystem**, using **FInstancedStruct**, which favor type erasure and abstract payload information. Each **Presenter** can register to user defined **channels** using **GameplayTags**. Our api tend to favor exposing the registration process/delegate binding through Blueprints, and provide abstraction around project modules.
+A lightweight, modular, and performance-driven framework for Unreal Engine designed to streamline [e.g., Gameplay Ability Systems, AI Behavior, State Management, etc.]. Built with a **C++ core** and exposed cleanly to **Blueprints** to bridge the gap between performance and rapid prototyping.
 
-Our objective with this system is merely to reduce the challenges that come during development with the usage of **Global** ViewModel type, where often, programmers will build complex system, store information and update it's cache multiple time by interacting with multiple instance of an object. Or create one persistant object, which between seamless travel, has to be updated according to the latest state of the game. Using our system, we remove those operation and defer any data handling to Unreal **Actor Model** to instance a new set of presenters, initialize it's internal representation and display proper content.
+---
 
-Note : This system is currently a work in-progress and has for objective to remove problem caused by data persistency coming from **Global** ViewModel type misuse. A core benefit of using our system can be easilly experience during **Pawn** controller update. Runtime change of **Actor** can often be a burden when handled from a **global** standpoint but become trivial when acted on at the **Actor** level.
+## 🚀 Key Features
 
-Here's an example case explaning our expectations : 
+* **Modular Architecture:** Easily plug and play core systems without tight coupling.
+* **Enhanced State Management:** A robust, event-driven state machine handling [e.g., player states / game phases].
+* **Performance First:** Core heavy-lifting handled in highly optimized C++, utilizing data-oriented design where applicable.
+* **Developer Tooling:** Built-in debug imgui/draw tools and comprehensive logging categories for painless troubleshooting.
+* **Blueprint Friendly:** Clean `@Gameplay` macros and strictly validated `BlueprintCallable` / `BlueprintNativeEvent` structures.
 
-* Steve's controlling a Pawn **Actor**. His Pawn has health, Stamina and a Backpack interaction which allow them to open their inventory.
-* Steve sees a car.
-* Steve takes control of the car.
-* By taking control of the car, a notification was invoked during the **OnPossesChanged**, and now our HUD elements have all updated with what a user would normally expect from a driving experience. We no longer have a backpack showing, our stamina has now become our gas tank, etc... 
+---
 
-### Project Miro
+## 🛠️ Tech Stack & Requirements
 
-Mind map for the UE-AVVM system and general use case built using **Overwatch 2** for reference. [Note : This mind map is built based on experience gained during production of COOP multiplayer for a AAA game.](https://miro.com/app/board/uXjVI663y_k=/?share_link_id=72860067020)
+| Requirement | Supported / Recommended Version                      |
+| :--- |:-----------------------------------------------------|
+| **Unreal Engine** | UE 5.7+ (Compatible with 5.X with minor adjustments) |
+| **Language** | C++17 / C++20 & Blueprints                           |
+| **Build Tool** | UnrealBuildTool (UBT) / Visual Studio 2022 or Rider  |
+| **Target Platforms** | Windows         |
 
-#### Cheats
+---
 
-To iterate quicker on the development process and validate system features, I added cheats through **GameFeatureActions**. See **UAVVMCheatExtension** for more information! Additionally, to test the various notification channels, make sure to properly inject channel tags that follow the plugin define nomenclature. i.e : **ModuleName.ChannelName.PresenterClass.GameplayEventType**.
+## 📦 Installation & Setup
 
-Note : Cheats are really how this system will be tested and build upon. Resources to implement proper **Backend** behaviour are not available, and implementing one is out-of-scope for this project. To test any **Backend** request, simply have your **Actor** type implement the **AVVMOnlineInterface** and extend on the exposed virtual calls.
+### As a Project Plugin (Recommended)
 
-##### Tip
+1. **Clone the repository** directly into your project's `Plugins` directory:
+   
+```bash
+   cd YourProject/Plugins
+   git clone https://github.com/guyllaumedemers/UE-AVVM.git
+```
 
-Check **AVVMSample** plugin, under **GameFeaturePlugin**, for details about the project architecture! Also, a quick look at **Modules** default scripts might save you some headache!
+---
 
-##### Warnings
+## 📖 Architecture & Usage Examples
 
-ImGui plugin was added as a submodule, so it likely that any deprecation fixes made locally aren't commited to the following project. Those changes are minimal enough to keep it as such and not have to fork the existing plugin to address them on the local copy.
+UE-AVVM is a lightweight, component-driven architectural framework for Unreal Engine that implements an Actor-View-ViewModel (AVVM) pattern. By leveraging the RAII (Resource Acquisition Is Initialization) principle and Unreal's GameFeaturePlugin system, UE-AVVM modularizes game state and UI presentation, entirely eliminating the architectural headaches caused by global, persistent ViewModels.
 
-### UE-Miro
+### 🚀 Key Features
 
-[GameFeature](https://miro.com/app/board/uXjVI9C3ofk=/?share_link_id=470254566267) - UGameFeatureData are name dependent. UGameFeaturePluginStateMachine cannot register/load/activate unless it's named identical to the GameFeature plugin it represent.
+1. RAII-Based Actor Componentization
 
-[MVVM](https://miro.com/app/board/uXjVI8PJltw=/?share_link_id=952318299614)
+* **Dynamic Extension**: Define a base Actor and inject runtime functionality dynamically using Unreal’s Game Feature Plugins.
+* **The AVVMComponent**: This core component manages a collection of UObject-based Presenters that drive the architecture of both single-player and multiplayer games. 
+* **Deterministic Lifecycle**: The lifetime of the AVVMComponent is strictly bound to its strongly-typed Outer (the owning Actor), ensuring clean memory management without dangling references.
 
-[DataRegistry](https://miro.com/app/board/uXjVI8q9jKI=/)
+2. Reference-Counted Presenters & Manual ViewModels
 
-[CommonGame](https://miro.com/app/board/uXjVI8F91lE=/?share_link_id=765292763899)
+* Each AVVMPresenter is a reference-counted UObject responsible for managing its own Manual ViewModel instance.
+* This design avoids the typical pitfalls of globally scoped ViewModels by scoping data presentation strictly to the lifespan of the relevant gameplay Actor.
 
-[ImGui](https://miro.com/app/board/uXjVI5N81qQ=/?share_link_id=426653642808)
+3. Type-Erased Notification Subsystem (FInstancedStruct)
 
-[Actor Replication](https://miro.com/app/board/uXjVIxoRe8E=/?share_link_id=43947381721)
+* Features a generic notification system driven by the AVVMNotificationSubsystem.
+* Utilizes Unreal's FInstancedStruct to achieve clean type erasure, allowing you to pass abstract, lightweight data payloads seamlessly.
+* Tag-Based Channels: Presenters can dynamically register to user-defined communication channels using Gameplay Tags.
 
-#### Preview
+4. Blueprint & Modular Friendly API
 
-![UE-AVVM](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM.jpg)
+* Out-of-the-box API design that prioritizes Blueprint-exposed registration processes and delegate bindings.
+* Provides a clean layer of abstraction around project modules, keeping your codebase decoupled and maintainable.
 
-# AVVM
+---
 
-### A quick walkthrough to help the reader be made aware of the existing utilities that can be found under the AVVM plugin.
+## 🧠 The Problem It Solves
 
- * **AVVMDebugger** : Is a developer tool module that register descriptor context (i.e cheat extension) and execute draw calls using imgui immediate mode.
- * **AVVM** : Is a core system for UI development. It exposes the base class required to create View Model instance (with the Actor-View-ViewModel paradigm) and register Presenter object with the notification system from which we can forward generic payload information.
- * **AVVMOnline** : Is an interface exposing general backend request and pre-define data struct to be used with your game. Available payloads extend from the expected base class use by the AVVM notification system. User defined types exposed here all support serialization through Unreal json object and can be converted back/from string, facilitating interfacing with your backend api.
- * **AVVMGameplay** : Is a core system for gameplay development. It exposes the base class for supporting **Async Resource loading** using FDataRegistryId and **Input/Ability triggering** via tag activation.
- * ...
+In traditional Unreal Engine UI/Architecture development, relying on Global ViewModels often leads to brittle code and scaling issues:
 
-**Other modules are placeholder work for ideas that are currently floating around.**
+* State Pollution: Developers build overly complex systems that store persistent information, requiring the cache to be manually updated multiple times across different object instances.
+* Seamless Travel Headaches: Persistent global objects must be manually scrubbed, reset, and synchronized with the latest game state during seamless travel between maps.
 
-## GameFeature Plugin Sample Modules
+### Our Solution
 
-To properly vehicule the train of thought into laying down good grounds for general game production, scenario example cases were added and can be found under **AVVMGameplaySampleRuntime**, **AVVMSampleRuntime**, **InteractionSample**, **FencingSample**, **InventorySample**, etc... Note that the general architecture of this project follows Unreal Actor Model and any relevant **feature** will most-likely be derived/or owned by Unreal's three main Actor classes. i.e AGameMode, AGameState & APlayerState. General implementation details can be found in the interface those classes implement from their derived **AVVM** type, under AVVMGameplay module. It may be important to note that the general communication method favored here, and to keep modules serarate for your project, rely heavily on Interface dispatch!
+UE-AVVM eliminates manual state tracking and cache synchronization. By deferring all data handling directly to Unreal's native Actor Model, the framework automatically:
 
-### AVVMGameplay
+1. Instances a fresh set of localized Presenters alongside the Actor.
+2. Initializes the internal data representation cleanly.
+3. Displays the correct content immediately based on the new state.
 
-Under **AVVMGameplay** can be found extended version of Unreal's actor model for gameplay. Systems such as GameMode, GameState PlayerState, and Character have been extended, and configured to expose basic hooks into Unreal api. Entry point for gameplay Replication handling initialization of PlayerState, and Character have been set, ensuring support for Net synchronization of stateful UI for local, and simulated clients.
+No more manual resetting between maps, no more stale caches—just predictable, Actor-driven data flow.
 
-**Other systems**
+---
 
-* **AVVMTickScheduler** : A MLFQ (Multi-Level Feedback Queue) that aggregate Actor Tick per-class, and Round Robin through jobs.
-* **AVVMResourceManagerComponent** : A Resource loading system that Async load DataRegistry, and forward resulting data to calling Outer.
-* **AVVMNetSynchronization** : A system that register system features state, and ensure synchronization of all Actors (local, or simulated) on local client UI.
-* **AVVMAbilityInputComponent** : A system that capture user input, and trigger Abilities registered via tags (also support InputId).
-* **AVVMAbilitySystemComponent** : Extended version of Unreal ASC which handles Async loading/granting of Abilities, and AttributeSets.
-* **AVVMWorldSetting** : Extend Unreal WorldSetting, and manage user defined Rules. **AVVMWorldRule** can be defined under project, or plugin, and be registered with the system to configure gameplay, or subsystem creation on a per-world basis.
-* ...
+## 🧩 Available Extensions & Plugins
 
-### AVVMEditorToolkit
+Enhance your architectural pipeline with these official and community-supported add-on plugins for the UE-AVVM ecosystem:
 
-Under **AVVMEditorToolkit** can be found (wip) tools that are used to develop Data driven gameplay content. In the work, is the AVVMDataTableEditor which serve as a Helper for creating
-Data Table content that respect rules defined in the AVVM plugin Api (& Samples). A good example : **UInventorySample** which require ActorIdentifier to be within a user defined range based on the Category type referenced.
+| Plugin Name            | Description   | Key Feature    |
+|:-----------------------|:--------------|:---------------|
+| **AVVM**               | loremp ipsum. | lorem ipsum    |
+| **AVVMImGui**          | loremp ipsum. | lorem ipsum    |
+| **AVVMSlateIM**        | loremp ipsum. | lorem ipsum    |
+| **AVVMSample**         | loremp ipsum. | lorem ipsum    |
+| **BatchSample**        | loremp ipsum. | lorem ipsum    |
+| **DamageSample**       | loremp ipsum. | lorem ipsum    |
+| **FencingSample**      | loremp ipsum. | lorem ipsum    |
+| **HitDetectionSample** | loremp ipsum. | lorem ipsum    |
+| **InteractionSample**  | loremp ipsum. | lorem ipsum    |
+| **InventorySample**    | loremp ipsum. | lorem ipsum    |
+| **SkillSample**        | loremp ipsum. | lorem ipsum    |
+| **SnapshotSample**     | loremp ipsum. | lorem ipsum    |
+| **TeamSample**         | loremp ipsum. | lorem ipsum    |
+| **TransactionSample**  | loremp ipsum. | lorem ipsum    |
+| **WeaponSample**       | loremp ipsum. | lorem ipsum    |
 
-### PlayerTrace (FPS, and TPS)
+---
 
-**Notes** : Math explanation coming soon! 
+# Plugin Description
 
-#### Preview
+AVVM (Actor-View-ViewModel) is a modular, high-performance architecture framework designed to streamline UI development, backend integration, and core gameplay systems in Unreal Engine. By decoupling data, visual representation, and game logic, AVVM provides a scalable foundation for both production-ready games and rapid prototyping.
 
-![TPS](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_PlayerTrace_TPS.png)
+The framework is divided into four highly specialized, interconnected modules:
 
-#### Problem when using TPS in FPS
+### 🎮 Core Modules
 
-![TPS-Side](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_PlayerTrace_TPS_Side_ProblemWhenFps.png)
+* **Core UI Architecture (AVVM):** Establishes the foundation for user interface development by implementing the Actor-View-ViewModel paradigm. It exposes base classes for creating View Model instances and features a robust Presenter registration system. This system utilizes a centralized notification network to seamlessly forward generic payload data between your game logic and UI layers.
+* **Gameplay Foundation (AVVMGameplay):** Drives core gameplay execution by providing robust base classes that support asynchronous resource loading via FDataRegistryId. Additionally, it features an extensible, tag-based activation system to handle seamless input and ability triggering.
+* **Backend & Online Services (AVVMOnline):** Acts as the bridge between your game client and the web. This interface exposes standardized backend request wrappers and predefined data structures that extend the base payload classes used by the AVVM notification system. To ensure hassle-free networking, all user-defined types natively support serialization through Unreal JSON objects, allowing effortless conversion to and from strings when interacting with external REST APIs.
+* **Developer Tooling (AVVMDebugger):** A dedicated diagnostic module built to accelerate workflows. It automatically registers descriptor contexts (such as cheat extensions) and utilizes ImGui immediate mode to execute real-time debug draw calls directly in-game.
 
-### Interaction Sample [WIP - 95%]
+### ⚔️ Gameplay & Ability Systems
 
-This GameFeature plugin is a sample plugin for supporting general interaction between a Local player and a World Actor. The overall system support replication and grant players with the ability to interact with world actor while optionaly preventing contingency during multiplayer scenario.
+* **AVVMAbilitySystemComponent:** An extended version of Unreal's native Ability System Component (ASC) engineered for modern data workflows. It natively handles the asynchronous loading, caching, and granting of Abilities and AttributeSets to prevent frame drops during runtime initialization.
+* **AVVMAbilityInputComponent:** A specialized input routing component that captures user input to trigger abilities registered via gameplay tags, featuring full native support for explicit InputId mapping.
 
-#### How To
+### ⚙️ Systems, Scheduling & Networking
 
-* Through GFP_AddComponent, push an UActorInteractionComponent onto the **interactable** Actor. This component handle CRUD principle via a **record** object, acting as a handshake between a player and itself, handling future contingency for interaction ownership.
-* Define an **Interaction Implementation** object within the component for handling record locking, and GameplayEffect granting. (During Overlap events, between the item and player, a GameplayEffect is granted to the Player)
-* Define a derived impl of **FInteractionExecutionRequirements** that will validate the interaction completion on the Impl Object.
-* Define a derived impl of **FInteractionExecutionContext** that will execute an action following the interaction completion.
-* Register a **UPlayerInteractionAbilityBase** derived ability with your Player. Note : This Ability has to define a Tag identical to whats applied to the Player by the Interaction Actor during Overlap Events. Doing so allow retrieval of the Interaction Actor within the Ability via the GameplayEffect **EffectCauser**.
-* During Player Ability (**Interact**), our **Interaction** actor can be access to accept/or reject the handshake due to contingency, and conditionally execute our behaviour.
+* **AVVMResourceManagerComponent:** A standalone asset management component that asynchronously loads data from the DataRegistry and safely forwards the resulting data payloads back to the calling Outer object.
+* **AVVMTickScheduler:** A high-performance optimization system that aggregates Actor ticks on a per-class basis using a Multi-Level Feedback Queue (MLFQ) architecture, utilizing a Round Robin approach to distribute jobs efficiently across frames.
+* **AVVMNetSynchronization:** A specialized networking utility that monitors and registers individual feature states across the network, ensuring precise visual synchronization of all relevant Actors (both local and simulated) on the local client's UI.
+* **AVVMWorldSetting & AVVMWorldRule:** An extension of Unreal’s AWorldSettings that introduces per-world modular configuration. Developers can define custom AVVMWorldRule assets at the project or plugin level and register them with the system to dynamically configure gameplay logic, toggle features, or dictate subsystem creation on a per-map basis.
 
-Note : An example usage is available with **UPlayerHoldInteractionAbility**, where player can interact with the shop actor in World to open empty menu.
+### 🛠️ Developer & Editor Tooling
 
-### Transaction Sample [Completed]
+* **Featured Tool:** AVVMDataTableEditor – A custom helper utility built to enforce data integrity during Data Table creation, ensuring entries strictly adhere to constraints defined across the AVVM plugin API and Samples. For example, in the provided UInventorySample, the tool validates that an entry's ActorIdentifier falls within a strictly bounded, user-defined range determined by its referenced item Category type.
 
-This GameFeature plugin is a sample plugin for caching statistics captured during gameplay events. Transaction payload are parsed using Unreal json object and store statistics via a string field. The overall system support replication of transactions to all clients who can preview the latest updates from systems such as a leaderboard, after action report and more.
+---
 
-#### How To
+# GameFeature Plugin Descriptions
 
-* Through GFP_AddComponent, push an UGameStateTransactionHistory onto the **GameState** Actor.
-* Add plugin dependency where ever needed in your project. (**This plugin should always be loaded**)
-* Record new transaction for relevant data when needed. For display, Template methods are available for returning aggregated values.
+## World Interaction System
 
-Note : Two things!
+This GameFeature Plugin (GFP) serves as an extensible blueprint and production-ready sample for handling network-replicated interactions between local players and world actors. Built with multiplayer architecture in mind, the system utilizes a robust handshake protocol to manage actor ownership and eliminate contingency or race conditions when multiple players attempt to interact with the same object simultaneously.
 
-* Telemetry could make use of this system! (and only publish at the very end of gameplay, or before doing a crash dump)
-* This system is mostly for global gathering of data, and may be inefficient if parse for visual updates that are frequent. 
+## 🚀 Key Capabilities
 
-### Inventory Sample [WIP - 90%]
+* Handshake Ownership Protocol: Prevents interaction concurrency issues in high-latency multiplayer environments.
+* Modular Logic Splitting: Decouples validation requirements from the actual execution payload.
+* Native Gameplay Effect Integration: Leverages Unreal's Gameplay Ability System (GAS) to safely pass interaction context via active effects.
 
-This GameFeature plugin is a sample plugin for supporting content gathering. Players, enemies and inanimate objects can all use this system to exchange, acquire and/or release content from under their authority. **Edit** : Through GFP_AddComponent, your target actors will support resource loading, actor socketing, and AttributeSet registration in an asynchronous fashion. With the required interfaces, the User will be able to interface with backend or DataAsset, retrieve relevant information, and let the system parse the data configuration to fully initialized their runtime represention.
+## 🛠️ Implementation Guide (How-To)
 
-* Notes : **Network optimization** may become a bottleneck over time depending on your project size. As such, creating **FFastArraySerializer** proxy of the internal state of your UItemObject during Inventory replication should be considered. Keep in mind that such system would require a central place handling updates, and data forwarding. **Build around the existing api!** 
+To integrate a world interaction, follow this modular setup pipeline:
 
-#### How To
+### 1. The Interactable Actor Setup
 
-* Data Scheme : An item representation is structured as follow - create a BP deriving from UItemObject, this will be the runtime representation of the object owned by your inventory component Outer. It is a stateful object, and is replicated. This object handle the instancing of it's Actor counter-part.
-* Interfaces : Our inventory Outer is expected to support **InventoryProvider** interface. This allows project specific support for accessing data from either backend, or DataAsset.
-* Encoding : Our items are encoded based on the {FAVVMPlayerProfile::InventoryIds} data scheme. This means that a singular integer encapsulate information about the item unique id, or attachment unique id, storage, position within storage, stack count, and if bound or not to a character. Doing so simplify access for data retrieval in context such as item filtering, storage identification, etc...
-* Initialization : Our Actor can initialize their inventory based on a Data Structure representation of the held content, or backend. In short, a collection of {FDataRegistrId} are received and loaded based on the owning component state (as we may not allow specific items in lobbies for example). During the initialization phase, content information is configured to store the item layout within the inventory system for later access using bits encoding. Any runtime update is done on a copy, and serialized back to backend or disk when required.  
-* Socketing : Our items are able to socket themselves during the initialization phase using the same integer handling item layout within the inventory system. **Notes : Some constraint within the system currently prevent two items or more sharing a Unique Id to resolve complex attachments scheme, but will be address in a near future!** 
+Using the GameFeature data asset configuration (GFP_AddComponent), inject an UActorInteractionComponent onto your target interactable Actor.
 
-**Note : For backend, we expect your project to comply to the AVVMOnlinePlayer, and AVVMOnlineInventory standards.**
+* This component manages interaction lifecycle data via a Record Object, which serves as the server-authoritative handshake between the player and the actor to resolve any multiplayer ownership conflicts.
+* Define an Interaction Implementation Object inside this component. This object dictates how record locking behaves and manages the granting of proximity-based GameplayEffects.
 
-*Otherwise, simply call the api for requesting your inventory Outer resources, and be done with it! Actor Socketing is handled within the system, and UI expect their ViewModel to receive a UItemObject to handle visual representation of an Object. For 3D display, the UItemObject managed Actor is there for you!*
+### 2. Proximity & Context Passing
 
-### Skill Sample [WIP - 01%]
+When a player overlaps with the interactable actor, a GameplayEffect is granted to the player character. Crucially, the interactable actor assigns itself as the EffectCauser within the effect context, allowing data to cleanly bridge into the player's ability system.
 
-This GameFeature plugin is a sample plugin for supporting GameplayAbility, GameplayEffect granting based on Player skill progression.
+### 3. Validation & Execution Logic
 
-#### How To
+Configure your interaction behavior by deriving from two structural types within your Implementation Object:
 
-tbd!
+* FInteractionExecutionRequirements: Create a derived implementation to evaluate and validate whether the interaction criteria are successfully met.
+* FInteractionExecutionContext: Create a derived implementation to define the exact logic/action that fires immediately upon successful interaction validation.
 
-### Fencing Sample [Completed]
+### 4. Player Ability Binding
 
-This GameFeature plugin is a sample plugin for supporting deferred execution of events based on user requirements such as, waiting for initialization phase to be complete, ending of a cutscene or even synchronization between clients. The overall system leverage replicated tags from **UAVVMReplicatedTagComponent** to notify clients of a state change. Use the fencing system wherever possible and ensure systems like loading screen, cutscene and more... are ready to execute their next action!
+Register a custom ability derived from UPlayerInteractionAbilityBase to your player character.
 
-### Batch Sample [Completed]
+* Tag Matching: Ensure this ability is bound to a Gameplay Tag identical to the tag applied to the player by the actor's overlap GameplayEffect.
+* Actor Retrieval: Upon activation, the ability automatically unrolls the GameplayEffect payload, pulling the interactable actor out of the EffectCauser slot.
+* The Handshake: During the execution of the player's interaction ability, the target world actor is safely queried to accept or reject the handshake before running the execution context.
 
-This GameFeature plugin is a sample plugin for supporting batch actions on content that are subject for registration with the managing system. Currently only supporting batching call to AActor::Destroy, the purpose this system is to allow generalizing
-batch actions, and execute process based on user-defined conditions.
+💡 Included Example: See UPlayerHoldInteractionAbility for a complete reference implementation. This sample demonstrates a player executing a "hold input" interaction on a physical world Shop Actor to securely open an empty UI storefront menu.
 
-### Weapon Sample [WIP - 40%]
+---
 
-This GameFeature plugin is a sample plugin that define reusable construct for **Triggering** abilities tied to an Actor our player may reference during gameplay. This system, build a-top the InventorySample plugin, allow creation of **Triggering** items, and their initialization based on AttributeSet reference. Implementation details are still under development. Notes : It's suggested that the data scheme be first reviewed to better understand the constraint within which this system exist.
+## Inventory & Content Gathering System
 
-* Notes : Weapon systems, Armor, equippable items, etc... can really start bloating your codebase when derived classes are created for every iteration that exist. As such, it's suggested to use the existing base classes (example : Attachment), create derived BP class from them, and iterate on implementation details such as : What ability is this Actor granting, or set of Attrbiutes, etc... **Make your project Data-Oriented, not Class-Oriented!**
+This GameFeature Plugin (GFP) provides a data-driven, network-replicated sample system for content gathering, asset socketing, and inventory management. Engineered for versatility, this framework allows players, AI enemies, and inanimate world objects (like chests or item drops) to dynamically exchange, acquire, and release items under authoritative validation.
 
-#### Preview
+By utilizing modular configurations (GFP_AddComponent), target actors are automatically provisioned with asynchronous resource loading, automated actor socketing, and relevant AttributeSet registration out of the box.
 
-![DataScheme](https://github.com/guyllaumedemers/UE-AVVM/blob/master/Content/gitRes/UE-AVVM_DataScheme(Short).jpg)
+## 🌐 Network Optimization Note
 
-### Snapshot Sample
+Depending on your project scale, standard object replication for massive inventories can become a bottleneck. It is highly recommended to implement a FFastArraySerializer proxy layer to mirror the internal state of your replicated UItemObject data. Ensure all data forwarding and state updates hook directly into the existing API to maintain architectural consistency.
 
-tbd
+## 🛠️ Implementation Guide (How-To
 
-### Team Sample [Completed]
+The system operates on an optimized bit-encoded data scheme and decouples runtime state from visual representations:
 
-This GameFeature plugin is a sample plugin for supporting team gameplay separation, and expose the necessary api to building teams based on backend information retrieved.
+### 1. Data Schema & Runtime Representation
 
-### Damage Sample
+Items are split into a lightweight runtime data object and an optional physical actor:
 
-tbd
+* UItemObject: Create a Blueprint deriving from this class. This is a stateful, fully replicated UObject owned by the inventory component's Outer. It acts as the definitive data authority and manages the lifecycle/spawning of its physical 3D Actor counterpart in the world.
 
-**Notes : All plugins defined above are example cases that utilize the api from AVVM plugin.**
+### 2. Provider Interfaces
 
-## Tips and Tricks
+Your inventory's owning Actor (the Outer) must implement the IInventoryProvider interface. This abstraction layer bridges your game logic to your chosen data source, allowing project-specific queries to seamlessly fetch item definitions from either local DataAssets or an external database.
 
-#### Optimization (Random facts learn on Shrapnel during game thread optimization)
+### 3. Bit-Encoded Item Structuring
 
-* Gc Interval. Set your dedicated server (ds) garbage collection to be intervale so object gathering happens across multiple frames, instead of a single frame.
-* Enable Actor clustering with the Gc.
-* NiagaraSystem (NS) Culling. Make sure Niagara systems are referencing a valid **EffectType**. Doing so allows for particle systems to be culled, and free performance. (See **-Stat UObject**)
-* NS Pooling (obvious one!)
-* Tick aggregation. Reduce cache misses by loading into register the mem address of the v-func to be executed, and executing it for all ctx.
-* Disable Tick on static Actors that don't run animations (or require logic support in Tick).
-* Disable Tick on Colliders when overlaps events are the only thing of interest. PrimitiveComponents are doing overlap check following parent SceneComponent Move (See **UpdateOverlapsImpl**).
-* Reduce number of Audio systems. (Please!!!)
-* Pool Components/Actors when applicable.
-* Pack Data.
-* Use Push Model Replication (w/ Iris)
-* Set COND_ for replicated property when applicable.
-* RPC smart (not like a maniac!)
-* Monitor texture memory consumption.
-* Mesh LODs
+To maximize network efficiency and simplify data queries, items are encoded using the {FAVVMPlayerProfile::InventoryIds} bitmask layout. A single integer encapsulates all vital item metadata, including:
 
-# Automation Testing (Functional Test/ Gauntlet)
+* Unique Item ID / Attachment ID
+* Target Storage Container & Grid Position
+* Stack Count
+* Character Soulbound Status
 
-**Notes** : Automated Testing is in the work for existing GFP modules, and will keep being worked on so to ensure the api provided is put to the test. In the meantime, here's a list of the existing api that is validated!
+This packed integer enables lightning-fast item filtering, sorting, and container verification without heavy struct unpacking.
 
-* AVVM Subsystem
-* AVVM Notification Subsystem
-* AVVM Resource Manager Component (using latent command)
-* BatchSample
-* InventorySample (support Unit Tests)(Missing Functional test with server-client)
-* TransactionSample
+### 4. Initialization Pipeline
+
+Inventories can be initialized dynamically via backend payloads or local data structures:
+
+* The component receives a collection of FDataRegistryId handles.
+* The system evaluates these handles against the current component state (e.g., stripping out blacklisted items if the player is currently in a pre-game lobby).
+* Assets are loaded asynchronously. The initial layout layout is written into the bit-encoded schema.
+* Any runtime updates (moving items, splitting stacks) are performed on a local copy and serialized back to the backend or disk when saved.
+
+### 5. Automated Equipment Socketing
+
+During the initialization phase, items automatically read their bitmask data to determine their assigned equipment slots and socket themselves to the parent mesh. ⚠️ Current WIP Constraint: The system currently prevents multiple items sharing the exact same Unique ID from resolving complex sub-attachment nesting chains (e.g., a weapon mod attached to an attachment that is attached to a gun). This will be addressed in a future update.
+
+### 🔗 Online Integration Standards
+
+For external web architectures, your project is expected to comply with the native AVVMOnlinePlayer and AVVMOnlineInventory API standards.
+If you are running a purely local or standalone project, simply invoke the core API methods to request your inventory Outer resources directly. UI layouts expect their corresponding ViewModels to receive a UItemObject reference for 2D visual layout representation, while 3D viewport rendering is automatically managed by the underlying Actor reference.
+
+---
+
+## Fencing & Deferred Event System
+
+This GameFeature Plugin (GFP) provides a robust, production-ready framework for managing deferred event execution based on custom, server-authoritative state requirements. Designed to handle complex synchronization scenarios in both single-player and multiplayer environments, the Fencing System ensures that critical gameplay transitions wait smoothly until all pre-requisites are met before triggering the next sequence.
+
+## 🚀 Key Capabilities
+
+* State Synchronization: Perfect for gating execution blocks behind initialization phases, loading screens, network handshakes, or cutscene completions.
+* Network-Replicated Fences: Leverages lightweight, replicated tags via the UAVVMReplicatedTagComponent to instantaneously notify local and simulated clients of state changes.
+* Race Condition Mitigation: Guarantees that multi-client games stay perfectly in sync during critical world transitions.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Fencing System acts as a gatekeeper across your subsystems to orchestrate precise execution timing:
+
+### 1. Replicated State Tracking
+
+Instead of relying on heavy RPC polling or fragile timing delays, the system utilizes the UAVVMReplicatedTagComponent. State milestones (e.g., State.Fence.LoadingComplete, State.Fence.CutsceneFinished) are pushed to this component as replicated gameplay tags, which instantly propagate to all connected clients.
+
+### 2. Setting Up a Fence
+
+When a system needs to defer logic, it registers a "Fence" with the framework, specifying the mandatory requirements (tags) that must be present before continuing.
+
+* The system halts downstream execution, allowing background tasks—such as asset streaming, UI asset caching, or backend player profile retrieval—to complete safely without blocking the main game thread or causing script errors.
+
+### 3. Verification & Execution
+
+Once the server updates the UAVVMReplicatedTagComponent and all required tags are present on the client, the fence is considered "dropped." The system immediately executes the deferred actions across all synchronized endpoints.
+
+💡 Best Practice: Integrate the fencing system wherever multi-system synchronization is critical. Ensure that high-impact features like custom loading screen teardowns, cinematics, level streaming handshakes, and multiplayer round countdowns are "fenced" to guarantee a seamless, stutter-free user experience!
+
+---
+
+## Batch Action & Content Processing System
+
+This GameFeature Plugin (GFP) provides a highly optimized, scalable framework for executing batch actions on registered game content. Designed to mitigate performance spikes during heavy collection management, the system allows developers to aggregate actors or data objects and process them simultaneously based on custom, user-defined execution conditions.
+
+## 🚀 Key Capabilities
+
+* Performance Optimization: Prevents frame-rate hitches by grouping heavy, recurring logic into controlled execution windows.
+* Conditional Processing: Allows batch jobs to be deferred, filtered, or throttled based on specific runtime criteria (e.g., performance thresholds, gameplay states, or distance metrics).
+* Extensible Architecture: Designed to serve as a generalized template for scaling any multi-object operations across the framework.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Batch System acts as a central registry to decouple what content needs an action from when and how that action is executed:
+
+### 1. Registration Phase
+
+Target objects or actors register themselves with the central batch management subsystem. This places them into an un-tracked, lightweight pool, removing the need for individual actors to independently monitor or poll for state updates.
+
+### 2. Generalizing Batch Actions
+
+While currently implemented with native support for optimized AActor::Destroy batching calls, the underlying architecture is entirely generic. The API is built to be easily extended to support other bulk operations, such as:
+
+* Mass component toggling or visibility updates.
+* Batch network replication dormancy changes.
+* Collective data flushing/serialization back to disk or backend APIs.
+
+### 3. Conditional Execution
+
+Instead of executing operations immediately upon request, the manager evaluates user-defined conditions. For example, a bulk Destroy command on a group of discarded world loot drops can be queued and executed over multiple frames, or deferred until the player looks away, ensuring a seamless, stutter-free gameplay experience.
+
+---
+
+## GameState Transaction History & Analytics
+
+This GameFeature Plugin (GFP) provides a lightweight, network-replicated caching system for capturing telemetry and statistics during gameplay events. By parsing transaction payloads into Unreal JSON objects and storing them as serialized strings, the system delivers a flexible, schema-agnostic data pipeline. It natively supports full client replication, allowing players to view real-time synchronized updates across global UI features like leaderboards, match recaps, and after-action reports.
+
+## 🚀 Key Capabilities
+
+* Flexible JSON Payloads: Leverages Unreal's JSON object architecture to store varying data structures into string fields without breaking runtime compatibility.
+* Global Synchronization: Replicates critical transaction logs across all connected clients for instant UI previewing.
+* Dual-Purpose Design: Operates as both an in-game data aggregator and a lightweight telemetry system.
+
+## ⚠️ Performance & Usage Considerations
+
+* Frequency Constraints: This system is architected for global, high-level data gathering. It is inefficient to parse these string-serialized payloads for high-frequency, frame-by-frame visual updates.
+* Telemetry & Crash Reporting: This framework is an excellent candidate for local telemetry buffering; data can be cached seamlessly throughout the match and published to external endpoints only at the end of gameplay or immediately prior to writing a crash dump.
+
+## 🛠️ Implementation Guide (How-To)
+
+To begin logging and tracking match-wide statistics, follow this implementation pipeline:
+
+### 1. GameState Initialization
+
+Using the GameFeature data asset configuration (GFP_AddComponent), inject the UGameStateTransactionHistory component directly onto your project's AGameState actor.
+
+### 2. Dependency Management
+
+Add this plugin as a dependency inside the modules where telemetry or stats tracking is required. Because this system acts as a foundational data logger, this plugin should always remain loaded during the match lifecycle.
+
+### 3. Recording & Querying Transactions
+
+* Writing Data: Invoke the recording API whenever a significant gameplay event occurs (e.g., player elimination, objective capture, match milestone reached) to push a new transaction into the history log.
+* Reading Data: For UI and display systems, utilize the built-in C++ Template methods to safely parse, filter, and return aggregated values from the string-serialized history pool.
+
+---
+
+## Weapon & Equippable Item Framework
+
+This GameFeature Plugin (GFP) provides a foundation for handling equippable, triggering actors (such as weapons, armor, or tools) that grant and activate abilities on the player character. Built directly on top of the Inventory Sample plugin, this framework bridges item inventory states with real-time gameplay execution, enabling modular item initialization powered by automated AttributeSet registration.
+
+## 🎯 Architectural Philosophy: Data-Oriented vs. Class-Oriented
+
+Weapon and equipment systems are notorious for bloating base codebases when developers create separate C++ or Blueprint classes for every minor iteration or item tier.
+
+To prevent this architectural debt, this plugin enforces a Data-Oriented Design:
+
+* Use the existing, generic base classes provided by the framework (such as the base Attachment actor).
+* Iterate strictly via data configuration in derived Blueprints or Data Assets.
+* Control unique item identities purely through data variables: What ability tags does this weapon grant? Which AttributeSet does it initialize? What meshes does it swap out?
+
+## 🛠️ Implementation & Current Status
+
+Because this framework is actively under development, developers are highly encouraged to thoroughly review the underlying Inventory Sample data schema to fully grasp the bit-encoded constraints governing item ownership and attachment structures before extending the system.
+
+### 1. The Triggering Lifecycle
+
+When an item is equipped out of the inventory system, the framework identifies it as a "Triggering" item. The system automatically handles the physical spawning and socketing of the attachment while linking the item's data structure to the player's core Ability System.
+
+### 2. Attribute Set Integration
+
+Upon equipping a weapon or piece of armor, the framework dynamically references and binds the designated AttributeSet (e.g., granting temporary MaxAmmo, WeaponSpread, or BaseDamage attributes unique to that weapon) without requiring permanent attribute bloat on the character's base Actor.
+
+### 3. Ability Mapping & Execution
+
+Once initialized, the equippable actor exposes its gameplay capability mappings to the player. The player's input or tag activation systems can then directly invoke abilities bound specifically to the currently held item context.
+
+---
+
+## Team & Matchmaking Separation System
+
+This GameFeature Plugin (GFP) provides a robust, production-ready framework for managing team alignment, player assignment, and gameplay separation. Engineered to integrate seamlessly with external server architectures, this system exposes a unified API that translates backend profile and matchmaking data into server-authoritative team structures at runtime.
+
+## 🚀 Key Capabilities
+
+* Backend-Driven Team Generation: Automatically maps incoming web/backend metadata to internal gameplay team configurations upon player initialization.
+* Modular Separation Logic: Decouples team identity from rigid character classes, allowing smooth runtime team switches, spectator setups, or multi-team game modes.
+* Framework-Wide Compatibility: Integrates cleanly with UI ViewModels for scoreboard representation and gameplay systems for friendly-fire or targeting validation.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Team System acts as an organizational layer that dictates how players and world entities interact based on their assigned allegiance:
+
+### 1. Data Retrieval & Mapping
+
+During the initialization phase (or upon match join), the framework queries the game's network/backend adapter. The system reads the incoming player profile payload and uses the Team API to assign a unique, server-validated team identifier to the player's session.
+
+### 2. Gameplay & Subsystem Isolation
+
+Once team assignments are locked, other core systems can query the Team API to conditionally execute logic. This provides immediate, out-of-the-box support for:
+
+* Targeting & Threat Evaluation: Ensuring AI behaviors or auto-target abilities differentiate between allies and hostiles.
+* UI & ViewModel Updates: Filtering scoreboard data, nameplates, and mini-map icons dynamically based on the local player's team perspective.
+* Subsystem Routing: Directing team-specific chat channels, voice streams, or specialized spawn rules efficiently.
+
+---
+
+## Skill & Talent Progression System
+
+This GameFeature Plugin (GFP) provides a data-driven, network-replicated framework for managing character skills, talent trees, and active capability progression. Built directly around the highly optimized bitmask architecture established in the Inventory Sample, this plugin treats skills, passive nodes, and masteries as lightweight data payloads. This ensures instant filtering, rapid server validation, and absolute memory efficiency in multiplayer environments.
+
+## 🚀 Key Capabilities
+
+* Unified Architectural footprint: Shares the exact same underlying identification and encoding systems as your inventory, reducing boilerplate and centralizing data formatting rules.
+* Network Efficiency: Compresses complex tree progression, node states, and skill tiers into highly optimized bitfields for minimal network replication overhead.
+* GAS & Attribute Bonding: Dynamically maps unlocked skill states to active GameplayAbilities and modifies character AttributeSets on the fly.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Skill System mirrors the workflow of your inventory framework, treating a player's skill book or talent tree as a specialized data container:
+
+### 1. Bit-Encoded Skill Layout
+
+To eliminate massive, nested structural replication over the wire, skills are encoded using the framework's native {FAVVMPlayerProfile} integer data scheme. A single packed integer encapsulates all vital skill metadata, including:
+
+* Unique Skill / Node ID (Mirroring the Item/Attachment Unique ID format).
+* Tree Column & Row Position (Mirroring the Container & Grid Position format).
+* Current Skill Rank / Tier Count (Mirroring the Stack Count format).
+* Unlock / Mutation Status (Mirroring the Soulbound / Custom Flag format).
+
+### 2. Initialization & Validation Pipeline
+
+When a player loads into the world, their skill profile is loaded asynchronously via FDataRegistryId handles. The system parses the bitmask configuration to instantly map out the player’s active character build.
+Because the structure matches the inventory API, you can easily implement validation logic using your existing editor toolkit rules (e.g., ensuring a skill's allocated points do not exceed the max tier range assigned to its specific tree category).
+
+### 3. Dynamic Ability Granting
+
+Upon successful runtime verification of a skill bitmask change (such as a player allocating a point into a new talent node), the system instantly triggers a copy update. It then automatically communicates with the player's AVVMAbilitySystemComponent to asynchronously load, cache, and grant the newly unlocked ability or attribute modifiers.
+
+## 🔗 UI & Viewmodel Integration
+
+Just as the UI layout expects a UItemObject to handle 2D item graphics, the skill system uses an equivalent stateful USkillObject runtime representation. ViewModels can query these objects directly, utilizing the bitmask layout to cleanly map out active nodes, locked paths, and dynamic tooltip numbers in the user interface.
+
+---
+
+# 🤖 Automation Testing (Functional Test / Gauntlet)
+
+Current Status Note: Automated testing is actively under development across all core modules and GameFeature Plugins (GFPs) to ensure the API remains bulletproof against regression. The following matrix outlines the current validation coverage.
+
+| System / Module | Test Type | Coverage Status | Notes / Methodology |
+| :--- | :--- | :--- | :--- |
+| **AVVM Subsystem** | Functional | 🟢 **Passing** | Validates core subsystem life-cycle, initialization, and shutdown sequences. |
+| **AVVM Notification Subsystem** | Functional | 🟢 **Passing** | Tests payload routing reliability and Presenter registration callbacks. |
+| **AVVM Resource Manager Component** | Functional | 🟢 **Passing** | Utilizes **Latent Commands** to thoroughly validate asynchronous asset streaming from the `DataRegistry`. |
+| **BatchSample** | Functional | 🟢 **Passing** | Verifies conditional aggregation and bulk optimization paths (e.g., mass `AActor::Destroy`). |
+| **TransactionSample** | Functional | 🟢 **Passing** | Validates JSON parsing stability, string serialization, and historical data logging. |
+| **InventorySample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Server-client networking and multiplayer handshake testing under Gauntlet are currently being implemented. |
+| **SkillSample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Multi-client synchronization tests for bit-encoded node unlocks are currently being implemented. |
+
+## 🛠️ Running the Tests
+
+### 1. Via the Unreal Editor (Unreal Automation Tool)
+
+To execute the suite locally within the editor:
+
+* Open the Test Automation window (Window > Developer Tools > Session Frontend).
+* Navigate to the Automation tab.
+* Filter by the AVVM category prefix.
+* Select your desired tests and click Start Tests.
+
+### 2. Via Command Line (CI/CD & Gauntlet)
+
+For headless verification or build-machine integration, execute the Unreal Automation Tool via the CLI:
+
+Here is a clean, professional, and scannable automation section tailored for your GitHub README. It transforms your raw list into a clear, visual matrix that highlights exactly what is covered and what is currently planned.
+
+---
+
+## 🤖 Automation Testing (Functional Test / Gauntlet)
+
+> **Current Status Note:** Automated testing is actively under development across all core modules and GameFeature Plugins (GFPs) to ensure the API remains bulletproof against regression. The following matrix outlines the current validation coverage.
+
+| System / Module | Test Type | Coverage Status | Notes / Methodology |
+| --- | --- | --- | --- |
+| **AVVM Subsystem** | Functional | 🟢 **Passing** | Validates core subsystem life-cycle, initialization, and shutdown sequences. |
+| **AVVM Notification Subsystem** | Functional | 🟢 **Passing** | Tests payload routing reliability and Presenter registration callbacks. |
+| **AVVM Resource Manager Component** | Functional | 🟢 **Passing** | Utilizes **Latent Commands** to thoroughly validate asynchronous asset streaming from the `DataRegistry`. |
+| **BatchSample** | Functional | 🟢 **Passing** | Verifies conditional aggregation and bulk optimization paths (e.g., mass `AActor::Destroy`). |
+| **TransactionSample** | Functional | 🟢 **Passing** | Validates JSON parsing stability, string serialization, and historical data logging. |
+| **InventorySample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Server-client networking and multiplayer handshake testing under Gauntlet are currently being implemented. |
+| **SkillSample** | Unit / Functional | 🟡 **Partial (90%)** | Unit Tests are fully operational. **WIP:** Multi-client synchronization tests for bit-encoded node unlocks are currently being implemented. |
+
+---
+
+### 🛠️ Running the Tests
+
+#### 1. Via the Unreal Editor (Unreal Automation Tool)
+
+To execute the suite locally within the editor:
+
+1. Open the **Test Automation** window (`Window > Developer Tools > Session Frontend`).
+2. Navigate to the **Automation** tab.
+3. Filter by the `AVVM` category prefix.
+4. Select your desired tests and click **Start Tests**.
+
+#### 2. Via Command Line (CI/CD & Gauntlet)
+
+For headless verification or build-machine integration, execute the Unreal Automation Tool via the CLI:
+
+```bash
+Engine\Build\BatchFiles\RunUAT.bat BuildCookRun ^
+  -project="YourProjectName" ^
+  -runautomationtests ^
+  -automationtestfilter="AVVM" ^
+  -unattended ^
+  -noleaktests
+
+```
+
+---
+
+### 📄 License
+
+#### Distributed under the MIT License. See LICENSE for more information.
+
+## ✉️ Contact & Acknowledgments
+
+If you want to discuss architectural design patterns in Unreal, have questions about this implementation, or wish to reach out regarding professional opportunities, feel free to connect:
+
+* **Developer:** Guyllaume Demers
+* **GitHub:** [click me](https://github.com/guyllaumedemers)
+* **LinkedIn:** [click me](https://www.linkedin.com/in/guyllaume-demers-4960033b1/)
+* **Project Link:** [click me](https://github.com/guyllaumedemers/UE-AVVM)
 
 ### Stay tuned!
