@@ -8,18 +8,18 @@
 
 A lightweight, modular, and performance-driven framework for Unreal Engine designed to streamline [e.g., Gameplay Ability Systems, AI Behavior, State Management, etc.]. Built with a **C++ core** and exposed cleanly to **Blueprints** to bridge the gap between performance and rapid prototyping.
 
----
-
 ## 🚀 Key Features
+
+---
 
 * **Modular Architecture:** Easily plug and play core systems without tight coupling.
 * **Performance First:** Core heavy-lifting handled in highly optimized C++, utilizing data-oriented design where applicable.
 * **Developer Tooling:** Built-in debug imgui/draw tools and comprehensive logging categories for painless troubleshooting.
 * **Blueprint Friendly:** Clean `@Gameplay` macros and strictly validated `BlueprintCallable` / `BlueprintNativeEvent` structures.
 
----
-
 ## 🛠️ Tech Stack & Requirements
+
+---
 
 | Requirement | Supported / Recommended Version                      |
 | :--- |:-----------------------------------------------------|
@@ -28,9 +28,9 @@ A lightweight, modular, and performance-driven framework for Unreal Engine desig
 | **Build Tool** | UnrealBuildTool (UBT) / Visual Studio 2022 or Rider  |
 | **Target Platforms** | Windows         |
 
----
-
 ## 📦 Installation & Setup
+
+---
 
 ### As a Project Plugin (Recommended)
 
@@ -41,13 +41,15 @@ A lightweight, modular, and performance-driven framework for Unreal Engine desig
    git clone https://github.com/guyllaumedemers/UE-AVVM.git
 ```
 
----
-
 ## 📖 Architecture & Usage Examples
+
+---
 
 UE-AVVM is a lightweight, component-driven architectural framework for Unreal Engine that implements an Actor-View-ViewModel (AVVM) pattern. By leveraging the RAII (Resource Acquisition Is Initialization) principle and Unreal's GameFeaturePlugin system, UE-AVVM modularizes game state and UI presentation, entirely eliminating the architectural headaches caused by global, persistent ViewModels.
 
 ### 🚀 Key Features
+
+---
 
 1. RAII-Based Actor Componentization
 
@@ -71,9 +73,9 @@ UE-AVVM is a lightweight, component-driven architectural framework for Unreal En
 * Out-of-the-box API design that prioritizes Blueprint-exposed registration processes and delegate bindings.
 * Provides a clean layer of abstraction around project modules, keeping your codebase decoupled and maintainable.
 
----
-
 ## 🧠 The Problem It Solves
+
+---
 
 In traditional Unreal Engine UI/Architecture development, relying on Global ViewModels often leads to brittle code and scaling issues:
 
@@ -81,6 +83,8 @@ In traditional Unreal Engine UI/Architecture development, relying on Global View
 * Seamless Travel Headaches: Persistent global objects must be manually scrubbed, reset, and synchronized with the latest game state during seamless travel between maps.
 
 ### Our Solution
+
+---
 
 UE-AVVM eliminates manual state tracking and cache synchronization. By deferring all data handling directly to Unreal's native Actor Model, the framework automatically:
 
@@ -90,9 +94,9 @@ UE-AVVM eliminates manual state tracking and cache synchronization. By deferring
 
 No more manual resetting between maps, no more stale caches—just predictable, Actor-driven data flow.
 
----
+# 🧩 Available Extensions & Plugins
 
-## 🧩 Available Extensions & Plugins
+---
 
 Enhance your architectural pipeline with these official and community-supported add-on plugins for the UE-AVVM ecosystem:
 
@@ -114,15 +118,17 @@ Enhance your architectural pipeline with these official and community-supported 
 | **TransactionSample**  | loremp ipsum. | lorem ipsum    |
 | **WeaponSample**       | loremp ipsum. | lorem ipsum    |
 
----
-
 # Plugin Description
+
+---
 
 AVVM (Actor-View-ViewModel) is a modular, high-performance architecture framework designed to streamline UI development, backend integration, and core gameplay systems in Unreal Engine. By decoupling data, visual representation, and game logic, AVVM provides a scalable foundation for both production-ready games and rapid prototyping.
 
 The framework is divided into four highly specialized, interconnected modules:
 
 ### 🎮 Core Modules
+
+---
 
 * **Core UI Architecture (AVVM):** Establishes the foundation for user interface development by implementing the Actor-View-ViewModel paradigm. It exposes base classes for creating View Model instances and features a robust Presenter registration system. This system utilizes a centralized notification network to seamlessly forward generic payload data between your game logic and UI layers.
 * **Gameplay Foundation (AVVMGameplay):** Drives core gameplay execution by providing robust base classes that support asynchronous resource loading via FDataRegistryId. Additionally, it features an extensible, tag-based activation system to handle seamless input and ability triggering.
@@ -131,10 +137,14 @@ The framework is divided into four highly specialized, interconnected modules:
 
 ### ⚔️ Gameplay & Ability Systems
 
+---
+
 * **AVVMAbilitySystemComponent:** An extended version of Unreal's native Ability System Component (ASC) engineered for modern data workflows. It natively handles the asynchronous loading, caching, and granting of Abilities and AttributeSets to prevent frame drops during runtime initialization.
 * **AVVMAbilityInputComponent:** A specialized input routing component that captures user input to trigger abilities registered via gameplay tags, featuring full native support for explicit InputId mapping.
 
 ### ⚙️ Systems, Scheduling & Networking
+
+---
 
 * **AVVMResourceManagerComponent:** A standalone asset management component that asynchronously loads data from the DataRegistry and safely forwards the resulting data payloads back to the calling Outer object.
 * **AVVMTickScheduler:** A high-performance optimization system that aggregates Actor ticks on a per-class basis using a Multi-Level Feedback Queue (MLFQ) architecture, utilizing a Round Robin approach to distribute jobs efficiently across frames.
@@ -143,13 +153,103 @@ The framework is divided into four highly specialized, interconnected modules:
 
 ### 🛠️ Developer & Editor Tooling
 
+---
+
 * **Featured Tool:** AVVMDataTableEditor – A custom helper utility built to enforce data integrity during Data Table creation, ensuring entries strictly adhere to constraints defined across the AVVM plugin API and Samples. For example, in the provided UInventorySample, the tool validates that an entry's ActorIdentifier falls within a strictly bounded, user-defined range determined by its referenced item Category type.
+
+# 🔌 Included GameFeature Plugins (GFPs)
+
+This repository leverages Unreal Engine’s Modular Game Features framework to deliver a highly decoupled, data-driven, and network-replicated gameplay architecture. Each sub-system is encapsulated as a standalone plugin, allowing features to be dynamically loaded, unloaded, or tested without polluting the project's core code.
+
+The framework is structurally divided into four foundational pillars:
+
+### ⚔️ Core Gameplay & Interactions
 
 ---
 
-# GameFeature Plugin Descriptions
+* World Interaction System: A multiplayer-ready interaction framework utilizing a server-authoritative handshake ownership protocol to eliminate concurrency race conditions. Bridges seamlessly into the Gameplay Ability System (GAS) via context-passing GameplayEffects.
+* Weapon & Equippable Item Framework: A data-oriented system for spawning, socketing, and triggering items (weapons, armor, tools). It dynamically registers item-specific AttributeSets and grants gameplay abilities without incurring permanent base-class code bloat.
 
-## World Interaction System
+### 📦 Economy & Progression Systems
+
+---
+
+* Inventory & Content Gathering System: A highly optimized inventory framework utilizing an efficient, bit-encoded integer data scheme (FAVVMPlayerProfile::InventoryIds) to compress item metadata, support asynchronous resource loading, and drastically minimize replication overhead.
+* Skill & Talent Progression System: Mirrors the inventory’s bitfield architecture to compress complex talent tree nodes, skill tiers, and unlock states into lightweight data payloads that dynamically grant GameplayAbilities upon server validation.
+
+### ⏱️ Flow & System Synchronization
+
+---
+
+* Fencing & Deferred Event System: A server-authoritative orchestration tool that utilizes lightweight, replicated gameplay tags (UAVVMReplicatedTagComponent) to defer critical gameplay loops until multi-system background tasks (loading screens, streaming, backend auth) successfully sync.
+* Batch Action & Content Processing System: A performance-optimization manager that pools registered objects and aggregates heavy, recurring logic into throttled, conditional execution windows to eliminate frame-rate spikes.
+
+### 📊 Analytics & Session Management
+
+---
+
+* GameState Transaction History & Analytics: A telemetry aggregator that serializes global match events into schema-agnostic Unreal JSON strings. Provides full client replication for live UI features (leaderboards, recaps) and doubles as a local buffer for crash reporting and analytics.
+* Team & Matchmaking Separation System: A backend-agnostic abstraction layer that maps external player profiles into server-authoritative teams, isolating Targeting/Threat evaluation, friendly fire, and UI scoreboard ViewModels.
+
+## Batch Action & Content Processing System
+
+---
+
+This GameFeature Plugin (GFP) provides a scalable framework for executing batch actions on registered game content. Designed to mitigate performance spikes during heavy collection management, the system allows developers to aggregate actors or data objects and process them simultaneously based on custom, user-defined execution conditions.
+
+## 🚀 Key Capabilities
+
+* Performance Optimization: Prevents frame-rate hitches by grouping heavy, recurring logic into controlled execution windows.
+* Conditional Processing: Allows batch jobs to be deferred, filtered, or throttled based on specific runtime criteria (e.g., performance thresholds, gameplay states, or distance metrics).
+* Extensible Architecture: Designed to serve as a generalized template for scaling any multi-object operations across the framework.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Batch System acts as a central registry to decouple what content needs an action from when and how that action is executed:
+
+### 1. Registration Phase
+
+Target objects or actors register themselves with the central batch management subsystem. This places them into an un-tracked, lightweight pool, removing the need for individual actors to independently monitor or poll for state updates.
+
+### 2. Conditional Execution
+
+Instead of executing operations immediately upon request, the manager evaluates user-defined conditions. For example, a bulk Destroy command on a group of discarded world loot drops can be queued and executed over multiple frames, or deferred until the player looks away, ensuring a seamless, stutter-free gameplay experience.
+
+## Fencing & Deferred Event System
+
+---
+
+This GameFeature Plugin (GFP) provides a robust, production-ready framework for managing deferred event execution based on custom, server-authoritative state requirements. Designed to handle complex synchronization scenarios in both single-player and multiplayer environments, the Fencing System ensures that critical gameplay transitions wait smoothly until all pre-requisites are met before triggering the next sequence.
+
+## 🚀 Key Capabilities
+
+* State Synchronization: Perfect for gating execution blocks behind initialization phases, loading screens, network handshakes, or cutscene completions.
+* Network-Replicated Fences: Leverages lightweight, replicated tags via the UAVVMReplicatedTagComponent to instantaneously notify local and simulated clients of state changes.
+* Race Condition Mitigation: Guarantees that multi-client games stay perfectly in sync during critical world transitions.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Fencing System acts as a gatekeeper across your subsystems to orchestrate precise execution timing:
+
+### 1. Replicated State Tracking
+
+Instead of relying on heavy RPC polling or fragile timing delays, the system utilizes the UAVVMReplicatedTagComponent. State milestones (e.g., State.Fence.LoadingComplete, State.Fence.CutsceneFinished) are pushed to this component as replicated gameplay tags, which instantly propagate to all connected clients.
+
+### 2. Setting Up a Fence
+
+When a system needs to defer logic, it registers a "Fence" with the framework, specifying the mandatory requirements (tags) that must be present before continuing.
+
+* The system halts downstream execution, allowing background tasks—such as asset streaming, UI asset caching, or backend player profile retrieval—to complete safely without blocking the main game thread or causing script errors.
+
+### 3. Verification & Execution
+
+Once the server updates the UAVVMReplicatedTagComponent and all required tags are present on the client, the fence is considered "dropped." The system immediately executes the deferred actions across all synchronized endpoints.
+
+💡 Best Practice: Integrate the fencing system wherever multi-system synchronization is critical. Ensure that high-impact features like custom loading screen teardowns, cinematics, level streaming handshakes, and multiplayer round countdowns are "fenced" to guarantee a seamless, stutter-free user experience!
+
+## World Interaction System (WIP - 95%)
+
+---
 
 This GameFeature Plugin (GFP) serves as an extensible blueprint and production-ready sample for handling network-replicated interactions between local players and world actors. Built with multiplayer architecture in mind, the system utilizes a robust handshake protocol to manage actor ownership and eliminate contingency or race conditions when multiple players attempt to interact with the same object simultaneously.
 
@@ -191,9 +291,9 @@ Register a custom ability derived from UPlayerInteractionAbilityBase to your pla
 
 💡 Included Example: See UPlayerHoldInteractionAbility for a complete reference implementation. This sample demonstrates a player executing a "hold input" interaction on a physical world Shop Actor to securely open an empty UI storefront menu.
 
----
+## Inventory & Content Gathering System (WIP - 90%)
 
-## Inventory & Content Gathering System
+---
 
 This GameFeature Plugin (GFP) provides a data-driven, network-replicated sample system for content gathering, asset socketing, and inventory management. Engineered for versatility, this framework allows players, AI enemies, and inanimate world objects (like chests or item drops) to dynamically exchange, acquire, and release items under authoritative validation.
 
@@ -246,159 +346,9 @@ During the initialization phase, items automatically read their bitmask data to 
 For external web architectures, your project is expected to comply with the native AVVMOnlinePlayer and AVVMOnlineInventory API standards.
 If you are running a purely local or standalone project, simply invoke the core API methods to request your inventory Outer resources directly. UI layouts expect their corresponding ViewModels to receive a UItemObject reference for 2D visual layout representation, while 3D viewport rendering is automatically managed by the underlying Actor reference.
 
----
-
-## Fencing & Deferred Event System
-
-This GameFeature Plugin (GFP) provides a robust, production-ready framework for managing deferred event execution based on custom, server-authoritative state requirements. Designed to handle complex synchronization scenarios in both single-player and multiplayer environments, the Fencing System ensures that critical gameplay transitions wait smoothly until all pre-requisites are met before triggering the next sequence.
-
-## 🚀 Key Capabilities
-
-* State Synchronization: Perfect for gating execution blocks behind initialization phases, loading screens, network handshakes, or cutscene completions.
-* Network-Replicated Fences: Leverages lightweight, replicated tags via the UAVVMReplicatedTagComponent to instantaneously notify local and simulated clients of state changes.
-* Race Condition Mitigation: Guarantees that multi-client games stay perfectly in sync during critical world transitions.
-
-## 🛠️ Implementation & Architecture Guidance
-
-The Fencing System acts as a gatekeeper across your subsystems to orchestrate precise execution timing:
-
-### 1. Replicated State Tracking
-
-Instead of relying on heavy RPC polling or fragile timing delays, the system utilizes the UAVVMReplicatedTagComponent. State milestones (e.g., State.Fence.LoadingComplete, State.Fence.CutsceneFinished) are pushed to this component as replicated gameplay tags, which instantly propagate to all connected clients.
-
-### 2. Setting Up a Fence
-
-When a system needs to defer logic, it registers a "Fence" with the framework, specifying the mandatory requirements (tags) that must be present before continuing.
-
-* The system halts downstream execution, allowing background tasks—such as asset streaming, UI asset caching, or backend player profile retrieval—to complete safely without blocking the main game thread or causing script errors.
-
-### 3. Verification & Execution
-
-Once the server updates the UAVVMReplicatedTagComponent and all required tags are present on the client, the fence is considered "dropped." The system immediately executes the deferred actions across all synchronized endpoints.
-
-💡 Best Practice: Integrate the fencing system wherever multi-system synchronization is critical. Ensure that high-impact features like custom loading screen teardowns, cinematics, level streaming handshakes, and multiplayer round countdowns are "fenced" to guarantee a seamless, stutter-free user experience!
+## Skill & Talent Progression System (WIP - 70%)
 
 ---
-
-## Batch Action & Content Processing System
-
-This GameFeature Plugin (GFP) provides a scalable framework for executing batch actions on registered game content. Designed to mitigate performance spikes during heavy collection management, the system allows developers to aggregate actors or data objects and process them simultaneously based on custom, user-defined execution conditions.
-
-## 🚀 Key Capabilities
-
-* Performance Optimization: Prevents frame-rate hitches by grouping heavy, recurring logic into controlled execution windows.
-* Conditional Processing: Allows batch jobs to be deferred, filtered, or throttled based on specific runtime criteria (e.g., performance thresholds, gameplay states, or distance metrics).
-* Extensible Architecture: Designed to serve as a generalized template for scaling any multi-object operations across the framework.
-
-## 🛠️ Implementation & Architecture Guidance
-
-The Batch System acts as a central registry to decouple what content needs an action from when and how that action is executed:
-
-### 1. Registration Phase
-
-Target objects or actors register themselves with the central batch management subsystem. This places them into an un-tracked, lightweight pool, removing the need for individual actors to independently monitor or poll for state updates.
-
-### 2. Conditional Execution
-
-Instead of executing operations immediately upon request, the manager evaluates user-defined conditions. For example, a bulk Destroy command on a group of discarded world loot drops can be queued and executed over multiple frames, or deferred until the player looks away, ensuring a seamless, stutter-free gameplay experience.
-
----
-
-## GameState Transaction History & Analytics
-
-This GameFeature Plugin (GFP) provides a lightweight, network-replicated caching system for capturing telemetry and statistics during gameplay events. By parsing transaction payloads into Unreal JSON objects and storing them as serialized strings, the system delivers a flexible, schema-agnostic data pipeline. It natively supports full client replication, allowing players to view real-time synchronized updates across global UI features like leaderboards, match recaps, and after-action reports.
-
-## 🚀 Key Capabilities
-
-* Flexible JSON Payloads: Leverages Unreal's JSON object architecture to store varying data structures into string fields without breaking runtime compatibility.
-* Global Synchronization: Replicates critical transaction logs across all connected clients for instant UI previewing.
-* Dual-Purpose Design: Operates as both an in-game data aggregator and a lightweight telemetry system.
-
-## ⚠️ Performance & Usage Considerations
-
-* Frequency Constraints: This system is architected for global, high-level data gathering. It is inefficient to parse these string-serialized payloads for high-frequency, frame-by-frame visual updates.
-* Telemetry & Crash Reporting: This framework is an excellent candidate for local telemetry buffering; data can be cached seamlessly throughout the match and published to external endpoints only at the end of gameplay or immediately prior to writing a crash dump.
-
-## 🛠️ Implementation Guide (How-To)
-
-To begin logging and tracking match-wide statistics, follow this implementation pipeline:
-
-### 1. GameState Initialization
-
-Using the GameFeature data asset configuration (GFP_AddComponent), inject the UGameStateTransactionHistory component directly onto your project's AGameState actor.
-
-### 2. Dependency Management
-
-Add this plugin as a dependency inside the modules where telemetry or stats tracking is required. Because this system acts as a foundational data logger, this plugin should always remain loaded during the match lifecycle.
-
-### 3. Recording & Querying Transactions
-
-* Writing Data: Invoke the recording API whenever a significant gameplay event occurs (e.g., player elimination, objective capture, match milestone reached) to push a new transaction into the history log.
-* Reading Data: For UI and display systems, utilize the built-in C++ Template methods to safely parse, filter, and return aggregated values from the string-serialized history pool.
-
----
-
-## Weapon & Equippable Item Framework
-
-This GameFeature Plugin (GFP) provides a foundation for handling equippable, triggering actors (such as weapons, armor, or tools) that grant and activate abilities on the player character. Built directly on top of the Inventory Sample plugin, this framework bridges item inventory states with real-time gameplay execution, enabling modular item initialization powered by automated AttributeSet registration.
-
-## 🎯 Architectural Philosophy: Data-Oriented vs. Class-Oriented
-
-Weapon and equipment systems are notorious for bloating base codebases when developers create separate C++ or Blueprint classes for every minor iteration or item tier.
-
-To prevent this architectural debt, this plugin enforces a Data-Oriented Design:
-
-* Use the existing, generic base classes provided by the framework (such as the base Attachment actor).
-* Iterate strictly via data configuration in derived Blueprints or Data Assets.
-* Control unique item identities purely through data variables: What ability tags does this weapon grant? Which AttributeSet does it initialize? What meshes does it swap out?
-
-## 🛠️ Implementation & Current Status
-
-Because this framework is actively under development, developers are highly encouraged to thoroughly review the underlying Inventory Sample data schema to fully grasp the bit-encoded constraints governing item ownership and attachment structures before extending the system.
-
-### 1. The Triggering Lifecycle
-
-When an item is equipped out of the inventory system, the framework identifies it as a "Triggering" item. The system automatically handles the physical spawning and socketing of the attachment while linking the item's data structure to the player's core Ability System.
-
-### 2. Attribute Set Integration
-
-Upon equipping a weapon or piece of armor, the framework dynamically references and binds the designated AttributeSet (e.g., granting temporary MaxAmmo, WeaponSpread, or BaseDamage attributes unique to that weapon) without requiring permanent attribute bloat on the character's base Actor.
-
-### 3. Ability Mapping & Execution
-
-Once initialized, the equippable actor exposes its gameplay capability mappings to the player. The player's input or tag activation systems can then directly invoke abilities bound specifically to the currently held item context.
-
----
-
-## Team & Matchmaking Separation System
-
-This GameFeature Plugin (GFP) provides a robust, production-ready framework for managing team alignment, player assignment, and gameplay separation. Engineered to integrate seamlessly with external server architectures, this system exposes a unified API that translates backend profile and matchmaking data into server-authoritative team structures at runtime.
-
-## 🚀 Key Capabilities
-
-* Backend-Driven Team Generation: Automatically maps incoming web/backend metadata to internal gameplay team configurations upon player initialization.
-* Modular Separation Logic: Decouples team identity from rigid character classes, allowing smooth runtime team switches, spectator setups, or multi-team game modes.
-* Framework-Wide Compatibility: Integrates cleanly with UI ViewModels for scoreboard representation and gameplay systems for friendly-fire or targeting validation.
-
-## 🛠️ Implementation & Architecture Guidance
-
-The Team System acts as an organizational layer that dictates how players and world entities interact based on their assigned allegiance:
-
-### 1. Data Retrieval & Mapping
-
-During the initialization phase (or upon match join), the framework queries the game's network/backend adapter. The system reads the incoming player profile payload and uses the Team API to assign a unique, server-validated team identifier to the player's session.
-
-### 2. Gameplay & Subsystem Isolation
-
-Once team assignments are locked, other core systems can query the Team API to conditionally execute logic. This provides immediate, out-of-the-box support for:
-
-* Targeting & Threat Evaluation: Ensuring AI behaviors or auto-target abilities differentiate between allies and hostiles.
-* UI & ViewModel Updates: Filtering scoreboard data, nameplates, and mini-map icons dynamically based on the local player's team perspective.
-* Subsystem Routing: Directing team-specific chat channels, voice streams, or specialized spawn rules efficiently.
-
----
-
-## Skill & Talent Progression System
 
 This GameFeature Plugin (GFP) provides a data-driven, network-replicated framework for managing character skills, talent trees, and active capability progression. Built directly around the highly optimized bitmask architecture established in the Inventory Sample, this plugin treats skills, passive nodes, and masteries as lightweight data payloads. This ensures instant filtering, rapid server validation, and absolute memory efficiency in multiplayer environments.
 
@@ -430,9 +380,103 @@ Because the structure matches the inventory API, you can easily implement valida
 
 Upon successful runtime verification of a skill bitmask change (such as a player allocating a point into a new talent node), the system instantly triggers a copy update. It then automatically communicates with the player's AVVMAbilitySystemComponent to asynchronously load, cache, and grant the newly unlocked ability or attribute modifiers.
 
+## Team & Matchmaking Separation System
+
 ---
 
+This GameFeature Plugin (GFP) provides a robust, production-ready framework for managing team alignment, player assignment, and gameplay separation. Engineered to integrate seamlessly with external server architectures, this system exposes a unified API that translates backend profile and matchmaking data into server-authoritative team structures at runtime.
+
+## 🚀 Key Capabilities
+
+* Backend-Driven Team Generation: Automatically maps incoming web/backend metadata to internal gameplay team configurations upon player initialization.
+* Modular Separation Logic: Decouples team identity from rigid character classes, allowing smooth runtime team switches, spectator setups, or multi-team game modes.
+* Framework-Wide Compatibility: Integrates cleanly with UI ViewModels for scoreboard representation and gameplay systems for friendly-fire or targeting validation.
+
+## 🛠️ Implementation & Architecture Guidance
+
+The Team System acts as an organizational layer that dictates how players and world entities interact based on their assigned allegiance:
+
+### 1. Data Retrieval & Mapping
+
+During the initialization phase (or upon match join), the framework queries the game's network/backend adapter. The system reads the incoming player profile payload and uses the Team API to assign a unique, server-validated team identifier to the player's session.
+
+### 2. Gameplay & Subsystem Isolation
+
+Once team assignments are locked, other core systems can query the Team API to conditionally execute logic. This provides immediate, out-of-the-box support for:
+
+* Targeting & Threat Evaluation: Ensuring AI behaviors or auto-target abilities differentiate between allies and hostiles.
+* UI & ViewModel Updates: Filtering scoreboard data, nameplates, and mini-map icons dynamically based on the local player's team perspective.
+* Subsystem Routing: Directing team-specific chat channels, voice streams, or specialized spawn rules efficiently.
+
+## GameState Transaction History & Analytics
+
+---
+
+This GameFeature Plugin (GFP) provides a lightweight, network-replicated caching system for capturing telemetry and statistics during gameplay events. By parsing transaction payloads into Unreal JSON objects and storing them as serialized strings, the system delivers a flexible, schema-agnostic data pipeline. It natively supports full client replication, allowing players to view real-time synchronized updates across global UI features like leaderboards, match recaps, and after-action reports.
+
+## 🚀 Key Capabilities
+
+* Flexible JSON Payloads: Leverages Unreal's JSON object architecture to store varying data structures into string fields without breaking runtime compatibility.
+* Global Synchronization: Replicates critical transaction logs across all connected clients for instant UI previewing.
+* Dual-Purpose Design: Operates as both an in-game data aggregator and a lightweight telemetry system.
+
+## ⚠️ Performance & Usage Considerations
+
+* Frequency Constraints: This system is architected for global, high-level data gathering. It is inefficient to parse these string-serialized payloads for high-frequency, frame-by-frame visual updates.
+* Telemetry & Crash Reporting: This framework is an excellent candidate for local telemetry buffering; data can be cached seamlessly throughout the match and published to external endpoints only at the end of gameplay or immediately prior to writing a crash dump.
+
+## 🛠️ Implementation Guide (How-To)
+
+To begin logging and tracking match-wide statistics, follow this implementation pipeline:
+
+### 1. GameState Initialization
+
+Using the GameFeature data asset configuration (GFP_AddComponent), inject the UGameStateTransactionHistory component directly onto your project's AGameState actor.
+
+### 2. Dependency Management
+
+Add this plugin as a dependency inside the modules where telemetry or stats tracking is required. Because this system acts as a foundational data logger, this plugin should always remain loaded during the match lifecycle.
+
+### 3. Recording & Querying Transactions
+
+* Writing Data: Invoke the recording API whenever a significant gameplay event occurs (e.g., player elimination, objective capture, match milestone reached) to push a new transaction into the history log.
+* Reading Data: For UI and display systems, utilize the built-in C++ Template methods to safely parse, filter, and return aggregated values from the string-serialized history pool.
+
+## Weapon & Equippable Item Framework (WIP - 40%)
+
+---
+
+This GameFeature Plugin (GFP) provides a foundation for handling equippable, triggering actors (such as weapons, armor, or tools) that grant and activate abilities on the player character. Built directly on top of the Inventory Sample plugin, this framework bridges item inventory states with real-time gameplay execution, enabling modular item initialization powered by automated AttributeSet registration.
+
+## 🎯 Architectural Philosophy: Data-Oriented vs. Class-Oriented
+
+Weapon and equipment systems are notorious for bloating base codebases when developers create separate C++ or Blueprint classes for every minor iteration or item tier.
+
+To prevent this architectural debt, this plugin enforces a Data-Oriented Design:
+
+* Use the existing, generic base classes provided by the framework (such as the base Attachment actor).
+* Iterate strictly via data configuration in derived Blueprints or Data Assets.
+* Control unique item identities purely through data variables: What ability tags does this weapon grant? Which AttributeSet does it initialize? What meshes does it swap out?
+
+## 🛠️ Implementation & Current Status
+
+Because this framework is actively under development, developers are highly encouraged to thoroughly review the underlying Inventory Sample data schema to fully grasp the bit-encoded constraints governing item ownership and attachment structures before extending the system.
+
+### 1. The Triggering Lifecycle
+
+When an item is equipped out of the inventory system, the framework identifies it as a "Triggering" item. The system automatically handles the physical spawning and socketing of the attachment while linking the item's data structure to the player's core Ability System.
+
+### 2. Attribute Set Integration
+
+Upon equipping a weapon or piece of armor, the framework dynamically references and binds the designated AttributeSet (e.g., granting temporary MaxAmmo, WeaponSpread, or BaseDamage attributes unique to that weapon) without requiring permanent attribute bloat on the character's base Actor.
+
+### 3. Ability Mapping & Execution
+
+Once initialized, the equippable actor exposes its gameplay capability mappings to the player. The player's input or tag activation systems can then directly invoke abilities bound specifically to the currently held item context.
+
 ## 🤖 Automation Testing (Functional Test / Gauntlet)
+
+---
 
 > **Current Status Note:** Automated testing is actively under development across all core modules and GameFeature Plugins (GFPs) to ensure the API remains bulletproof against regression. The following matrix outlines the current validation coverage.
 
@@ -446,9 +490,9 @@ Upon successful runtime verification of a skill bitmask change (such as a player
 | **InventorySample** | Unit / Functional | 🟢 **Passing** | Unit Tests are fully operational. **WIP:** Server-client networking and multiplayer handshake testing under Gauntlet are currently being implemented. |
 | **SkillSample** | Unit / Functional | 🟢 **Passing** | Unit Tests are fully operational. **WIP:** Multi-client synchronization tests for bit-encoded node unlocks are currently being implemented. |
 
----
-
 ### 🛠️ Running the Tests
+
+---
 
 #### 1. Via the Unreal Editor (Unreal Automation Tool)
 
@@ -473,9 +517,9 @@ Engine\Build\BatchFiles\RunUAT.bat BuildCookRun ^
 
 ```
 
----
-
 ## ✉️ Contact & Acknowledgments
+
+---
 
 If you want to discuss architectural design patterns in Unreal, have questions about this implementation, or wish to reach out regarding professional opportunities, feel free to connect:
 
@@ -485,5 +529,7 @@ If you want to discuss architectural design patterns in Unreal, have questions a
 * **Project Link:** [click me](https://github.com/guyllaumedemers/UE-AVVM)
 
 ## License
+
+---
 
 Distributed under the MIT License. See `LICENSE` for more information.
