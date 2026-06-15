@@ -29,6 +29,7 @@
 #include "Data/AVVMHandshakePayload.h"
 #include "Data/InteractionExecutionContext.h"
 #include "Data/InteractionExecutionRequirements.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerState.h"
 
@@ -219,7 +220,7 @@ bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
 
 void UActorInteractionImpl::PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const
 {
-	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	const auto* Instanced = GetExecutionCtx().GetPtr<FInteractionExecutionContext>();
 	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
 	{
 		return;
@@ -232,7 +233,7 @@ void UActorInteractionImpl::PumpHeartbeat(const AActor* NewTarget, const float N
 
 void UActorInteractionImpl::Execute(const AActor* NewTarget) const
 {
-	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	const auto* Instanced = GetExecutionCtx().GetPtr<FInteractionExecutionContext>();
 	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
 	{
 		return;
@@ -244,7 +245,7 @@ void UActorInteractionImpl::Execute(const AActor* NewTarget) const
 
 void UActorInteractionImpl::Kill(const AActor* NewTarget) const
 {
-	const auto* Instanced = ExecutionCtx.GetPtr<FInteractionExecutionContext>();
+	const auto* Instanced = GetExecutionCtx().GetPtr<FInteractionExecutionContext>();
 	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
 	{
 		return;
@@ -257,13 +258,39 @@ void UActorInteractionImpl::Kill(const AActor* NewTarget) const
 bool UActorInteractionImpl::DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const
 {
 	const auto* Instanced = Compare.GetPtr<FInteractionExecutionRequirements>();
-	return (Instanced != nullptr) ? Instanced->DoesMeetRequirements(Requirements) : false;
+	return (Instanced != nullptr) ? Instanced->DoesMeetRequirements(GetRequirements()) : false;
 }
 
 const TInstancedStruct<FInteractionExecutionRequirements>& UActorInteractionImpl::GetExecutionRequirements() const
 {
-	return Requirements;
+	return GetRequirements();
 }
+
+#if WITH_EDITOR
+void UActorInteractionImpl::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FInteractionImplSparseData* SparseClassData = GetMutableInteractionImplSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->GameplayEffect = GameplayEffect_DEPRECATED;
+	SparseClassData->StartPromptInteractionChannel = StartPromptInteractionChannel_DEPRECATED;
+	SparseClassData->StopPromptInteractionChannel = StopPromptInteractionChannel_DEPRECATED;
+	SparseClassData->Requirements = Requirements_DEPRECATED;
+	SparseClassData->ExecutionCtx = ExecutionCtx_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif
 
 TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
                                                                           const AActor* NewInstigator,
@@ -351,7 +378,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 #if WITH_SERVER_CODE
 	if (Controller->HasAuthority())
 	{
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffect, const_cast<AController*>(Controller), const_cast<AActor*>(Instigator));
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GetGameplayEffect(), const_cast<AController*>(Controller), const_cast<AActor*>(Instigator));
 		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
 		AddGameplayEffectHandle(ASC, GESpecHandle);
 	}
@@ -362,7 +389,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 #endif
 	{
 		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        StartPromptInteractionChannel,
+		                                        GetStartPromptInteractionChannel(),
 		                                        Controller,
 		                                        Instigator,
 		                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(Instigator, Controller));
@@ -416,7 +443,7 @@ void UActorInteractionImpl::HandlePendingKillRecords(const TArray<UInteraction*>
 #endif
 		{
 			UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-			                                        StopPromptInteractionChannel,
+			                                        GetStopPromptInteractionChannel(),
 			                                        Controller,
 			                                        Instigator,
 			                                        FAVVMNotificationPayload::Empty);

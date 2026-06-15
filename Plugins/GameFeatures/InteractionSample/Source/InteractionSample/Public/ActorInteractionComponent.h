@@ -37,12 +37,39 @@ class UGameplayAbility;
 
 /**
  *	Class description:
+ *	
+*	FInteractionSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FInteractionSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Only allow interactions to run for holder of given tags."))
+	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Block any interaction if tags are present."))
+	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldPreventContingency = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Set the default size of our collection type."))
+	int32 DefaultAllocationSize = 6;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
+};
+
+/**
+ *	Class description:
  *
  *	UActorInteractionComponent is a system held by a world actor from which collision check are executed from. It caches a record
  *	of interaction between its owning actor and the local players that enter it's range. During that time, players can interact with the
  *	owning actor and execute actions based on the implementation object referenced.
  */
-UCLASS(ClassGroup=("Interaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=("Interaction"), Blueprintable, SparseClassDataTypes="InteractionSparseData", meta=(BlueprintSpawnableComponent))
 class INTERACTIONSAMPLE_API UActorInteractionComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -63,6 +90,11 @@ public:
 	virtual void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
 	virtual void Execute(const AActor* NewTarget) const;
 	virtual void Kill(const AActor* NewTarget) const;
+
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
 
 protected:
 	UFUNCTION()
@@ -90,21 +122,6 @@ protected:
 	UFUNCTION()
 	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Only allow interactions to run for holder of given tags."))
-	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Block any interaction if tags are present."))
-	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldPreventContingency = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Set the default size of our collection type."))
-	int32 DefaultAllocationSize = 6;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
-
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UActorInteractionImpl> InteractionImpl = nullptr;
 
@@ -113,4 +130,23 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+private:
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	FGameplayTagContainer RequiredTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY()
+	FGameplayTagContainer BlockingTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY()
+	bool bShouldPreventContingency_DEPRECATED = true;
+
+	UPROPERTY()
+	int32 DefaultAllocationSize_DEPRECATED = 6;
+
+	UPROPERTY()
+	TSubclassOf<UActorInteractionImpl> InteractionImplClass_DEPRECATED = nullptr;
+#endif
 };

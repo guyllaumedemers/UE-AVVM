@@ -38,11 +38,38 @@ class UGameplayEffect;
 class UInteraction;
 
 /**
+ *	Class description:
+ *	
+*	FInteractionImplSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FInteractionImplSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	FGameplayTag StartPromptInteractionChannel = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	TInstancedStruct<FInteractionExecutionRequirements> Requirements = TInstancedStruct<FInteractionExecutionRequirements>();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx = TInstancedStruct<FInteractionExecutionContext>();
+};
+
+/**
  *	Class Description :
  *
  *	UActorInteractionImpl is a functional class from which we run validation during a player interaction with a world actor.
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, SparseClassDataTypes="InteractionImplSparseData")
 class INTERACTIONSAMPLE_API UActorInteractionImpl : public UObject
 {
 	GENERATED_BODY()
@@ -80,6 +107,11 @@ public:
 	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const;
 	const TInstancedStruct<FInteractionExecutionRequirements>& GetExecutionRequirements() const;
 
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
+
 protected:
 	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
 	                                                   const AActor* NewInstigator,
@@ -110,24 +142,28 @@ protected:
 	                              const AActor* NewInstigator,
 	                              const AActor* NewTarget);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag StartPromptInteractionChannel = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FInteractionExecutionRequirements> Requirements;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx;
-
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+
+private:
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	TSubclassOf<UGameplayEffect> GameplayEffect_DEPRECATED = nullptr;
+
+	UPROPERTY()
+	FGameplayTag StartPromptInteractionChannel_DEPRECATED = FGameplayTag::EmptyTag;
+
+	UPROPERTY()
+	FGameplayTag StopPromptInteractionChannel_DEPRECATED = FGameplayTag::EmptyTag;
+
+	UPROPERTY()
+	TInstancedStruct<FInteractionExecutionRequirements> Requirements_DEPRECATED = TInstancedStruct<FInteractionExecutionRequirements>();
+
+	UPROPERTY()
+	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx_DEPRECATED = TInstancedStruct<FInteractionExecutionContext>();
+#endif
 };

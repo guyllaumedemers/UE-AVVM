@@ -26,6 +26,7 @@
 #include "AVVMTagUtils.h"
 #include "Interaction.h"
 #include "Components/ShapeComponent.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
@@ -61,7 +62,7 @@ void UActorInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// @gdemers allow control over collection size based on user-defined requirements.
-	Records.Reset(DefaultAllocationSize);
+	Records.Reset(GetDefaultAllocationSize());
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -76,10 +77,10 @@ void UActorInteractionComponent::BeginPlay()
 	                TEXT("Adding %s."),
 	                *GetNameSafe(UActorInteractionComponent::StaticClass()));
 
-	if (ensureAlwaysMsgf(IsValid(InteractionImplClass),
+	if (ensureAlwaysMsgf(IsValid(GetInteractionImplClass()),
 	                     TEXT("Invalid InteractionImplClass!")))
 	{
-		InteractionImpl = NewObject<UActorInteractionImpl>(this, InteractionImplClass);
+		InteractionImpl = NewObject<UActorInteractionImpl>(this, GetInteractionImplClass());
 		InteractionImpl->SafeBegin();
 	}
 
@@ -151,14 +152,14 @@ UActorInteractionComponent* UActorInteractionComponent::GetActorComponent(const 
 bool UActorInteractionComponent::StartExecution(const AActor* NewTarget) const
 {
 	return IsValid(InteractionImpl)
-		       ? InteractionImpl->StartExecute(OwningOuter.Get(), NewTarget, Records, bShouldPreventContingency)
+		       ? InteractionImpl->StartExecute(OwningOuter.Get(), NewTarget, Records, GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency)
 		       : false;
 }
 
 bool UActorInteractionComponent::StopExecution(const AActor* NewTarget) const
 {
 	return IsValid(InteractionImpl)
-		       ? InteractionImpl->StopExecute(OwningOuter.Get(), NewTarget, Records, bShouldPreventContingency)
+		       ? InteractionImpl->StopExecute(OwningOuter.Get(), NewTarget, Records, GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency)
 		       : false;
 }
 
@@ -201,6 +202,32 @@ void UActorInteractionComponent::Kill(const AActor* NewTarget) const
 	}
 }
 
+#if WITH_EDITOR
+void UActorInteractionComponent::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+ 
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FInteractionSparseData* SparseClassData = GetMutableInteractionSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->RequiredTags = RequiredTags_DEPRECATED;
+	SparseClassData->BlockingTags = BlockingTags_DEPRECATED;
+	SparseClassData->bShouldPreventContingency = bShouldPreventContingency_DEPRECATED;
+	SparseClassData->DefaultAllocationSize = DefaultAllocationSize_DEPRECATED;
+	SparseClassData->InteractionImplClass = InteractionImplClass_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif
+
 void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
                                                                   AActor* OtherActor,
                                                                   UPrimitiveComponent* OtherComp,
@@ -224,7 +251,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 		ensureAlwaysMsgf(IsValid(ReplicatedTagComponent), TEXT("Attempt to retrieve %s from invalid target."), *GetNameSafe(UAVVMReplicatedTagComponent::StaticClass()));
 	}
 
-	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, RequiredTags, BlockingTags))
+	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, GetRequiredTags(), GetBlockingTags()))
 	{
 		return;
 	}
@@ -238,7 +265,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	const bool bResult = Impl->HandleBeginOverlap(Records,
 	                                              Instigator/*World Actor*/,
 	                                              Target/*AController*/,
-	                                              bShouldPreventContingency);
+	                                              GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency);
 
 	if (bResult)
 	{
@@ -267,7 +294,7 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 		ensureAlwaysMsgf(IsValid(ReplicatedTagComponent), TEXT("Attempt to retrieve %s from invalid target."), *GetNameSafe(UAVVMReplicatedTagComponent::StaticClass()));
 	}
 
-	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, RequiredTags, BlockingTags))
+	if (!UAVVMTagUtils::DoesMeetRequirements(ReplicatedTagComponent, GetRequiredTags(), GetBlockingTags()))
 	{
 		return;
 	}
