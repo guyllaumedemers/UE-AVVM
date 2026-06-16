@@ -79,6 +79,8 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
 	};
 
+	// TODO @gdemers Add support to conditionally serializing to disk default provider based on USavedGame. This currently
+	// cause issue with testing PIE if the default provider hasnt been serialized to disk once.
 	// @gdemers get-set file from disk caching all skill tree providers representation.
 	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent);
 

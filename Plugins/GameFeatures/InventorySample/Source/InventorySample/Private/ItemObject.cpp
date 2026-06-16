@@ -549,6 +549,8 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return UInventoryUtils::CreateDefaultInventoryProviders();
 	};
 
+	// TODO @gdemers Add support to conditionally serializing to disk default provider based on USavedGame. This currently
+	// cause issue with testing PIE if the default provider hasnt been serialized to disk once.
 	// @gdemers get-set file from disk caching all inventory providers representation.
 	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent);
 
