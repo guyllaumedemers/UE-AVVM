@@ -861,8 +861,8 @@ void UActorInventoryComponent::OnPickup(UItemObject* ItemObject)
 	});
 
 	// @gdemers hard limit set by bit encoding to possible storage positions, and Ids.
-	static const int32 StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-	static const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+	static const int32 StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+	static const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 	bool bDoesStackOverflow = false;
 
 	// @gdemers an entry already exist for us to support stacking.

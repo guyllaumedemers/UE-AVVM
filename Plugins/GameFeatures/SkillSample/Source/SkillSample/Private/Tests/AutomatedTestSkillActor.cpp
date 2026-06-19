@@ -139,8 +139,8 @@ bool AAutomatedTestSkillActor::RunTest_SkillTreeNodeUniqueId(const TArray<const 
 	bool bResult = true;
 	for (const FSkillTreeNodeObject& SkillTreeObject : SkillTreeComponent->SkillTree.SkillTreeNodeObjects)
 	{
-		const int32 NonShiftedItemId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(SkillTreeObject.GetSkillTreeNodePrivateId());
-		bResult &= CheckGameplayEffectIdentifier(NonShiftedItemId, GameplayEffectIdentifiers);
+		const int32 PhysicalGlobalId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(SkillTreeObject.GetSkillTreeNodePrivateId());
+		bResult &= CheckGameplayEffectIdentifier(PhysicalGlobalId, GameplayEffectIdentifiers);
 	}
 
 	return bResult;

@@ -72,7 +72,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,
 	                                       const TArray<int32>& NewPrivateIds,
-	                                       const int32 SkillTreeId);
+	                                       const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);

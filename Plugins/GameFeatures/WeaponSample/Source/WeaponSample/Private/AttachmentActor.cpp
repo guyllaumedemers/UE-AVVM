@@ -69,9 +69,9 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
 		// target a triggering actor.
 		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-		                                                      GET_ITEM_ID_ENCODING_BIT_RANGE,
-		                                                      GET_ITEM_ID_ENCODING_RSHIFT,
-		                                                      CHECK_CHARACTER_DEPENDENT_ENCODING);
+		                                                      GET_ELEMENT_RELATIONSHIP_BIT_RANGE,
+		                                                      GET_ELEMENT_RELATIONSHIP_RSHIFT,
+		                                                      FILTER_CHARACTER_RELATIONSHIP_BIT);
 	}
 	else
 	{
@@ -87,10 +87,10 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
 	}
 
-	// @gdemers from our sub-set of attachments that are equipped to the target actor dependency set, we validate our input attachment against possible match.
+	// @gdemers TODO @gdemers revisit this. may no longer work with new encoding. we may have to translate the id retrieved from the dependencies
 	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-	                                                      GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
-	                                                      GET_ATTACHMENT_ID_ENCODING_RSHIFT,
+	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT,
 	                                                      SearchUniqueId);
 
 	if (!Dependencies.IsEmpty())

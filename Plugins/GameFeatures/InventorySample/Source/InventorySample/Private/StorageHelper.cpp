@@ -28,7 +28,7 @@ void FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<co
 {
 	const TArray<int32> SearchResults = Items.FilterByPredicate([](const int32 Value)
 	{
-		const int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(Value, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 StorageId = UAVVMOnlineEncodingUtils::FilterInt32(Value, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
 		return (!!StorageId);
 	});
 
@@ -66,17 +66,17 @@ void FStorageHelper::HandleStorageAssignment(const TMap<int32, TWeakObjectPtr<co
 			continue;
 		}
 
-		const int32 FilteredStorageId = UAVVMOnlineEncodingUtils::FilterInt32(StoragePrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 FilteredStorageId = UAVVMOnlineEncodingUtils::FilterInt32(StoragePrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
 		for (int32 i = StorageStartPosition; (i < Items.Num()) && (i < (StorageStartPosition + StorageMaxCapacity)); ++i)
 		{
-			const int32 Storage = UAVVMOnlineEncodingUtils::FilterInt32(Items[i], GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+			const int32 Storage = UAVVMOnlineEncodingUtils::FilterInt32(Items[i], GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
 			if (true == !!Storage)
 			{
 				continue;
 			}
 
 			const int32 StoragePosition = ((i - StorageStartPosition) % StorageMaxCapacity);
-			Items[i] += (FilteredStorageId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition + 1/*always start at one*/, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT));
+			Items[i] += (FilteredStorageId + UAVVMOnlineEncodingUtils::EncodeInt32(StoragePosition + 1/*always start at one*/, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT));
 		}
 
 		StorageStartPosition += StorageMaxCapacity;

@@ -146,8 +146,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemUniqueId(const TArray<const FAVVM
 			continue;
 		}
 
-		const int32 NonShiftedItemId = UItemObjectUtils::FilterItem(ItemObject);
-		bResult &= CheckActorIdentifier(NonShiftedItemId, ActorIdentifiers);
+		const int32 PhysicalGlobalId = UItemObjectUtils::FilterItem(ItemObject);
+		bResult &= CheckActorIdentifier(PhysicalGlobalId, ActorIdentifiers);
 	}
 
 	return bResult;
@@ -174,11 +174,11 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 			continue;
 		}
 
-		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-		const int32 MaxStorageCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent.Get(), ShiftedStorageId);
+		const int32 RuntimeStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 MaxStorageCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent.Get(), RuntimeStorageId);
 		
 		// @gdemers test that the max storage capacity retrieved for this storage item is indeed handling correctly being maxed out.
-		bResult &= (UItemObjectUtils::HasStorageReachMaxCapacity(InventoryComponent.Get(), ShiftedStorageId, MaxStorageCapacity));
+		bResult &= (UItemObjectUtils::HasStorageReachMaxCapacity(InventoryComponent.Get(), RuntimeStorageId, MaxStorageCapacity));
 		bResult &= (MaxStorageCapacity > 0);
 	}
 	
@@ -189,8 +189,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		// @gdemers test setting storage on an item in world.
 		FStorageQualifierContextArgs Params;
 		Params.PrivateItemIds = InventoryComponent->PrivateItemIds;
-		Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-		Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+		Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+		Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 		Params.CurrentStoragePosition = INDEX_NONE;
 		Params.CurrentStorageId = INDEX_NONE;
 
@@ -198,14 +198,14 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		UItemObjectUtils::QualifyStorage(InventoryComponent.Get(), Params, TestObject);
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(TestObject);
-		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT);
 		
 		TestObject->ModifyRuntimeStorageId(ShiftedStorageId);
 		TestObject->ModifyRuntimeStoragePosition(ShiftedStoragePosition);
 
 		// @gdemers test assigned storage id.
-		const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE);
+		const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 		bResult &= ((ShiftedStorageId < StorageIdBounds) && (ShiftedStorageId > 0));
 
 		// @gdemers test assigned storage position.
@@ -222,7 +222,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 				continue;
 			}
 
-			const int32 NewShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+			const int32 NewShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT);
 			if (false == (NewShiftedStoragePosition ^ ShiftedStoragePosition))
 			{
 				bResult &= false;
@@ -241,8 +241,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(this);
 		const FString OutInventoryProviders = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);
 
-		const int32 NonShiftedItemId = UItemObjectUtils::FilterItem(TestObject);
-		const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(OutInventoryProviders, {}, NonShiftedItemId);
+		const int32 PhysicalGlobalId = UItemObjectUtils::FilterItem(TestObject);
+		const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(OutInventoryProviders, {}, PhysicalGlobalId);
 		bResult &= (PrivateItemId != INDEX_NONE);
 
 		// @gdemers revert changes made to the inventory system for subsequent cases.
@@ -254,8 +254,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		UItemObjectUtils::NullifyStorage(TestObject);
 
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(TestObject);
-		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT);
 
 		bResult &= (ShiftedStorageId == 0);
 		bResult &= (ShiftedStoragePosition == 0);
@@ -284,7 +284,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
 
 		// @gdemers test referencing a valid stack count. i.e non-zero.
-		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
+		const int32 ItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ELEMENT_STACK_COUNT_BIT_RANGE, GET_ELEMENT_STACK_COUNT_RSHIFT);
 		bResult &= (ItemStackCount > 0);
 
 		// @gdemers test splitting an object with count overflow.
@@ -313,8 +313,8 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		// @gdemers test serializing split objects back to disk, and read from them.
 		FStorageQualifierContextArgs Params;
 		Params.PrivateItemIds = InventoryComponent->PrivateItemIds;
-		Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-		Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+		Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+		Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 		Params.CurrentStoragePosition = INDEX_NONE;
 		Params.CurrentStorageId = INDEX_NONE;
 
@@ -336,11 +336,13 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStacking() const
 		if (IsValid(SingleSplit))
 		{
 			// @gdemers item types share the same ItemId, as such, our only way of differentiating is through storage position.
-			const int32 NonShiftedPrivateItemId = UItemObjectUtils::GetPrivateItemId(SingleSplit);
-			const int32 NonShiftedStoragePosition = UItemObjectUtils::FilterStoragePosition(NonShiftedPrivateItemId);
-			const int32 NewPrivateItemId = UInventoryUtils::GetItemPrivateIdUsingStoragePosition(OutInventoryProviders, {}, NonShiftedStoragePosition);
-			const int32 NewItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
-			bResult &= (NewPrivateItemId != INDEX_NONE);
+			const int32 PrivateItemId = UItemObjectUtils::GetPrivateItemId(SingleSplit);
+			const int32 StoragePosition = UItemObjectUtils::FilterStoragePosition(PrivateItemId);
+			
+			const int32 SearchResult_PrivateItemId = UInventoryUtils::GetItemPrivateIdUsingStoragePosition(OutInventoryProviders, {}, StoragePosition);
+			const int32 NewItemStackCount = UAVVMOnlineEncodingUtils::DecodeInt32(SearchResult_PrivateItemId, GET_ELEMENT_STACK_COUNT_BIT_RANGE, GET_ELEMENT_STACK_COUNT_RSHIFT);
+			
+			bResult &= (SearchResult_PrivateItemId != INDEX_NONE);
 			bResult &= (NewItemStackCount == SingleSplit->GetRuntimeCount());
 		}
 	}
@@ -385,8 +387,8 @@ bool AAutomatedTestInventoryActor::RunTest_InventoryBounds() const
 			// @gdemers setup storage information so we can 
 			FStorageQualifierContextArgs Params;
 			Params.PrivateItemIds = InventoryComponent->PrivateItemIds;
-			Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-			Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE);
+			Params.StoragePositionBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+			Params.StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 			Params.CurrentStoragePosition = INDEX_NONE;
 			Params.CurrentStorageId = INDEX_NONE;
 

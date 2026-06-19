@@ -261,10 +261,10 @@ int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& Tre
                                                       const int32 EffectLevel)
 {
 	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
-	const int32 TreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
-	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
+	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
+	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
 	// TODO @gdemers add whatever information is required in the tree node encoding later
-	return (TreeNodeId + NewEffectLevel);
+	return (PhysicalGlobalId + NewEffectLevel);
 }
 
 FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
@@ -306,7 +306,7 @@ void USkillTreeUtils::GetSkillTreeProvider(const FString& NewPayload,
 
 int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
                                                  const TArray<int32>& NewPrivateIds,
-                                                 const int32 SkillTreeId)
+                                                 const int32 PhysicalGlobalId)
 {
 	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
 	NSJsonSkillTree::FromString(NewPayload, OutProvider);
@@ -317,12 +317,12 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 		FilteredSet.Remove(PrivateId);
 	}
 
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = SkillTreeId](const int32 Value)
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = PhysicalGlobalId](const int32 Value)
 	{
-		// @gdemers filter Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
-		// that respect our initial bit encoding defined under AVVMOnlineSkillTree.h
-		const int32 OutValue = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
-		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
+		// from the integer into a physical id for comparison.
+		const int32 OutPhysicalGlobalId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
+		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (SearchResult != nullptr)

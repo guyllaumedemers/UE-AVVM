@@ -113,12 +113,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static int32 FilterTreeNodePrivateId(const int32 EncodedBits);
-	
-	UFUNCTION(BlueprintCallable)
-	static bool IsAttachment(const int32 EncodedBits);
-	
-	UFUNCTION(BlueprintCallable)
-	static bool IsWeapon(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
 	static FGameplayTag GetPrivateIdBlockingTag(const int32 EncodedBits); 

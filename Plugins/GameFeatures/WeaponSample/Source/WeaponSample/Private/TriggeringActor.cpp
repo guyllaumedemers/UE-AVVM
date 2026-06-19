@@ -54,10 +54,10 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 
-	// @gdemers search for all entries that partial match the element id.
+	// @gdemers TODO @gdemers revisit this. may no longer work with new encoding. we may have to translate the id retrieved from the dependencies
 	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-	                                                      GET_ITEM_ID_ENCODING_BIT_RANGE,
-	                                                      NULL,
+	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT,
 	                                                      ElementId/*{FAVVMPlayerResource::UniqueId}*/);
 
 	return Dependencies;

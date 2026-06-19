@@ -27,7 +27,6 @@
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
-#include "Backend/AVVMOnlineInventory.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -67,8 +66,8 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	const int32 NonShiftedTreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
-	if (!ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
+	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
+	if (!ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
 	                      TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
@@ -92,7 +91,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers read private tree node id from payload.
-	const int32 PrivateItemId = USkillTreeUtils::GetSkillTreeNodePrivateId(SkillTreeProviderPayload, NewPrivateIds, NonShiftedTreeNodeId);
+	const int32 PrivateItemId = USkillTreeUtils::GetSkillTreeNodePrivateId(SkillTreeProviderPayload, NewPrivateIds, PhysicalGlobalId);
 	return PrivateItemId;
 }
 
@@ -117,9 +116,9 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 NonShiftedTreeNodeId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
+	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
 
-	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(NonShiftedTreeNodeId != INDEX_NONE,
+	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
 	                                                     TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
@@ -132,12 +131,12 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		FilteredSet.Remove(ReservedItemId);
 	}
 
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = NonShiftedTreeNodeId](const int32 Value)
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = PhysicalGlobalId](const int32 Value)
 	{
-		// @gdemers filter Value (PrivateTreeNodeId) of the backend item, and returning an output value
-		// that respect our initial bit encoding defined under AVVMOnlineSkillTree.h
-		const int32 OutValue = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
-		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
+		// from the integer into a physical id for comparison.
+		const int32 OutPhysicalGlobalId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
+		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldn't retrieve the TreeNodeId.")))
@@ -154,38 +153,13 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 
 int32 USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(const int32 EncodedBits)
 {
-	// TODO @gdemers Comeback to this later.
-	int32 BitRange = INDEX_NONE;
-	int32 BitShift = INDEX_NONE;
+	// TODO @gdemers I believe that the skill tree node do not require physical address
+	// translation, but keep for consistency until proven correct.
+	int32 PhysicalOffset = 0;
 
-	if (USkillTreeNodeObjectUtils::IsAttachment(EncodedBits))
-	{
-		BitRange = GET_ATTACHMENT_ID_ENCODING_BIT_RANGE;
-		BitShift = GET_ATTACHMENT_ID_ENCODING_RSHIFT;
-	}
-	else if (USkillTreeNodeObjectUtils::IsWeapon(EncodedBits))
-	{
-		BitRange = GET_ITEM_ID_ENCODING_BIT_RANGE;
-		BitShift = GET_ITEM_ID_ENCODING_RSHIFT;
-	}
-	else
-	{
-		BitRange = GET_ITEM_ID_ENCODING_BIT_RANGE;
-		BitShift = GET_ITEM_ID_ENCODING_RSHIFT;
-	}
-
-	const int32 NonShiftedTreeNodeId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, BitRange, BitShift);
-	return NonShiftedTreeNodeId;
-}
-
-bool USkillTreeNodeObjectUtils::IsAttachment(const int32 EncodedBits)
-{
-	return !!(EncodedBits & CHECK_ATTACHMENT_DEPENDENT_ENCODING);
-}
-
-bool USkillTreeNodeObjectUtils::IsWeapon(const int32 EncodedBits)
-{
-	return !!(EncodedBits & CHECK_WEAPON_DEPENDENT_ENCODING);
+	// @gdemers translate the virtual id stored in the encoded bits into globally defined physical id
+	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
+	return (VirtualGlobalId + PhysicalOffset);
 }
 
 FGameplayTag USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(const int32 EncodedBits)

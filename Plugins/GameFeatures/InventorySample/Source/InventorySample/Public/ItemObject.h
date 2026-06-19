@@ -468,12 +468,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static bool HasStorageReachMaxCapacity(const UActorInventoryComponent* InventoryComponent,
-	                                       const int32 StorageId,
+	                                       const int32 RuntimeStorageId,
 	                                       const int32 Count);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
-	                                   const int32 StorageId);
+	                                   const int32 RuntimeStorageId);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetMaxStackCount(const UDataTable* MaxStackCountDataTable,

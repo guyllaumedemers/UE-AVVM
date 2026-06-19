@@ -24,22 +24,39 @@
 // @gdemers Skill Tree Nodes are referenced by {FAVVMPlayerResource}. More advance encoding are put in place to parse information
 // within the {FAVVMPlayerProfile::SkillIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_SKILL_TREE_ENCODING
-// @gdemers tree node (number of possible skills/perks/traits across all classes)
-#define GET_SKILL_TREE_NODE_ID_ENCODING_BIT_RANGE (9)
-#define GET_SKILL_TREE_NODE_ID_ENCODING_RSHIFT (0)
-// @gdemers 
-#define GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE (3)
-#define GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT (10)
-// @gdemers tree node position index (number of possible slots within a skill tree)
-#define GET_SKILL_TREE_NODE_POSITION_ENCODING_BIT_RANGE (5)
-#define GET_SKILL_TREE_NODE_POSITION_ENCODING_RSHIFT (14)
-// @gdemers see AVVMOnlineInventory for our items hard limit for Id range. Keep in mind, we can handle shifting
-// using our validation bits below!
-#define GET_SKILL_TREE_NODE_OWNER_ID_ENCODING_BIT_RANGE (8)
-#define GET_SKILL_TREE_NODE_OWNER_ID_ENCODING_RSHIFT (20)
-// @gdemers our skill tree may be tied to an entity, and may only allow being active when that entity
-// is active during gameplay.
-#define CHECK_PLAYER_DEPENDENT_ENCODING (1 << 29)
-#define CHECK_WEAPON_DEPENDENT_ENCODING (1 << 30)
-#define CHECK_ATTACHMENT_DEPENDENT_ENCODING (1 << 31)
+// @gdemers RELATIONSHIP Bitmask (7)
+// Tree Node	000
+// attachment	001
+// character	010
+// item			100
+#define GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE (2)
+#define GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT (0)
+// @gdemers skill tree node global unique id (2047)
+#define GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE (10)
+#define GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT (3)
+// @gdemers skill tree node id to identify duplicated instances (7) (solve the problem of ownership, and attachment composition)
+#define GET_SKILL_TREE_NODE_INSTANCED_ID_BIT_RANGE (2)
+#define GET_SKILL_TREE_NODE_INSTANCED_ID_RSHIFT (14)
+// @gdemers entry level (127)
+#define GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE (6)
+#define GET_SKILL_TREE_NODE_LEVEL_RSHIFT (17)
+// @gdemers entry position within a skill tree (255)
+#define GET_SKILL_TREE_NODE_POSITION_BIT_RANGE (7)
+#define GET_SKILL_TREE_NODE_POSITION_RSHIFT (24)
+#endif
+
+// @gdemers element lookup for supporting the socketing process -- identify dependencies between an attachment and an owner (which may have more than one instance)
+#ifdef AVVMONLINE_USE_DEFAULT_SKILL_TREE_LOOKUP_ENCODING
+// @gdemers physical id that represent the element we are evaluating dependencies for
+#define GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE (10)
+#define GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT (0)
+// @gdemers the instance id that uniquely identify 'this' element
+#define GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_BIT_RANGE (2)
+#define GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_RSHIFT (11)
+// @gdemers the virtual id of a dependency that reference our element we evaluate
+#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE (10)
+#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT (14)
+// @gdemers the instance id of a dependency that reference our element we evaluate
+#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE (2)
+#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT (25)
 #endif

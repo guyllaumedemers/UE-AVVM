@@ -123,7 +123,7 @@ void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 {
 	const FItemState OldState = RuntimeItemState;
 	
-	static const int32 MaxStorageId = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE);
+	static const int32 MaxStorageId = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 	RuntimeItemState.StorageId = FMath::Clamp<int32>(NewStorageId, 0, MaxStorageId);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
@@ -328,7 +328,7 @@ int32 UItemObject::GetMaxStackCount() const
 	const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE));
 	if (bIsStorage)
 	{
-		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
+		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
 	}
@@ -342,7 +342,7 @@ int32 UItemObject::GetMaxStackCount() const
 	}
 	else
 	{
-		static const int32 MaxStackCountBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_COUNT_ENCODING_BIT_RANGE);
+		static const int32 MaxStackCountBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_STACK_COUNT_BIT_RANGE);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
 	}
@@ -535,9 +535,9 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	const int32 NonShiftedItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
-	if (!ensureAlwaysMsgf(NonShiftedItemId != INDEX_NONE,
-	                      TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
+	const int32 PhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
+	if (!ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
+	                      TEXT("Couldn't retrieve a valid PhysicalGlobalId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
 	}
@@ -562,10 +562,10 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	}
 
 	// @gdemers read private item id from payload.
-	const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, NonShiftedItemId);
+	const int32 PrivateItemId = UInventoryUtils::GetItemPrivateId(InventoryProviderPayload, NewPrivateIds, PhysicalGlobalId);
 	const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
-	const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
-	const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
+	const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE,GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+	const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_POSITION_BIT_RANGE,GET_STORAGE_POSITION_RSHIFT);
 	const FGameplayTag SlotTag = UInventoryUtils::GetItemSlotTagFromPayload(InventoryProviderPayload, PrivateItemId);
 	UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
 	UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
@@ -596,10 +596,10 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 
 	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
-	const int32 NonShiftedItemId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
+	const int32 PhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(UnInitializedItemObject);
 
-	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(NonShiftedItemId != INDEX_NONE,
-	                                                     TEXT("Couldn't retrieve a valid ItemId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
+	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
+	                                                     TEXT("Couldn't retrieve a valid PhysicalGlobalId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
 	}
@@ -611,12 +611,12 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		FilteredSet.Remove(ReservedItemId);
 	}
 
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = NonShiftedItemId](const int32 Value)
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = PhysicalGlobalId](const int32 NewPrivateItemId)
 	{
-		// @gdemers filter Value (PrivateItemId) of the backend item, and parse it's type, returning an output value
-		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
-		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
-		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
+		// from the integer into a physical id for comparison.
+		const int32 OutPhysicalGlobalId = UItemObjectUtils::FilterItemPrivateId(NewPrivateItemId);
+		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldn't retrieve the ItemId.")))
@@ -624,8 +624,8 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		// @gdemers your backend private id that represent the allocated UItemObject.
 		const int32 PrivateItemId = (*SearchResult);
 		const int32 ItemCount = UItemObjectUtils::GetItemStartupStackCount(UnInitializedItemObject, PrivateItemId);
-		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
-		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
+		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE,GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_POSITION_BIT_RANGE,GET_STORAGE_POSITION_RSHIFT);
 		const FGameplayTag SlotTag = UInventoryUtils::GetItemSlotTag(Outer, TargetUniqueId, PrivateItemId);
 		UnInitializedItemObject->ModifyRuntimeStackCount(ItemCount);
 		UnInitializedItemObject->ModifyRuntimeStorageId(StorageId);
@@ -650,8 +650,8 @@ int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 {
 	if (IsValid(ItemObject))
 	{
-		// @gdemers return a non-shifted version of the ItemId.
-		// Keep in mind that the range of the bit encoding define the item category manipulated!
+		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
+		// from the integer into a physical id for comparison.
 		return UItemObjectUtils::FilterItemPrivateId(ItemObject->PrivateItemId);
 	}
 	else
@@ -662,36 +662,31 @@ int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 
 int32 UItemObjectUtils::FilterItemPrivateId(const int32 EncodedBits)
 {
-	int32 BitRange = INDEX_NONE;
-	int32 BitShift = INDEX_NONE;
+	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
+	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
+	int32 PhysicalOffset = 0;
 
-	// @gdemers order dependent since attachment may be tied to an item 
-	if (UItemObjectUtils::IsAttachment(EncodedBits))
+	if (UItemObjectUtils::IsItem(EncodedBits))
 	{
-		BitRange = GET_ATTACHMENT_ID_ENCODING_BIT_RANGE;
-		BitShift = GET_ATTACHMENT_ID_ENCODING_RSHIFT;
+		PhysicalOffset = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET;
+	}
+	else if (UItemObjectUtils::IsAttachment(EncodedBits))
+	{
+		PhysicalOffset = GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET;
 	}
 	else if (UItemObjectUtils::IsStorage(EncodedBits))
 	{
-		BitRange = GET_STORAGE_ID_ENCODING_BIT_RANGE;
-		BitShift = GET_STORAGE_ID_ENCODING_RSHIFT;
-	}
-	else
-	{
-		BitRange = GET_ITEM_ID_ENCODING_BIT_RANGE;
-		BitShift = GET_ITEM_ID_ENCODING_RSHIFT;
+		PhysicalOffset = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET;
 	}
 
-	const int32 NonShiftedItemId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, BitRange, BitShift);
-	return NonShiftedItemId;
+	// @gdemers translate the virtual id stored in the encoded bits into globally defined physical id
+	const int32 BaseId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, BitRange, BitShift);
+	return (BaseId + PhysicalOffset);
 }
 
 int32 UItemObjectUtils::FilterStoragePosition(const int32 EncodedBits)
 {
-	const int32 NonShiftedStoragePosition = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
-	                                                                              GET_ITEM_POSITION_ENCODING_BIT_RANGE,
-	                                                                              GET_ITEM_POSITION_ENCODING_RSHIFT);
-
+	const int32 NonShiftedStoragePosition = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT);
 	return NonShiftedStoragePosition;
 }
 
@@ -725,8 +720,8 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
 	{
-		const int32 StorageIdBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_ID_ENCODING_BIT_RANGE) << GET_STORAGE_ID_ENCODING_RSHIFT;
-		const int32 ItemPositionBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE) << GET_ITEM_POSITION_ENCODING_RSHIFT;
+		const int32 StorageIdBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE) << GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT;
+		const int32 ItemPositionBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE) << GET_STORAGE_POSITION_RSHIFT;
 		// @gdemers IMPORTANT - Order matter here!
 		PendingDropItemObject->ModifyRuntimeStoragePosition(INDEX_NONE);
 		PendingDropItemObject->ModifyRuntimeStorageId(INDEX_NONE);
@@ -750,8 +745,8 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 	TMap<int32/*StorageId*/, FStorageSlots/*OccupiedEntries*/> Storages;
 	for (const int32 PrivateItemId : Params.PrivateItemIds)
 	{
-		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE,GET_ITEM_POSITION_ENCODING_RSHIFT);
-		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE,GET_STORAGE_ID_ENCODING_RSHIFT);
+		const int32 StoragePosition = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_POSITION_BIT_RANGE,GET_STORAGE_POSITION_RSHIFT);
+		const int32 StorageId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE,GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
 		FStorageSlots& OutResult = Storages.FindOrAdd(StorageId);
 		OutResult.Slots.Add(StoragePosition);
 	}
@@ -815,8 +810,8 @@ void UItemObjectUtils::QualifyStorage(const UActorInventoryComponent* InventoryC
 
 	if (IsValid(PendingPickupItemObject))
 	{
-		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(OutMin_StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(OutMin_StoragePosition, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+		const int32 ShiftedStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(OutMin_StorageId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 ShiftedStoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(OutMin_StoragePosition, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT);
 		PendingPickupItemObject->ModifyRuntimeStorageId(OutMin_StorageId);
 		PendingPickupItemObject->ModifyRuntimeStoragePosition(OutMin_StoragePosition);
 		PendingPickupItemObject->PrivateItemId |= (ShiftedStorageId | ShiftedStoragePosition);
@@ -867,18 +862,18 @@ bool UItemObjectUtils::GetFreeStorageFromPosition(const FStorageContextArgs& Par
 }
 
 bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent* InventoryComponent,
-                                                  const int32 StorageId,
+                                                  const int32 RuntimeStorageId,
                                                   const int32 Count)
 {
 	// @gdemers our count has reach our encoding hard limit. this 100% imply that the storage is full.
 	// if theres an overflow from what design configured in DataAsset, theres a problem at the user level!
-	const bool bDoesCountReachMaxCapacity = (Count >= UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE));
+	const bool bDoesCountReachMaxCapacity = (Count >= UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE));
 	if (bDoesCountReachMaxCapacity)
 	{
 		return true;
 	}
 
-	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, StorageId);
+	const int32 StorageMaxCapacity = UItemObjectUtils::GetStorageMaxCapacity(InventoryComponent, RuntimeStorageId);
 	if (!ensureAlwaysMsgf((StorageMaxCapacity != INDEX_NONE),
 	                      TEXT("StorageId provided couldn't resolve a valid Storage Capacity.")))
 	{
@@ -889,19 +884,19 @@ bool UItemObjectUtils::HasStorageReachMaxCapacity(const UActorInventoryComponent
 }
 
 int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* InventoryComponent,
-                                              const int32 StorageId)
+                                              const int32 RuntimeStorageId)
 {
 	if (!IsValid(InventoryComponent))
 	{
 		return INDEX_NONE;
 	}
-	
-	const int32 NewStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(StorageId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
+
+	const int32 PhysicalGlobalId = (RuntimeStorageId + GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
 	// @gdemers Remember that storage are also UItemObject, and as such, they hold a tag to a capacity which refer to their max stack_count, i.e the total of items they can fit in.
 	// IMPORTANT : However, remember that when initializing data from file on disk, our item collection may or may not reference a storage, which means that retrieving its
 	// configuration from the runtime representation may be impossible at time, or ever. Example : A shop default inventory configuration set in the Data Table (proj. Settings)
 	// require capacity information for default initialization of its item layout, but doesn't care much about instancing the containers.
-	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = NewStorageId](const UItemObject* ItemObject)
+	const TObjectPtr<UItemObject>* SearchResult = InventoryComponent->Items.FindByPredicate([SearchId = PhysicalGlobalId](const UItemObject* ItemObject)
 	{
 		if (!IsValid(ItemObject))
 		{
@@ -910,7 +905,7 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 		else
 		{
 			// @gdemers get the PrivateId, and validate storage item (Not ownership).
-			const bool bResult = (false == (UItemObjectUtils::FilterItem(ItemObject)/*NonShiftedItemId*/ ^ SearchId));
+			const bool bResult = (false == (UItemObjectUtils::FilterItem(ItemObject)/*PhysicalGlobalId*/ ^ SearchId));
 			return bResult;
 		}
 	});
@@ -928,8 +923,8 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
 	if (ensureAlwaysMsgf(IsValid(MaxCountDataTable), TEXT("Missing valid StackCount Data Table in project Settings.")))
 	{
-		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_POSITION_ENCODING_BIT_RANGE);
-		const FGameplayTag& StorageCapacityTag = UInventorySettings::GetStorageCapacityTagById(NewStorageId);
+		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+		const FGameplayTag& StorageCapacityTag = UInventorySettings::GetStorageCapacityTagById(PhysicalGlobalId);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, StorageCapacityTag);
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
 	}
@@ -974,7 +969,7 @@ int32 UItemObjectUtils::GetItemStartupStackCount(const UItemObject* UnInitialize
 		return One;
 	}
 
-	const int32 StackCount = UAVVMOnlineEncodingUtils::DecodeInt32(ElementId, GET_ITEM_COUNT_ENCODING_BIT_RANGE,GET_ITEM_COUNT_ENCODING_RSHIFT);
+	const int32 StackCount = UAVVMOnlineEncodingUtils::DecodeInt32(ElementId, GET_ELEMENT_STACK_COUNT_BIT_RANGE,GET_ELEMENT_STACK_COUNT_RSHIFT);
 	return StackCount;
 }
 
@@ -985,39 +980,28 @@ int32 UItemObjectUtils::MakeRuntimePrivateItemId(const UItemObject* ItemObject)
 		return INDEX_NONE;
 	}
 
-	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(),
-	                                                               GET_ITEM_COUNT_ENCODING_BIT_RANGE,
-	                                                               GET_ITEM_COUNT_ENCODING_RSHIFT);
-
-	const int32 StorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStorageId(),
-	                                                              GET_STORAGE_ID_ENCODING_BIT_RANGE,
-	                                                              GET_STORAGE_ID_ENCODING_RSHIFT);
-
-	// TODO @gdemers storage are edge cases, and do not support positioning atm.
 	const int32 OldPrivateItemId = UItemObjectUtils::GetPrivateItemId(ItemObject);
-	if (UItemObjectUtils::IsStorage(OldPrivateItemId))
-	{
-		return (StackCount + StorageId);
-	}
 
-	// TODO @gdemers theres a problem here !
-	// MakeRuntimePrivateItemId is called from within CheckBackend, and indirectly from OnDrop, and OnPickup. This means that our inventory
-	// updates in those two cases. We may have an Actor in World representing this UItemObject, or not. If our UItemObject is an attachment, its dependent on another
-	// actor being dropped, but also being picked up. Attachment can be drop as a unique element, or parented by an outer. The encoding as to reflect all those cases, and
-	// update accordingly.
-	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId,
-	                                                           GET_ITEM_ID_ENCODING_BIT_RANGE,
-	                                                           GET_ITEM_ID_ENCODING_RSHIFT);
+	// TODO @gdemers relationship may have changed at Runtime. We need to address possible changes, and manage this!
+	const int32 RelationshipBitMask = UAVVMOnlineEncodingUtils::FilterInt32(OldPrivateItemId, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
+	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::FilterInt32(OldPrivateItemId, GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
 
-	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(ItemObject->PrivateItemId,
-	                                                                 GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
-	                                                                 GET_ATTACHMENT_ID_ENCODING_RSHIFT);
+	// @gdemers should never change, unless we add the case for destroying items, for freeing space in the inventory system.
+	// in that case, the whole set of unique instances need to be shifted by 1, and serialized again.
+	const int32 InstancedId = UAVVMOnlineEncodingUtils::FilterInt32(OldPrivateItemId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
 
-	const int32 StoragePosition = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStoragePosition(),
-	                                                                    GET_ITEM_POSITION_ENCODING_BIT_RANGE,
-	                                                                    GET_ITEM_POSITION_ENCODING_RSHIFT);
+	const int32 VirtualStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeStorageId(), GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
 
-	return (ItemId + StackCount + StorageId + StoragePosition + AttachmentId);
+	// @gdemers IMPORTANT exception case. items may be position at index 0 if equipped, or if of storage type.
+	const int32 StoragePosition = (ItemObject->GetRuntimeStoragePosition() << GET_STORAGE_POSITION_RSHIFT);
+	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ItemObject->GetRuntimeCount(), GET_ELEMENT_STACK_COUNT_BIT_RANGE, GET_ELEMENT_STACK_COUNT_RSHIFT);
+
+	return (RelationshipBitMask
+		+ VirtualGlobalId
+		+ InstancedId
+		+ VirtualStorageId
+		+ StoragePosition
+		+ StackCount);
 }
 
 int32 UItemObjectUtils::GetNumSplits(const UItemObject* SrcItem)
@@ -1051,8 +1035,8 @@ UItemObject* UItemObjectUtils::SplitObject(UObject* Outer, UItemObject* SrcItem)
 		OutItem->ModifyRuntimeStackCount(SplitResources);
 		OutItem->PrivateItemId = SrcItem->PrivateItemId;
 		// @gdemers we need to invalidate storage so we can correctly qualify it next!
-		OutItem->PrivateItemId &= ~UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_STORAGE_ID_ENCODING_BIT_RANGE, GET_STORAGE_ID_ENCODING_RSHIFT);
-		OutItem->PrivateItemId &= ~UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_ITEM_POSITION_ENCODING_BIT_RANGE, GET_ITEM_POSITION_ENCODING_RSHIFT);
+		OutItem->PrivateItemId &= ~UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		OutItem->PrivateItemId &= ~UAVVMOnlineEncodingUtils::FilterInt32(SrcItem->PrivateItemId, GET_STORAGE_POSITION_BIT_RANGE, GET_STORAGE_POSITION_RSHIFT);
 	}
 
 	return OutItem;
@@ -1089,33 +1073,44 @@ void UItemObjectUtils::DestroyWorldItemActor(const UItemObject* SrcItem)
 
 bool UItemObjectUtils::IsItem(const int32 EncodedBits)
 {
-	const int32 ItemId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
-	                                                           GET_ITEM_ID_ENCODING_BIT_RANGE,
-	                                                           GET_ITEM_ID_ENCODING_RSHIFT);
-
-	const bool bResult = !!ItemId;
-	return bResult;
+	// @gdemers See AVVMOnlineInventory.h for possible attachment encoding scheme
+	// 100 (non-assigned, i.e in storage)
+	// 110 (character dependent)
+	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
+	return (RelationshipBitmask & (1 << 2/*item bit-index*/));
 }
 
 bool UItemObjectUtils::IsAttachment(const int32 EncodedBits)
 {
-	const int32 AttachmentId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits,
-																	 GET_ATTACHMENT_ID_ENCODING_BIT_RANGE,
-																	 GET_ATTACHMENT_ID_ENCODING_RSHIFT);
-
-	const bool bResult = !!AttachmentId;
-	return bResult;
+	// @gdemers See AVVMOnlineInventory.h for possible attachment encoding scheme
+	// 001 (non-assigned, i.e in storage)
+	// 011 (character dependent)
+	// 101 (item dependent)
+	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
+	return (RelationshipBitmask & (1 << 0/*attachment bit-index*/));
 }
 
 bool UItemObjectUtils::IsStorage(const int32 EncodedBits)
 {
-	const bool bIsStorage = (!IsItem(EncodedBits) && !IsAttachment(EncodedBits));
-	return bIsStorage;
+	// @gdemers See AVVMOnlineInventory.h for possible attachment encoding scheme
+	// 000 (storage)
+	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
+	return (false == !!RelationshipBitmask);
 }
 
 UItemObject* UItemObjectUtils::MakeZeroInitItemObject(UObject* Outer)
 {
+	// @gdemers we make the most barebone item for our automation test. See AutomatedTestInventoryActor.cpp
+	// for details about dependency injection to our dependent storage configuration.
 	auto* TestObject = NewObject<UItemObject>(Outer);
-	TestObject->PrivateItemId = (UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ITEM_ID_ENCODING_BIT_RANGE) - 1);
+	if (!IsValid(TestObject))
+	{
+		return nullptr;
+	}
+
+	const int32 VirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(4/*item bitmask*/, GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + 1/*PhysicalGlobalId*/);
+	const int32 InstancedId = UAVVMOnlineEncodingUtils::EncodeInt32(1, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
+	TestObject->PrivateItemId = (VirtualGlobalId + InstancedId);
+
 	return TestObject;
 }

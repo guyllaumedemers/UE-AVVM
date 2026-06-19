@@ -169,9 +169,8 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		TMap<FGameplayTag, int32> Loadout;
 		TArray<int32> Items;
 
-		// @gdemers IMPORTANT : Understand that content defined within the inventory of a provider fed by DataAsset
-		// are Blueprints, not elements dynamically composed. A complex entry is configured based on an Item Actor definition.
-		for (auto& [ItemObjectClass, StackCount] : Row->DefaultInventory)
+		// @gdemers generate PrivateItemIds for all entries defined for a given Provider
+		for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : Row->DefaultInventory)
 		{
 			if (ItemObjectClass.IsNull())
 			{
@@ -186,7 +185,8 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			}
 
 			const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
-			const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, StackCount);
+			const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, ProviderDefaultItemProperties);
+			
 			ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
 			Items.Add(PrivateItemId);
 
@@ -355,24 +355,44 @@ void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
 }
 
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-                                                  const int32 StackCount)
+                                                  const FProviderDefaultItemProperties& ProviderItemProperties)
 {
 	if (!IsValid(ItemObjectCDO))
 	{
 		return INDEX_NONE;
 	}
 
-	const int32 NewStackCount = UAVVMOnlineEncodingUtils::EncodeInt32(StackCount, GET_ITEM_COUNT_ENCODING_BIT_RANGE, GET_ITEM_COUNT_ENCODING_RSHIFT);
-	// @gdemers retrieve unique id of item. IMPORTANT : the item should ALREADY be shifted within the Data Table that define its unique Id.
-	const int32 ItemId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
-	// @gdemers we do not assign storage as we are still unaware of which storage type is referenced
-	// on the Inventory Provider we are trying to initialize. This information will be handled from within the calling function.
-	return (ItemId + NewStackCount);
+	// @gdemers Relationship bitmask define dependency on another element (example :
+	// an attachment being dependent on a character, or weapon). 
+	const int32 RelationshipBitMask = ProviderItemProperties.GetRelationshipBitmask();
+	const int32 PhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
+	const int32 VirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
+
+	const int32 InstancedId = UAVVMOnlineEncodingUtils::EncodeInt32(ProviderItemProperties.InstancedId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
+
+	int32 VirtualStorageId = 0;
+	if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
+	{
+		const int32 BaseId = (PhysicalGlobalId - GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
+		// @gdemers IMPORTANT : Remember that Storage are valid UItemObject references (ex: a backpack, belt-pouch, etc...)
+		// Our Storage Virtual Global Id encoded within the PrivateItemId will simply be duplicated into the range defined for storage.
+		VirtualStorageId = UAVVMOnlineEncodingUtils::EncodeInt32(BaseId, GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT);
+	}
+
+	const int32 StackCount = UAVVMOnlineEncodingUtils::EncodeInt32(ProviderItemProperties.StackCount, GET_ELEMENT_STACK_COUNT_BIT_RANGE, GET_ELEMENT_STACK_COUNT_RSHIFT);
+	// @gdemers StoragePosition is managed by the calling function, and require all PrivateItemId to be
+	// created first. Doing so, a storage Item will have been created, based on system requirements, and used during the binding process
+	// to set storage positions for each objects defined in the inventory system of this provider actor.
+	return (RelationshipBitMask
+		+ VirtualGlobalId
+		+ InstancedId
+		+ VirtualStorageId
+		+ StackCount);
 }
 
 int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
                                         const TArray<int32>& NewPrivateIds,
-                                        const int32 ItemId)
+                                        const int32 PhysicalGlobalId)
 {
 	NSJsonInventory::FJsonInventoryProvider OutProvider;
 	NSJsonInventory::FromString(NewPayload, OutProvider);
@@ -383,12 +403,12 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 		FilteredSet.Remove(PrivateId);
 	}
 
-	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = ItemId](const int32 Value)
+	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = PhysicalGlobalId](const int32 NewPrivateItemId)
 	{
-		// @gdemers filter Value (PrivateItemId) of the disk representation of the item, and parse it's type, returning an output value
-		// that respect our initial bit encoding defined under AVVMOnlineInventory.h
-		const int32 OutValue = UItemObjectUtils::FilterItemPrivateId(Value);
-		return (false == (OutValue ^ SearchId))/*if both bits are identical, return 0.*/;
+		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
+		// from the integer into a physical id for comparison.
+		const int32 OutPhysicalGlobalId = UItemObjectUtils::FilterItemPrivateId(NewPrivateItemId);
+		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (SearchResult != nullptr)
@@ -441,6 +461,30 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 		const FDataRegistryId RegistryId = {UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName};
 		return UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(RegistryId);
 	}
+}
+
+int32 UInventoryUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMask,
+                                                   const int32 PhysicalGlobalId)
+{
+	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
+	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
+	int32 BaseId = 0;
+
+	if ((RelationshipBitMask & (1 << 0/*attachment bit-index*/)))
+	{
+		BaseId = (PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET);
+	}
+	else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
+	{
+		BaseId = (PhysicalGlobalId - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET);
+	}
+	else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
+	{
+		BaseId = (PhysicalGlobalId - GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
+	}
+
+	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32(BaseId, BitRange, BitShift);
+	return VirtualGlobalId;
 }
 
 bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)

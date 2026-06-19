@@ -70,12 +70,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-	                                        const int32 StackCount);
+	                                        const FProviderDefaultItemProperties& ProviderItemProperties);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetItemPrivateId(const FString& NewPayload,
 	                              const TArray<int32>& NewPrivateIds,
-	                              const int32 ItemId);
+	                              const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetItemPrivateIdUsingStoragePosition(const FString& NewPayload,
@@ -86,6 +86,10 @@ public:
 	// shifting following user defined rules.
 	UFUNCTION(BlueprintCallable)
 	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
+	                                         const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);

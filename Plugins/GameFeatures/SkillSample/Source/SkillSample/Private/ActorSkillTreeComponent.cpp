@@ -548,7 +548,7 @@ FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(con
 	AActor* NonConstOuter = const_cast<AActor*>(Outer);
 
 	// @gdemers filter the level bitmask of our encoded bitmask so we can support progression scaling using GAS.
-	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateTreeNodeId, GET_SKILL_TREE_NODE_LEVEL_ENCODING_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_ENCODING_RSHIFT);
+	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateTreeNodeId, GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
 	// @gdemers manually grant the GameplayEffect to the ASC, and store the ActiveHandle so we can remove the effect when the owning Outer is no longer referenced
 	// within the outer chain of ACharacter, or when a user swap Skill Node entries in UI.
 	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);

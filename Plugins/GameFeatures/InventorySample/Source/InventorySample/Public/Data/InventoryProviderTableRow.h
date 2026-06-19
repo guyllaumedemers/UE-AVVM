@@ -36,6 +36,30 @@ class UItemObject;
 /**
  *	Class description:
  *	
+ *	FProviderDefaultItemProperties are user defined values that participate in the generation of a
+ *	PrivateItemId for providers such as NPC, shops, etc...
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FProviderDefaultItemProperties
+{
+	GENERATED_BODY()
+	
+	const int32 GetRelationshipBitmask() const;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTagContainer RelationshipTags = FGameplayTagContainer::EmptyContainer;
+
+	// @gdemers see AVVMOnlineInventory.h
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
+	int32 InstancedId = INDEX_NONE;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="127"))
+	int32 StackCount = INDEX_NONE;
+};
+
+/**
+ *	Class description:
+ *	
  *	FInventoryProviderTableRow is a Row type that define the default values used to initialize an
  *	Inventory Provider entry on disk (based on Data Asset).
  *	
@@ -63,5 +87,5 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	TArray<FGameplayTag> DefaultSlotTags;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
-	TMap<TSoftClassPtr<UItemObject>, int32/*DefaultStackCount*/> DefaultInventory;
+	TMap<TSoftClassPtr<UItemObject>, FProviderDefaultItemProperties> DefaultInventory;
 };

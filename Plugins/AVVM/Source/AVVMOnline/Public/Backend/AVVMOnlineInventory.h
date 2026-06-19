@@ -24,22 +24,57 @@
 // @gdemers Inventory Items are referenced by {FAVVMPlayerResource}. More advance encoding are put in place to parse information
 // within the {FAVVMPlayerProfile::InventoryIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING
-// @gdemers item
-#define GET_ITEM_ID_ENCODING_BIT_RANGE (8)
-#define GET_ITEM_ID_ENCODING_RSHIFT (0)
-// @gdemers passive items that are direct child of character require their bits encoding to set the first 10 bits to the max value
-// so to allow validation during the attachment process.
-#define CHECK_CHARACTER_DEPENDENT_ENCODING (1 << 9)
-// @gdemers item position
-#define GET_ITEM_POSITION_ENCODING_BIT_RANGE (5)
-#define GET_ITEM_POSITION_ENCODING_RSHIFT (10)
-// @gdemers item count
-#define GET_ITEM_COUNT_ENCODING_BIT_RANGE (5)
-#define GET_ITEM_COUNT_ENCODING_RSHIFT (16)
-// @gdemers storage
-#define GET_STORAGE_ID_ENCODING_BIT_RANGE (3)
-#define GET_STORAGE_ID_ENCODING_RSHIFT (22)
-// @gdemers attachment
-#define GET_ATTACHMENT_ID_ENCODING_BIT_RANGE (5)
-#define GET_ATTACHMENT_ID_ENCODING_RSHIFT (26)
+// @gdemers RELATIONSHIP Bitmask (7)
+// storage		000
+// attachment	001
+// character	010
+// item			100
+// ---------------
+// attachment, storage dependent	001
+// attachment, item dependent		101
+// attachment, character dependent	011
+// item, storage dependent			100
+// item, character dependent		110
+#define GET_ELEMENT_RELATIONSHIP_BIT_RANGE (2)
+#define GET_ELEMENT_RELATIONSHIP_RSHIFT (0)
+// @gdemers item or attachment global unique id (255) (based on RELATIONSHIP value, we offset an attachment global id)
+#define GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE (7)
+#define GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT (3)
+// @gdemers item or attachment id to identify duplicated instances (63) (solve the problem of ownership, and attachment composition)
+#define GET_ELEMENT_INSTANCED_ID_BIT_RANGE (5)
+#define GET_ELEMENT_INSTANCED_ID_RSHIFT (11)
+// @gdemers storage referencing (7)
+#define GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE (2)
+#define GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT (17)
+// @gdemers entry position within storage (31)
+#define GET_STORAGE_POSITION_BIT_RANGE (4)
+#define GET_STORAGE_POSITION_RSHIFT (20)
+// @gdemers entry stack count (127)
+#define GET_ELEMENT_STACK_COUNT_BIT_RANGE (6)
+#define GET_ELEMENT_STACK_COUNT_RSHIFT (25)
+// @gdemers check relationship
+#define FILTER_CHARACTER_RELATIONSHIP_BIT (2/*2^1*/)
+#endif
+
+#ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_DATATABLE_BASE_ADDRESSING
+// @gdemers addressing offset we expect implementers of the Data Table to use when defining global id.
+#define GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET (1000)
+#define GET_ITEM_PHYSICAL_ADDRESSING_OFFSET (2000)
+#define GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET (3000)
+#endif
+
+// @gdemers element lookup for supporting the socketing process -- identify dependencies between an attachment and an owner (which may have more than one instance)
+#ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_LOOKUP_ENCODING
+// @gdemers physical id that represent the element we are evaluating dependencies for
+#define GET_ELEMENT_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE (7)
+#define GET_ELEMENT_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT (0)
+// @gdemers the instance id that uniquely identify 'this' element
+#define GET_ELEMENT_LOOKUP_INSTANCED_ID_BIT_RANGE (5)
+#define GET_ELEMENT_LOOKUP_INSTANCED_ID_RSHIFT (8)
+// @gdemers the virtual id of a dependency that reference our element we evaluate
+#define GET_ELEMENT_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE (7)
+#define GET_ELEMENT_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT (14)
+// @gdemers the instance id of a dependency that reference our element we evaluate
+#define GET_ELEMENT_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE (5)
+#define GET_ELEMENT_LOOKUP_OWNER_INSTANCED_ID_RSHIFT (22)
 #endif
