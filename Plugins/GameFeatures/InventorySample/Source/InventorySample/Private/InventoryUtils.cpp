@@ -466,25 +466,21 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 int32 UInventoryUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMask,
                                                    const int32 PhysicalGlobalId)
 {
-	// TODO @gdemers fix issue with PrivateItemId not being able to differentiate offset calculation
-	// for the item based on relationship.
 	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
 	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
 	int32 BaseId = 0;
 
 	if ((RelationshipBitMask & (1 << 0/*attachment bit-index*/)))
 	{
-		BaseId = (PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET);
+		BaseId = (PhysicalGlobalId & ~GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET);
 	}
-	
-	if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
+	else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
 	{
-		BaseId = (PhysicalGlobalId - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET);
+		BaseId = (PhysicalGlobalId & ~GET_ITEM_PHYSICAL_ADDRESSING_OFFSET);
 	}
-	
-	if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
+	else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
 	{
-		BaseId = (PhysicalGlobalId - GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
+		BaseId = (PhysicalGlobalId & ~GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
 	}
 
 	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32(BaseId, BitRange, BitShift);
