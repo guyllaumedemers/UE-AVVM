@@ -466,6 +466,8 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 int32 UInventoryUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMask,
                                                    const int32 PhysicalGlobalId)
 {
+	// TODO @gdemers fix issue with PrivateItemId not being able to differentiate offset calculation
+	// for the item based on relationship.
 	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
 	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
 	int32 BaseId = 0;
@@ -474,11 +476,13 @@ int32 UInventoryUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMa
 	{
 		BaseId = (PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET);
 	}
-	else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
+	
+	if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
 	{
 		BaseId = (PhysicalGlobalId - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET);
 	}
-	else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
+	
+	if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
 	{
 		BaseId = (PhysicalGlobalId - GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
 	}

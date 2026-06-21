@@ -660,8 +660,10 @@ int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 	}
 }
 
-int32 UItemObjectUtils::FilterItemPrivateId(const int32 EncodedBits)
+int32 UItemObjectUtils::FilterItemPrivateId(const int32 EncodedBits/*PrivateItemId*/)
 {
+	// TODO @gdemers fix issue with PrivateItemId not being able to differentiate offset calculation
+	// for the item based on relationship.
 	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
 	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
 	int32 PhysicalOffset = 0;
