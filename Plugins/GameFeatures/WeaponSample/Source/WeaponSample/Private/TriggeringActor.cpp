@@ -51,14 +51,18 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 	if (IsValid(Character) && UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
 		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
-		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 
-	// @gdemers TODO @gdemers revisit this. may no longer work with new encoding. we may have to translate the id retrieved from the dependencies
+	// @gdemers translate physical addressing into virtual addressing for running searches.
+	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((ElementId/*PhysicalGlobalId*/ - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET),
+	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
+
 	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
 	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
 	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT,
-	                                                      ElementId/*{FAVVMPlayerResource::UniqueId}*/);
+	                                                      VirtualGlobalId);
 
 	return Dependencies;
 }

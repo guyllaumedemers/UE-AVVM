@@ -41,8 +41,8 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 	// @gdemers src (attachment) unique id defined in global table. Note : attachment shouldn't be considered
 	// as resource provider. They are instanced from a resource provider which is different.
-	const int32 SearchUniqueId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(Src);
-	if (!ensureAlwaysMsgf(SearchUniqueId != INDEX_NONE,
+	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(Src);
+	if (!ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
 	                      *Src->GetName()))
 	{
@@ -66,8 +66,8 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		// @gdemers aggregate dependencies defined in backend representation.
 		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 
-		// @gdemers character dependencies should validate their encoding so the input id we are comparing against isnt an attachment that
-		// target a triggering actor.
+		// @gdemers character dependencies should validate their encoding so the input id we are comparing against
+		// isnt an attachment that target a triggering actor.
 		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
 		                                                      GET_ELEMENT_RELATIONSHIP_BIT_RANGE,
 		                                                      GET_ELEMENT_RELATIONSHIP_RSHIFT,
@@ -83,15 +83,20 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 		// @gdemers aggregate dependencies defined in backend representation.
 		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
-		                                                               TargetUniqueId,
+		                                                               TargetUniqueId/*ProviderId of target is the PhysicalGlobalId*/,
 		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
 	}
 
-	// @gdemers TODO @gdemers revisit this. may no longer work with new encoding. we may have to translate the id retrieved from the dependencies
+	// @gdemers translate physical addressing into virtual addressing for running searches.
+	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET),
+	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
+
+	// @gdemers search for virtual address within bit range
 	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
 	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
 	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT,
-	                                                      SearchUniqueId);
+	                                                      VirtualGlobalId);
 
 	if (!Dependencies.IsEmpty())
 	{
