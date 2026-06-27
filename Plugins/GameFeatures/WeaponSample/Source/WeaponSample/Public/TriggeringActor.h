@@ -95,7 +95,7 @@ public:
 	// @gdemers IAVVMDoesOwnAttributeSet
 	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
 
-	// @gdemers IDoesSupportSocketTargeting
+	// @gdemers IAVVMDoesActorSupportDeferredSocketParenting
 	virtual TInstancedStruct<FAVVMSocketTargetingHelper> GetSocketHelper_Implementation() const override;
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
 	virtual void Attach_Implementation(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName NewSocketName) override;
