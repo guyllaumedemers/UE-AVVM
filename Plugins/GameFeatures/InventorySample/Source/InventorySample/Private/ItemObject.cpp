@@ -407,13 +407,13 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	                *GetNameSafe(RuntimeItemActor),
 	                *GetName());
 
-	const bool bShouldNotifyWhenRegisteringAttachment = RuntimeItemActor->Implements<UAVVMDoesSupportAttachmentNotify>();
+	const bool bShouldNotifyWhenRegisteringAttachment = RuntimeItemActor->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
 	if (bShouldNotifyWhenRegisteringAttachment)
 	{
-		const auto OnSocketAttached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketAttachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemAttached);
-		const auto OnSocketDetached = IAVVMDoesSupportAttachmentNotify::FOnNewSocketDetachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemDetached);
+		const auto OnSocketAttached = IAVVMDoesActorSupportOnAttachmentNotify::FOnNewSocketAttachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemAttached);
+		const auto OnSocketDetached = IAVVMDoesActorSupportOnAttachmentNotify::FOnNewSocketDetachedDelegate::FDelegate::CreateUObject(this, &UItemObject::OnNewSocketItemDetached);
 
-		auto Observer = TScriptInterface<IAVVMDoesSupportAttachmentNotify>(RuntimeItemActor);
+		auto Observer = TScriptInterface<IAVVMDoesActorSupportOnAttachmentNotify>(RuntimeItemActor);
 		OnNewSocketAttachedHandle = Observer->OnNewSocketAttachedDelegate_Add(OnSocketAttached);
 		OnNewSocketDetachedHandle = Observer->OnNewSocketDetachedDelegate_Add(OnSocketDetached);
 	}

@@ -74,8 +74,8 @@ UCLASS()
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
-                                          public IAVVMDoesSupportAttachmentNotify,
-                                          public IAVVMDoesSupportSocketTargeting,
+                                          public IAVVMDoesActorSupportOnAttachmentNotify,
+                                          public IAVVMDoesActorSupportDeferredSocketParenting,
                                           public IAVVMResourceProvider
 {
 	GENERATED_BODY()

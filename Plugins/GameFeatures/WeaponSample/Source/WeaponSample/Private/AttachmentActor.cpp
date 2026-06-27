@@ -103,6 +103,31 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		return Target;
 	}
 
+	// @gdemers early out for the recursive case so we avoid calling GetAllChildActors.
+	if (Target->IsA<ATriggeringActor>())
+	{
+		return nullptr;
+	}
+
+	// @gdemers we need to validate that the parent we are looking for hasnt been created yet.
+	TArray<AActor*> OutChildren;
+	Target->GetAllChildActors(OutChildren, false);
+
+	OutChildren = OutChildren.FilterByPredicate([](const AActor* Child)
+	{
+		return IsValid(Child) && Child->IsA<ATriggeringActor>();
+	});
+
+	for (AActor* Child : OutChildren)
+	{
+		// @gdemers recursively search for parent that are already spawned, and may own the current attachment.
+		AActor* SearchResult = FAttachmentSocketTargetingHelper::GetDesiredTypedInner(Src, Child);
+		if (IsValid(SearchResult))
+		{
+			return SearchResult;
+		}
+	}
+
 	return nullptr;
 }
 
@@ -180,13 +205,13 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 	}
 
 	// @gdemers retrieve socket deferral interface from current parent.
-	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+	auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Parent);
 	if (!(SocketDeferral.GetInterface() != nullptr && IsValid(SocketDeferral.GetObject())))
 	{
-		// @gdemers IMPORTANT : During our first attempt, the received context will reference the AVVMCharacter, but on subsequent attempts, reference
-		// the ATriggeringActor which may NOT be the correct target for this attachment (i.e right type, maybe wrong instance). As such, retrieving the interface based on the outer chain
-		// is the logic approach to allowing proper recursion until the proper match is found.
-		SocketDeferral = Cast<UObject>(Parent->GetImplementingOuterObject(UAVVMDoesSupportSocketDeferral::StaticClass()));
+		// @gdemers IMPORTANT : During our first traversal, the received context will reference the AVVMCharacter, but on deferred attempts,
+		// the parent type may reference a ATriggeringActor which will not implement the interface UAVVMSocketProcessHandler.
+		// IMPORTANT : ONLY the AVVMCharacter should orchestrate the socketing process.
+		SocketDeferral = Cast<UObject>(Parent->GetImplementingOuterObject(UAVVMSocketProcessHandler::StaticClass()));
 	}
 
 	const bool bDoesImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral);
@@ -196,7 +221,7 @@ void AAttachmentActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 		return;
 	}
 
-	IAVVMDoesSupportSocketDeferral::FOnNewSocketParentAvailableDelegate::FDelegate Callback;
+	IAVVMSocketProcessHandler::FOnNewSocketParentAvailableDelegate::FDelegate Callback;
 	Callback.BindUObject(this, &AAttachmentActor::OnSocketParentingDeferred, ContextArgs);
 	DeferredSocketParentingDelegateHandle = SocketDeferral->OnNewSocketParentAvailableDelegate_Add(Callback);
 }
@@ -215,20 +240,23 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	                *NewSocketName.ToString());
 
 	// @gdemers detach actor + remove AttributeSet registered
-	IAVVMDoesSupportSocketTargeting::Execute_Detach(this);
+	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 
 	// @gdemers attach actor + add AttributeSet
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
 	OwningOuter = Target;
 
-	const bool bShouldNotifyWhenAttachingActor = Target->Implements<UAVVMDoesSupportAttachmentNotify>();
+	const bool bShouldNotifyWhenAttachingActor = Target->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
 	if (bShouldNotifyWhenAttachingActor)
 	{
 		OwningSocketSlotTag = NewItemAttachmentSlotTag;
 
-		const auto Observer = TScriptInterface<const IAVVMDoesSupportAttachmentNotify>(Target);
+		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Target);
 		Observer->NotifyOnNewSocketAttached(NewItemAttachmentSlotTag, this);
 	}
+	
+	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
+	// if the element is active, and not equipped which are two unique states.
 
 	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
@@ -260,10 +288,10 @@ void AAttachmentActor::Detach_Implementation()
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
-	const bool bShouldNotifyWhenDetachingActor = Outer->Implements<UAVVMDoesSupportAttachmentNotify>();
+	const bool bShouldNotifyWhenDetachingActor = Outer->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
 	if (bShouldNotifyWhenDetachingActor)
 	{
-		const auto Observer = TScriptInterface<const IAVVMDoesSupportAttachmentNotify>(Outer);
+		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Outer);
 		Observer->NotifyOnNewSocketDetached(OwningSocketSlotTag);
 	}
 
@@ -286,7 +314,7 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
                                                  AActor* Target,
                                                  const FAVVMSocketTargetingDeferralContextArgs ContextArgs)
 {
-	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+	auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Parent);
 
 	const bool bDoesImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
@@ -305,6 +333,9 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	{
 		return;
 	}
+	
+	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
+	// if the element is active, and not equipped which are two unique states.
 
 	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());

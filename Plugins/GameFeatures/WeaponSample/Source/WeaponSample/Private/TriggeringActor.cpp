@@ -114,7 +114,7 @@ void ATriggeringActor::BeginPlay()
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
-		auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Outer);
+		auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Outer);
 		if (ensureAlwaysMsgf(UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral),
 		                     TEXT("Outer doesn't implement required interface.")))
 		{
@@ -148,7 +148,7 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
-		IAVVMDoesSupportSocketTargeting::Execute_Detach(this);
+		IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 	}
 #endif
 }
@@ -186,7 +186,7 @@ void ATriggeringActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 		return;
 	}
 
-	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+	auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Parent);
 
 	const bool bDoesImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
@@ -195,7 +195,7 @@ void ATriggeringActor::DeferredSocketParenting_Implementation(const FAVVMSocketT
 		return;
 	}
 
-	IAVVMDoesSupportSocketDeferral::FOnNewSocketParentAvailableDelegate::FDelegate Callback;
+	IAVVMSocketProcessHandler::FOnNewSocketParentAvailableDelegate::FDelegate Callback;
 	Callback.BindUObject(this, &ATriggeringActor::OnSocketParentingDeferred, ContextArgs);
 	DeferredSocketParentingDelegateHandle = SocketDeferral->OnNewSocketParentAvailableDelegate_Add(Callback);
 }
@@ -214,7 +214,7 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 					*NewSocketName.ToString());
 
 	// @gdemers detach actor + remove AttributeSet registered
-	IAVVMDoesSupportSocketTargeting::Execute_Detach(this);
+	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 
 	// @gdemers attach actor + add AttributeSet
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
@@ -222,6 +222,9 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 
 	// @gdemers Unregister/Register ability from owner.
 	Server_SwapAbility(true);
+	
+	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
+	// if the element is active, and not equipped which are two unique states.
 
 	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
@@ -296,7 +299,7 @@ void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
                                                  AActor* Target,
                                                  const FAVVMSocketTargetingDeferralContextArgs ContextArgs)
 {
-	auto SocketDeferral = TScriptInterface<IAVVMDoesSupportSocketDeferral>(Parent);
+	auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Parent);
 
 	const bool bDoesImplement = UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral);
 	if (!ensureAlwaysMsgf(bDoesImplement,
@@ -311,6 +314,9 @@ void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
 	{
 		return;
 	}
+	
+	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
+	// if the element is active, and not equipped which are two unique states.
 
 	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());

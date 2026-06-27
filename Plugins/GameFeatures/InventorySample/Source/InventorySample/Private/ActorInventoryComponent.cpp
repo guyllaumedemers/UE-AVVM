@@ -661,17 +661,20 @@ void UActorInventoryComponent::TrySpawnEquipItem(const AActor* Outer)
 		return;
 	}
 
-	// @gdemers update runtime state for the item to equipped. Note : this doesn't imply that the item is visible.
+	// @gdemers update runtime state for the item to equip.
+	// Note : this doesn't imply that the item is visible, only equip, and may not have an Actor in play.
 	NewItem->ModifyRuntimeState(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED}, {});
 
-	// @gdemers we want to prevent spawning item actors that don't respect our flag system, and mostly provide data constraint to other items.
-	// example : ammo, consumables, etc...
+	// @gdemers we want to prevent spawning item actors that don't require visual representation.
 	FGameplayTagContainer ActorSpawnConditions;
 	ActorSpawnConditions.AddTag(TAG_INVENTORYSAMPLE_ITEM_VISIBILITY_ONLY_WHEN_ACTIVE);
 	ActorSpawnConditions.AddTag(TAG_INVENTORYSAMPLE_ITEM_VISIBILITY_ALWAYS_VISIBLE);
 
 	if (NewItem->DoesBehaviourHasPartialMatch(ActorSpawnConditions))
 	{
+		// @gdemers update runtime state for the item to spawn. This imply that any action executed by an external system
+		// on an UItemObject while its counter-part actor is spawning will not proceed, and should be deferred.
+		NewItem->ModifyRuntimeState(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN}, {});
 		RequestItemActor(ResourceManagerComponent, NewItem);
 	}
 }

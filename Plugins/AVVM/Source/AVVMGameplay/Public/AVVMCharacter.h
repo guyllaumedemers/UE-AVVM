@@ -84,7 +84,7 @@ UCLASS()
 class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
                                         public IAbilitySystemInterface,
                                         public IAVVMCanExposeActorPayload,
-                                        public IAVVMDoesSupportSocketDeferral,
+                                        public IAVVMSocketProcessHandler,
                                         public IAVVMResourceProvider
 {
 	GENERATED_BODY()

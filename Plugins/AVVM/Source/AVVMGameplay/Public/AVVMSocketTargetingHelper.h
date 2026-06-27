@@ -88,16 +88,18 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
 /**
  *	Class description:
  *	
- *	IAVVMDoesSupportSocketTargeting is an interface to be impl in actor classes that require attachment from an actor thats lives as child of a root actor. example : Attachment Actor that require
- *	socketing in Weapons (which itself is rooted under the ACharacter).
+ *	IAVVMDoesActorSupportDeferredSocketParenting is an interface to be impl in an actor class that allow Actor socketing request to be deferred.
+ *	Using this interface allow for Async request to resolve creation ordering problems between dependent Actor.
+ *	
+ *	example : An attachment spawn before its parent counter-part, and fail to attach itself.
  */
 UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UAVVMDoesSupportSocketTargeting : public UInterface
+class AVVMGAMEPLAY_API UAVVMDoesActorSupportDeferredSocketParenting : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMGAMEPLAY_API IAVVMDoesSupportSocketTargeting
+class AVVMGAMEPLAY_API IAVVMDoesActorSupportDeferredSocketParenting
 {
 	GENERATED_BODY()
 
@@ -122,15 +124,16 @@ public:
 /**
 *	Class description:
  *	
- *	IAVVMDoesSupportAttachmentNotify is an interface to be impl in actor classes that require being notified of new child being parent to them.
+ *	IAVVMDoesActorSupportOnAttachmentNotify is an interface to be impl in an actor class that is expected to act as the Root of another Actor.
+ *	Using this interface allow to notify listeners that fail their Async request to attach themselves on the implementer of this interface.
  */
 UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UAVVMDoesSupportAttachmentNotify : public UInterface
+class AVVMGAMEPLAY_API UAVVMDoesActorSupportOnAttachmentNotify : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMGAMEPLAY_API IAVVMDoesSupportAttachmentNotify
+class AVVMGAMEPLAY_API IAVVMDoesActorSupportOnAttachmentNotify
 {
 	GENERATED_BODY()
 
@@ -154,16 +157,19 @@ protected:
 /**
  *	Class description:
  *	
- *	IAVVMDoesSupportSocketDeferral is an interface to be impl in actor classes that require deferred attachment to parent actor that arent
- *	yet available via the inventory system.
+ *	IAVVMSocketProcessHandler is an interface to be impl on the actor class from which the loading process
+ *	of dependent actors start from.
+ *	
+ *	example : AVVMCharacter handles notifying spawned actor that a new entity is made available so previous
+ *	Actor can try socketing themselves to the target.
  */
 UINTERFACE(BlueprintType)
-class AVVMGAMEPLAY_API UAVVMDoesSupportSocketDeferral : public UInterface
+class AVVMGAMEPLAY_API UAVVMSocketProcessHandler : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class AVVMGAMEPLAY_API IAVVMDoesSupportSocketDeferral
+class AVVMGAMEPLAY_API IAVVMSocketProcessHandler
 {
 	GENERATED_BODY()
 
