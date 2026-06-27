@@ -208,37 +208,20 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	}
 
 	AVVM_LOGGER_LOG(LogWeaponSample,
-					this,
-					Target,
-					TEXT("Target for attach at socket name %s."),
-					*NewSocketName.ToString());
+	                this,
+	                Target,
+	                TEXT("Root Parent used to attach at socket name %s."),
+	                *NewSocketName.ToString());
 
-	// @gdemers detach actor + remove AttributeSet registered
+	// @gdemers detach actor from root
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 
-	// @gdemers attach actor + add AttributeSet
+	// @gdemers attach actor to root, and update OwningOuter
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
 	OwningOuter = Target;
 
-	// @gdemers Unregister/Register ability from owner.
-	Server_SwapAbility(true);
-	
-	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
-	// if the element is active, and not equipped which are two unique states.
-
-	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
-	{
-		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
-	}
-	
-	// @gdemers allow linking anim instance to driving anim instance.
-	auto* TargetSkeletalMeshComponent = Target->GetComponentByClass<USkeletalMeshComponent>();
-	if (IsValid(TargetSkeletalMeshComponent))
-	{
-		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
-	}
+	// @gdemers bind animation, and attribute set with new owning outer
+	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
 }
 
 void ATriggeringActor::Detach_Implementation()
@@ -250,11 +233,57 @@ void ATriggeringActor::Detach_Implementation()
 	}
 
 	AVVM_LOGGER_LOG(LogWeaponSample,
-					this,
-					Outer,
-					TEXT("Target for detach."));
+	                this,
+	                Outer,
+	                TEXT("Detach from Root Parent."));
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
+}
+
+void ATriggeringActor::Bind_Implementation()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Outer,
+	                TEXT("Bind to Target."));
+
+	// @gdemers Unregister/Register ability from owner.
+	Server_SwapAbility(true);
+
+	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+	}
+
+	// @gdemers allow linking anim instance to driving anim instance.
+	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(TargetSkeletalMeshComponent))
+	{
+		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
+	}
+}
+
+void ATriggeringActor::Unbind_Implementation()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                this,
+	                TEXT("Unbind Target."));
 
 	// @gdemers Unregister ability from owner.
 	Server_SwapAbility(false);

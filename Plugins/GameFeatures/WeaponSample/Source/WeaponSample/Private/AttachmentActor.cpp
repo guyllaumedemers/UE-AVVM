@@ -236,15 +236,18 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	AVVM_LOGGER_LOG(LogWeaponSample,
 	                this,
 	                Target,
-	                TEXT("Target for attach at socket name %s."),
+	                TEXT("Root Parent used to attach at socket name %s."),
 	                *NewSocketName.ToString());
 
-	// @gdemers detach actor + remove AttributeSet registered
+	// @gdemers detach actor from root
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 
-	// @gdemers attach actor + add AttributeSet
+	// @gdemers attach actor to root, and update OwningOuter
 	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
 	OwningOuter = Target;
+
+	// @gdemers bind animation, and attribute set with new owning outer
+	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
 
 	const bool bShouldNotifyWhenAttachingActor = Target->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
 	if (bShouldNotifyWhenAttachingActor)
@@ -253,23 +256,6 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 
 		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Target);
 		Observer->NotifyOnNewSocketAttached(NewItemAttachmentSlotTag, this);
-	}
-	
-	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
-	// if the element is active, and not equipped which are two unique states.
-
-	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
-	{
-		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
-	}
-	
-	// @gdemers allow linking anim instance to driving anim instance.
-	auto* TargetSkeletalMeshComponent = Target->GetComponentByClass<USkeletalMeshComponent>();
-	if (IsValid(TargetSkeletalMeshComponent))
-	{
-		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
 	}
 }
 
@@ -287,6 +273,7 @@ void AAttachmentActor::Detach_Implementation()
 	                TEXT("Target for detach."));
 
 	DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 
 	const bool bShouldNotifyWhenDetachingActor = Outer->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
 	if (bShouldNotifyWhenDetachingActor)
@@ -294,6 +281,48 @@ void AAttachmentActor::Detach_Implementation()
 		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Outer);
 		Observer->NotifyOnNewSocketDetached(OwningSocketSlotTag);
 	}
+}
+
+void AAttachmentActor::Bind_Implementation()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Outer,
+	                TEXT("Bind to Target."));
+
+	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+	if (IsValid(ASC))
+	{
+		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+	}
+
+	// @gdemers allow linking anim instance to driving anim instance.
+	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
+	if (IsValid(TargetSkeletalMeshComponent))
+	{
+		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
+	}
+}
+
+void AAttachmentActor::Unbind_Implementation()
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Outer,
+	                TEXT("Unbind Target."));
 
 	// @gdemers clear AttributeSet provided by this attachment.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());

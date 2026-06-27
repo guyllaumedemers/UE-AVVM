@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "GameplayAbilitySpecHandle.h"
@@ -76,6 +77,7 @@ class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAVVMDoesOwnAttributeSet,
                                           public IAVVMDoesActorSupportOnAttachmentNotify,
                                           public IAVVMDoesActorSupportDeferredSocketParenting,
+                                          public IAVVMDoesActorSupportStateBinding,
                                           public IAVVMResourceProvider
 {
 	GENERATED_BODY()
@@ -100,6 +102,10 @@ public:
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
 	virtual void Attach_Implementation(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName NewSocketName) override;
 	virtual void Detach_Implementation() override;
+	
+	// @gdemers IAVVMDoesActorSupportStateBinding
+	virtual void Bind_Implementation() override;
+	virtual void Unbind_Implementation() override;
 
 	// @gdemers IAVVMResourceProvider
 	virtual int32 GetProviderUniqueId_Implementation() const override;
