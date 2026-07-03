@@ -35,19 +35,22 @@
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_AUTOMATED_TEST, "InventorySample.AutomatedTest.Tag");
 
-// @gdemers from GameFeaturePluginTests.cpp
-DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForTrue, bool*, bVariableToWaitFor);
-bool FWaitForTrue::Update()
+namespace
 {
-	// @gdemers : careful, we want to ensure all dependent resources are loaded without being affected by unrelated loading logic. if you have some external system doing async
-	// load, and waiting, this will create throttling.
-	return *bVariableToWaitFor && UAssetManager::GetStreamableManager().AreAllAsyncLoadsComplete();
-}
+	// @gdemers from GameFeaturePluginTests.cpp
+	DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FWaitForTrue, bool*, bVariableToWaitFor);
+	bool FWaitForTrue::Update()
+	{
+		// @gdemers : careful, we want to ensure all dependent resources are loaded without being affected by unrelated loading logic. if you have some external system doing async
+		// load, and waiting, this will create throttling.
+		return *bVariableToWaitFor && UAssetManager::GetStreamableManager().AreAllAsyncLoadsComplete();
+	}
 
-DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FExecuteFunction, TFunction<bool()>, Function);
-bool FExecuteFunction::Update()
-{
-	return Function();
+	DEFINE_LATENT_AUTOMATION_COMMAND_ONE_PARAMETER(FExecuteFunction, TFunction<bool()>, Function);
+	bool FExecuteFunction::Update()
+	{
+		return Function();
+	}
 }
 
 /**
