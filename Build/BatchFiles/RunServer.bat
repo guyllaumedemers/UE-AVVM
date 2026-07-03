@@ -7,7 +7,7 @@ for /f "tokens=1-2 delims=: " %%a in ('time /t') do set "mytime=%%a:%%b"
 set "TIMESTAMP=[%mydate% %mytime%]"
 
 :: 1. Setup paths and log file
-set "LOG_FILE=%CD%\launch_errors.log"
+set "LOG_FILE=%CD%\launch_errors_server.log"
 set "ENGINE_ROOT=%~dp0..\..\..\.."
 set "UBT_EXE=%ENGINE_ROOT%\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.exe"
 set "UNREAL_EDITOR=%ENGINE_ROOT%\Engine\Binaries\Win64\UnrealEditor.exe"
@@ -67,15 +67,15 @@ if /i "%~1"=="clean" (
 
 	echo %TIMESTAMP% Regenerating Project Manifest Assemblies
 	:: 5. This forces UBT to regenerate Project Manifest Assemblies
-	"%UBT_EXE%" -projectfiles -project="%PROJECT_PATH%" -game -rocket -progress
+	"%UBT_EXE%" -projectfiles -project="%UPROJECT%" -server -rocket -progress
 	
 ) else (
     echo %TIMESTAMP% [STANDARD MODE] Skipping directory flush. (Run with 'clean' argument to force a full rebuild)
 )
 
-echo %TIMESTAMP% [FINAL STEP] Building the Main Project Game Target
+echo %TIMESTAMP% [FINAL STEP] Building the Main Project Server Target
 :: 3.2 Final build invocation for the project core logic now that all plugin .dlls exist
-"%UBT_EXE%" "%PROJECT_NAME%Editor" Win64 Development -Project="%PROJECT_PATH%" -WaitMutex
+"%UBT_EXE%" "%PROJECT_NAME%Server" Win64 Development -Project="%UPROJECT%" -WaitMutex
 
 if %ERRORLEVEL% NEQ 0 (
     echo %TIMESTAMP% [ERROR] UnrealBuildTool failed to compile project.
@@ -83,9 +83,9 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo %TIMESTAMP% [SUCCESS] Entire environment compiled perfectly without conflicts!
-echo %TIMESTAMP% Launching Unreal Editor...
+echo %TIMESTAMP% Launching Unreal Editor as Dedicated Server...
 :: 4. Launch and WAIT for the exit code, redirecting command-line errors to the log
-start /wait "%UNREAL_EDITOR%" "%PROJECT_PATH%" "%STARTUP_MAP%" -windowed -ResX=640 -ResY=400 -log 2>> "%LOG_FILE%"
+start /wait "%UNREALED%" "%UPROJECT%" "%MAP%" -server -port=7777 -windowed -ResX=640 -ResY=400 -log 2>> "%LOG_FILE%"
 
 if %ERRORLEVEL% NEQ 0 (
     echo %TIMESTAMP% [FAILURE] UnrealEditor closed with Exit Code: %ERRORLEVEL% >> "%LOG_FILE%"

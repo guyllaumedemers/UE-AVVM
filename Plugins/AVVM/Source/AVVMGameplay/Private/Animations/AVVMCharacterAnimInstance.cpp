@@ -98,10 +98,12 @@ void UAVVMCharacterAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeco
 	// @gdemers do work here!
 }
 
+#if WITH_EDITORONLY_DATA
 bool UAVVMCharacterAnimInstance::PCV_ShouldWarnAboutNodesNotUsingFastPath() const
 {
 	return true;
 }
+#endif
 
 void UAVVMCharacterAnimInstance::OnCharacterStateTagChanged(const FGameplayTagContainer& NewStateTags)
 {

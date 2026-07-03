@@ -99,10 +99,12 @@ void UTriggeringActorAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSe
 	// @gdemers do work here!
 }
 
+#if WITH_EDITORONLY_DATA
 bool UTriggeringActorAnimInstance::PCV_ShouldWarnAboutNodesNotUsingFastPath() const
 {
 	return true;
 }
+#endif
 
 void UTriggeringActorAnimInstance::OnTriggeringActorStateTagChanged(const FGameplayTagContainer& NewStateTags)
 {

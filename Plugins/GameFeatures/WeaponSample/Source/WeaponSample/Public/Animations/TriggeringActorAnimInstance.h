@@ -96,7 +96,10 @@ public:
 	virtual void NativeUninitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
+
+#if WITH_EDITORONLY_DATA
 	virtual bool PCV_ShouldWarnAboutNodesNotUsingFastPath() const override;
+#endif
 
 protected:
 	// @gdemers only update state flags based on events triggered following local client state change or
