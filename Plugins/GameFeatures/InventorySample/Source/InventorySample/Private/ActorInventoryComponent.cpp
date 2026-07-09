@@ -749,7 +749,7 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 	};
 
 	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, ScopedSafety, QueueingMechanism);
-	FAVVMScopedDelegate ScopedDelegate(Callback);
+	FAVVMScopedDelegate ScopedDelegate{Callback};
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer),
