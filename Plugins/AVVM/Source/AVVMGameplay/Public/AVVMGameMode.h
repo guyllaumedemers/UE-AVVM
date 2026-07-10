@@ -26,8 +26,9 @@
 
 #include "AVVMGameMode.generated.h"
 
-class AAVVMWorldSetting;
 class AGameStateBase;
+class AAVVMWorldSetting;
+class UAVVMGameModeAdditive;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForUnregistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerReadyForRegistrationDelegate, const FUniqueNetId& NewPlayerId, const APlayerState* NewPlayerState);
@@ -99,11 +100,15 @@ public:
 	static FOnPlayerReadyForRegistrationDelegate& GetOnPlayerReadyForRegistration();
 
 protected:
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool IsMatchInProgress() const override;
 	virtual bool ReadyToStartMatch_Implementation() override;
 	virtual bool ReadyToEndMatch_Implementation() override;
 	virtual bool HasMatchEnded() const override;
+	
+	virtual void StartMatch() override;
+	virtual void EndMatch() override;
 	
 	UFUNCTION()
 	void OnGameStateSet(AGameStateBase* NewGameState);
@@ -138,6 +143,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AAVVMWorldSetting> WorldSetting = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TMap<FName, TObjectPtr<UAVVMGameModeAdditive>> GameModeAdditives;
 
 private:
 	void Terminate();

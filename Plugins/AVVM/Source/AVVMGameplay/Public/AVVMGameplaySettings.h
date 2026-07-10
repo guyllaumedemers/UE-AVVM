@@ -24,6 +24,8 @@
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "AVVMGameplaySettings.generated.h"
 
@@ -55,6 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FGameplayTagContainer& GetPlayerAbilityBlockingTags();
 
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& GetGameModeAdditiveClasses();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
@@ -72,4 +77,7 @@ protected:
 	// @gdemers defined tags that are able to prevent user from modifying a player ability selection based on conditions. (i.e Tutorial, Departing, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FGameplayTagContainer PlayerAbilityBlockingTags = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TArray<TSoftClassPtr<UAVVMGameModeAdditive>> GameModeAdditiveClasses;
 };

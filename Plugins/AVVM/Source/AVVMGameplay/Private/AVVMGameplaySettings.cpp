@@ -48,3 +48,8 @@ const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerAbilityBlockingTags
 {
 	return GetDefault<UAVVMGameplaySettings>()->PlayerAbilityBlockingTags;
 }
+
+const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& UAVVMGameplaySettings::GetGameModeAdditiveClasses()
+{
+	return GetDefault<UAVVMGameplaySettings>()->GameModeAdditiveClasses;
+}

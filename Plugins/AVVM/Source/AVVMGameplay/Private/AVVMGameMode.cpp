@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameMode.h"
 
+#include "AVVMGameModeAdditive.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMGameState.h"
 #include "AVVMLogger.h"
@@ -85,6 +86,37 @@ FOnPlayerReadyForRegistrationDelegate& AAVVMGameMode::GetOnPlayerReadyForRegistr
 	return OnPlayerReadyForRegistration;
 }
 
+void AAVVMGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	// @gdemers Parse the Option string provided from an OpenLevel call, AND
+	// from the server executable command line.
+	const TArray<FString> SplitOptions = UAVVMGameModeAdditiveUtils::ParseCmdOptions(Options);
+	if (SplitOptions.IsEmpty())
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogGameplay,
+	                this,
+	                this,
+	                TEXT("Parsing Server UAVVMGameModeAdditive Options: %s"),
+	                *FString::Join(SplitOptions, TEXT(", ")));
+
+	// @gdemers IMPORTANT - we need this process to be synchronous to enforce execution
+	// ordering. UAVVMGameModeAdditive need to participate in the game loop startup process.
+	// i.e the AGameMode ReadyStartMatch/ReadyEndMatch/StartMatch/& EndMatch api.
+	// Reminder : Keep your UAVVMGameModeAdditive UObject lightweight!
+	const auto& NewGameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, this);
+
+	GameModeAdditives.Reserve(NewGameModeAdditives.Num());
+	for (const auto& [Key, Value] : NewGameModeAdditives)
+	{
+		GameModeAdditives.Add(Key, Value);
+	}
+}
+
 void AAVVMGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -104,6 +136,11 @@ bool AAVVMGameMode::IsMatchInProgress() const
 		bIsInProgress &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bIsInProgress);
 	}
 
+	for (const auto& [Key, Value] : GameModeAdditives)
+	{
+		bIsInProgress &= (IsValid(Value) && Value->IsMatchInProgress());
+	}
+
 	return bIsInProgress;
 }
 
@@ -116,6 +153,11 @@ bool AAVVMGameMode::ReadyToStartMatch_Implementation()
 		bHasStarted &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasStarted);
 	}
 
+	for (const auto& [Key, Value] : GameModeAdditives)
+	{
+		bHasStarted &= (IsValid(Value) && Value->ReadyToStartMatch());
+	}
+
 	return bHasStarted;
 }
 
@@ -126,6 +168,11 @@ bool AAVVMGameMode::ReadyToEndMatch_Implementation()
 	{
 		const UAVVMWorldRule* MatchProgressionRule = WorldSetting->GetRule(RuleTagAggregator.MatchEndTag);
 		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasEnded);
+	}
+
+	for (const auto& [Key, Value] : GameModeAdditives)
+	{
+		bHasEnded |= (IsValid(Value) && Value->ReadyToEndMatch());
 	}
 
 	return bHasEnded;
@@ -141,6 +188,32 @@ bool AAVVMGameMode::HasMatchEnded() const
 	}
 
 	return bHasEnded;
+}
+
+void AAVVMGameMode::StartMatch()
+{
+	Super::StartMatch();
+
+	for (const auto& [Key, Value] : GameModeAdditives)
+	{
+		if (IsValid(Value))
+		{
+			Value->StartMatch();
+		}
+	}
+}
+
+void AAVVMGameMode::EndMatch()
+{
+	Super::EndMatch();
+
+	for (const auto& [Key, Value] : GameModeAdditives)
+	{
+		if (IsValid(Value))
+		{
+			Value->EndMatch();
+		}
+	}
 }
 
 void AAVVMGameMode::OnGameStateSet(AGameStateBase* NewGameState)
