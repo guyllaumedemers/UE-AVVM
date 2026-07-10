@@ -17,39 +17,14 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMGameplaySettings.h"
+#include "AVVMGameModeAdditiveCheatExtension.h"
 
-UAVVMGameplaySettings::UAVVMGameplaySettings()
+void UAVVMGameModeAdditiveCheatExtension::AddedToCheatManager_Implementation()
 {
-	CategoryName = TEXT("Game");
+	Super::AddedToCheatManager_Implementation();
 }
 
-const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
+void UAVVMGameModeAdditiveCheatExtension::RemovedFromCheatManager_Implementation()
 {
-	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->GameplayEffectIdentifierRegistryType;
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetActorDefinitionRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->ActorDefinitionRegistryType;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerActionBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerActionBlockingTags;
-}
-
-const FGameplayTagContainer& UAVVMGameplaySettings::GetPlayerAbilityBlockingTags()
-{
-	return GetDefault<UAVVMGameplaySettings>()->PlayerAbilityBlockingTags;
-}
-
-const FDataRegistryType& UAVVMGameplaySettings::GetGameModeAdditiveRegistryType()
-{
-	return GetDefault<UAVVMGameplaySettings>()->GameModeAdditiveRegistryType;
+	Super::RemovedFromCheatManager_Implementation();
 }

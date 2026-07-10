@@ -82,7 +82,7 @@ protected:
 	                         const int32 Index) const;
 
 	void HandleComboBoxLinkage(const bool bIsComboBoxLinked,
-	                           const int32& TagChannelIndex,
+	                           const int32 TagChannelIndex,
 	                           int32& OutRegistryIndex);
 
 	// @gdemers handle data registry/gameplay tag changes at runtime. (most-likely triggered from GFP)

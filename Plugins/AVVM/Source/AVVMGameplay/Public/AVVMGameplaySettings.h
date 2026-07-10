@@ -25,7 +25,6 @@
 #include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
 #include "Templates/SubclassOf.h"
-#include "UObject/SoftObjectPtr.h"
 
 #include "AVVMGameplaySettings.generated.h"
 
@@ -58,7 +57,7 @@ public:
 	static const FGameplayTagContainer& GetPlayerAbilityBlockingTags();
 
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
-	static const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& GetGameModeAdditiveClasses();
+	static const FDataRegistryType& GetGameModeAdditiveRegistryType();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -79,5 +78,5 @@ protected:
 	FGameplayTagContainer PlayerAbilityBlockingTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TArray<TSoftClassPtr<UAVVMGameModeAdditive>> GameModeAdditiveClasses;
+	FDataRegistryType GameModeAdditiveRegistryType = FDataRegistryType();
 };

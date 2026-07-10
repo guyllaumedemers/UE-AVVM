@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "UObject/Object.h"
@@ -79,6 +80,25 @@ public:
 /**
  *	Class description:
  *	
+ *	FAVVMGameModeAdditiveDataTableRow is a table row entry thet reference a UAVVMGameModeAdditive class object
+ *	to extend AGameMode.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMGameModeAdditiveDataTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<UAVVMGameModeAdditive> GameModeAdditiveClass = nullptr;
+};
+
+/**
+ *	Class description:
+ *	
  *	UAVVMGameModeAdditiveUtils is a blueprint function library for reusable api specific to UAVVMGameModeAdditive.
  */
 UCLASS()
@@ -92,8 +112,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static TMap<FName, UAVVMGameModeAdditive*> LoadSynchronous(const TArray<FString>& SplitOptions,
-	                                                           UObject* Outer);
+	                                                           UObject* Outer,
+	                                                           TArray<FString>& OutFailedOrPluginSpecificOptions);
 
 	UFUNCTION(BlueprintCallable)
-	static TSoftClassPtr<UAVVMGameModeAdditive> GetGameModeAdditiveSoftClass(const FString& CmdLineFlagName);
+	static TSoftClassPtr<UAVVMGameModeAdditive> GetGameModeAdditiveSoftClass(const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& OutGameModeAdditives,
+	                                                                         const FString& CmdLineFlagName);
 };

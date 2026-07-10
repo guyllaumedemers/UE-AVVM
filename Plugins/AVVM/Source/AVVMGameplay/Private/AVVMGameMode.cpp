@@ -104,17 +104,24 @@ void AAVVMGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	                TEXT("Parsing Server UAVVMGameModeAdditive Options: %s"),
 	                *FString::Join(SplitOptions, TEXT(", ")));
 
+	FailedOrPluginGameModeAdditiveOptions.Reserve(SplitOptions.Num());
 	// @gdemers IMPORTANT - we need this process to be synchronous to enforce execution
 	// ordering. UAVVMGameModeAdditive need to participate in the game loop startup process.
 	// i.e the AGameMode ReadyStartMatch/ReadyEndMatch/StartMatch/& EndMatch api.
 	// Reminder : Keep your UAVVMGameModeAdditive UObject lightweight!
-	const auto& NewGameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, this);
+	const TMap<FName, UAVVMGameModeAdditive*> NewGameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, this, FailedOrPluginGameModeAdditiveOptions);
 
-	GameModeAdditives.Reserve(NewGameModeAdditives.Num());
+	RuntimeGameModeAdditives.Reserve(NewGameModeAdditives.Num());
 	for (const auto& [Key, Value] : NewGameModeAdditives)
 	{
-		GameModeAdditives.Add(Key, Value);
+		RuntimeGameModeAdditives.Add(Key, Value);
 	}
+
+	AVVM_LOGGER_LOG(LogGameplay,
+	                this,
+	                this,
+	                TEXT("Failed to parse project, or Plugin UAVVMGameModeAdditive Options: %s."),
+	                *FString::Join(FailedOrPluginGameModeAdditiveOptions, TEXT(", ")));
 }
 
 void AAVVMGameMode::Tick(float DeltaSeconds)
@@ -136,7 +143,7 @@ bool AAVVMGameMode::IsMatchInProgress() const
 		bIsInProgress &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bIsInProgress);
 	}
 
-	for (const auto& [Key, Value] : GameModeAdditives)
+	for (const auto& [Key, Value] : RuntimeGameModeAdditives)
 	{
 		bIsInProgress &= (IsValid(Value) && Value->IsMatchInProgress());
 	}
@@ -153,7 +160,7 @@ bool AAVVMGameMode::ReadyToStartMatch_Implementation()
 		bHasStarted &= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasStarted);
 	}
 
-	for (const auto& [Key, Value] : GameModeAdditives)
+	for (const auto& [Key, Value] : RuntimeGameModeAdditives)
 	{
 		bHasStarted &= (IsValid(Value) && Value->ReadyToStartMatch());
 	}
@@ -170,7 +177,7 @@ bool AAVVMGameMode::ReadyToEndMatch_Implementation()
 		bHasEnded |= (IsValid(MatchProgressionRule) ? MatchProgressionRule->Predicate() : bHasEnded);
 	}
 
-	for (const auto& [Key, Value] : GameModeAdditives)
+	for (const auto& [Key, Value] : RuntimeGameModeAdditives)
 	{
 		bHasEnded |= (IsValid(Value) && Value->ReadyToEndMatch());
 	}
@@ -194,7 +201,7 @@ void AAVVMGameMode::StartMatch()
 {
 	Super::StartMatch();
 
-	for (const auto& [Key, Value] : GameModeAdditives)
+	for (const auto& [Key, Value] : RuntimeGameModeAdditives)
 	{
 		if (IsValid(Value))
 		{
@@ -207,7 +214,7 @@ void AAVVMGameMode::EndMatch()
 {
 	Super::EndMatch();
 
-	for (const auto& [Key, Value] : GameModeAdditives)
+	for (const auto& [Key, Value] : RuntimeGameModeAdditives)
 	{
 		if (IsValid(Value))
 		{
@@ -235,7 +242,7 @@ void AAVVMGameMode::PreLogin(const FString& Options, const FString& Address, con
 	                     TEXT("Invalid %s"),
 	                     *GetNameSafe(AAVVMWorldSetting::StaticClass())))
 	{
-		const auto* PlayerAcceptanceRule = Cast<UAVVMPlayerAcceptanceRule>(WorldSetting->GetRule(RuleTagAggregator.PlayerAcceptanceTag));
+		const auto* PlayerAcceptanceRule = WorldSetting->GetRule<UAVVMPlayerAcceptanceRule>(RuleTagAggregator.PlayerAcceptanceTag);
 		bIsExpectedPlayer = (IsValid(PlayerAcceptanceRule) ? PlayerAcceptanceRule->Predicate_IsExpectedUniqueNetId(UniqueId) : bDoesAcceptAnyPlayerLogin);
 	}
 
@@ -323,7 +330,7 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 		return nullptr;
 	}
 
-	const auto* SpawnPointRule = Cast<UAVVMSpawnPointRetrySearchRule>(WorldSetting->GetRule(RuleTagAggregator.SpawnPointSelectionTag));
+	const auto* SpawnPointRule = WorldSetting->GetRule<UAVVMSpawnPointRetrySearchRule>(RuleTagAggregator.SpawnPointSelectionTag);
 	if (!ensureAlwaysMsgf(IsValid(SpawnPointRule),
 	                      TEXT("Invalid %s for tag %s."),
 	                      *GetNameSafe(UAVVMSpawnPointRetrySearchRule::StaticClass()),
@@ -422,7 +429,7 @@ APawn* AAVVMGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer,
 		return nullptr;
 	}
 
-	const auto* DefaultPawnSpawnRule = Cast<UAVVMDefaultPawnSpawnRule>(WorldSetting->GetRule(RuleTagAggregator.DefaultPawnSpawnConditionsTag));
+	const auto* DefaultPawnSpawnRule = WorldSetting->GetRule<UAVVMDefaultPawnSpawnRule>(RuleTagAggregator.DefaultPawnSpawnConditionsTag);
 	if (!ensureAlwaysMsgf(IsValid(DefaultPawnSpawnRule),
 	                      TEXT("Invalid %s for tag %s."),
 	                      *GetNameSafe(UAVVMDefaultPawnSpawnRule::StaticClass()),

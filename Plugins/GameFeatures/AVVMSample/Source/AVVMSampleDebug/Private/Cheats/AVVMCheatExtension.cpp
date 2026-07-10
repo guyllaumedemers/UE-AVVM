@@ -377,7 +377,7 @@ FString UAVVMCheatExtension::GetIndexedString(const char* ConcatString, const in
 }
 
 void UAVVMCheatExtension::HandleComboBoxLinkage(const bool bIsComboBoxLinked,
-                                                const int32& TagChannelIndex,
+                                                const int32 TagChannelIndex,
                                                 int32& OutRegistryIndex)
 {
 	static int32 PreviousTagChannelIndex = 0;

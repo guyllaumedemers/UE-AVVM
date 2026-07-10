@@ -125,9 +125,6 @@ protected:
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName = L"") override;
 	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 	virtual void FailedToRestartPlayer(AController* NewPlayer) override;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bAllowServerProcessExit = false;
@@ -140,12 +137,20 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldDeferDefaultPawnCreation = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<AAVVMWorldSetting> WorldSetting = nullptr;
+	TWeakObjectPtr<const AAVVMWorldSetting> WorldSetting = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FName, TObjectPtr<UAVVMGameModeAdditive>> GameModeAdditives;
+	TMap<FName, TObjectPtr<UAVVMGameModeAdditive>> RuntimeGameModeAdditives;
+
+	// @gdemers IMPORTANT : If a GFP is added late in the AGameMode loop,
+	// we may still want to add UAVVMGameModeAdditive behaviour based on unused parameters.
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<FString> FailedOrPluginGameModeAdditiveOptions;
 
 private:
 	void Terminate();

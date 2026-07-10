@@ -22,8 +22,24 @@
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMLogger.h"
+#include "DataRegistry.h"
+#include "DataRegistrySubsystem.h"
 #include "Misc/CommandLine.h"
 #include "Templates/SubclassOf.h"
+
+#if WITH_EDITOR
+EDataValidationResult FAVVMGameModeAdditiveDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (GameModeAdditiveClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FAVVMGameModeAdditiveDataTableRow", "", "Invalid SoftClassPtr."));
+	}
+
+	return Result;
+}
+#endif
 
 const TArray<FString> UAVVMGameModeAdditiveUtils::ParseCmdOptions(const FString& GameModeOptions)
 {
@@ -46,15 +62,48 @@ const TArray<FString> UAVVMGameModeAdditiveUtils::ParseCmdOptions(const FString&
 }
 
 TMap<FName, UAVVMGameModeAdditive*> UAVVMGameModeAdditiveUtils::LoadSynchronous(const TArray<FString>& SplitOptions,
-                                                                                UObject* Outer)
+                                                                                UObject* Outer,
+                                                                                TArray<FString>& OutFailedOrPluginSpecificOptions)
 {
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		OutFailedOrPluginSpecificOptions = SplitOptions;
+		return {};
+	}
+
+	// @gdemers Using UDataRegistrySubsystem allow for cross dll referencing of user defined
+	// UAVVMGameModeAdditive (for example : when creating a BP in a GFP).
+	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(UAVVMGameplaySettings::GetGameModeAdditiveRegistryType());
+	if (!IsValid(DataRegistry))
+	{
+		OutFailedOrPluginSpecificOptions = SplitOptions;
+		return {};
+	}
+
+	TArray<const FAVVMGameModeAdditiveDataTableRow*> OutGameModeAdditiveDataTableRows;
+	DataRegistry->GetAllItems(TEXT(""), OutGameModeAdditiveDataTableRows);
+
+	TArray<TSoftClassPtr<UAVVMGameModeAdditive>> OutGameModeAdditives;
+	OutGameModeAdditives.Reserve(OutGameModeAdditiveDataTableRows.Num());
+	
+	for (const auto* TableRow : OutGameModeAdditiveDataTableRows)
+	{
+		if (TableRow != nullptr)
+		{
+			OutGameModeAdditives.Add(TableRow->GameModeAdditiveClass);
+		}
+	}
+
 	TMap<FName, TSubclassOf<UAVVMGameModeAdditive>> OutClasses;
 	for (const FString& SplitOption : SplitOptions)
 	{
-		const TSoftClassPtr<UAVVMGameModeAdditive> GameModeAdditiveSoftClass = UAVVMGameModeAdditiveUtils::GetGameModeAdditiveSoftClass(SplitOption/*Cmdline Flag name used*/);
-		if (!ensureAlwaysMsgf(GameModeAdditiveSoftClass.IsValid(),
-		                      TEXT("Invalid FSoftObjectPath to %s"), *GameModeAdditiveSoftClass.ToString()))
+		const TSoftClassPtr<UAVVMGameModeAdditive> GameModeAdditiveSoftClass = UAVVMGameModeAdditiveUtils::GetGameModeAdditiveSoftClass(OutGameModeAdditives, SplitOption/*Cmdline Flag name used*/);
+		if (!GameModeAdditiveSoftClass.IsValid())
 		{
+			// @gdemers we need to track which cmd line parameter werent able to resolved to handle the case
+			// where GFP specific UAVVMGameModeAdditive are requested for load.
+			OutFailedOrPluginSpecificOptions.Add(SplitOption);
 			continue;
 		}
 
@@ -76,9 +125,10 @@ TMap<FName, UAVVMGameModeAdditive*> UAVVMGameModeAdditiveUtils::LoadSynchronous(
 	return OutResults;
 }
 
-TSoftClassPtr<UAVVMGameModeAdditive> UAVVMGameModeAdditiveUtils::GetGameModeAdditiveSoftClass(const FString& CmdLineFlagName)
+TSoftClassPtr<UAVVMGameModeAdditive> UAVVMGameModeAdditiveUtils::GetGameModeAdditiveSoftClass(const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& OutGameModeAdditives,
+                                                                                              const FString& CmdLineFlagName)
 {
-	const TSoftClassPtr<UAVVMGameModeAdditive>* NewGameModeAdditives = UAVVMGameplaySettings::GetGameModeAdditiveClasses()
+	const TSoftClassPtr<UAVVMGameModeAdditive>* NewGameModeAdditives = OutGameModeAdditives
 			.FindByPredicate([Search = CmdLineFlagName](const TSoftClassPtr<UAVVMGameModeAdditive>& GameModeAdditiveClass)
 			{
 				if (GameModeAdditiveClass.IsNull())
