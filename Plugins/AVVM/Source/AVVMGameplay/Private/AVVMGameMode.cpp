@@ -104,12 +104,12 @@ void AAVVMGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	                TEXT("Parsing Server UAVVMGameModeAdditive Options: %s"),
 	                *FString::Join(SplitOptions, TEXT(", ")));
 
-	FailedOrPluginGameModeAdditiveOptions.Reserve(SplitOptions.Num());
+	FailedProjectOrPluginGameModeAdditiveOptions.Reserve(SplitOptions.Num());
 	// @gdemers IMPORTANT - we need this process to be synchronous to enforce execution
 	// ordering. UAVVMGameModeAdditive need to participate in the game loop startup process.
 	// i.e the AGameMode ReadyStartMatch/ReadyEndMatch/StartMatch/& EndMatch api.
 	// Reminder : Keep your UAVVMGameModeAdditive UObject lightweight!
-	const TMap<FName, UAVVMGameModeAdditive*> NewGameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, this, FailedOrPluginGameModeAdditiveOptions);
+	const TMap<FName, UAVVMGameModeAdditive*> NewGameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, this, FailedProjectOrPluginGameModeAdditiveOptions);
 
 	RuntimeGameModeAdditives.Reserve(NewGameModeAdditives.Num());
 	for (const auto& [Key, Value] : NewGameModeAdditives)
@@ -121,7 +121,7 @@ void AAVVMGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	                this,
 	                this,
 	                TEXT("Failed to parse project, or Plugin UAVVMGameModeAdditive Options: %s."),
-	                *FString::Join(FailedOrPluginGameModeAdditiveOptions, TEXT(", ")));
+	                *FString::Join(FailedProjectOrPluginGameModeAdditiveOptions, TEXT(", ")));
 }
 
 void AAVVMGameMode::Tick(float DeltaSeconds)

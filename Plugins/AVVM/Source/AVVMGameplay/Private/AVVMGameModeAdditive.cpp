@@ -28,13 +28,13 @@
 #include "Templates/SubclassOf.h"
 
 #if WITH_EDITOR
-EDataValidationResult FAVVMGameModeAdditiveDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FAVVMGameModeAdditiveDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 	if (GameModeAdditiveClass.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FAVVMGameModeAdditiveDataTableRow", "", "Invalid SoftClassPtr."));
+		Context.AddError(NSLOCTEXT("FAVVMGameModeAdditiveDefinitionDataTableRow", "", "Invalid SoftClassPtr."));
 	}
 
 	return Result;
@@ -81,7 +81,7 @@ TMap<FName, UAVVMGameModeAdditive*> UAVVMGameModeAdditiveUtils::LoadSynchronous(
 		return {};
 	}
 
-	TArray<const FAVVMGameModeAdditiveDataTableRow*> OutGameModeAdditiveDataTableRows;
+	TArray<const FAVVMGameModeAdditiveDefinitionDataTableRow*> OutGameModeAdditiveDataTableRows;
 	DataRegistry->GetAllItems(TEXT(""), OutGameModeAdditiveDataTableRows);
 
 	TArray<TSoftClassPtr<UAVVMGameModeAdditive>> OutGameModeAdditives;

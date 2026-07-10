@@ -80,11 +80,11 @@ public:
 /**
  *	Class description:
  *	
- *	FAVVMGameModeAdditiveDataTableRow is a table row entry thet reference a UAVVMGameModeAdditive class object
+ *	FAVVMGameModeAdditiveDefinitionDataTableRow is a table row entry thet reference a UAVVMGameModeAdditive class object
  *	to extend AGameMode.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMGameModeAdditiveDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMGameModeAdditiveDefinitionDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
