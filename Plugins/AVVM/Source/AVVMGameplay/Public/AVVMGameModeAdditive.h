@@ -81,7 +81,8 @@ public:
  *	Class description:
  *	
  *	FAVVMGameModeAdditiveDefinitionDataTableRow is a table row entry thet reference a UAVVMGameModeAdditive class object
- *	to extend AGameMode.
+ *	to extend AGameMode. UAVVMGameModeAdditive referenced in GFP can be dynamically added via Unreal Registry system, resolving the
+ *	cross Dll boundaries problem. 
  */
 USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMGameModeAdditiveDefinitionDataTableRow : public FTableRowBase
