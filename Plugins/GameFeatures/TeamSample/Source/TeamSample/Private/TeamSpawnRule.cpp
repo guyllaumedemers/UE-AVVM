@@ -82,5 +82,7 @@ bool UTeamSpawnRule::Predicate_GetSpawnPoint_Implementation(const TArray<AActor*
 
 	const UTeamStartComponent* SearchResult = UTeamSpawnSubsystem::Static_TryGetPlayerStart(GetWorld(), Player->PlayerState);
 	OutActor = IsValid(SearchResult) ? SearchResult->GetTypedOuter<AActor>() : nullptr;
+	// TODO @gdemers Add support for applying Fx constraint to newly spawned player. Require proper support to delegate
+	// binding here so we apply our UTeamSpawnRule internal definition to the spawned ACharacter.
 	return IsValid(OutActor);
 }
