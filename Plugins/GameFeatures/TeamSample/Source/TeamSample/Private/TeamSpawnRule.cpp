@@ -19,6 +19,10 @@
 //SOFTWARE.
 #include "TeamSpawnRule.h"
 
+#include "TeamSpawnSubsystem.h"
+#include "TeamStartComponent.h"
+#include "GameFramework/Controller.h"
+
 #if WITH_EDITOR
 EDataValidationResult UTeamSpawnRule::IsDataValid(class FDataValidationContext& Context) const
 {
@@ -57,12 +61,26 @@ EDataValidationResult UTeamSpawnRule::IsDataValid(class FDataValidationContext& 
 }
 #endif
 
-const TArray<TSoftClassPtr<UTeamSpawnCondition>>& UTeamSpawnRule::GetSpawnConditions() const
+const TArray<TSoftClassPtr<UTeamSpawnCondition>>& UTeamSpawnRule::GetSpawnConditionClasses() const
 {
 	return SpawnConditionClasses;
 }
 
-const TSoftClassPtr<UTeamSpawnWeightRule>& UTeamSpawnRule::GetSpawnWeightRule() const
+const TSoftClassPtr<UTeamSpawnWeightRule>& UTeamSpawnRule::GetSpawnWeightRuleClass() const
 {
 	return SpawnWeightRuleClass;
+}
+
+bool UTeamSpawnRule::Predicate_GetSpawnPoint_Implementation(const TArray<AActor*>& SpawnPoints,
+                                                            const AController* Player,
+                                                            AActor*& OutActor) const
+{
+	if (!ensureAlwaysMsgf(IsValid(Player), TEXT("Invalid PlayerController.")))
+	{
+		return false;
+	}
+
+	const UTeamStartComponent* SearchResult = UTeamSpawnSubsystem::Static_TryGetPlayerStart(GetWorld(), Player->PlayerState);
+	OutActor = IsValid(SearchResult) ? SearchResult->GetTypedOuter<AActor>() : nullptr;
+	return IsValid(OutActor);
 }

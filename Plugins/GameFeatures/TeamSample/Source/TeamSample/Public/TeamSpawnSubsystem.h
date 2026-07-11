@@ -66,7 +66,6 @@ public:
 	// and UAVVMSpawnPointRetrySearchRule be used as logic driving the spawn process of the player.
 	UFUNCTION(BlueprintCallable)
 	static const UTeamStartComponent* Static_TryGetPlayerStart(const UWorld* World,
-	                                                           const FWorldContextArgs& WorldContextArgs,
 	                                                           const APlayerState* OldPlayerState); 
 
 protected:
@@ -74,8 +73,8 @@ protected:
 	void UnRegister(const UTeamStartComponent* Component);
 	void Register(const UTeamStartComponent* Component);
 	
-	const UTeamStartComponent* TryGetPlayerStart(const FWorldContextArgs& WorldContextArgs,
-	                                             const APlayerState* OldPlayerState) const;
+	const UTeamStartComponent* TryGetPlayerStart(const APlayerState* OldPlayerState) const;
+	const FWorldContextArgs MakeWorldContextArgs() const;
 	
 	void CreateTeamSpawnRule();
 	void InitRule();

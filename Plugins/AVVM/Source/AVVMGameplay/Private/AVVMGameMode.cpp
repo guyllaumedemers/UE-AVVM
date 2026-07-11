@@ -345,7 +345,7 @@ AActor* AAVVMGameMode::FindPlayerStart_Implementation(AController* Player, const
 	TArray<AActor*> OutSpawnPoints;
 	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), OutSpawnPoints);
 
-	bResult |= SpawnPointRule->Predicate_GetSpawnPoint(OutSpawnPoints, SpawnPoint);
+	bResult |= SpawnPointRule->Predicate_GetSpawnPoint(OutSpawnPoints, Player, SpawnPoint);
 	if (bResult)
 	{
 		// @gdemers safe reset counter upon finding valid spot.

@@ -47,8 +47,8 @@ public:
 	
 	// @gdemers validate information about player based on the referenced UniqueNetId.
 	UFUNCTION(BlueprintNativeEvent)
-	bool Predicate_GetSpawnPoint(const TArray<AActor*>& SpawnPoints, AActor*& OutActor) const;
-	virtual bool Predicate_GetSpawnPoint_Implementation(const TArray<AActor*>& SpawnPoints, AActor*& OutActor) const PURE_VIRTUAL(Predicate_GetSpawnPoint_Implementation, return false;);
+	bool Predicate_GetSpawnPoint(const TArray<AActor*>& SpawnPoints, const AController* Player, AActor*& OutActor) const;
+	virtual bool Predicate_GetSpawnPoint_Implementation(const TArray<AActor*>& SpawnPoints, const AController* Player, AActor*& OutActor) const PURE_VIRTUAL(Predicate_GetSpawnPoint_Implementation, return false;);
 	
 	UFUNCTION(BlueprintCallable)
 	bool CanUsePreviousStartPositionOnFailure() const;

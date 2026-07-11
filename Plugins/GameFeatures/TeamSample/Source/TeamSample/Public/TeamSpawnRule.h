@@ -21,8 +21,8 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMWorldSetting.h"
 #include "GameplayTagContainer.h"
+#include "Rules/AVVMSpawnPointRule.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -105,7 +105,7 @@ public:
  *	so to use Abilities, loadout, etc...
  */
 UCLASS()
-class TEAMSAMPLE_API UTeamSpawnRule : public UAVVMWorldRule
+class TEAMSAMPLE_API UTeamSpawnRule : public UAVVMSpawnPointRetrySearchRule
 {
 	GENERATED_BODY()
 
@@ -114,8 +114,14 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	const TArray<TSoftClassPtr<UTeamSpawnCondition>>& GetSpawnConditions() const;
-	const TSoftClassPtr<UTeamSpawnWeightRule>& GetSpawnWeightRule() const;
+	const TArray<TSoftClassPtr<UTeamSpawnCondition>>& GetSpawnConditionClasses() const;
+	const TSoftClassPtr<UTeamSpawnWeightRule>& GetSpawnWeightRuleClass() const;
+	
+	// @gdemers override to handle call to UTeamSpawnSubsystem::TryGetPlayerStart from
+	// with AVVMGameMode::FindPlayerStart.
+	virtual bool Predicate_GetSpawnPoint_Implementation(const TArray<AActor*>& SpawnPoints,
+	                                                    const AController* Player,
+	                                                    AActor*& OutActor) const override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="True in most case, certain lobbies require static players and run simple animation."))

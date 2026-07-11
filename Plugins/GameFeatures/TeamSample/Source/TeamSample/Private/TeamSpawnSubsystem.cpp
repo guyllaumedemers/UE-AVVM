@@ -87,11 +87,10 @@ void UTeamSpawnSubsystem::Static_RegisterPlayerStart(const UWorld* World,
 }
 
 const UTeamStartComponent* UTeamSpawnSubsystem::Static_TryGetPlayerStart(const UWorld* World,
-                                                                         const FWorldContextArgs& WorldContextArgs,
                                                                          const APlayerState* OldPlayerState)
 {
 	auto* TeamSpawnSubsystem = UTeamSpawnSubsystem::Get(World);
-	return IsValid(TeamSpawnSubsystem) ? TeamSpawnSubsystem->TryGetPlayerStart(WorldContextArgs, OldPlayerState) : nullptr;
+	return IsValid(TeamSpawnSubsystem) ? TeamSpawnSubsystem->TryGetPlayerStart(OldPlayerState) : nullptr;
 }
 
 UTeamSpawnSubsystem* UTeamSpawnSubsystem::Get(const UWorld* World)
@@ -143,11 +142,11 @@ void UTeamSpawnSubsystem::Register(const UTeamStartComponent* Component)
 					*GetNameSafe(Outer));
 }
 
-const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const FWorldContextArgs& WorldContextArgs,
-                                                                  const APlayerState* OldPlayerState) const
+const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const APlayerState* OldPlayerState) const
 {
 	const UTeamStartComponent* Result = nullptr;
 
+	const FWorldContextArgs WorldContextArgs = MakeWorldContextArgs();
 	for (const TWeakObjectPtr<const UTeamStartComponent>& PlayerStart : PlayerStarts)
 	{
 		bool bPredicate = true;
@@ -175,6 +174,12 @@ const UTeamStartComponent* UTeamSpawnSubsystem::TryGetPlayerStart(const FWorldCo
 	}
 
 	return Result;
+}
+
+const FWorldContextArgs UTeamSpawnSubsystem::MakeWorldContextArgs() const
+{
+	// TODO @gdemers make a new world context args
+	return FWorldContextArgs{};
 }
 
 void UTeamSpawnSubsystem::CreateTeamSpawnRule()
@@ -254,7 +259,7 @@ void UTeamSpawnSubsystem::CreateTeamSpawnWeightRule()
 	};
 
 	const auto Callback = FStreamableDelegate::CreateWeakLambda(this, OnAsyncLoadComplete, TWeakObjectPtr(this));
-	SpawnWeightRuleStreamableHandle = UAssetManager::Get().LoadAssetList({Rule->GetSpawnWeightRule().ToSoftObjectPath()}, Callback);
+	SpawnWeightRuleStreamableHandle = UAssetManager::Get().LoadAssetList({Rule->GetSpawnWeightRuleClass().ToSoftObjectPath()}, Callback);
 }
 
 void UTeamSpawnSubsystem::CreateSpawnConditions()
@@ -266,7 +271,7 @@ void UTeamSpawnSubsystem::CreateSpawnConditions()
 	}
 
 	TArray<FSoftObjectPath> SpawnConditionPaths;
-	for (const auto& SpawnConditionsClass : Rule->GetSpawnConditions())
+	for (const auto& SpawnConditionsClass : Rule->GetSpawnConditionClasses())
 	{
 		SpawnConditionPaths.Add(SpawnConditionsClass.ToSoftObjectPath());
 	}
