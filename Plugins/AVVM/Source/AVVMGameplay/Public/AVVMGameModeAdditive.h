@@ -20,12 +20,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-
 #include "UObject/Object.h"
 
 #include "AVVMGameModeAdditive.generated.h"
+
+class AAVVMGameMode;
 
 /**
  *	Class description:
@@ -119,4 +121,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TSoftClassPtr<UAVVMGameModeAdditive> GetGameModeAdditiveSoftClass(const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& OutGameModeAdditives,
 	                                                                         const FString& CmdLineFlagName);
+	
+	UFUNCTION(BlueprintCallable)
+	static void AddOrRemoveGameModeAdditive(AAVVMGameMode* GameMode,
+	                                        const FName& GameModeAdditiveClassAssetName,
+	                                        const bool bAddOrRemove);
 };

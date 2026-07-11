@@ -157,4 +157,6 @@ private:
 	virtual void TerminateDedicatedServer();
 	virtual void TerminateListenServer();
 	virtual void RecycleProcess();
+	
+	friend class UAVVMGameModeAdditiveUtils;
 };

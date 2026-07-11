@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AVVMGameModeAdditive.h"
 
+#include "AVVMGameMode.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMLogger.h"
@@ -111,7 +112,7 @@ TMap<FName, UAVVMGameModeAdditive*> UAVVMGameModeAdditiveUtils::LoadSynchronous(
 		const TSubclassOf<UAVVMGameModeAdditive> GameModeAdditiveClass = GameModeAdditiveSoftClass.LoadSynchronous();
 		if (IsValid(GameModeAdditiveClass))
 		{
-			OutClasses.Add(FName(SplitOption), GameModeAdditiveClass);
+			OutClasses.Add(FName(GameModeAdditiveSoftClass.GetAssetName()), GameModeAdditiveClass);
 		}
 	}
 
@@ -155,5 +156,61 @@ TSoftClassPtr<UAVVMGameModeAdditive> UAVVMGameModeAdditiveUtils::GetGameModeAddi
 	else
 	{
 		return nullptr;
+	}
+}
+
+void UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(AAVVMGameMode* GameMode,
+                                                             const FName& GameModeAdditiveClassAssetName,
+                                                             const bool bAddOrRemove)
+{
+	if (!IsValid(GameMode))
+	{
+		return;
+	}
+
+	const bool bDoesContains = GameMode->RuntimeGameModeAdditives.Contains(GameModeAdditiveClassAssetName);
+	if (bDoesContains && bAddOrRemove)
+	{
+		return;
+	}
+
+	if (bAddOrRemove)
+	{
+		TArray<FString> OutFailedOptions;
+
+		const TArray<FString> SplitOptions = UAVVMGameModeAdditiveUtils::ParseCmdOptions(FString::Printf(TEXT("GameModeOptions=%s"), *GameModeAdditiveClassAssetName.ToString()));
+		const TMap<FName, UAVVMGameModeAdditive*> GameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, GameMode, OutFailedOptions);
+
+		for (const auto& [Key, Value] : GameModeAdditives)
+		{
+			GameMode->RuntimeGameModeAdditives.Add(GameModeAdditiveClassAssetName, Value);
+
+			AVVM_LOGGER_LOG(LogGameplay,
+			                GameMode,
+			                GameMode,
+			                TEXT("Creating new GameModeAdditive %s."),
+			                *Key.ToString());
+
+			if (IsValid(Value))
+			{
+				Value->StartMatch();
+			}
+		}
+	}
+	else
+	{
+		TObjectPtr<UAVVMGameModeAdditive>& GameModeAdditive = GameMode->RuntimeGameModeAdditives[GameModeAdditiveClassAssetName];
+		if (IsValid(GameModeAdditive))
+		{
+			GameModeAdditive->EndMatch();
+		}
+
+		AVVM_LOGGER_LOG(LogGameplay,
+		                GameMode,
+		                GameMode,
+		                TEXT("Destroying GameModeAdditive %s."),
+		                *GameModeAdditiveClassAssetName.ToString());
+
+		GameMode->RuntimeGameModeAdditives.Remove(GameModeAdditiveClassAssetName);
 	}
 }

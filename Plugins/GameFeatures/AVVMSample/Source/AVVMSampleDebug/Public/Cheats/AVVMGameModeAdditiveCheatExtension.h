@@ -22,18 +22,42 @@
 #include "CoreMinimal.h"
 
 #include "AVVMClientExecutorCheatExtension.h"
+#include "AVVMImGuiModule.h"
 
 #include "AVVMGameModeAdditiveCheatExtension.generated.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMGameModeAdditiveCheatExtension is a CheatExtension, added via GFP, that expose a set of new console commands to test recurrent gameplay features
+ *	specific to the AVVMGameModeAdditive system.
  */
 UCLASS()
-class AVVMGAMEPLAY_API UAVVMGameModeAdditiveCheatExtension : public UAVVMClientExecutorCheatExtension
+class AVVMSAMPLEDEBUG_API UAVVMGameModeAdditiveCheatExtension : public UAVVMClientExecutorCheatExtension,
+                                                                public IAVVMImGuiDescriptor
 {
 	GENERATED_BODY()
 
 public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameModeAdditive.Create")
+	void Create(const FString& GameModeAdditiveClassAssetName);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameModeAdditive.Destroy")
+	void Destroy(const FString& GameModeAdditiveClassAssetName);
+
+	virtual void Draw() override;
+
+protected:
+	const char* LazyGatherGameModeAdditiveClasses(bool& bForceGathering) const;
+
+	FString GetIndexedString(const char* ConcatString,
+	                         const int32 Index) const;
+
+	// @gdemers handle data registry/gameplay tag changes at runtime. (most-likely triggered from GFP)
+	void OnDataRegistrySubsystemChanged();
+
+	bool bHasRegistriesChanged = false;
 };
