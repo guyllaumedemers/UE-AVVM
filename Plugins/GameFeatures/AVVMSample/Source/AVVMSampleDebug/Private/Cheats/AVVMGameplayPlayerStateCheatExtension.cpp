@@ -25,7 +25,6 @@
 #include "AVVMQuicktimeEventInterface.h"
 #include "AVVMToolkitUtils.h"
 #include <imgui.h>
-#include "Containers/StringFwd.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
