@@ -26,9 +26,8 @@
 #include "AVVMLogger.h"
 #include "DataRegistrySubsystem.h"
 #include <imgui.h>
-
-#include "AVVMGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/StringOutputDevice.h"
 
 void UAVVMGameModeAdditiveCheatExtension::AddedToCheatManager_Implementation()
 {
@@ -71,8 +70,7 @@ void UAVVMGameModeAdditiveCheatExtension::Create(const FString& GameModeAdditive
 	                TEXT("Creating %s."),
 	                *GameModeAdditiveClassAssetName);
 
-	auto* GameMode = Cast<AAVVMGameMode>(UGameplayStatics::GetGameMode(this));
-	UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(GameMode, FName(GameModeAdditiveClassAssetName), true);
+	UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(this, FName(GameModeAdditiveClassAssetName), true);
 }
 
 void UAVVMGameModeAdditiveCheatExtension::Destroy(const FString& GameModeAdditiveClassAssetName)
@@ -83,8 +81,7 @@ void UAVVMGameModeAdditiveCheatExtension::Destroy(const FString& GameModeAdditiv
 	                TEXT("Destroying %s."),
 	                *GameModeAdditiveClassAssetName);
 
-	auto* GameMode = Cast<AAVVMGameMode>(UGameplayStatics::GetGameMode(this));
-	UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(GameMode, FName(GameModeAdditiveClassAssetName), false);
+	UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(this, FName(GameModeAdditiveClassAssetName), false);
 }
 
 void UAVVMGameModeAdditiveCheatExtension::Draw()
@@ -115,7 +112,7 @@ void UAVVMGameModeAdditiveCheatExtension::Draw()
 		if (ImGui::Button("Create"))
 		{
 			const FString GameModeAdditiveAssetName = GetIndexedString(GameModeAdditiveClasses, CurrentGameModeAdditiveClassIndex);
-			Create(GameModeAdditiveAssetName);
+			SERVER_EXECUTE_FORMATED_CHEAT("Create %s", *GameModeAdditiveAssetName);
 		}
 
 		ImGui::SameLine();
@@ -123,7 +120,7 @@ void UAVVMGameModeAdditiveCheatExtension::Draw()
 		if (ImGui::Button("Destroy"))
 		{
 			const FString GameModeAdditiveAssetName = GetIndexedString(GameModeAdditiveClasses, CurrentGameModeAdditiveClassIndex);
-			Destroy(GameModeAdditiveAssetName);
+			SERVER_EXECUTE_FORMATED_CHEAT("Destroy %s", *GameModeAdditiveAssetName);
 		}
 	}
 }

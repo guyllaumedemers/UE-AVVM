@@ -61,10 +61,14 @@ public:
 	void Killstreak();
 
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.CaptureObjective")
-	void CaptureObjective();
+	void CaptureObjective(const int32 ObjectiveId);
 
 	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.GameState.DiscoverArea")
-	void DiscoverArea();
+	void DiscoverArea(const int32 AreaId);
 
 	virtual void Draw() override;
+	
+private:
+	int32 SelectedObjectiveId = INDEX_NONE;
+	int32 SelectedAreaId = INDEX_NONE;
 };

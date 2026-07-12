@@ -395,19 +395,19 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Damage")) { Damage(PlayerIndex); }
+		if (ImGui::Button("Damage")) { SERVER_EXECUTE_FORMATED_CHEAT("Damage %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Heal")) { Heal(PlayerIndex); }
+		if (ImGui::Button("Heal")) { SERVER_EXECUTE_FORMATED_CHEAT("Heal %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Die")) { Die(PlayerIndex); }
+		if (ImGui::Button("Die")) { SERVER_EXECUTE_FORMATED_CHEAT("Die %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Raise")) { Raise(PlayerIndex); }
+		if (ImGui::Button("Raise")) { SERVER_EXECUTE_FORMATED_CHEAT("Raise %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
@@ -420,7 +420,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Stun")) { Stun(PlayerIndex); }
+		if (ImGui::Button("Stun")) { SERVER_EXECUTE_FORMATED_CHEAT("Stun %d", PlayerIndex); }
 
 		ImGui::EndGroup();
 	}
@@ -431,7 +431,7 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Exhaust")) { Exhaust(PlayerIndex); }
+		if (ImGui::Button("Exhaust")) { SERVER_EXECUTE_FORMATED_CHEAT("Exhaust %d", PlayerIndex); }
 
 		ImGui::EndGroup();
 	}
@@ -442,11 +442,11 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Start Casting")) { StartCasting(PlayerIndex); }
+		if (ImGui::Button("Start Casting")) { SERVER_EXECUTE_FORMATED_CHEAT("StartCasting %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Stop Casting")) { StopCasting(PlayerIndex); }
+		if (ImGui::Button("Stop Casting")) { SERVER_EXECUTE_FORMATED_CHEAT("StopCasting %d", PlayerIndex); }
 
 		ImGui::EndGroup();
 	}
@@ -457,31 +457,31 @@ void UAVVMGameplayPlayerStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Earn Money")) { EarnMoney(PlayerIndex); }
+		if (ImGui::Button("Earn Money")) { SERVER_EXECUTE_FORMATED_CHEAT("EarnMoney %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Spend Money")) { SpendMoney(PlayerIndex); }
+		if (ImGui::Button("Spend Money")) { SERVER_EXECUTE_FORMATED_CHEAT("SpendMoney %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Start Interaction")) { StartInteractingWithWorld(PlayerIndex); }
+		if (ImGui::Button("Start Interaction")) { SERVER_EXECUTE_FORMATED_CHEAT("StartInteractingWithWorld %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Stop Interaction")) { StopInteractingWithWorld(PlayerIndex); }
+		if (ImGui::Button("Stop Interaction")) { SERVER_EXECUTE_FORMATED_CHEAT("StopInteractingWithWorld %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Consume Item")) { ConsumeItem(PlayerIndex); }
+		if (ImGui::Button("Consume Item")) { SERVER_EXECUTE_FORMATED_CHEAT("ConsumeItem %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Start Talking to NPC")) { StartTalkingToNpc(PlayerIndex); }
+		if (ImGui::Button("Start Talking to NPC")) { SERVER_EXECUTE_FORMATED_CHEAT("StartTalkingToNpc %d", PlayerIndex); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Stop Talking to NPC")) { StopTalkingToNpc(PlayerIndex); }
+		if (ImGui::Button("Stop Talking to NPC")) { SERVER_EXECUTE_FORMATED_CHEAT("StopTalkingToNpc %d", PlayerIndex); }
 
 		ImGui::EndGroup();
 	}

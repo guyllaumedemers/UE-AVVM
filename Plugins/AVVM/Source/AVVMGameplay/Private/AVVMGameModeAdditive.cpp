@@ -25,6 +25,7 @@
 #include "AVVMLogger.h"
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
+#include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Templates/SubclassOf.h"
 
@@ -100,7 +101,7 @@ TMap<FName, UAVVMGameModeAdditive*> UAVVMGameModeAdditiveUtils::LoadSynchronous(
 	for (const FString& SplitOption : SplitOptions)
 	{
 		const TSoftClassPtr<UAVVMGameModeAdditive> GameModeAdditiveSoftClass = UAVVMGameModeAdditiveUtils::GetGameModeAdditiveSoftClass(OutGameModeAdditives, SplitOption/*Cmdline Flag name used*/);
-		if (!GameModeAdditiveSoftClass.IsValid())
+		if (GameModeAdditiveSoftClass.IsNull())
 		{
 			// @gdemers we need to track which cmd line parameter werent able to resolved to handle the case
 			// where GFP specific UAVVMGameModeAdditive are requested for load.
@@ -139,10 +140,9 @@ TSoftClassPtr<UAVVMGameModeAdditive> UAVVMGameModeAdditiveUtils::GetGameModeAddi
 
 				// @gdemers its expected that the package name follow specific standard. i.e BP_{ProjectName}_AssetName
 				// By doing so, we are able to parse cmd line parameter flags, and compare against the associated AssetPath of each class.
-				const FTopLevelAssetPath AssetPath = GameModeAdditiveClass->GetClassPathName();
 
 				TArray<FString> OutSplits;
-				AssetPath.GetAssetName().ToString().ParseIntoArray(OutSplits, TEXT("_"));
+				GameModeAdditiveClass.GetAssetName().ParseIntoArray(OutSplits, TEXT("_"));
 				const FString ParsedPath = (OutSplits.Num() > 1) ? OutSplits[OutSplits.Num() - 2/*ignore _C extension in last entry*/] : TEXT("");
 				return ParsedPath.Equals(Search);
 			});
@@ -159,10 +159,11 @@ TSoftClassPtr<UAVVMGameModeAdditive> UAVVMGameModeAdditiveUtils::GetGameModeAddi
 	}
 }
 
-void UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(AAVVMGameMode* GameMode,
+void UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(const UObject* WorldContextObject,
                                                              const FName& GameModeAdditiveClassAssetName,
                                                              const bool bAddOrRemove)
 {
+	auto* GameMode = Cast<AAVVMGameMode>(UGameplayStatics::GetGameMode(WorldContextObject));
 	if (!IsValid(GameMode))
 	{
 		return;
@@ -176,9 +177,15 @@ void UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(AAVVMGameMode* Game
 
 	if (bAddOrRemove)
 	{
+		// @gdemers we dont parse the name here as we are using the AssetPath name as KVP
+		// when caching the ptr on the AVVMGameMode.
+		TArray<FString> OutSplits;
+		GameModeAdditiveClassAssetName.ToString().ParseIntoArray(OutSplits, TEXT("_"));
+		const FString ParsedPath = (OutSplits.Num() > 1) ? OutSplits[OutSplits.Num() - 2/*ignore _C extension in last entry*/] : TEXT("");
+		
 		TArray<FString> OutFailedOptions;
 
-		const TArray<FString> SplitOptions = UAVVMGameModeAdditiveUtils::ParseCmdOptions(FString::Printf(TEXT("GameModeOptions=%s"), *GameModeAdditiveClassAssetName.ToString()));
+		const TArray<FString> SplitOptions = UAVVMGameModeAdditiveUtils::ParseCmdOptions(FString::Printf(TEXT("GameModeOptions=%s"), *ParsedPath));
 		const TMap<FName, UAVVMGameModeAdditive*> GameModeAdditives = UAVVMGameModeAdditiveUtils::LoadSynchronous(SplitOptions, GameMode, OutFailedOptions);
 
 		for (const auto& [Key, Value] : GameModeAdditives)

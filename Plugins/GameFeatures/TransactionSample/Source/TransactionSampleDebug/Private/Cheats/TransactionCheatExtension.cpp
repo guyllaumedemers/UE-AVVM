@@ -163,14 +163,14 @@ void UTransactionCheatExtension::Draw()
 		if (ImGui::Button("Add"))
 		{
 			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex + 1);
-			AddTransaction(Value, PlayerIndex);
+			SERVER_EXECUTE_FORMATED_CHEAT("AddTransaction %d, %d", Value, PlayerIndex);
 		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("RemoveAll"))
 		{
-			RemoveAllTransactions(PlayerIndex);
+			SERVER_EXECUTE_FORMATED_CHEAT("RemoveAllTransactions %d", PlayerIndex);
 		}
 
 		ImGui::SameLine();
@@ -178,13 +178,14 @@ void UTransactionCheatExtension::Draw()
 		if (ImGui::Button("RemoveAllOfType"))
 		{
 			const auto Value = StaticCast<ETransactionType>(CurrentTransactionTypeIndex + 1);
-			RemoveAllTransactionsOfType(Value, PlayerIndex);
+			SERVER_EXECUTE_FORMATED_CHEAT("RemoveAllTransactionsOfType %d, %d", Value, PlayerIndex);
 		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("Print All"))
 		{
+			// @gdemers Note : Client-sided. Usage of preprocessor #define SERVER_EXECUTE_CHEAT is not required here.
 			PrintAll(PlayerIndex);
 		}
 

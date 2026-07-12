@@ -25,6 +25,7 @@
 #include "FenceManagerSubsystem.h"
 #include "FencingSampleModule.h"
 #include "Containers/StringFwd.h"
+#include "Kismet/GameplayStatics.h"
 
 void UFenceCheatExtension::AddedToCheatManager_Implementation()
 {
@@ -79,7 +80,7 @@ void UFenceCheatExtension::Draw()
 
 		if (ImGui::Button("Lower Fence"))
 		{
-			LowerFence(CurrentFenceIndex);
+			SERVER_EXECUTE_FORMATED_CHEAT("LowerFence %d", CurrentFenceIndex);
 		}
 
 		ImGui::EndGroup();

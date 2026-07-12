@@ -121,9 +121,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TSoftClassPtr<UAVVMGameModeAdditive> GetGameModeAdditiveSoftClass(const TArray<TSoftClassPtr<UAVVMGameModeAdditive>>& OutGameModeAdditives,
 	                                                                         const FString& CmdLineFlagName);
-	
+
 	UFUNCTION(BlueprintCallable)
-	static void AddOrRemoveGameModeAdditive(AAVVMGameMode* GameMode,
+	static void AddOrRemoveGameModeAdditive(const UObject* WorldContextObject,
 	                                        const FName& GameModeAdditiveClassAssetName,
 	                                        const bool bAddOrRemove);
 };

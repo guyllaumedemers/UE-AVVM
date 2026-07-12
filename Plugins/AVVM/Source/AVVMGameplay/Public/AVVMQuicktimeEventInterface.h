@@ -24,6 +24,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMGameplayModule.h"
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "UObject/Interface.h"
 
@@ -118,46 +119,72 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventGameStateInterface
 public:
 	virtual void Disconnect()
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Disconnecting."));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+		                TEXT("Disconnecting."));
 	};
 
 	virtual void Connect()
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Connecting."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Connecting."));
 	};
 
 	virtual void Win()
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Game Won."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Game Won."));
 	};
 
 	virtual void Lose()
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Game Lost."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Game Lost."));
 	};
 
 	virtual void Kill()
 	{
 		// @gdemers Post-Death replication. the owned AInfo update its replicated properties. OnRep_, 'this' call, TScriptInterface<ThisClass>(SomeGameState)->Kill is invoked.
 		// Through our GameState, we can notify the relevant presenters of a player death events on all remote players.
-		UE_LOG(LogGameplay, Log, TEXT("Kill."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Kill."));
 	};
 
 	virtual void Killstreak()
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Killstreak."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Killstreak."));
 	};
 
-	virtual void CaptureObjective()
+	virtual void CaptureObjective(const int32 ObjectiveId)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Capturing new Objective."));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+		                TEXT("Capturing new Objective %d."),
+		                ObjectiveId);
 	};
 
-	virtual void DiscoverArea()
+	virtual void DiscoverArea(const int32 AreaId)
 	{
 		// @gdemers same principles can be applied here. a player could enter an area, consume a token which would no longer make the area "non-discovered", and push the information
 		// of the area to the AInfo of the game state so whenever a player actually discover the area, all players gets notified OnRep_.
-		UE_LOG(LogGameplay, Log, TEXT("Discovering new Area."));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+		                TEXT("Discovering new Area %d."),
+		                AreaId);
 	};
 };
 
@@ -208,12 +235,18 @@ class AVVMGAMEPLAY_API IAVVMQuicktimeEventPlayerStateInterface
 public:
 	virtual void Damage(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Damaged."));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+		                TEXT("Player Damaged."));
 	}
 
 	virtual void Heal(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Healed."));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+		                TEXT("Player Healed."));
 	}
 
 	virtual void Die(const UActorComponent* Component)
@@ -226,66 +259,105 @@ public:
 		//	etc...
 		// All of this is obviously depended on your project!
 		// Additionally, note that we heavily rely on interface dispatch here. It creates separation of concern in modules as they only need to know about "Engine", and "AVVMGameplay".
-		UE_LOG(LogGameplay, Log, TEXT("Player Died."));
+		AVVM_LOGGER_LOG(LogGameplay,
+		                nullptr,
+		                UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+		                TEXT("Player Died."));
 	}
 
 	virtual void Raise(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Raised."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Raised."));
 	}
 
 	virtual void Stun(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Stunned."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Stunned."));
 	}
 
 	virtual void Exhaust(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Exhausted."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Exhausted."));
 	}
 
 	virtual void StartCasting(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Started Casting."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Started Casting."));
 	}
 
 	virtual void StopCasting(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Stopped Casting."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Stopped Casting."));
 	}
 
 	virtual void EarnMoney(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Earned Money."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Earned Money."));
 	}
 
 	virtual void SpendMoney(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Spent Money."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Spent Money."));
 	}
 
 	virtual void StartInteractingWithWorld(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Started Interacting with World."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Started Interacting with World."));
 	}
 
 	virtual void StopInteractingWithWorld(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Stopped Interacting with World."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Stopped Interacting with World."));
 	}
 
 	virtual void ConsumeItem(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Consumed Item."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Consumed Item."));
 	}
 
 	virtual void StartTalkingToNpc(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Started Talking to NPC."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Started Talking to NPC."));
 	}
 
 	virtual void StopTalkingToNpc(const UActorComponent* Component)
 	{
-		UE_LOG(LogGameplay, Log, TEXT("Player Stopped Talking to NPC."));
+		AVVM_LOGGER_LOG(LogGameplay,
+						nullptr,
+						UAVVMQuicktimeEventGameStateInterface::StaticClass(),
+						TEXT("Player Stopped Talking to NPC."));
 	}
 };

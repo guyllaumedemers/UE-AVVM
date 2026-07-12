@@ -104,21 +104,21 @@ void UAVVMGameplayGameStateCheatExtension::Killstreak()
 	}
 }
 
-void UAVVMGameplayGameStateCheatExtension::CaptureObjective()
+void UAVVMGameplayGameStateCheatExtension::CaptureObjective(const int32 ObjectiveId)
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
 	if (UAVVMToolkitUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
-		QuickTimeEventHandler->CaptureObjective();
+		QuickTimeEventHandler->CaptureObjective(ObjectiveId);
 	}
 }
 
-void UAVVMGameplayGameStateCheatExtension::DiscoverArea()
+void UAVVMGameplayGameStateCheatExtension::DiscoverArea(const int32 AreaId)
 {
 	auto QuickTimeEventHandler = TScriptInterface<IAVVMQuicktimeEventGameStateInterface>(UGameplayStatics::GetGameState(this));
 	if (UAVVMToolkitUtils::IsNativeScriptInterfaceValid(QuickTimeEventHandler))
 	{
-		QuickTimeEventHandler->DiscoverArea();
+		QuickTimeEventHandler->DiscoverArea(AreaId);
 	}
 }
 
@@ -135,11 +135,11 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Disconnect")) { Disconnect(); }
+		if (ImGui::Button("Disconnect")) { SERVER_EXECUTE_CHEAT("Disconnect"); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Connect")) { Connect(); }
+		if (ImGui::Button("Connect")) { SERVER_EXECUTE_CHEAT("Connect"); }
 
 		ImGui::EndGroup();
 	}
@@ -150,11 +150,11 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Lose")) { Lose(); }
+		if (ImGui::Button("Lose")) { SERVER_EXECUTE_CHEAT("Lose"); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Win")) { Win(); }
+		if (ImGui::Button("Win")) { SERVER_EXECUTE_CHEAT("Win"); }
 
 		ImGui::EndGroup();
 	}
@@ -165,15 +165,19 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 
 		ImGui::BeginGroup();
 
-		if (ImGui::Button("Kill")) { Kill(); }
+		if (ImGui::Button("Kill")) { SERVER_EXECUTE_CHEAT("Kill"); }
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Killstreak")) { Killstreak(); }
+		if (ImGui::Button("Killstreak")) { SERVER_EXECUTE_CHEAT("Killstreak"); }
 
 		ImGui::SameLine();
+		
+		ImGui::InputInt("Objective Id", &SelectedObjectiveId);
 
-		if (ImGui::Button("CaptureObjective")) { CaptureObjective(); }
+		ImGui::SameLine();
+		
+		if (ImGui::Button("CaptureObjective")) { SERVER_EXECUTE_FORMATED_CHEAT("CaptureObjective %d", SelectedObjectiveId); }
 
 		ImGui::EndGroup();
 	}
@@ -183,8 +187,12 @@ void UAVVMGameplayGameStateCheatExtension::Draw()
 		ImGui::Separator();
 
 		ImGui::BeginGroup();
+		
+		ImGui::InputInt("Area Id", &SelectedAreaId);
 
-		if (ImGui::Button("DiscoverArea")) { DiscoverArea(); }
+		ImGui::SameLine();
+
+		if (ImGui::Button("DiscoverArea")) { SERVER_EXECUTE_FORMATED_CHEAT("DiscoverArea %d", SelectedAreaId); }
 
 		ImGui::EndGroup();
 	}

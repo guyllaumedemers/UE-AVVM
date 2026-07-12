@@ -178,6 +178,7 @@ void UAVVMCheatExtension::Draw()
 		{
 			const FString Channel = GetIndexedString(TagChannels, CurrentTagChannelIndex);
 			const FString Payload = GetIndexedString(RegistryIds, CurrentRegistryIdIndex);
+			// @gdemers Note : Client-sided. Usage of preprocessor #define SERVER_EXECUTE_CHEAT is not required here.
 			NotifyChannelWithPayload(Channel, Payload);
 		}
 

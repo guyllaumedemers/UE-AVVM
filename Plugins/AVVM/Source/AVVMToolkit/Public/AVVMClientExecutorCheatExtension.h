@@ -26,6 +26,20 @@
 #include "AVVMClientExecutorCheatExtension.generated.h"
 
 /**
+ *	Macro definition for Server authoritative execution of Cheat extensions. Mimic the console command
+ *	execution, so we can execute Exec commands from ImGui native implementation.
+ */
+#define SERVER_EXECUTE_FORMATED_CHEAT(Formated_FuncName, ...)\
+{\
+	this->ProcessConsoleExec(*FString::Printf(TEXT(Formated_FuncName), __VA_ARGS__), *GLog, UGameplayStatics::GetPlayerController(this, 0));\
+}\
+
+#define SERVER_EXECUTE_CHEAT(FuncName)\
+{\
+	this->ProcessConsoleExec(TEXT(FuncName), *GLog, UGameplayStatics::GetPlayerController(this, 0));\
+}\
+
+/**
  *	Class description:
  *	
  *	UAVVMClientExecutorCheatExtension is the base impl for processing console cheats from a Client NetMode. It allows Server exec
