@@ -56,7 +56,9 @@ public:
 	                                  const int32 BitRange,
 	                                  const int32 RShift,
 	                                  const int32 SearchValue);
-	
-	UFUNCTION(BlueprintCallable)
-	static int32 GetRangeAsBitMask(const int32 BitRange);
+
+	static constexpr int32 GetRangeAsBitMask(const int32 BitRange)
+	{
+		return (BitRange == 0) ? 1 : (1 << BitRange) + GetRangeAsBitMask(BitRange - 1);
+	}
 };
