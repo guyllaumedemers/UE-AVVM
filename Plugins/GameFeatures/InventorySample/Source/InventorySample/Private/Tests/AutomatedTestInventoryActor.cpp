@@ -205,7 +205,7 @@ bool AAutomatedTestInventoryActor::RunTest_ItemStorageReference() const
 		TestObject->ModifyRuntimeStoragePosition(ShiftedStoragePosition);
 
 		// @gdemers test assigned storage id.
-		const int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+		constexpr int32 StorageIdBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 		bResult &= ((ShiftedStorageId < StorageIdBounds) && (ShiftedStorageId > 0));
 
 		// @gdemers test assigned storage position.

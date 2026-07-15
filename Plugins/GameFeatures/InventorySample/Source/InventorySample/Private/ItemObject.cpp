@@ -123,7 +123,7 @@ void UItemObject::ModifyRuntimeStorageId(const int32 NewStorageId)
 {
 	const FItemState OldState = RuntimeItemState;
 	
-	static const int32 MaxStorageId = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	constexpr int32 MaxStorageId = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE);
 	RuntimeItemState.StorageId = FMath::Clamp<int32>(NewStorageId, 0, MaxStorageId);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemState, this);
 
@@ -328,7 +328,7 @@ int32 UItemObject::GetMaxStackCount() const
 	const bool bIsStorage = DoesTypeHasPartialMatch(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_TYPE_STORAGE));
 	if (bIsStorage)
 	{
-		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+		constexpr int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
 	}
@@ -337,12 +337,12 @@ int32 UItemObject::GetMaxStackCount() const
 	const bool bDoesStack = DoesBehaviourHasPartialMatch(StackableTagContainer);
 	if (!bDoesStack)
 	{
-		static constexpr int32 One = 1;
+		constexpr int32 One = 1;
 		return One;
 	}
 	else
 	{
-		static const int32 MaxStackCountBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_STACK_COUNT_BIT_RANGE);
+		constexpr int32 MaxStackCountBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_STACK_COUNT_BIT_RANGE);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, GetMaxStackCount_CategoryTag());
 		return FMath::Clamp(MaxStackCount, 0, MaxStackCountBounds);
 	}
@@ -721,8 +721,8 @@ void UItemObjectUtils::NullifyStorage(UItemObject* PendingDropItemObject)
 {
 	if (IsValid(PendingDropItemObject))
 	{
-		const int32 StorageIdBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE) << GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT;
-		const int32 ItemPositionBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE) << GET_STORAGE_POSITION_RSHIFT;
+		constexpr int32 StorageIdBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_VIRTUAL_GLOBAL_ID_BIT_RANGE) << GET_STORAGE_VIRTUAL_GLOBAL_ID_RSHIFT;
+		constexpr int32 ItemPositionBitmask = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE) << GET_STORAGE_POSITION_RSHIFT;
 		// @gdemers IMPORTANT - Order matter here!
 		PendingDropItemObject->ModifyRuntimeStoragePosition(INDEX_NONE);
 		PendingDropItemObject->ModifyRuntimeStorageId(INDEX_NONE);
@@ -924,7 +924,7 @@ int32 UItemObjectUtils::GetStorageMaxCapacity(const UActorInventoryComponent* In
 	const UDataTable* MaxCountDataTable = DataTable.LoadSynchronous();
 	if (ensureAlwaysMsgf(IsValid(MaxCountDataTable), TEXT("Missing valid StackCount Data Table in project Settings.")))
 	{
-		static const int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+		constexpr int32 MaxStorageCapacityBounds = UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
 		const FGameplayTag& StorageCapacityTag = UInventorySettings::GetStorageCapacityTagById(PhysicalGlobalId);
 		const int32 MaxStackCount = UItemObjectUtils::GetMaxStackCount(MaxCountDataTable, StorageCapacityTag);
 		return FMath::Clamp(MaxStackCount, 0, MaxStorageCapacityBounds);
