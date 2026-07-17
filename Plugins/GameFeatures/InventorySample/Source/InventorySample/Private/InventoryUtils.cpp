@@ -251,7 +251,7 @@ FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
                                                  const TArray<int32>& NewPrivateIds)
 {
 	TArray<NSJsonInventory::FJsonInventoryProvider> InventoryProviders;
-	for (const FString& Payload : GetInventoryProviderPayloads(NewPayload))
+	for (const FString& Payload : UInventoryUtils::GetInventoryProviderPayloads(NewPayload))
 	{
 		NSJsonInventory::FJsonInventoryProvider OutProvider;
 		NSJsonInventory::FromString(Payload, OutProvider);
@@ -318,7 +318,7 @@ TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& New
 FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
                                                   const int32 NewProviderId)
 {
-	const TArray<FString> InventoryProviders = GetInventoryProviderPayloads(NewPayload);
+	const TArray<FString> InventoryProviders = UInventoryUtils::GetInventoryProviderPayloads(NewPayload);
 	if (InventoryProviders.IsEmpty())
 	{
 		return FString();
@@ -339,6 +339,55 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	{
 		return TEXT("");
 	}
+}
+
+TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const FString& NewPayload,
+                                                                         const int32 NewProviderId)
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return TArray<FDataRegistryId>{};
+	}
+
+	TArray<FDataRegistryId> OutRegistryIds;
+	Subsystem->GetPossibleDataRegistryIdList(UInventorySettings::GetItemRegistryType(), OutRegistryIds);
+
+	static const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
+	                                     const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
+	                                     const int32 NewPrivateItemId)
+	{
+		if (!DataRegistrySubsystem.IsValid())
+		{
+			return FDataRegistryId{};
+		}
+
+		const int32 PhysicalGlobalId = UItemObjectUtils::FilterItemPrivateId(NewPrivateItemId);
+		for (const auto& RegistryId : NewRegistryIds)
+		{
+			const auto* Row = DataRegistrySubsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(RegistryId);
+			if (ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row.")) && (Row->UniqueId == PhysicalGlobalId))
+			{
+				return RegistryId;
+			}
+		}
+
+		return FDataRegistryId{};
+	};
+
+	const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(NewPayload, NewProviderId);
+
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(NewPayload, OutProvider);
+
+	TArray<FDataRegistryId> OutResults;
+	for (const int32 PrivateItemId : OutProvider.PrivateItemIds)
+	{
+		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
+		OutResults.Add(ItemRegistryId);
+	}
+
+	return OutResults;
 }
 
 void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
