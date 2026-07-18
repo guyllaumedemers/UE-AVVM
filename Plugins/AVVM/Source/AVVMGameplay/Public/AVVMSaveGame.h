@@ -21,32 +21,23 @@
 
 #include "CoreMinimal.h"
 
-#include "Data/AVVMDataTableRow.h"
+#include "GameFramework/SaveGame.h"
 
-#if WITH_EDITOR
-#include "Misc/DataValidation.h"
-#endif
-
-#include "ItemStackTableRow.generated.h"
+#include "AVVMSaveGame.generated.h"
 
 /**
- *	Class description:
- *	
- *	FItemStackTableRow is a context struct type that define the information about the stacking
- *	capability of an Item.
+ * 
  */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemStackTableRow : public FAVVMDataTableRow
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMSaveGame : public ULocalPlayerSaveGame
 {
 	GENERATED_BODY()
 
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool Static_DoesRequireDefaultProvidersSerialization(const ULocalPlayer* LocalPlayer);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldRepresentStorageCapacity = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	int32 MaxStackCount = INDEX_NONE;
+protected:
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bDoesRequireDefaultProvidersSerialization = false;
 };

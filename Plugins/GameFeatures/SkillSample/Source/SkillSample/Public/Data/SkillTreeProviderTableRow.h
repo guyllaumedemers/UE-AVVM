@@ -23,7 +23,7 @@
 
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
-#include "Engine/DataTable.h"
+#include "Data/AVVMDataTableRow.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -58,7 +58,7 @@ struct SKILLSAMPLE_API FSkillTreeNodePhase
  *	Example : A boss in elden ring.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FTableRowBase
+struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMCharacter.h"
 
+#include "AVVMGameplaySettings.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMReplicatedTagComponent.h"
@@ -135,9 +137,18 @@ void AAVVMCharacter::NotifyOnNewSocketParentAvailable(AActor* SocketTarget)
 
 int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
 {
+	// @gdemers allow testing using static data without backend hooks in multiplayer (server-client net mode).
+	// Also, useful for branching on project that run standalone net mode with story progression.
+	const bool bIsCharacterUsingStaticData = UAVVMGameplaySettings::DoesCharacterResourceProviderUseStaticData();
+	if (bIsCharacterUsingStaticData)
+	{
+		return UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(this);
+	}
+
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
+		// @gdemers Otherwise, multiplayer should retrieve resource provider id from account/player profile.
 		const APlayerState* NewPlayerState = GetPlayerState();
 		return AAVVMGameSession::Static_GetPlayerProfileId(GetWorld(), NewPlayerState);
 	}

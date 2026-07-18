@@ -21,9 +21,13 @@
 
 #include "CoreMinimal.h"
 
-#include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/AVVMDataTableRow.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/Object.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
 
 #include "AVVMGameModeAdditive.generated.h"
 
@@ -87,7 +91,7 @@ public:
  *	cross Dll boundaries problem. 
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMGameModeAdditiveDefinitionDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMGameModeAdditiveDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

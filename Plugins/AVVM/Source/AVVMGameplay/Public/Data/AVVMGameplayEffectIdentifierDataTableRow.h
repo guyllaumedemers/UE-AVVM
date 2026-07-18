@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DataTable.h"
+#include "AVVMDataTableRow.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -42,7 +42,7 @@
  *	separation ensure clean organization of our data, and expose editor tooling to parsing data table per unique types.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMGameplayEffectIdentifierDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMGameplayEffectIdentifierDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

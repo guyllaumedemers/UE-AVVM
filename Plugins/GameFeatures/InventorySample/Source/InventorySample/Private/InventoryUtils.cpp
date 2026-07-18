@@ -20,6 +20,7 @@
 #include "InventoryUtils.h"
 
 #include "AVVMCharacter.h"
+#include "AVVMFileHelper.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
@@ -341,8 +342,7 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	}
 }
 
-TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const FString& NewPayload,
-                                                                         const int32 NewProviderId)
+TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const int32 NewProviderId)
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -351,7 +351,7 @@ TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const F
 	}
 
 	TArray<FDataRegistryId> OutRegistryIds;
-	Subsystem->GetPossibleDataRegistryIdList(UInventorySettings::GetItemRegistryType(), OutRegistryIds);
+	Subsystem->GetPossibleDataRegistryIdList(UAVVMGameplaySettings::GetActorIdentifierRegistryType(), OutRegistryIds);
 
 	static const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
 	                                     const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
@@ -375,16 +375,30 @@ TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const F
 		return FDataRegistryId{};
 	};
 
-	const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(NewPayload, NewProviderId);
+	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
+	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
 
 	NSJsonInventory::FJsonInventoryProvider OutProvider;
-	NSJsonInventory::FromString(NewPayload, OutProvider);
+	NSJsonInventory::FromString(SearchPayload, OutProvider);
 
 	TArray<FDataRegistryId> OutResults;
 	for (const int32 PrivateItemId : OutProvider.PrivateItemIds)
 	{
 		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
-		OutResults.Add(ItemRegistryId);
+		if (!ItemRegistryId.IsValid())
+		{
+			continue;
+		}
+
+		// @gdemers hard rule : we expect users to define UItemObject DataTable entries with _ItemObject,
+		// and ActorIdentifier, ActorDefinition with _ItemActor. This string replace allow conversion from ItemActor
+		// to ItemObject using PrivateItemId.
+		const FString ModifiedString = ItemRegistryId.ItemName.ToString().Replace(TEXT("ItemActor"), TEXT("ItemObject"));
+		OutResults.Add(FDataRegistryId
+		               {
+				               UInventorySettings::GetItemRegistryType(),
+				               FName(ModifiedString)
+		               });
 	}
 
 	return OutResults;

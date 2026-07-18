@@ -42,6 +42,9 @@ public:
 	UAVVMGameplaySettings();
 
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const bool DoesCharacterResourceProviderUseStaticData();
+
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FDataRegistryType& GetActorIdentifierRegistryType();
 
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
@@ -60,6 +63,9 @@ public:
 	static const FDataRegistryType& GetGameModeAdditiveRegistryType();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	bool bDoesCharacterResourceProviderUseStaticData = false;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
 

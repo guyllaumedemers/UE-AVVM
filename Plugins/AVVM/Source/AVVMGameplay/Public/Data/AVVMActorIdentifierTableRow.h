@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DataTable.h"
+#include "AVVMDataTableRow.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -39,7 +39,7 @@
  *	using the InventorySample system, make sure the FDataRegistryId::ItemName is identical to the Actor Class FName referenced.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FTableRowBase
+struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 

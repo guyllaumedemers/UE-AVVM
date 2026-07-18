@@ -24,6 +24,11 @@ UAVVMGameplaySettings::UAVVMGameplaySettings()
 	CategoryName = TEXT("Game");
 }
 
+const bool UAVVMGameplaySettings::DoesCharacterResourceProviderUseStaticData()
+{
+	return GetDefault<UAVVMGameplaySettings>()->bDoesCharacterResourceProviderUseStaticData;
+}
+
 const FDataRegistryType& UAVVMGameplaySettings::GetActorIdentifierRegistryType()
 {
 	return GetDefault<UAVVMGameplaySettings>()->ActorIdentifierRegistryType;

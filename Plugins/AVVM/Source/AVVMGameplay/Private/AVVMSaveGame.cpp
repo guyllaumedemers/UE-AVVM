@@ -17,36 +17,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AVVMSaveGame.h"
 
-#include "CoreMinimal.h"
-
-#include "Data/AVVMDataTableRow.h"
-
-#if WITH_EDITOR
-#include "Misc/DataValidation.h"
-#endif
-
-#include "ItemStackTableRow.generated.h"
-
-/**
- *	Class description:
- *	
- *	FItemStackTableRow is a context struct type that define the information about the stacking
- *	capability of an Item.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FItemStackTableRow : public FAVVMDataTableRow
+bool UAVVMSaveGame::Static_DoesRequireDefaultProvidersSerialization(const ULocalPlayer* LocalPlayer)
 {
-	GENERATED_BODY()
-
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldRepresentStorageCapacity = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	int32 MaxStackCount = INDEX_NONE;
-};
+	return true;
+}
