@@ -23,7 +23,7 @@
 #include "AVVMLogger.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "AVVMToolkitUtils.h"
-#include "AVVMFileHelper.h"
+#include "AVVMSaveGame.h"
 #include "InventoryManagerSubsystem.h"
 #include "InventorySampleModule.h"
 #include "InventorySettings.h"
@@ -44,6 +44,9 @@
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceProvider.h"
 #include "Tags/PrivateTags.h"
+
+// @gdemers external linkage for property FName sharing.
+extern const FName InventoryProviderPayloads;
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -549,10 +552,8 @@ int32 UItemObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return UInventoryUtils::CreateDefaultInventoryProviders();
 	};
 
-	// TODO @gdemers Add support to conditionally serializing to disk default provider based on USavedGame. This currently
-	// cause issue with testing PIE if the default provider hasnt been serialized to disk once.
 	// @gdemers get-set file from disk caching all inventory providers representation.
-	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent);
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, GenerateDefaultContent);
 
 	// @gdemers fetch provider payload from disk representation.
 	const FString InventoryProviderPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), TargetUniqueId);

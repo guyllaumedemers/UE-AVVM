@@ -19,11 +19,10 @@
 //SOFTWARE.
 #include "ActorInventoryComponent.h"
 #include "AutomatedTestInventoryActor.h"
-#include "AVVMFileHelper.h"
 #include "AVVMGameplaySettings.h"
+#include "AVVMSaveGame.h"
 #include "DataRegistrySubsystem.h"
 #include "InventoryUtils.h"
-#include "ItemObject.h"
 #include "NativeGameplayTags.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/AssetManager.h"
@@ -52,6 +51,9 @@ namespace
 		return Function();
 	}
 }
+
+// @gdemers external linkage for property FName sharing.
+extern const FName InventoryProviderPayloads;
 
 /**
  *	Class description:
@@ -124,7 +126,7 @@ public:
 		};
 		
 		// @gdemers test data serialization/deserialization to disk using Data Table data.
-		const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent, true/*always test from scratch*/);
+		const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, GenerateDefaultContent, true/*always test from scratch*/);
 		TestFalse("Write to disk with empty content.", FileContent.IsEmpty());
 
 		const TArray<FString> OutInventoryProviders = UInventoryUtils::GetInventoryProviderPayloads(FileContent.GetData());

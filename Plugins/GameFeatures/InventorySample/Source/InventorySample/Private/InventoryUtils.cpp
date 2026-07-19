@@ -20,10 +20,10 @@
 #include "InventoryUtils.h"
 
 #include "AVVMCharacter.h"
-#include "AVVMFileHelper.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
+#include "AVVMSaveGame.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "InventoryProvider.h"
@@ -131,6 +131,9 @@ namespace NSJsonInventory
 		OutInventoryProvider = InventoryProvider;
 	}
 }
+
+// @gdemers external linkage for property FName sharing.
+extern const FName InventoryProviderPayloads;
 
 FString UInventoryUtils::CreateDefaultInventoryProviders()
 {
@@ -373,7 +376,7 @@ TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const i
 		return FDataRegistryId{};
 	};
 
-	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
 	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
 
 	NSJsonInventory::FJsonInventoryProvider OutProvider;

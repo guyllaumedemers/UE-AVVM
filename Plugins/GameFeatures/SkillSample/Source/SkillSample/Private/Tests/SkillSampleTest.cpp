@@ -18,8 +18,8 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AutomatedTestSkillActor.h"
-#include "AVVMFileHelper.h"
 #include "AVVMGameplaySettings.h"
+#include "AVVMSaveGame.h"
 #include "DataRegistrySubsystem.h"
 #include "NativeGameplayTags.h"
 #include "SkillTreeUtils.h"
@@ -51,6 +51,9 @@ namespace
 		return Function();
 	}
 }
+
+// @gdemers external linkage for property FName sharing.
+extern const FName SkillTreeProviderPayloads;
 
 /**
  *	Class description:
@@ -111,7 +114,7 @@ public:
 		};
 
 		// @gdemers test data serialization/deserialization to disk using Data Table data.
-		const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent, true/*always test from scratch*/);
+		const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent, true/*always test from scratch*/);
 		TestFalse("Write to disk with empty content.", FileContent.IsEmpty());
 
 		const TArray<FString> OutSkillTreeProviders = USkillTreeUtils::GetSkillTreeProviderPayloads(FileContent.GetData());

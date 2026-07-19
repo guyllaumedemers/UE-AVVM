@@ -22,8 +22,11 @@
 #include "CoreMinimal.h"
 
 #include "UObject/Object.h"
+#include "UObject/StrongObjectPtrTemplates.h"
 
 #include "AVVMFileHelper.generated.h"
+
+class UAVVMSaveGame;
 
 /**
  *	Class description:
@@ -34,27 +37,20 @@ UCLASS()
 class AVVMTOOLKIT_API UAVVMFileHelper : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
-	static FStringView Static_GetSetFileContent(const TFunction<FString()>& GenerateDefaultContent, const bool bShouldDelete = false);
-	static void Static_Serialize(const FString& NewFileContent);
-	
+	static void Static_SetSaveGameSlot(const FName SaveGameSlot);
+	static UAVVMSaveGame* Static_GetSetSaveGame();
+
 protected:
 	static UAVVMFileHelper* Get();
+	FName GetSetSaveGameSlot();
+	void SetSaveGameSlot(const FName SaveGameSlot);
+	UAVVMSaveGame* GetSetSaveGame();
 
-	FStringView GetSetFileContent(const FStringView NewFilePath,
-	                              const TFunction<FString()>& GenerateDefaultContent,
-	                              const bool bShouldDelete);
-	
-	// @gdemers _v2 prevent function name shadowing in base UObject class.
-	void Serialize_v2(const FString& NewFileContent);
-	void MarkFileDirty();
-	
-	UPROPERTY(Transient,  BlueprintReadOnly)
-	bool bIsMarkedDirty = false;
-	
-	UPROPERTY(Transient,  BlueprintReadOnly)
-	FString FileContent = FString();
-	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FName ActiveSaveGameSlot = NAME_None;
+
 	static TStrongObjectPtr<UAVVMFileHelper> gFileHelper;
+	TStrongObjectPtr<UAVVMSaveGame> SaveGameObject = nullptr;
 };

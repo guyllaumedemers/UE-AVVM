@@ -20,8 +20,8 @@
 #include "SkillTreeNodeObject.h"
 
 #include "AbilitySystemComponent.h"
-#include "AVVMFileHelper.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMSaveGame.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
@@ -30,6 +30,9 @@
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceProvider.h"
+
+// @gdemers external linkage for property FName sharing.
+SKILLSAMPLE_API const FName SkillTreeProviderPayloads = TEXT("SkillTreeProviderPayloads");
 
 FSkillTreeNodeObject::FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
                                            const int32 NewActiveGameplayEffectHandleTypeHash)
@@ -78,10 +81,8 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
 	};
 
-	// TODO @gdemers Add support to conditionally serializing to disk default provider based on USavedGame. This currently
-	// cause issue with testing PIE if the default provider hasnt been serialized to disk once.
 	// @gdemers get-set file from disk caching all skill tree providers representation.
-	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent(GenerateDefaultContent);
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
 
 	// @gdemers fetch provider payload from disk representation.
 	const FString SkillTreeProviderPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), TargetUniqueId);

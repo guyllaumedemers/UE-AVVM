@@ -20,11 +20,11 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMCharacter.h"
-#include "AVVMFileHelper.h"
 #include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMReplicatedTagComponent.h"
+#include "AVVMSaveGame.h"
 #include "AVVMScopedUtils.h"
 #include "AVVMToolkitUtils.h"
 #include "InventoryExecutionContextParams.h"
@@ -59,6 +59,8 @@
 #endif
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
+// @gdemers external linkage for property FName sharing.
+INVENTORYSAMPLE_API const FName InventoryProviderPayloads = TEXT("InventoryProviderPayloads");
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
@@ -1136,7 +1138,7 @@ void UActorInventoryComponent::CheckDisk() const
 	}
 
 	// @gdemers get-set file from disk caching all inventory providers representation.
-	const FStringView FileContent = UAVVMFileHelper::Static_GetSetFileContent({});
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
 
 	// @gdemers serialize runtime values so we can write to disk.
 	const TArray<int32> NewDependencies = UInventoryUtils::GetRuntimeUniqueIds(Items);
@@ -1145,7 +1147,7 @@ void UActorInventoryComponent::CheckDisk() const
 	const FString DirtyFileContent = UInventoryUtils::ModifyInventoryProvider(FileContent.GetData(), TargetUniqueId, NewDependencies);
 
 	// @gdemers : serialize new file content.
-	UAVVMFileHelper::Static_Serialize(DirtyFileContent);
+	UAVVMSaveGame::Static_Serialize(InventoryProviderPayloads, DirtyFileContent);
 }
 
 void UActorInventoryComponent::CheckBounds()

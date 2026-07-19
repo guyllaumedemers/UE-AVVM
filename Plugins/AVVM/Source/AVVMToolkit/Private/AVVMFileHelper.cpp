@@ -19,52 +19,26 @@
 //SOFTWARE.
 #include "AVVMFileHelper.h"
 
-#include "AVVMLogger.h"
-#include "AVVMToolkitModule.h"
-#include "AVVMToolkitSettings.h"
-#include "HAL/PlatformFileManager.h"
-#include "Misc/FileHelper.h"
+#include "AVVMSaveGame.h"
+#include "Engine/Engine.h"
+#include "GameFramework/SaveGame.h"
+#include "Kismet/GameplayStatics.h"
 
 TStrongObjectPtr<UAVVMFileHelper> UAVVMFileHelper::gFileHelper = nullptr;
 
-FStringView UAVVMFileHelper::Static_GetSetFileContent(const TFunction<FString()>& GenerateDefaultContent, const bool bShouldDelete)
+void UAVVMFileHelper::Static_SetSaveGameSlot(const FName SaveGameSlot)
 {
-	auto* FileHelper = UAVVMFileHelper::Get();
-	if (IsValid(FileHelper))
+	auto* FileHelper = Get();
+	if (ensureAlwaysMsgf(IsValid(FileHelper), TEXT("Invalid File Helper")))
 	{
-		return FileHelper->GetSetFileContent(UAVVMToolkitSettings::GetAppDataDirPath(),
-		                                     GenerateDefaultContent,
-		                                     bShouldDelete);
-	}
-	else
-	{
-		static FStringView Empty = TEXT("");
-		return Empty;
+		FileHelper->SetSaveGameSlot(SaveGameSlot);
 	}
 }
 
-void UAVVMFileHelper::Static_Serialize(const FString& NewFileContent)
+UAVVMSaveGame* UAVVMFileHelper::Static_GetSetSaveGame()
 {
-	auto* FileHelper = UAVVMFileHelper::Get();
-	if (IsValid(FileHelper))
-	{
-		FileHelper->Serialize_v2(NewFileContent);
-	}
-}
-
-void UAVVMFileHelper::Serialize_v2(const FString& NewFileContent)
-{
-	const FStringView NewPath = UAVVMToolkitSettings::GetAppDataDirPath();
-	const TCHAR* FilePath = NewPath.GetData();
-
-	IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
-	if (!ensureAlwaysMsgf(FileManager.FileExists(FilePath), TEXT("Invalid FilePath \"%s\""), FilePath))
-	{
-		return;
-	}
-
-	FFileHelper::SaveStringToFile(NewFileContent, FilePath);
-	MarkFileDirty();
+	auto* FileHelper = Get();
+	return ensureAlwaysMsgf(IsValid(FileHelper), TEXT("Invalid File Helper")) ? FileHelper->GetSetSaveGame() : nullptr;
 }
 
 UAVVMFileHelper* UAVVMFileHelper::Get()
@@ -78,60 +52,38 @@ UAVVMFileHelper* UAVVMFileHelper::Get()
 	return gFileHelper.Get();
 }
 
-FStringView UAVVMFileHelper::GetSetFileContent(const FStringView NewFilePath,
-                                               const TFunction<FString()>& GenerateDefaultContent,
-                                               const bool bShouldDelete)
+FName UAVVMFileHelper::GetSetSaveGameSlot()
 {
-	const auto GetFileFromDisk = [](const FStringView NewPath,
-	                                const TFunction<FString()>& NewGenerateDefaultContent,
-	                                const bool bNewShouldDelete)
+	if (ActiveSaveGameSlot.IsNone())
 	{
-		IPlatformFile& FileManager = FPlatformFileManager::Get().GetPlatformFile();
-		const TCHAR* FilePath = NewPath.GetData();
-
-		FString OutFileContent;
-
-		const bool bDoesFileExist = FileManager.FileExists(FilePath);
-		if (bDoesFileExist && bNewShouldDelete)
-		{
-			FileManager.DeleteFile(FilePath);
-		}
-		else if (bDoesFileExist)
-		{
-			FFileHelper::LoadFileToString(OutFileContent, FilePath);
-			AVVM_LOGGER_LOG(LogToolkit,
-			                nullptr,
-			                GetDefault<UAVVMFileHelper>(),
-			                TEXT("I/O action on Disk. FFileHelper::LoadFileToString. DirPath: %s \n %s"),
-			                FilePath,
-			                *OutFileContent);
-		}
-
-		if (OutFileContent.IsEmpty())
-		{
-			OutFileContent = NewGenerateDefaultContent();
-			FFileHelper::SaveStringToFile(OutFileContent, FilePath);
-			AVVM_LOGGER_LOG(LogToolkit,
-			                nullptr,
-			                GetDefault<UAVVMFileHelper>(),
-			                TEXT("I/O action on Disk. FFileHelper::SaveStringToFile. DirPath: %s \n %s"),
-			                FilePath,
-			                *OutFileContent);
-		}
-
-		return OutFileContent;
-	};
-
-	if (FileContent.IsEmpty() || bIsMarkedDirty || bShouldDelete)
-	{
-		FileContent = GetFileFromDisk(NewFilePath, GenerateDefaultContent, bShouldDelete);
-		bIsMarkedDirty = false;
+		// @gdemers default a random slot name until
+		// user implement a save slot selector.
+		ActiveSaveGameSlot = TEXT("Empty");
 	}
 
-	return FileContent;
+	return ActiveSaveGameSlot;
 }
 
-void UAVVMFileHelper::MarkFileDirty()
+void UAVVMFileHelper::SetSaveGameSlot(const FName SaveGameSlot)
 {
-	bIsMarkedDirty = true;
+	ActiveSaveGameSlot = SaveGameSlot;
+}
+
+UAVVMSaveGame* UAVVMFileHelper::GetSetSaveGame()
+{
+	if (!SaveGameObject.IsValid())
+	{
+#if WITH_EDITOR
+		auto* NewSameObject = NewObject<UAVVMSaveGame>(this);
+		const FString SaveGameSlot = GetSetSaveGameSlot().ToString();
+		NewSameObject->SetSaveSlotName(SaveGameSlot);
+#else
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GEngine, 0);
+		const FString SaveGameSlot = GetSetSaveGameSlot().ToString();
+		auto* NewSameObject = Cast<UAVVMSaveGame>(ULocalPlayerSaveGame::LoadOrCreateSaveGameForLocalPlayer(UAVVMSaveGame::StaticClass(), PC, SaveGameSlot));
+#endif
+		SaveGameObject.Reset(NewSameObject);
+	}
+
+	return SaveGameObject.Get();
 }
