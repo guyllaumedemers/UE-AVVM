@@ -21,6 +21,17 @@
       "Name": "TeamSample",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "TeamSampleDebug",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
     }
   ],
   "Plugins": [

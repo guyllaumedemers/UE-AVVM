@@ -18,6 +18,55 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-#include "AVVMSampleDebug.h"
+using UnrealBuildTool;
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMSampleDebug)
+public class WeaponSampleDebug : ModuleRules
+{
+	public WeaponSampleDebug(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
+		bWarningsAsErrors = true;
+
+		// @gdemers ImGui & AVVMDebugger being DeveloperTool only load on targets where bBuildDeveloperTools
+		// is enabled. Set your project editor .target.cs to enable it!
+		if (Target.bBuildDeveloperTools)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"AVVMImGui",
+				});
+
+			PrivateDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"ImGui"
+				});
+
+			// Tell the compiler we want to import the ImPlot symbols when linking against ImGui plugin 
+			PrivateDefinitions.AddRange(
+				new string[]
+				{
+					"IMPLOT_API=DLLIMPORT"
+				});
+		}
+
+		PublicDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"Core",
+				"CoreUObject",
+				"Engine",
+				"WeaponSample"
+			}
+		);
+
+		PrivateDependencyModuleNames.AddRange(
+			new string[]
+			{
+				"AVVMToolkit",
+			}
+		);
+	}
+}

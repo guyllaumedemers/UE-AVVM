@@ -21,6 +21,17 @@
       "Name": "DamageSample",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "DamageSampleDebug",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
     }
   ],
   "Plugins": [

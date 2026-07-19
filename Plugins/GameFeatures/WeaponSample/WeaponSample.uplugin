@@ -21,6 +21,17 @@
       "Name": "WeaponSample",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "WeaponSampleDebug",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
     }
   ],
   "Plugins": [

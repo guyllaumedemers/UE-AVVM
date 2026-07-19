@@ -22,6 +22,17 @@
       "Name": "InteractionSample",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "InteractionSampleDebug",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
     }
   ],
   "Plugins": [
