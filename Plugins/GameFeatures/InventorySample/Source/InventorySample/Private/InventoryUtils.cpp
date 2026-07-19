@@ -134,22 +134,20 @@ namespace NSJsonInventory
 
 FString UInventoryUtils::CreateDefaultInventoryProviders()
 {
-	const TSoftObjectPtr<UDataTable>& ProviderDataTable = UInventorySettings::GetDefaultProviderInventories();
-	if (!ensureAlwaysMsgf(!ProviderDataTable.IsNull(),
-	                      TEXT("Project doesn't reference a valid Data Table to initialize the Provider Inventories on Disk.")))
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
 	{
-		return FString();
+		return FString{};
 	}
 
-	// TODO @gdemers Improve on this. I dont like that its synchronous.
-	const UDataTable* DataTable = ProviderDataTable.LoadSynchronous();
-	if (!IsValid(DataTable))
+	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(UInventorySettings::GetInventoryProviderRegistryType());
+	if (!IsValid(DataRegistry))
 	{
-		return FString();
+		return FString{};
 	}
-
-	TArray<FInventoryProviderTableRow*> OutRows;
-	DataTable->GetAllRows<FInventoryProviderTableRow>(TEXT(""), OutRows);
+	
+	TArray<const FInventoryProviderTableRow*> OutRows;
+	DataRegistry->GetAllItems<FInventoryProviderTableRow>(TEXT(""), OutRows);
 
 	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
 	for (const FInventoryProviderTableRow* Row : OutRows)
@@ -187,7 +185,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 
 			const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
 			const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, ProviderDefaultItemProperties);
-			
+
 			ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
 			Items.Add(PrivateItemId);
 
@@ -224,7 +222,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 	{
-		return FString();
+		return FString{};
 	}
 	else
 	{

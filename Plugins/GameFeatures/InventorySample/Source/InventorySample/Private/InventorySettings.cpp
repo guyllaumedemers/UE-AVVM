@@ -29,6 +29,11 @@ const FDataRegistryType& UInventorySettings::GetItemRegistryType()
 	return GetDefault<UInventorySettings>()->ItemRegistryType;
 }
 
+const FDataRegistryType& UInventorySettings::GetInventoryProviderRegistryType()
+{
+	return GetDefault<UInventorySettings>()->InventoryProviderRegistryType;
+}
+
 const TSoftClassPtr<UItemRandomizerRule>& UInventorySettings::GetItemRandomizerRuleClass()
 {
 	return GetDefault<UInventorySettings>()->ItemRandomizerRuleClass;
@@ -95,11 +100,6 @@ const FGameplayTagContainer& UInventorySettings::GetDefensiveRuleset()
 const FGameplayTagContainer& UInventorySettings::GetConsumableRuleset()
 {
 	return GetDefault<UInventorySettings>()->ConsumableRuleset;
-}
-
-const TSoftObjectPtr<UDataTable>& UInventorySettings::GetDefaultProviderInventories()
-{
-	return GetDefault<UInventorySettings>()->DefaultProviderInventories;
 }
 
 const TMap<int32, FGameplayTag>& UInventorySettings::GetStorageCapacityTags()

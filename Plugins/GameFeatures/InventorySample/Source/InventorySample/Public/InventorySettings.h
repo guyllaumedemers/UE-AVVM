@@ -41,13 +41,16 @@ class INVENTORYSAMPLE_API UInventorySettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FDataRegistryType& GetItemGroupRegistryType();
 	
-	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FDataRegistryType& GetItemRegistryType();
 	
-	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FDataRegistryType& GetInventoryProviderRegistryType();
+	
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftClassPtr<UItemRandomizerRule>& GetItemRandomizerRuleClass();
 	
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
@@ -84,9 +87,6 @@ public:
 	static const FGameplayTagContainer& GetConsumableRuleset();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderInventories();
-
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TMap<int32, FGameplayTag>& GetStorageCapacityTags();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
@@ -98,12 +98,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ItemRegistryType = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType InventoryProviderRegistryType = NAME_None;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RequiredAssetDataTags="RowStructure=/Script/InventorySample.InventoryProviderTableRow"))
-	TSoftObjectPtr<UDataTable> DefaultProviderInventories;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(RequiredAssetDataTags="RowStructure=/Script/InventorySample.ItemStackTableRow"))
 	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;
