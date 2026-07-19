@@ -149,9 +149,11 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		TArray<int32> PrivateTreeNodeIds;
 		// @gdemers Only phase 0 matter during initialization. progression tracking will handle replacing data
 		// during player playthrough.
+		const int32 RelationshipBitMask = Row->SkillTreeNodePerPhases[0].GetRelationshipBitmask();
+		const int32 InstancedId = Row->SkillTreeNodePerPhases[0].InstancedId;
 		for (const auto& [RegistryId, EffectLevel] : Row->SkillTreeNodePerPhases[0].SkillTreeNodeIds)
 		{
-			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(RegistryId, EffectLevel);
+			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(RegistryId, RelationshipBitMask, InstancedId, EffectLevel);
 			PrivateTreeNodeIds.Add(PrivateTreeNodeId);
 		}
 
@@ -258,13 +260,21 @@ TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& New
 }
 
 int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& TreeNodeEffectRegistryId,
+                                                      const int32 RelationshipBitMask,
+                                                      const int32 InstancedId,
                                                       const int32 EffectLevel)
 {
 	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
 	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
+	const int32 VirtualGlobalId = USkillTreeUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
+	
 	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
-	// TODO @gdemers add whatever information is required in the tree node encoding later
-	return (PhysicalGlobalId + NewEffectLevel);
+	
+	// TODO @gdemers we are missing position support.
+	return (RelationshipBitMask
+		+ VirtualGlobalId
+		+ InstancedId
+		+ NewEffectLevel);
 }
 
 FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
@@ -333,6 +343,31 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 	{
 		return INDEX_NONE;
 	}
+}
+
+int32 USkillTreeUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMask,
+                                                   const int32 PhysicalGlobalId)
+{
+	constexpr int32 BitRange = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE;
+	constexpr int32 BitShift = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT;
+	int32 BaseId = PhysicalGlobalId;
+
+	// TODO @gdemers until proven otherwise, SkillTreeNode GlobalId dont require offset calculation.
+	// if ((RelationshipBitMask & (1 << 0/*attachment bit-index*/)))
+	// {
+	// 	BaseId = (PhysicalGlobalId & ~0);
+	// }
+	// else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
+	// {
+	// 	BaseId = (PhysicalGlobalId & ~0);
+	// }
+	// else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
+	// {
+	// 	BaseId = (PhysicalGlobalId & ~0);
+	// }
+
+	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32(BaseId, BitRange, BitShift);
+	return VirtualGlobalId;
 }
 
 bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType)

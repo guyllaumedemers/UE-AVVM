@@ -58,6 +58,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 CreateDefaultPrivateTreeNodeId(const FDataRegistryId& TreeNodeEffectRegistryId,
+	                                            const int32 RelationshipBitMask,
+	                                            const int32 InstancedId,
 	                                            const int32 EffectLevel);
 
 	UFUNCTION(BlueprintCallable)
@@ -73,6 +75,10 @@ public:
 	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,
 	                                       const TArray<int32>& NewPrivateIds,
 	                                       const int32 PhysicalGlobalId);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
+	                                         const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);

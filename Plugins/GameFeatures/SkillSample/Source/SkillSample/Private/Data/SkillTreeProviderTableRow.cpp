@@ -19,6 +19,33 @@
 //SOFTWARE.
 #include "Data/SkillTreeProviderTableRow.h"
 
+#include "NativeGameplayTags.h"
+
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT("PrivateTreeNodeId.Relationship.Attachment"));
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateTreeNodeId.Relationship.Character"));
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateTreeNodeId.Relationship.Item"));
+
+const int32 FSkillTreeNodePhase::GetRelationshipBitmask() const
+{
+	int32 Bitmask = 0; // @gdemers 0 is storage by design
+	if (RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
+	{
+		Bitmask += (1/*2^0*/);
+	}
+
+	if (RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
+	{
+		Bitmask += (2/*2^1*/);
+	}
+
+	if (RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM}))
+	{
+		Bitmask += (4/*2^2*/);
+	}
+
+	return Bitmask;
+}
+
 #if WITH_EDITOR
 EDataValidationResult FSkillTreeProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {

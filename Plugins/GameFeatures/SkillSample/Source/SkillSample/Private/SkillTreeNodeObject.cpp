@@ -152,15 +152,15 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	}
 }
 
-int32 USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(const int32 EncodedBits)
+int32 USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(const int32 EncodedBits/*PrivateTreeNodeId*/)
 {
-	// TODO @gdemers I believe that the skill tree node do not require physical address
-	// translation, but keep for consistency until proven correct.
+	constexpr int32 BitRange = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE;
+	constexpr int32 BitShift = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT;
 	int32 PhysicalOffset = 0;
 
 	// @gdemers translate the virtual id stored in the encoded bits into globally defined physical id
-	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
-	return (VirtualGlobalId + PhysicalOffset);
+	const int32 BaseId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, BitRange, BitShift);
+	return (BaseId + PhysicalOffset);
 }
 
 FGameplayTag USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(const int32 EncodedBits)
