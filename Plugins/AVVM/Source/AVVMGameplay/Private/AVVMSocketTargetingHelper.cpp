@@ -89,7 +89,7 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActorAsync(AActor* Src, const FA
 	if (!bDoesImplement)
 	{
 		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
-		Src->AttachToActor(SocketTarget, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		ensureAlwaysMsgf(Src->AttachToActor(SocketTarget, FAttachmentTransformRules::KeepRelativeTransform, SocketName), TEXT("Failed to find socket target."));
 		return true;
 	}
 
@@ -138,7 +138,7 @@ bool FAVVMSocketTargetingHelper::Static_AttachToActor(AActor* Src, const FAVVMSo
 	if (!bDoesImplement)
 	{
 		// @gdemers we don't support inner targeting so we must be rooted under the target Pawn.
-		Src->AttachToActor(SocketTarget, FAttachmentTransformRules::KeepRelativeTransform, SocketName);
+		ensureAlwaysMsgf(Src->AttachToActor(SocketTarget, FAttachmentTransformRules::KeepRelativeTransform, SocketName), TEXT("Failed to find socket target."));
 		return true;
 	}
 

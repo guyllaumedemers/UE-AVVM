@@ -243,7 +243,7 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 
 	// @gdemers attach actor to root, and update OwningOuter
-	AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName);
+	ensureAlwaysMsgf(AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName), TEXT("Failed to find socket target."));
 	OwningOuter = Target;
 
 	// @gdemers bind animation, and attribute set with new owning outer
