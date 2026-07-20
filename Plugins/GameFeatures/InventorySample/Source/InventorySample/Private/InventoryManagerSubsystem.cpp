@@ -25,6 +25,7 @@
 #include "NativeGameplayTags.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_WORLD_RULE_ITEM_RANDOMIZER, "WorldRule.ItemRandomizer");
@@ -64,6 +65,7 @@ AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
 	{
 		FActorSpawnParameters Params;
 		Params.Owner = Outer;
+		Params.Instigator = Cast<APawn>(Outer);
 		return InventoryManagerSubsystem->CreateItemActor(ItemActorClass, Params);
 	}
 

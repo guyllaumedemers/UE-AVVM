@@ -277,7 +277,7 @@ void UAVVMAbilitySystemComponent::UnRegisterAttributeSet(const AActor* Attribute
 		return;
 	}
 
-	TSharedPtr<FStreamableHandle>& StreamableHandle = AttributeSetHandles[AttributeSetOwner];
+	TSharedPtr<FStreamableHandle> StreamableHandle = AttributeSetHandles.Contains(AttributeSetOwner) ? AttributeSetHandles[AttributeSetOwner] : nullptr;
 	if (StreamableHandle.IsValid())
 	{
 		StreamableHandle->ReleaseHandle();

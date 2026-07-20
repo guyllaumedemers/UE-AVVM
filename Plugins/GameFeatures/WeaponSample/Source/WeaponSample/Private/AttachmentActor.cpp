@@ -147,7 +147,7 @@ void AAttachmentActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const auto* Outer = GetTypedOuter<AActor>();
+	auto* Outer = GetOwner();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;

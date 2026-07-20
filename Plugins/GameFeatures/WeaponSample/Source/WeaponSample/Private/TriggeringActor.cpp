@@ -98,7 +98,7 @@ void ATriggeringActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	auto* Outer = GetTypedOuter<AActor>();
+	auto* Outer = GetOwner();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
