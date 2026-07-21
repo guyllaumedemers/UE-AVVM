@@ -42,7 +42,8 @@ bool UAVVMPredicateTask::WaitUntilDone_Implementation(FAVVMPredicateTaskResult& 
 	if (!bIsWaiting)
 	{
 		NotifyEnd();
-		++OutResult.CurrTaskIndex;
+		OutResult.StartTimestamp = 0.f;
+		OutResult.CurrTaskIndex = FMath::Clamp(OutResult.CurrTaskIndex + 1, 0, INT32_MAX);
 	}
 
 	return bIsWaiting;
