@@ -36,6 +36,53 @@ class AAVVMGameMode;
 /**
  *	Class description:
  *	
+ *	FAVVMPredicateTaskResult is a context struct that encapsulate information about
+ *	a PredicateTask progress. 
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMPredicateTaskResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	double StartTimestamp = 0.f;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 CurrTaskIndex = 0;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMPredicateTask is UObject type that define conditions for deferred execution
+ *	of events.
+ */
+UCLASS(BlueprintType, Blueprintable)
+class AVVMGAMEPLAY_API UAVVMPredicateTask : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintNativeEvent)
+	bool WaitUntilDone(FAVVMPredicateTaskResult& OutResult) const;
+	virtual bool WaitUntilDone_Implementation(FAVVMPredicateTaskResult& OutResult) const;
+
+protected:
+	UFUNCTION(BlueprintNativeEvent)
+	void NotifyStart() const;
+	virtual void NotifyStart_Implementation() const PURE_VIRTUAL(NotifyStart_Implementation, return;);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void NotifyEnd() const;
+	virtual void NotifyEnd_Implementation() const PURE_VIRTUAL(NotifyEnd_Implementation, return;);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	double Timeout = 0.f;
+};
+
+/**
+ *	Class description:
+ *	
  *	UAVVMGameModeAdditive is a UObject class that modify the runtime behaviour
  *	of the World referenced AGameMode.
  *	
@@ -81,6 +128,14 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void RestartGame();
 	virtual void RestartGame_Implementation() PURE_VIRTUAL(RestartGame_Implementation, return;);
+
+protected:
+	// @gdemers for cdo access.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSubclassOf<UAVVMPredicateTask>> PredicateTaskClasses;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FAVVMPredicateTaskResult PredicateResult = FAVVMPredicateTaskResult{};
 };
 
 /**
@@ -130,4 +185,8 @@ public:
 	static void AddOrRemoveGameModeAdditive(const UObject* WorldContextObject,
 	                                        const FName& GameModeAdditiveClassAssetName,
 	                                        const bool bAddOrRemove);
+
+	UFUNCTION(BlueprintCallable)
+	static bool WaitUntilDone(const TArray<UAVVMPredicateTask*>& PredicateTaskCDOs,
+	                          FAVVMPredicateTaskResult& OutResult);
 };

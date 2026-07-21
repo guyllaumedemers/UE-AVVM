@@ -29,6 +29,25 @@
 #include "Misc/CommandLine.h"
 #include "Templates/SubclassOf.h"
 
+bool UAVVMPredicateTask::WaitUntilDone_Implementation(FAVVMPredicateTaskResult& OutResult) const
+{
+	const double Now = FDateTime::Now().ToUnixTimestamp();
+	if (FMath::IsNearlyZero(OutResult.StartTimestamp))
+	{
+		OutResult.StartTimestamp = Now;
+		NotifyStart();
+	}
+
+	const bool bIsWaiting = ((Now - OutResult.StartTimestamp) < Timeout);
+	if (!bIsWaiting)
+	{
+		NotifyEnd();
+		++OutResult.CurrTaskIndex;
+	}
+
+	return bIsWaiting;
+}
+
 #if WITH_EDITOR
 EDataValidationResult FAVVMGameModeAdditiveDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
@@ -220,4 +239,28 @@ void UAVVMGameModeAdditiveUtils::AddOrRemoveGameModeAdditive(const UObject* Worl
 
 		GameMode->RuntimeGameModeAdditives.Remove(GameModeAdditiveClassAssetName);
 	}
+}
+
+bool UAVVMGameModeAdditiveUtils::WaitUntilDone(const TArray<UAVVMPredicateTask*>& PredicateTaskCDOs,
+                                               FAVVMPredicateTaskResult& OutResult)
+{
+	if (PredicateTaskCDOs.IsEmpty())
+	{
+		return false;
+	}
+
+	const bool bIsIndexValid = PredicateTaskCDOs.IsValidIndex(OutResult.CurrTaskIndex);
+	if (!bIsIndexValid)
+	{
+		return false;
+	}
+
+	const UAVVMPredicateTask* PredicateTask = PredicateTaskCDOs[OutResult.CurrTaskIndex];
+	if (!ensureAlwaysMsgf(IsValid(PredicateTask), TEXT("Invalid Predicate Task.")))
+	{
+		return false;
+	}
+
+	const bool bShouldWait = (IsValid(PredicateTask) && PredicateTask->WaitUntilDone(OutResult));
+	return bShouldWait;
 }
