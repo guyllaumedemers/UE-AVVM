@@ -130,8 +130,8 @@ void UTriggeringActorAnimInstance::OnTriggeringActorStateTagChanged(const FGamep
 FAnimInstanceProxy* UTriggeringActorAnimInstance::CreateAnimInstanceProxy()
 {
 	// @gdemers automatic storage duration.
-	// main game thread (i.e main process running), and worker thread are sharing the same memory space. 
-	AnyThreadProxy = FAVVMTriggeringActorAnimInstanceProxy(this);
+	// game thread (i.e main process running), and worker thread are sharing the same memory space. 
+	AnyThreadProxy = FAVVMTriggeringActorAnimInstanceProxy{this};
 	return &AnyThreadProxy;
 }
 
