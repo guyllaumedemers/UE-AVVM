@@ -68,10 +68,37 @@ struct WEAPONSAMPLE_API FTriggeringSocketTargetingHelper : public FAVVMSocketTar
 
 /**
  *	Class description:
+ *	
+ *	FTriggeringActorSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FTriggeringActorSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldSwapAbilityOnBeginPlay = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	bool bDoesDefineAttachmentStatically = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesDefineAttachmentStatically", ItemStruct="TriggeringDefinitionDataTableRow"))
+	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
+};
+
+/**
+ *	Class description:
  *
  *	ATriggeringActor is a triggering system that executes behaviour such as triggering or targeting.
  */
-UCLASS()
+UCLASS(SparseClassDataTypes="TriggeringActorSparseData")
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
@@ -86,6 +113,11 @@ public:
 	ATriggeringActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void Trigger() const;
@@ -130,18 +162,6 @@ protected:
 	UFUNCTION()
 	void OnTriggeringAbilityClassAcquired();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Most-likely not wanted. We want to track what's in the user active hands."))
-	bool bShouldAsyncLoadOnBeginPlay = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="TriggeringDefinitionDataTableRow"))
-	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
-
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 
@@ -164,9 +184,25 @@ protected:
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
-	FDelegateHandle DeferredSocketParentingDelegateHandle;
+	FDelegateHandle DeferredSocketParentingDelegateHandle = FDelegateHandle();
 
+private:
 	friend class UTriggeringUtils;
+
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass_DEPRECATED = nullptr;
+
+	UPROPERTY()
+	bool bShouldSwapAbilityOnBeginPlay_DEPRECATED = true;
+
+	UPROPERTY()
+	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass_DEPRECATED = nullptr;
+
+	UPROPERTY()
+	FDataRegistryId TriggeringDefinitionId_DEPRECATED = FDataRegistryId();
+#endif
 };
 
 /**

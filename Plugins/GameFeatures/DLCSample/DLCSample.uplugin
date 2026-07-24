@@ -23,5 +23,19 @@
       "Type": "Runtime",
       "LoadingPhase": "Default"
     }
+  ],
+  "Plugins": [
+    {
+      "Name": "AVVM",
+      "Enabled": true
+    },
+    {
+      "Name": "InventorySample",
+      "Enabled": true
+    },
+    {
+      "Name": "WeaponSample",
+      "Enabled": true
+    }
   ]
 }

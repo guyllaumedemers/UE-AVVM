@@ -31,6 +31,7 @@
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/BlueprintGeneratedClass.h"
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
@@ -178,8 +179,31 @@ void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	                TEXT("Removing %s."),
 	                *GetNameSafe(AAttachmentActor::StaticClass()));
 
-	Detach();
+	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 }
+
+#if WITH_EDITOR
+void AAttachmentActor::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FAttachmentActorSparseData* SparseClassData = GetMutableAttachmentActorSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->LinkedAnimInstanceClass = LinkedAnimInstanceClass_DEPRECATED;
+	SparseClassData->SocketName = SocketName_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif
 
 UAbilitySystemComponent* AAttachmentActor::GetAbilitySystemComponent() const
 {
@@ -250,7 +274,8 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
 
 	const bool bShouldNotifyWhenAttachingActor = Target->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
-	if (bShouldNotifyWhenAttachingActor)
+	if (bShouldNotifyWhenAttachingActor && ensureAlwaysMsgf(NewItemAttachmentSlotTag.IsValid(),
+	                                                        TEXT("Attachment Tag invalid. Please review asset setup.")))
 	{
 		OwningSocketSlotTag = NewItemAttachmentSlotTag;
 
@@ -276,7 +301,8 @@ void AAttachmentActor::Detach_Implementation()
 	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 
 	const bool bShouldNotifyWhenDetachingActor = Outer->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
-	if (bShouldNotifyWhenDetachingActor)
+	if (bShouldNotifyWhenDetachingActor && ensureAlwaysMsgf(OwningSocketSlotTag.IsValid(),
+	                                                        TEXT("Attachment Tag invalid. Please review asset setup.")))
 	{
 		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Outer);
 		Observer->NotifyOnNewSocketDetached(OwningSocketSlotTag);
@@ -307,7 +333,7 @@ void AAttachmentActor::Bind_Implementation()
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
 	if (IsValid(TargetSkeletalMeshComponent))
 	{
-		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
+		TargetSkeletalMeshComponent->LinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
 }
 
@@ -335,7 +361,7 @@ void AAttachmentActor::Unbind_Implementation()
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
 	if (IsValid(TargetSkeletalMeshComponent))
 	{
-		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(LinkedAnimInstanceClass);
+		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
 }
 

@@ -47,11 +47,34 @@ struct WEAPONSAMPLE_API FAttachmentSocketTargetingHelper : public FAVVMSocketTar
 
 /**
  *	Class description:
+ *	
+ *	FAttachmentActorSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct WEAPONSAMPLE_API FAttachmentActorSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	bool bDoesAllowDefiningSocketName = false;
+
+	// @gdemers This property handles the attachment to a socket when the element is built-in the owning triggering actors.
+	// This imply that the attachment arent part of the inventory system. They are baked into the representation of its owning actor, and attached at runtime (like a Gun blueprint).
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesAllowDefiningSocketName"))
+	FName SocketName = NAME_None;
+};
+
+/**
+ *	Class description:
  *
  *	AAttachmentActor is an attachment system that extends the Outer Actor and can be invalidated
  *	during Unequip phase if required (since they are children of the actor with Authoritative state).
  */
-UCLASS()
+UCLASS(SparseClassDataTypes="AttachmentActorSparseData")
 class WEAPONSAMPLE_API AAttachmentActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
@@ -64,6 +87,11 @@ public:
 	AAttachmentActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
 
 	// @gdemers IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -87,9 +115,6 @@ protected:
 	                               AActor* Target,
 	                               const FAVVMSocketTargetingDeferralContextArgs ContextArgs);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
-
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 
@@ -102,10 +127,16 @@ protected:
 	FDelegateHandle DeferredSocketParentingDelegateHandle;
 
 private:
+	friend class UAttachmentManagerComponent;
+
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass_DEPRECATED = nullptr;
+
 	// @gdemers This property handles the attachment to a socket when the element is built-in the owning triggering actors.
 	// This imply that the attachment arent part of the inventory system. They are baked into the representation of its owning actor, and attached at runtime (like a Gun blueprint).
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
-	FName SocketName = NAME_None;
-
-	friend class UAttachmentManagerComponent;
+	UPROPERTY()
+	FName SocketName_DEPRECATED = NAME_None;
+#endif
 };

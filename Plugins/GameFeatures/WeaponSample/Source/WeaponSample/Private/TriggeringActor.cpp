@@ -33,6 +33,7 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/AssetManager.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
 #include "Resources/AVVMResourceManagerComponent.h"
@@ -121,7 +122,7 @@ void ATriggeringActor::BeginPlay()
 			SocketDeferral->NotifyOnNewSocketParentAvailable(this);
 		}
 
-		if (bShouldAsyncLoadOnBeginPlay)
+		if (GetTriggeringActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldSwapAbilityOnBeginPlay)
 		{
 			Server_SwapAbility(true);
 		}
@@ -152,6 +153,31 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 #endif
 }
+
+#if WITH_EDITOR
+void ATriggeringActor::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FTriggeringActorSparseData* SparseClassData = GetMutableTriggeringActorSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->LinkedAnimInstanceClass = LinkedAnimInstanceClass_DEPRECATED;
+	SparseClassData->bShouldSwapAbilityOnBeginPlay = bShouldSwapAbilityOnBeginPlay_DEPRECATED;
+	SparseClassData->TriggeringAbilityClass = TriggeringAbilityClass_DEPRECATED;
+	SparseClassData->TriggeringDefinitionId = TriggeringDefinitionId_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif
 
 void ATriggeringActor::Server_SwapAbility_Implementation(const bool bIsActive)
 {
@@ -268,7 +294,7 @@ void ATriggeringActor::Bind_Implementation()
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
 	if (IsValid(TargetSkeletalMeshComponent))
 	{
-		TargetSkeletalMeshComponent->LinkAnimClassLayers(LinkedAnimInstanceClass);
+		TargetSkeletalMeshComponent->LinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
 }
 
@@ -299,7 +325,7 @@ void ATriggeringActor::Unbind_Implementation()
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
 	if (IsValid(TargetSkeletalMeshComponent))
 	{
-		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(LinkedAnimInstanceClass);
+		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
 }
 
@@ -315,7 +341,7 @@ UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Imp
 
 TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
-	return {TriggeringDefinitionId};
+	return {GetTriggeringDefinitionId()};
 }
 
 const TInstancedStruct<FAVVMDataResolverHelper>& ATriggeringActor::GetTriggeringActorDataResolverHelper()
@@ -362,7 +388,7 @@ void ATriggeringActor::RegisterAbility()
 	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
 	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
-	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({TriggeringAbilityClass.ToSoftObjectPath()});
+	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({GetTriggeringAbilityClass().ToSoftObjectPath()});
 }
 
 void ATriggeringActor::UnRegisterAbility()

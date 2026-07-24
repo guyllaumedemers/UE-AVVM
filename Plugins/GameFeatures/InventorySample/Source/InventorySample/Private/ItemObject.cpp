@@ -498,7 +498,7 @@ void UItemObject::OnRep_ItemStateModified(const FItemState& OldItemState)
 void UItemObject::OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentSlotTag,
                                           const AActor* NewAttachment)
 {
-	const bool bDoesDefineAttachmentSlot = DoesAttachmentSlotHasPartialMatch(FGameplayTagContainer(NewItemAttachmentSlotTag));
+	const bool bDoesDefineAttachmentSlot = DoesAttachmentSlotHasPartialMatch(FGameplayTagContainer{NewItemAttachmentSlotTag});
 	if (ensureAlwaysMsgf(bDoesDefineAttachmentSlot,
 	                     TEXT("Attachment Slot Tag \"%s\" isn't expected to be referenced on the UItemObject targeted \"%s\"."),
 	                     *NewItemAttachmentSlotTag.GetTagName().ToString(),
@@ -510,7 +510,7 @@ void UItemObject::OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentS
 
 void UItemObject::OnNewSocketItemDetached(const FGameplayTag& NewItemAttachmentSlotTag)
 {
-	const bool bDoesDefineAttachmentSlot = DoesAttachmentSlotHasPartialMatch(FGameplayTagContainer(NewItemAttachmentSlotTag));
+	const bool bDoesDefineAttachmentSlot = DoesAttachmentSlotHasPartialMatch(FGameplayTagContainer{NewItemAttachmentSlotTag});
 	if (ensureAlwaysMsgf(bDoesDefineAttachmentSlot,
 	                     TEXT("Attachment Slot Tag \"%s\" isn't expected to be referenced on the UItemObject targeted \"%s\"."),
 	                     *NewItemAttachmentSlotTag.GetTagName().ToString(),

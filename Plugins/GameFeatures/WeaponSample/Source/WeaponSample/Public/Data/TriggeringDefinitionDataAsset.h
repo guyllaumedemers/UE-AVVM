@@ -54,13 +54,13 @@ protected:
 	// from the owner, then use this! OTHERWISE, the inventory system will handle creation of the attachment actor as the attachment
 	// information is likely to come from external src such as backend inventory loadout (example : as a list of registry id).
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportDefaultAttachments = true;
+	bool bDoesSupportDefaultAttachments = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportDefaultAttachments", ItemStruct="AttachmentDefinitionDataTableRow"))
 	TArray<FDataRegistryId> DefaultAttachmentIds;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportProjectileBehaviour = true;
+	bool bDoesSupportProjectileBehaviour = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportProjectileBehaviour", ItemStruct="ProjectileDefinitionDataTableRow"))
 	TArray<FDataRegistryId> ProjectileDefinitionIds;

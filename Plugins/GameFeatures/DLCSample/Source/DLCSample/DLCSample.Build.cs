@@ -24,7 +24,7 @@ public class DLCSample : ModuleRules
 {
 	public DLCSample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 		bWarningsAsErrors = true;
 

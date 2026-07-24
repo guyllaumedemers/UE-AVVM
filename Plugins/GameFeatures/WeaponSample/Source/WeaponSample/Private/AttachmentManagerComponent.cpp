@@ -210,7 +210,7 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 
 	// @gdemers handle attachment process
 	const FSoftObjectPath AttributeSetSoftObjectPath = !AttributeSoftObjectPaths.IsEmpty() ? AttributeSoftObjectPaths[0] : FSoftObjectPath();
-	Swap(FAttachmentSwapContextArgs{NewAttachment, AttributeSetSoftObjectPath, NewAttachment->SocketName});
+	Swap(FAttachmentSwapContextArgs{NewAttachment, AttributeSetSoftObjectPath, NewAttachment->GetSocketName()});
 
 	// @gdemers adding attachment AttributeSet initialization based on owning actor creation process.
 	// other alternative for this initialization is based on the inventory system, and would imply we consider the attachment a unique element in the inventory system.
