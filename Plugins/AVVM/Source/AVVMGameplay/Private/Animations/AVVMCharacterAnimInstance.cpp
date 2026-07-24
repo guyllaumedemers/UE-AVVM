@@ -24,6 +24,11 @@
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 #include "Tags/AVVMGameplayTags.h"
 
+FAVVMCharacterAnimInstanceProxy::FAVVMCharacterAnimInstanceProxy(UAnimInstance* InInstance)
+	: Super(InInstance)
+{
+}
+
 void FAVVMCharacterAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds)
 {
 	FAnimInstanceProxy::PreUpdate(InAnimInstance, DeltaSeconds);
@@ -137,6 +142,9 @@ void UAVVMCharacterAnimInstance::OnCharacterStateTagChanged(const FGameplayTagCo
 
 FAnimInstanceProxy* UAVVMCharacterAnimInstance::CreateAnimInstanceProxy()
 {
+	// @gdemers automatic storage duration.
+	// main game thread (i.e main process running), and worker thread are sharing the same memory space. 
+	AnyThreadProxy = FAVVMCharacterAnimInstanceProxy(this);
 	return &AnyThreadProxy;
 }
 

@@ -70,6 +70,9 @@ struct WEAPONSAMPLE_API FAVVMTriggeringActorAnimInstanceProxy : public FAnimInst
 {
 	GENERATED_BODY()
 	
+	FAVVMTriggeringActorAnimInstanceProxy() = default;
+	FAVVMTriggeringActorAnimInstanceProxy(UAnimInstance* InInstance);
+	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FTriggeringActorStatusProperties Status = FTriggeringActorStatusProperties();
 

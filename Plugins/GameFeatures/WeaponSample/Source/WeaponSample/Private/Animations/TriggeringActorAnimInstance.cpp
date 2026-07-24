@@ -25,6 +25,11 @@
 #include "Animations/AVVMTSAnimInstanceUtils.h"
 #include "Tags/PrivateTags.h"
 
+FAVVMTriggeringActorAnimInstanceProxy::FAVVMTriggeringActorAnimInstanceProxy(UAnimInstance* InInstance)
+	: Super(InInstance)
+{
+}
+
 void FAVVMTriggeringActorAnimInstanceProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds)
 {
 	FAnimInstanceProxy::PreUpdate(InAnimInstance, DeltaSeconds);
@@ -124,6 +129,9 @@ void UTriggeringActorAnimInstance::OnTriggeringActorStateTagChanged(const FGamep
 
 FAnimInstanceProxy* UTriggeringActorAnimInstance::CreateAnimInstanceProxy()
 {
+	// @gdemers automatic storage duration.
+	// main game thread (i.e main process running), and worker thread are sharing the same memory space. 
+	AnyThreadProxy = FAVVMTriggeringActorAnimInstanceProxy(this);
 	return &AnyThreadProxy;
 }
 

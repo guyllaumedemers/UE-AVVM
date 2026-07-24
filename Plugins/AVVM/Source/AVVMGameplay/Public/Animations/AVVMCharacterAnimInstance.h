@@ -113,6 +113,9 @@ USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMCharacterAnimInstanceProxy : public FAnimInstanceProxy
 {
 	GENERATED_BODY()
+	
+	FAVVMCharacterAnimInstanceProxy() = default;
+	FAVVMCharacterAnimInstanceProxy(UAnimInstance* InInstance);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FAVVMMovementProperties Movement = FAVVMMovementProperties();
