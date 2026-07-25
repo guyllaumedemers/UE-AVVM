@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 
 #include "AttachmentManagerComponent.generated.h"
@@ -43,6 +44,9 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FName SocketName = NAME_None;

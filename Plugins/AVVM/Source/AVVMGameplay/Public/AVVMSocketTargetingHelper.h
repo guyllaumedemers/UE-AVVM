@@ -76,13 +76,13 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
 	TWeakObjectPtr<AActor> Parent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FName SocketName = NAME_None;
+	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
+	FName SocketName = NAME_None;
 };
 
 /**

@@ -110,8 +110,9 @@ void UAttachmentManagerComponent::Swap_Implementation(const FAttachmentSwapConte
 	// @gdemers create a context for handling socketing, and initialization of the attachment created.
 	FAVVMSocketTargetingDeferralContextArgs ContextArgs;
 	ContextArgs.Parent = Cast<AActor>(OwningOuter.Get());
-	ContextArgs.SocketName = NewAttachmentSwapContext.SocketName;
 	ContextArgs.SrcAttributeSetSoftObjectPath = NewAttachmentSwapContext.SrcAttributeSetSoftObjectPath;
+	ContextArgs.AttachmentSlotTag = NewAttachmentSwapContext.AttachmentSlotTag;
+	ContextArgs.SocketName = NewAttachmentSwapContext.SocketName;
 
 	// @gdemers attach new actor to parent.
 	UTriggeringUtils::Swap(OldAttachment.Get(), SearchResult.Get(), ContextArgs);
@@ -210,7 +211,15 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 
 	// @gdemers handle attachment process
 	const FSoftObjectPath AttributeSetSoftObjectPath = !AttributeSoftObjectPaths.IsEmpty() ? AttributeSoftObjectPaths[0] : FSoftObjectPath();
-	Swap(FAttachmentSwapContextArgs{NewAttachment, AttributeSetSoftObjectPath, NewAttachment->GetSocketName()});
+	const FAttachmentSwapContextArgs ContextArgs =
+	{
+			NewAttachment,
+			AttributeSetSoftObjectPath,
+			NewAttachment->GetAttachmentSlotTag(),
+			NewAttachment->GetSocketName()
+	};
+
+	Swap(ContextArgs);
 
 	// @gdemers adding attachment AttributeSet initialization based on owning actor creation process.
 	// other alternative for this initialization is based on the inventory system, and would imply we consider the attachment a unique element in the inventory system.

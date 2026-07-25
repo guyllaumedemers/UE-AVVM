@@ -60,6 +60,12 @@ struct WEAPONSAMPLE_API FAttachmentActorSparseData
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	bool bDoesAllowDefiningAttachmentSlotTag = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesAllowDefiningAttachmentSlotTag"))
+	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesAllowDefiningSocketName = false;
 
 	// @gdemers This property handles the attachment to a socket when the element is built-in the owning triggering actors.

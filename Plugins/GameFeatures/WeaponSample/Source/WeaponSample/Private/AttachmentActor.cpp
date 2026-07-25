@@ -301,8 +301,7 @@ void AAttachmentActor::Detach_Implementation()
 	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 
 	const bool bShouldNotifyWhenDetachingActor = Outer->Implements<UAVVMDoesActorSupportOnAttachmentNotify>();
-	if (bShouldNotifyWhenDetachingActor && ensureAlwaysMsgf(OwningSocketSlotTag.IsValid(),
-	                                                        TEXT("Attachment Tag invalid. Please review asset setup.")))
+	if (bShouldNotifyWhenDetachingActor && OwningSocketSlotTag.IsValid()/*may be invalid due to multiple call to detach*/)
 	{
 		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Outer);
 		Observer->NotifyOnNewSocketDetached(OwningSocketSlotTag);
