@@ -202,8 +202,8 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 				return AllowedSlots.HasTagExact(Tag);
 			});
 
-			if ((SearchResult != nullptr) && ensureAlwaysMsgf(!Items.Contains(PrivateItemId),
-			                                                  TEXT("Duplicated assignment for the current Inventory Provider.")))
+			if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Player hasn't defined the required slot tags to support equipping this item.")) &&
+				ensureAlwaysMsgf(!Items.Contains(PrivateItemId), TEXT("Duplicated assignment for the current Inventory Provider.")))
 			{
 				Loadout.FindOrAdd(*SearchResult, PrivateItemId);
 			}
