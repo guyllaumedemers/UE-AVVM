@@ -156,11 +156,8 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString ProfileId = FString();
 
-	// @gdemers Bits encoding allow users to retrieve {Item_Id, Storage_Id, Position_Index, Count, and Attachments}
-	// by bit shifting the integer retrieved from our collection (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
-	// Items, and attachments both occupy a unique entry within this collection. Parenting of attachments can be retrieved
-	// using our bits encoding scheme. See AVVMOnlineInventory.h for information about the bits encoding.
-	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Item, Attachment, etc...
+	// @gdemers Tightly packed Bitmask. Define information about an Item using bits translation. See AVVMOnlineInventory.h
+	// to inspect bits encoding scheme.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> InventoryIds;
 	
@@ -169,10 +166,9 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> CharmsIds;
-
-	// @gdemers Bits encoding allow users to retrieve {Skill_Id, Category_Id, Position_Index, Level}
-	// by bit shifting the integer retrieved from our collection (See UAVVMOnlineEncodingUtils::DecodeInt32, EncodeInt32).
-	// Note : Our ids refer to {FAVVMPlayerResource::UniqueId} which can represent an Ability, Perks, etc...
+	
+	// @gdemers Tightly packed Bitmask. Define information about an Item using bits translation. See AVVMOnlineSkillTree.h
+	// to inspect bits encoding scheme.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> SkillIds;
 
