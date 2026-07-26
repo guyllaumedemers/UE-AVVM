@@ -75,46 +75,46 @@ public:
 	virtual void UnregisterPlayer(const APlayerController* ExitingPlayer) override;
 
 	UFUNCTION(BlueprintCallable)
-	static int32 Static_GetPlayerConnectionId(const UWorld* World,
+	static int32 Static_GetPlayerConnectionId(const UObject* WorldContextObject,
 	                                          const APlayerState* PlayerState);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 Static_GetPlayerProfileId(const UWorld* World,
+	static int32 Static_GetPlayerProfileId(const UObject* WorldContextObject,
 	                                       const APlayerState* PlayerState);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 Static_GetPlayerPresetId(const UWorld* World,
+	static int32 Static_GetPlayerPresetId(const UObject* WorldContextObject,
 	                                      const APlayerState* PlayerState);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<int32> Static_GetPlayerPresetItems(const UWorld* World,
+	static TArray<int32> Static_GetPlayerPresetItems(const UObject* WorldContextObject,
 	                                                 const int32 ProfileId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<int32> Static_GetPlayerInventoryItems(const UWorld* World,
+	static TArray<int32> Static_GetPlayerInventoryItems(const UObject* WorldContextObject,
 	                                                    const int32 ProfileId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<int32> Static_GetActorInventoryItems(const UWorld* World,
+	static TArray<int32> Static_GetActorInventoryItems(const UObject* WorldContextObject,
 	                                                   const int32 ProfileId);
 
 	UFUNCTION(BlueprintCallable)
-	static FString Static_ModifyPlayerProfileInventory(const UWorld* World,
+	static FString Static_ModifyPlayerProfileInventory(const UObject* WorldContextObject,
 	                                                   const int32 ProfileId,
 	                                                   const TArray<int32>& NewItems);
 
 	UFUNCTION(BlueprintCallable)
-	static FGameplayTag Static_GetPlayerPresetSlot(const UWorld* World,
+	static FGameplayTag Static_GetPlayerPresetSlot(const UObject* WorldContextObject,
 	                                               const int32 ProfileId,
 	                                               const int32 PrivateItemId);
 
 	UFUNCTION(BlueprintCallable)
-	static FGameplayTag Static_GetActorPresetSlot(const UWorld* World,
+	static FGameplayTag Static_GetActorPresetSlot(const UObject* WorldContextObject,
 	                                              const int32 ProfileId,
 	                                              const int32 PrivateItemId);
 
 protected:
-	static AAVVMGameSession* Get(const UWorld* World);
+	static AAVVMGameSession* Get(const UObject* WorldContextObject);
 	int32 GetPlayerConnectionId(const APlayerState* PlayerState) const;
 	int32 GetPlayerProfileId(const APlayerState* PlayerState) const;
 	int32 GetPlayerPresetId(const APlayerState* PlayerState) const;

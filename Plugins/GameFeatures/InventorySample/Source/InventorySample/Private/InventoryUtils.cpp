@@ -203,7 +203,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			});
 
 			if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Player hasn't defined the required slot tags to support equipping this item.")) &&
-				ensureAlwaysMsgf(!Items.Contains(PrivateItemId), TEXT("Duplicated assignment for the current Inventory Provider.")))
+				ensureAlwaysMsgf(!Loadout.Contains(*SearchResult), TEXT("Duplicated assignment for the current Inventory Provider.")))
 			{
 				Loadout.FindOrAdd(*SearchResult, PrivateItemId);
 			}
@@ -343,17 +343,8 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	}
 }
 
-TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const int32 NewProviderId)
+TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds)
 {
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
-	{
-		return TArray<FDataRegistryId>{};
-	}
-
-	TArray<FDataRegistryId> OutRegistryIds;
-	Subsystem->GetPossibleDataRegistryIdList(UAVVMGameplaySettings::GetActorIdentifierRegistryType(), OutRegistryIds);
-
 	static const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
 	                                     const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
 	                                     const int32 NewPrivateItemId)
@@ -376,14 +367,17 @@ TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const i
 		return FDataRegistryId{};
 	};
 
-	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
-	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return TArray<FDataRegistryId>{};
+	}
 
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
-	NSJsonInventory::FromString(SearchPayload, OutProvider);
+	TArray<FDataRegistryId> OutRegistryIds;
+	Subsystem->GetPossibleDataRegistryIdList(UAVVMGameplaySettings::GetActorIdentifierRegistryType(), OutRegistryIds);
 
 	TArray<FDataRegistryId> OutResults;
-	for (const int32 PrivateItemId : OutProvider.PrivateItemIds)
+	for (const int32 PrivateItemId : NewPrivateItemIds)
 	{
 		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
 		if (!ItemRegistryId.IsValid())
@@ -402,6 +396,26 @@ TArray<FDataRegistryId> UInventoryUtils::GetInventoryProviderRegistryIds(const i
 		               });
 	}
 
+	return OutResults;
+}
+
+TArray<FDataRegistryId> UInventoryUtils::GetProviderInventoryRegistryIds(const int32 NewProviderId)
+{
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
+	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
+
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(SearchPayload, OutProvider);
+
+	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(OutProvider.PrivateItemIds);
+	return OutResults;
+}
+
+TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderInventoryRegistryIds(const UObject* WorldContextObject,
+                                                                                const int32 NewProfileId)
+{
+	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerInventoryItems(WorldContextObject, NewProfileId);
+	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
 	return OutResults;
 }
 
@@ -583,13 +597,13 @@ FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character) && Character->IsPlayerControlled())
 	{
-		OutResult = AAVVMGameSession::Static_GetPlayerPresetSlot(Outer->GetWorld(), ProviderId/*calling Player UniqueId*/, PrivateItemId);
+		OutResult = AAVVMGameSession::Static_GetPlayerPresetSlot(Outer, ProviderId/*calling Player UniqueId*/, PrivateItemId);
 	}
 	else
 	{
 		// @gdemers we may attempt retrieving the inventory for an NPC actor
 		// (or any other actor type) that are defined in backend.
-		OutResult = AAVVMGameSession::Static_GetActorPresetSlot(Outer->GetWorld(), ProviderId/*calling Actor UniqueId*/, PrivateItemId);
+		OutResult = AAVVMGameSession::Static_GetActorPresetSlot(Outer, ProviderId/*calling Actor UniqueId*/, PrivateItemId);
 	}
 
 	return OutResult;

@@ -63,7 +63,14 @@ public:
 	                                        const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> GetInventoryProviderRegistryIds(const int32 NewProviderId);
+	static TArray<FDataRegistryId> TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetProviderInventoryRegistryIds(const int32 NewProviderId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetBackendProviderInventoryRegistryIds(const UObject* WorldContextObject,
+	                                                                      const int32 NewProfileId);
 
 	UFUNCTION(BlueprintCallable)
 	static void GetInventoryProvider(const FString& NewPayload,

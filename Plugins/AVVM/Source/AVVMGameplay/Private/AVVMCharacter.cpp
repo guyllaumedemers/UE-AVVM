@@ -40,7 +40,7 @@ TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UOb
 		return TArray<int32>{};
 	}
 
-	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerPresetItems(Outer->GetWorld(), ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
+	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerPresetItems(Outer, ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
 	return OutResults;
 }
 
@@ -150,7 +150,7 @@ int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
 	{
 		// @gdemers Otherwise, multiplayer should retrieve resource provider id from account/player profile.
 		const APlayerState* NewPlayerState = GetPlayerState();
-		return AAVVMGameSession::Static_GetPlayerProfileId(GetWorld(), NewPlayerState);
+		return AAVVMGameSession::Static_GetPlayerProfileId(this, NewPlayerState);
 	}
 	else
 #endif

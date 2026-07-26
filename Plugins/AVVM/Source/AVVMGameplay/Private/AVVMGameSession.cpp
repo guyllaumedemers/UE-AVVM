@@ -25,69 +25,69 @@
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
-int32 AAVVMGameSession::Static_GetPlayerConnectionId(const UWorld* World,
+int32 AAVVMGameSession::Static_GetPlayerConnectionId(const UObject* WorldContextObject,
                                                      const APlayerState* PlayerState)
 {
-	const AAVVMGameSession* GameSession = Get(World);
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerConnectionId(PlayerState) : INDEX_NONE;
 }
 
-int32 AAVVMGameSession::Static_GetPlayerProfileId(const UWorld* World,
+int32 AAVVMGameSession::Static_GetPlayerProfileId(const UObject* WorldContextObject,
                                                   const APlayerState* PlayerState)
 {
-	const AAVVMGameSession* GameSession = Get(World);
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerProfileId(PlayerState) : INDEX_NONE;
 }
 
-int32 AAVVMGameSession::Static_GetPlayerPresetId(const UWorld* World,
+int32 AAVVMGameSession::Static_GetPlayerPresetId(const UObject* WorldContextObject,
                                                  const APlayerState* PlayerState)
 {
-	const AAVVMGameSession* GameSession = Get(World);
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerPresetId(PlayerState) : INDEX_NONE;
 }
 
-TArray<int32> AAVVMGameSession::Static_GetPlayerPresetItems(const UWorld* World,
+TArray<int32> AAVVMGameSession::Static_GetPlayerPresetItems(const UObject* WorldContextObject,
                                                             const int32 ProfileId)
 {
-	const AAVVMGameSession* GameSession = Get(World);
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerPresetItems(ProfileId) : TArray<int32>{};
 }
 
-TArray<int32> AAVVMGameSession::Static_GetPlayerInventoryItems(const UWorld* World,
+TArray<int32> AAVVMGameSession::Static_GetPlayerInventoryItems(const UObject* WorldContextObject,
                                                                const int32 ProfileId)
 {
-	const AAVVMGameSession* GameSession = Get(World);
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerInventoryItems(ProfileId) : TArray<int32>{};
 }
 
-TArray<int32> AAVVMGameSession::Static_GetActorInventoryItems(const UWorld* World,
+TArray<int32> AAVVMGameSession::Static_GetActorInventoryItems(const UObject* WorldContextObject,
                                                               const int32 ProfileId)
 {
-	const AAVVMGameSession* GameSession = Get(World);
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetActorInventoryItems(ProfileId) : TArray<int32>{};
 }
 
-FString AAVVMGameSession::Static_ModifyPlayerProfileInventory(const UWorld* World,
+FString AAVVMGameSession::Static_ModifyPlayerProfileInventory(const UObject* WorldContextObject,
                                                               const int32 ProfileId,
                                                               const TArray<int32>& NewItems)
 {
-	AAVVMGameSession* GameSession = Get(World);
+	AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->ModifyPlayerProfileInventory(ProfileId, NewItems) : FString();
 }
 
-FGameplayTag AAVVMGameSession::Static_GetPlayerPresetSlot(const UWorld* World,
+FGameplayTag AAVVMGameSession::Static_GetPlayerPresetSlot(const UObject* WorldContextObject,
                                                           const int32 ProfileId,
                                                           const int32 PrivateItemId)
 {
-	AAVVMGameSession* GameSession = Get(World);
+	AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerPresetSlot(ProfileId, PrivateItemId) : FGameplayTag::EmptyTag;
 }
 
-FGameplayTag AAVVMGameSession::Static_GetActorPresetSlot(const UWorld* World,
+FGameplayTag AAVVMGameSession::Static_GetActorPresetSlot(const UObject* WorldContextObject,
                                                          const int32 ProfileId,
                                                          const int32 PrivateItemId)
 {
-	AAVVMGameSession* GameSession = Get(World);
+	AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetActorPresetSlot(ProfileId, PrivateItemId) : FGameplayTag::EmptyTag;
 }
 
@@ -116,9 +116,9 @@ void AAVVMGameSession::UnregisterPlayer(const APlayerController* ExitingPlayer)
 	}
 }
 
-AAVVMGameSession* AAVVMGameSession::Get(const UWorld* World)
+AAVVMGameSession* AAVVMGameSession::Get(const UObject* WorldContextObject)
 {
-	const AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(World);
+	const AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(WorldContextObject);
 	return IsValid(GameModeBase) ? Cast<AAVVMGameSession>(GameModeBase->GameSession) : nullptr;
 }
 

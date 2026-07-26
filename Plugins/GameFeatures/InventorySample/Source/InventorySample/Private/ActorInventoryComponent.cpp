@@ -74,13 +74,13 @@ TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character) && Character->IsPlayerControlled())
 	{
-		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer->GetWorld(), ElementId/*calling Player UniqueId*/);
+		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer, ElementId/*calling Player UniqueId*/);
 	}
 	else
 	{
 		// @gdemers we may attempt retrieving the inventory for an NPC actor
 		// (or any other actor type) that are defined in backend.
-		OutResults = AAVVMGameSession::Static_GetActorInventoryItems(Outer->GetWorld(), ElementId/*calling Actor UniqueId*/);
+		OutResults = AAVVMGameSession::Static_GetActorInventoryItems(Outer, ElementId/*calling Actor UniqueId*/);
 	}
 
 	return OutResults;
@@ -1114,7 +1114,7 @@ void UActorInventoryComponent::CheckBackend() const
 	if (ensureAlwaysMsgf((false == bAreSetIdentical),
 	                     TEXT("Attempting backend update on identical Sets.")))
 	{
-		const FString NewProfile = AAVVMGameSession::Static_ModifyPlayerProfileInventory(GetWorld(), TargetUniqueId, NewDependencies);
+		const FString NewProfile = AAVVMGameSession::Static_ModifyPlayerProfileInventory(Outer, TargetUniqueId, NewDependencies);
 		UAVVMOnlineBackendUtils::Submit(this, TargetUniqueId, NewProfile);
 	}
 }
