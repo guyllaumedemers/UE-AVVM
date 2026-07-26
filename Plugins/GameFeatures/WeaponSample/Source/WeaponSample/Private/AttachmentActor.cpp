@@ -45,7 +45,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(Src);
 	if (!ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
-	                      *Src->GetName()))
+	                      *GetNameSafe(Src)))
 	{
 		return nullptr;
 	}
@@ -54,7 +54,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Target);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),
-	                      *Target->GetName()))
+	                      *GetNameSafe(Target)))
 	{
 		return nullptr;
 	}
