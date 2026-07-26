@@ -31,6 +31,37 @@ class APlayerState;
 /**
  *	Class description:
  *	
+ *	FAVVMBackendSessionPayload is a context struct that aggregate all information about players that participate in
+ *	the running GameSession.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMBackendSessionPayload
+{
+	GENERATED_BODY()
+
+	// @gdemers {FAVVMParty::UniqueId}
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 PartyId = INDEX_NONE;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TMap<FString/*{FAVVMPlayerConnection::UniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TMap<int32/*{FAVVMPlayerConnection::UniqueId}*/, int32/*{FAVVMPlayerProfile::UniqueId}*/> ProfileIds;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, int32/*{FAVVMPlayerPreset::UniqueId}*/> PresetIds;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, FString/*FAVVMPlayerProfile*/> ResolvedProfiles;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TMap<int32/*{FAVVMPlayerPreset::UniqueId}*/, FString/*FAVVMPlayerPreset*/> ResolvedPresets;
+};
+
+/**
+ *	Class description:
+ *	
  *	AAVVMGameSession is a server sided actor who tracking player connection to gameplay session. It may also exist
  *	on your client if the lobby is simulated (example: Offline lobby), and not within a shared level/hub.
  */
@@ -100,24 +131,8 @@ protected:
 	FGameplayTag GetActorPresetSlot(const int32 ProfileId,
 	                                const int32 PrivateItemId);
 
-	// @gdemers {FAVVMParty::UniqueId}
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 PartyId = INDEX_NONE;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FString/*{FAVVMPlayerConnection::UniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<int32/*{FAVVMPlayerConnection::UniqueId}*/, int32/*{FAVVMPlayerProfile::UniqueId}*/> ProfileIds;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, int32/*{FAVVMPlayerPreset::UniqueId}*/> PresetIds;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, FString/*FAVVMPlayerProfile*/> ResolvedProfiles;
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<int32/*{FAVVMPlayerPreset::UniqueId}*/, FString/*FAVVMPlayerPreset*/> ResolvedPresets;
+	FAVVMBackendSessionPayload SessionPayload = FAVVMBackendSessionPayload();
 
 private:
 	void AddPlayer(const FString& UniqueNetId);

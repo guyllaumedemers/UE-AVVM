@@ -126,11 +126,11 @@ int32 AAVVMGameSession::GetPlayerConnectionId(const APlayerState* PlayerState) c
 {
 	const FString UniqueNetId = UAVVMOnlineUtils::GetUniqueNetId(PlayerState);
 
-	const bool bDoesContains = PlayerConnectionIds.Contains(UniqueNetId);
+	const bool bDoesContains = SessionPayload.PlayerConnectionIds.Contains(UniqueNetId);
 	if (ensureAlwaysMsgf(bDoesContains,
 	                     TEXT("Entry missing in collection.")))
 	{
-		return PlayerConnectionIds[UniqueNetId];
+		return SessionPayload.PlayerConnectionIds[UniqueNetId];
 	}
 	else
 	{
@@ -143,11 +143,11 @@ int32 AAVVMGameSession::GetPlayerProfileId(const APlayerState* PlayerState) cons
 	const int32 PlayerConnectionId = GetPlayerConnectionId(PlayerState);
 	if (PlayerConnectionId != INDEX_NONE)
 	{
-		const bool bDoesContains = ProfileIds.Contains(PlayerConnectionId);
+		const bool bDoesContains = SessionPayload.ProfileIds.Contains(PlayerConnectionId);
 		if (ensureAlwaysMsgf(bDoesContains,
 		                     TEXT("Entry missing in collection.")))
 		{
-			return ProfileIds[PlayerConnectionId];
+			return SessionPayload.ProfileIds[PlayerConnectionId];
 		}
 		else
 		{
@@ -165,11 +165,11 @@ int32 AAVVMGameSession::GetPlayerPresetId(const APlayerState* PlayerState) const
 	const int32 PlayerProfileId = GetPlayerProfileId(PlayerState);
 	if (PlayerProfileId != INDEX_NONE)
 	{
-		const bool bDoesContains = PresetIds.Contains(PlayerProfileId);
+		const bool bDoesContains = SessionPayload.PresetIds.Contains(PlayerProfileId);
 		if (ensureAlwaysMsgf(bDoesContains,
 		                     TEXT("Entry missing in collection.")))
 		{
-			return PresetIds[PlayerProfileId];
+			return SessionPayload.PresetIds[PlayerProfileId];
 		}
 		else
 		{
@@ -191,19 +191,19 @@ TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) cons
 		return TArray<int32>{};
 	}
 
-	const bool bDoesContains = PresetIds.Contains(ProfileId);
+	const bool bDoesContains = SessionPayload.PresetIds.Contains(ProfileId);
 	if (bDoesContains)
 	{
-		const int32 PresetId = PresetIds[ProfileId];
+		const int32 PresetId = SessionPayload.PresetIds[ProfileId];
 
-		const bool bHasResolvedPreset = ResolvedPresets.Contains(PresetId);
+		const bool bHasResolvedPreset = SessionPayload.ResolvedPresets.Contains(PresetId);
 		if (!ensureAlwaysMsgf(bHasResolvedPreset,
 		                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
 		{
 			return TArray<int32>{};
 		}
 
-		const FString PresetPayload = ResolvedPresets[PresetId];
+		const FString PresetPayload = SessionPayload.ResolvedPresets[PresetId];
 
 		FAVVMPlayerPreset OutPlayerPreset;
 		JsonParser->FromString(PresetPayload, OutPlayerPreset);
@@ -228,14 +228,14 @@ TArray<int32> AAVVMGameSession::GetPlayerInventoryItems(const int32 ProfileId) c
 		return TArray<int32>{};
 	}
 
-	const bool bHasResolvedProfile = ResolvedProfiles.Contains(ProfileId);
+	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
 	if (!ensureAlwaysMsgf(bHasResolvedProfile,
 	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
 	{
 		return TArray<int32>{};
 	}
 
-	const FString ProfilePayload = ResolvedProfiles[ProfileId];
+	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
 
 	FAVVMPlayerProfile OutPlayerProfile;
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
@@ -260,7 +260,7 @@ FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,
 		return FString();
 	}
 
-	const bool bHasResolvedProfile = ResolvedProfiles.Contains(ProfileId);
+	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
 	if (!ensureAlwaysMsgf(bHasResolvedProfile,
 	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
 	{
@@ -269,7 +269,7 @@ FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,
 
 	FAVVMPlayerProfile OutOldProfile;
 
-	FString& OldProfile = ResolvedProfiles[ProfileId];
+	FString& OldProfile = SessionPayload.ResolvedProfiles[ProfileId];
 	JsonParser->FromString(OldProfile, OutOldProfile);
 
 	// @gdemers dirty profile with new data.
@@ -289,26 +289,26 @@ FGameplayTag AAVVMGameSession::GetPlayerPresetSlot(const int32 ProfileId,
 		return FGameplayTag::EmptyTag;
 	}
 
-	const bool bHasResolvedProfile = ResolvedProfiles.Contains(ProfileId);
+	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
 	if (!ensureAlwaysMsgf(bHasResolvedProfile,
 	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
 	{
 		return FGameplayTag::EmptyTag;
 	}
 
-	const FString ProfilePayload = ResolvedProfiles[ProfileId];
+	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
 
 	FAVVMPlayerProfile OutPlayerProfile;
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
-	const bool bHasResolvedPreset = ResolvedPresets.Contains(OutPlayerProfile.EquippedPresetId);
+	const bool bHasResolvedPreset = SessionPayload.ResolvedPresets.Contains(OutPlayerProfile.EquippedPresetId);
 	if (!ensureAlwaysMsgf(bHasResolvedPreset,
 	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
 	{
 		return FGameplayTag::EmptyTag;
 	}
 
-	const FString PresetPayload = ResolvedPresets[OutPlayerProfile.EquippedPresetId];
+	const FString PresetPayload = SessionPayload.ResolvedPresets[OutPlayerProfile.EquippedPresetId];
 
 	FAVVMPlayerPreset OutPlayerPreset;
 	JsonParser->FromString(PresetPayload, OutPlayerPreset);
@@ -327,18 +327,18 @@ FGameplayTag AAVVMGameSession::GetActorPresetSlot(const int32 ProfileId,
 
 void AAVVMGameSession::AddPlayer(const FString& UniqueNetId)
 {
-	int32& OutPlayerConnectionId = PlayerConnectionIds.FindOrAdd(UniqueNetId);
+	int32& OutPlayerConnectionId = SessionPayload.PlayerConnectionIds.FindOrAdd(UniqueNetId);
 	OutPlayerConnectionId = ResolveNewPlayerConnection(UniqueNetId);
 }
 
 void AAVVMGameSession::RemovePlayer(const FString& UniqueNetId)
 {
-	const bool bDoesContains = PlayerConnectionIds.Contains(UniqueNetId);
+	const bool bDoesContains = SessionPayload.PlayerConnectionIds.Contains(UniqueNetId);
 	if (bDoesContains)
 	{
-		const int32 PlayerConnectionId = PlayerConnectionIds[UniqueNetId];
+		const int32 PlayerConnectionId = SessionPayload.PlayerConnectionIds[UniqueNetId];
 		CleanupOldPlayerConnection(PlayerConnectionId);
-		PlayerConnectionIds.Remove(UniqueNetId);
+		SessionPayload.PlayerConnectionIds.Remove(UniqueNetId);
 	}
 }
 
@@ -351,34 +351,34 @@ int32 AAVVMGameSession::ResolveNewPlayerConnection(const FString& UniqueNetId)
 
 void AAVVMGameSession::CleanupOldPlayerConnection(const int32 PlayerConnectionId)
 {
-	const bool bHasProfile = ProfileIds.Contains(PlayerConnectionId);
+	const bool bHasProfile = SessionPayload.ProfileIds.Contains(PlayerConnectionId);
 	if (!bHasProfile)
 	{
 		return;
 	}
 
-	const int32 ProfileId = ProfileIds[PlayerConnectionId];
+	const int32 ProfileId = SessionPayload.ProfileIds[PlayerConnectionId];
 	if (!ensureAlwaysMsgf(ProfileId != INDEX_NONE,
 	                      TEXT("Cannot remove the requested Id from the collection. Missing entry.")))
 	{
 		return;
 	}
 
-	const bool bHasPreset = PresetIds.Contains(ProfileId);
+	const bool bHasPreset = SessionPayload.PresetIds.Contains(ProfileId);
 	if (!bHasPreset)
 	{
 		return;
 	}
 
-	const int32 PresetId = PresetIds[ProfileId];
+	const int32 PresetId = SessionPayload.PresetIds[ProfileId];
 	if (!ensureAlwaysMsgf(PresetId != INDEX_NONE,
 	                      TEXT("Cannot remove the requested Id from the collection. Missing entry.")))
 	{
 		return;
 	}
 
-	ProfileIds.Remove(PlayerConnectionId);
-	PresetIds.Remove(ProfileId);
-	ResolvedProfiles.Remove(ProfileId);
-	ResolvedPresets.Remove(PresetId);
+	SessionPayload.ProfileIds.Remove(PlayerConnectionId);
+	SessionPayload.PresetIds.Remove(ProfileId);
+	SessionPayload.ResolvedProfiles.Remove(ProfileId);
+	SessionPayload.ResolvedPresets.Remove(PresetId);
 }
