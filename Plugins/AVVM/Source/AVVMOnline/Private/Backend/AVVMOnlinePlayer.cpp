@@ -150,5 +150,5 @@ bool FAVVMPlayerConnection::operator!=(const FAVVMPlayerConnection& Rhs) const
 bool FAVVMHostConfiguration::operator==(const FAVVMHostConfiguration& Rhs) const
 {
 	return (GameMode.Equals(Rhs.GameMode))
-			&& (Options.Equals(Rhs.Options));
+			&& (GameModeAdditiveOptions.Equals(Rhs.GameModeAdditiveOptions));
 }

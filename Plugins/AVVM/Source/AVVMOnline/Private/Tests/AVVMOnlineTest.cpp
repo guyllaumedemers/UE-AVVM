@@ -246,7 +246,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		FAVVMHostConfiguration A;
 		A.UniqueId = FMath::Rand32();
 		A.GameMode = TEXT("MyGameMode");
-		A.Options = TEXT("OneShotKill");
+		A.GameModeAdditiveOptions = TEXT("OneShotKill");
 		Parser->ToString(A, OutPayload);
 
 		FAVVMHostConfiguration B;

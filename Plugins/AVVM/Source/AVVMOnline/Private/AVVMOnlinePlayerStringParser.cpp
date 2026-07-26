@@ -751,7 +751,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 	FAVVMHostConfiguration NewHostConfiguration;
 	NewHostConfiguration.UniqueId = JsonData->GetIntegerField(TEXT("UniqueId"));
 	NewHostConfiguration.GameMode = JsonData->GetStringField(TEXT("GameMode"));
-	NewHostConfiguration.Options = JsonData->GetStringField(TEXT("Options"));
+	NewHostConfiguration.GameModeAdditiveOptions = JsonData->GetStringField(TEXT("GameModeAdditiveOptions"));
 
 	OutHostConfiguration = NewHostConfiguration;
 }
@@ -762,7 +762,7 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMHostConfiguration& NewHo
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewHostConfiguration.UniqueId);
 	JsonData->SetStringField(TEXT("GameMode"), NewHostConfiguration.GameMode);
-	JsonData->SetStringField(TEXT("Options"), NewHostConfiguration.Options);
+	JsonData->SetStringField(TEXT("GameModeAdditiveOptions"), NewHostConfiguration.GameModeAdditiveOptions);
 
 	FString JsonOutput;
 

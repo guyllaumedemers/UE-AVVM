@@ -386,5 +386,5 @@ struct AVVMONLINE_API FAVVMHostConfiguration
 
 	// @gdemers may define complex properties tied to the gameplay experience to be run.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Options = FString();
+	FString GameModeAdditiveOptions = FString();
 };
