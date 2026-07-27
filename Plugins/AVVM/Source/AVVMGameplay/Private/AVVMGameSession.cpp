@@ -346,7 +346,9 @@ int32 AAVVMGameSession::ResolveNewPlayerConnection(const FString& UniqueNetId)
 {
 	// @gdemers TODO make backend request that return a player connection id based on
 	// the available FUniqueNetId.
-	return INDEX_NONE;
+	// @gdemers truncated value, will def cause problem eventually! temp solution for testing in PIE.
+	const int32 TypeHash = GetTypeHash(UniqueNetId);
+	return TypeHash;
 }
 
 void AAVVMGameSession::CleanupOldPlayerConnection(const int32 PlayerConnectionId)
