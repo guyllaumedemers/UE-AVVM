@@ -42,5 +42,16 @@ public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
 
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.ONline.MakePlayerProfile")
+	void MakePlayerProfile(const int32 PlayerIndex = 0);
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.ONline.MakePlayerPreset")
+	void MakePlayerPreset(const int32 PlayerIndex = 0);
+
 	virtual void Draw() override;
+
+protected:
+	void GetPayloads(TArray<FString>& OutProfiles, TArray<FString>& OutPresets) const;
+	TStringView<char> GetProfiles(const TArray<FString>& Profiles) const;
+	TStringView<char> GetPresets(const TArray<FString>& Presets) const;
 };

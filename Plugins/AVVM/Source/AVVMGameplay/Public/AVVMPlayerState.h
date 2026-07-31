@@ -136,10 +136,30 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void Client_OnSimulatedClientNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized,
 	                                          AAVVMPlayerState* SimulatedPlayerState);
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
+
+private:
+#if !UE_BUILD_SHIPPING
+	void SetClientSidedProfilePayload(const FString& Payload);
+	void SetClientSidedPresetPayload(const FString& Payload);
+#endif
+
+	// @gdemers runtime representation of a player backend profile. AVVMGameSession hold the source of truth
+	// but isnt accessible on Clients due to only being instanced on server.
+	// This should ONLY being used to display runtime representation on Client for TOOLING purposes.
+	// If runtime updates are required, make sure to execute from AVVMGameSession.
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(AllowPrivateAccess="true"))
+	FString ClientSidedPlayerProfilePayload = FString{};
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(AllowPrivateAccess="true"))
+	FString ClientSidedPlayerPresetPayload = FString{};
+
+	friend class AAVVMGameSession;
+	// @gdemers friending cross dll works due to being a fwd declaration.
+	friend class UAVVMOnlineCheatExtension;
 };

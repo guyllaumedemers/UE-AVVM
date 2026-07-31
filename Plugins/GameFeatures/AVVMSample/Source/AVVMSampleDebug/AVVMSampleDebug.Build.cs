@@ -57,6 +57,7 @@ public class AVVMSampleDebug : ModuleRules
 			{
 				"AVVM",
 				"AVVMGameplay",
+				"AVVMOnline",
 				"Core",
 				"CoreUObject",
 				"DataRegistry",

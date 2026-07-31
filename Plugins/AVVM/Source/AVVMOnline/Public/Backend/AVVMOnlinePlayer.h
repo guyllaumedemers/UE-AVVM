@@ -45,10 +45,10 @@ struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 	int32 UniqueId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Username = FString();
+	FString Username = {};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Password = FString();
+	FString Password = {};
 };
 
 /*
@@ -73,7 +73,7 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 	int32 LoginId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Gamertag = FString();
+	FString Gamertag = {};
 
 	// @gdemers {FAVVMPlayerWallet.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -81,12 +81,12 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 
 	// @gdemers {FAVVMPlayerProfile.UniqueId} keep id reference for all owned profiles.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> ProfileIds;
+	TArray<int32> ProfileIds{};
 
 	// @gdemers {FAVVMPlayerPreset.UniqueId} may refer to a complex system that captures details about the playable character builds.
 	// Id referral allows preset sharing across profiles.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> PresetIds;
+	TArray<int32> PresetIds{};
 };
 
 /*
@@ -108,7 +108,7 @@ struct AVVMONLINE_API FAVVMPlayerWallet
 
 	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> IrlMoneys;
+	TArray<FString> IrlMoneys{};
 };
 
 /*
@@ -126,7 +126,7 @@ struct AVVMONLINE_API FAVVMCurrency
 
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString CurrencyId = FString();
+	FString CurrencyId = {};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 TotalAmount = INDEX_NONE;
@@ -154,27 +154,27 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 
 	// @gdemers may refer to a unique name tied to your playable character.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ProfileId = FString();
+	FString ProfileId = {};
 
 	// @gdemers Tightly packed Bitmask. Define information about an Item using bits translation. See AVVMOnlineInventory.h
 	// to inspect bits encoding scheme.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> InventoryIds;
-	
+	TArray<int32> InventoryIds{};
+
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> SkinIds;
-	
+	TArray<int32> SkinIds{};
+
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> CharmsIds;
-	
+	TArray<int32> CharmsIds{};
+
 	// @gdemers Tightly packed Bitmask. Define information about an Item using bits translation. See AVVMOnlineSkillTree.h
 	// to inspect bits encoding scheme.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> SkillIds;
+	TArray<int32> SkillIds{};
 
 	// @gdemers {FAVVMPlayerChallenge.UniqueId} store shared challenges by id that are active for this profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> ChallengeIds;
+	TArray<int32> ChallengeIds{};
 
 	// @gdemers currently equipped Loadout {FAVVMPlayerPreset.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -203,11 +203,11 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 
 	// @gdemers may refer to a unique name tied to your profile preset.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PresetId = FString();
+	FString PresetId = {};
 
 	// @gdemers aggregate a subset of {FAVVMPlayerProfile::InventoryIds}.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<FGameplayTag/*slot tag*/, int32> EquippedItems;
+	TMap<FGameplayTag/*slot tag*/, int32> EquippedItems{};
 };
 
 /**
@@ -234,7 +234,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	// Note : Live Services may have an actual POD that defines the properties from an excel sheet or something instead
 	// of RegistryId.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ResourceId = FString();
+	FString ResourceId = {};
 };
 
 /**
@@ -260,7 +260,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 	// of RegistryId.
 	// Progression tracking should be handled separately.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ChallengeId = FString();
+	FString ChallengeId = {};
 };
 
 /**
@@ -311,7 +311,7 @@ struct AVVMONLINE_API FAVVMParty
 
 	// @gdemers may represent a party name.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PartyId = FString();
+	FString PartyId = {};
 
 	// @gdemers NA, China, Russia, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -327,7 +327,7 @@ struct AVVMONLINE_API FAVVMParty
 
 	// @gdemers {FAVVMPlayerConnection.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> PlayerConnectionIds;
+	TArray<int32> PlayerConnectionIds{};
 };
 
 /**
@@ -345,12 +345,13 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 	bool operator!=(const FAVVMPlayerConnection& Rhs) const;
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
+	// Could be GetTypeHash(UniqueNetId)
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString UniqueNetId = FString();
+	FString UniqueNetId = {};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
@@ -378,9 +379,9 @@ struct AVVMONLINE_API FAVVMHostConfiguration
 
 	// @gdemers define the experience the players of a party will go through.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString GameMode = FString();
+	FString GameMode = {};
 
 	// @gdemers may define complex properties tied to the gameplay experience to be run.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString GameModeAdditiveOptions = FString();
+	FString GameModeAdditiveOptions = {};
 };

@@ -24,6 +24,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"
 #include "Net/AVVMNetSynchronizationManager.h"
+#include "Net/UnrealNetwork.h"
 
 FAVVMPlayerStatePayload::FAVVMPlayerStatePayload(const APlayerState* NewPlayerState,
                                                  const bool bNewAddOrRemove)
@@ -49,6 +50,12 @@ AAVVMPlayerState::AAVVMPlayerState(const FObjectInitializer& ObjectInitializer)
 void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	// @gdemers IMPORTANT : Push model updates will be stripped out of Shipping build.
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAVVMPlayerState, ClientSidedPlayerProfilePayload, Params);
 }
 
 void AAVVMPlayerState::BeginPlay()
@@ -227,6 +234,20 @@ void AAVVMPlayerState::HandleSimulatedPlayerBackfilling()
 		LocalPlayerState->Server_OnPlayerBackfillingReceived(this);
 	}
 }
+
+#if !UE_BUILD_SHIPPING
+void AAVVMPlayerState::SetClientSidedProfilePayload(const FString& Payload)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(AAVVMPlayerState, ClientSidedPlayerProfilePayload, this);
+	ClientSidedPlayerProfilePayload = Payload;
+}
+
+void AAVVMPlayerState::SetClientSidedPresetPayload(const FString& Payload)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(AAVVMPlayerState, ClientSidedPlayerPresetPayload, this);
+	ClientSidedPlayerPresetPayload = Payload;
+}
+#endif
 
 void AAVVMPlayerState::Server_OnPlayerBackfillingReceived_Implementation(AAVVMPlayerState* SimulatedPlayerState)
 {

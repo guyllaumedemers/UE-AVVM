@@ -26,6 +26,8 @@
 
 #include "AVVMGameSession.generated.h"
 
+struct FAVVMPlayerPreset;
+struct FAVVMPlayerProfile;
 class APlayerState;
 
 /**
@@ -44,7 +46,7 @@ struct AVVMGAMEPLAY_API FAVVMBackendSessionPayload
 	int32 PartyId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<FString/*{FAVVMPlayerConnection::UniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds;
+	TMap<FString/*{FUniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TMap<int32/*{FAVVMPlayerConnection::UniqueId}*/, int32/*{FAVVMPlayerProfile::UniqueId}*/> ProfileIds;
@@ -79,8 +81,18 @@ public:
 	                                          const APlayerState* PlayerState);
 
 	UFUNCTION(BlueprintCallable)
+	static void Static_MakePlayerProfileId(const UObject* WorldContextObject,
+	                                       const APlayerState* PlayerState,
+	                                       const FAVVMPlayerProfile& NewPlayerProfile);
+
+	UFUNCTION(BlueprintCallable)
 	static int32 Static_GetPlayerProfileId(const UObject* WorldContextObject,
 	                                       const APlayerState* PlayerState);
+
+	UFUNCTION(BlueprintCallable)
+	static void Static_MakePlayerPresetId(const UObject* WorldContextObject,
+	                                      const APlayerState* PlayerState,
+	                                      const FAVVMPlayerPreset& NewPlayerPreset);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 Static_GetPlayerPresetId(const UObject* WorldContextObject,
@@ -122,14 +134,11 @@ protected:
 	TArray<int32> GetPlayerInventoryItems(const int32 ProfileId) const;
 	TArray<int32> GetActorInventoryItems(const int32 ProfileId) const;
 
-	FString ModifyPlayerProfileInventory(const int32 ProfileId,
-	                                     const TArray<int32>& NewItems);
-
-	FGameplayTag GetPlayerPresetSlot(const int32 ProfileId,
-	                                 const int32 PrivateItemId);
-
-	FGameplayTag GetActorPresetSlot(const int32 ProfileId,
-	                                const int32 PrivateItemId);
+	FString ModifyPlayerProfileInventory(const int32 ProfileId, const TArray<int32>& NewItems);
+	FGameplayTag GetPlayerPresetSlot(const int32 ProfileId, const int32 PrivateItemId) const;
+	FGameplayTag GetActorPresetSlot(const int32 ProfileId, const int32 PrivateItemId) const;
+	void MakePlayerProfileId(const APlayerState* PlayerState, const FAVVMPlayerProfile& NewPlayerProfile);
+	void MakePlayerPresetId(const APlayerState* PlayerState, const FAVVMPlayerPreset& NewPlayerPreset);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FAVVMBackendSessionPayload SessionPayload = FAVVMBackendSessionPayload();

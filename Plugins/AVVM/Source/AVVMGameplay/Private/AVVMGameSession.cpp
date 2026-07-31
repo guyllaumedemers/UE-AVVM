@@ -20,6 +20,7 @@
 #include "AVVMGameSession.h"
 
 #include "AVVMOnlineUtils.h"
+#include "AVVMPlayerState.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -32,11 +33,33 @@ int32 AAVVMGameSession::Static_GetPlayerConnectionId(const UObject* WorldContext
 	return IsValid(GameSession) ? GameSession->GetPlayerConnectionId(PlayerState) : INDEX_NONE;
 }
 
+void AAVVMGameSession::Static_MakePlayerProfileId(const UObject* WorldContextObject,
+                                                  const APlayerState* PlayerState,
+                                                  const FAVVMPlayerProfile& NewPlayerProfile)
+{
+	AAVVMGameSession* GameSession = Get(WorldContextObject);
+	if (IsValid(GameSession))
+	{
+		GameSession->MakePlayerProfileId(PlayerState, NewPlayerProfile);
+	}
+}
+
 int32 AAVVMGameSession::Static_GetPlayerProfileId(const UObject* WorldContextObject,
                                                   const APlayerState* PlayerState)
 {
 	const AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetPlayerProfileId(PlayerState) : INDEX_NONE;
+}
+
+void AAVVMGameSession::Static_MakePlayerPresetId(const UObject* WorldContextObject,
+                                                 const APlayerState* PlayerState,
+                                                 const FAVVMPlayerPreset& NewPlayerPreset)
+{
+	AAVVMGameSession* GameSession = Get(WorldContextObject);
+	if (IsValid(GameSession))
+	{
+		GameSession->MakePlayerPresetId(PlayerState, NewPlayerPreset);
+	}
 }
 
 int32 AAVVMGameSession::Static_GetPlayerPresetId(const UObject* WorldContextObject,
@@ -280,7 +303,7 @@ FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,
 }
 
 FGameplayTag AAVVMGameSession::GetPlayerPresetSlot(const int32 ProfileId,
-                                                   const int32 PrivateItemId)
+                                                   const int32 PrivateItemId) const
 {
 	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
 	if (!ensureAlwaysMsgf(IsValid(JsonParser),
@@ -318,11 +341,77 @@ FGameplayTag AAVVMGameSession::GetPlayerPresetSlot(const int32 ProfileId,
 }
 
 FGameplayTag AAVVMGameSession::GetActorPresetSlot(const int32 ProfileId,
-                                                  const int32 PrivateItemId)
+                                                  const int32 PrivateItemId) const
 {
 	// TODO @gdemers access backend representation of our actor, and their inventory
 	// this may apply to NPC types, Shops, Boxes, etc...
 	return FGameplayTag::EmptyTag;
+}
+
+void AAVVMGameSession::MakePlayerProfileId(const APlayerState* PlayerState,
+                                           const FAVVMPlayerProfile& NewPlayerProfile)
+{
+	const int32 PlayerConnectionId = GetPlayerConnectionId(PlayerState);
+	if (!ensureAlwaysMsgf(PlayerConnectionId != INDEX_NONE,
+	                      TEXT("PlayerState UniqueNetId didnt resolve to a valid PlayerConnectionId.")))
+	{
+		return;
+	}
+
+	int32& OutProfileId = SessionPayload.ProfileIds.FindOrAdd(PlayerConnectionId);
+	OutProfileId = NewPlayerProfile.UniqueId;
+
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return;
+	}
+
+	FString& OutJsonPayload = SessionPayload.ResolvedProfiles.FindOrAdd(OutProfileId);
+	JsonParser->ToString(NewPlayerProfile, OutJsonPayload);
+
+#if !UE_BUILD_SHIPPING
+	// @gdemers violating constness on purpose. this workaround is for dev tooling ONLY.
+	auto* Target = Cast<AAVVMPlayerState>(const_cast<APlayerState*>(PlayerState));
+	if (IsValid(Target))
+	{
+		Target->SetClientSidedProfilePayload(OutJsonPayload);
+	}
+#endif
+}
+
+void AAVVMGameSession::MakePlayerPresetId(const APlayerState* PlayerState,
+                                          const FAVVMPlayerPreset& NewPlayerPreset)
+{
+	const int32 PlayerProfileId = GetPlayerProfileId(PlayerState);
+	if (!ensureAlwaysMsgf(PlayerProfileId != INDEX_NONE,
+	                      TEXT("PlayerState UniqueNetId didnt resolve to a valid PlayerProfileId.")))
+	{
+		return;
+	}
+
+	int32& OutPresetId = SessionPayload.PresetIds.FindOrAdd(PlayerProfileId);
+	OutPresetId = NewPlayerPreset.UniqueId;
+
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return;
+	}
+
+	FString& OutJsonPayload = SessionPayload.ResolvedPresets.FindOrAdd(OutPresetId);
+	JsonParser->ToString(NewPlayerPreset, OutJsonPayload);
+
+#if !UE_BUILD_SHIPPING
+	// @gdemers violating constness on purpose. this workaround is for dev tooling ONLY.
+	auto* Target = Cast<AAVVMPlayerState>(const_cast<APlayerState*>(PlayerState));
+	if (IsValid(Target))
+	{
+		Target->SetClientSidedPresetPayload(OutJsonPayload);
+	}
+#endif
 }
 
 void AAVVMGameSession::AddPlayer(const FString& UniqueNetId)
