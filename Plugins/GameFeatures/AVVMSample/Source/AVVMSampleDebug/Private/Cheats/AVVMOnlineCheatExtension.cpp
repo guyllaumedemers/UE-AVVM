@@ -124,12 +124,12 @@ void UAVVMOnlineCheatExtension::Draw()
 		{
 		}
 
-		static int CurrItem = 0;
+		static int CurrPresetId = 0;
 		const TStringView<char> Presets = GetPresets(OutPresets);
 
-		// if (ImGui::ListBox("Game Session", &CurrItem, ANSI_ListOptions.Get()))
-		// {
-		// }
+		if (ImGui::Combo("Profile Presets", &CurrPresetId, Presets.GetData()))
+		{
+		}
 
 		ImGui::EndGroup();
 		ImGui::EndGroup();
