@@ -28,6 +28,17 @@ public class AVVMGameplay : ModuleRules
 		bUseUnity = false;
 		bWarningsAsErrors = true;
 
+		if (Target.bBuildDeveloperTools)
+		{
+			// @gdemers We may want to disable this whenever a project
+			// has their own backend setup.
+			PrivateDefinitions.AddRange(
+				new string[]
+				{
+					"WITH_SIMULATED_BACKEND"
+				});
+		}
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{

@@ -55,7 +55,7 @@ void UAVVMOnlineCheatExtension::RemovedFromCheatManager_Implementation()
 
 void UAVVMOnlineCheatExtension::MakePlayerProfile(const int32 PlayerIndex)
 {
-	// @gdemers TODO Add same Inventory, and other requirements to all new profile entries. 
+	// @gdemers TODO Add same Inventory, and other requirements to all new profile entries.
 	FAVVMPlayerProfile NewProfile
 	{
 			FMath::Rand()/*rand unique id to globally identify this Profile*/,

@@ -122,10 +122,24 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 
 	// @gdemers we may not yet have a APlayerState bound to our Server PC but the FUniqueNetId is valid here.
 	FUniqueNetIdPtr UniqueNetIdPtr = UniqueId.GetV1();
-	if (UniqueNetIdPtr.IsValid())
+	if (!ensureAlwaysMsgf(UniqueNetIdPtr.IsValid(), TEXT("Invalid UniqueNetId")))
 	{
-		AddPlayer(UniqueNetIdPtr->ToString());
+		return;
 	}
+	
+	const FString UniqueNetIdString = UniqueNetIdPtr->ToString();
+	AddPlayer(UniqueNetIdString);
+
+#if WITH_SIMULATED_BACKEND
+	FAVVMPlayerProfile NewProfile
+	{
+			FMath::Rand()/*rand unique id to globally identify this Profile*/,
+			UniqueNetIdString
+	};
+
+	const APlayerState* Player = IsValid(NewPlayer) ? NewPlayer->PlayerState : nullptr;
+	MakePlayerProfileId(Player, NewProfile);
+#endif
 }
 
 void AAVVMGameSession::UnregisterPlayer(const APlayerController* ExitingPlayer)
