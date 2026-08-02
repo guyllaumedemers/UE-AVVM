@@ -60,7 +60,6 @@ TArray<int32> UInventoryStubDataProvider::MakePropertyStubData() const
 	}
 
 	TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
-	TMap<FGameplayTag, int32> Loadout;
 	TArray<int32> Items;
 
 	// @gdemers generate PrivateItemIds for all entries defined for a given Provider

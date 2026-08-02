@@ -60,6 +60,10 @@
       "Enabled": true
     },
     {
+      "Name": "CosmeticSample",
+      "Enabled": true
+    },
+    {
       "Name": "DamageSample",
       "Enabled": true
     },
