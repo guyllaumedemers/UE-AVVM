@@ -19,8 +19,10 @@
 //SOFTWARE.
 #include "AVVMGameSession.h"
 
+#include "AVVMOnlineSettings.h"
 #include "AVVMOnlineUtils.h"
 #include "AVVMPlayerState.h"
+#include "NativeGameplayTags.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
@@ -134,7 +136,11 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 	FAVVMPlayerProfile NewProfile
 	{
 			FMath::Rand()/*rand unique id to globally identify this Profile*/,
-			UniqueNetIdString
+			UniqueNetIdString,
+			UAVVMOnlineSettings::GetPropertyStubData(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY),
+			UAVVMOnlineSettings::GetPropertyStubData(TAG_AVVMONLINE_BACKEND_STUB_SKINS),
+			UAVVMOnlineSettings::GetPropertyStubData(TAG_AVVMONLINE_BACKEND_STUB_CHARMS),
+			UAVVMOnlineSettings::GetPropertyStubData(TAG_AVVMONLINE_BACKEND_STUB_SKILLS)
 	};
 
 	const APlayerState* Player = IsValid(NewPlayer) ? NewPlayer->PlayerState : nullptr;

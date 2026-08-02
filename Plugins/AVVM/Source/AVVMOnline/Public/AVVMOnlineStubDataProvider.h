@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,36 +17,26 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMOnlineSettings.h"
+#pragma once
 
-#include "AVVMOnlineStubDataProvider.h"
+#include "CoreMinimal.h"
 
-UAVVMOnlineSettings::UAVVMOnlineSettings()
+#include "UObject/Object.h"
+
+#include "AVVMOnlineStubDataProvider.generated.h"
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMOnlineStubDataProvider is an impl UObject that return stub information about a property
+ *	specific to {FAVVMPlayerProfile}, and initializing cached information within AVVMGameSession to simulate
+ *	running a backend without the required hooks in place.
+ */
+UCLASS(BlueprintType, Blueprintable)
+class AVVMONLINE_API UAVVMOnlineStubDataProvider : public UObject
 {
-	CategoryName = TEXT("Game");
-}
-
-TSubclassOf<UAVVMOnlinePlayerStringParser> UAVVMOnlineSettings::GetJsonParserClass_Player()
-{
-	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Player;
-}
-
-const TArray<int32> UAVVMOnlineSettings::GetPropertyStubData(const FGameplayTag& PropertyTag)
-{
-	const auto& StubProviders = GetDefault<UAVVMOnlineSettings>()->StubDataProviders;
-	if (!ensureAlwaysMsgf(StubProviders.Contains(PropertyTag),
-	                      TEXT("Invalid Provider")))
-	{
-		return TArray<int32>{};
-	}
-
-	UAVVMOnlineStubDataProvider* CDO = StubProviders[PropertyTag].GetDefaultObject();
-	if (!IsValid(CDO))
-	{
-		return TArray<int32>{};
-	}
-	else
-	{
-		return CDO->MakePropertyStubData();
-	}
-}
+	GENERATED_BODY()
+	
+public:
+	virtual TArray<int32> MakePropertyStubData() const PURE_VIRTUAL(MakePropertyStubData, return TArray<int32>{};);
+};

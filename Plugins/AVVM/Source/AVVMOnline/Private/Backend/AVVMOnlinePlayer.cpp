@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "Backend/AVVMOnlinePlayer.h"
 
+UE_DEFINE_GAMEPLAY_TAG(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY, TEXT("AVVMOnline.Backend.StubData.Inventory"));
+UE_DEFINE_GAMEPLAY_TAG(TAG_AVVMONLINE_BACKEND_STUB_SKINS, TEXT("AVVMOnline.Backend.StubData.Skins"));
+UE_DEFINE_GAMEPLAY_TAG(TAG_AVVMONLINE_BACKEND_STUB_CHARMS, TEXT("AVVMOnline.Backend.StubData.Charms"));
+UE_DEFINE_GAMEPLAY_TAG(TAG_AVVMONLINE_BACKEND_STUB_SKILLS, TEXT("AVVMOnline.Backend.StubData.Skills"));
+
 bool FAVVMPlayerLoginContext::operator==(const FAVVMPlayerLoginContext& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)

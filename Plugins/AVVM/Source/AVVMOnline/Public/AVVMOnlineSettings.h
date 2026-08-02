@@ -21,12 +21,14 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTags.h"
 #include "Engine/DeveloperSettings.h"
 #include "Templates/SubclassOf.h"
 
 #include "AVVMOnlineSettings.generated.h"
 
 class UAVVMOnlinePlayerStringParser;
+class UAVVMOnlineStubDataProvider;
 
 /**
 *	Class description:
@@ -44,7 +46,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVMOnline|Settings")
 	static TSubclassOf<UAVVMOnlinePlayerStringParser> GetJsonParserClass_Player();
 
+	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
+	static const TArray<int32> GetPropertyStubData(const FGameplayTag& PropertyTag);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSubclassOf<UAVVMOnlinePlayerStringParser> JsonParserClass_Player = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TMap<FGameplayTag, TSubclassOf<UAVVMOnlineStubDataProvider>> StubDataProviders;
 };

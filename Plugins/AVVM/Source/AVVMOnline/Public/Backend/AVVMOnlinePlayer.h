@@ -24,8 +24,16 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "NativeGameplayTags.h"
 
 #include "AVVMOnlinePlayer.generated.h"
+
+// @gdemers tags to map Tag to UObject impl returning collection of integer bitmask.
+// Used to inject stub data to external system, simulating backend hooks.
+AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY);
+AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_SKINS);
+AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_CHARMS);
+AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_SKILLS);
 
 /**
  *	Class description:
