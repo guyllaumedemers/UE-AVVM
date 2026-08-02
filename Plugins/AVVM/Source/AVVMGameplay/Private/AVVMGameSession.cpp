@@ -135,6 +135,8 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 	AddPlayer(UniqueNetIdString);
 
 #if WITH_SIMULATED_BACKEND
+	constexpr int32 PresetId = 0;
+
 	const FDataRegistryId ActorIdentifier = UAVVMGameplaySettings::GetStubDataProviderActorIdentifierId()/*AVVMCharacter unique id to globally identify this Profile*/;
 	FAVVMPlayerProfile NewProfile
 	{
@@ -143,11 +145,22 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKINS),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_CHARMS),
-			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKILLS)
+			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKILLS),
+			{},
+			PresetId
 	};
 
 	const APlayerState* Player = IsValid(NewPlayer) ? NewPlayer->PlayerState : nullptr;
 	MakePlayerProfileId(Player, NewProfile);
+
+	FAVVMPlayerPreset NewPreset
+	{
+			PresetId,
+			TEXT("StubPreset"),
+			{} // @gdemers TODO define how we can provide stub data for preset loadout 
+	};
+
+	MakePlayerPresetId(Player, NewPreset);
 #endif
 }
 
