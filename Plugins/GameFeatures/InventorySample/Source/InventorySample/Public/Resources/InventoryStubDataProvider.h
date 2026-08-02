@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,30 +21,22 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
+#include "AVVMOnlineStubDataProvider.h"
 
-#include "AVVMOnlineSettings.generated.h"
-
-class UAVVMOnlinePlayerStringParser;
+#include "InventoryStubDataProvider.generated.h"
 
 /**
-*	Class description:
- *
- *	UAVVMOnlineSettings is a DeveloperSetting for global variable that require access in this plugin.
+ *	Class description:
+ *	
+ *	UInventoryStubDataProvider is the impl UObject that handle returning a stub representation
+ *	of a {FAVVMPlayerProfile::InventoryIds}.
  */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMOnlineSettings"))
-class AVVMONLINE_API UAVVMOnlineSettings : public UDeveloperSettings
+UCLASS()
+class INVENTORYSAMPLE_API UInventoryStubDataProvider : public UAVVMOnlineStubDataProvider
 {
 	GENERATED_BODY()
-
+	
 public:
-	UAVVMOnlineSettings();
-
-	UFUNCTION(BlueprintCallable, Category="AVVMOnline|Settings")
-	static TSubclassOf<UAVVMOnlinePlayerStringParser> GetJsonParserClass_Player();
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TSubclassOf<UAVVMOnlinePlayerStringParser> JsonParserClass_Player = nullptr;
+	UInventoryStubDataProvider(const FObjectInitializer& ObjectInitializer);
+	virtual TArray<int32> MakePropertyStubData() const override;
 };

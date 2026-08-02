@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,34 +17,20 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Resources/SkillTreeStubDataProvider.h"
 
-#include "CoreMinimal.h"
+#include "Backend/AVVMOnlinePlayer.h"
 
-#include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
-
-#include "AVVMOnlineSettings.generated.h"
-
-class UAVVMOnlinePlayerStringParser;
-
-/**
-*	Class description:
- *
- *	UAVVMOnlineSettings is a DeveloperSetting for global variable that require access in this plugin.
- */
-UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UAVVMOnlineSettings"))
-class AVVMONLINE_API UAVVMOnlineSettings : public UDeveloperSettings
+USkillTreeStubDataProvider::USkillTreeStubDataProvider(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	GENERATED_BODY()
+	if (IsTemplate(RF_ClassDefaultObject))
+	{
+		UAVVMOnlineStubDataHelper::Static_RegisterPropertyProvider(TAG_AVVMONLINE_BACKEND_STUB_SKILLS, GetClass());
+	}
+}
 
-public:
-	UAVVMOnlineSettings();
-
-	UFUNCTION(BlueprintCallable, Category="AVVMOnline|Settings")
-	static TSubclassOf<UAVVMOnlinePlayerStringParser> GetJsonParserClass_Player();
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TSubclassOf<UAVVMOnlinePlayerStringParser> JsonParserClass_Player = nullptr;
-};
+TArray<int32> USkillTreeStubDataProvider::MakePropertyStubData() const
+{
+	return {2001};
+}

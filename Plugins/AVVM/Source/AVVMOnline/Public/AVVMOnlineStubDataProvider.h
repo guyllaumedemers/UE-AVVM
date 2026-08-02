@@ -21,7 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
+#include "Templates/SubclassOf.h"
 #include "UObject/Object.h"
+#include "UObject/StrongObjectPtr.h"
 
 #include "AVVMOnlineStubDataProvider.generated.h"
 
@@ -36,7 +39,30 @@ UCLASS(BlueprintType, Blueprintable)
 class AVVMONLINE_API UAVVMOnlineStubDataProvider : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual TArray<int32> MakePropertyStubData() const PURE_VIRTUAL(MakePropertyStubData, return TArray<int32>{};);
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMOnlineStubDataHelper is a Singleton Helper to allow registering Stub Data Provider across multiple Dlls.
+ */
+UCLASS()
+class AVVMONLINE_API UAVVMOnlineStubDataHelper : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	static void Static_RegisterPropertyProvider(const FGameplayTag& PropertyTag,
+	                                            const TSubclassOf<UAVVMOnlineStubDataProvider>& ProviderClass);
+	
+	static TArray<int32> Static_MakePropertyData(const FGameplayTag& PropertyTag);
+
+protected:
+	static UAVVMOnlineStubDataHelper* Get();
+
+	static TStrongObjectPtr<UAVVMOnlineStubDataHelper> gStubDataHelper;
+	TMap<FGameplayTag, TSubclassOf<UAVVMOnlineStubDataProvider>> StubDataProviders;
 };

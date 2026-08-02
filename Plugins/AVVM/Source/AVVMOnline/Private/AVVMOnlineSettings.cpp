@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "AVVMOnlineSettings.h"
 
-#include "AVVMOnlineStubDataProvider.h"
-
 UAVVMOnlineSettings::UAVVMOnlineSettings()
 {
 	CategoryName = TEXT("Game");
@@ -29,24 +27,4 @@ UAVVMOnlineSettings::UAVVMOnlineSettings()
 TSubclassOf<UAVVMOnlinePlayerStringParser> UAVVMOnlineSettings::GetJsonParserClass_Player()
 {
 	return GetDefault<UAVVMOnlineSettings>()->JsonParserClass_Player;
-}
-
-const TArray<int32> UAVVMOnlineSettings::GetPropertyStubData(const FGameplayTag& PropertyTag)
-{
-	const auto& StubProviders = GetDefault<UAVVMOnlineSettings>()->StubDataProviders;
-	if (!ensureAlwaysMsgf(StubProviders.Contains(PropertyTag),
-	                      TEXT("Invalid Provider")))
-	{
-		return TArray<int32>{};
-	}
-
-	UAVVMOnlineStubDataProvider* CDO = StubProviders[PropertyTag].GetDefaultObject();
-	if (!IsValid(CDO))
-	{
-		return TArray<int32>{};
-	}
-	else
-	{
-		return CDO->MakePropertyStubData();
-	}
 }
