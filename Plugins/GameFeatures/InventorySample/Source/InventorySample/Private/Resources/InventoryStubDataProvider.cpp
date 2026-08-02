@@ -19,7 +19,15 @@
 //SOFTWARE.
 #include "Resources/InventoryStubDataProvider.h"
 
+#include "AVVMGameplayUtils.h"
+#include "DataRegistrySubsystem.h"
+#include "InventorySettings.h"
+#include "InventoryUtils.h"
+#include "IPropertyTable.h"
+#include "ItemObject.h"
+#include "StorageHelper.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "Data/InventoryProviderTableRow.h"
 
 UInventoryStubDataProvider::UInventoryStubDataProvider(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -32,5 +40,53 @@ UInventoryStubDataProvider::UInventoryStubDataProvider(const FObjectInitializer&
 
 TArray<int32> UInventoryStubDataProvider::MakePropertyStubData() const
 {
-	return {1001};
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return TArray<int32>{};
+	}
+
+	const auto* Row = Subsystem->GetCachedItem<FInventoryProviderTableRow>(UInventorySettings::GetStubDataProviderInventoryId());
+	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->InventoryProviderActorIdentifierId);
+	if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
+	                      TEXT("Missing valid Id for Provider entry.")))
+	{
+		return TArray<int32>{};
+	}
+
+	TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
+	TMap<FGameplayTag, int32> Loadout;
+	TArray<int32> Items;
+
+	// @gdemers generate PrivateItemIds for all entries defined for a given Provider
+	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : Row->DefaultInventory)
+	{
+		if (ItemObjectClass.IsNull())
+		{
+			continue;
+		}
+
+		// TODO @gdemers Improve on this. I dont like that its synchronous.
+		const UClass* Class = ItemObjectClass.LoadSynchronous();
+		if (!IsValid(Class))
+		{
+			continue;
+		}
+
+		const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
+		const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, ProviderDefaultItemProperties);
+
+		ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
+		Items.Add(PrivateItemId);
+	}
+
+	// @gdemers all items are initialized. if our inventory provider definition was configured correctly,
+	// a valid storage object, or more are available for referencing on relevant items.
+	FStorageHelper::HandleStorageAssignment(ItemCDOs, Items);
+	return Items;
 }

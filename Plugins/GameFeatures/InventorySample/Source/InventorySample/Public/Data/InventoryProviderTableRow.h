@@ -86,6 +86,6 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanInventoryProviderEquipItems"))
 	TArray<FGameplayTag> DefaultSlotTags;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="999"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TMap<TSoftClassPtr<UItemObject>, FProviderDefaultItemProperties> DefaultInventory;
 };

@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMGameSession.h"
 
+#include "AVVMGameplaySettings.h"
+#include "AVVMGameplayUtils.h"
 #include "AVVMOnlineStubDataProvider.h"
 #include "AVVMOnlineUtils.h"
 #include "AVVMPlayerState.h"
@@ -133,9 +135,10 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 	AddPlayer(UniqueNetIdString);
 
 #if WITH_SIMULATED_BACKEND
+	const FDataRegistryId ActorIdentifier = UAVVMGameplaySettings::GetStubDataProviderActorIdentifierId()/*AVVMCharacter unique id to globally identify this Profile*/;
 	FAVVMPlayerProfile NewProfile
 	{
-			FMath::Rand()/*rand unique id to globally identify this Profile*/,
+			UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(ActorIdentifier),
 			UniqueNetIdString,
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKINS),

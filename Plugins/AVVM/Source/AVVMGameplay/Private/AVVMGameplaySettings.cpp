@@ -58,3 +58,8 @@ const FDataRegistryType& UAVVMGameplaySettings::GetGameModeAdditiveRegistryType(
 {
 	return GetDefault<UAVVMGameplaySettings>()->GameModeAdditiveRegistryType;
 }
+
+const FDataRegistryId& UAVVMGameplaySettings::GetStubDataProviderActorIdentifierId()
+{
+	return GetDefault<UAVVMGameplaySettings>()->StubDataProviderActorIdentifierId;
+}

@@ -33,7 +33,7 @@ class UAVVMSaveGame;
  *	
  *	UAVVMFileHelper is a singleton helper object that allow global access to content serialized to disk.
  */
-UCLASS()
+UCLASS(NotBlueprintType, NotBlueprintable)
 class AVVMTOOLKIT_API UAVVMFileHelper : public UObject
 {
 	GENERATED_BODY()

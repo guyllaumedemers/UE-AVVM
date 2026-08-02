@@ -119,3 +119,8 @@ const FGameplayTag& UInventorySettings::GetStorageCapacityTagById(const int32 St
 		return FGameplayTag::EmptyTag;
 	}
 }
+
+const FDataRegistryId& UInventorySettings::GetStubDataProviderInventoryId()
+{
+	return GetDefault<UInventorySettings>()->StubDataProviderInventoryId;
+}

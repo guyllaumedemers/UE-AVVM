@@ -35,7 +35,7 @@
  *	specific to {FAVVMPlayerProfile}, and initializing cached information within AVVMGameSession to simulate
  *	running a backend without the required hooks in place.
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, NotBlueprintable)
 class AVVMONLINE_API UAVVMOnlineStubDataProvider : public UObject
 {
 	GENERATED_BODY()
@@ -49,7 +49,7 @@ public:
  *	
  *	UAVVMOnlineStubDataHelper is a Singleton Helper to allow registering Stub Data Provider across multiple Dlls.
  */
-UCLASS()
+UCLASS(NotBlueprintType, NotBlueprintable)
 class AVVMONLINE_API UAVVMOnlineStubDataHelper : public UObject
 {
 	GENERATED_BODY()

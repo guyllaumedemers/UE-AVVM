@@ -35,7 +35,7 @@ UCLASS()
 class INVENTORYSAMPLE_API UInventoryStubDataProvider : public UAVVMOnlineStubDataProvider
 {
 	GENERATED_BODY()
-	
+
 public:
 	UInventoryStubDataProvider(const FObjectInitializer& ObjectInitializer);
 	virtual TArray<int32> MakePropertyStubData() const override;

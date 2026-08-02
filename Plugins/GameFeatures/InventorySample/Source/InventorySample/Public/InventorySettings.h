@@ -92,6 +92,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FGameplayTag& GetStorageCapacityTagById(const int32 StorageId);
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FDataRegistryId& GetStubDataProviderInventoryId();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ItemGroupRegistryType = NAME_None;
@@ -140,4 +143,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
 	FGameplayTagContainer BlockingTagsWhenFull = FGameplayTagContainer::EmptyContainer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryId StubDataProviderInventoryId = FDataRegistryId();
 };

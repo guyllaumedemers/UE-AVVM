@@ -62,9 +62,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVMGameplay|Settings")
 	static const FDataRegistryType& GetGameModeAdditiveRegistryType();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FDataRegistryId& GetStubDataProviderActorIdentifierId();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	bool bDoesCharacterResourceProviderUseStaticData = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryId StubDataProviderActorIdentifierId = FDataRegistryId();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
