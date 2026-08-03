@@ -119,6 +119,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		A.CharmsIds = {FMath::Rand32(), FMath::Rand32()};
 		A.SkillIds = {FMath::Rand32(), FMath::Rand32()};
 		A.ChallengeIds = {FMath::Rand32(), FMath::Rand32()};
+		A.ComplexDependencyLookup = {FMath::Rand32(), FMath::Rand32()};
 		A.EquippedPresetId = FMath::Rand32();
 		Parser->ToString(A, OutPayload);
 

@@ -260,6 +260,12 @@ void UAVVMOnlinePlayerStringParser::FromString(const FString& NewPayload,
 		NewPlayerProfile.ChallengeIds.Add(ChallengeId->AsNumber());
 	}
 
+	const TArray<TSharedPtr<FJsonValue>> ComplexDependencyLookup = JsonData->GetArrayField(TEXT("ComplexDependencyLookup"));
+	for (const auto& ComplexDependencyLookupEntry : ComplexDependencyLookup)
+	{
+		NewPlayerProfile.ComplexDependencyLookup.Add(ComplexDependencyLookupEntry->AsNumber());
+	}
+
 	OutPlayerProfile = NewPlayerProfile;
 }
 
@@ -296,6 +302,12 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfile& NewPlayer
 		ChallengeIds.Add(MakeShareable(new FJsonValueNumber(ChallengeId)));
 	}
 
+	TArray<TSharedPtr<FJsonValue>> ComplexDependencyLookup;
+	for (const int32 ComplexDependencyLookupEntry : NewPlayerProfile.ComplexDependencyLookup)
+	{
+		ComplexDependencyLookup.Add(MakeShareable(new FJsonValueNumber(ComplexDependencyLookupEntry)));
+	}
+
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 	JsonData->SetNumberField(TEXT("UniqueId"), NewPlayerProfile.UniqueId);
 	JsonData->SetStringField(TEXT("ProfileId"), NewPlayerProfile.ProfileId);
@@ -305,6 +317,7 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerProfile& NewPlayer
 	JsonData->SetArrayField(TEXT("SkillIds"), SkillIds);
 	JsonData->SetArrayField(TEXT("ChallengeIds"), ChallengeIds);
 	JsonData->SetNumberField(TEXT("EquippedPresetId"), NewPlayerProfile.EquippedPresetId);
+	JsonData->SetArrayField(TEXT("ComplexDependencyLookup"), ComplexDependencyLookup);
 
 	FString JsonOutput;
 

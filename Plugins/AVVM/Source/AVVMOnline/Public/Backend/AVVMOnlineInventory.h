@@ -63,10 +63,6 @@
 #define GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET (3000)
 #endif
 
-// @gdemers TODO we are missing attachment lookup for creating dependencies between two items. We can either :
-// A) create another collection type used to map this association within our FAVVMPlayerProfile
-// B) extend  our bit encoding to int64... which may be overkill.
-
 // @gdemers element lookup for supporting the socketing process
 // i.e we identify dependencies between an attachment and an owning item (which may have more than one instance)
 // IMPORTANT : other relationship are irrelevant, and shouldn't require tracking.

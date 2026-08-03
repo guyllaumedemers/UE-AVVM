@@ -187,6 +187,12 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	// @gdemers currently equipped Loadout {FAVVMPlayerPreset.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 EquippedPresetId = INDEX_NONE;
+
+	// @gdemers Define the association between an items referenced in {InventoryIds}, and possible attachments it may hold. {FAVVMPlayerPreset::EquippedItems} will require referencing
+	// of this property during initialization to resolve all attachments that are dependent on the equipped item. See AVVMOnlineInventory.h
+	// AVVMONLINE_USE_DEFAULT_INVENTORY_LOOKUP_ENCODING section for more details.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> ComplexDependencyLookup{};
 };
 
 /**

@@ -82,7 +82,8 @@ bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 			&& (CharmsIds == Rhs.CharmsIds)
 			&& (SkillIds == Rhs.SkillIds)
 			&& (ChallengeIds == Rhs.ChallengeIds)
-			&& (EquippedPresetId == Rhs.EquippedPresetId);
+			&& (EquippedPresetId == Rhs.EquippedPresetId)
+			&& (ComplexDependencyLookup == Rhs.ComplexDependencyLookup);
 }
 
 bool FAVVMPlayerProfile::operator!=(const FAVVMPlayerProfile& Rhs) const
