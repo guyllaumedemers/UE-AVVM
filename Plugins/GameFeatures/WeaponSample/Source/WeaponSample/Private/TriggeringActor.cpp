@@ -70,13 +70,14 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 
 AActor* FTriggeringSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
-	if (!IsValid(Target))
+	if (!IsValid(Target) || !Target->IsA<ACharacter>())
 	{
 		return nullptr;
 	}
-
-	auto* Pawn = Cast<ACharacter>(Target);
-	return IsValid(Pawn) ? Pawn : nullptr;
+	else
+	{
+		return Target;
+	}
 }
 
 ATriggeringActor::ATriggeringActor(const FObjectInitializer& ObjectInitializer)
