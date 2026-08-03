@@ -63,18 +63,24 @@
 #define GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET (3000)
 #endif
 
-// @gdemers element lookup for supporting the socketing process -- identify dependencies between an attachment and an owner (which may have more than one instance)
+// @gdemers TODO we are missing attachment lookup for creating dependencies between two items. We can either :
+// A) create another collection type used to map this association within our FAVVMPlayerProfile
+// B) extend  our bit encoding to int64... which may be overkill.
+
+// @gdemers element lookup for supporting the socketing process
+// i.e we identify dependencies between an attachment and an owning item (which may have more than one instance)
+// IMPORTANT : other relationship are irrelevant, and shouldn't require tracking.
 #ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_LOOKUP_ENCODING
-// @gdemers physical id that represent the element we are evaluating dependencies for
-#define GET_ELEMENT_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE (7)
-#define GET_ELEMENT_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT (0)
-// @gdemers the instance id that uniquely identify 'this' element
-#define GET_ELEMENT_LOOKUP_INSTANCED_ID_BIT_RANGE (5)
-#define GET_ELEMENT_LOOKUP_INSTANCED_ID_RSHIFT (8)
-// @gdemers the virtual id of a dependency that reference our element we evaluate
-#define GET_ELEMENT_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE (7)
-#define GET_ELEMENT_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT (14)
-// @gdemers the instance id of a dependency that reference our element we evaluate
-#define GET_ELEMENT_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE (5)
-#define GET_ELEMENT_LOOKUP_OWNER_INSTANCED_ID_RSHIFT (22)
+// @gdemers virtual id that represent the item we are evaluating dependencies for
+#define GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE (7)
+#define GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT (0)
+// @gdemers the instance id that uniquely identify 'this' item
+#define GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE (5)
+#define GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT (8)
+// @gdemers the virtual id of a dependency that socket to the item we evaluate
+#define GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE (7)
+#define GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT (14)
+// @gdemers the instance id that uniquely identify 'this' attachment
+#define GET_ATTACHMENT_LOOKUP_INSTANCED_ID_BIT_RANGE (5)
+#define GET_ATTACHMENT_LOOKUP_INSTANCED_ID_RSHIFT (22)
 #endif
