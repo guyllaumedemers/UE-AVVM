@@ -43,14 +43,14 @@ struct SKILLSAMPLE_API FSkillTreeNodeObject : public FFastArraySerializerItem
 
 	FSkillTreeNodeObject() = default;
 	FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
-	                     const int32 NewActiveGameplayEffectHandleTypeHash);
+	                     const uint32 NewActiveGameplayEffectHandleTypeHash);
 	
-	const int32 GetActiveEffectHandleTypeHash() const;
+	const uint32 GetActiveEffectHandleTypeHash() const;
 	const int32 GetSkillTreeNodePrivateId() const;
 
 protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 ActiveGameplayEffectHandleTypeHash = INDEX_NONE;
+	UPROPERTY(Transient)
+	uint32 ActiveGameplayEffectHandleTypeHash = UINT32_MAX;
 
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
 	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 

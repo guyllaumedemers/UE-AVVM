@@ -98,8 +98,8 @@ struct TRANSACTIONSAMPLE_API FTransactionObject : public FFastArraySerializerIte
 	                   const ETransactionType NewTransactionType,
 	                   const FString& NewPayload);
 	
-	bool operator==(const FTransactionObject& Rhs) const;
 	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);
+	bool operator==(const FTransactionObject& Rhs) const;
 
 protected:
 	// @gdemers he who triggered/caused this transaction event.

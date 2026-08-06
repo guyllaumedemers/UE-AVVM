@@ -147,13 +147,11 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
 
-	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
+	void ModifyRuntimeState(const uint32 SkillTreeNodeTypeHash,
 							const FGameplayTagContainer& AddedTags,
 							const FGameplayTagContainer& RemovedTags);
 
-	UFUNCTION(BlueprintCallable)
-	void ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
+	void ModifyRuntimeLevel(const uint32 SkillTreeNodeTypeHash,
 							const int32 NewLevel);
 	
 	void CheckBackend() const;

@@ -35,13 +35,13 @@
 SKILLSAMPLE_API const FName SkillTreeProviderPayloads = TEXT("SkillTreeProviderPayloads");
 
 FSkillTreeNodeObject::FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
-                                           const int32 NewActiveGameplayEffectHandleTypeHash)
+                                           const uint32 NewActiveGameplayEffectHandleTypeHash)
 	: ActiveGameplayEffectHandleTypeHash(NewActiveGameplayEffectHandleTypeHash),
 	  PrivateTreeNodeId(NewPrivateTreeNodeId)
 {
 }
 
-const int32 FSkillTreeNodeObject::GetActiveEffectHandleTypeHash() const
+const uint32 FSkillTreeNodeObject::GetActiveEffectHandleTypeHash() const
 {
 	return ActiveGameplayEffectHandleTypeHash;
 }

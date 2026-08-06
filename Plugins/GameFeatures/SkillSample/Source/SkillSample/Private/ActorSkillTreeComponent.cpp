@@ -519,7 +519,7 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 		{
 			const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TryApplyGameplayEffect(SkillTreeNodeEffectClass, PrivateItemId);
 			const uint32 TypeHash = GetTypeHash(ActiveGameplayEffectHandle);
-			SkillTree.SkillTreeNodeObjects.Add(FSkillTreeNodeObject(PrivateItemId, TypeHash)/*rvalue*/);
+			SkillTree.SkillTreeNodeObjects.Add(FSkillTreeNodeObject{PrivateItemId, TypeHash}/*rvalue*/);
 			NonReplicatedActiveGameplayEffectHandles.Add(TypeHash, ActiveGameplayEffectHandle);
 			PrivateSkillTreeNodeIds.Add(PrivateItemId);
 		}
@@ -584,7 +584,7 @@ void UActorSkillTreeComponent::Server_ModifyTreeNodeObject_Implementation(const 
 	ModifyTreeNodeObject(Params);
 }
 
-void UActorSkillTreeComponent::ModifyRuntimeState(const int32 SkillTreeNodeTypeHash,
+void UActorSkillTreeComponent::ModifyRuntimeState(const uint32 SkillTreeNodeTypeHash,
                                                   const FGameplayTagContainer& AddedTags,
                                                   const FGameplayTagContainer& RemovedTags)
 {
@@ -611,7 +611,7 @@ void UActorSkillTreeComponent::ModifyRuntimeState(const int32 SkillTreeNodeTypeH
 	}
 }
 
-void UActorSkillTreeComponent::ModifyRuntimeLevel(const int32 SkillTreeNodeTypeHash,
+void UActorSkillTreeComponent::ModifyRuntimeLevel(const uint32 SkillTreeNodeTypeHash,
                                                   const int32 NewLevel)
 {
 	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
