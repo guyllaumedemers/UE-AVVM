@@ -139,8 +139,7 @@ void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetI
 	// A) TDerivedPayload must derived from FTransactionPayload. *Can be enforced via metaprogramming or concepts later.
 	// B) TDerivedPayload must have a property named Value.
 	// C) TValue overload the operator+=().
-	TArray<const FTransactionObject*> SearchResult = GetAllTransactionsOfType(NewTargetId, TransactionType);
-	for (const auto* Transaction : SearchResult)
+	for (const auto* Transaction : GetAllTransactionsOfType(NewTargetId, TransactionType))
 	{
 		if (!ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
 		{
