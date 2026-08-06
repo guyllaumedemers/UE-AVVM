@@ -37,6 +37,17 @@
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.UIChannel.Notification.Transaction");
 
+FTransactionObject::FTransactionObject(const FString& NewInstigatorId,
+                                       const FString& NewTargetId,
+                                       const ETransactionType NewTransactionType,
+                                       const FString& NewPayload)
+	: InstigatorId(NewInstigatorId),
+	  TargetId(NewTargetId),
+	  TransactionType(NewTransactionType),
+	  Payload(NewPayload)
+{
+}
+
 bool FTransactionObject::operator==(const FTransactionObject& Rhs) const
 {
 	return InstigatorId.Equals(Rhs.InstigatorId) &&
@@ -170,7 +181,6 @@ FTransactionObject UTransactionObjectUtils::MakeTransaction(const AActor* NewIns
 {
 	return FTransactionObject
 	{
-			FFastArraySerializerItem{},
 			UTransactionObjectUtils::GetUniqueId(NewInstigator),
 			UTransactionObjectUtils::GetUniqueId(NewTarget),
 			NewTransactionType,

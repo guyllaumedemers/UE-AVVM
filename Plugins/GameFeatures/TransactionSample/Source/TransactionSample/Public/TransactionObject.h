@@ -91,24 +91,32 @@ USTRUCT(BlueprintType)
 struct TRANSACTIONSAMPLE_API FTransactionObject : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
+
+	FTransactionObject() = default;
+	FTransactionObject(const FString& NewInstigatorId,
+	                   const FString& NewTargetId,
+	                   const ETransactionType NewTransactionType,
+	                   const FString& NewPayload);
 	
 	bool operator==(const FTransactionObject& Rhs) const;
-	
 	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);
 
+protected:
 	// @gdemers he who triggered/caused this transaction event.
-	UPROPERTY(Transient, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	FString InstigatorId = FString();
 
 	// @gdemers he who owns this transaction.
-	UPROPERTY(Transient, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	FString TargetId = FString();
 
-	UPROPERTY(Transient, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	ETransactionType TransactionType = ETransactionType::None;
 
-	UPROPERTY(Transient, BlueprintReadWrite)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	FString Payload = FString();
+
+	friend class UTransactionObjectUtils;
 };
 
 /**
