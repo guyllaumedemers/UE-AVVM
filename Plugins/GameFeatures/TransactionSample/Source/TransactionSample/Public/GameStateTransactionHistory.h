@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Transaction.h"
+#include "TransactionObject.h"
 #include "TransactionFactoryUtils.h"
 #include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
@@ -90,33 +90,28 @@ public:
 	                                       const ETransactionType TransactionType,
 	                                       TValue& OutResult);
 
-	// @gdemers TArray cannot cast from TArray<const UTransaction*> to TArray<UTransaction*> which is
-	// required for BP support. I prefer ensuring const-ness here.
-	static TArray<const UTransaction*> Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
-	                                                                   const FString& NewTargetId,
-	                                                                   const ETransactionType TransactionType);
+	static TArray<const FTransactionObject*> Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
+	                                                                         const FString& NewTargetId,
+	                                                                         const ETransactionType TransactionType);
 
-	static TArray<const UTransaction*> Static_GetAllTransactions(const UObject* WorldContextObject,
-	                                                             const FString& NewTargetId);
+	static TArray<const FTransactionObject*> Static_GetAllTransactions(const UObject* WorldContextObject,
+	                                                                   const FString& NewTargetId);
 
 protected:
 	static UGameStateTransactionHistory* GetActorComponent(const UObject* WorldContextObject);
 	void CreateAndRecordTransaction(const FTransactionContextArgs& Args);
 	void RemoveAllTransactionOfType(const AActor* NewTarget, const ETransactionType NewTransactionType);
 	void RemoveAllTransactions(const AActor* NewTarget);
-	TArray<const UTransaction*> GetAllTransactionsOfType(const FString& NewTargetId, const ETransactionType TransactionType) const;
-	TArray<const UTransaction*> GetAllTransactions(const FString& NewTargetId) const;
+	TArray<const FTransactionObject*> GetAllTransactionsOfType(const FString& NewTargetId, const ETransactionType TransactionType) const;
+	TArray<const FTransactionObject*> GetAllTransactions(const FString& NewTargetId) const;
 
 	template <typename TDerivedPayload, typename TValue>
 	void GetAggregatedValues(const FString& NewTargetId,
 	                         const ETransactionType TransactionType,
 	                         TValue& OutResult) const;
 
-	UFUNCTION()
-	void OnRep_NewTransactionRecorded();
-
-	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_NewTransactionRecorded")
-	TArray<TObjectPtr<const UTransaction>> Transactions;
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	FTransactionObjectFastArray Transactions;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AGameStateBase> OwningOuter = nullptr;
@@ -144,15 +139,15 @@ void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetI
 	// A) TDerivedPayload must derived from FTransactionPayload. *Can be enforced via metaprogramming or concepts later.
 	// B) TDerivedPayload must have a property named Value.
 	// C) TValue overload the operator+=().
-	TArray<const UTransaction*> SearchResult = GetAllTransactionsOfType(NewTargetId, TransactionType);
+	TArray<const FTransactionObject*> SearchResult = GetAllTransactionsOfType(NewTargetId, TransactionType);
 	for (const auto* Transaction : SearchResult)
 	{
-		if (!IsValid(Transaction))
+		if (!ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
 		{
 			continue;
 		}
 
-		const TInstancedStruct<FTransactionPayload> InstancedPayload = Transaction->GetValue();
+		const TInstancedStruct<FTransactionPayload> InstancedPayload = UTransactionObjectUtils::GetValue(*Transaction);
 		const auto* Payload = InstancedPayload.GetPtr<TDerivedPayload>();
 		if (Payload != nullptr)
 		{

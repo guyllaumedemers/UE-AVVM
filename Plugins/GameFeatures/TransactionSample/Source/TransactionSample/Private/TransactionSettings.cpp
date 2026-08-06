@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "TransactionSettings.h"
 
-#include "Transaction.h"
+#include "TransactionObject.h"
 #include "TransactionFactoryUtils.h"
 
 UTransactionSettings::UTransactionSettings()

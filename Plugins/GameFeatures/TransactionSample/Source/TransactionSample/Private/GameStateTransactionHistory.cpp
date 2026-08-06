@@ -20,17 +20,11 @@
 #include "GameStateTransactionHistory.h"
 
 #include "AVVMLogger.h"
-#include "AVVMNotificationSubsystem.h"
-#include "NativeGameplayTags.h"
-#include "Transaction.h"
+#include "TransactionObject.h"
 #include "TransactionSampleModule.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "Net/Core/PushModel/PushModel.h"
-
-// @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
-UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.UIChannel.Notification.Transaction");
 
 UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -40,7 +34,7 @@ UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitiali
 	PrimaryComponentTick.bAllowTickBatching = false;
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 	SetIsReplicatedByDefault(true);
-	
+
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
@@ -77,12 +71,7 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 {
 	Super::EndPlay(EndPlayReason);
 
-	for (auto Iterator = Transactions.CreateIterator(); Iterator; ++Iterator)
-	{
-		auto* MutableTransaction = const_cast<UTransaction*>(Iterator->Get());
-		RemoveReplicatedSubObject(MutableTransaction);
-		Iterator.RemoveCurrentSwap();
-	}
+	Transactions.TransactionObjects.Reset();
 
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -91,10 +80,10 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 	}
 
 	AVVM_LOGGER_LOG(LogTransactionSample,
-					Outer,
-					Outer,
-					TEXT("Removing %s."),
-					*GetNameSafe(UGameStateTransactionHistory::StaticClass()));
+	                Outer,
+	                Outer,
+	                TEXT("Removing %s."),
+	                *GetNameSafe(UGameStateTransactionHistory::StaticClass()));
 }
 
 void UGameStateTransactionHistory::Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
@@ -128,19 +117,19 @@ void UGameStateTransactionHistory::Static_RemoveAllTransactions(const UObject* W
 	}
 }
 
-TArray<const UTransaction*> UGameStateTransactionHistory::Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
-                                                                                          const FString& NewTargetId,
-                                                                                          const ETransactionType TransactionType)
+TArray<const FTransactionObject*> UGameStateTransactionHistory::Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
+                                                                                                const FString& NewTargetId,
+                                                                                                const ETransactionType TransactionType)
 {
 	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
-	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactionsOfType(NewTargetId, TransactionType) : TArray<const UTransaction*>{};
+	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactionsOfType(NewTargetId, TransactionType) : TArray<const FTransactionObject*>{};
 }
 
-TArray<const UTransaction*> UGameStateTransactionHistory::Static_GetAllTransactions(const UObject* WorldContextObject,
-                                                                                    const FString& NewTargetId)
+TArray<const FTransactionObject*> UGameStateTransactionHistory::Static_GetAllTransactions(const UObject* WorldContextObject,
+                                                                                          const FString& NewTargetId)
 {
 	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
-	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactions(NewTargetId) : TArray<const UTransaction*>{};
+	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactions(NewTargetId) : TArray<const FTransactionObject*>{};
 }
 
 UGameStateTransactionHistory* UGameStateTransactionHistory::GetActorComponent(const UObject* WorldContextObject)
@@ -168,12 +157,9 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 		return;
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTransactionHistory, Transactions, this);
-	
-	auto* Transaction = NewObject<UTransaction>(this);
-	Transaction->operator()(Args.Instigator.Get(), Args.Target.Get(), Args.TransactionType, Args.Payload);
-	AddReplicatedSubObject(Transaction);
-	Transactions.Add(Transaction);
+	FTransactionObject Transaction = UTransactionObjectUtils::MakeTransaction(Args.Instigator.Get(), Args.Target.Get(), Args.TransactionType, Args.Payload);
+	Transactions.MarkArrayDirty();
+	Transactions.TransactionObjects.Add(MoveTemp(Transaction));
 
 	const auto* Outer = OwningOuter.Get();
 	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -182,10 +168,8 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 		                Outer,
 		                Outer,
 		                TEXT("Creating new Record %s."),
-		                IsValid(Transaction) ? *Transaction->ToString() : TEXT(""));
+		                *UTransactionObjectUtils::ToString(Transaction));
 	}
-
-	OnRep_NewTransactionRecorded();
 #endif
 }
 
@@ -198,11 +182,13 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 		return;
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTransactionHistory, Transactions, this);
-	for (const auto* Transaction : GetAllTransactionsOfType(UTransaction::GetUniqueId(NewTarget), NewTransactionType))
+	Transactions.MarkArrayDirty();
+	for (const auto* Transaction : GetAllTransactionsOfType(UTransactionObjectUtils::GetUniqueId(NewTarget), NewTransactionType))
 	{
-		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
-		Transactions.RemoveSingleSwap(Transaction);
+		if (ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
+		{
+			Transactions.TransactionObjects.RemoveSingleSwap(*Transaction);
+		}
 	}
 
 	const auto* Outer = OwningOuter.Get();
@@ -215,8 +201,6 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 		                EnumToString(NewTransactionType),
 		                *GetNameSafe(NewTarget));
 	}
-
-	OnRep_NewTransactionRecorded();
 #endif
 }
 
@@ -228,11 +212,13 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 		return;
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UGameStateTransactionHistory, Transactions, this);
-	for (const auto* Transaction : GetAllTransactions(UTransaction::GetUniqueId(NewTarget)))
+	Transactions.MarkArrayDirty();
+	for (const auto* Transaction : GetAllTransactions(UTransactionObjectUtils::GetUniqueId(NewTarget)))
 	{
-		RemoveReplicatedSubObject(const_cast<UTransaction*>(Transaction)/*bad but also don't want to allow property being mutable elsewhere*/);
-		Transactions.RemoveSingleSwap(Transaction);
+		if (ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
+		{
+			Transactions.TransactionObjects.RemoveSingleSwap(*Transaction);
+		}
 	}
 
 	const auto* Outer = OwningOuter.Get();
@@ -244,64 +230,34 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 		                TEXT("Remove all transactions from %s."),
 		                *GetNameSafe(NewTarget));
 	}
-
-	OnRep_NewTransactionRecorded();
 #endif
 }
 
-TArray<const UTransaction*> UGameStateTransactionHistory::GetAllTransactionsOfType(const FString& NewTargetId,
-                                                                                   const ETransactionType TransactionType) const
+TArray<const FTransactionObject*> UGameStateTransactionHistory::GetAllTransactionsOfType(const FString& NewTargetId,
+                                                                                         const ETransactionType TransactionType) const
 {
-	TArray<TObjectPtr<const UTransaction>> SearchResult = Transactions.FilterByPredicate([NewTargetId, TransactionType](const TObjectPtr<const UTransaction>& Param)
+	TArray<const FTransactionObject*> OutResult;
+	for (const auto& TransactionObject : Transactions.TransactionObjects)
 	{
-		return IsValid(Param) && Param->DoesExactMatch(NewTargetId, TransactionType);
-	});
-
-	TArray<const UTransaction*> Out;
-	for (const TObjectPtr<const UTransaction>& Transaction : SearchResult)
-	{
-		Out.Add(Transaction.Get());
+		if (UTransactionObjectUtils::DoesExactMatch(TransactionObject, NewTargetId, TransactionType))
+		{
+			OutResult.Add(&TransactionObject);
+		}
 	}
 
-	return Out;
+	return OutResult;
 }
 
-TArray<const UTransaction*> UGameStateTransactionHistory::GetAllTransactions(const FString& NewTargetId) const
+TArray<const FTransactionObject*> UGameStateTransactionHistory::GetAllTransactions(const FString& NewTargetId) const
 {
-	TArray<TObjectPtr<const UTransaction>> SearchResult = Transactions.FilterByPredicate([NewTargetId](const TObjectPtr<const UTransaction>& Param)
+	TArray<const FTransactionObject*> OutResult;
+	for (const auto& TransactionObject : Transactions.TransactionObjects)
 	{
-		return IsValid(Param) && Param->DoesPartialMatch(NewTargetId);
-	});
-
-	TArray<const UTransaction*> Out;
-	for (const TObjectPtr<const UTransaction>& Transaction : SearchResult)
-	{
-		Out.Add(Transaction.Get());
+		if (UTransactionObjectUtils::DoesPartialMatch(TransactionObject, NewTargetId))
+		{
+			OutResult.Add(&TransactionObject);
+		}
 	}
 
-	return Out;
-}
-
-void UGameStateTransactionHistory::OnRep_NewTransactionRecorded()
-{
-	// TODO @gdemers Problem! Theres no way of handling removal due to TObjectPtr<const UTransaction> not being cast
-	// to a non-const version. Fix it!
-	const TObjectPtr<const UTransaction> NewTransaction = Transactions.IsEmpty() ? nullptr : Transactions.Top();
-	if (!IsValid(NewTransaction))
-	{
-		return;
-	}
-
-	const auto* Outer = OwningOuter.Get();
-	AVVM_LOGGER_LOG(LogTransactionSample,
-	                Outer,
-	                Outer,
-	                TEXT("New Transaction Detected! \r\n Value: %s."),
-	                IsValid(NewTransaction) ? *NewTransaction->ToString() : TEXT(""));
-
-	FAVVMNotificationContextArgs ContextArgs;
-	ContextArgs.ChannelTag = TAG_TRANSACTION_NOTIFICATION;
-	ContextArgs.Payload = NewTransaction->GetValue();
-	ContextArgs.Target = nullptr;
-	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
+	return OutResult;
 }

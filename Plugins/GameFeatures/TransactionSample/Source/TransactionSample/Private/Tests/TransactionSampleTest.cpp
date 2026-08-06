@@ -40,14 +40,13 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 #if WITH_AUTOMATION_TESTS
 	FTestWorldWrapper WorldWrapper;
 	WorldWrapper.CreateTestWorld(EWorldType::Game);
+	WorldWrapper.BeginPlayInTestWorld();
+	
 	UWorld* World = WorldWrapper.GetTestWorld();
 	UTEST_NOT_NULL("UWorld.", World)
 
-	auto* GameState = World->SpawnActor<AGameStateBase>();
+	AGameStateBase* GameState = World->GetGameState();
 	UTEST_NOT_NULL("AGameStateBase.", GameState)
-
-	// @gdemers required manual registration.
-	World->SetGameState(GameState);
 
 	auto* TestComponent = GameState->GetComponentByClass<UGameStateTransactionHistory>();
 	if (!IsValid(TestComponent))
@@ -58,13 +57,10 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 
 	UTEST_NOT_NULL("UGameStateTransactionHistory.", TestComponent)
 
-	// @gdemers required manual invocation.
-	TestComponent->BeginPlay();
-
 	const auto* TestActor = World->SpawnActor<AAutomatedTestTransactionActor>();
 	UTEST_NOT_NULL("AAutomatedTestTransactionActor.", TestActor)
 
-	const FString TestActorUniqueId = UTransaction::GetUniqueId(TestActor);
+	const FString TestActorUniqueId = UTransactionObjectUtils::GetUniqueId(TestActor);
 	UTEST_FALSE("Checking Empty FString.", TestActorUniqueId.IsEmpty())
 	UTEST_NOT_EQUAL("Checking UniqueId property Equality.", TestActorUniqueId, FString::FromInt(INDEX_NONE))
 
@@ -105,30 +101,28 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 	Args_C.Payload = StringInput;
 	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(World, Args_C);
 
-	TArray<const UTransaction*> OutResult_A = UGameStateTransactionHistory::Static_GetAllTransactionsOfType(World, TestActorUniqueId, ETransactionType::Kill);
+	TArray<const FTransactionObject*> OutResult_A = UGameStateTransactionHistory::Static_GetAllTransactionsOfType(World, TestActorUniqueId, ETransactionType::Kill);
 	UTEST_EQUAL("Post-Addition, ETransactionType::Kill Count.", OutResult_A.Num(), 2)
 
 	int32 OutResult = 0;
 	UGameStateTransactionHistory::Static_GetAggregatedValues<FTransactionPayloadTest, int32>(World, TestActorUniqueId, ETransactionType::Kill, OutResult);
 	UTEST_EQUAL("Aggregate values, ETransactionType::Kill Total Value.", OutResult, 2)
 
-	TArray<const UTransaction*> OutResult_B = UGameStateTransactionHistory::Static_GetAllTransactions(World, TestActorUniqueId);
+	TArray<const FTransactionObject*> OutResult_B = UGameStateTransactionHistory::Static_GetAllTransactions(World, TestActorUniqueId);
 	UTEST_EQUAL("Post-Addition, All Transaction Count.", OutResult_B.Num(), 3)
 
 	UGameStateTransactionHistory::Static_RemoveAllTransactionOfType(World, TestActor, ETransactionType::Killstreak);
 
-	TArray<const UTransaction*> OutResult_C = UGameStateTransactionHistory::Static_GetAllTransactionsOfType(World, TestActorUniqueId, ETransactionType::Killstreak);
+	TArray<const FTransactionObject*> OutResult_C = UGameStateTransactionHistory::Static_GetAllTransactionsOfType(World, TestActorUniqueId, ETransactionType::Killstreak);
 	UTEST_EQUAL("Post-Removal, ETransactionType::Killstreak Count.", OutResult_C.Num(), 0)
 
 	UGameStateTransactionHistory::Static_RemoveAllTransactions(World, TestActor);
 
-	TArray<const UTransaction*> OutResult_D = UGameStateTransactionHistory::Static_GetAllTransactions(World, TestActorUniqueId);
+	TArray<const FTransactionObject*> OutResult_D = UGameStateTransactionHistory::Static_GetAllTransactions(World, TestActorUniqueId);
 	UTEST_EQUAL("Post-Removal, All Transaction Count.", OutResult_D.Num(), 0)
 
 	// @gdemers cleanup.
-	TestComponent->DestroyComponent();
-	GameState->Destroy();
-	World->DestroyWorld(true);
+	WorldWrapper.EndPlayInTestWorld();
 #endif
 	return true;
 }

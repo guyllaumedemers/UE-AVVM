@@ -116,13 +116,18 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 		return;
 	}
 
-	for (const UTransaction* Transaction : UGameStateTransactionHistory::Static_GetAllTransactions(this, UniqueNetId->ToString()))
+	for (const FTransactionObject* Transaction : UGameStateTransactionHistory::Static_GetAllTransactions(this, UniqueNetId->ToString()))
 	{
+		if (!ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
+		{
+			continue;
+		}
+
 		AVVM_LOGGER_LOG(LogTransactionSample,
 		                nullptr,
 		                this,
 		                TEXT("%s"),
-		                IsValid(Transaction) ? *Transaction->ToString() : TEXT(""));
+		                *UTransactionObjectUtils::ToString(*Transaction));
 	}
 }
 
