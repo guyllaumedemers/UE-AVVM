@@ -30,7 +30,8 @@ void FAVVMToolkitModule::StartupModule()
 	IModuleInterface::StartupModule();
 
 	UDeviceProfile* TargetProfile = UDeviceProfileManager::Get().FindProfile(TEXT("SixtyHertz_Windows_60"));
-	if (IsValid(TargetProfile))
+	if (ensureAlwaysMsgf(IsValid(TargetProfile),
+	                     TEXT("/UISample/Config/DefaultDeviceProfiles.ini is missing. Make sure to include it in your project to run editor with 60 fps settings.")))
 	{
 		UDeviceProfileManager::Get().SetOverrideDeviceProfile(TargetProfile);
 	}
