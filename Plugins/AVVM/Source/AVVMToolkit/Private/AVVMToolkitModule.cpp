@@ -20,6 +20,20 @@
 
 #include "AVVMToolkitModule.h"
 
-DEFINE_LOG_CATEGORY(LogToolkit);
+#include "DeviceProfiles/DeviceProfile.h"
+#include "DeviceProfiles/DeviceProfileManager.h"
 
-IMPLEMENT_MODULE(FDefaultGameModuleImpl, AVVMToolkit)
+DEFINE_LOG_CATEGORY(LogToolkit)
+
+void FAVVMToolkitModule::StartupModule()
+{
+	IModuleInterface::StartupModule();
+
+	UDeviceProfile* TargetProfile = UDeviceProfileManager::Get().FindProfile(TEXT("SixtyHertz_Windows_60"));
+	if (IsValid(TargetProfile))
+	{
+		UDeviceProfileManager::Get().SetOverrideDeviceProfile(TargetProfile);
+	}
+};
+
+IMPLEMENT_MODULE(FAVVMToolkitModule, AVVMToolkit)

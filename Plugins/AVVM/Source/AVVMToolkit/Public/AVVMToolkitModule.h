@@ -32,4 +32,10 @@ AVVMTOOLKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogToolkit, Log, All);
  *	This plugin will be packaged with your client build!
  *
  *		TODO @gdemers do a rundown of all available utilities here as you go!
- */
+*/
+
+class FAVVMToolkitModule : public IModuleInterface
+{
+public:
+	virtual void StartupModule() override;
+};
