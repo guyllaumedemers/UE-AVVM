@@ -20,7 +20,7 @@
 #include "Resources/InventoryResourceHandlingImpl.h"
 
 #include "ActorInventoryComponent.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "GameFramework/Actor.h"
@@ -28,7 +28,7 @@
 TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (!IsValid(InventoryComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(InventoryComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}

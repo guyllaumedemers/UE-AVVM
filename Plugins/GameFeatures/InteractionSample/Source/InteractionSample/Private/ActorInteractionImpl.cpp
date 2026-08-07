@@ -22,9 +22,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AVVMGameplayModule.h"
-#include "AVVMGameplayUtils.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMToolkitUtils.h"
 #include "Interaction.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Data/InteractionExecutionContext.h"
@@ -77,7 +77,7 @@ bool UActorInteractionImpl::HandleBeginOverlap(const TArray<UInteraction*>& NewR
 		return false;
 	}
 
-	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(NewTarget);
+	const bool bHasActorAuthority = UAVVMToolkitUtils::CheckActorAuthority(NewTarget);
 	if (!bHasActorAuthority)
 	{
 		return false;
@@ -110,7 +110,7 @@ bool UActorInteractionImpl::HandleEndOverlap(const TArray<UInteraction*>& NewRec
 		return false;
 	}
 
-	const bool bHasActorAuthority = UAVVMGameplayUtils::CheckActorAuthority(NewTarget);
+	const bool bHasActorAuthority = UAVVMToolkitUtils::CheckActorAuthority(NewTarget);
 	if (!bHasActorAuthority)
 	{
 		return false;

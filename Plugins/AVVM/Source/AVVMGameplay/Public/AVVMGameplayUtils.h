@@ -39,23 +39,15 @@ class AVVMGAMEPLAY_API UAVVMGameplayUtils : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	// @gdemers check if the actor has authority on the local machine. i.e can it modify the state of the actor locally.
 	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
-	static bool CheckActorAuthority(const AActor* Actor);
-
-	// @gdemers other than the APlayerController, all Actors are ROLE_Authority if non-replicated or if existing on the Server.
-	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
-	static bool HasNetworkAuthority(const AActor* Actor);
-	
-	UFUNCTION(BlueprintCallable)
 	static int32 GetActorUniqueIdentifierByActor(const AActor* Actor);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static int32 GetActorUniqueIdentifierByRegistryId(const FDataRegistryId& ActorIdentifierId);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static int32 GetGameplayEffectUniqueIdentifierByGameplayEffect(const UGameplayEffect* GameplayEffect);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="AVVM|Utils")
 	static int32 GetGameplayEffectUniqueIdentifierByRegistryId(const FDataRegistryId& GameplayEffectIdentifierId);
 };

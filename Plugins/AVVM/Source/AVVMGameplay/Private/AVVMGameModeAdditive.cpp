@@ -23,6 +23,7 @@
 #include "AVVMGameplayModule.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -31,7 +32,7 @@
 
 bool UAVVMPredicateTask::WaitUntilDone_Implementation(FAVVMPredicateTaskResult& OutResult) const
 {
-	const double Now = FDateTime::Now().ToUnixTimestamp();
+	const double Now = UAVVMToolkitUtils::GetServerWorldTime(this);
 	if (FMath::IsNearlyZero(OutResult.StartTimestamp))
 	{
 		OutResult.StartTimestamp = Now;

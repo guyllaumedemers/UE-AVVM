@@ -20,7 +20,7 @@
 #include "TriggeringResourceImpl.h"
 
 #include "AttachmentManagerComponent.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "ProjectileComponent.h"
 #include "Components/ActorComponent.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
@@ -32,7 +32,7 @@
 TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponent* ActorComponent,
                                                                   const TArray<UObject*>& Resources) const
 {
-	if (!IsValid(ActorComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(ActorComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(ActorComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(ActorComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}

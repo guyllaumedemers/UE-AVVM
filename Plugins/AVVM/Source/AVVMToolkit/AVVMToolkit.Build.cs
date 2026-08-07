@@ -50,7 +50,7 @@ public class AVVMToolkit : ModuleRules
 			new string[]
 			{
 				"IrisCore",
-				"NetCore",
+				"NetCore"
 			}
 		);
 	}

@@ -51,10 +51,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils", meta=(HideSelfPin, DefaultToSelf="WorldContextObject"))
 	static ULocalPlayer* GetTargetLocalPlayer(const UObject* WorldContextObject);
 
+	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils")
+	static double GetServerWorldTime(const UObject* WorldContextObject);
+
+	// @gdemers check if the actor has authority on the local machine. i.e can it modify the state of the actor locally.
+	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils")
+	static bool CheckActorAuthority(const AActor* Actor);
+
+	// @gdemers other than the APlayerController, all Actors are ROLE_Authority if non-replicated or if existing on the Server.
+	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils")
+	static bool HasNetworkAuthority(const AActor* Actor);
+
 	// @gdemers handle binding "Manual" ViewModel type to a Widget
 	UFUNCTION(BlueprintCallable, Category="AVVMToolkit|Utils")
 	static void BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper,
-							  UCommonUserWidget* Target);
+	                          UCommonUserWidget* Target);
 };
 
 template <typename T>

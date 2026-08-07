@@ -25,7 +25,9 @@
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
+#include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "View/MVVMView.h"
 
 ULocalPlayer* UAVVMToolkitUtils::GetFirstOrTargetLocalPlayer(const UObject* WorldContextObject)
@@ -73,6 +75,58 @@ ULocalPlayer* UAVVMToolkitUtils::GetTargetLocalPlayer(const UObject* WorldContex
 	}
 
 	return nullptr;
+}
+
+double UAVVMToolkitUtils::GetServerWorldTime(const UObject* WorldContextObject)
+{
+	const auto* GameState = UGameplayStatics::GetGameState(WorldContextObject);
+	return ensureAlwaysMsgf(IsValid(GameState), TEXT("Missing GameState. Cannot retrieve Server time.")) ? GameState->GetServerWorldTimeSeconds() : 0.f;
+}
+
+bool UAVVMToolkitUtils::CheckActorAuthority(const AActor* Actor)
+{
+	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
+	{
+		return false;
+	}
+
+	const ENetRole RemoteRole = Actor->GetRemoteRole();
+	const ENetRole LocalRole = Actor->GetLocalRole();
+
+	const ENetMode NetMode = Actor->GetNetMode();
+	if (NetMode == NM_Standalone)
+	{
+		return true;
+	}
+	else if ((NetMode == NM_ListenServer) || (NetMode == NM_Client))
+	{
+		const bool bIsRunningActorOnClientWithoutControl = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
+		if (bIsRunningActorOnClientWithoutControl)
+		{
+			return false;
+		}
+
+		const bool bIsRunningActorClientOnServer = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
+		const bool bIsRunningActorOnClient = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
+		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
+		return bIsRunningActorOnClient || bIsRunningActorClientOnServer || bIsRunningActorOnServer;
+	}
+	else if (NetMode == NM_DedicatedServer)
+	{
+		return Actor->HasAuthority();
+	}
+
+	return false;
+}
+
+bool UAVVMToolkitUtils::HasNetworkAuthority(const AActor* Actor)
+{
+	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
+	{
+		return false;
+	}
+
+	return Actor->HasAuthority();
 }
 
 void UAVVMToolkitUtils::BindViewModel(const TScriptInterface<IAVVMViewModelFNameHelper>& ViewModelFNameHelper, UCommonUserWidget* Target)

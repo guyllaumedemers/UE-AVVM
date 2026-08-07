@@ -20,14 +20,14 @@
 #include "Resources/SkillTreeResourceHandlingImpl.h"
 
 #include "ActorSkillTreeComponent.h"
-#include "AVVMGameplayUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "Data/SkillTreeDefinitionDataAsset.h"
 #include "GameFramework/Actor.h"
 
 TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(ActorComponent);
-	if (!IsValid(SkillTreeComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(SkillTreeComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(SkillTreeComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(SkillTreeComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}

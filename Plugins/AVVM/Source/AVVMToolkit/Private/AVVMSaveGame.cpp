@@ -22,6 +22,7 @@
 #include "AVVMFileHelper.h"
 #include "AVVMLogger.h"
 #include "AVVMToolkitModule.h"
+#include "AVVMToolkitUtils.h"
 #include "Kismet/GameplayStatics.h"
 
 FStringView UAVVMSaveGame::Static_GetSetFileContent(const FName PayloadType,
@@ -47,7 +48,7 @@ void UAVVMSaveGame::HandlePreSave()
 	Super::HandlePreSave();
 	PrevPayloadPerType = CurrPayloadPerType;
 
-	const double Now = FDateTime::Now().ToUnixTimestampDecimal();
+	const double Now = UAVVMToolkitUtils::GetServerWorldTime(this);
 	TotalPlayTime += (Now - SessionStartTime);
 	SessionStartTime = Now;
 }
@@ -57,7 +58,7 @@ void UAVVMSaveGame::HandlePostLoad()
 	Super::HandlePostLoad();
 	CurrPayloadPerType = PrevPayloadPerType;
 
-	const double Now = FDateTime::Now().ToUnixTimestampDecimal();
+	const double Now = UAVVMToolkitUtils::GetServerWorldTime(this);
 	SessionStartTime = Now;
 }
 

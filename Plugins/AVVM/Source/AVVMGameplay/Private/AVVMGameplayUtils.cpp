@@ -26,52 +26,7 @@
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Engine/NetConnection.h"
 #include "GameFramework/Actor.h"
-
-bool UAVVMGameplayUtils::CheckActorAuthority(const AActor* Actor)
-{
-	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
-	{
-		return false;
-	}
-
-	const ENetRole RemoteRole = Actor->GetRemoteRole();
-	const ENetRole LocalRole = Actor->GetLocalRole();
-
-	const ENetMode NetMode = Actor->GetNetMode();
-	if (NetMode == NM_Standalone)
-	{
-		return true;
-	}
-	else if ((NetMode == NM_ListenServer) || (NetMode == NM_Client))
-	{
-		const bool bIsRunningActorOnClientWithoutControl = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_SimulatedProxy);
-		if (bIsRunningActorOnClientWithoutControl)
-		{
-			return false;
-		}
-
-		const bool bIsRunningActorClientOnServer = (RemoteRole == ROLE_AutonomousProxy) && (LocalRole == ROLE_Authority);
-		const bool bIsRunningActorOnClient = (RemoteRole == ROLE_Authority) && (LocalRole == ROLE_AutonomousProxy);
-		const bool bIsRunningActorOnServer = (RemoteRole == ROLE_SimulatedProxy) && (LocalRole == ROLE_Authority);
-		return bIsRunningActorOnClient || bIsRunningActorClientOnServer || bIsRunningActorOnServer;
-	}
-	else if (NetMode == NM_DedicatedServer)
-	{
-		return Actor->HasAuthority();
-	}
-
-	return false;
-}
-
-bool UAVVMGameplayUtils::HasNetworkAuthority(const AActor* Actor)
-{
-	if (!ensureAlwaysMsgf(IsValid(Actor), TEXT("Invalid Actor!")))
-	{
-		return false;
-	}
-
-	return Actor->HasAuthority();
-}
+#include "Kismet/GameplayStatics.h"
 
 int32 UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(const AActor* Actor)
 {

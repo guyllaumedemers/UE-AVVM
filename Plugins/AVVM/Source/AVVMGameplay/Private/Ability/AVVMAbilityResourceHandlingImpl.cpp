@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "Ability/AVVMAbilityResourceHandlingImpl.h"
 
-#include "AVVMGameplayUtils.h"
+#include "AVVMToolkitUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Components/ActorComponent.h"
@@ -27,7 +27,7 @@
 TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	auto* AbilitySystemComponent = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
-	if (!IsValid(AbilitySystemComponent) || !UAVVMGameplayUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(AbilitySystemComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}
