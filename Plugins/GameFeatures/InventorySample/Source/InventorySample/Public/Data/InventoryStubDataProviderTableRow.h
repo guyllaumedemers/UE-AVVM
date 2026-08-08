@@ -34,7 +34,8 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	FComplexDependencies
+ *	FComplexDependencies are user defined values that participate in the generation of a complex
+ *	bitmask scheme representing a dependency between an attachment, and an item.  (See AVVMOnlineInventory.h)
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FComplexDependencies
@@ -48,7 +49,12 @@ struct INVENTORYSAMPLE_API FComplexDependencies
 /**
  *	Class description:
  *	
- *	FComplexDependencyLookupStubDataTableRow
+ *	FComplexDependencyLookupStubDataTableRow is a Row type that define the dependency between a UItemObject class,
+ *	and many attachments.
+ *	
+ *	IMPORTANT : THIS ROW TYPE IS PURELY FOR BACKEND SIMULATION DURING HEADLESS PROJECT DEVELOPMENT! IF YOU REQUIRE
+ *	DEFINING A STATIC DEPENDENCY BETWEEN AN ITEM AND AN ATTACHMENT, SIMPLY DEFINE THE DEPENDENCY IN YOUR ITEM REFERENCED ACTOR CLASS.
+ *	(See WeaponSample ATriggeringActor for reference.)
  */
 USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FComplexDependencyLookupStubDataTableRow : public FTableRowBase
