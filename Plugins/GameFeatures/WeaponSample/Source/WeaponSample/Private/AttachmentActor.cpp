@@ -112,7 +112,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 	// @gdemers we need to validate that the parent we are looking for hasnt been created yet.
 	TArray<AActor*> OutChildren;
-	Target->GetAllChildActors(OutChildren, false);
+	Target->GetAttachedActors(OutChildren, false);
 
 	OutChildren = OutChildren.FilterByPredicate([](const AActor* Child)
 	{
@@ -262,6 +262,11 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	                Target,
 	                TEXT("Root Parent used to attach at socket name %s."),
 	                *NewSocketName.ToString());
+	
+	// @gdemers Actor creation should invoke begin play ONLY upon attaching,
+	// and not on creation.
+	FinishSpawning(GetTransform());
+	Rename(nullptr, Target);
 
 	// @gdemers detach actor from root
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
