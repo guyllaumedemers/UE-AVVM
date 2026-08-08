@@ -104,7 +104,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		return Target;
 	}
 
-	// @gdemers early out for the recursive case so we avoid calling GetAllChildActors.
+	// @gdemers early out for the recursive case so we avoid calling GetAttachedActors.
 	if (Target->IsA<ATriggeringActor>())
 	{
 		return nullptr;
