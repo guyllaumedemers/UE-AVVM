@@ -419,6 +419,29 @@ TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderInventoryRegistryIds(
 	return OutResults;
 }
 
+TArray<FDataRegistryId> UInventoryUtils::GetProviderLoadoutRegistryIds(const int32 NewProviderId)
+{
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
+	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
+
+	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FromString(SearchPayload, OutProvider);
+
+	TArray<int32> PrivateItemIds;
+	OutProvider.Loadout.GenerateValueArray(PrivateItemIds);
+
+	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
+	return OutResults;
+}
+
+TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderLoadoutRegistryIds(const UObject* WorldContextObject,
+                                                                              const int32 NewProfileId)
+{
+	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerPresetItems(WorldContextObject, NewProfileId);
+	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
+	return OutResults;
+}
+
 void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
                                            int32& OutProviderId,
                                            TMap<FGameplayTag, int32>& OutLoadout,

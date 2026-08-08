@@ -73,6 +73,13 @@ public:
 	                                                                      const int32 NewProfileId);
 
 	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetProviderLoadoutRegistryIds(const int32 NewProviderId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetBackendProviderLoadoutRegistryIds(const UObject* WorldContextObject,
+	                                                                    const int32 NewProfileId);
+
+	UFUNCTION(BlueprintCallable)
 	static void GetInventoryProvider(const FString& NewPayload,
 	                                 int32& OutProviderId,
 	                                 TMap<FGameplayTag, int32>& OutLoadout,
