@@ -84,8 +84,8 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 
 	// @gdemers slot tags used to bind an item to an abstract location within the loadout system.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanInventoryProviderEquipItems"))
-	TArray<FGameplayTag> DefaultSlotTags;
+	TArray<FGameplayTag> DefaultSlotTags{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSoftClassPtr<UItemObject>, FProviderDefaultItemProperties> DefaultInventory;
+	TMap<TSoftClassPtr<UItemObject>, FProviderDefaultItemProperties> DefaultInventory{};
 };

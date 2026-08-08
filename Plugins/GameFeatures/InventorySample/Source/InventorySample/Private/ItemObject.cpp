@@ -392,7 +392,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		return;
 	}
 
-	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateItemActor(GetWorld(), ActorClass, Outer);
+	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateDeferredItemActor(GetWorld(), ActorClass, Outer);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemActor, this);
 
 	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor),

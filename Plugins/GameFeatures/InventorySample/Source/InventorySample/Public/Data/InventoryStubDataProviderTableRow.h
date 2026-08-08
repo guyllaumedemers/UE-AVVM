@@ -21,39 +21,44 @@
 
 #include "CoreMinimal.h"
 
-#include "AVVMOnlineStubDataProvider.h"
+#include "Engine/DataTable.h"
 
-#include "InventoryStubDataProvider.generated.h"
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
+
+#include "InventoryStubDataProviderTableRow.generated.h"
+
+class UItemObject;
 
 /**
  *	Class description:
  *	
- *	UInventoryStubDataProvider is the impl UObject that handle returning a stub representation
- *	of a {FAVVMPlayerProfile::InventoryIds}.
+ *	FComplexDependencies
  */
-UCLASS()
-class INVENTORYSAMPLE_API UInventoryStubDataProvider : public UAVVMOnlineStubDataProvider
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FComplexDependencies
 {
 	GENERATED_BODY()
-
-public:
-	UInventoryStubDataProvider(const FObjectInitializer& ObjectInitializer);
-	virtual TArray<int32> MakePropertyStubData() const override;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TArray<TSoftClassPtr<UItemObject>> Dependencies{};
 };
 
 /**
  *	Class description:
  *	
- *	UComplexDependencyLookupStubDataProvider is the impl UObject that handle returning a stub representation
- *	of a {FAVVMPlayerProfile::ComplexDependencyLookup}. i.e it provide stub information about dependencies between an item, and
- *	attachments that are socket to it.
+ *	FComplexDependencyLookupStubDataTableRow
  */
-UCLASS()
-class INVENTORYSAMPLE_API UComplexDependencyLookupStubDataProvider : public UAVVMOnlineStubDataProvider
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FComplexDependencyLookupStubDataTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
-public:
-	UComplexDependencyLookupStubDataProvider(const FObjectInitializer& ObjectInitializer);
-	virtual TArray<int32> MakePropertyStubData() const override;
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TMap<TSoftClassPtr<UItemObject>, FComplexDependencies> ComplexDependencyLookup{};
 };

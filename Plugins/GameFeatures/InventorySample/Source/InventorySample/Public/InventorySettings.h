@@ -95,6 +95,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FDataRegistryId& GetStubDataProviderInventoryId();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FDataRegistryId& GetStubDataProviderComplexLookupId();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType ItemGroupRegistryType = NAME_None;
@@ -146,4 +149,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryId StubDataProviderInventoryId = FDataRegistryId();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryId StubDataProviderComplexLookupId = FDataRegistryId();
 };

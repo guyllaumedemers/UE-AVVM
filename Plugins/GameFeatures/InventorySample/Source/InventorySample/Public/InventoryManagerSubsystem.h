@@ -55,6 +55,11 @@ public:
 	                                      AActor* Outer);
 
 	UFUNCTION(BlueprintCallable)
+	static AActor* Static_CreateDeferredItemActor(const UWorld* World,
+	                                              const UClass* ItemActorClass,
+	                                              AActor* Outer);
+
+	UFUNCTION(BlueprintCallable)
 	static TArray<UItemObject*> Static_GetRandomItems(const UWorld* World,
 	                                                  const AActor* Outer,
 	                                                  const TArray<UItemObject*>& PoolItems);
@@ -69,6 +74,9 @@ protected:
 
 	AActor* CreateItemActor(const UClass* ItemActorClass,
 	                        const FActorSpawnParameters& SpawnParams);
+
+	AActor* CreateDeferredItemActor(const UClass* ItemActorClass,
+	                                const FActorSpawnParameters& SpawnParams);
 
 	TArray<UItemObject*> GetRandomItems(const AActor* Outer,
 	                                    const TArray<UItemObject*>& PoolItems);

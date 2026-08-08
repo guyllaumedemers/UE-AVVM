@@ -147,7 +147,8 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_CHARMS),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKILLS),
 			{},
-			PresetId
+			PresetId,
+			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_DEPENDENCY_LOOKUP),
 	};
 
 	const APlayerState* Player = IsValid(NewPlayer) ? NewPlayer->PlayerState : nullptr;

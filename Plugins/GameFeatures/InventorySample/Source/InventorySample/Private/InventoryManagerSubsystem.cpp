@@ -72,6 +72,22 @@ AActor* UInventoryManagerSubsystem::Static_CreateItemActor(const UWorld* World,
 	return nullptr;
 }
 
+AActor* UInventoryManagerSubsystem::Static_CreateDeferredItemActor(const UWorld* World,
+                                                                   const UClass* ItemActorClass,
+                                                                   AActor* Outer)
+{
+	auto* InventoryManagerSubsystem = UInventoryManagerSubsystem::Get(World);
+	if (IsValid(InventoryManagerSubsystem))
+	{
+		FActorSpawnParameters Params;
+		Params.Owner = Outer;
+		Params.Instigator = Cast<APawn>(Outer);
+		return InventoryManagerSubsystem->CreateDeferredItemActor(ItemActorClass, Params);
+	}
+
+	return nullptr;
+}
+
 TArray<UItemObject*> UInventoryManagerSubsystem::Static_GetRandomItems(const UWorld* World,
                                                                        const AActor* Outer,
                                                                        const TArray<UItemObject*>& PoolItems)
@@ -147,8 +163,22 @@ AActor* UInventoryManagerSubsystem::CreateItemActor(const UClass* ItemActorClass
 	return Factory(ItemActorClass, SpawnParams);
 }
 
+AActor* UInventoryManagerSubsystem::CreateDeferredItemActor(const UClass* ItemActorClass,
+                                                            const FActorSpawnParameters& SpawnParams)
+{
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		// @gdemers another good example of const-ness issue in the engine. theres no point in violating bitwise const-ness or logical const-ness and yet
+		// the engine require a UClass* to be non-const.
+		return World->SpawnActorDeferred<AActor>(const_cast<UClass*>(ItemActorClass), FTransform::Identity, SpawnParams.Owner, SpawnParams.Instigator);
+	}
+
+	return nullptr;
+}
+
 TArray<UItemObject*> UInventoryManagerSubsystem::GetRandomItems(const AActor* Actor,
-																const TArray<UItemObject*>& PoolItems)
+                                                                const TArray<UItemObject*>& PoolItems)
 {
 	if (ItemRandomizerRule.IsValid())
 	{

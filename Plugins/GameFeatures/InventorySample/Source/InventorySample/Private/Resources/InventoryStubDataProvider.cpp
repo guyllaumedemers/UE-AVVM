@@ -28,6 +28,9 @@
 #include "StorageHelper.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Data/InventoryProviderTableRow.h"
+#include "Data/InventoryStubDataProviderTableRow.h"
+
+struct FComplexDependencyLookupStubDataTableRow;
 
 UInventoryStubDataProvider::UInventoryStubDataProvider(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -88,4 +91,85 @@ TArray<int32> UInventoryStubDataProvider::MakePropertyStubData() const
 	// a valid storage object, or more are available for referencing on relevant items.
 	FStorageHelper::HandleStorageAssignment(ItemCDOs, Items);
 	return Items;
+}
+
+UComplexDependencyLookupStubDataProvider::UComplexDependencyLookupStubDataProvider(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	if (IsTemplate(RF_ClassDefaultObject))
+	{
+		UAVVMOnlineStubDataHelper::Static_RegisterPropertyProvider(TAG_AVVMONLINE_BACKEND_STUB_DEPENDENCY_LOOKUP, GetClass());
+	}
+}
+
+TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() const
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return TArray<int32>{};
+	}
+
+	const auto* Row = Subsystem->GetCachedItem<FComplexDependencyLookupStubDataTableRow>(UInventorySettings::GetStubDataProviderComplexLookupId());
+	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider Complex Lookup.")))
+	{
+		return TArray<int32>{};
+	}
+
+	// @gdemers allow assigning proper instance id to items.
+	TMap<const UItemObject*/*CDO*/, int32/*Counter*/> InstanceCount;
+
+	TArray<int32> OutComplexDependencies;
+	for (const auto& [ItemObjectClass, ComplexDependencies] : Row->ComplexDependencyLookup)
+	{
+		if (ItemObjectClass.IsNull())
+		{
+			continue;
+		}
+
+		// TODO @gdemers Improve on this. I dont like that its synchronous.
+		const UClass* ItemClass = ItemObjectClass.LoadSynchronous();
+		if (!IsValid(ItemClass))
+		{
+			continue;
+		}
+
+		const auto* ItemObjectCDO = ItemClass->GetDefaultObject<UItemObject>();
+		const int32 ItemPhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
+		const int32 ItemVirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing((1 << 2/*item bit-index*/), ItemPhysicalGlobalId);
+		int32& OutItemCount = InstanceCount.FindOrAdd(ItemObjectCDO);
+		++OutItemCount;
+
+		for (const auto& DependencyObjectClass : ComplexDependencies.Dependencies)
+		{
+			if (DependencyObjectClass.IsNull())
+			{
+				continue;
+			}
+
+			// TODO @gdemers Improve on this. I dont like that its synchronous.
+			const UClass* DependencyClass = DependencyObjectClass.LoadSynchronous();
+			if (!IsValid(DependencyClass))
+			{
+				continue;
+			}
+
+			const auto* AttachmentObjectCDO = DependencyClass->GetDefaultObject<UItemObject>();
+			const int32 AttachmentPhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(AttachmentObjectCDO);
+			const int32 AttachmentVirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(1 << 0/*attachment bit-index*/, AttachmentPhysicalGlobalId);
+			int32& OutAttachmentCount = InstanceCount.FindOrAdd(AttachmentObjectCDO);
+			++OutAttachmentCount;
+
+			const int32 DependencyBitmask = (
+				ItemVirtualGlobalId +
+				OutItemCount +
+				AttachmentVirtualGlobalId +
+				OutAttachmentCount
+			);
+
+			OutComplexDependencies.Add(DependencyBitmask);
+		}
+	}
+
+	return OutComplexDependencies;
 }

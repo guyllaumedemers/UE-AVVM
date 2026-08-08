@@ -120,7 +120,7 @@ UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 {
 	// @gdemers Note : Override for AI derived class and provide ASC directly.
 	const APlayerState* OwningActor = GetPlayerState();
-	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningActor);
+	return IsValid(OwningActor) ? UAVVMAbilityUtils::GetAbilitySystemComponent(OwningActor) : nullptr;
 }
 
 TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Implementation() const
