@@ -103,6 +103,10 @@ public:
 	                                                 const int32 ProfileId);
 
 	UFUNCTION(BlueprintCallable)
+	static TArray<int32> Static_GetPlayerComplexDependencyLookup(const UObject* WorldContextObject,
+	                                                             const int32 ProfileId);
+
+	UFUNCTION(BlueprintCallable)
 	static TArray<int32> Static_GetPlayerInventoryItems(const UObject* WorldContextObject,
 	                                                    const int32 ProfileId);
 
@@ -131,6 +135,7 @@ protected:
 	int32 GetPlayerProfileId(const APlayerState* PlayerState) const;
 	int32 GetPlayerPresetId(const APlayerState* PlayerState) const;
 	TArray<int32> GetPlayerPresetItems(const int32 ProfileId) const;
+	TArray<int32> GetPlayerComplexDependencyLookup(const int32 ProfileId) const;
 	TArray<int32> GetPlayerInventoryItems(const int32 ProfileId) const;
 	TArray<int32> GetActorInventoryItems(const int32 ProfileId) const;
 

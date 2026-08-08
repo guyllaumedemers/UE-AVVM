@@ -80,6 +80,13 @@ TArray<int32> AAVVMGameSession::Static_GetPlayerPresetItems(const UObject* World
 	return IsValid(GameSession) ? GameSession->GetPlayerPresetItems(ProfileId) : TArray<int32>{};
 }
 
+TArray<int32> AAVVMGameSession::Static_GetPlayerComplexDependencyLookup(const UObject* WorldContextObject,
+                                                                        const int32 ProfileId)
+{
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
+	return IsValid(GameSession) ? GameSession->GetPlayerComplexDependencyLookup(ProfileId) : TArray<int32>{};
+}
+
 TArray<int32> AAVVMGameSession::Static_GetPlayerInventoryItems(const UObject* WorldContextObject,
                                                                const int32 ProfileId)
 {
@@ -277,6 +284,30 @@ TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) cons
 	{
 		return TArray<int32>{};
 	}
+}
+
+TArray<int32> AAVVMGameSession::GetPlayerComplexDependencyLookup(const int32 ProfileId) const
+{
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+						  TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
+	if (!ensureAlwaysMsgf(bHasResolvedProfile,
+						  TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
+
+	FAVVMPlayerProfile OutPlayerProfile;
+	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
+
+	return OutPlayerProfile.ComplexDependencyLookup;
 }
 
 TArray<int32> AAVVMGameSession::GetPlayerInventoryItems(const int32 ProfileId) const
