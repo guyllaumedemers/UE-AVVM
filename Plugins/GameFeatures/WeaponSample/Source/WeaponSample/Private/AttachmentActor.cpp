@@ -265,8 +265,11 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	
 	// @gdemers Actor creation should invoke begin play ONLY upon attaching,
 	// and not on creation.
-	FinishSpawning(GetTransform());
 	Rename(nullptr, Target);
+	if (!IsActorBeginningPlay())
+	{
+		FinishSpawning(GetTransform());
+	}
 
 	// @gdemers detach actor from root
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
