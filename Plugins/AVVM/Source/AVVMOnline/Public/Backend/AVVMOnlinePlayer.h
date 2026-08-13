@@ -35,6 +35,7 @@ AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_SKINS)
 AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_CHARMS);
 AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_SKILLS);
 AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_DEPENDENCY_LOOKUP);
+AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_PRESET_LOADOUT);
 
 /**
  *	Class description:
@@ -176,7 +177,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> CharmsIds{};
 
-	// @gdemers Tightly packed Bitmask. Define information about an Item using bits translation. See AVVMOnlineSkillTree.h
+	// @gdemers Tightly packed Bitmask. Define information about a Skill/Trait/Perk using bits translation. See AVVMOnlineSkillTree.h
 	// to inspect bits encoding scheme.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TArray<int32> SkillIds{};

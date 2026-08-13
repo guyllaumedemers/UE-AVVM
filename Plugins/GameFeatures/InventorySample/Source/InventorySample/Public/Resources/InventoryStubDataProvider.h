@@ -44,6 +44,22 @@ public:
 /**
  *	Class description:
  *	
+ *	UPresetLoadoutStubDataProvider is the impl UObject that handle returning a stub representation
+ *	of a {FAVVMPlayerPreset::EquippedItems}.
+ */
+UCLASS()
+class INVENTORYSAMPLE_API UPresetLoadoutStubDataProvider : public UAVVMOnlinePresetStubDataProvider
+{
+	GENERATED_BODY()
+
+public:
+	UPresetLoadoutStubDataProvider(const FObjectInitializer& ObjectInitializer);
+	virtual TMap<FGameplayTag/*Slot Tag*/, int32> MakePropertyStubData() const override;
+};
+
+/**
+ *	Class description:
+ *	
  *	UComplexDependencyLookupStubDataProvider is the impl UObject that handle returning a stub representation
  *	of a {FAVVMPlayerProfile::ComplexDependencyLookup}. i.e it provide stub information about dependencies between an item, and
  *	attachments that are socket to it.

@@ -21,6 +21,17 @@
 
 TStrongObjectPtr<UAVVMOnlineStubDataHelper> UAVVMOnlineStubDataHelper::gStubDataHelper = nullptr;
 
+void UAVVMOnlineStubDataHelper::Static_RegisterPresetPropertyProvider(const FGameplayTag& PropertyTag,
+                                                                      const TSubclassOf<UAVVMOnlinePresetStubDataProvider>& ProviderClass)
+{
+	auto* StubDataHelper = Get();
+	if (ensureAlwaysMsgf(IsValid(StubDataHelper), TEXT("Invalid Stub Data Helper")))
+	{
+		auto& SubClassOf = StubDataHelper->PresetStubDataProviders.FindOrAdd(PropertyTag);
+		SubClassOf = ProviderClass;
+	}
+}
+
 void UAVVMOnlineStubDataHelper::Static_RegisterPropertyProvider(const FGameplayTag& PropertyTag,
                                                                 const TSubclassOf<UAVVMOnlineStubDataProvider>& ProviderClass)
 {
@@ -29,6 +40,31 @@ void UAVVMOnlineStubDataHelper::Static_RegisterPropertyProvider(const FGameplayT
 	{
 		auto& SubClassOf = StubDataHelper->StubDataProviders.FindOrAdd(PropertyTag);
 		SubClassOf = ProviderClass;
+	}
+}
+
+TMap<FGameplayTag, int32> UAVVMOnlineStubDataHelper::Static_MakePresetPropertyData(const FGameplayTag& PropertyTag)
+{
+	auto* StubDataHelper = Get();
+	if (!ensureAlwaysMsgf(IsValid(StubDataHelper), TEXT("Invalid Stub Data Helper")))
+	{
+		return TMap<FGameplayTag, int32>{};
+	}
+
+	if (!ensureAlwaysMsgf(StubDataHelper->PresetStubDataProviders.Contains(PropertyTag),
+	                      TEXT("Invalid Provider")))
+	{
+		return TMap<FGameplayTag, int32>{};
+	}
+
+	UAVVMOnlinePresetStubDataProvider* CDO = StubDataHelper->PresetStubDataProviders[PropertyTag].GetDefaultObject();
+	if (!IsValid(CDO))
+	{
+		return TMap<FGameplayTag, int32>{};
+	}
+	else
+	{
+		return CDO->MakePropertyStubData();
 	}
 }
 

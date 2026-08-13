@@ -47,22 +47,46 @@ public:
 /**
  *	Class description:
  *	
- *	UAVVMOnlineStubDataHelper is a Singleton Helper to allow registering Stub Data Provider across multiple Dlls.
+ *	UAVVMOnlinePresetStubDataProvider is an impl UObject that return stub information about a KVP property
+ *	specific to {FAVVMPlayerPreset}, and initializing cached information within AVVMGameSession to simulate
+ *	running a backend without the required hooks in place.
+ *	
+ *	Note : We may later require KVP information about user defined preset for custom skill/build, 
+ *	cosmetics, etc...
  */
-UCLASS(NotBlueprintType, NotBlueprintable)
-class AVVMONLINE_API UAVVMOnlineStubDataHelper : public UObject
+UCLASS(BlueprintType, NotBlueprintable)
+class AVVMONLINE_API UAVVMOnlinePresetStubDataProvider : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	virtual TMap<FGameplayTag/*Slot Tag*/, int32> MakePropertyStubData() const PURE_VIRTUAL(MakePropertyStubData, return TMap<FGameplayTag, int32>{};);
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMOnlineStubDataHelper is a Singleton Helper to allow registering Stub Data Provider across multiple Dlls.
+ */
+UCLASS(NotBlueprintType, NotBlueprintable)
+class AVVMONLINE_API UAVVMOnlineStubDataHelper final : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	static void Static_RegisterPresetPropertyProvider(const FGameplayTag& PropertyTag,
+	                                                  const TSubclassOf<UAVVMOnlinePresetStubDataProvider>& ProviderClass);
+
 	static void Static_RegisterPropertyProvider(const FGameplayTag& PropertyTag,
 	                                            const TSubclassOf<UAVVMOnlineStubDataProvider>& ProviderClass);
 	
+	static TMap<FGameplayTag, int32> Static_MakePresetPropertyData(const FGameplayTag& PropertyTag);
 	static TArray<int32> Static_MakePropertyData(const FGameplayTag& PropertyTag);
 
 protected:
 	static UAVVMOnlineStubDataHelper* Get();
 
 	static TStrongObjectPtr<UAVVMOnlineStubDataHelper> gStubDataHelper;
+	TMap<FGameplayTag, TSubclassOf<UAVVMOnlinePresetStubDataProvider>> PresetStubDataProviders;
 	TMap<FGameplayTag, TSubclassOf<UAVVMOnlineStubDataProvider>> StubDataProviders;
 };
