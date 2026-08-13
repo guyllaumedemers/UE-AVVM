@@ -407,3 +407,15 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 		ASC->SetupAttributeSet(RecursiveContextArgs.SrcAttributeSetSoftObjectPath, Target);
 	}
 }
+
+const FGameplayTag AAttachmentActor::GetConditionalAttachmentSlotTag() const
+{
+	const bool bResult = GetAttachmentActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bDoesAllowDefiningAttachmentSlotTag;
+	return bResult ? GetAttachmentSlotTag() : FGameplayTag::EmptyTag;
+}
+
+const FName AAttachmentActor::GetConditionalSocketName() const
+{
+	const bool bResult = GetAttachmentActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bDoesAllowDefiningSocketName;
+	return bResult ? GetSocketName() : NAME_None;
+}

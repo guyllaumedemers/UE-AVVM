@@ -350,7 +350,7 @@ UAVVMResourceManagerComponent* ATriggeringActor::GetResourceManagerComponent_Imp
 
 TArray<FDataRegistryId> ATriggeringActor::GetResourceDefinitionRegistryIds_Implementation() const
 {
-	return {GetTriggeringDefinitionId()};
+	return {GetConditionalTriggeringDefinition()};
 }
 
 const TInstancedStruct<FAVVMDataResolverHelper>& ATriggeringActor::GetTriggeringActorDataResolverHelper()
@@ -443,6 +443,12 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 			                                               1,
 			                                               GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
 	                                               });
+}
+
+const FDataRegistryId ATriggeringActor::GetConditionalTriggeringDefinition() const
+{
+	const bool bResult = GetTriggeringActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bDoesDefineAttachmentStatically;
+	return bResult ? GetTriggeringDefinitionId() : FDataRegistryId{};
 }
 
 void UTriggeringUtils::Swap(AActor* UnEquip,

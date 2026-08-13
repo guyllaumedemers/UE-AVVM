@@ -53,13 +53,6 @@ TArray<int32> UInventoryStubDataProvider::MakePropertyStubData() const
 		return TArray<int32>{};
 	}
 
-	const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->InventoryProviderActorIdentifierId);
-	if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
-	                      TEXT("Missing valid Id for Provider entry.")))
-	{
-		return TArray<int32>{};
-	}
-
 	TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
 	TArray<int32> Items;
 
@@ -110,13 +103,6 @@ TMap<FGameplayTag/*Slot Tag*/, int32> UPresetLoadoutStubDataProvider::MakeProper
 
 	const auto* Row = Subsystem->GetCachedItem<FInventoryProviderTableRow>(UInventorySettings::GetStubDataProviderInventoryId());
 	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider.")))
-	{
-		return TMap<FGameplayTag, int32>{};
-	}
-
-	const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->InventoryProviderActorIdentifierId);
-	if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
-	                      TEXT("Missing valid Id for Provider entry.")))
 	{
 		return TMap<FGameplayTag, int32>{};
 	}

@@ -215,8 +215,8 @@ void UAttachmentManagerComponent::OnAttachmentActorClassRetrieved(FAttachmentTok
 	{
 			NewAttachment,
 			AttributeSetSoftObjectPath,
-			NewAttachment->GetAttachmentSlotTag(),
-			NewAttachment->GetSocketName()
+			NewAttachment->GetConditionalAttachmentSlotTag(),
+			NewAttachment->GetConditionalSocketName()
 	};
 
 	Swap(ContextArgs);

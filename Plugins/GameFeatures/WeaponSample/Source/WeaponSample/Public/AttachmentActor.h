@@ -133,6 +133,8 @@ protected:
 	FDelegateHandle DeferredSocketParentingDelegateHandle;
 
 private:
+	const FGameplayTag GetConditionalAttachmentSlotTag() const;
+	const FName GetConditionalSocketName() const;
 	friend class UAttachmentManagerComponent;
 
 #if WITH_EDITORONLY_DATA
