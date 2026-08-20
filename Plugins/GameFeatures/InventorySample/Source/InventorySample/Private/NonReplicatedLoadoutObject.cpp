@@ -28,6 +28,16 @@
 #include "Tags/PrivateTags.h"
 #include "UI/LoadoutNotificationPayload.h"
 
+UNonReplicatedLoadoutObject::UNonReplicatedLoadoutObject()
+{
+	PredictiveInputIndex = FAVVMPredictiveInputIndexObject
+	{
+			MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Stalled),
+			MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resumed),
+			MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Executed)
+	};
+}
+
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 {
 	const AActor* Outer = GetTypedOuter<AActor>();
@@ -48,12 +58,19 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		}
 		else
 		{
-			// TODO @gdemers We need to support predictive exchange of loadout items so the equip/unequip
-			// animation sequence can smoothly be transition on client, and run latent validation with server to reconciliate
-			// the end pose in which the play is expected to be on Server.
-			// i.e For when local client equip/unequip rapidly for showing off (Ping-Pong effect).
 			Server_Cycle(TargetTag);
 		}
+
+		// @gdemers for server and client, we need to capture the user selection
+		// locally, or received via RPC, and execute actions based on the state of the active index, and pending to be active index.
+		const int32 NewTargetIndex = CyclingSlots.IndexOfByKey(TargetTag);
+		ensureAlwaysMsgf(UAVVMPredictiveInputUtils::Capture(NewTargetIndex, PredictiveInputIndex), TEXT("Invalid Capture operation."));
+	}
+	else
+	{
+		// @gdemers for server and client, any failure to execute action should result
+		// in a complete flush of the predictive queue captured over the last few inputs.
+		ensureAlwaysMsgf(UAVVMPredictiveInputUtils::Flush(PredictiveInputIndex), TEXT("Invalid Flush operation."));
 	}
 
 #if WITH_EDITOR
@@ -186,8 +203,6 @@ void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 	const FGameplayTag& OldTag = ActiveItemSlotTag;
 	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
 
-	// TODO @gdemers We need to be able to queue incoming exchange (equip/unequip), and cancel running animation
-	// during animation cancellation due to ping-pong effect. 
 	if (CyclingSlots.Contains(OldTag))
 	{
 		auto& OldItem = Loadout[OldTag];
@@ -205,6 +220,24 @@ void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 			NewItem->ModifyRuntimeState(ActiveTags, {});
 		}
 	}
+}
+
+bool UNonReplicatedLoadoutObject::OnIndex_Stalled(const int32 TargetIndex)
+{
+	// TODO @gdemers Do impl.
+	return true;
+}
+
+bool UNonReplicatedLoadoutObject::OnIndex_Resumed(const int32 TargetIndex)
+{
+	// TODO @gdemers Do impl.
+	return true;
+}
+
+bool UNonReplicatedLoadoutObject::OnIndex_Executed(const int32 TargetIndex)
+{
+	// TODO @gdemers Do impl.
+	return true;
 }
 
 bool UActorLoadoutUtils::DoesActiveItemHasHighestPriority(const TArray<FGameplayTag>& CyclingSlots,
