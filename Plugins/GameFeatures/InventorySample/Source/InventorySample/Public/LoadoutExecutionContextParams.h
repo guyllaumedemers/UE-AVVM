@@ -21,21 +21,34 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "ExecutionContextParams.h"
+#include "GameplayTagContainer.h"
 
-#include "CraftingContextRule.generated.h"
+#include "LoadoutExecutionContextParams.generated.h"
+
+class UNonReplicatedLoadoutObject;
 
 /**
  *	Class description:
- *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
+ *	
+ *	FLoadoutExecutionContextParams
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FLoadoutExecutionContextParams : public FExecutionContextParams
 {
 	GENERATED_BODY()
 
-	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	FLoadoutExecutionContextParams() = default;
+	FLoadoutExecutionContextParams(const UNonReplicatedLoadoutObject* NewNonReplicatedLoadoutObject,
+	                               const FGameplayTag& NewSrcSlotTag,
+	                               const FGameplayTag& NewDestSlotTag);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const UNonReplicatedLoadoutObject> NonReplicatedLoadoutObject = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag SrcSlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag DestSlotTag = FGameplayTag::EmptyTag;
 };

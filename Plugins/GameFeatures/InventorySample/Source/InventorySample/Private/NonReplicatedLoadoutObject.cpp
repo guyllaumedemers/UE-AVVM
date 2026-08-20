@@ -19,39 +19,52 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
-#include "InventorySettings.h"
+#include "AVVMNotificationSubsystem.h"
 #include "ItemObject.h"
+#include "LoadoutExecutionContextParams.h"
+#include "LoadoutExecutionContextRule.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerController.h"
 #include "Tags/PrivateTags.h"
+#include "UI/LoadoutNotificationPayload.h"
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 {
-	if (!ensureAlwaysMsgf(bDoesSupportItemCycling,
-	                      TEXT("Attempt to cycle on an Owning Inventory Component that doesn't support it!")))
+	const AActor* Outer = GetTypedOuter<AActor>();
+	if (!ensureAlwaysMsgf(IsValid(Outer),
+	                      TEXT("Invalid Outer!")))
 	{
 		return;
 	}
 
-	static const auto ActiveTags = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE};
-	const FGameplayTag& OldTag = ActiveItemSlotTag;
-	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
-
-	if (CyclingSlots.Contains(OldTag))
+	const auto Ctx = FExecutionContextParams::Make<FLoadoutExecutionContextParams>(this, ActiveItemSlotTag, TargetTag);
+	const auto Rule = GetEquipRule();
+	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	if (bWasSuccess)
 	{
-		auto& OldItem = Loadout[OldTag];
-		if (OldItem.IsValid())
+		if (Outer->HasAuthority())
 		{
-			OldItem->ModifyRuntimeState({}, ActiveTags);
+			OnCycle(TargetTag);
+		}
+		else
+		{
+			// TODO @gdemers We need to support predictive exchange of loadout items so the equip/unequip
+			// animation sequence can smoothly be transition on client, and run latent validation with server to reconciliate
+			// the end pose in which the play is expected to be on Server.
+			// i.e For when local client equip/unequip rapidly for showing off (Ping-Pong effect).
+			Server_Cycle(TargetTag);
 		}
 	}
 
-	if (CyclingSlots.Contains(NewTag))
+#if WITH_EDITOR
+	if (!Outer->IsNetMode(NM_DedicatedServer))
+#endif
 	{
-		auto& NewItem = Loadout[NewTag];
-		if (NewItem.IsValid())
-		{
-			NewItem->ModifyRuntimeState(ActiveTags, {});
-		}
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORYSAMPLE_ITEM_NOTIFICATION_SWAP,
+		                                        Outer->GetTypedOuter<APlayerController>(),
+		                                        Outer,
+		                                        FAVVMNotificationPayload::Make<FLoadoutNotificationPayload>(ActiveItemSlotTag, TargetTag, bWasSuccess));
 	}
 }
 
@@ -107,12 +120,6 @@ void UNonReplicatedLoadoutObject::RemoveOldItems(const TArray<UItemObject*>& New
 
 void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewItemObjects)
 {
-	const AActor* Outer = GetTypedOuter<AActor>();
-	if (!IsValid(Outer))
-	{
-		return;
-	}
-
 	FGameplayTagContainer Requirements;
 	Requirements.AddTag(TAG_INVENTORYSAMPLE_ITEM_STATE_PENDING_SPAWN);
 	Requirements.AddTag(TAG_INVENTORYSAMPLE_ITEM_STATE_INSTANCED);
@@ -148,6 +155,67 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 		if (!bDoesActiveItemHasHighestPriority)
 		{
 			Cycle(TargetSlotTag);
+		}
+	}
+}
+
+bool UNonReplicatedLoadoutObject::CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+                                             const TInstancedStruct<FExecutionContextRule>& Rule) const
+{
+	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
+	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
+	{
+		return false;
+	}
+
+	const bool bPredicate = ContextRule->Predicate(this, Params);
+	return bPredicate;
+}
+
+void UNonReplicatedLoadoutObject::Server_Cycle_Implementation(const FGameplayTag& TargetTag)
+{
+	Cycle(TargetTag);
+}
+
+TInstancedStruct<FExecutionContextRule> UNonReplicatedLoadoutObject::GetUnequipRule() const
+{
+	return FExecutionContextRule::Make<FLoadoutUnequipRule>();
+}
+
+TInstancedStruct<FExecutionContextRule> UNonReplicatedLoadoutObject::GetEquipRule() const
+{
+	return FExecutionContextRule::Make<FLoadoutEquipRule>();
+}
+
+void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
+{
+	if (!ensureAlwaysMsgf(bDoesSupportItemCycling,
+	                      TEXT("Attempt to cycle on an Owning Inventory Component that doesn't support it!")))
+	{
+		return;
+	}
+
+	static const auto ActiveTags = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE};
+	const FGameplayTag& OldTag = ActiveItemSlotTag;
+	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
+
+	// TODO @gdemers We need to be able to queue incoming exchange (equip/unequip), and cancel running animation
+	// during animation cancellation due to ping-pong effect. 
+	if (CyclingSlots.Contains(OldTag))
+	{
+		auto& OldItem = Loadout[OldTag];
+		if (OldItem.IsValid())
+		{
+			OldItem->ModifyRuntimeState({}, ActiveTags);
+		}
+	}
+
+	if (CyclingSlots.Contains(NewTag))
+	{
+		auto& NewItem = Loadout[NewTag];
+		if (NewItem.IsValid())
+		{
+			NewItem->ModifyRuntimeState(ActiveTags, {});
 		}
 	}
 }

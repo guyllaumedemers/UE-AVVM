@@ -26,7 +26,6 @@
 #include "InventoryExecutionContextRule.generated.h"
 
 struct FExecutionContextParams;
-class UActorComponent;
 
 /**
  *	Class description:
@@ -40,7 +39,7 @@ struct INVENTORYSAMPLE_API FDropRule : public FExecutionContextRule
 	GENERATED_BODY()
 
 	FDropRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
 
@@ -56,7 +55,7 @@ struct INVENTORYSAMPLE_API FPickupRule : public FExecutionContextRule
 	GENERATED_BODY()
 
 	FPickupRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
 
@@ -72,6 +71,6 @@ struct INVENTORYSAMPLE_API FSwapRule : public FExecutionContextRule
 	GENERATED_BODY()
 
 	FSwapRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

@@ -21,8 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "ExecutionContextParams.h"
+#include "ExecutionContextRule.h"
 #include "GameplayTagContainer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
 #include "NonReplicatedLoadoutObject.generated.h"
@@ -61,6 +64,12 @@ protected:
 
 	void ModifyLoadout(const TArray<UItemObject*>& NewItemObjects);
 
+	bool CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
+	                const TInstancedStruct<FExecutionContextRule>& Rule) const;
+
+	UFUNCTION(Server, Reliable)
+	void Server_Cycle(const FGameplayTag& TargetTag);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bDoesSupportItemCycling = false;
 
@@ -72,7 +81,14 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Define the slot tag of the item in hand."))
 	FGameplayTag ActiveItemSlotTag = FGameplayTag::EmptyTag;
+
+private:
+	// @gdemers ai version of this object may require different rules.
+	virtual TInstancedStruct<FExecutionContextRule> GetUnequipRule() const;
+	virtual TInstancedStruct<FExecutionContextRule> GetEquipRule() const;
 	
+	virtual void OnCycle(const FGameplayTag& TargetTag);
+
 	friend class UActorInventoryComponent;
 };
 

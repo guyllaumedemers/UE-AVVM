@@ -384,6 +384,7 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 
 void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 {
+	const FSoftObjectPath& AttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
 	const UClass* ActorClass = ContextArgs.ActorClass;
 	AActor* Outer = ContextArgs.Outer.Get();
 
@@ -430,14 +431,13 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		// TODO @gdemers : will require proper tag handling later. keep gameplay tag container for now until requirements
 		// changes.
 		Params.AttachmentSlotTag = GetItemAttachmentSlotTags().First();
-		Params.SrcAttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
+		Params.SrcAttributeSetSoftObjectPath = AttributeSetSoftObjectPath;
 
 		// @gdemers We use this so we can handle more complex case that require traversal of our root actor
 		// to find attached actors, and used them as targets.
 		bCanRegisterAttributeSet = FAVVMSocketTargetingHelper::Static_AttachToActorAsync(RuntimeItemActor, Params);
 	}
 
-	const FSoftObjectPath& AttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
 	// @gdemers IMPORTANT : Keep in mind that deferred actor being attached, may or may not own an ASC. As such,
 	// handling the initialization of the Attribute set for the delayed case has to be accounted for in the implementer
 	// of the IAVVMDoesSupportInnerSocketTargeting interface. This is why we are forwarding above. Below is the case for
@@ -450,7 +450,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(RuntimeItemActor);
 	if (IsValid(ASC))
 	{
-		ASC->SetupAttributeSet(ContextArgs.AttributeSetSoftObjectPath, RuntimeItemActor);
+		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, RuntimeItemActor);
 	}
 }
 

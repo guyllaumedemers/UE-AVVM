@@ -17,25 +17,13 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "UI/LoadoutNotificationPayload.h"
 
-#include "CoreMinimal.h"
-
-#include "ExecutionContextRule.h"
-
-#include "CraftingContextRule.generated.h"
-
-/**
- *	Class description:
- *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+FLoadoutNotificationPayload::FLoadoutNotificationPayload(const FGameplayTag& NewSrcSlotTag,
+                                                         const FGameplayTag& NewDestSlotTag,
+                                                         const bool bNewWasSuccess)
+	: SrcSlotTag(NewSrcSlotTag),
+	  DestSlotTag(NewDestSlotTag),
+	  bWasSuccess(bNewWasSuccess)
 {
-	GENERATED_BODY()
-
-	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
-};
+}

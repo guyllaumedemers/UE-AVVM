@@ -26,8 +26,6 @@
 
 #include "ExecutionContextRule.generated.h"
 
-class UActorComponent;
-
 /**
 *	Class description:
  *
@@ -39,7 +37,7 @@ struct AVVMGAMEPLAY_API FExecutionContextRule
 	GENERATED_BODY()
 
 	virtual ~FExecutionContextRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextRule>::Make<T>

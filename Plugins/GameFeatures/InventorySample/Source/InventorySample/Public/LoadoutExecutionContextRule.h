@@ -23,19 +23,38 @@
 
 #include "ExecutionContextRule.h"
 
-#include "CraftingContextRule.generated.h"
+#include "LoadoutExecutionContextRule.generated.h"
+
+struct FExecutionContextParams;
 
 /**
  *	Class description:
- *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
+ *	
+*	FLoadoutUnequipRule is a context struct that define the parameters of an unequip action,
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FLoadoutUnequipRule : public FExecutionContextRule
 {
 	GENERATED_BODY()
 
+	FLoadoutUnequipRule() = default;
+	virtual bool Predicate(const UObject* WorldContextObject,
+						   const TInstancedStruct<FExecutionContextParams>& Params) const override;
+};
+
+/**
+ *	Class description:
+ *	
+*	FLoadoutEquipRule is a context struct that define the parameters of an equip action,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FLoadoutEquipRule : public FExecutionContextRule
+{
+	GENERATED_BODY()
+
+	FLoadoutEquipRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };

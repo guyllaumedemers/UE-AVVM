@@ -21,21 +21,31 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "AVVMNotificationSubsystem.h"
 
-#include "CraftingContextRule.generated.h"
+#include "LoadoutNotificationPayload.generated.h"
 
 /**
  *	Class description:
- *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
+ *	
+ *	FLoadoutNotificationPayload is a context payload encapsulating action end-points for UI updates.
  */
-USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+USTRUCT()
+struct INVENTORYSAMPLE_API FLoadoutNotificationPayload : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
-	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	FLoadoutNotificationPayload() = default;
+	FLoadoutNotificationPayload(const FGameplayTag& NewSrcSlotTag,
+	                            const FGameplayTag& NewDestSlotTag,
+	                            const bool bNewWasSuccess);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag SrcSlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FGameplayTag DestSlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bWasSuccess = false;
 };

@@ -28,11 +28,11 @@
 #include "ItemObject.h"
 #include "Tags/PrivateTags.h"
 
-bool FDropRule::Predicate(const UActorComponent* Component,
+bool FDropRule::Predicate(const UObject* WorldContextObject,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	auto* InventoryComponent = Cast<UActorInventoryComponent>(Component);
-	if (!IsValid(InventoryComponent))
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(WorldContextObject);
+	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Invalid Cast to Actor Inventory Component.")))
 	{
 		return false;
 	}
@@ -72,11 +72,11 @@ bool FDropRule::Predicate(const UActorComponent* Component,
 	return true;
 }
 
-bool FPickupRule::Predicate(const UActorComponent* Component,
+bool FPickupRule::Predicate(const UObject* WorldContextObject,
                             const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	auto* InventoryComponent = Cast<UActorInventoryComponent>(Component);
-	if (!IsValid(InventoryComponent))
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(WorldContextObject);
+	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Invalid Cast to Actor Inventory Component.")))
 	{
 		return false;
 	}
@@ -127,11 +127,11 @@ bool FPickupRule::Predicate(const UActorComponent* Component,
 	return true;
 }
 
-bool FSwapRule::Predicate(const UActorComponent* Component,
+bool FSwapRule::Predicate(const UObject* WorldContextObject,
                           const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	auto* InventoryComponent = Cast<UActorInventoryComponent>(Component);
-	if (!IsValid(InventoryComponent))
+	auto* InventoryComponent = Cast<UActorInventoryComponent>(WorldContextObject);
+	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Invalid Cast to Actor Inventory Component.")))
 	{
 		return false;
 	}

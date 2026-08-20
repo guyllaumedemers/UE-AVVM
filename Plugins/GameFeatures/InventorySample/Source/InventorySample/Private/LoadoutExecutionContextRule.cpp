@@ -17,25 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "LoadoutExecutionContextRule.h"
 
-#include "CoreMinimal.h"
+#include "NonReplicatedLoadoutObject.h"
 
-#include "ExecutionContextRule.h"
-
-#include "CraftingContextRule.generated.h"
-
-/**
- *	Class description:
- *
- *	FCraftingContextRule is a context struct that define the parameters of a crafting action,
- *	and it's requirements to be successful.
- */
-USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+bool FLoadoutUnequipRule::Predicate(const UObject* WorldContextObject,
+									const TInstancedStruct<FExecutionContextParams>& Params) const
 {
-	GENERATED_BODY()
+	auto* NonReplicatedLoadoutObject = Cast<UNonReplicatedLoadoutObject>(WorldContextObject);
+	if (!ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject), TEXT("Invalid Cast to Loadout Object.")))
+	{
+		return false;
+	}
+	
+	// TODO @gdemers handle predicate case that may prevent unequipping.
 
-	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
-};
+	return true;
+}
+
+bool FLoadoutEquipRule::Predicate(const UObject* WorldContextObject,
+                                  const TInstancedStruct<FExecutionContextParams>& Params) const
+{
+	auto* NonReplicatedLoadoutObject = Cast<UNonReplicatedLoadoutObject>(WorldContextObject);
+	if (!ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject), TEXT("Invalid Cast to Loadout Object.")))
+	{
+		return false;
+	}
+	
+	// TODO @gdemers handle predicate case that may prevent equipping.
+
+	return true;
+}

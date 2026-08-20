@@ -26,7 +26,6 @@
 #include "SkillTreeExecutionContextRule.generated.h"
 
 struct FExecutionContextParams;
-class UActorComponent;
 
 /**
  *	Class description:
@@ -40,7 +39,7 @@ struct SKILLSAMPLE_API FGrantRule : public FExecutionContextRule
 	GENERATED_BODY()
 
 	FGrantRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
 
@@ -56,7 +55,7 @@ struct SKILLSAMPLE_API FRevokeRule : public FExecutionContextRule
 	GENERATED_BODY()
 
 	FRevokeRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
 
@@ -72,6 +71,6 @@ struct SKILLSAMPLE_API FModifyRule : public FExecutionContextRule
 	GENERATED_BODY()
 
 	FModifyRule() = default;
-	virtual bool Predicate(const UActorComponent* Component,
+	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
 };
