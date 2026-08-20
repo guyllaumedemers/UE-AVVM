@@ -37,7 +37,7 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		return;
 	}
 
-	const auto Ctx = FAVVMExecutionContextParams::Make<FLoadoutExecutionContextParams>(this, ActiveItemSlotTag, TargetTag);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FLoadoutExecutionContextParams>(ActiveItemSlotTag, TargetTag);
 	const auto Rule = GetEquipRule();
 	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
 	if (bWasSuccess)

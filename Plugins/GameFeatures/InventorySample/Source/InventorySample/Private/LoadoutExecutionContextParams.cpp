@@ -21,11 +21,9 @@
 
 #include "NonReplicatedLoadoutObject.h"
 
-FLoadoutExecutionContextParams::FLoadoutExecutionContextParams(const UNonReplicatedLoadoutObject* NewNonReplicatedLoadoutObject,
-                                                               const FGameplayTag& NewSrcSlotTag,
+FLoadoutExecutionContextParams::FLoadoutExecutionContextParams(const FGameplayTag& NewSrcSlotTag,
                                                                const FGameplayTag& NewDestSlotTag)
-	: NonReplicatedLoadoutObject(NewNonReplicatedLoadoutObject),
-	  SrcSlotTag(NewSrcSlotTag),
+	: SrcSlotTag(NewSrcSlotTag),
 	  DestSlotTag(NewDestSlotTag)
 {
 }

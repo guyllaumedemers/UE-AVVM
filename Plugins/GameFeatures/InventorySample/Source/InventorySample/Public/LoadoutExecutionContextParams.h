@@ -26,8 +26,6 @@
 
 #include "LoadoutExecutionContextParams.generated.h"
 
-class UNonReplicatedLoadoutObject;
-
 /**
  *	Class description:
  *	
@@ -39,12 +37,8 @@ struct INVENTORYSAMPLE_API FLoadoutExecutionContextParams : public FAVVMExecutio
 	GENERATED_BODY()
 
 	FLoadoutExecutionContextParams() = default;
-	FLoadoutExecutionContextParams(const UNonReplicatedLoadoutObject* NewNonReplicatedLoadoutObject,
-	                               const FGameplayTag& NewSrcSlotTag,
+	FLoadoutExecutionContextParams(const FGameplayTag& NewSrcSlotTag,
 	                               const FGameplayTag& NewDestSlotTag);
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TWeakObjectPtr<const UNonReplicatedLoadoutObject> NonReplicatedLoadoutObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag SrcSlotTag = FGameplayTag::EmptyTag;
