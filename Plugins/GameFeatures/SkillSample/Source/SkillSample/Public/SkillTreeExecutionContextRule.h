@@ -21,11 +21,11 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "AVVMExecutionContextRule.h"
 
 #include "SkillTreeExecutionContextRule.generated.h"
 
-struct FExecutionContextParams;
+struct FAVVMExecutionContextParams;
 
 /**
  *	Class description:
@@ -34,13 +34,13 @@ struct FExecutionContextParams;
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FGrantRule : public FExecutionContextRule
+struct SKILLSAMPLE_API FGrantRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FGrantRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };
 
 /**
@@ -50,13 +50,13 @@ struct SKILLSAMPLE_API FGrantRule : public FExecutionContextRule
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FRevokeRule : public FExecutionContextRule
+struct SKILLSAMPLE_API FRevokeRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FRevokeRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };
 
 /**
@@ -66,11 +66,11 @@ struct SKILLSAMPLE_API FRevokeRule : public FExecutionContextRule
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FModifyRule : public FExecutionContextRule
+struct SKILLSAMPLE_API FModifyRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FModifyRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };

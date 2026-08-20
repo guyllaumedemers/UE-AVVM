@@ -384,19 +384,19 @@ const TInstancedStruct<FAVVMDataResolverHelper>& UActorInventoryComponent::GetIn
 	return Helper;
 }
 
-TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetDropRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UActorInventoryComponent::GetDropRule() const
 {
-	return FExecutionContextRule::Make<FDropRule>();
+	return FAVVMExecutionContextRule::Make<FDropRule>();
 }
 
-TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetPickupRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UActorInventoryComponent::GetPickupRule() const
 {
-	return FExecutionContextRule::Make<FPickupRule>();
+	return FAVVMExecutionContextRule::Make<FPickupRule>();
 }
 
-TInstancedStruct<FExecutionContextRule> UActorInventoryComponent::GetSwapRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UActorInventoryComponent::GetSwapRule() const
 {
-	return FExecutionContextRule::Make<FSwapRule>();
+	return FAVVMExecutionContextRule::Make<FSwapRule>();
 }
 
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
@@ -416,9 +416,9 @@ bool UActorInventoryComponent::HasExactMatch(const FGameplayTagContainer& Compar
 
 void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 {
-	const auto Ctx = FExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FDropContextParams>(PendingDropItemObject);
 	const auto Rule = GetDropRule();
-	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
 	if (bWasSuccess)
 	{
 		if ((GetOwnerRole() == ROLE_Authority))
@@ -445,9 +445,9 @@ void UActorInventoryComponent::Drop(UItemObject* PendingDropItemObject)
 
 void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 {
-	const auto Ctx = FExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FPickupContextParams>(PendingPickupItemObject);
 	const auto Rule = GetPickupRule();
-	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
 	if (bWasSuccess)
 	{
 		if ((GetOwnerRole() == ROLE_Authority))
@@ -474,9 +474,9 @@ void UActorInventoryComponent::Pickup(UItemObject* PendingPickupItemObject)
 
 void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject)
 {
-	const auto Ctx = FExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FSwapContextParams>(SrcItemObject, DestItemObject);
 	const auto Rule = GetSwapRule();
-	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
 	if (bWasSuccess)
 	{
 		if ((GetOwnerRole() == ROLE_Authority))
@@ -1050,19 +1050,6 @@ UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() 
 	}
 
 	return ItemObject.Get();
-}
-
-bool UActorInventoryComponent::CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                          const TInstancedStruct<FExecutionContextRule>& Rule) const
-{
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
-	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return false;
-	}
-
-	const bool bPredicate = ContextRule->Predicate(this, Params);
-	return bPredicate;
 }
 
 void UActorInventoryComponent::Server_Drop_Implementation(UItemObject* PendingDropItemObject)

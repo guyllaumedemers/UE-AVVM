@@ -37,9 +37,9 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		return;
 	}
 
-	const auto Ctx = FExecutionContextParams::Make<FLoadoutExecutionContextParams>(this, ActiveItemSlotTag, TargetTag);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FLoadoutExecutionContextParams>(this, ActiveItemSlotTag, TargetTag);
 	const auto Rule = GetEquipRule();
-	const bool bWasSuccess = CanExecute(Ctx, Rule);
+	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
 	if (bWasSuccess)
 	{
 		if (Outer->HasAuthority())
@@ -159,32 +159,19 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 	}
 }
 
-bool UNonReplicatedLoadoutObject::CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                             const TInstancedStruct<FExecutionContextRule>& Rule) const
-{
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
-	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
-	{
-		return false;
-	}
-
-	const bool bPredicate = ContextRule->Predicate(this, Params);
-	return bPredicate;
-}
-
 void UNonReplicatedLoadoutObject::Server_Cycle_Implementation(const FGameplayTag& TargetTag)
 {
 	Cycle(TargetTag);
 }
 
-TInstancedStruct<FExecutionContextRule> UNonReplicatedLoadoutObject::GetUnequipRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UNonReplicatedLoadoutObject::GetUnequipRule() const
 {
-	return FExecutionContextRule::Make<FLoadoutUnequipRule>();
+	return FAVVMExecutionContextRule::Make<FLoadoutUnequipRule>();
 }
 
-TInstancedStruct<FExecutionContextRule> UNonReplicatedLoadoutObject::GetEquipRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UNonReplicatedLoadoutObject::GetEquipRule() const
 {
-	return FExecutionContextRule::Make<FLoadoutEquipRule>();
+	return FAVVMExecutionContextRule::Make<FLoadoutEquipRule>();
 }
 
 void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)

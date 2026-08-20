@@ -25,7 +25,7 @@
 #include "SkillTreeExecutionContextParams.h"
 
 bool FGrantRule::Predicate(const UObject* WorldContextObject,
-                           const TInstancedStruct<FExecutionContextParams>& Params) const
+                           const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(SkillTreeComponent), TEXT("Invalid Cast to Skill Tree Component.")))
@@ -53,7 +53,7 @@ bool FGrantRule::Predicate(const UObject* WorldContextObject,
 }
 
 bool FRevokeRule::Predicate(const UObject* WorldContextObject,
-                            const TInstancedStruct<FExecutionContextParams>& Params) const
+                            const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(SkillTreeComponent), TEXT("Invalid Cast to Skill Tree Component.")))
@@ -81,7 +81,7 @@ bool FRevokeRule::Predicate(const UObject* WorldContextObject,
 }
 
 bool FModifyRule::Predicate(const UObject* WorldContextObject,
-                            const TInstancedStruct<FExecutionContextParams>& Params) const
+                            const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(SkillTreeComponent), TEXT("Invalid Cast to Skill Tree Component.")))

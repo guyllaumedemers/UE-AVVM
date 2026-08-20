@@ -21,8 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
-#include "ExecutionContextRule.h"
+#include "AVVMExecutionContextRule.h"
 #include "GameplayTagContainer.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "Components/ActorComponent.h"
@@ -153,9 +152,6 @@ protected:
 		TArray<UActorInventoryComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests;
 		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
 	};
-
-	bool CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-	                const TInstancedStruct<FExecutionContextRule>& Rule) const;
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Drop(UItemObject* PendingDropItemObject);
@@ -207,9 +203,9 @@ private:
 
 	// @gdemers ai version of this component may require different rules, or any in-game static actor
 	// such as destructables.
-	virtual TInstancedStruct<FExecutionContextRule> GetDropRule() const;
-	virtual TInstancedStruct<FExecutionContextRule> GetPickupRule() const;
-	virtual TInstancedStruct<FExecutionContextRule> GetSwapRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetDropRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetPickupRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetSwapRule() const;
 
 	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnDrop(UItemObject* ItemObject);

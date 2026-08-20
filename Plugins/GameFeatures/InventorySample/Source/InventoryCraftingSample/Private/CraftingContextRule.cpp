@@ -20,7 +20,7 @@
 #include "CraftingContextRule.h"
 
 bool FCraftingContextRule::Predicate(const UObject* WorldContextObject,
-                                     const TInstancedStruct<FExecutionContextParams>& Params) const
+                                     const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
-	return FExecutionContextRule::Predicate(WorldContextObject, Params);
+	return FAVVMExecutionContextRule::Predicate(WorldContextObject, Params);
 }

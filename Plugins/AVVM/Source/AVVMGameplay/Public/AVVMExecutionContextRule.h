@@ -21,38 +21,56 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "ExecutionContextRule.generated.h"
+#include "AVVMExecutionContextRule.generated.h"
 
 /**
-*	Class description:
+ *	Class description:
  *
- *	FExecutionContextRule is a context struct that define the conditions required for executing an action.
+ *	FAVVMExecutionContextRule is a context struct that define the conditions required for executing an action.
  */
 USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FExecutionContextRule
+struct AVVMGAMEPLAY_API FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
-	virtual ~FExecutionContextRule() = default;
+	virtual ~FAVVMExecutionContextRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
 
-	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextRule>::Make<T>
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMExecutionContextRule>::Make<T>
 	template <typename TChild, typename... TArgs>
-	static TInstancedStruct<FExecutionContextRule> Make(TArgs&&... Args);
+	static TInstancedStruct<FAVVMExecutionContextRule> Make(TArgs&&... Args);
 };
 
 template <typename TChild, typename... TArgs>
-TInstancedStruct<FExecutionContextRule> FExecutionContextRule::Make(TArgs&&... Args)
+TInstancedStruct<FAVVMExecutionContextRule> FAVVMExecutionContextRule::Make(TArgs&&... Args)
 {
-	return TInstancedStruct<FExecutionContextRule>::Make<TChild>(Forward<TArgs>(Args)...);
+	return TInstancedStruct<FAVVMExecutionContextRule>::Make<TChild>(Forward<TArgs>(Args)...);
 }
 
 template <>
-struct TBaseStructure<FExecutionContextRule>
+struct TBaseStructure<FAVVMExecutionContextRule>
 {
 	static AVVMGAMEPLAY_API UScriptStruct* Get();
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMExecutionContextUtils expose a set of utility function relevant for evaluating event execution conditions.
+ */
+UCLASS()
+class AVVMGAMEPLAY_API UAVVMExecutionContextUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static bool CanExecute(const UObject* WorldContextObject,
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params,
+	                       const TInstancedStruct<FAVVMExecutionContextRule>& Rule);
 };

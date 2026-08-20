@@ -17,9 +17,9 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
 
-UScriptStruct* TBaseStructure<FExecutionContextParams>::Get()
+UScriptStruct* TBaseStructure<FAVVMExecutionContextParams>::Get()
 {
-	return FExecutionContextParams::StaticStruct();
+	return FAVVMExecutionContextParams::StaticStruct();
 }

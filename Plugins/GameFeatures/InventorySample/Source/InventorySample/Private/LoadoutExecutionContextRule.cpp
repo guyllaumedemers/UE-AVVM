@@ -22,7 +22,7 @@
 #include "NonReplicatedLoadoutObject.h"
 
 bool FLoadoutUnequipRule::Predicate(const UObject* WorldContextObject,
-									const TInstancedStruct<FExecutionContextParams>& Params) const
+									const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* NonReplicatedLoadoutObject = Cast<UNonReplicatedLoadoutObject>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject), TEXT("Invalid Cast to Loadout Object.")))
@@ -36,7 +36,7 @@ bool FLoadoutUnequipRule::Predicate(const UObject* WorldContextObject,
 }
 
 bool FLoadoutEquipRule::Predicate(const UObject* WorldContextObject,
-                                  const TInstancedStruct<FExecutionContextParams>& Params) const
+                                  const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* NonReplicatedLoadoutObject = Cast<UNonReplicatedLoadoutObject>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject), TEXT("Invalid Cast to Loadout Object.")))

@@ -17,9 +17,40 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "ExecutionContextRule.h"
+#pragma once
 
-UScriptStruct* TBaseStructure<FExecutionContextRule>::Get()
+#include "CoreMinimal.h"
+
+#include "StructUtils/InstancedStruct.h"
+
+#include "AVVMExecutionContextParams.generated.h"
+
+/**
+ *	Class description:
+ *
+ *	FAVVMExecutionContextParams is a context struct that defines the properties to be
+ *	involved in executing an action, as well as the execution implementation details itself.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMExecutionContextParams
 {
-	return FExecutionContextRule::StaticStruct();
+	GENERATED_BODY()
+
+	virtual ~FAVVMExecutionContextParams() = default;
+
+	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMExecutionContextParams>::Make<T>
+	template <typename TChild, typename... TArgs>
+	static TInstancedStruct<FAVVMExecutionContextParams> Make(TArgs&&... Args);
+};
+
+template <typename TChild, typename... TArgs>
+TInstancedStruct<FAVVMExecutionContextParams> FAVVMExecutionContextParams::Make(TArgs&&... Args)
+{
+	return TInstancedStruct<FAVVMExecutionContextParams>::Make<TChild>(Forward<TArgs>(Args)...);
 }
+
+template <>
+struct TBaseStructure<FAVVMExecutionContextParams>
+{
+	static AVVMGAMEPLAY_API UScriptStruct* Get();
+};

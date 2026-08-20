@@ -21,11 +21,11 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "AVVMExecutionContextRule.h"
 
 #include "LoadoutExecutionContextRule.generated.h"
 
-struct FExecutionContextParams;
+struct FAVVMExecutionContextParams;
 
 /**
  *	Class description:
@@ -34,13 +34,13 @@ struct FExecutionContextParams;
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FLoadoutUnequipRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FLoadoutUnequipRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FLoadoutUnequipRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-						   const TInstancedStruct<FExecutionContextParams>& Params) const override;
+						   const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };
 
 /**
@@ -50,11 +50,11 @@ struct INVENTORYSAMPLE_API FLoadoutUnequipRule : public FExecutionContextRule
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FLoadoutEquipRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FLoadoutEquipRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FLoadoutEquipRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };

@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
 #include "GameplayTagContainer.h"
 
 #include "LoadoutExecutionContextParams.generated.h"
@@ -34,7 +34,7 @@ class UNonReplicatedLoadoutObject;
  *	FLoadoutExecutionContextParams
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FLoadoutExecutionContextParams : public FExecutionContextParams
+struct INVENTORYSAMPLE_API FLoadoutExecutionContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 

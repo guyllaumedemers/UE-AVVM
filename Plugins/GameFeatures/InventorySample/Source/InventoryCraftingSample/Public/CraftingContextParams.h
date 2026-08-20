@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
 
 #include "CraftingContextParams.generated.h"
 
@@ -32,7 +32,7 @@
  *	involved in executing a crafting action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextParams : public FExecutionContextParams
+struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 };

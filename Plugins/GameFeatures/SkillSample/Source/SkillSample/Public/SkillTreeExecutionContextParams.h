@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
 #include "SkillTreeNodeObject.h"
 
 #include "SkillTreeExecutionContextParams.generated.h"
@@ -33,7 +33,7 @@
  *	involved in executing a granting of a tree node.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FGrantContextParams : public FExecutionContextParams
+struct SKILLSAMPLE_API FGrantContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 
@@ -51,7 +51,7 @@ struct SKILLSAMPLE_API FGrantContextParams : public FExecutionContextParams
  *	involved in executing a revoking of a tree node.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FRevokeContextParams : public FExecutionContextParams
+struct SKILLSAMPLE_API FRevokeContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 
@@ -69,7 +69,7 @@ struct SKILLSAMPLE_API FRevokeContextParams : public FExecutionContextParams
  *	involved in executing a modification to a tree node.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FModifyContextParams : public FExecutionContextParams
+struct SKILLSAMPLE_API FModifyContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 

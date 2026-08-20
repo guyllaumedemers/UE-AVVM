@@ -17,40 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "AVVMExecutionContextRule.h"
 
-#include "CoreMinimal.h"
-
-#include "StructUtils/InstancedStruct.h"
-
-#include "ExecutionContextParams.generated.h"
-
-/**
- *	Class description:
- *
- *	FExecutionContextParams is a context struct that defines the properties to be
- *	involved in executing an action, as well as the execution implementation details itself.
- */
-USTRUCT(BlueprintType)
-struct AVVMGAMEPLAY_API FExecutionContextParams
+UScriptStruct* TBaseStructure<FAVVMExecutionContextRule>::Get()
 {
-	GENERATED_BODY()
-
-	virtual ~FExecutionContextParams() = default;
-
-	// @gdemers wrapper function template to avoid writing TInstancedStruct<FExecutionContextParams>::Make<T>
-	template <typename TChild, typename... TArgs>
-	static TInstancedStruct<FExecutionContextParams> Make(TArgs&&... Args);
-};
-
-template <typename TChild, typename... TArgs>
-TInstancedStruct<FExecutionContextParams> FExecutionContextParams::Make(TArgs&&... Args)
-{
-	return TInstancedStruct<FExecutionContextParams>::Make<TChild>(Forward<TArgs>(Args)...);
+	return FAVVMExecutionContextRule::StaticStruct();
 }
 
-template <>
-struct TBaseStructure<FExecutionContextParams>
+bool UAVVMExecutionContextUtils::CanExecute(const UObject* WorldContextObject,
+                                            const TInstancedStruct<FAVVMExecutionContextParams>& Params,
+                                            const TInstancedStruct<FAVVMExecutionContextRule>& Rule)
 {
-	static AVVMGAMEPLAY_API UScriptStruct* Get();
-};
+	const auto* ContextRule = Rule.GetPtr<FAVVMExecutionContextRule>();
+	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
+	{
+		return false;
+	}
+
+	const bool bPredicate = ContextRule->Predicate(WorldContextObject, Params);
+	return bPredicate;
+}

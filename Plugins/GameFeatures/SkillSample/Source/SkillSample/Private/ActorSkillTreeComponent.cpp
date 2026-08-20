@@ -188,7 +188,7 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 
 void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	const auto Ctx = FExecutionContextParams::Make<FGrantContextParams>(NewTreeNodeObject);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FGrantContextParams>(NewTreeNodeObject);
 	const auto Rule = GetGrantRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
@@ -217,7 +217,7 @@ void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& N
 
 void UActorSkillTreeComponent::RevokeTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject)
 {
-	const auto Ctx = FExecutionContextParams::Make<FRevokeContextParams>(NewTreeNodeObject);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FRevokeContextParams>(NewTreeNodeObject);
 	const auto Rule = GetRevokeRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
@@ -246,7 +246,7 @@ void UActorSkillTreeComponent::RevokeTreeNodeObject(const FSkillTreeNodeObject& 
 
 void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params)
 {
-	const auto Ctx = FExecutionContextParams::Make<FModifyContextParams>(Params.TreeNodeObject, Params.ModifiedLevel);
+	const auto Ctx = FAVVMExecutionContextParams::Make<FModifyContextParams>(Params.TreeNodeObject, Params.ModifiedLevel);
 	const auto Rule = GetModifyRule();
 	const bool bWasSuccess = CanExecute(Ctx, Rule);
 	if (bWasSuccess)
@@ -340,19 +340,19 @@ const TInstancedStruct<FAVVMDataResolverHelper>& UActorSkillTreeComponent::GetSk
 	return Helper;
 }
 
-TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetGrantRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UActorSkillTreeComponent::GetGrantRule() const
 {
-	return FExecutionContextRule::Make<FGrantRule>();
+	return FAVVMExecutionContextRule::Make<FGrantRule>();
 }
 
-TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetRevokeRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UActorSkillTreeComponent::GetRevokeRule() const
 {
-	return FExecutionContextRule::Make<FRevokeRule>();
+	return FAVVMExecutionContextRule::Make<FRevokeRule>();
 }
 
-TInstancedStruct<FExecutionContextRule> UActorSkillTreeComponent::GetModifyRule() const
+TInstancedStruct<FAVVMExecutionContextRule> UActorSkillTreeComponent::GetModifyRule() const
 {
-	return FExecutionContextRule::Make<FModifyRule>();
+	return FAVVMExecutionContextRule::Make<FModifyRule>();
 }
 
 void UActorSkillTreeComponent::OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject)
@@ -556,10 +556,10 @@ FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(con
 	return ActiveGEHandle;
 }
 
-bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-                                          const TInstancedStruct<FExecutionContextRule>& Rule) const
+bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FAVVMExecutionContextParams>& Params,
+                                          const TInstancedStruct<FAVVMExecutionContextRule>& Rule) const
 {
-	const auto* ContextRule = Rule.GetPtr<FExecutionContextRule>();
+	const auto* ContextRule = Rule.GetPtr<FAVVMExecutionContextRule>();
 	if (!ensureAlwaysMsgf(ContextRule != nullptr, TEXT("FExecutionContextRule invalid.")))
 	{
 		return false;

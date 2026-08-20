@@ -22,8 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "ActiveGameplayEffectHandle.h"
-#include "ExecutionContextParams.h"
-#include "ExecutionContextRule.h"
+#include "AVVMExecutionContextParams.h"
+#include "AVVMExecutionContextRule.h"
 #include "GameplayTagContainer.h"
 #include "SkillTreeNodeObject.h"
 #include "Backend/AVVMDataResolverHelper.h"
@@ -135,8 +135,8 @@ protected:
 	FActiveGameplayEffectHandle TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
 	                                                   const int32 PrivateTreeNodeId);
 
-	bool CanExecute(const TInstancedStruct<FExecutionContextParams>& Params,
-	                const TInstancedStruct<FExecutionContextRule>& Rule) const;
+	bool CanExecute(const TInstancedStruct<FAVVMExecutionContextParams>& Params,
+	                const TInstancedStruct<FAVVMExecutionContextRule>& Rule) const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_GrantTreeNodeObject(const FSkillTreeNodeObject& NewTreeNodeObject);
@@ -180,9 +180,9 @@ private:
 	// @gdemers Data Resolver for backend representation of an actor skill tree. 
 	static const TInstancedStruct<FAVVMDataResolverHelper>& GetSkillTreeDataResolverHelper();
 
-	virtual TInstancedStruct<FExecutionContextRule> GetGrantRule() const;
-	virtual TInstancedStruct<FExecutionContextRule> GetRevokeRule() const;
-	virtual TInstancedStruct<FExecutionContextRule> GetModifyRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetGrantRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetRevokeRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetModifyRule() const;
 
 	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnGrant(const FSkillTreeNodeObject& NewTreeNodeObject);

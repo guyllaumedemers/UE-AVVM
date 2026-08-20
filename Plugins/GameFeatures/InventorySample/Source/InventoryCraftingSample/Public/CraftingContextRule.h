@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "AVVMExecutionContextRule.h"
 
 #include "CraftingContextRule.generated.h"
 
@@ -32,10 +32,10 @@
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FExecutionContextRule
+struct INVENTORYCRAFTINGSAMPLE_API FCraftingContextRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };

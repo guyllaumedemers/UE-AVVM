@@ -21,11 +21,11 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextRule.h"
+#include "AVVMExecutionContextRule.h"
 
 #include "InventoryExecutionContextRule.generated.h"
 
-struct FExecutionContextParams;
+struct FAVVMExecutionContextParams;
 
 /**
  *	Class description:
@@ -34,13 +34,13 @@ struct FExecutionContextParams;
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FDropRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FDropRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FDropRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };
 
 /**
@@ -50,13 +50,13 @@ struct INVENTORYSAMPLE_API FDropRule : public FExecutionContextRule
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FPickupRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FPickupRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FPickupRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };
 
 /**
@@ -66,11 +66,11 @@ struct INVENTORYSAMPLE_API FPickupRule : public FExecutionContextRule
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FSwapRule : public FExecutionContextRule
+struct INVENTORYSAMPLE_API FSwapRule : public FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
 	FSwapRule() = default;
 	virtual bool Predicate(const UObject* WorldContextObject,
-	                       const TInstancedStruct<FExecutionContextParams>& Params) const override;
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };

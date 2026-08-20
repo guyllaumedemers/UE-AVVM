@@ -22,14 +22,14 @@
 #include "ActorInventoryComponent.h"
 #include "AVVMCharacter.h"
 #include "AVVMGameplaySettings.h"
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
 #include "InventoryExecutionContextParams.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "Tags/PrivateTags.h"
 
 bool FDropRule::Predicate(const UObject* WorldContextObject,
-                          const TInstancedStruct<FExecutionContextParams>& Params) const
+                          const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Invalid Cast to Actor Inventory Component.")))
@@ -73,7 +73,7 @@ bool FDropRule::Predicate(const UObject* WorldContextObject,
 }
 
 bool FPickupRule::Predicate(const UObject* WorldContextObject,
-                            const TInstancedStruct<FExecutionContextParams>& Params) const
+                            const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Invalid Cast to Actor Inventory Component.")))
@@ -128,7 +128,7 @@ bool FPickupRule::Predicate(const UObject* WorldContextObject,
 }
 
 bool FSwapRule::Predicate(const UObject* WorldContextObject,
-                          const TInstancedStruct<FExecutionContextParams>& Params) const
+                          const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
 {
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(WorldContextObject);
 	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Invalid Cast to Actor Inventory Component.")))

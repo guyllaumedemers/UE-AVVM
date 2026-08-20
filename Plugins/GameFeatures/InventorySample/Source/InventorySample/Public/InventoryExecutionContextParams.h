@@ -21,7 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ExecutionContextParams.h"
+#include "AVVMExecutionContextParams.h"
 
 #include "InventoryExecutionContextParams.generated.h"
 
@@ -34,7 +34,7 @@ class UItemObject;
  *	involved in executing a drop action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
+struct INVENTORYSAMPLE_API FDropContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 
@@ -52,7 +52,7 @@ struct INVENTORYSAMPLE_API FDropContextParams : public FExecutionContextParams
  *	involved in executing a pickup action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FPickupContextParams : public FExecutionContextParams
+struct INVENTORYSAMPLE_API FPickupContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 
@@ -70,7 +70,7 @@ struct INVENTORYSAMPLE_API FPickupContextParams : public FExecutionContextParams
  *	involved in executing a swap action.
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FSwapContextParams : public FExecutionContextParams
+struct INVENTORYSAMPLE_API FSwapContextParams : public FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 
