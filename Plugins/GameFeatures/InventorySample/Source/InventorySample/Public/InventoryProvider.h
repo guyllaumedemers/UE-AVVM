@@ -28,7 +28,9 @@
 
 #include "InventoryProvider.generated.h"
 
+class UActorInventoryComponent;
 class UItemObject;
+class UNonReplicatedLoadoutObject;
 
 /**
  *	Class description:
@@ -83,6 +85,14 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void RequestItemsFromMicroService() const;
 	virtual void RequestItemsFromMicroService_Implementation() const PURE_VIRTUAL(RequestItemsFromMicroService_Implementation, return;);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UActorInventoryComponent* GetInventoryComponent() const;
+	virtual UActorInventoryComponent* GetInventoryComponent_Implementation() const PURE_VIRTUAL(GetInventoryComponent_Implementation, return nullptr;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	UNonReplicatedLoadoutObject* GetNonReplicatedLoadoutObject() const;
+	virtual UNonReplicatedLoadoutObject* GetNonReplicatedLoadoutObject_Implementation() const PURE_VIRTUAL(GetNonReplicatedLoadoutObject_Implementation, return nullptr;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	EItemSrcType GetItemSrcType() const;

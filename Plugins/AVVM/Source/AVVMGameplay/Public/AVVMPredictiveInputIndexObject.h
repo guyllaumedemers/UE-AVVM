@@ -28,7 +28,7 @@
 /**
  *	Wrapper macro to register Closure Types with `this` class FAVVMPredictiveInputIndexObject property.
  */
-#define MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(WeakFunc)\
+#define BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(WeakFunc)\
 {\
 	[ThisInstance = TWeakObjectPtr(this)](const int32 PredictedTargetIndex) { return ThisInstance.IsValid() ? ThisInstance->WeakFunc(PredictedTargetIndex) : false; }\
 }\

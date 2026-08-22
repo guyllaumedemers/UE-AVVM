@@ -32,10 +32,23 @@ UNonReplicatedLoadoutObject::UNonReplicatedLoadoutObject()
 {
 	PredictiveInputIndex = FAVVMPredictiveInputIndexObject
 	{
-			MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Stalled),
-			MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resumed),
-			MAKE_ON_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Executed)
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Stalled),
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resumed),
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Executed)
 	};
+}
+
+void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
+{
+	const int32 Sign = FMath::Sign(MouseWheelDelta);
+	const int32 CurrSlotTagIndex = CyclingSlots.IndexOfByKey(ActiveItemSlotTag);
+	const int32 NewSlotTagIndex = ((CurrSlotTagIndex + Sign) % CyclingSlots.Num());
+
+	if (ensureAlwaysMsgf(CyclingSlots.IsValidIndex(NewSlotTagIndex), TEXT("Invalid Slot Tag.")) &&
+		(CurrSlotTagIndex != NewSlotTagIndex))
+	{
+		Cycle(CyclingSlots[NewSlotTagIndex]);
+	}
 }
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)

@@ -40,6 +40,7 @@ public class AVVM : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"CommonInput",
 				"Core",
 				"CoreUObject",
 				"DataRegistry",

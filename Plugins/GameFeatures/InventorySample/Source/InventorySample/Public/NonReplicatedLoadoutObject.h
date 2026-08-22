@@ -53,6 +53,9 @@ class INVENTORYSAMPLE_API UNonReplicatedLoadoutObject : public UObject
 	
 public:
 	UNonReplicatedLoadoutObject();
+
+	UFUNCTION(BlueprintCallable)
+	void MouseCycle(const float MouseWheelDelta);
 	
 	UFUNCTION(BlueprintCallable)
 	void Cycle(const FGameplayTag& TargetTag);
@@ -87,12 +90,13 @@ private:
 	virtual TInstancedStruct<FAVVMExecutionContextRule> GetEquipRule() const;
 	
 	virtual void OnCycle(const FGameplayTag& TargetTag);
-	bool OnIndex_Stalled(const int32 TargetIndex);
-	bool OnIndex_Resumed(const int32 TargetIndex);
-	bool OnIndex_Executed(const int32 TargetIndex);
+	virtual bool OnIndex_Stalled(const int32 TargetIndex);
+	virtual bool OnIndex_Resumed(const int32 TargetIndex);
+	virtual bool OnIndex_Executed(const int32 TargetIndex);
 
 	FAVVMPredictiveInputIndexObject PredictiveInputIndex{};
 	friend class UActorInventoryComponent;
+	friend class UActorLoadoutUtils;
 };
 
 /**

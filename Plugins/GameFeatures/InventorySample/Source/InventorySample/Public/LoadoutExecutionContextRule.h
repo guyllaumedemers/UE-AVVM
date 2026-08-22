@@ -30,7 +30,7 @@ struct FAVVMExecutionContextParams;
 /**
  *	Class description:
  *	
-*	FLoadoutUnequipRule is a context struct that define the parameters of an unequip action,
+ *	FLoadoutUnequipRule is a context struct that define the parameters of an unequip action,
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)
@@ -46,7 +46,7 @@ struct INVENTORYSAMPLE_API FLoadoutUnequipRule : public FAVVMExecutionContextRul
 /**
  *	Class description:
  *	
-*	FLoadoutEquipRule is a context struct that define the parameters of an equip action,
+ *	FLoadoutEquipRule is a context struct that define the parameters of an equip action,
  *	and it's requirements to be successful.
  */
 USTRUCT(BlueprintType)

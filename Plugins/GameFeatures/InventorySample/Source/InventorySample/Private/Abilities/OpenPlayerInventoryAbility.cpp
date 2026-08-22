@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Abilities/PlayerToggleInventoryAbility.h"
+#include "Abilities/OpenPlayerInventoryAbility.h"
 
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
@@ -27,7 +27,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 
-void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+void UOpenPlayerInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                   const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
@@ -51,7 +51,7 @@ void UPlayerToggleInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInf
 	                *GetName());
 }
 
-void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+void UOpenPlayerInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                     const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
@@ -75,7 +75,7 @@ void UPlayerToggleInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorI
 					*GetName());
 }
 
-bool UPlayerToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+bool UOpenPlayerInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                        const FGameplayAbilityActorInfo* ActorInfo,
                                                        const FGameplayTagContainer* SourceTags,
                                                        const FGameplayTagContainer* TargetTags,
@@ -93,7 +93,7 @@ bool UPlayerToggleInventoryAbility::CanActivateAbility(const FGameplayAbilitySpe
 	return Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
-void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+void UOpenPlayerInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                     const FGameplayAbilityActorInfo* ActorInfo,
                                                     const FGameplayAbilityActivationInfo ActivationInfo,
                                                     const FGameplayEventData* TriggerEventData)
@@ -133,7 +133,7 @@ void UPlayerToggleInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHa
 	}
 }
 
-void UPlayerToggleInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+void UOpenPlayerInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
                                                const FGameplayAbilityActorInfo* ActorInfo,
                                                const FGameplayAbilityActivationInfo ActivationInfo,
                                                bool bReplicateEndAbility,
