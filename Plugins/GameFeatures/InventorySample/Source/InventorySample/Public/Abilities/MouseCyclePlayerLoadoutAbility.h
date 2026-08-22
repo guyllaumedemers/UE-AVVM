@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
 #include "Abilities/GameplayAbility.h"
 #include "Ability/AVVMGameplayAbility.h"
 
@@ -40,25 +39,30 @@ class INVENTORYSAMPLE_API UMouseCyclePlayerLoadoutAbility : public UAVVMGameplay
 
 public:
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-							   const FGameplayAbilitySpec& Spec) override;
+	                           const FGameplayAbilitySpec& Spec) override;
 
 	virtual void OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-								 const FGameplayAbilitySpec& Spec) override;
+	                             const FGameplayAbilitySpec& Spec) override;
 
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-									const FGameplayAbilityActorInfo* ActorInfo,
-									const FGameplayTagContainer* SourceTags = nullptr,
-									const FGameplayTagContainer* TargetTags = nullptr,
-									FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	                                const FGameplayAbilityActorInfo* ActorInfo,
+	                                const FGameplayTagContainer* SourceTags = nullptr,
+	                                const FGameplayTagContainer* TargetTags = nullptr,
+	                                FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-								 const FGameplayAbilityActorInfo* ActorInfo,
-								 const FGameplayAbilityActivationInfo ActivationInfo,
-								 const FGameplayEventData* TriggerEventData) override;
+	                             const FGameplayAbilityActorInfo* ActorInfo,
+	                             const FGameplayAbilityActivationInfo ActivationInfo,
+	                             const FGameplayEventData* TriggerEventData) override;
 
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle,
-							const FGameplayAbilityActorInfo* ActorInfo,
-							const FGameplayAbilityActivationInfo ActivationInfo,
-							bool bReplicateEndAbility,
-							bool bWasCancelled) override;
+	                        const FGameplayAbilityActorInfo* ActorInfo,
+	                        const FGameplayAbilityActivationInfo ActivationInfo,
+	                        bool bReplicateEndAbility,
+	                        bool bWasCancelled) override;
+
+	virtual bool CommitAbility(const FGameplayAbilitySpecHandle Handle,
+							   const FGameplayAbilityActorInfo* ActorInfo,
+							   const FGameplayAbilityActivationInfo ActivationInfo,
+							   FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
 };

@@ -20,9 +20,12 @@
 #include "Abilities/MouseCyclePlayerLoadoutAbility.h"
 
 #include "AVVMCommonInputPreprocessor.h"
+#include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
 #include "InventoryProvider.h"
+#include "InventorySampleModule.h"
 #include "NonReplicatedLoadoutObject.h"
+#include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Engine/Player.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
@@ -31,12 +34,48 @@ void UMouseCyclePlayerLoadoutAbility::OnGiveAbility(const FGameplayAbilityActorI
                                                     const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+						  TEXT("UMouseCyclePlayerLoadoutAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
+	const AActor* Outer = ActorInfo->OwnerActor.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Outer,
+					Outer,
+					TEXT("%s Ability Granted."),
+					*GetName());
 }
 
 void UMouseCyclePlayerLoadoutAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                       const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
+
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+						  TEXT("UMouseCyclePlayerLoadoutAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return;
+	}
+
+	const AActor* Outer = ActorInfo->OwnerActor.Get();
+	if (!ensure(IsValid(Outer)))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogInventorySample,
+					Outer,
+					Outer,
+					TEXT("%s Ability Revoked."),
+					*GetName());
 }
 
 bool UMouseCyclePlayerLoadoutAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -45,7 +84,18 @@ bool UMouseCyclePlayerLoadoutAbility::CanActivateAbility(const FGameplayAbilityS
                                                          const FGameplayTagContainer* TargetTags,
                                                          FGameplayTagContainer* OptionalRelevantTags) const
 {
-	const bool bResult = Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return false;
+	}
+
+	// @gdemers required to pass the internal call to ShouldActivateAbility(AvatarActor->GetLocalRole()) since our ASC is owned
+	// by the player state which is simulated_proxy on client.
+	FAVVMGameplayAbilityActorInfo ModifiedActorInfo(*ActorInfo);
+
+	// @gdemers Any blocking Tags should be managed by the ASC component. In-Menu, vs In-Game. Dead, In-Tutorial, Stasis, etc...
+	const bool bResult = Super::CanActivateAbility(Handle, &ModifiedActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 	if (!bResult)
 	{
 		return false;
@@ -62,11 +112,6 @@ bool UMouseCyclePlayerLoadoutAbility::CanActivateAbility(const FGameplayAbilityS
 	{
 		return false;
 	}
-	
-	// TODO @gdemers we need to be able to track mouse wheel, its delta direction, and check if the player
-	// is within menu, in-game, or in a state that prevent activation such as stasis, or death.
-	const auto* LocalPlayer = Cast<ULocalPlayer>(ActorInfo->PlayerController->Player);
-	const float MouseWheelDelta = UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(LocalPlayer);
 
 	return true;
 }
@@ -78,17 +123,29 @@ void UMouseCyclePlayerLoadoutAbility::ActivateAbility(const FGameplayAbilitySpec
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (!ensureAlwaysMsgf(ActorInfo != nullptr, TEXT("Invalid Actor info access.")))
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UMouseCyclePlayerLoadoutAbility FGameplayAbilityActorInfo invalid!")))
 	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
 
-	auto* NonReplicatedLoadoutObject = IInventoryProvider::Execute_GetNonReplicatedLoadoutObject(ActorInfo->AvatarActor.Get());
-	if (ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject), TEXT("Inventory Provider is missing the required Loadout Object.")))
+	const APlayerController* PC = ActorInfo->PlayerController.Get();
+	if (!ensureAlwaysMsgf(IsValid(PC),
+	                      TEXT("UMouseCyclePlayerLoadoutAbility PlayerController invalid!")))
 	{
-		const auto* LocalPlayer = Cast<ULocalPlayer>(ActorInfo->PlayerController->Player);
-		const float MouseWheelDelta = UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(LocalPlayer);
-		NonReplicatedLoadoutObject->MouseCycle(MouseWheelDelta);
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
+	}
+
+	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
+	if (bWasCommitted)
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	}
+	else
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
 }
 
@@ -99,4 +156,38 @@ void UMouseCyclePlayerLoadoutAbility::EndAbility(const FGameplayAbilitySpecHandl
                                                  bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+bool UMouseCyclePlayerLoadoutAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle,
+                                                    const FGameplayAbilityActorInfo* ActorInfo,
+                                                    const FGameplayAbilityActivationInfo ActivationInfo,
+                                                    FGameplayTagContainer* OptionalRelevantTags)
+{
+	if (!Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	auto* NonReplicatedLoadoutObject = IInventoryProvider::Execute_GetNonReplicatedLoadoutObject(ActorInfo->AvatarActor.Get());
+	if (!ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject),
+	                      TEXT("Inventory Provider is missing the required Loadout Object.")))
+	{
+		return false;
+	}
+
+	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
+	if (IsValid(PC))
+	{
+		const auto* LocalPlayer = Cast<ULocalPlayer>(PC->Player);
+		const float MouseWheelDelta = UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(LocalPlayer);
+		NonReplicatedLoadoutObject->MouseCycle(MouseWheelDelta);
+	}
+
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                PC,
+	                this,
+	                TEXT("Commit %s."),
+	                *GetName());
+
+	return true;
 }

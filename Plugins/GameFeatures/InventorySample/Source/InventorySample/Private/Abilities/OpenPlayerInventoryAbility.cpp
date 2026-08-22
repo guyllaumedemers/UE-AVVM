@@ -28,7 +28,7 @@
 #include "GameFramework/PlayerState.h"
 
 void UOpenPlayerInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                                  const FGameplayAbilitySpec& Spec)
+                                                const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 
@@ -52,7 +52,7 @@ void UOpenPlayerInventoryAbility::OnGiveAbility(const FGameplayAbilityActorInfo*
 }
 
 void UOpenPlayerInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                                    const FGameplayAbilitySpec& Spec)
+                                                  const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 
@@ -69,17 +69,17 @@ void UOpenPlayerInventoryAbility::OnRemoveAbility(const FGameplayAbilityActorInf
 	}
 
 	AVVM_LOGGER_LOG(LogInventorySample,
-					Outer,
-					Outer,
-					TEXT("%s Ability Revoked."),
-					*GetName());
+	                Outer,
+	                Outer,
+	                TEXT("%s Ability Revoked."),
+	                *GetName());
 }
 
 bool UOpenPlayerInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                       const FGameplayAbilityActorInfo* ActorInfo,
-                                                       const FGameplayTagContainer* SourceTags,
-                                                       const FGameplayTagContainer* TargetTags,
-                                                       FGameplayTagContainer* OptionalRelevantTags) const
+                                                     const FGameplayAbilityActorInfo* ActorInfo,
+                                                     const FGameplayTagContainer* SourceTags,
+                                                     const FGameplayTagContainer* TargetTags,
+                                                     FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
 	                      TEXT("UPlayerInteractionAbility FGameplayAbilityActorInfo invalid!")))
@@ -94,9 +94,9 @@ bool UOpenPlayerInventoryAbility::CanActivateAbility(const FGameplayAbilitySpecH
 }
 
 void UOpenPlayerInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                    const FGameplayAbilityActorInfo* ActorInfo,
-                                                    const FGameplayAbilityActivationInfo ActivationInfo,
-                                                    const FGameplayEventData* TriggerEventData)
+                                                  const FGameplayAbilityActorInfo* ActorInfo,
+                                                  const FGameplayAbilityActivationInfo ActivationInfo,
+                                                  const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
@@ -115,29 +115,33 @@ void UOpenPlayerInventoryAbility::ActivateAbility(const FGameplayAbilitySpecHand
 		return;
 	}
 
-	AVVM_LOGGER_LOG(LogInventorySample,
-					PC,
-					PC,
-					TEXT("TryActivate %s."),
-					*GetName());
+	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
+	if (bWasCommitted)
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 
 #if WITH_EDITOR
-	if (!PC->IsNetMode(NM_DedicatedServer))
+		if (!PC->IsNetMode(NM_DedicatedServer))
 #endif
+		{
+			UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+			                                        ChannelTag,
+			                                        PC,
+			                                        PC->PlayerState,
+			                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, PC->PlayerState));
+		}
+	}
+	else
 	{
-		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-		                                        ChannelTag,
-		                                        PC,
-		                                        PC->PlayerState,
-		                                        FAVVMNotificationPayload::Make<FAVVMHandshakePayload>(PC->PlayerState, PC->PlayerState));
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
 }
 
 void UOpenPlayerInventoryAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                               const FGameplayAbilityActorInfo* ActorInfo,
-                                               const FGameplayAbilityActivationInfo ActivationInfo,
-                                               bool bReplicateEndAbility,
-                                               bool bWasCancelled)
+                                             const FGameplayAbilityActorInfo* ActorInfo,
+                                             const FGameplayAbilityActivationInfo ActivationInfo,
+                                             bool bReplicateEndAbility,
+                                             bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
