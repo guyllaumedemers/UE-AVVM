@@ -40,6 +40,12 @@ UNonReplicatedLoadoutObject::UNonReplicatedLoadoutObject()
 
 void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
 {
+	if (!ensureAlwaysMsgf(!CyclingSlots.IsEmpty(),
+	                      TEXT("Attempting to cycle on invalid slot collection.")))
+	{
+		return;
+	}
+
 	const int32 Sign = FMath::Sign(MouseWheelDelta);
 	const int32 CurrSlotTagIndex = CyclingSlots.IndexOfByKey(ActiveItemSlotTag);
 	const int32 NewSlotTagIndex = ((CurrSlotTagIndex + Sign) % CyclingSlots.Num());

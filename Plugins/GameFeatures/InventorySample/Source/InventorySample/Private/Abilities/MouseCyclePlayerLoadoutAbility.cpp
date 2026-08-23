@@ -28,6 +28,7 @@
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Engine/Player.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 
 void UMouseCyclePlayerLoadoutAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -107,7 +108,7 @@ bool UMouseCyclePlayerLoadoutAbility::CanActivateAbility(const FGameplayAbilityS
 		return false;
 	}
 
-	const bool bDoesImplements = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(ActorInfo->AvatarActor.Get());
+	const bool bDoesImplements = UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UInventoryProvider>(ActorInfo->PlayerController->GetPawn());
 	if (!bDoesImplements)
 	{
 		return false;
@@ -168,20 +169,35 @@ bool UMouseCyclePlayerLoadoutAbility::CommitAbility(const FGameplayAbilitySpecHa
 		return false;
 	}
 
-	auto* NonReplicatedLoadoutObject = IInventoryProvider::Execute_GetNonReplicatedLoadoutObject(ActorInfo->AvatarActor.Get());
+	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
+	                      TEXT("UMouseCyclePlayerLoadoutAbility FGameplayAbilityActorInfo invalid!")))
+	{
+		return false;
+	}
+
+	const APlayerController* PC = ActorInfo->PlayerController.Get();
+	if (!ensureAlwaysMsgf(IsValid(PC),
+	                      TEXT("UMouseCyclePlayerLoadoutAbility PlayerController invalid!")))
+	{
+		return false;
+	}
+
+	auto* NonReplicatedLoadoutObject = IInventoryProvider::Execute_GetNonReplicatedLoadoutObject(PC->GetPawn());
 	if (!ensureAlwaysMsgf(IsValid(NonReplicatedLoadoutObject),
 	                      TEXT("Inventory Provider is missing the required Loadout Object.")))
 	{
 		return false;
 	}
 
-	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
-	if (IsValid(PC))
+	const auto* LocalPlayer = Cast<ULocalPlayer>(PC->Player);
+	if (!ensureAlwaysMsgf(IsValid(LocalPlayer),
+	                      TEXT("Fail to retrieve Local player.")))
 	{
-		const auto* LocalPlayer = Cast<ULocalPlayer>(PC->Player);
-		const float MouseWheelDelta = UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(LocalPlayer);
-		NonReplicatedLoadoutObject->MouseCycle(MouseWheelDelta);
+		return false;
 	}
+	
+	const float MouseWheelDelta = UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(LocalPlayer);
+	NonReplicatedLoadoutObject->MouseCycle(MouseWheelDelta);
 
 	AVVM_LOGGER_LOG(LogInventorySample,
 	                PC,
