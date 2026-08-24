@@ -168,6 +168,9 @@ protected:
 	void CheckBackend() const;
 	void CheckDisk() const;
 	void CheckBounds();
+	
+	UFUNCTION()
+	void OnNewActorStateBound(const TWeakObjectPtr<UItemObject> Item);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
@@ -179,7 +182,7 @@ protected:
 	FGameplayTagContainer OuterDropConditionTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemCollectionChanged")
-	TArray<TObjectPtr<UItemObject>> Items;
+	TArray<TObjectPtr<UItemObject>> Items{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
@@ -190,9 +193,10 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
-	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> ItemHandleSystem{};
 	TSharedPtr<FItemSpawnerQueuingMechanism> QueueingMechanism = nullptr;
 	TSharedPtr<FStreamableHandle> LoadoutHandle = nullptr;
+	FDelegateHandle OnNewActorStateBoundHandle{};
 
 private:
 	void SetupItemObjects(const TArray<UObject*>& NewResources);
@@ -217,7 +221,7 @@ private:
 
 	// @gdemers cached representation of what has been attributed during the initialization
 	// phase of our inventory. This address the problem of uniqueness for entries with identical type.
-	TArray<int32> PrivateItemIds;
+	TArray<int32> PrivateItemIds{};
 	
 	friend class AAutomatedTestInventoryActor;
 	friend class UInventoryResourceHandlingImpl;

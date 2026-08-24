@@ -260,7 +260,7 @@ public:
 	void GetItemActorClassAsync(const UObject* NewActorDefinitionDataAsset,
 	                            const FOnRequestItemActorClassComplete& OnRequestItemActorClassComplete);
 
-	void SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
+	AActor* SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
 
 	// @gdemers read data specific to all attachments equipped on the given UItemObject referenced actor.
 	const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& GetNonReplicatedItemAttachmentActors() const;
@@ -294,14 +294,14 @@ protected:
 	// not be what you want for your game, but still make its possible to customize/display item configuration in offline scenarios (example : menu lobby).
 	// Note : Alternatives can be put in place to forward that data via RPC following client-sided request.
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, TWeakObjectPtr<const AActor>> NonReplicatedItemAttachmentActors;
+	TMap<FGameplayTag, TWeakObjectPtr<const AActor>> NonReplicatedItemAttachmentActors{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_ItemStateModified")
-	FItemState RuntimeItemState = FItemState();
+	FItemState RuntimeItemState{};
 
 	TSharedPtr<FStreamableHandle> StreamingHandle = nullptr;
-	FDelegateHandle OnNewSocketAttachedHandle;
-	FDelegateHandle OnNewSocketDetachedHandle;
+	FDelegateHandle OnNewSocketAttachedHandle{};
+	FDelegateHandle OnNewSocketDetachedHandle{};
 
 private:
 	// @gdemers IMPORTANT do not modify the following element id unless you have already serialized your changes

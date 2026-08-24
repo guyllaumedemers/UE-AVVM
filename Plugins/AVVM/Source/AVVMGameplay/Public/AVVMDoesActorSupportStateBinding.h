@@ -45,6 +45,8 @@ class AVVMGAMEPLAY_API IAVVMDoesActorSupportStateBinding
 	GENERATED_BODY()
 
 public:
+	DECLARE_MULTICAST_DELEGATE(FOnNewActorStateBoundDelegate);
+	
 	UFUNCTION(BlueprintNativeEvent)
 	void Bind();
 	virtual void Bind_Implementation() PURE_VIRTUAL(Bind_Implementation, return;);
@@ -52,4 +54,11 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void Unbind();
 	virtual void Unbind_Implementation() PURE_VIRTUAL(Unbind_Implementation, return;);
+
+	virtual void NotifyOnNewActorStateBound() const;
+	FDelegateHandle OnNewActorStateBoundDelegate_Add(const FOnNewActorStateBoundDelegate::FDelegate& Callback);
+	void OnNewActorStateBoundDelegate_Remove(const FDelegateHandle& Handle);
+
+protected:
+	FOnNewActorStateBoundDelegate OnNewActorStatBound{};
 };

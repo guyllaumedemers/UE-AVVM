@@ -305,6 +305,9 @@ void ATriggeringActor::Bind_Implementation()
 	{
 		TargetSkeletalMeshComponent->LinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
+	
+	// @gdemers notify loadout system to attempt default equipping ourself if we are targeting the correct slot.
+	NotifyOnNewActorStateBound();
 }
 
 void ATriggeringActor::Unbind_Implementation()

@@ -382,7 +382,7 @@ void UItemObject::GetItemActorClassAsync(const UObject* NewActorDefinitionDataAs
 	StreamingHandle = UAssetManager::Get().LoadAssetList({ActorDefinitionDataAsset->GetActorClassSoftObjectPath()}, OnRequestItemActorClassComplete);
 }
 
-void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
+AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 {
 	const FSoftObjectPath& AttributeSetSoftObjectPath = ContextArgs.AttributeSetSoftObjectPath;
 	const UClass* ActorClass = ContextArgs.ActorClass;
@@ -390,7 +390,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 
 	if (!IsValid(ActorClass) || !IsValid(Outer))
 	{
-		return;
+		return nullptr;
 	}
 
 	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateDeferredItemActor(GetWorld(), ActorClass, Outer);
@@ -399,7 +399,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                      TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
-		return;
+		return nullptr;
 	}
 
 	const bool bShouldSpawnAndAttach = RuntimeItemState.StateTags.HasAllExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_EQUIPPED});
@@ -444,7 +444,7 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	// an actor that has a valid socket at creation time.
 	if (!bCanRegisterAttributeSet || AttributeSetSoftObjectPath.IsNull())
 	{
-		return;
+		return RuntimeItemActor;
 	}
 
 	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(RuntimeItemActor);
@@ -452,6 +452,8 @@ void UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	{
 		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, RuntimeItemActor);
 	}
+	
+	return RuntimeItemActor;
 }
 
 const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& UItemObject::GetNonReplicatedItemAttachmentActors() const

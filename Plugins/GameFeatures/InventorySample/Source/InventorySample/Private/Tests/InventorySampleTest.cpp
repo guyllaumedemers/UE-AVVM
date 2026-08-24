@@ -91,9 +91,9 @@ public:
 
 		const TArray<int32> StubItems_A = {FMath::Rand32()};
 
-		const FString Payload = UInventoryUtils::CreateInventoryProvider(StubProviderId_A,
-		                                                                 StubLoadout_A,
-		                                                                 StubItems_A);
+		const FString Payload = UInventoryUtils::CreateInventoryProviderJSON(StubProviderId_A,
+		                                                                     StubLoadout_A,
+		                                                                     StubItems_A);
 
 		int32 OutStubProviderId_B = INDEX_NONE;
 		TMap<FGameplayTag, int32> OutStubLoadout_B;

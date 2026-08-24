@@ -20,6 +20,7 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMCharacter.h"
+#include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
@@ -776,7 +777,31 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 	Params.Outer = const_cast<AActor*>(Outer);
 
 	// @gdemers handle actor creation.
-	NewItemObject->SpawnActor(Params);
+	AActor* ItemActor = NewItemObject->SpawnActor(Params);
+	if (!ensureAlwaysMsgf(IsValid(ItemActor), TEXT("World Failed to create Item Actor!")))
+	{
+		return;
+	}
+
+	// @gdemers handle reacting to actor binding to a parent, i.e imply we have an anim instance linked when called.
+	const bool bShouldNotifyUponBinding = ItemActor->Implements<UAVVMDoesActorSupportStateBinding>();
+	if (!bShouldNotifyUponBinding)
+	{
+		return;
+	}
+
+	// TODO @gdemers find a way to improve on number of notification so we only bind/execute
+	// for the relevant instance. Instead of all impl of the interface.
+	const auto OnNewActorStatBound = IAVVMDoesActorSupportStateBinding::FOnNewActorStateBoundDelegate::FDelegate::CreateUObject(this, &UActorInventoryComponent::OnNewActorStateBound, TWeakObjectPtr(NewItemObject));
+
+	auto StateBinding = TScriptInterface<IAVVMDoesActorSupportStateBinding>(ItemActor);
+	OnNewActorStateBoundHandle = StateBinding->OnNewActorStateBoundDelegate_Add(OnNewActorStatBound);
+
+	// @gdemers we may have already call the state bound delegate, and finished spawning our ItemActor.
+	if (ItemActor->HasActorBegunPlay())
+	{
+		StateBinding->NotifyOnNewActorStateBound();
+	}
 }
 
 void UActorInventoryComponent::OnLoadoutObjectRetrieved()
@@ -1170,6 +1195,27 @@ void UActorInventoryComponent::CheckBounds()
 	else
 	{
 		ModifyRuntimeState({}, StorageFullTags);
+	}
+}
+
+void UActorInventoryComponent::OnNewActorStateBound(const TWeakObjectPtr<UItemObject> Item)
+{
+	if (!Item.IsValid())
+	{
+		return;
+	}
+
+	// @gdemers handle default equipping our primary weapon upon construction. it is safe to assume at this point
+	// that our anim instance is linked to the owning character.
+	const FGameplayTagContainer& SlotTags = Item->BP_GetItemSlotTags();
+	if (!SlotTags.HasTagExact(TAG_INVENTORYSAMPLE_ITEM_SLOT_OFFENSIVE_PRIMARY))
+	{
+		return;
+	}
+
+	if (IsValid(NonReplicatedLoadout))
+	{
+		NonReplicatedLoadout->Cycle(SlotTags.First());
 	}
 }
 

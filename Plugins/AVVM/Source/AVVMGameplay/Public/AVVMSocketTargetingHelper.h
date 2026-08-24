@@ -150,8 +150,8 @@ public:
 	void OnNewSocketDetachedDelegate_Remove(const FDelegateHandle& Handle);
 
 protected:
-	FOnNewSocketAttachedDelegate OnNewSocketAttached;
-	FOnNewSocketDetachedDelegate OnNewSocketDetached;
+	FOnNewSocketAttachedDelegate OnNewSocketAttached{};
+	FOnNewSocketDetachedDelegate OnNewSocketDetached{};
 };
 
 /**
@@ -181,5 +181,5 @@ public:
 	void OnNewSocketParentAvailableDelegate_Remove(const FDelegateHandle& Handle);
 
 protected:
-	FOnNewSocketParentAvailableDelegate OnNewSocketParentAvailable;
+	FOnNewSocketParentAvailableDelegate OnNewSocketParentAvailable{};
 };

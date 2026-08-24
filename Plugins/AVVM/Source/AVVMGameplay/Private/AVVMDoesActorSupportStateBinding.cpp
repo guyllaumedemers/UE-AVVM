@@ -18,3 +18,18 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMDoesActorSupportStateBinding.h"
+
+void IAVVMDoesActorSupportStateBinding::NotifyOnNewActorStateBound() const
+{
+	OnNewActorStatBound.Broadcast();
+}
+
+FDelegateHandle IAVVMDoesActorSupportStateBinding::OnNewActorStateBoundDelegate_Add(const FOnNewActorStateBoundDelegate::FDelegate& Callback)
+{
+	return OnNewActorStatBound.Add(Callback);
+}
+
+void IAVVMDoesActorSupportStateBinding::OnNewActorStateBoundDelegate_Remove(const FDelegateHandle& Handle)
+{
+	OnNewActorStatBound.Remove(Handle);
+}

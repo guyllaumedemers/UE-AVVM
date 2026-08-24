@@ -59,6 +59,12 @@ void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 {
+	if (!ensureAlwaysMsgf(bDoesSupportItemCycling,
+	                      TEXT("Attempting to call Cycle on a instance that isnt supporting it.")))
+	{
+		return;
+	}
+	
 	const AActor* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer),
 	                      TEXT("Invalid Outer!")))
@@ -180,18 +186,6 @@ void UNonReplicatedLoadoutObject::ModifyLoadout(const TArray<UItemObject*>& NewI
 
 		auto& OutValue = Loadout.FindOrAdd(TargetSlotTag);
 		OutValue = NewItemObject;
-
-		if (!bDoesSupportItemCycling || !NewItemObject->DoesBehaviourHasPartialMatch(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE}))
-		{
-			continue;
-		}
-
-		// @gdemers we need to initialize our loadout with the default element in hand represented by the highest priority tag.
-		const bool bDoesActiveItemHasHighestPriority = UActorLoadoutUtils::DoesActiveItemHasHighestPriority(CyclingSlots, ActiveItemSlotTag, TargetSlotTag);
-		if (!bDoesActiveItemHasHighestPriority)
-		{
-			Cycle(TargetSlotTag);
-		}
 	}
 }
 
@@ -212,12 +206,6 @@ TInstancedStruct<FAVVMExecutionContextRule> UNonReplicatedLoadoutObject::GetEqui
 
 void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 {
-	if (!ensureAlwaysMsgf(bDoesSupportItemCycling,
-	                      TEXT("Attempt to cycle on an Owning Inventory Component that doesn't support it!")))
-	{
-		return;
-	}
-
 	static const auto ActiveTags = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE};
 	const FGameplayTag& OldTag = ActiveItemSlotTag;
 	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
@@ -265,5 +253,5 @@ bool UActorLoadoutUtils::DoesActiveItemHasHighestPriority(const TArray<FGameplay
 {
 	const int32 ActiveItemIndex = CyclingSlots.IndexOfByKey(ActiveItemSlotTag);
 	const int32 NewItemIndex = CyclingSlots.IndexOfByKey(NewItemSlotTag);
-	return (ActiveItemIndex >= NewItemIndex);
+	return !ActiveItemSlotTag.IsValid() || (ActiveItemIndex >= NewItemIndex);
 }

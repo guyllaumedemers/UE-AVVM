@@ -107,47 +107,11 @@ TMap<FGameplayTag/*Slot Tag*/, int32> UPresetLoadoutStubDataProvider::MakeProper
 		return TMap<FGameplayTag, int32>{};
 	}
 
-	TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
-	TMap<FGameplayTag, int32> Loadout;
-	TArray<int32> Items;
+	TMap<FGameplayTag, int32> OutLoadout;
+	TArray<int32> OutItems;
 
-	// @gdemers generate PrivateItemIds for all entries defined for a given Provider
-	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : Row->DefaultInventory)
-	{
-		if (ItemObjectClass.IsNull())
-		{
-			continue;
-		}
-
-		// TODO @gdemers Improve on this. I dont like that its synchronous.
-		const UClass* Class = ItemObjectClass.LoadSynchronous();
-		if (!IsValid(Class))
-		{
-			continue;
-		}
-
-		const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
-		const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, ProviderDefaultItemProperties);
-
-		ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
-		Items.Add(PrivateItemId);
-
-		const auto* SearchResult = Row->DefaultSlotTags.FindByPredicate([AllowedSlots = ItemObjectCDO->BP_GetItemSlotTags()](const FGameplayTag& Tag)
-		{
-			return AllowedSlots.HasTagExact(Tag);
-		});
-
-		if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Player hasn't defined the required slot tags to support equipping this item.")) &&
-			ensureAlwaysMsgf(!Loadout.Contains(*SearchResult), TEXT("Duplicated assignment for the current Inventory Provider.")))
-		{
-			Loadout.FindOrAdd(*SearchResult, PrivateItemId);
-		}
-	}
-
-	// @gdemers all items are initialized. if our inventory provider definition was configured correctly,
-	// a valid storage object, or more are available for referencing on relevant items.
-	FStorageHelper::HandleStorageAssignment(ItemCDOs, Items);
-	return Loadout;
+	UInventoryUtils::CreateInventoryProvider(Row, OutLoadout, OutItems);
+	return OutLoadout;
 }
 
 UComplexDependencyLookupStubDataProvider::UComplexDependencyLookupStubDataProvider(const FObjectInitializer& ObjectInitializer)

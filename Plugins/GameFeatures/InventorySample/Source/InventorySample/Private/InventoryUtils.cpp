@@ -167,53 +167,12 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
-		TMap<int32, TWeakObjectPtr<const UItemObject>> ItemCDOs;
-		TMap<FGameplayTag, int32> Loadout;
-		TArray<int32> Items;
+		TMap<FGameplayTag, int32> OutLoadout;
+		TArray<int32> OutItems;
 
-		// @gdemers generate PrivateItemIds for all entries defined for a given Provider
-		for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : Row->DefaultInventory)
-		{
-			if (ItemObjectClass.IsNull())
-			{
-				continue;
-			}
+		UInventoryUtils::CreateInventoryProvider(Row, OutLoadout, OutItems);
 
-			// TODO @gdemers Improve on this. I dont like that its synchronous.
-			const UClass* Class = ItemObjectClass.LoadSynchronous();
-			if (!IsValid(Class))
-			{
-				continue;
-			}
-
-			const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
-			const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, ProviderDefaultItemProperties);
-
-			ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
-			Items.Add(PrivateItemId);
-
-			if (!Row->bCanInventoryProviderEquipItems)
-			{
-				continue;
-			}
-
-			const auto* SearchResult = Row->DefaultSlotTags.FindByPredicate([AllowedSlots = ItemObjectCDO->BP_GetItemSlotTags()](const FGameplayTag& Tag)
-			{
-				return AllowedSlots.HasTagExact(Tag);
-			});
-
-			if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Player hasn't defined the required slot tags to support equipping this item.")) &&
-				ensureAlwaysMsgf(!Loadout.Contains(*SearchResult), TEXT("Duplicated assignment for the current Inventory Provider.")))
-			{
-				Loadout.FindOrAdd(*SearchResult, PrivateItemId);
-			}
-		}
-
-		// @gdemers all items are initialized. if our inventory provider definition was configured correctly,
-		// a valid storage object, or more are available for referencing on relevant items.
-		FStorageHelper::HandleStorageAssignment(ItemCDOs, Items);
-
-		const FString OutProvider = UInventoryUtils::CreateInventoryProvider(ProviderId, Loadout, Items);
+		const FString OutProvider = UInventoryUtils::CreateInventoryProviderJSON(ProviderId, OutLoadout, OutItems);
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
 	}
 
@@ -233,9 +192,77 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 	}
 }
 
-FString UInventoryUtils::CreateInventoryProvider(const int32 ProviderId,
-                                                 const TMap<FGameplayTag, int32>& Loadout,
-                                                 const TArray<int32>& PrivateItemIds)
+void UInventoryUtils::CreateInventoryProvider(const FInventoryProviderTableRow* TableRowEntry,
+                                              TMap<FGameplayTag, int32>& OutLoadout,
+                                              TArray<int32>& OutItems)
+{
+	if (!ensureAlwaysMsgf(TableRowEntry != nullptr, TEXT("Invalid Table Row Entry.")))
+	{
+		return;
+	}
+
+	TMap<int32/*PrivateItemId_WithoutStorage*/, TWeakObjectPtr<const UItemObject>> ItemCDOs;
+	TArray<TWeakObjectPtr<const UItemObject>> OrderedItemCDOs;
+	// @gdemers generate PrivateItemIds for all entries defined for a given Provider
+	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : TableRowEntry->DefaultInventory)
+	{
+		if (ItemObjectClass.IsNull())
+		{
+			continue;
+		}
+
+		// TODO @gdemers Improve on this. I dont like that its synchronous.
+		const UClass* Class = ItemObjectClass.LoadSynchronous();
+		if (!IsValid(Class))
+		{
+			continue;
+		}
+
+		const auto* ItemObjectCDO = Class->GetDefaultObject<UItemObject>();
+		const int32 PrivateItemId = UInventoryUtils::CreateDefaultPrivateItemId(ItemObjectCDO, ProviderDefaultItemProperties);
+
+		ItemCDOs.FindOrAdd(PrivateItemId, ItemObjectCDO);
+		OrderedItemCDOs.Add(ItemObjectCDO);
+		OutItems.Add(PrivateItemId);
+	}
+
+	// @gdemers all items are initialized. if our inventory provider definition was configured correctly,
+	// a valid storage object, or more are available for referencing on relevant items.
+	FStorageHelper::HandleStorageAssignment(ItemCDOs, OutItems);
+
+	// @gdemers IMPORTANT We need to append our loadout AFTER our ItemObject PrivateItemId has FULLY
+	// initialized. This includes with a valid storage position, otherwise there will be a mismatch during loadout lookup.
+	if (!TableRowEntry->bCanInventoryProviderEquipItems || !ensureAlwaysMsgf((OrderedItemCDOs.Num() == OutItems.Num()),
+	                                                                         TEXT("Collection size mismatch.")))
+	{
+		return;
+	}
+
+	for (int32 i = 0; i < OrderedItemCDOs.Num(); ++i)
+	{
+		const auto& ItemObjectCDO = OrderedItemCDOs[i];
+		if (!ItemObjectCDO.IsValid())
+		{
+			continue;
+		}
+
+		const auto* SearchResult = TableRowEntry->DefaultSlotTags.FindByPredicate([AllowedSlots = ItemObjectCDO->BP_GetItemSlotTags()](const FGameplayTag& Tag)
+		{
+			return AllowedSlots.HasTagExact(Tag);
+		});
+
+		if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Player hasn't defined the required slot tags to support equipping this item.")) &&
+			ensureAlwaysMsgf(!OutLoadout.Contains(*SearchResult), TEXT("Duplicated assignment for the current Inventory Provider.")))
+		{
+			// @gdemers OutItems[i] return the proper bitmask with storage referencing, and position included.
+			OutLoadout.FindOrAdd(*SearchResult, OutItems[i]);
+		}
+	}
+}
+
+FString UInventoryUtils::CreateInventoryProviderJSON(const int32 ProviderId,
+                                                     const TMap<FGameplayTag, int32>& Loadout,
+                                                     const TArray<int32>& PrivateItemIds)
 {
 	NSJsonInventory::FJsonInventoryProvider InventoryProvider;
 	InventoryProvider.Id = ProviderId;
