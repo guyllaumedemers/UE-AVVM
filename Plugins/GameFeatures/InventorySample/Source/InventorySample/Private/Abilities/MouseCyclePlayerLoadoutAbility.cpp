@@ -195,15 +195,15 @@ bool UMouseCyclePlayerLoadoutAbility::CommitAbility(const FGameplayAbilitySpecHa
 	{
 		return false;
 	}
+
+	AVVM_LOGGER_LOG(LogInventorySample,
+					PC,
+					this,
+					TEXT("Commit %s."),
+					*GetName());
 	
 	const float MouseWheelDelta = UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(LocalPlayer);
 	NonReplicatedLoadoutObject->MouseCycle(MouseWheelDelta);
-
-	AVVM_LOGGER_LOG(LogInventorySample,
-	                PC,
-	                this,
-	                TEXT("Commit %s."),
-	                *GetName());
 
 	return true;
 }

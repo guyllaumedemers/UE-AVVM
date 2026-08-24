@@ -19,7 +19,9 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
+#include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
+#include "InventorySampleModule.h"
 #include "ItemObject.h"
 #include "LoadoutExecutionContextParams.h"
 #include "LoadoutExecutionContextRule.h"
@@ -138,6 +140,12 @@ bool UNonReplicatedLoadoutObject::CallRemoteFunction(UFunction* Function, void* 
 
 void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
 {
+	auto* Outer = GetTypedOuter<AActor>();
+	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
+	{
+		return;
+	}
+
 	if (!ensureAlwaysMsgf(!CyclingSlots.IsEmpty(),
 	                      TEXT("Attempting to cycle on invalid slot collection.")))
 	{
@@ -148,11 +156,20 @@ void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
 	const int32 CurrSlotTagIndex = CyclingSlots.IndexOfByKey(ActiveItemSlotTag);
 	const int32 NewSlotTagIndex = ((CurrSlotTagIndex + Sign + CyclingSlots.Num()) % CyclingSlots.Num());
 
-	if (ensureAlwaysMsgf(CyclingSlots.IsValidIndex(NewSlotTagIndex), TEXT("Invalid Slot Tag.")) &&
-		(CurrSlotTagIndex != NewSlotTagIndex))
+	if (!ensureAlwaysMsgf(CyclingSlots.IsValidIndex(NewSlotTagIndex),
+	                      TEXT("Invalid Slot Tag.")) || (CurrSlotTagIndex == NewSlotTagIndex))
 	{
-		Cycle(CyclingSlots[NewSlotTagIndex]);
+		return;
 	}
+
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("Attempting to modify Active Slot Tag from : %s, to: %s"),
+	                *CyclingSlots[CurrSlotTagIndex].ToString(),
+	                *CyclingSlots[NewSlotTagIndex].ToString());
+
+	Cycle(CyclingSlots[NewSlotTagIndex]);
 }
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
@@ -198,6 +215,13 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		// in a complete flush of the predictive queue captured over the last few inputs.
 		ensureAlwaysMsgf(UAVVMPredictiveInputUtils::Flush(PredictiveInputIndex), TEXT("Invalid Flush operation."));
 	}
+
+	AVVM_LOGGER_LOG(LogInventorySample,
+	                Outer,
+	                Outer,
+	                TEXT("bResult:%d, Active SlotTag is: %s"),
+	                static_cast<int32>(bWasSuccess),
+	                *ActiveItemSlotTag.ToString());
 
 #if WITH_EDITOR
 	if (!Outer->IsNetMode(NM_DedicatedServer))
@@ -312,12 +336,6 @@ void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 	
 	MARK_PROPERTY_DIRTY_FROM_NAME(UNonReplicatedLoadoutObject, ActiveItemSlotTag, this);
 	ActiveItemSlotTag = TargetTag;
-
-	const auto* Outer = GetTypedOuter<AActor>();
-	if (!IsValid(Outer) || !Outer->HasAuthority())
-	{
-		return;
-	}
 
 	if (OldTag.IsValid() && ensureAlwaysMsgf(Loadout.Contains(OldTag),
 	                                         TEXT("Tag invalid. Loadout doesnt support this slot tag.")))
