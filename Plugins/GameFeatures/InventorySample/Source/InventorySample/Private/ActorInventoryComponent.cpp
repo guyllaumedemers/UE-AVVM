@@ -603,7 +603,9 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 }
 
 void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
-{ 
+{
+	// @gdemers PIE, NetMode=Client, 2 Viewports assert on nullptr OwningOuter due to racing conditions between initial replication
+	// and Component::BeginPlay.
 	if (!HasBegunPlay())
 	{
 		return;
