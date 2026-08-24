@@ -105,10 +105,15 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
-	Params.Condition = COND_InitialOrOwner;
+	
+	// @gdemers should be different based on gameplay requirements. i.e a shop with inventory should replicate all items (COND_None)
+	// on client connection, but a character should only replicate inventory items specific to the connection owner (COND_AutonomousOnly/COND_InitOrOwner).
+	Params.Condition = InventoryRepCondition;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, Items, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, ComponentStateTags, Params);
+
+	Params.Condition = COND_None;
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, NonReplicatedLoadout, Params);
 }
 
@@ -598,7 +603,12 @@ void UActorInventoryComponent::OnItemsRetrieved(FItemToken ItemToken)
 }
 
 void UActorInventoryComponent::OnRep_ItemCollectionChanged(const TArray<UItemObject*>& OldItemObjects)
-{
+{ 
+	if (!HasBegunPlay())
+	{
+		return;
+	}
+	
 	auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Actor!")))
 	{
