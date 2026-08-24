@@ -21,16 +21,17 @@
 
 #include "AVVMToolkitUtils.h"
 #include "Engine/Engine.h"
+#include "Engine/LocalPlayer.h"
 
 const FAVVMCommonInputPreprocessor* UAVVMCommonInputSubsystem::Static_GetMouseProcessor(const ULocalPlayer* LocalPlayer)
 {
-	const auto* Subsystem = Cast<UAVVMCommonInputSubsystem>(UCommonInputSubsystem::Get(LocalPlayer));
+	const auto* Subsystem = ULocalPlayer::GetSubsystem<UAVVMCommonInputSubsystem>(LocalPlayer);
 	return IsValid(Subsystem) ? Subsystem->GetMouseProcessor() : nullptr;
 }
 
 float UAVVMCommonInputSubsystem::Static_GetMouseWheelDelta(const ULocalPlayer* LocalPlayer)
 {
-	const auto* Subsystem = Cast<UAVVMCommonInputSubsystem>(UCommonInputSubsystem::Get(LocalPlayer));
+	const auto* Subsystem = ULocalPlayer::GetSubsystem<UAVVMCommonInputSubsystem>(LocalPlayer);
 	return IsValid(Subsystem) ? Subsystem->GetMouseWheelDelta() : 0.f;
 }
 
@@ -68,17 +69,17 @@ bool FAVVMCommonInputPreprocessor::HandleMouseWheelOrGestureEvent(FSlateApplicat
                                                                   const FPointerEvent* InGestureEvent)
 {
 	const bool bResult = FCommonInputPreprocessor::HandleMouseWheelOrGestureEvent(SlateApp, InWheelEvent, InGestureEvent);
+	// @gdemers we need to be able to hijack mouse events to cache relevant information outside the fire-n-forget events
+	// received from the operating system. Note : I havent found within the FSlateApplication class relevant property caching wheel delta information, hence
+	// why this override exist. 
+	const double Now = UAVVMToolkitUtils::GetServerWorldTime(&InputSubsystem);
+	PrevMouseWheelTimestamp = Now;
+	PrevMouseWheelDelta = InWheelEvent.GetWheelDelta();
+	
 	if (!bResult)
 	{
 		return false;
 	}
-
-	// @gdemers we need to be able to hijack mouse events to cache relevant information outside the fire-n-forget events
-	// received from the operating system. Note : I havent found within the FSlateApplication class relevant property caching wheel delta information, hence
-	// why this override exist. 
-	const double Now = UAVVMToolkitUtils::GetServerWorldTime(GEngine);
-	PrevMouseWheelTimestamp = Now;
-	PrevMouseWheelDelta = InWheelEvent.GetWheelDelta();
 
 	return true;
 }
@@ -87,7 +88,7 @@ float FAVVMCommonInputPreprocessor::TryGetMouseWheelDelta(const float ResetThres
 {
 	// @gdemers safeguard surrounding Mouse Wheel delta access. If ever an external resource trigger access to this information
 	// outside an input event, we can mitigate the effect outcome by invalidating the value returned.
-	const double Now = UAVVMToolkitUtils::GetServerWorldTime(GEngine);
+	const double Now = UAVVMToolkitUtils::GetServerWorldTime(&InputSubsystem);
 	const bool bShouldIgnoreGetRequest = ((Now - PrevMouseWheelTimestamp) > ResetThreshold);
-	return bShouldIgnoreGetRequest ? PrevMouseWheelDelta : 0.f;
+	return bShouldIgnoreGetRequest ? 0.f : PrevMouseWheelDelta;
 }

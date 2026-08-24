@@ -28,6 +28,10 @@
 #include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
+#if UE_WITH_IRIS
+#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
+#endif // UE_WITH_IRIS
+
 #include "NonReplicatedLoadoutObject.generated.h"
 
 class UItemObject;
@@ -52,7 +56,16 @@ class INVENTORYSAMPLE_API UNonReplicatedLoadoutObject : public UObject
 	GENERATED_BODY()
 	
 public:
-	UNonReplicatedLoadoutObject();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool IsSupportedForNetworking() const override;
+
+#if UE_WITH_IRIS
+	virtual void RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context,
+	                                          UE::Net::EFragmentRegistrationFlags RegistrationFlags) override;
+#endif // UE_WITH_IRIS
+	
+	virtual int32 GetFunctionCallspace(UFunction* Function, FFrame* Stack) override;
+	virtual bool CallRemoteFunction(UFunction* Function, void* Parms, struct FOutParmRec* OutParms, FFrame* Stack) override;
 
 	UFUNCTION(BlueprintCallable)
 	void MouseCycle(const float MouseWheelDelta);
@@ -76,12 +89,12 @@ protected:
 	bool bDoesSupportItemCycling = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportItemCycling", ToolTip="Define the order in which mouse wheel scolling cycles through items."))
-	TArray<FGameplayTag> CyclingSlots;
+	TArray<FGameplayTag> CyclingSlots{};
 
 	UPROPERTY(Transient, meta=(ToolTip="Define the items that are in the Equipped state, but not necessarily active."))
-	TMap<FGameplayTag, TWeakObjectPtr<UItemObject>> Loadout;
+	TMap<FGameplayTag, TWeakObjectPtr<UItemObject>> Loadout{};
 
-	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="Define the slot tag of the item in hand."))
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="Define the slot tag of the item in hand."))
 	FGameplayTag ActiveItemSlotTag = FGameplayTag::EmptyTag;
 
 private:
@@ -93,6 +106,8 @@ private:
 	virtual bool OnIndex_Stalled(const int32 TargetIndex);
 	virtual bool OnIndex_Resumed(const int32 TargetIndex);
 	virtual bool OnIndex_Executed(const int32 TargetIndex);
+	
+	void Client_Init();
 
 	FAVVMPredictiveInputIndexObject PredictiveInputIndex{};
 	friend class UActorInventoryComponent;

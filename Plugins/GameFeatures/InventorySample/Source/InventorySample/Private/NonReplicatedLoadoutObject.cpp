@@ -23,19 +23,117 @@
 #include "ItemObject.h"
 #include "LoadoutExecutionContextParams.h"
 #include "LoadoutExecutionContextRule.h"
+#include "Engine/NetDriver.h"
+#include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
+#include "Iris/ReplicationSystem/ReplicationSystem.h"
+#include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "Tags/PrivateTags.h"
 #include "UI/LoadoutNotificationPayload.h"
 
-UNonReplicatedLoadoutObject::UNonReplicatedLoadoutObject()
+void UNonReplicatedLoadoutObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
-	PredictiveInputIndex = FAVVMPredictiveInputIndexObject
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UNonReplicatedLoadoutObject, ActiveItemSlotTag, Params);
+}
+
+bool UNonReplicatedLoadoutObject::IsSupportedForNetworking() const
+{
+	return true;
+}
+
+#if UE_WITH_IRIS
+void UNonReplicatedLoadoutObject::RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags)
+{
+	// Build descriptors and allocate PropertyReplicaitonFragments for this object
+	UE::Net::FReplicationFragmentUtil::CreateAndRegisterFragmentsForObject(this, Context, RegistrationFlags);
+}
+#endif // UE_WITH_IRIS
+
+int32 UNonReplicatedLoadoutObject::GetFunctionCallspace(UFunction* Function, FFrame* Stack)
+{
+	check(!(Function->FunctionFlags & FUNC_Static));
+	check(Function->FunctionFlags & FUNC_Net);
+
+	const AActor* Outer = GetTypedOuter<AActor>();
+	const bool bIsOnServer = IsValid(Outer) ? Outer->HasAuthority() : false;
+
+	// get the top most function
+	while (Function->GetSuperFunction() != nullptr)
 	{
-			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Stalled),
-			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resumed),
-			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Executed)
-	};
+		Function = Function->GetSuperFunction();
+	}
+
+	// Multicast RPCs
+	if ((Function->FunctionFlags & FUNC_NetMulticast))
+	{
+		if (bIsOnServer)
+		{
+			// Server should execute locally and call remotely
+			return (FunctionCallspace::Local | FunctionCallspace::Remote);
+		}
+		else
+		{
+			return FunctionCallspace::Local;
+		}
+	}
+
+	// if we are the authority
+	if (bIsOnServer)
+	{
+		if (Function->FunctionFlags & FUNC_NetClient)
+		{
+			return FunctionCallspace::Remote;
+		}
+		else
+		{
+			return FunctionCallspace::Local;
+		}
+
+	}
+	// if we are not the authority
+	else
+	{
+		if (Function->FunctionFlags & FUNC_NetServer)
+		{
+			return FunctionCallspace::Remote;
+		}
+		else
+		{
+			// don't replicate
+			return FunctionCallspace::Local;
+		}
+	}
+}
+
+bool UNonReplicatedLoadoutObject::CallRemoteFunction(UFunction* Function, void* Parms, struct FOutParmRec* OutParms, FFrame* Stack)
+{
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return false;
+	}
+	
+	const UNetDriver* NetDriver = World->GetNetDriver();
+	if (!IsValid(NetDriver))
+	{
+		return false;
+	}
+	
+	// Retrieves the Iris ReplicationSystem instance tied to this NetDriver
+	UReplicationSystem* ReplicationSystem = NetDriver->GetReplicationSystem();
+	if (!IsValid(ReplicationSystem))
+	{
+		return false;
+	}
+	
+	return ReplicationSystem->SendRPC(GetTypedOuter<AActor>(), this, Function, Parms);
 }
 
 void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
@@ -48,7 +146,7 @@ void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
 
 	const int32 Sign = FMath::Sign(MouseWheelDelta);
 	const int32 CurrSlotTagIndex = CyclingSlots.IndexOfByKey(ActiveItemSlotTag);
-	const int32 NewSlotTagIndex = ((CurrSlotTagIndex + Sign) % CyclingSlots.Num());
+	const int32 NewSlotTagIndex = ((CurrSlotTagIndex + Sign + CyclingSlots.Num()) % CyclingSlots.Num());
 
 	if (ensureAlwaysMsgf(CyclingSlots.IsValidIndex(NewSlotTagIndex), TEXT("Invalid Slot Tag.")) &&
 		(CurrSlotTagIndex != NewSlotTagIndex))
@@ -84,6 +182,9 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		else
 		{
 			Server_Cycle(TargetTag);
+			
+			// @gdemers Predictively set this value as the target, even if the server hasnt validated yet.
+			ActiveItemSlotTag = TargetTag;
 		}
 
 		// @gdemers for server and client, we need to capture the user selection
@@ -207,10 +308,19 @@ TInstancedStruct<FAVVMExecutionContextRule> UNonReplicatedLoadoutObject::GetEqui
 void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 {
 	static const auto ActiveTags = FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_STATE_ACTIVE};
-	const FGameplayTag& OldTag = ActiveItemSlotTag;
-	const FGameplayTag& NewTag = ActiveItemSlotTag = TargetTag;
+	const FGameplayTag OldTag = ActiveItemSlotTag;
+	
+	MARK_PROPERTY_DIRTY_FROM_NAME(UNonReplicatedLoadoutObject, ActiveItemSlotTag, this);
+	ActiveItemSlotTag = TargetTag;
 
-	if (CyclingSlots.Contains(OldTag))
+	const auto* Outer = GetTypedOuter<AActor>();
+	if (!IsValid(Outer) || !Outer->HasAuthority())
+	{
+		return;
+	}
+
+	if (OldTag.IsValid() && ensureAlwaysMsgf(Loadout.Contains(OldTag),
+	                                         TEXT("Tag invalid. Loadout doesnt support this slot tag.")))
 	{
 		auto& OldItem = Loadout[OldTag];
 		if (OldItem.IsValid())
@@ -219,9 +329,10 @@ void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 		}
 	}
 
-	if (CyclingSlots.Contains(NewTag))
+	if (TargetTag.IsValid() && ensureAlwaysMsgf(Loadout.Contains(TargetTag),
+	                                            TEXT("Tag invalid. Loadout doesnt support this slot tag.")))
 	{
-		auto& NewItem = Loadout[NewTag];
+		auto& NewItem = Loadout[TargetTag];
 		if (NewItem.IsValid())
 		{
 			NewItem->ModifyRuntimeState(ActiveTags, {});
@@ -245,6 +356,22 @@ bool UNonReplicatedLoadoutObject::OnIndex_Executed(const int32 TargetIndex)
 {
 	// TODO @gdemers Do impl.
 	return true;
+}
+
+void UNonReplicatedLoadoutObject::Client_Init()
+{
+	// @gdemers default init loadout keys
+	for (const auto& SlotTag : CyclingSlots)
+	{
+		Loadout.Add(SlotTag);
+	}
+
+	PredictiveInputIndex =
+	{
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Stalled),
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resumed),
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Executed)
+	};
 }
 
 bool UActorLoadoutUtils::DoesActiveItemHasHighestPriority(const TArray<FGameplayTag>& CyclingSlots,

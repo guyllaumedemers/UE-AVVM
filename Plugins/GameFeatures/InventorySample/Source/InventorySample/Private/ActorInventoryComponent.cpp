@@ -109,6 +109,7 @@ void UActorInventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, Items, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, ComponentStateTags, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UActorInventoryComponent, NonReplicatedLoadout, Params);
 }
 
 void UActorInventoryComponent::BeginPlay()
@@ -137,20 +138,21 @@ void UActorInventoryComponent::BeginPlay()
 	OwningOuter = Outer;
 
 #if WITH_SERVER_CODE
-	if (Outer->HasAuthority())
+	if (!Outer->HasAuthority())
 	{
-		if (bShouldAsyncLoadOnBeginPlay)
-		{
-			RequestItems(Outer);
-		}
-
-		auto* TagComponent = Outer->GetComponentByClass<UAVVMReplicatedTagComponent>();
-		if (IsValid(TagComponent))
-		{
-			TagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &UActorInventoryComponent::OnOuterTagChanged);
-		}
+		return;
 	}
-#endif
+
+	if (bShouldAsyncLoadOnBeginPlay)
+	{
+		RequestItems(Outer);
+	}
+
+	auto* TagComponent = Outer->GetComponentByClass<UAVVMReplicatedTagComponent>();
+	if (IsValid(TagComponent))
+	{
+		TagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &UActorInventoryComponent::OnOuterTagChanged);
+	}
 
 	bool bDoesSupportLoadout = false;
 
@@ -166,6 +168,7 @@ void UActorInventoryComponent::BeginPlay()
 		Callback.BindUObject(this, &UActorInventoryComponent::OnLoadoutObjectRetrieved);
 		LoadoutHandle = UAssetManager::Get().LoadAssetList({NonReplicatedLoadoutClass.ToSoftObjectPath()}, Callback);
 	}
+#endif
 }
 
 void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -196,6 +199,11 @@ void UActorInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	LoadoutHandle.Reset();
 	PrivateItemIds.Reset();
 
+	if (IsValid(NonReplicatedLoadout))
+	{
+		RemoveReplicatedSubObject(NonReplicatedLoadout);
+	}
+	
 	for (auto Iterator = Items.CreateIterator(); Iterator; ++Iterator)
 	{
 		RemoveReplicatedSubObject(Iterator->Get());
@@ -822,8 +830,12 @@ void UActorInventoryComponent::OnLoadoutObjectRetrieved()
 			continue;
 		}
 
+		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInventoryComponent, NonReplicatedLoadout, this);
 		NonReplicatedLoadout = NewObject<UNonReplicatedLoadoutObject>(this, NewLoadoutClass);
+		AddReplicatedSubObject(NonReplicatedLoadout);
+
 		// @gdemers server initialize loadout based on latest state cache.
+		NonReplicatedLoadout->Client_Init();
 		NonReplicatedLoadout->HandleItemCollectionChanged(Items, TArray<UItemObject*>());
 	}
 }
@@ -1216,6 +1228,15 @@ void UActorInventoryComponent::OnNewActorStateBound(const TWeakObjectPtr<UItemOb
 	if (IsValid(NonReplicatedLoadout))
 	{
 		NonReplicatedLoadout->Cycle(SlotTags.First());
+	}
+}
+
+void UActorInventoryComponent::OnRep_OnNonReplicatedLoadoutInit()
+{
+	if (IsValid(NonReplicatedLoadout))
+	{
+		NonReplicatedLoadout->Client_Init();
+		NonReplicatedLoadout->HandleItemCollectionChanged(Items, {});
 	}
 }
 

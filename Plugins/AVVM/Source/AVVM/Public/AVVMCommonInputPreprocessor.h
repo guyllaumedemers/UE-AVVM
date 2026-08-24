@@ -43,6 +43,11 @@ public:
 	static const FAVVMCommonInputPreprocessor* Static_GetMouseProcessor(const ULocalPlayer* LocalPlayer);
 	static float Static_GetMouseWheelDelta(const ULocalPlayer* LocalPlayer);
 
+	// @gdemers IMPORTANT - CommonUI expose this override to allow extending the InputPreprocess with custom behaviour.
+	// However, this come at a cost! Subsystem that arent marked "Abstract", or properly override the ShouldCreateSubsystem, will create a unique instance as per defined in the SubsystemCollection api.
+	// If you inspect the Subsystem Collection of the ULocalPlayer, you will find both : UCommonInputSubsystem & UAVVMCommonInputSubsystem references.
+	// We CANNOT prevent this unless we refactor CommonUI api due to explicit subsystem initialization dependencies (See UCommonUIActionRouterBase::Initialize).
+	// This raise the question as to : Should ALL subsystems defined in Unreal check for available derived type within their base class ShouldCreateSubsystem api ?
 	virtual TSharedPtr<FCommonInputPreprocessor> MakeInputProcessor() override;
 
 protected:

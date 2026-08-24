@@ -171,6 +171,9 @@ protected:
 	
 	UFUNCTION()
 	void OnNewActorStateBound(const TWeakObjectPtr<UItemObject> Item);
+	
+	UFUNCTION()
+	void OnRep_OnNonReplicatedLoadoutInit();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldAsyncLoadOnBeginPlay = false;
@@ -187,7 +190,9 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	// @gdemers IMPORTANT - we default replicate to support network RPC but there
+	// shouldnt be any property replication done during gameplay here!
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnNonReplicatedLoadoutInit")
 	TObjectPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadout = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
