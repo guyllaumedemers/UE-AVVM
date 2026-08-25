@@ -456,6 +456,11 @@ AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 	return RuntimeItemActor;
 }
 
+AActor* UItemObject::GetRuntimeItemActor() const
+{
+	return RuntimeItemActor;
+}
+
 const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& UItemObject::GetNonReplicatedItemAttachmentActors() const
 {
 	return NonReplicatedItemAttachmentActors;

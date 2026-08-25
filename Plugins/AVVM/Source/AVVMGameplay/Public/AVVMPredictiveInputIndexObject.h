@@ -45,9 +45,9 @@ struct AVVMGAMEPLAY_API FAVVMPredictiveInputIndexObject
 	GENERATED_BODY()
 
 	FAVVMPredictiveInputIndexObject() = default;
-	FAVVMPredictiveInputIndexObject(TFunctionRef<bool(const int32)> OnNewStalled,
-	                                TFunctionRef<bool(const int32)> OnNewRestored,
-	                                TFunctionRef<bool(const int32)> OnNewExecuted);
+	FAVVMPredictiveInputIndexObject(TFunctionRef<bool(const int32)> OnNewPause,
+	                                TFunctionRef<bool(const int32)> OnNewRestore,
+	                                TFunctionRef<bool(const int32)> OnNewRestart);
 
 protected:
 	// TODO @gdemers Idk yet what I want here. I just know that upon capturing a new entry,
@@ -59,9 +59,9 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 LatestInputIndex = INDEX_NONE;
 
-	TFunction<bool(const int32)> OnStalled{};
-	TFunction<bool(const int32)> OnRestored{};
-	TFunction<bool(const int32)> OnExecuted{};
+	TFunction<bool(const int32)> OnPause{};
+	TFunction<bool(const int32)> OnRestore{};
+	TFunction<bool(const int32)> OnRestart{};
 };
 
 /**

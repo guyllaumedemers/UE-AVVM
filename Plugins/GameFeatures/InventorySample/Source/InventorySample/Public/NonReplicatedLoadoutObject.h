@@ -103,9 +103,9 @@ private:
 	virtual TInstancedStruct<FAVVMExecutionContextRule> GetEquipRule() const;
 	
 	virtual void OnCycle(const FGameplayTag& TargetTag);
-	virtual bool OnIndex_Stalled(const int32 TargetIndex);
-	virtual bool OnIndex_Resumed(const int32 TargetIndex);
-	virtual bool OnIndex_Executed(const int32 TargetIndex);
+	virtual bool OnIndex_Pause(const int32 TargetIndex);
+	virtual bool OnIndex_Resume(const int32 TargetIndex);
+	virtual bool OnIndex_Restart(const int32 TargetIndex);
 	
 	void Client_Init();
 

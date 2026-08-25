@@ -19,8 +19,10 @@
 //SOFTWARE.
 #include "NonReplicatedLoadoutObject.h"
 
+#include "AVVMDoesActorSupportAnimationInterruption.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
+#include "AVVMToolkitUtils.h"
 #include "InventorySampleModule.h"
 #include "ItemObject.h"
 #include "LoadoutExecutionContextParams.h"
@@ -193,6 +195,11 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
 	if (bWasSuccess)
 	{
+		// @gdemers for server and client, we need to capture the user selection
+		// locally, or received via RPC, and execute actions based on the state of the active index, and pending to be active index.
+		const int32 NewTargetIndex = CyclingSlots.IndexOfByKey(TargetTag);
+		ensureAlwaysMsgf(UAVVMPredictiveInputUtils::Capture(NewTargetIndex, PredictiveInputIndex), TEXT("Invalid Capture operation."));
+		
 		if (Outer->HasAuthority())
 		{
 			OnCycle(TargetTag);
@@ -200,15 +207,7 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 		else
 		{
 			Server_Cycle(TargetTag);
-			
-			// @gdemers Predictively set this value as the target, even if the server hasnt validated yet.
-			ActiveItemSlotTag = TargetTag;
 		}
-
-		// @gdemers for server and client, we need to capture the user selection
-		// locally, or received via RPC, and execute actions based on the state of the active index, and pending to be active index.
-		const int32 NewTargetIndex = CyclingSlots.IndexOfByKey(TargetTag);
-		ensureAlwaysMsgf(UAVVMPredictiveInputUtils::Capture(NewTargetIndex, PredictiveInputIndex), TEXT("Invalid Capture operation."));
 	}
 	else
 	{
@@ -359,21 +358,115 @@ void UNonReplicatedLoadoutObject::OnCycle(const FGameplayTag& TargetTag)
 	}
 }
 
-bool UNonReplicatedLoadoutObject::OnIndex_Stalled(const int32 TargetIndex)
+bool UNonReplicatedLoadoutObject::OnIndex_Pause(const int32 TargetIndex)
 {
-	// TODO @gdemers Do impl.
+	if (!ActiveItemSlotTag.IsValid())
+	{
+		return false;
+	}
+
+	if (!ensureAlwaysMsgf(Loadout.Contains(ActiveItemSlotTag),
+	                      TEXT("Slot Tag missing from loadout Object.")))
+	{
+		return false;
+	}
+
+	auto& ItemObject = Loadout[ActiveItemSlotTag];
+	if (!ensureAlwaysMsgf(ItemObject.IsValid(),
+	                      TEXT("Invalid ItemObject access.")))
+	{
+		return false;
+	}
+
+	AActor* RuntimeItemActor = ItemObject->GetRuntimeItemActor();
+
+	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor), TEXT("Invalid ItemActor access.")) ||
+		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMDoesActorSupportAnimationInterruption>(RuntimeItemActor))
+	{
+		return false;
+	}
+
+	IAVVMDoesActorSupportAnimationInterruption::Execute_Pause(RuntimeItemActor);
 	return true;
 }
 
-bool UNonReplicatedLoadoutObject::OnIndex_Resumed(const int32 TargetIndex)
+bool UNonReplicatedLoadoutObject::OnIndex_Resume(const int32 TargetIndex)
 {
-	// TODO @gdemers Do impl.
+	if (!ensureAlwaysMsgf(CyclingSlots.IsValidIndex(TargetIndex),
+	                      TEXT("Invalid Slot Tag Index")))
+	{
+		return false;
+	}
+
+	const FGameplayTag& TargetSlotTag = CyclingSlots[TargetIndex];
+	if (!ensureAlwaysMsgf(TargetSlotTag.IsValid(),
+	                      TEXT("Invalid Slot Tag.")))
+	{
+		return false;
+	}
+	
+	if (!ensureAlwaysMsgf(Loadout.Contains(TargetSlotTag),
+						  TEXT("Slot Tag missing from loadout Object.")))
+	{
+		return false;
+	}
+
+	auto& ItemObject = Loadout[TargetSlotTag];
+	if (!ensureAlwaysMsgf(ItemObject.IsValid(),
+						  TEXT("Invalid ItemObject access.")))
+	{
+		return false;
+	}
+
+	AActor* RuntimeItemActor = ItemObject->GetRuntimeItemActor();
+	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor), TEXT("Invalid ItemActor access.")) ||
+		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMDoesActorSupportAnimationInterruption>(RuntimeItemActor))
+	{
+		return false;
+	}
+
+	IAVVMDoesActorSupportAnimationInterruption::Execute_Resume(RuntimeItemActor);
 	return true;
 }
 
-bool UNonReplicatedLoadoutObject::OnIndex_Executed(const int32 TargetIndex)
+bool UNonReplicatedLoadoutObject::OnIndex_Restart(const int32 TargetIndex)
 {
-	// TODO @gdemers Do impl.
+	if (!ensureAlwaysMsgf(CyclingSlots.IsValidIndex(TargetIndex),
+	                      TEXT("Invalid Slot Tag Index")))
+	{
+		return false;
+	}
+
+	const FGameplayTag& TargetSlotTag = CyclingSlots[TargetIndex];
+	if (!ensureAlwaysMsgf(TargetSlotTag.IsValid(),
+	                      TEXT("Invalid Slot Tag.")))
+	{
+		return false;
+	}
+
+	if (!ensureAlwaysMsgf(Loadout.Contains(TargetSlotTag),
+	                      TEXT("Slot Tag missing from loadout Object.")))
+	{
+		return false;
+	}
+
+	auto& ItemObject = Loadout[TargetSlotTag];
+	if (!ensureAlwaysMsgf(ItemObject.IsValid(),
+	                      TEXT("Invalid ItemObject access.")))
+	{
+		return false;
+	}
+
+	// @gdemers imply it is not destroyed between item swap.
+	AActor* RuntimeItemActor = ItemObject->GetRuntimeItemActor();
+	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor), TEXT("Invalid ItemActor access.")) ||
+		!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMDoesActorSupportAnimationInterruption>(RuntimeItemActor))
+	{
+		return false;
+	}
+
+	ActiveItemSlotTag = TargetSlotTag;
+	IAVVMDoesActorSupportAnimationInterruption::Execute_Restart(RuntimeItemActor);
 	return true;
 }
 
@@ -387,9 +480,9 @@ void UNonReplicatedLoadoutObject::Client_Init()
 
 	PredictiveInputIndex =
 	{
-			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Stalled),
-			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resumed),
-			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Executed)
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Pause),
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resume),
+			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Restart)
 	};
 }
 

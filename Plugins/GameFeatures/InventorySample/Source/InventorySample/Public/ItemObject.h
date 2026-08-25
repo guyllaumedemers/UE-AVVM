@@ -262,6 +262,9 @@ public:
 
 	AActor* SpawnActor(const FItemActorSpawnContextArgs& ContextArgs);
 
+	UFUNCTION(BlueprintCallable)
+	AActor* GetRuntimeItemActor() const;
+
 	// @gdemers read data specific to all attachments equipped on the given UItemObject referenced actor.
 	const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& GetNonReplicatedItemAttachmentActors() const;
 

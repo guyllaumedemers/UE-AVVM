@@ -17,26 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "AVVMPredictiveInputIndexObject.h"
-
-FAVVMPredictiveInputIndexObject::FAVVMPredictiveInputIndexObject(TFunctionRef<bool(const int32)> OnNewPause,
-                                                                 TFunctionRef<bool(const int32)> OnNewRestore,
-                                                                 TFunctionRef<bool(const int32)> OnNewRestart)
-	: OnPause([OnNewPause](const int32 Value) { return OnNewPause(Value); }),
-	  OnRestore([OnNewRestore](const int32 Value) { return OnNewRestore(Value); }),
-	  OnRestart([OnNewRestart](const int32 Value) { return OnNewRestart(Value); })
-{
-}
-
-bool UAVVMPredictiveInputUtils::Capture(const int32 NewInputIndex,
-                                        FAVVMPredictiveInputIndexObject& OutResult)
-{
-	// TODO @gdemers add impl
-	return true;
-}
-
-bool UAVVMPredictiveInputUtils::Flush(FAVVMPredictiveInputIndexObject& OutResult)
-{
-	// TODO @gdemers add impl
-	return true;
-}
+#include "AVVMDoesActorSupportAnimationInterruption.h"
