@@ -341,6 +341,26 @@ void ATriggeringActor::Unbind_Implementation()
 	}
 }
 
+void ATriggeringActor::Restart_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Restart_Implementation();
+}
+
+void ATriggeringActor::Pause_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Pause_Implementation();
+}
+
+void ATriggeringActor::Resume_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Resume_Implementation();
+}
+
+void ATriggeringActor::Flush_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Flush_Implementation();
+}
+
 int32 ATriggeringActor::GetProviderUniqueId_Implementation() const
 {
 	return UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(this);

@@ -424,7 +424,8 @@ bool UNonReplicatedLoadoutObject::OnIndex_Resume(const int32 TargetIndex)
 	{
 		return false;
 	}
-
+	
+	ActiveItemSlotTag = TargetSlotTag;
 	IAVVMDoesActorSupportAnimationInterruption::Execute_Resume(RuntimeItemActor);
 	return true;
 }
@@ -467,6 +468,12 @@ bool UNonReplicatedLoadoutObject::OnIndex_Restart(const int32 TargetIndex)
 
 	ActiveItemSlotTag = TargetSlotTag;
 	IAVVMDoesActorSupportAnimationInterruption::Execute_Restart(RuntimeItemActor);
+	return true;
+}
+
+bool UNonReplicatedLoadoutObject::OnIndex_Flush(const int32 TargetIndex)
+{
+	// TODO @gdemers define how flushing should behave
 	return true;
 }
 

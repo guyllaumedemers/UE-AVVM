@@ -375,6 +375,26 @@ void AAttachmentActor::Unbind_Implementation()
 	}
 }
 
+void AAttachmentActor::Restart_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Restart_Implementation();
+}
+
+void AAttachmentActor::Pause_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Pause_Implementation();
+}
+
+void AAttachmentActor::Resume_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Resume_Implementation();
+}
+
+void AAttachmentActor::Flush_Implementation()
+{
+	IAVVMDoesActorSupportAnimationInterruption::Flush_Implementation();
+}
+
 void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
                                                  AActor* Target,
                                                  const FAVVMSocketTargetingDeferralContextArgs ContextArgs)

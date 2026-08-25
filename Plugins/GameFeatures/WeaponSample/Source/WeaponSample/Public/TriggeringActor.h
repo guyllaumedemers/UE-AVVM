@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMDoesActorSupportAnimationInterruption.h"
 #include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
@@ -102,8 +103,9 @@ UCLASS(SparseClassDataTypes="TriggeringActorSparseData")
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
-                                          public IAVVMDoesActorSupportOnAttachmentNotify,
+                                          public IAVVMDoesActorSupportAnimationInterruption,
                                           public IAVVMDoesActorSupportDeferredSocketParenting,
+                                          public IAVVMDoesActorSupportOnAttachmentNotify,
                                           public IAVVMDoesActorSupportStateBinding,
                                           public IAVVMResourceProvider
 {
@@ -138,6 +140,12 @@ public:
 	// @gdemers IAVVMDoesActorSupportStateBinding
 	virtual void Bind_Implementation() override;
 	virtual void Unbind_Implementation() override;
+	
+	// @gdemers IAVVMDoesActorSupportAnimationInterruption
+	virtual void Restart_Implementation() override;
+	virtual void Pause_Implementation() override;
+	virtual void Resume_Implementation() override;
+	virtual void Flush_Implementation() override;
 
 	// @gdemers IAVVMResourceProvider
 	virtual int32 GetProviderUniqueId_Implementation() const override;

@@ -106,6 +106,7 @@ private:
 	virtual bool OnIndex_Pause(const int32 TargetIndex);
 	virtual bool OnIndex_Resume(const int32 TargetIndex);
 	virtual bool OnIndex_Restart(const int32 TargetIndex);
+	virtual bool OnIndex_Flush(const int32 TargetIndex);
 	
 	void Client_Init();
 
