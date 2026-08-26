@@ -36,6 +36,20 @@
 /**
  *	Class description:
  *	
+ *	EPredictiveState is an enum class type that represent transient states for a predicted input capture.
+ */
+UENUM(BlueprintType)
+enum class EPredictiveState : uint8
+{
+	None = 0 UMETA(Hidden),
+	Paused,
+	Running,
+	PendingKill
+};
+
+/**
+ *	Class description:
+ *	
  *	FAVVMPredictiveInputIndexObject is a utility object meant to manage predictive cases where
  *	input captured require tracking invalidated states, and possibly Restore them.
  */
@@ -45,23 +59,23 @@ struct AVVMGAMEPLAY_API FAVVMPredictiveInputIndexObject
 	GENERATED_BODY()
 
 	FAVVMPredictiveInputIndexObject() = default;
-	FAVVMPredictiveInputIndexObject(TFunctionRef<bool(const int32)> OnNewPause,
-	                                TFunctionRef<bool(const int32)> OnNewRestore,
-	                                TFunctionRef<bool(const int32)> OnNewRestart);
+	FAVVMPredictiveInputIndexObject(TFunction<bool(const int32)> OnNewPause,
+	                                TFunction<bool(const int32)> OnNewRestore,
+	                                TFunction<bool(const int32)> OnNewRestart,
+	                                const int32 ReserveArraySize);
 
 protected:
-	// TODO @gdemers Idk yet what I want here. I just know that upon capturing a new entry,
-	// the object currently referencing this index should stall, and later be discarded, unless
-	// a new input is captured which is the stalled index.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<int32, bool/*bIsStalled*/> PredictiveInputIndexes{};
+	TArray<EPredictiveState> PredictiveInputIndexes{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 LatestInputIndex = INDEX_NONE;
+	int32 PrevInputIndex = INDEX_NONE;
 
 	TFunction<bool(const int32)> OnPause{};
 	TFunction<bool(const int32)> OnRestore{};
 	TFunction<bool(const int32)> OnRestart{};
+
+	friend class UAVVMPredictiveInputUtils;
 };
 
 /**

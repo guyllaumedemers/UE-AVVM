@@ -343,22 +343,34 @@ void ATriggeringActor::Unbind_Implementation()
 
 void ATriggeringActor::Restart_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Restart_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Restart animation"));
 }
 
 void ATriggeringActor::Pause_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Pause_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Pause animation"));
 }
 
 void ATriggeringActor::Resume_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Resume_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Resume animation"));
 }
 
 void ATriggeringActor::Flush_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Flush_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Flush animation"));
 }
 
 int32 ATriggeringActor::GetProviderUniqueId_Implementation() const

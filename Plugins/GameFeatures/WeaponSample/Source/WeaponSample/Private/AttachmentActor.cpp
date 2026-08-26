@@ -377,22 +377,34 @@ void AAttachmentActor::Unbind_Implementation()
 
 void AAttachmentActor::Restart_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Restart_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Restart animation"));
 }
 
 void AAttachmentActor::Pause_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Pause_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Pause animation"));
 }
 
 void AAttachmentActor::Resume_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Resume_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Resume animation"));
 }
 
 void AAttachmentActor::Flush_Implementation()
 {
-	IAVVMDoesActorSupportAnimationInterruption::Flush_Implementation();
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					this,
+					TEXT("Flush animation"));
 }
 
 void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
