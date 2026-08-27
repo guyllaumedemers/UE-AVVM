@@ -24,6 +24,7 @@
 #include "AVVMLogger.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMTagUtils.h"
+#include "InteractionManagerSubsystem.h"
 #include "InteractionObject.h"
 #include "Components/ShapeComponent.h"
 #include "Engine/BlueprintGeneratedClass.h"
@@ -86,14 +87,18 @@ void UActorInteractionComponent::BeginPlay()
 	}
 
 #if WITH_SERVER_CODE
-	if (Outer->HasAuthority())
+	if (!Outer->HasAuthority())
 	{
-		auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-		if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
-		{
-			CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
-			CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
-		}
+		return;
+	}
+
+	Handle = UInteractionManagerSubsystem::Static_Register(GetWorld(), this);
+
+	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
+	if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
+	{
+		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
+		CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
 	}
 #endif
 }
@@ -114,18 +119,6 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 		return;
 	}
 
-#if WITH_SERVER_CODE
-	if (Outer->HasAuthority())
-	{
-		auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-		if (IsValid(CollisionComponent))
-		{
-			CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
-			CollisionComponent->OnComponentEndOverlap.RemoveAll(this);
-		}
-	}
-#endif
-
 	AVVM_LOGGER_LOG(LogGameplay,
 	                Outer,
 	                Outer,
@@ -133,6 +126,22 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	                *GetNameSafe(UActorInteractionComponent::StaticClass()));
 
 	OwningOuter.Reset();
+
+#if WITH_SERVER_CODE
+	if (!Outer->HasAuthority())
+	{
+		return;
+	}
+
+	UInteractionManagerSubsystem::Static_Unregister(GetWorld(), Handle);
+
+	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
+	if (IsValid(CollisionComponent))
+	{
+		CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
+		CollisionComponent->OnComponentEndOverlap.RemoveAll(this);
+	}
+#endif
 }
 
 UActorInteractionComponent* UActorInteractionComponent::GetActorComponent(const AActor* NewActor)
@@ -246,18 +255,20 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	{
 		return;
 	}
-
+	
+	Server_ClearPendingKill();
+	
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
 	if (!IsValid(Impl))
 	{
 		return;
 	}
-
+	
 	const bool bResult = Impl->HandleBeginOverlap(Instigator/*World Actor*/,
 	                                              Target/*AController*/,
 	                                              GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency,
 	                                              Records);
-
+	
 	if (bResult)
 	{
 		Server_AddRecord(Instigator, Target);
@@ -328,7 +339,6 @@ void UActorInteractionComponent::Server_SetPendingKill(const AActor* NewInstigat
 		SearchResult->SetPendingKill();
 
 		HandlePendingKillRecord(*SearchResult);
-		Server_ClearPendingKill();
 	}
 }
 

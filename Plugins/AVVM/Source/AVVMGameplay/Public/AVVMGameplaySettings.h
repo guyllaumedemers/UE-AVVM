@@ -24,7 +24,6 @@
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DeveloperSettings.h"
-#include "Templates/SubclassOf.h"
 
 #include "AVVMGameplaySettings.generated.h"
 

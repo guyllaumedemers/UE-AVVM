@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,48 +17,34 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#pragma once
 
-using UnrealBuildTool;
+#include "CoreMinimal.h"
 
-public class InteractionSample : ModuleRules
+#include "Engine/DeveloperSettings.h"
+#include "Templates/SubclassOf.h"
+
+#include "InteractionSettings.generated.h"
+
+class AAVVMBeaconClusterActor;
+
+/**
+ *	Class description:
+ *
+ *	UInteractionDeveloperSettings is a DeveloperSettings that expose global data specific to gameplay.
+ */
+UCLASS(config="Game", DefaultConfig, meta=(DisplayName="UInteractionSettings"))
+class INTERACTIONSAMPLE_API UInteractionSettings : public UDeveloperSettings
 {
-	public InteractionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
-		bUseUnity = false;
-		bWarningsAsErrors = true;
-		
-		SetupIrisSupport(Target);
+	GENERATED_BODY()
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"FieldNotification",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModelViewViewModel",
-				"UIExtension",
-				"UMG"
-			}
-		);
+public:
+	UInteractionSettings();
+	
+	UFUNCTION(BlueprintCallable, Category="InteractionSample|Settings")
+	static TSubclassOf<AAVVMBeaconClusterActor> GetBeaconClusterActorClass();
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit",
-				"CommonInput",
-				"EnhancedInput",
-				"NetCore",
-				"SlateCore",
-			}
-		);
-	}
-}
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	TSubclassOf<AAVVMBeaconClusterActor> BeaconClusterActorClass = nullptr;
+};

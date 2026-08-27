@@ -23,6 +23,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMClusterSystem.h"
 #include "GameplayTagContainer.h"
 #include "InteractionObject.h"
 #include "Components/ActorComponent.h"
@@ -131,6 +132,8 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	
+	FAVVMClusterObjectHandle Handle{};
 
 private:
 #if WITH_EDITORONLY_DATA

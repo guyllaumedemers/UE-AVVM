@@ -19,7 +19,14 @@
 //SOFTWARE.
 #include "InteractionManagerSubsystem.h"
 
+#include "ActorInteractionComponent.h"
+#include "InteractionSettings.h"
 #include "Engine/World.h"
+
+TSubclassOf<AAVVMBeaconClusterActor> FInteractionClusterSystem::GetBeaconActorClass() const
+{
+	return UInteractionSettings::GetBeaconClusterActorClass();
+}
 
 bool UInteractionManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
@@ -31,4 +38,40 @@ bool UInteractionManagerSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	}
 
 	return false;
+}
+
+FAVVMClusterObjectHandle UInteractionManagerSubsystem::Static_Register(const UWorld* World,
+                                                                       const UActorInteractionComponent* InteractionObject)
+{
+	auto* Subsystem = UInteractionManagerSubsystem::Get(World);
+	return IsValid(Subsystem) ? Subsystem->Register(InteractionObject) : FAVVMClusterObjectHandle{};
+}
+
+bool UInteractionManagerSubsystem::Static_Unregister(const UWorld* World,
+                                                     const FAVVMClusterObjectHandle& Handle)
+{
+	auto* Subsystem = UInteractionManagerSubsystem::Get(World);
+	return IsValid(Subsystem) ? Subsystem->Unregister(Handle) : false;
+}
+
+UInteractionManagerSubsystem* UInteractionManagerSubsystem::Get(const UWorld* World)
+{
+	return UWorld::GetSubsystem<UInteractionManagerSubsystem>(World);
+}
+
+FAVVMClusterObjectHandle UInteractionManagerSubsystem::Register(const UActorInteractionComponent* InteractionComponent)
+{
+	if (!IsValid(InteractionComponent))
+	{
+		return FAVVMClusterObjectHandle::InvalidHandle;
+	}
+
+	const FAVVMClusterObjectHandle OutHandle = ClusterSystem.AppendOrCreateCluster(InteractionComponent->GetTypedOuter<AActor>());
+	return OutHandle;
+}
+
+bool UInteractionManagerSubsystem::Unregister(const FAVVMClusterObjectHandle& Handle)
+{
+	const bool bResult = ClusterSystem.RemoveFromCluster(Handle);
+	return bResult;
 }

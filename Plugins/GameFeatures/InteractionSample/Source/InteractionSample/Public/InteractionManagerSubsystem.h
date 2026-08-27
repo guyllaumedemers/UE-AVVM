@@ -21,9 +21,26 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMClusterSystem.h"
 #include "Subsystems/WorldSubsystem.h"
 
 #include "InteractionManagerSubsystem.generated.h"
+
+class UActorInteractionComponent;
+
+/**
+ *	Class description:
+ *	
+ *	FInteractionClusterSystem is a derived type that handle Interactable Actor clustering. It also provides
+ *	visual feedback for cluster location in-world.
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FInteractionClusterSystem : public FAVVMClusterSystem
+{
+	GENERATED_BODY()
+	
+	virtual TSubclassOf<AAVVMBeaconClusterActor> GetBeaconActorClass() const override;
+};
 
 /**
  *	Class description:
@@ -41,13 +58,17 @@ UCLASS()
 class INTERACTIONSAMPLE_API UInteractionManagerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
-	
-	/*
-	 *	TODO @gdemers Make all Component register with this subsystem. Create a graph of clusters
-	 *  by proximity, and have use attempting an interaction with a given elements display the owning custer
-	 *  in a list on the UI.
-	 */
+	static FAVVMClusterObjectHandle Static_Register(const UWorld* World, const UActorInteractionComponent* InteractionComponent);
+	static bool Static_Unregister(const UWorld* World, const FAVVMClusterObjectHandle& Handle);
+
+protected:
+	static UInteractionManagerSubsystem* Get(const UWorld* World);
+	FAVVMClusterObjectHandle Register(const UActorInteractionComponent* InteractionComponent);
+	bool Unregister(const FAVVMClusterObjectHandle& Handle);
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FInteractionClusterSystem ClusterSystem{};
 };

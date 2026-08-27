@@ -1,4 +1,4 @@
-﻿//Copyright(c) 2025 gdemers
+//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,48 +17,16 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+#include "InteractionSettings.h"
 
-using UnrealBuildTool;
+#include "AVVMClusterSystem.h"
 
-public class InteractionSample : ModuleRules
+UInteractionSettings::UInteractionSettings()
 {
-	public InteractionSample(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
-		bUseUnity = false;
-		bWarningsAsErrors = true;
-		
-		SetupIrisSupport(Target);
+	CategoryName = TEXT("Game");
+}
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVM",
-				"AVVMGameplay",
-				"CommonUI",
-				"Core",
-				"CoreUObject",
-				"DeveloperSettings",
-				"Engine",
-				"FieldNotification",
-				"GameplayAbilities",
-				"GameplayTags",
-				"GameplayTasks",
-				"ModelViewViewModel",
-				"UIExtension",
-				"UMG"
-			}
-		);
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"AVVMToolkit",
-				"CommonInput",
-				"EnhancedInput",
-				"NetCore",
-				"SlateCore",
-			}
-		);
-	}
+TSubclassOf<AAVVMBeaconClusterActor> UInteractionSettings::GetBeaconClusterActorClass()
+{
+	return GetDefault<UInteractionSettings>()->BeaconClusterActorClass;
 }
