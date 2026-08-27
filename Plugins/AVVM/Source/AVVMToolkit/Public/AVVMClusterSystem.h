@@ -78,6 +78,8 @@ public:
 	void RemoveFromCluster(const AActor* Target);
 
 protected:
+	void UpdateBeaconTransform();
+	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 ClusterId{INDEX_NONE};
 

@@ -39,7 +39,22 @@ bool AAVVMBeaconClusterActor::IsClusterEmpty() const
 void AAVVMBeaconClusterActor::AddToCluster(const AActor* Target)
 {
 	Cluster.Add(Target);
+	UpdateBeaconTransform();
+}
 
+void AAVVMBeaconClusterActor::RemoveFromCluster(const AActor* Target)
+{
+	const bool bDoesContain = Cluster.Contains(Target);
+	if (bDoesContain)
+	{
+		Cluster.Remove(Target);
+	}
+
+	UpdateBeaconTransform();
+}
+
+void AAVVMBeaconClusterActor::UpdateBeaconTransform()
+{
 	FVector NewAverageLocation{FVector::ZeroVector};
 	for (const auto& Actor : Cluster)
 	{
@@ -48,11 +63,6 @@ void AAVVMBeaconClusterActor::AddToCluster(const AActor* Target)
 
 	NewAverageLocation /= (Cluster.IsEmpty() ? 1.f : Cluster.Num());
 	SetActorLocation(NewAverageLocation);
-}
-
-void AAVVMBeaconClusterActor::RemoveFromCluster(const AActor* Target)
-{
-	Cluster.Remove(Target);
 }
 
 AAVVMBeaconClusterActor* FAVVMClusterSystem::Factory(UWorld* World,
