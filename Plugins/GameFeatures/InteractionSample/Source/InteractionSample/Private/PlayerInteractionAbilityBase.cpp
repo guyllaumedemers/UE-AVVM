@@ -120,7 +120,7 @@ void UPlayerInteractionAbilityBase::ActivateAbility(const FGameplayAbilitySpecHa
 	                TEXT("TryActivate %s."),
 	                *GetName());
 
-	const UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
+	UActorInteractionComponent* InteractionComponent = TargetComponent.Get();
 	if (!IsValid(InteractionComponent))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);

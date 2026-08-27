@@ -32,10 +32,11 @@
 struct FGameplayEffectSpecHandle;
 struct FInteractionExecutionContext;
 struct FInteractionExecutionRequirements;
+struct FInteractionObject;
+struct FInteractionObjectFastArray;
 class UAbilitySystemComponent;
 class UGameplayAbility;
 class UGameplayEffect;
-class UInteraction;
 
 /**
  *	Class description:
@@ -78,34 +79,34 @@ public:
 	virtual void SafeBegin();
 	virtual void SafeEnd();
 
-	bool HandleBeginOverlap(const TArray<UInteraction*>& NewRecords,
-	                        const AActor* NewInstigator /*World Actor*/,
+	bool HandleBeginOverlap(const AActor* NewInstigator /*World Actor*/,
 	                        const AActor* NewTarget /*APlayerCharacter*/,
-	                        const bool bShouldPreventContingency);
+	                        const bool bShouldPreventContingency,
+	                        FInteractionObjectFastArray& OutRecords);
 
-	bool HandleEndOverlap(const TArray<UInteraction*>& NewRecords,
-	                      const AActor* NewInstigator /*World Actor*/,
-	                      const AActor* NewTarget /*APlayerCharacter*/);
-
-	void HandleRecordModified(const TArray<UInteraction*>& OldRecords,
-	                          const TArray<UInteraction*>& NewRecords);
+	bool HandleEndOverlap(const AActor* NewInstigator /*World Actor*/,
+	                      const AActor* NewTarget /*APlayerCharacter*/,
+	                      FInteractionObjectFastArray& OutRecords);
 
 	bool StartExecute(const AActor* NewInstigator,
 	                  const AActor* NewTarget,
-	                  const TArray<UInteraction*>& NewRecords,
-	                  const bool bShouldPreventContingency);
+	                  const bool bShouldPreventContingency,
+	                  FInteractionObjectFastArray& OutRecords);
 
 	bool StopExecute(const AActor* NewInstigator,
 	                 const AActor* NewTarget,
-	                 const TArray<UInteraction*>& NewRecords,
-	                 const bool bShouldPreventContingency);
-	
-	void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
-	void Execute(const AActor* NewTarget) const;
-	void Kill(const AActor* NewTarget) const;
+	                 const bool bShouldPreventContingency,
+	                 FInteractionObjectFastArray& OutRecords);
+
+	virtual void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
+	virtual void Execute(const AActor* NewTarget) const;
+	virtual void Kill(const AActor* NewTarget) const;
 
 	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const;
 	const TInstancedStruct<FInteractionExecutionRequirements>& GetExecutionRequirements() const;
+	
+	void HandleNewRecord(const FInteractionObject& NewRecord);
+	void HandlePendingKillRecord(const FInteractionObject& PendingKillRecord);
 
 #if WITH_EDITOR
 	// ~ This function transfers existing data into FMySparseClassData.
@@ -113,34 +114,23 @@ public:
 #endif // WITH_EDITOR
 
 protected:
-	TArray<UInteraction*> GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
-	                                                   const AActor* NewInstigator,
-	                                                   const AActor* NewTarget) const;
-
-	TArray<UInteraction*> GetPartialMatchingInteractions(const TArray<UInteraction*>& Records,
-	                                                     const AActor* NewInstigator) const;
-
-	virtual bool AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
-	                                 const AActor* NewInstigator,
-	                                 const bool bShouldPreventContingency);
-
-	virtual bool AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
-	                               const AActor* NewInstigator,
-	                               const AActor* NewTarget);
-
-	void HandleNewRecord(const TArray<UInteraction*>& NewRecords);
-	void HandlePendingKillRecords(const TArray<UInteraction*>& PendingKillRecords);
-
 	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
 	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);
 
-	bool Server_LockInteraction(const TArray<UInteraction*>& NewRecords,
-	                            const AActor* NewInstigator,
-	                            const AActor* NewTarget);
+	bool Server_LockInteraction(const AActor* NewInstigator,
+	                            const AActor* NewTarget,
+	                            FInteractionObjectFastArray& OutRecords);
 
-	bool Server_UnlockInteraction(const TArray<UInteraction*>& NewRecords,
-	                              const AActor* NewInstigator,
-	                              const AActor* NewTarget);
+	bool Server_UnlockInteraction(const AActor* NewInstigator,
+	                              const AActor* NewTarget,
+	                              FInteractionObjectFastArray& OutRecords);
+	
+	TArray<FInteractionObject*> GetExactMatchingInteractions(const AActor* NewInstigator,
+															 const AActor* NewTarget,
+															 FInteractionObjectFastArray& OutRecords) const;
+
+	TArray<FInteractionObject*> GetPartialMatchingInteractions(const AActor* NewInstigator,
+															   FInteractionObjectFastArray& OutRecords) const;
 
 	UPROPERTY(Transient)
 	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;

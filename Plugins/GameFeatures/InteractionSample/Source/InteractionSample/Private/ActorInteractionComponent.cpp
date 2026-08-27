@@ -24,13 +24,12 @@
 #include "AVVMLogger.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMTagUtils.h"
-#include "Interaction.h"
+#include "InteractionObject.h"
 #include "Components/ShapeComponent.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "Net/Core/PushModel/PushModel.h"
 #include "ProfilingDebugging/CountersTrace.h"
 
 TRACE_DECLARE_INT_COUNTER(UActorInteractionComponent_InstanceCounter, TEXT("Actor Interaction Component Instance Counter"));
@@ -44,7 +43,7 @@ UActorInteractionComponent::UActorInteractionComponent(const FObjectInitializer&
 	PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 	SetIsReplicatedByDefault(true);
 
-	bReplicateUsingRegisteredSubObjectList = true;
+	bReplicateUsingRegisteredSubObjectList = false;
 }
 
 void UActorInteractionComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -62,13 +61,15 @@ void UActorInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// @gdemers allow control over collection size based on user-defined requirements.
-	Records.Reset(GetDefaultAllocationSize());
+	Records.InteractionObjects.Reset(GetDefaultAllocationSize());
 
 	const auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
 	}
+
+	OwningOuter = Outer;
 
 	TRACE_COUNTER_INCREMENT(UActorInteractionComponent_InstanceCounter);
 	AVVM_LOGGER_LOG(LogGameplay,
@@ -95,23 +96,13 @@ void UActorInteractionComponent::BeginPlay()
 		}
 	}
 #endif
-
-	OwningOuter = Outer;
 }
 
 void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	for (auto Iterator = Records.CreateIterator(); Iterator; ++Iterator)
-	{
-		if (IsValid(*Iterator))
-		{
-			RemoveReplicatedSubObject(Iterator->Get());
-			Iterator.RemoveCurrentSwap();
-		}
-	}
-
+	Records.InteractionObjects.Empty();
 	if (IsValid(InteractionImpl))
 	{
 		InteractionImpl->SafeEnd();
@@ -149,17 +140,17 @@ UActorInteractionComponent* UActorInteractionComponent::GetActorComponent(const 
 	return IsValid(NewActor) ? NewActor->GetComponentByClass<UActorInteractionComponent>() : nullptr;
 }
 
-bool UActorInteractionComponent::StartExecution(const AActor* NewTarget) const
+bool UActorInteractionComponent::StartExecution(const AActor* NewTarget)
 {
 	return IsValid(InteractionImpl)
-		       ? InteractionImpl->StartExecute(OwningOuter.Get(), NewTarget, Records, GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency)
+		       ? InteractionImpl->StartExecute(OwningOuter.Get(), NewTarget, GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency, Records)
 		       : false;
 }
 
-bool UActorInteractionComponent::StopExecution(const AActor* NewTarget) const
+bool UActorInteractionComponent::StopExecution(const AActor* NewTarget)
 {
 	return IsValid(InteractionImpl)
-		       ? InteractionImpl->StopExecute(OwningOuter.Get(), NewTarget, Records, GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency)
+		       ? InteractionImpl->StopExecute(OwningOuter.Get(), NewTarget, GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency, Records)
 		       : false;
 }
 
@@ -262,10 +253,10 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 		return;
 	}
 
-	const bool bResult = Impl->HandleBeginOverlap(Records,
-	                                              Instigator/*World Actor*/,
+	const bool bResult = Impl->HandleBeginOverlap(Instigator/*World Actor*/,
 	                                              Target/*AController*/,
-	                                              GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency);
+	                                              GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventContingency,
+	                                              Records);
 
 	if (bResult)
 	{
@@ -305,9 +296,9 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 		return;
 	}
 
-	const bool bResult = Impl->HandleEndOverlap(Records,
-	                                            Instigator/*World Actor*/,
-	                                            Target/*AController*/);
+	const bool bResult = Impl->HandleEndOverlap(Instigator/*World Actor*/,
+	                                            Target/*AController*/,
+	                                            Records);
 
 	if (bResult)
 	{
@@ -318,33 +309,26 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 void UActorInteractionComponent::Server_AddRecord(const AActor* NewInstigator,
                                                   const AActor* NewTarget)
 {
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
-	TArray<UInteraction*> OldRecords = Records;
-
-	auto* Interaction = NewObject<UInteraction>(this);
-	Interaction->operator()(NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	AddReplicatedSubObject(Interaction);
-	Records.Add(Interaction);
-
-	OnRep_RecordModified(OldRecords);
+	Records.MarkArrayDirty();
+	Records.InteractionObjects.Add(FInteractionObject{NewTarget, NewInstigator, this});
+	HandleNewRecord(Records.InteractionObjects.Top());
 }
 
 void UActorInteractionComponent::Server_SetPendingKill(const AActor* NewInstigator,
                                                        const AActor* NewTarget)
 {
-	const TObjectPtr<UInteraction>* SearchResult = Records.FindByPredicate([&](const UInteraction* Param)
+	FInteractionObject* SearchResult = Records.InteractionObjects.FindByPredicate([&](const FInteractionObject& Param)
 	{
-		return IsValid(Param) && Param->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+		return Param.DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
 	});
 
 	if (SearchResult != nullptr)
 	{
-		MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
+		Records.MarkItemDirty(*SearchResult);
+		SearchResult->SetPendingKill();
 
-		UInteraction* Transaction = SearchResult->Get();
-		Transaction->SetPendingKill();
-
-		OnRep_RecordModified(Records);
+		HandlePendingKillRecord(*SearchResult);
+		Server_ClearPendingKill();
 	}
 }
 
@@ -356,31 +340,38 @@ void UActorInteractionComponent::Server_ClearPendingKill()
 		return;
 	}
 
-	if (!Outer->HasAuthority() || Records.IsEmpty())
+	if (!Outer->HasAuthority() || Records.InteractionObjects.IsEmpty())
 	{
 		return;
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(UActorInteractionComponent, Records, this);
-	for (int32 i = Records.Num() - 1; i >= 0; --i)
+	Records.MarkArrayDirty();
+	for (int32 i = Records.InteractionObjects.Num() - 1; i >= 0; --i)
 	{
-		const UInteraction* Record = Records[i];
-		if (!IsValid(Record) || !Record->IsPendingKill())
+		const FInteractionObject& Record = Records.InteractionObjects[i];
+		if (!Record.IsPendingKill())
 		{
 			continue;
 		}
 
-		Records.RemoveSingleSwap(Records[i]);
+		Records.InteractionObjects.RemoveSingleSwap(Record);
 	}
 }
 
-void UActorInteractionComponent::OnRep_RecordModified(TArray<UInteraction*> OldRecords)
+void UActorInteractionComponent::HandleNewRecord(const FInteractionObject& NewRecord)
 {
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
 	if (IsValid(Impl))
 	{
-		Impl->HandleRecordModified(OldRecords, Records);
+		Impl->HandleNewRecord(NewRecord);
 	}
-	
-	Server_ClearPendingKill();
+}
+
+void UActorInteractionComponent::HandlePendingKillRecord(const FInteractionObject& PendingKillRecord)
+{
+	UActorInteractionImpl* Impl = InteractionImpl.Get();
+	if (IsValid(Impl))
+	{
+		Impl->HandlePendingKillRecord(PendingKillRecord);
+	}
 }

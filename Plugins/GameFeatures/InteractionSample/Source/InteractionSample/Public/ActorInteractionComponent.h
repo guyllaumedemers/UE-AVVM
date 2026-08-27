@@ -24,6 +24,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "InteractionObject.h"
 #include "Components/ActorComponent.h"
 #include "StructUtils/InstancedStruct.h"
 #include "Templates/SubclassOf.h"
@@ -83,13 +84,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static UActorInteractionComponent* GetActorComponent(const AActor* NewActor);
 
-	bool StartExecution(const AActor* NewTarget) const;
-	bool StopExecution(const AActor* NewTarget) const;
+	bool StartExecution(const AActor* NewTarget);
+	bool StopExecution(const AActor* NewTarget);
 	bool DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const;
 	void GetInteractionRequirements(TInstancedStruct<FInteractionExecutionRequirements>& OutRequirements) const;
-	virtual void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
-	virtual void Execute(const AActor* NewTarget) const;
-	virtual void Kill(const AActor* NewTarget) const;
+	void PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const;
+	void Execute(const AActor* NewTarget) const;
+	void Kill(const AActor* NewTarget) const;
+
+	void HandleNewRecord(const FInteractionObject& NewRecord);
+	void HandlePendingKillRecord(const FInteractionObject& PendingKillRecord);
 
 #if WITH_EDITOR
 	// ~ This function transfers existing data into FMySparseClassData.
@@ -119,14 +123,11 @@ protected:
 
 	void Server_ClearPendingKill();
 
-	UFUNCTION()
-	void OnRep_RecordModified(TArray<UInteraction*> OldRecords);
-
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UActorInteractionImpl> InteractionImpl = nullptr;
 
-	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_RecordModified")
-	TArray<TObjectPtr<UInteraction>> Records;
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	FInteractionObjectFastArray Records{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

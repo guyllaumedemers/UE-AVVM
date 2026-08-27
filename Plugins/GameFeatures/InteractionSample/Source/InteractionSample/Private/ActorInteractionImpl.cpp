@@ -25,7 +25,7 @@
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitUtils.h"
-#include "Interaction.h"
+#include "InteractionObject.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Data/InteractionExecutionContext.h"
 #include "Data/InteractionExecutionRequirements.h"
@@ -67,10 +67,10 @@ void UActorInteractionImpl::SafeEnd()
 	OwningOuter.Reset();
 }
 
-bool UActorInteractionImpl::HandleBeginOverlap(const TArray<UInteraction*>& NewRecords,
-                                               const AActor* NewInstigator,
+bool UActorInteractionImpl::HandleBeginOverlap(const AActor* NewInstigator,
                                                const AActor* NewTarget,
-                                               const bool bShouldPreventContingency)
+                                               const bool bShouldPreventContingency,
+                                               FInteractionObjectFastArray& OutRecords)
 {
 	if (!IsValid(NewTarget))
 	{
@@ -96,14 +96,27 @@ bool UActorInteractionImpl::HandleBeginOverlap(const TArray<UInteraction*>& NewR
 	                *GetNameSafe(NewInstigator),
 	                *GetNameSafe(NewTarget));
 
-	return AttemptBeginOverlap(NewRecords,
-	                           NewInstigator /*World Actor*/,
-	                           bShouldPreventContingency);
+	if (!bShouldPreventContingency)
+	{
+		return true;
+	}
+
+	bool bCanInteract = true;
+	for (const FInteractionObject* Record : GetPartialMatchingInteractions(NewInstigator, OutRecords))
+	{
+		if ((Record != nullptr) && !Record->CanInteract())
+		{
+			bCanInteract = false;
+			break;
+		}
+	}
+
+	return bCanInteract;
 }
 
-bool UActorInteractionImpl::HandleEndOverlap(const TArray<UInteraction*>& NewRecords,
-                                             const AActor* NewInstigator,
-                                             const AActor* NewTarget)
+bool UActorInteractionImpl::HandleEndOverlap(const AActor* NewInstigator,
+                                             const AActor* NewTarget,
+                                             FInteractionObjectFastArray& OutRecords)
 {
 	if (!IsValid(NewTarget))
 	{
@@ -123,37 +136,20 @@ bool UActorInteractionImpl::HandleEndOverlap(const TArray<UInteraction*>& NewRec
 	}
 
 	AVVM_LOGGER_LOG(LogGameplay,
-					Outer,
-					this,
-					TEXT("Overlap event detected between %s, and %s."),
-					*GetNameSafe(NewInstigator),
-					*GetNameSafe(NewTarget));
+	                Outer,
+	                this,
+	                TEXT("Overlap event detected between %s, and %s."),
+	                *GetNameSafe(NewInstigator),
+	                *GetNameSafe(NewTarget));
 
-	return AttemptEndOverlap(NewRecords,
-	                         NewInstigator /*World Actor*/,
-	                         NewTarget /*AController*/);
-}
-
-void UActorInteractionImpl::HandleRecordModified(const TArray<UInteraction*>& OldRecords,
-                                                 const TArray<UInteraction*>& NewRecords)
-{
-	const int32 OldNum = OldRecords.Num();
-	const int32 NewNum = NewRecords.Num();
-
-	if (OldNum < NewNum)
-	{
-		HandleNewRecord(NewRecords);
-	}
-	else
-	{
-		HandlePendingKillRecords(OldRecords);
-	}
+	const TArray<FInteractionObject*> SearchResult = GetExactMatchingInteractions(NewInstigator /*World Actor*/, NewTarget /*AController*/, OutRecords);
+	return !SearchResult.IsEmpty();
 }
 
 bool UActorInteractionImpl::StartExecute(const AActor* NewInstigator,
                                          const AActor* NewTarget,
-                                         const TArray<UInteraction*>& NewRecords,
-                                         const bool bShouldPreventContingency)
+                                         const bool bShouldPreventContingency,
+                                         FInteractionObjectFastArray& OutRecords)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -170,7 +166,7 @@ bool UActorInteractionImpl::StartExecute(const AActor* NewInstigator,
 #if WITH_SERVER_CODE
 	if (bShouldPreventContingency && IsValid(NewTarget) && NewTarget->HasAuthority())
 	{
-		const bool bResult = Server_LockInteraction(NewRecords, NewInstigator, NewTarget);
+		const bool bResult = Server_LockInteraction(NewInstigator, NewTarget, OutRecords);
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                this,
@@ -186,8 +182,8 @@ bool UActorInteractionImpl::StartExecute(const AActor* NewInstigator,
 
 bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
                                         const AActor* NewTarget,
-                                        const TArray<UInteraction*>& NewRecords,
-                                        const bool bShouldPreventContingency)
+                                        const bool bShouldPreventContingency,
+                                        FInteractionObjectFastArray& OutRecords)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -204,7 +200,7 @@ bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
 #if WITH_SERVER_CODE
 	if (bShouldPreventContingency && IsValid(NewTarget) && NewTarget->HasAuthority())
 	{
-		const bool bResult = Server_UnlockInteraction(NewRecords, NewInstigator, NewTarget);
+		const bool bResult = Server_UnlockInteraction(NewInstigator, NewTarget, OutRecords);
 		AVVM_LOGGER_LOG(LogGameplay,
 		                Outer,
 		                this,
@@ -218,7 +214,8 @@ bool UActorInteractionImpl::StopExecute(const AActor* NewInstigator,
 	return true;
 }
 
-void UActorInteractionImpl::PumpHeartbeat(const AActor* NewTarget, const float NewDelta) const
+void UActorInteractionImpl::PumpHeartbeat(const AActor* NewTarget,
+                                          const float NewDelta) const
 {
 	const auto* Instanced = GetExecutionCtx().GetPtr<FInteractionExecutionContext>();
 	if (!ensureAlwaysMsgf(Instanced != nullptr, TEXT("FInteractionExecutionContext invalid!")))
@@ -227,8 +224,8 @@ void UActorInteractionImpl::PumpHeartbeat(const AActor* NewTarget, const float N
 	}
 
 	Instanced->PumpHeartbeat(OwningOuter.Get(),
-							 NewTarget,
-							 NewDelta);
+	                         NewTarget,
+	                         NewDelta);
 }
 
 void UActorInteractionImpl::Execute(const AActor* NewTarget) const
@@ -240,7 +237,7 @@ void UActorInteractionImpl::Execute(const AActor* NewTarget) const
 	}
 
 	Instanced->Execute(OwningOuter.Get(),
-					   NewTarget);
+	                   NewTarget);
 }
 
 void UActorInteractionImpl::Kill(const AActor* NewTarget) const
@@ -252,7 +249,7 @@ void UActorInteractionImpl::Kill(const AActor* NewTarget) const
 	}
 
 	Instanced->Kill(OwningOuter.Get(),
-					NewTarget);
+	                NewTarget);
 }
 
 bool UActorInteractionImpl::DoesMeetExecutionRequirements(const TInstancedStruct<FInteractionExecutionRequirements>& Compare) const
@@ -292,57 +289,7 @@ void UActorInteractionImpl::MoveDataToSparseClassDataStruct() const
 }
 #endif
 
-TArray<UInteraction*> UActorInteractionImpl::GetExactMatchingInteractions(const TArray<UInteraction*>& Records,
-                                                                          const AActor* NewInstigator,
-                                                                          const AActor* NewTarget) const
-{
-	return Records.FilterByPredicate([&](const UInteraction* Param)
-	{
-		return IsValid(Param) && Param->DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	});
-}
-
-TArray<UInteraction*> UActorInteractionImpl::GetPartialMatchingInteractions(const TArray<UInteraction*>& Records,
-                                                                            const AActor* NewInstigator) const
-{
-	return Records.FilterByPredicate([&](const UInteraction* Param)
-	{
-		return IsValid(Param) && Param->DoesPartialMatch(NewInstigator);
-	});
-}
-
-bool UActorInteractionImpl::AttemptBeginOverlap(const TArray<UInteraction*>& NewRecords,
-                                                const AActor* NewInstigator,
-                                                const bool bShouldPreventContingency)
-{
-	if (!bShouldPreventContingency)
-	{
-		return true;
-	}
-
-	bool bCanInteract = true;
-	for (const UInteraction* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
-	{
-		if (IsValid(Record) && !Record->CanInteract())
-		{
-			bCanInteract = false;
-			break;
-		}
-	}
-
-	const bool bExecute = (bShouldPreventContingency && bCanInteract);
-	return bExecute;
-}
-
-bool UActorInteractionImpl::AttemptEndOverlap(const TArray<UInteraction*>& NewRecords,
-                                              const AActor* NewInstigator,
-                                              const AActor* NewTarget)
-{
-	const TArray<UInteraction*> SearchResult = GetExactMatchingInteractions(NewRecords, NewInstigator /*World Actor*/, NewTarget /*AController*/);
-	return !SearchResult.IsEmpty();
-}
-
-void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewRecords)
+void UActorInteractionImpl::HandleNewRecord(const FInteractionObject& NewRecord)
 {
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -355,19 +302,8 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	                this,
 	                TEXT("Record Collection modified. Add!"));
 
-	if (NewRecords.IsEmpty())
-	{
-		return;
-	}
-
-	const UInteraction* TopRecord = NewRecords.Top();
-	if (!IsValid(TopRecord))
-	{
-		return;
-	}
-
-	const AActor* Instigator = TopRecord->GetInstigator();
-	const AActor* Target = TopRecord->GetTarget();
+	const AActor* Instigator = NewRecord.GetInstigator();
+	const AActor* Target = NewRecord.GetTarget();
 
 	const auto* Controller = Cast<AController>(Target);
 	if (!IsValid(Controller))
@@ -396,7 +332,7 @@ void UActorInteractionImpl::HandleNewRecord(const TArray<UInteraction*>& NewReco
 	}
 }
 
-void UActorInteractionImpl::HandlePendingKillRecords(const TArray<UInteraction*>& PendingKillRecords)
+void UActorInteractionImpl::HandlePendingKillRecord(const FInteractionObject& PendingKillRecord)
 {
 	const auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
@@ -409,45 +345,37 @@ void UActorInteractionImpl::HandlePendingKillRecords(const TArray<UInteraction*>
 	                this,
 	                TEXT("Record Collection modified. Remove!"));
 
-	if (PendingKillRecords.IsEmpty())
+	if (!PendingKillRecord.IsPendingKill())
 	{
 		return;
 	}
 
-	for (const UInteraction* PendingKillRecord : PendingKillRecords)
+	const AActor* Instigator = PendingKillRecord.GetInstigator();
+	const AActor* Target = PendingKillRecord.GetTarget();
+
+	const auto* Controller = Cast<AController>(Target);
+	if (!IsValid(Controller))
 	{
-		if (!IsValid(PendingKillRecord) || !PendingKillRecord->IsPendingKill())
-		{
-			continue;
-		}
-
-		const AActor* Instigator = PendingKillRecord->GetInstigator();
-		const AActor* Target = PendingKillRecord->GetTarget();
-
-		const auto* Controller = Cast<AController>(Target);
-		if (!IsValid(Controller))
-		{
-			return;
-		}
+		return;
+	}
 
 #if WITH_SERVER_CODE
-		if (Controller->HasAuthority())
-		{
-			auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
-			RemoveGameplayEffectHandle(ASC);
-		}
+	if (Controller->HasAuthority())
+	{
+		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
+		RemoveGameplayEffectHandle(ASC);
+	}
 #endif
 
 #if WITH_EDITOR
-		if (!Controller->IsNetMode(NM_DedicatedServer))
+	if (!Controller->IsNetMode(NM_DedicatedServer))
 #endif
-		{
-			UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
-			                                        GetStopPromptInteractionChannel(),
-			                                        Controller,
-			                                        Instigator,
-			                                        FAVVMNotificationPayload::Empty);
-		}
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        GetStopPromptInteractionChannel(),
+		                                        Controller,
+		                                        Instigator,
+		                                        FAVVMNotificationPayload::Empty);
 	}
 }
 
@@ -484,16 +412,16 @@ void UActorInteractionImpl::RemoveGameplayEffectHandle(UAbilitySystemComponent* 
 	}
 }
 
-bool UActorInteractionImpl::Server_LockInteraction(const TArray<UInteraction*>& NewRecords,
-                                                   const AActor* NewInstigator,
-                                                   const AActor* NewTarget)
+bool UActorInteractionImpl::Server_LockInteraction(const AActor* NewInstigator,
+                                                   const AActor* NewTarget,
+                                                   FInteractionObjectFastArray& OutRecords)
 {
 	bool bCanInteract = true;
-	UInteraction* TargetInteraction = nullptr;
+	FInteractionObject* TargetInteraction = nullptr;
 
-	for (UInteraction* Record : GetPartialMatchingInteractions(NewRecords, NewInstigator))
+	for (FInteractionObject* Record : GetPartialMatchingInteractions(NewInstigator, OutRecords))
 	{
-		if (!IsValid(Record))
+		if (Record == nullptr)
 		{
 			continue;
 		}
@@ -509,32 +437,67 @@ bool UActorInteractionImpl::Server_LockInteraction(const TArray<UInteraction*>& 
 		}
 	}
 
-	const bool bResult = bCanInteract && IsValid(TargetInteraction);
+	const bool bResult = bCanInteract && (TargetInteraction != nullptr);
 	if (bResult)
 	{
+		OutRecords.MarkItemDirty(*TargetInteraction);
 		TargetInteraction->Lock();
 	}
 
 	return bResult;
 }
 
-bool UActorInteractionImpl::Server_UnlockInteraction(const TArray<UInteraction*>& NewRecords,
-                                                     const AActor* NewInstigator,
-                                                     const AActor* NewTarget)
+bool UActorInteractionImpl::Server_UnlockInteraction(const AActor* NewInstigator,
+                                                     const AActor* NewTarget,
+                                                     FInteractionObjectFastArray& OutRecords)
 {
-	TArray<UInteraction*> SearchResult = GetExactMatchingInteractions(NewRecords, NewInstigator, NewTarget);
+	TArray<FInteractionObject*> SearchResult = GetExactMatchingInteractions(NewInstigator, NewTarget, OutRecords);
 	if (SearchResult.IsEmpty() || !ensureAlwaysMsgf(SearchResult.Num() == 1, TEXT("Multiple match found for unique instigator and target pair!")))
 	{
 		return false;
 	}
 
-	UInteraction* Interaction = SearchResult[0];
+	FInteractionObject* TargetInteraction = SearchResult[0];
 
-	const bool bResult = IsValid(Interaction) && ensureAlwaysMsgf(!Interaction->CanInteract(), TEXT("Target Interaction wasn't locked!"));
+	const bool bResult = (TargetInteraction != nullptr) && ensureAlwaysMsgf(!TargetInteraction->CanInteract(), TEXT("Target Interaction wasn't locked!"));
 	if (bResult)
 	{
-		Interaction->Unlock();
+		OutRecords.MarkItemDirty(*TargetInteraction);
+		TargetInteraction->Unlock();
 	}
 
 	return bResult;
+}
+
+TArray<FInteractionObject*> UActorInteractionImpl::GetExactMatchingInteractions(const AActor* NewInstigator,
+																				const AActor* NewTarget,
+																				FInteractionObjectFastArray& OutRecords) const
+{
+	TArray<FInteractionObject*> OutResult{};
+	for (auto& InteractionObject : OutRecords.InteractionObjects)
+	{
+		const bool bDoesMatch = InteractionObject.DoesExactMatch(NewInstigator /*World Actor*/, NewTarget /*AController*/);
+		if (bDoesMatch)
+		{
+			OutResult.Add(&InteractionObject);
+		}
+	}
+
+	return OutResult;
+}
+
+TArray<FInteractionObject*> UActorInteractionImpl::GetPartialMatchingInteractions(const AActor* NewInstigator,
+																				  FInteractionObjectFastArray& OutRecords) const
+{
+	TArray<FInteractionObject*> OutResult{};
+	for (auto& InteractionObject : OutRecords.InteractionObjects)
+	{
+		const bool bDoesMatch = InteractionObject.DoesPartialMatch(NewInstigator /*World Actor*/);
+		if (bDoesMatch)
+		{
+			OutResult.Add(&InteractionObject);
+		}
+	}
+
+	return OutResult;
 }
