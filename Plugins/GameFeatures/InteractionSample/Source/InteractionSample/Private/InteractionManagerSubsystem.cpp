@@ -66,12 +66,12 @@ FAVVMClusterObjectHandle UInteractionManagerSubsystem::Register(const UActorInte
 		return FAVVMClusterObjectHandle::InvalidHandle;
 	}
 
-	const FAVVMClusterObjectHandle OutHandle = ClusterSystem.AppendOrCreateCluster(InteractionComponent->GetTypedOuter<AActor>());
+	const FAVVMClusterObjectHandle OutHandle = ClusterSystem.PushPartition(GetWorld(), InteractionComponent->GetTypedOuter<AActor>());
 	return OutHandle;
 }
 
 bool UInteractionManagerSubsystem::Unregister(const FAVVMClusterObjectHandle& Handle)
 {
-	const bool bResult = ClusterSystem.RemoveFromCluster(Handle);
+	const bool bResult = ClusterSystem.PopPartition(Handle);
 	return bResult;
 }

@@ -34,12 +34,11 @@ class UActorInteractionComponent;
  *	FInteractionClusterSystem is a derived type that handle Interactable Actor clustering. It also provides
  *	visual feedback for cluster location in-world.
  */
-USTRUCT(BlueprintType)
 struct INTERACTIONSAMPLE_API FInteractionClusterSystem : public FAVVMClusterSystem
 {
-	GENERATED_BODY()
-	
 	virtual TSubclassOf<AAVVMBeaconClusterActor> GetBeaconActorClass() const override;
+	
+	friend class UInteractionManagerSubsystem;
 };
 
 /**
@@ -61,6 +60,7 @@ class INTERACTIONSAMPLE_API UInteractionManagerSubsystem : public UWorldSubsyste
 
 public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+
 	static FAVVMClusterObjectHandle Static_Register(const UWorld* World, const UActorInteractionComponent* InteractionComponent);
 	static bool Static_Unregister(const UWorld* World, const FAVVMClusterObjectHandle& Handle);
 
@@ -69,6 +69,5 @@ protected:
 	FAVVMClusterObjectHandle Register(const UActorInteractionComponent* InteractionComponent);
 	bool Unregister(const FAVVMClusterObjectHandle& Handle);
 
-	UPROPERTY(Transient, BlueprintReadOnly)
 	FInteractionClusterSystem ClusterSystem{};
 };

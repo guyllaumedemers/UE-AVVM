@@ -29,6 +29,88 @@
 #include "AVVMClusterSystem.generated.h"
 
 /**
+ * 
+ */
+template<typename InElementType> // convert to using concepts later
+struct FAVVMBinaryTreeNode
+{
+	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
+	
+	TWeakObjectPtr<InElementType> Entity = nullptr;
+	TBinaryTreeNodeType* Lhs = nullptr;
+	TBinaryTreeNodeType* Rhs = nullptr;
+};
+
+/**
+ * 
+ */
+template <typename InElementType, typename InAllocatorType>
+struct FAVVMBinaryTree
+{
+	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
+	using TAllocatorType = typename InAllocatorType::template ForElementType<TBinaryTreeNodeType>;
+	
+	template<typename TSelectNodePredicate, typename TGoLeftPredicate>
+	TBinaryTreeNodeType* Search(TSelectNodePredicate Select, TGoLeftPredicate GoLeft);
+
+private:
+	TAllocatorType MemBlock{};
+	int32 FreeIndex{INDEX_NONE};
+	TBinaryTreeNodeType* Root = nullptr;
+};
+
+template <typename InElementType, typename InAllocatorType>
+template <typename TSelectNodePredicate, typename TGoLeftPredicate>
+typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* FAVVMBinaryTree<InElementType, InAllocatorType>::Search(TSelectNodePredicate Select,
+                                                                                                                                       TGoLeftPredicate GoLeft)
+{
+	if (Root == nullptr)
+	{
+		FMemory::Memzero(static_cast<void*>(MemBlock.GetAllocation()), (sizeof(TBinaryTreeNodeType) * MemBlock.GetInitialCapacity()));
+		Root = MemBlock.GetAllocation();
+		FreeIndex = 1;
+	}
+	
+	TFunction<TBinaryTreeNodeType*(TBinaryTreeNodeType* CurrNode,
+	                               TSelectNodePredicate NewSelect,
+	                               TGoLeftPredicate NewGoLeft)> BST_Recurse{};
+
+	BST_Recurse = [&](TBinaryTreeNodeType* CurrNode,
+	                  TSelectNodePredicate NewSelect,
+	                  TGoLeftPredicate NewGoLeft)
+	{
+		if (CurrNode == nullptr)
+		{
+			void* Ptr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * FreeIndex++);
+			CurrNode = new(Ptr) TBinaryTreeNodeType;
+			return CurrNode;
+		}
+		else if (!CurrNode->Entity.IsValid() || NewSelect(CurrNode->Entity.Get()))
+		{
+			return CurrNode;
+		}
+
+		const bool bResult = NewGoLeft(CurrNode->Entity.Get());
+		if (bResult)
+		{
+			return BST_Recurse(CurrNode->Lhs,
+			                   NewSelect,
+			                   NewGoLeft);
+		}
+		else
+		{
+			return BST_Recurse(CurrNode->Rhs,
+			                   NewSelect,
+			                   NewGoLeft);
+		}
+	};
+
+	return BST_Recurse(Root,
+	                   Select,
+	                   GoLeft);
+}
+
+/**
  *	Class description:
  *	
  *	FAVVMClusterObjectHandle is a context handle object caching information about the owning cluster.
@@ -92,24 +174,15 @@ protected:
  *	
  *	FAVVMClusterSystem is a context object storing information about all clusters in play.
  */
-USTRUCT(BlueprintType)
 struct AVVMTOOLKIT_API FAVVMClusterSystem
 {
-	GENERATED_BODY()
-
-	virtual ~FAVVMClusterSystem() = default;
-
-	FAVVMClusterObjectHandle AppendOrCreateCluster(const AActor* Actor);
-	bool RemoveFromCluster(const FAVVMClusterObjectHandle& Handle);
+	FAVVMClusterObjectHandle PushPartition(UWorld* World, const AActor* PartitionActor);
+	bool PopPartition(const FAVVMClusterObjectHandle& Handle);
 
 protected:
 	virtual AAVVMBeaconClusterActor* Factory(UWorld* World, const FTransform& SpawnTransform, const FActorSpawnParameters& SpawnParams);
 	virtual TSubclassOf<AAVVMBeaconClusterActor> GetBeaconActorClass() const;
 	virtual double GetMaximumBeaconRadius() const;
 
-	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const AActor>, int32/*ClusterId*/> MemoizationMap{};
-
-	UPROPERTY(Transient)
-	TMap<int32/*ClusterId*/, TObjectPtr<AAVVMBeaconClusterActor>> Beacons{};
+	FAVVMBinaryTree<AActor, TFixedAllocator<512>> BST_ClusterGraph{};
 };

@@ -240,8 +240,8 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 		return;
 	}
 
-	const AActor* Instigator = OwningOuter.Get();
 	const AController* Target = OtherActor->GetInstigatorController();
+	const AActor* Instigator = OwningOuter.Get();
 
 	const UAVVMReplicatedTagComponent* ReplicatedTagComponent = nullptr;
 	if (IsValid(Target))

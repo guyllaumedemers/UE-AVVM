@@ -88,97 +88,119 @@ double FAVVMClusterSystem::GetMaximumBeaconRadius() const
 	return 1000.f;
 }
 
-FAVVMClusterObjectHandle FAVVMClusterSystem::AppendOrCreateCluster(const AActor* Actor)
+FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const AActor* PartitionActor)
 {
-	if (!IsValid(Actor) || !ensureAlwaysMsgf(!MemoizationMap.Contains(Actor),
-	                                         TEXT("Attempting to append duplicated actor.")))
+	if (!IsValid(PartitionActor))
 	{
 		return FAVVMClusterObjectHandle::InvalidHandle;
 	}
 
-	double CurrClosestDistSquared = DBL_MAX;
-	const double BeaconRangeSquared = (GetMaximumBeaconRadius() * GetMaximumBeaconRadius());
-
-	const auto Predicate_GetClosestBeacon = [&](const AActor* Target)
+	// TODO @gdemers try converting this to consteval
+	const double MaxBeaconRadiusSquared{GetMaximumBeaconRadius() * GetMaximumBeaconRadius()};
+	const auto Select = [Target = TWeakObjectPtr(PartitionActor), &MaxBeaconRadiusSquared](const AActor* BeaconActor)
 	{
-		if (!IsValid(Target) || !IsValid(Actor))
+		if (!IsValid(BeaconActor) || !Target.IsValid())
 		{
 			return false;
 		}
 
-		const double DistSquared = FVector::DistSquared(Target->GetActorLocation(), Actor->GetActorLocation());
-		if ((DistSquared < CurrClosestDistSquared) && (DistSquared <= BeaconRangeSquared))
-		{
-			CurrClosestDistSquared = DistSquared;
-			return true;
-		}
-
-		return false;
+		const double DistSquared = FVector::DistSquared(BeaconActor->GetActorLocation(), Target->GetActorLocation());
+		return FMath::IsWithin(DistSquared, 0.1, MaxBeaconRadiusSquared);
 	};
 
-	TArray<AActor*> OutOverlappingActors{};
-	Actor->GetOverlappingActors(OutOverlappingActors, GetBeaconActorClass());
-
-	const TArray<AActor*> OverlappingBeacons = OutOverlappingActors.FilterByPredicate(Predicate_GetClosestBeacon);
-	AAVVMBeaconClusterActor* ClosestBeacon = nullptr;
-
-	if (OverlappingBeacons.IsEmpty())
+	double MinDistSquared{DBL_MAX};
+	const auto GoLeft = [Target = TWeakObjectPtr(PartitionActor), &MinDistSquared](const AActor* BeaconActor)
 	{
-		TArray<TObjectPtr<AAVVMBeaconClusterActor>> ClosestActors{};
-		Beacons.GenerateValueArray(ClosestActors);
-
-		ClosestActors = ClosestActors.FilterByPredicate(Predicate_GetClosestBeacon);
-		if (ClosestActors.IsEmpty())
+		if (!IsValid(BeaconActor) || !Target.IsValid())
 		{
-			AAVVMBeaconClusterActor* NewBeacon = Factory(Actor->GetWorld(), Actor->GetActorTransform(), FActorSpawnParameters{});
-			if (ensureAlwaysMsgf(IsValid(NewBeacon), TEXT("Failed to allocate memory for actor creation.")))
-			{
-				NewBeacon->SetClusterId(FMath::Rand());
-				Beacons.Add(NewBeacon->GetClusterId(), NewBeacon);
-				ClosestBeacon = NewBeacon;
-			}
+			return false;
+		}
+
+		const double DistSquared = FVector::DistSquared(BeaconActor->GetActorLocation(), Target->GetActorLocation());
+		if (DistSquared < MinDistSquared)
+		{
+			MinDistSquared = DistSquared;
+			return true;
 		}
 		else
 		{
-			ClosestBeacon = Cast<AAVVMBeaconClusterActor>(ClosestActors.Top());
+			return false;
 		}
+	};
+
+	auto* TreeNode = BST_ClusterGraph.Search(Select, GoLeft);
+	if (!ensureAlwaysMsgf(TreeNode != nullptr, TEXT("Invalid MemBlock referenced.")))
+	{
+		return FAVVMClusterObjectHandle::InvalidHandle;
+	}
+
+	auto* Beacon = Cast<AAVVMBeaconClusterActor>(TreeNode->Entity.Get());
+	if (!IsValid(Beacon))
+	{
+		Beacon = Factory(World, PartitionActor->GetTransform(), FActorSpawnParameters{});
+		Beacon->SetClusterId(FMath::Rand());
+		TreeNode->Entity = Beacon;
+	}
+
+	Beacon->AddToCluster(PartitionActor);
+	return FAVVMClusterObjectHandle{Beacon->GetClusterId(), Beacon};
+}
+
+bool FAVVMClusterSystem::PopPartition(const FAVVMClusterObjectHandle& Handle)
+{
+	const auto* PartitionActor = Handle.OwnedActor.Get();
+	if (!IsValid(PartitionActor))
+	{
+		return false;
+	}
+
+	const auto Select = [SearchClusterId = Handle.ClusterId](const AActor* BeaconActor)
+	{
+		const auto* Beacon = Cast<AAVVMBeaconClusterActor>(BeaconActor);
+		if (!IsValid(Beacon))
+		{
+			return false;
+		}
+		else
+		{
+			return Beacon->GetClusterId() == SearchClusterId;
+		}
+	};
+
+	double MinDistSquared{DBL_MAX};
+	const auto GoLeft = [Target = TWeakObjectPtr(PartitionActor), &MinDistSquared](const AActor* BeaconActor)
+	{
+		if (!IsValid(BeaconActor) || !Target.IsValid())
+		{
+			return false;
+		}
+
+		const double DistSquared = FVector::DistSquared(BeaconActor->GetActorLocation(), Target->GetActorLocation());
+		if (DistSquared < MinDistSquared)
+		{
+			MinDistSquared = DistSquared;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+
+	auto* TreeNode = BST_ClusterGraph.Search(Select, GoLeft);
+	if (!ensureAlwaysMsgf(TreeNode != nullptr, TEXT("Invalid MemBlock referenced.")))
+	{
+		return false;
 	}
 	else
 	{
-		ClosestBeacon = Cast<AAVVMBeaconClusterActor>(OverlappingBeacons.Top());
+		// TODO @gdemers We have to rebuild the graph here.
+		auto* Beacon = Cast<AAVVMBeaconClusterActor>(TreeNode->Entity.Get());
+		if (IsValid(Beacon))
+		{
+			Beacon->RemoveFromCluster(PartitionActor);
+		}
+
+		return true;
 	}
-
-	int32& OutClusterId = MemoizationMap.Add(Actor);
-	if (ensureAlwaysMsgf(IsValid(ClosestBeacon), TEXT("Invalid Beacon Actor.")))
-	{
-		OutClusterId = ClosestBeacon->GetClusterId();
-		ClosestBeacon->AddToCluster(Actor);
-	}
-
-	FAVVMClusterObjectHandle NewHandle{OutClusterId, Actor};
-	return MoveTemp(NewHandle);
-}
-
-bool FAVVMClusterSystem::RemoveFromCluster(const FAVVMClusterObjectHandle& Handle)
-{
-	if (!ensureAlwaysMsgf(MemoizationMap.Contains(Handle.OwnedActor), TEXT("Trying to remove invalid Actor.")) ||
-		!ensureAlwaysMsgf(Beacons.Contains(Handle.ClusterId), TEXT("Trying to remove invalid handle.")))
-	{
-		return false;
-	}
-
-	TObjectPtr<AAVVMBeaconClusterActor>& OutResult = Beacons[Handle.ClusterId];
-	if (!ensureAlwaysMsgf(IsValid(OutResult), TEXT("Invalid Beacon Actor.")))
-	{
-		return false;
-	}
-
-	MemoizationMap.Remove(Handle.OwnedActor);
-	OutResult->RemoveFromCluster(Handle.OwnedActor.Get());
-	if (OutResult->IsClusterEmpty())
-	{
-		Beacons.Remove(Handle.ClusterId);
-	}
-
-	return true;
 }
