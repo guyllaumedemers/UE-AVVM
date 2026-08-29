@@ -64,13 +64,6 @@ template <typename TSelectNodePredicate, typename TGoLeftPredicate>
 typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* FAVVMBinaryTree<InElementType, InAllocatorType>::Search(TSelectNodePredicate Select,
                                                                                                                                        TGoLeftPredicate GoLeft)
 {
-	if (Root == nullptr)
-	{
-		FMemory::Memzero(static_cast<void*>(MemBlock.GetAllocation()), (sizeof(TBinaryTreeNodeType) * MemBlock.GetInitialCapacity()));
-		Root = MemBlock.GetAllocation();
-		FreeIndex = 1;
-	}
-	
 	TFunction<TBinaryTreeNodeType*(TBinaryTreeNodeType* CurrNode,
 	                               TSelectNodePredicate NewSelect,
 	                               TGoLeftPredicate NewGoLeft)> BST_Recurse{};
@@ -81,8 +74,13 @@ typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* F
 	{
 		if (CurrNode == nullptr)
 		{
-			void* Ptr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * FreeIndex++);
+			void* Ptr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * FreeIndex);
+			void* LhsPtr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * (FreeIndex + 1));
+			void* RhsPtr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * (FreeIndex + 2));
 			CurrNode = new(Ptr) TBinaryTreeNodeType;
+			CurrNode->Lhs = new(LhsPtr) TBinaryTreeNodeType;
+			CurrNode->Rhs = new(RhsPtr) TBinaryTreeNodeType;
+			FreeIndex += 3;
 			return CurrNode;
 		}
 		else if (!CurrNode->Entity.IsValid() || NewSelect(CurrNode->Entity.Get()))
@@ -105,9 +103,14 @@ typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* F
 		}
 	};
 
-	return BST_Recurse(Root,
-	                   Select,
-	                   GoLeft);
+	FreeIndex = FMath::Clamp(FreeIndex, 0, INT32_MAX);
+	auto* SearchResult = BST_Recurse(Root, Select, GoLeft);
+	if (Root == nullptr)
+	{
+		Root = SearchResult;
+	}
+
+	return SearchResult;
 }
 
 /**
