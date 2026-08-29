@@ -21,97 +21,13 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMBinarySearchTree.h"
 #include "Engine/World.h"
 #include "GameFramework/Info.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Templates/SubclassOf.h"
 
 #include "AVVMClusterSystem.generated.h"
-
-/**
- * 
- */
-template<typename InElementType> // convert to using concepts later
-struct FAVVMBinaryTreeNode
-{
-	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
-	
-	TWeakObjectPtr<InElementType> Entity = nullptr;
-	TBinaryTreeNodeType* Lhs = nullptr;
-	TBinaryTreeNodeType* Rhs = nullptr;
-};
-
-/**
- * 
- */
-template <typename InElementType, typename InAllocatorType>
-struct FAVVMBinaryTree
-{
-	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
-	using TAllocatorType = typename InAllocatorType::template ForElementType<TBinaryTreeNodeType>;
-	
-	template<typename TSelectNodePredicate, typename TGoLeftPredicate>
-	TBinaryTreeNodeType* Search(TSelectNodePredicate Select, TGoLeftPredicate GoLeft);
-
-private:
-	TAllocatorType MemBlock{};
-	int32 FreeIndex{INDEX_NONE};
-	TBinaryTreeNodeType* Root = nullptr;
-};
-
-template <typename InElementType, typename InAllocatorType>
-template <typename TSelectNodePredicate, typename TGoLeftPredicate>
-typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* FAVVMBinaryTree<InElementType, InAllocatorType>::Search(TSelectNodePredicate Select,
-                                                                                                                                       TGoLeftPredicate GoLeft)
-{
-	TFunction<TBinaryTreeNodeType*(TBinaryTreeNodeType* CurrNode,
-	                               TSelectNodePredicate NewSelect,
-	                               TGoLeftPredicate NewGoLeft)> BST_Recurse{};
-
-	BST_Recurse = [&](TBinaryTreeNodeType* CurrNode,
-	                  TSelectNodePredicate NewSelect,
-	                  TGoLeftPredicate NewGoLeft)
-	{
-		if (CurrNode == nullptr)
-		{
-			void* Ptr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * FreeIndex);
-			void* LhsPtr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * (FreeIndex + 1));
-			void* RhsPtr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * (FreeIndex + 2));
-			CurrNode = new(Ptr) TBinaryTreeNodeType;
-			CurrNode->Lhs = new(LhsPtr) TBinaryTreeNodeType;
-			CurrNode->Rhs = new(RhsPtr) TBinaryTreeNodeType;
-			FreeIndex += 3;
-			return CurrNode;
-		}
-		else if (!CurrNode->Entity.IsValid() || NewSelect(CurrNode->Entity.Get()))
-		{
-			return CurrNode;
-		}
-
-		const bool bResult = NewGoLeft(CurrNode->Entity.Get());
-		if (bResult)
-		{
-			return BST_Recurse(CurrNode->Lhs,
-			                   NewSelect,
-			                   NewGoLeft);
-		}
-		else
-		{
-			return BST_Recurse(CurrNode->Rhs,
-			                   NewSelect,
-			                   NewGoLeft);
-		}
-	};
-
-	FreeIndex = FMath::Clamp(FreeIndex, 0, INT32_MAX);
-	auto* SearchResult = BST_Recurse(Root, Select, GoLeft);
-	if (Root == nullptr)
-	{
-		Root = SearchResult;
-	}
-
-	return SearchResult;
-}
 
 /**
  *	Class description:
@@ -157,19 +73,18 @@ public:
 	bool IsClusterEmpty() const;
 
 	UFUNCTION(BlueprintCallable)
-	void AddToCluster(const AActor* Target);
+	void AddToCluster(const AActor* NewTarget);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveFromCluster(const AActor* Target);
+	bool RemoveFromCluster(const AActor* NewTarget);
 
 protected:
 	void UpdateBeaconTransform();
-	
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 ClusterId{INDEX_NONE};
 
-	UPROPERTY(Transient)
-	TSet<TWeakObjectPtr<const AActor>> Cluster{};
+	FAVVMBinaryTree<TWeakObjectPtr<const AActor>, TFixedAllocator<64>> ClusterElements{};
 };
 
 /**
@@ -187,5 +102,5 @@ protected:
 	virtual TSubclassOf<AAVVMBeaconClusterActor> GetBeaconActorClass() const;
 	virtual double GetMaximumBeaconRadius() const;
 
-	FAVVMBinaryTree<AActor, TFixedAllocator<512>> BST_ClusterGraph{};
+	FAVVMBinaryTree<TWeakObjectPtr<AActor>, TFixedAllocator<32>> Clusters{};
 };
