@@ -107,7 +107,8 @@ template <typename TOnSelectElement, typename TIsElementLessThan>
 typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType** FAVVMBinaryTree<InElementType, InAllocatorType>::SearchV2(const TOnSelectElement& OnSelectElement,
                                                                                                                                           const TIsElementLessThan& IsElementLessThan) const
 {
-	return SearchV1(Root, OnSelectElement, IsElementLessThan);
+	auto* NonConstPtr = Root;
+	return SearchV1(NonConstPtr/*Cant pass Root in a const api call here*/, OnSelectElement, IsElementLessThan);
 }
 
 template <typename InElementType, typename InAllocatorType>
@@ -123,7 +124,7 @@ typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType** 
                                                                                                                                           const TOnSelectElement& OnSelectElement,
                                                                                                                                           const TIsElementLessThan& IsElementLessThan) const
 {
-	if ((CurrNode == nullptr) || !CurrNode->Value.IsValid()/*TODO we need a requirements to a function that validate the value type*/ || OnSelectElement(CurrNode->Value))
+	if ((CurrNode == nullptr) || !CurrNode->Value.IsValid()/*TODO we need a requirements to a function that validate the value type*/ || OnSelectElement(CurrNode))
 	{
 		return &CurrNode;
 	}

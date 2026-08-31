@@ -46,21 +46,21 @@ void AAVVMBeaconClusterActor::AddToCluster(const AActor* NewTarget)
 	}
 
 	// @gdemers we never want to select during expansion of a cluster until proven otherwise.
-	const auto OnSelectElement = [](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	const auto OnSelectElement = [](const auto* CurrNode)
 	{
 		return false;
 	};
 
-	const double NewElement_DistSquared = FVector::DistSquared(GetActorLocation(), NewTarget->GetActorLocation());
-	const auto IsElementLessThan = [this, &NewElement_DistSquared](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	const double NewElement_SquaredMag = NewTarget->GetActorLocation().SquaredLength();
+	const auto IsElementLessThan = [this, &NewElement_SquaredMag](const TWeakObjectPtr<const AActor>& OtherClusterElement)
 	{
 		if (!OtherClusterElement.IsValid())
 		{
 			return false;
 		}
 
-		const double DistSquared = FVector::DistSquared(GetActorLocation(), OtherClusterElement->GetActorLocation());
-		if (NewElement_DistSquared < DistSquared)
+		const double SquaredMag = OtherClusterElement->GetActorLocation().SquaredLength();
+		if (NewElement_SquaredMag < SquaredMag)
 		{
 			return true;
 		}
@@ -86,7 +86,45 @@ bool AAVVMBeaconClusterActor::RemoveFromCluster(const AActor* NewTarget)
 
 const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* OtherActor) const
 {
-	return nullptr;
+	if (!IsValid(OtherActor))
+	{
+		return nullptr;
+	}
+
+	const auto OnSelectElement = [Target = TWeakObjectPtr(OtherActor)](const auto* CurrNode)
+	{
+		// TODO @gdemers Define how we manage selecting the closest intersect.
+		return false;
+	};
+
+	const double NewElement_SquaredMag = OtherActor->GetActorLocation().SquaredLength();
+	const auto IsElementLessThan = [Target = TWeakObjectPtr(OtherActor), &NewElement_SquaredMag](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	{
+		if (!OtherClusterElement.IsValid() || !Target.IsValid())
+		{
+			return false;
+		}
+
+		const double SquaredMag = OtherClusterElement->GetActorLocation().SquaredLength();
+		if (NewElement_SquaredMag < SquaredMag)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+
+	auto** SearchResult = ClusterElements.SearchV2(OnSelectElement, IsElementLessThan);
+	if ((SearchResult != nullptr) && ((*SearchResult) != nullptr))
+	{
+		return (*SearchResult)->Value.Get();
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 void AAVVMBeaconClusterActor::UpdateBeaconTransform()
@@ -140,14 +178,14 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 
 	// TODO @gdemers try converting this to consteval
 	const double MaxBeaconRadiusSquared{GetMaximumBeaconRadius() * GetMaximumBeaconRadius()};
-	const auto OnSelectElement = [Target = TWeakObjectPtr(PartitionActor), &MaxBeaconRadiusSquared](const TWeakObjectPtr<AActor>& BeaconActor)
+	const auto OnSelectElement = [Target = TWeakObjectPtr(PartitionActor), &MaxBeaconRadiusSquared](const auto* CurrNode)
 	{
-		if (!BeaconActor.IsValid() || !Target.IsValid())
+		if ((CurrNode == nullptr) || !CurrNode->Value.IsValid() || !Target.IsValid())
 		{
 			return false;
 		}
 
-		const double DistSquared = FVector::DistSquared(BeaconActor->GetActorLocation(), Target->GetActorLocation());
+		const double DistSquared = FVector::DistSquared(CurrNode->Value->GetActorLocation(), Target->GetActorLocation());
 		return FMath::IsWithin(DistSquared, 0.1, MaxBeaconRadiusSquared);
 	};
 
