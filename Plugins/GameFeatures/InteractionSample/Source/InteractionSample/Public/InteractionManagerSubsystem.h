@@ -42,6 +42,24 @@ struct INTERACTIONSAMPLE_API FInteractionClusterSystem : public FAVVMClusterSyst
 };
 
 /**
+ * 
+ */
+USTRUCT(BlueprintType)
+struct INTERACTIONSAMPLE_API FOverlapContext
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FAVVMClusterObjectHandle Handle{};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const AActor> Instigator = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const AActor> OtherActor = nullptr;
+};
+
+/**
  *	Class description:
  *	
  *	UInteractionManagerSubsystem is a subsystem that builds up a graph of UActorInteractionComponent clusters based on proximity
@@ -63,11 +81,13 @@ public:
 
 	static FAVVMClusterObjectHandle Static_Register(const UWorld* World, const UActorInteractionComponent* InteractionComponent);
 	static bool Static_Unregister(const UWorld* World, const FAVVMClusterObjectHandle& Handle);
+	static bool Static_CheckIfClosestOverlappingObject(const UWorld* World, const FOverlapContext& OverlapContext);
 
 protected:
 	static UInteractionManagerSubsystem* Get(const UWorld* World);
 	FAVVMClusterObjectHandle Register(const UActorInteractionComponent* InteractionComponent);
 	bool Unregister(const FAVVMClusterObjectHandle& Handle);
+	bool CheckIfClosestOverlappingObject(const FOverlapContext& OverlapContext) const;
 
 	FInteractionClusterSystem ClusterSystem{};
 };

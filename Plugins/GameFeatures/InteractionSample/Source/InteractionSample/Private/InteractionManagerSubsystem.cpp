@@ -54,6 +54,13 @@ bool UInteractionManagerSubsystem::Static_Unregister(const UWorld* World,
 	return IsValid(Subsystem) ? Subsystem->Unregister(Handle) : false;
 }
 
+bool UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(const UWorld* World,
+                                                                          const FOverlapContext& OverlapContext)
+{
+	auto* Subsystem = UInteractionManagerSubsystem::Get(World);
+	return IsValid(Subsystem) ? Subsystem->CheckIfClosestOverlappingObject(OverlapContext) : false;
+}
+
 UInteractionManagerSubsystem* UInteractionManagerSubsystem::Get(const UWorld* World)
 {
 	return UWorld::GetSubsystem<UInteractionManagerSubsystem>(World);
@@ -74,4 +81,10 @@ bool UInteractionManagerSubsystem::Unregister(const FAVVMClusterObjectHandle& Ha
 {
 	const bool bResult = ClusterSystem.PopPartition(Handle);
 	return bResult;
+}
+
+bool UInteractionManagerSubsystem::CheckIfClosestOverlappingObject(const FOverlapContext& OverlapContext) const
+{
+	const AActor* SearchResult = ClusterSystem.GetClosestOverlappingObject(OverlapContext.Handle, OverlapContext.OtherActor.Get());
+	return IsValid(SearchResult) && (SearchResult == OverlapContext.Instigator);
 }

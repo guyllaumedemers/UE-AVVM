@@ -78,6 +78,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool RemoveFromCluster(const AActor* NewTarget);
 
+	UFUNCTION(BlueprintCallable)
+	const AActor* GetClosestClusterElement(const AActor* OtherActor) const;
+
 protected:
 	void UpdateBeaconTransform();
 
@@ -96,6 +99,7 @@ struct AVVMTOOLKIT_API FAVVMClusterSystem
 {
 	FAVVMClusterObjectHandle PushPartition(UWorld* World, const AActor* PartitionActor);
 	bool PopPartition(const FAVVMClusterObjectHandle& Handle);
+	const AActor* GetClosestOverlappingObject(const FAVVMClusterObjectHandle& Handle, const AActor* OtherActor) const;
 
 protected:
 	virtual AAVVMBeaconClusterActor* Factory(UWorld* World, const FTransform& SpawnTransform, const FActorSpawnParameters& SpawnParams);

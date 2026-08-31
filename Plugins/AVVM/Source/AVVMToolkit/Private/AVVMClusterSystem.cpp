@@ -19,6 +19,8 @@
 //SOFTWARE.
 #include "AVVMClusterSystem.h"
 
+#include "WorldPartition/WorldPartitionEditorPerProjectUserSettings.h"
+
 FAVVMClusterObjectHandle FAVVMClusterObjectHandle::InvalidHandle{};
 
 int32 AAVVMBeaconClusterActor::GetClusterId() const
@@ -42,15 +44,15 @@ void AAVVMBeaconClusterActor::AddToCluster(const AActor* NewTarget)
 	{
 		return;
 	}
-	
+
 	// @gdemers we never want to select during expansion of a cluster until proven otherwise.
-	const auto Select = [](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	const auto OnSelectElement = [](const TWeakObjectPtr<const AActor>& OtherClusterElement)
 	{
 		return false;
 	};
 
 	const double NewElement_DistSquared = FVector::DistSquared(GetActorLocation(), NewTarget->GetActorLocation());
-	const auto GoLeft = [this, &NewElement_DistSquared](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	const auto IsElementLessThan = [this, &NewElement_DistSquared](const TWeakObjectPtr<const AActor>& OtherClusterElement)
 	{
 		if (!OtherClusterElement.IsValid())
 		{
@@ -67,61 +69,24 @@ void AAVVMBeaconClusterActor::AddToCluster(const AActor* NewTarget)
 			return false;
 		}
 	};
-	
-	auto* TreeNode = ClusterElements.Search(Select, GoLeft);
-	if (!ensureAlwaysMsgf(TreeNode != nullptr, TEXT("Invalid MemBlock referenced.")))
+
+	const auto OnPushNewElement = [NewElement = TWeakObjectPtr(NewTarget)]()
 	{
-		return;
-	}
-	
-	TreeNode->Value = NewTarget;
+		return NewElement;
+	};
+
+	ClusterElements.Push(OnSelectElement, IsElementLessThan, OnPushNewElement);
 	UpdateBeaconTransform();
 }
 
 bool AAVVMBeaconClusterActor::RemoveFromCluster(const AActor* NewTarget)
 {
-	if (!IsValid(NewTarget))
-	{
-		return false;
-	}
+	return true;
+}
 
-	const auto Select = [Target = TWeakObjectPtr(NewTarget)](const TWeakObjectPtr<const AActor>& OtherClusterElement)
-	{
-		return Target.IsValid() && OtherClusterElement.IsValid() && (OtherClusterElement == Target);
-	};
-
-	const double NewElement_DistSquared = FVector::DistSquared(GetActorLocation(), NewTarget->GetActorLocation());
-	const auto GoLeft = [this, &NewElement_DistSquared](const TWeakObjectPtr<const AActor>& OtherClusterElement)
-	{
-		if (!OtherClusterElement.IsValid())
-		{
-			return false;
-		}
-
-		const double DistSquared = FVector::DistSquared(GetActorLocation(), OtherClusterElement->GetActorLocation());
-		if (NewElement_DistSquared < DistSquared)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	};
-
-	auto* TreeNode = ClusterElements.Search(Select, GoLeft);
-	if (!ensureAlwaysMsgf(TreeNode != nullptr, TEXT("Invalid MemBlock referenced.")))
-	{
-		return false;
-	}
-	else
-	{
-		// TODO @gdemers We have to rebuild the graph here.
-		TreeNode->Value.Reset();
-
-		UpdateBeaconTransform();
-		return true;
-	}
+const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* OtherActor) const
+{
+	return nullptr;
 }
 
 void AAVVMBeaconClusterActor::UpdateBeaconTransform()
@@ -130,7 +95,7 @@ void AAVVMBeaconClusterActor::UpdateBeaconTransform()
 	int32 OutCount{0};
 
 	// @gdemers Prob the only valid use of capturing by ref when defining a capture clause...
-	ClusterElements.Sum([&OutAverageLocation, &OutCount](const TWeakObjectPtr<const AActor>& ClusterElement)
+	ClusterElements.SumV2([&OutAverageLocation, &OutCount](const TWeakObjectPtr<const AActor>& ClusterElement)
 	{
 		if (ClusterElement.IsValid())
 		{
@@ -175,7 +140,7 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 
 	// TODO @gdemers try converting this to consteval
 	const double MaxBeaconRadiusSquared{GetMaximumBeaconRadius() * GetMaximumBeaconRadius()};
-	const auto Select = [Target = TWeakObjectPtr(PartitionActor), &MaxBeaconRadiusSquared](const TWeakObjectPtr<AActor>& BeaconActor)
+	const auto OnSelectElement = [Target = TWeakObjectPtr(PartitionActor), &MaxBeaconRadiusSquared](const TWeakObjectPtr<AActor>& BeaconActor)
 	{
 		if (!BeaconActor.IsValid() || !Target.IsValid())
 		{
@@ -187,7 +152,7 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 	};
 
 	double MinDistSquared{DBL_MAX};
-	const auto GoLeft = [Target = TWeakObjectPtr(PartitionActor), &MinDistSquared](const TWeakObjectPtr<AActor>& BeaconActor)
+	const auto IsElementLessThan = [Target = TWeakObjectPtr(PartitionActor), &MinDistSquared](const TWeakObjectPtr<AActor>& BeaconActor)
 	{
 		if (!BeaconActor.IsValid() || !Target.IsValid())
 		{
@@ -206,79 +171,45 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 		}
 	};
 
-	auto* TreeNode = Clusters.Search(Select, GoLeft);
+	const auto OnPushNewElement = [this, NewWorld = TWeakObjectPtr(World), NewElement = TWeakObjectPtr(PartitionActor)]()
+	{
+		AAVVMBeaconClusterActor* Result = nullptr;
+		if (!NewElement.IsValid() || !NewWorld.IsValid())
+		{
+			return Result;
+		}
+
+		Result = Factory(NewWorld.Get(), NewElement->GetTransform(), FActorSpawnParameters{});
+		Result->SetClusterId(FMath::Rand());
+		return Result;
+	};
+
+	auto* TreeNode = Clusters.Push(OnSelectElement, IsElementLessThan, OnPushNewElement);
 	if (!ensureAlwaysMsgf(TreeNode != nullptr, TEXT("Invalid MemBlock referenced.")))
 	{
 		return FAVVMClusterObjectHandle::InvalidHandle;
 	}
 
 	auto* Beacon = Cast<AAVVMBeaconClusterActor>(TreeNode->Value.Get());
-	if (!IsValid(Beacon))
+	if (IsValid(Beacon))
 	{
-		Beacon = Factory(World, PartitionActor->GetTransform(), FActorSpawnParameters{});
-		Beacon->SetClusterId(FMath::Rand());
-		TreeNode->Value = Beacon;
+		Beacon->AddToCluster(PartitionActor);
+		return FAVVMClusterObjectHandle{Beacon->GetClusterId(), Beacon};
 	}
-
-	Beacon->AddToCluster(PartitionActor);
-	return FAVVMClusterObjectHandle{Beacon->GetClusterId(), Beacon};
+	else
+	{
+		return FAVVMClusterObjectHandle::InvalidHandle;
+	}
 }
 
 bool FAVVMClusterSystem::PopPartition(const FAVVMClusterObjectHandle& Handle)
 {
-	const auto* PartitionActor = Handle.OwnedActor.Get();
-	if (!IsValid(PartitionActor))
-	{
-		return false;
-	}
+	return true;
+}
 
-	const auto Select = [SearchClusterId = Handle.ClusterId](const TWeakObjectPtr<AActor>& BeaconActor)
-	{
-		const auto* Beacon = Cast<AAVVMBeaconClusterActor>(BeaconActor.Get());
-		if (!IsValid(Beacon))
-		{
-			return false;
-		}
-		else
-		{
-			return Beacon->GetClusterId() == SearchClusterId;
-		}
-	};
-
-	double MinDistSquared{DBL_MAX};
-	const auto GoLeft = [Target = TWeakObjectPtr(PartitionActor), &MinDistSquared](const TWeakObjectPtr<AActor>& BeaconActor)
-	{
-		if (!BeaconActor.IsValid() || !Target.IsValid())
-		{
-			return false;
-		}
-
-		const double DistSquared = FVector::DistSquared(BeaconActor->GetActorLocation(), Target->GetActorLocation());
-		if (DistSquared < MinDistSquared)
-		{
-			MinDistSquared = DistSquared;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	};
-
-	auto* TreeNode = Clusters.Search(Select, GoLeft);
-	if (!ensureAlwaysMsgf(TreeNode != nullptr, TEXT("Invalid MemBlock referenced.")))
-	{
-		return false;
-	}
-	else
-	{
-		// TODO @gdemers We have to rebuild the graph here.
-		auto* Beacon = Cast<AAVVMBeaconClusterActor>(TreeNode->Value.Get());
-		if (IsValid(Beacon))
-		{
-			Beacon->RemoveFromCluster(PartitionActor);
-		}
-
-		return true;
-	}
+const AActor* FAVVMClusterSystem::GetClosestOverlappingObject(const FAVVMClusterObjectHandle& Handle,
+                                                              const AActor* OtherActor) const
+{
+	const auto* Beacon = Cast<AAVVMBeaconClusterActor>(Handle.OwnedActor.Get());
+	return ensureAlwaysMsgf(IsValid(Beacon), TEXT("Invalid Beacon referenced.")) ? Beacon->GetClosestClusterElement(OtherActor) : nullptr;
 }

@@ -24,11 +24,11 @@
 /**
  * 
  */
-template<typename InElementType> // convert to using concepts later
+template <typename InElementType> // convert to using concepts later
 struct FAVVMBinaryTreeNode
 {
 	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
-	
+
 	TBinaryTreeNodeType* Lhs = nullptr;
 	TBinaryTreeNodeType* Rhs = nullptr;
 	InElementType Value{};
@@ -42,93 +42,118 @@ struct FAVVMBinaryTree
 {
 	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
 	using TAllocatorType = typename InAllocatorType::template ForElementType<TBinaryTreeNodeType>;
-	
-	template<typename TSelectNodePredicate, typename TGoLeftPredicate>
-	TBinaryTreeNodeType* Search(TSelectNodePredicate Select, TGoLeftPredicate GoLeft);
-	
-	template<typename TSumFunc>
-	void Sum(TSumFunc Functor) const;
-	
+
+	template <typename TOnSelectElement,
+	          typename TIsElementLessThan,
+	          typename TOnPushNewElement>
+	TBinaryTreeNodeType* Push(const TOnSelectElement& OnSelectElement,
+	                          const TIsElementLessThan& IsElementLessThan,
+	                          const TOnPushNewElement& OnPushNewElement);
+
+	template <typename TOnSelectElement,
+	          typename TIsElementLessThan>
+	TBinaryTreeNodeType** SearchV2(const TOnSelectElement& OnSelectElement,
+	                               const TIsElementLessThan& IsElementLessThan) const;
+
+	template <typename TSumFunc>
+	void SumV2(const TSumFunc& Functor) const;
+
 	bool IsEmpty() const;
 
 private:
+	template <typename TOnSelectElement,
+	          typename TIsElementLessThan>
+	TBinaryTreeNodeType** SearchV1(TBinaryTreeNodeType*& CurrNode,
+	                               const TOnSelectElement& OnSelectElement,
+	                               const TIsElementLessThan& IsElementLessThan) const;
+
+	template <typename TSumFunc>
+	void SumV1(TBinaryTreeNodeType* CurrNode,
+	           const TSumFunc& Functor) const;
+	
 	TAllocatorType MemBlock{};
 	int32 FreeIndex{INDEX_NONE};
 	TBinaryTreeNodeType* Root = nullptr;
 };
 
 template <typename InElementType, typename InAllocatorType>
-template <typename TSelectNodePredicate, typename TGoLeftPredicate>
-typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* FAVVMBinaryTree<InElementType, InAllocatorType>::Search(TSelectNodePredicate Select,
-                                                                                                                                       TGoLeftPredicate GoLeft)
+template <typename TOnSelectElement, typename TIsElementLessThan, typename TOnPushNewElement>
+typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType* FAVVMBinaryTree<InElementType, InAllocatorType>::Push(const TOnSelectElement& OnSelectElement,
+                                                                                                                                     const TIsElementLessThan& IsElementLessThan,
+                                                                                                                                     const TOnPushNewElement& OnPushNewElement)
 {
-	TFunction<TBinaryTreeNodeType*(TBinaryTreeNodeType* CurrNode,
-	                               TSelectNodePredicate NewSelect,
-	                               TGoLeftPredicate NewGoLeft)> BST_Recurse{};
-
-	BST_Recurse = [&](TBinaryTreeNodeType* CurrNode,
-	                  TSelectNodePredicate NewSelect,
-	                  TGoLeftPredicate NewGoLeft)
-	{
-		if (CurrNode == nullptr)
-		{
-			void* Ptr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * FreeIndex);
-			void* LhsPtr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * (FreeIndex + 1));
-			void* RhsPtr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * (FreeIndex + 2));
-			CurrNode = new(Ptr) TBinaryTreeNodeType;
-			CurrNode->Lhs = new(LhsPtr) TBinaryTreeNodeType;
-			CurrNode->Rhs = new(RhsPtr) TBinaryTreeNodeType;
-			FreeIndex += 3;
-			return CurrNode;
-		}
-		else if (!CurrNode->Value.IsValid()/*TODO we need a requirements to a function that validate the value type*/ || NewSelect(CurrNode->Value))
-		{
-			return CurrNode;
-		}
-
-		const bool bResult = NewGoLeft(CurrNode->Value);
-		if (bResult)
-		{
-			return BST_Recurse(CurrNode->Lhs,
-			                   NewSelect,
-			                   NewGoLeft);
-		}
-		else
-		{
-			return BST_Recurse(CurrNode->Rhs,
-			                   NewSelect,
-			                   NewGoLeft);
-		}
-	};
-
 	FreeIndex = FMath::Clamp(FreeIndex, 0, INT32_MAX);
-	auto* SearchResult = BST_Recurse(Root, Select, GoLeft);
-	if (Root == nullptr)
+	auto** SearchResult = SearchV1(Root, OnSelectElement, IsElementLessThan);
+	if ((SearchResult != nullptr) && (*SearchResult == nullptr))
 	{
-		Root = SearchResult;
+		void* Ptr = (char*)MemBlock.GetAllocation() + (sizeof(TBinaryTreeNodeType) * FreeIndex);
+		(*SearchResult) = new(Ptr) TBinaryTreeNodeType;
+		(*SearchResult)->Value = OnPushNewElement();
+		FreeIndex += 1;
+		return (*SearchResult);
 	}
+	else if (SearchResult != nullptr)
+	{
+		return *SearchResult;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
 
-	return SearchResult;
+template <typename InElementType, typename InAllocatorType>
+template <typename TOnSelectElement, typename TIsElementLessThan>
+typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType** FAVVMBinaryTree<InElementType, InAllocatorType>::SearchV2(const TOnSelectElement& OnSelectElement,
+                                                                                                                                          const TIsElementLessThan& IsElementLessThan) const
+{
+	return SearchV1(Root, OnSelectElement, IsElementLessThan);
 }
 
 template <typename InElementType, typename InAllocatorType>
 template <typename TSumFunc>
-void FAVVMBinaryTree<InElementType, InAllocatorType>::Sum(TSumFunc Functor) const
+void FAVVMBinaryTree<InElementType, InAllocatorType>::SumV2(const TSumFunc& Functor) const
 {
-	TFunction<void(TBinaryTreeNodeType* CurrNode)> BST_Recurse{};
-	BST_Recurse = [&](TBinaryTreeNodeType* CurrNode)
+	SumV1(Root, Functor);
+}
+
+template <typename InElementType, typename InAllocatorType>
+template <typename TOnSelectElement, typename TIsElementLessThan>
+typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType** FAVVMBinaryTree<InElementType, InAllocatorType>::SearchV1(TBinaryTreeNodeType*& CurrNode,
+                                                                                                                                          const TOnSelectElement& OnSelectElement,
+                                                                                                                                          const TIsElementLessThan& IsElementLessThan) const
+{
+	if ((CurrNode == nullptr) || !CurrNode->Value.IsValid()/*TODO we need a requirements to a function that validate the value type*/ || OnSelectElement(CurrNode->Value))
 	{
-		if (CurrNode == nullptr)
-		{
-			return;
-		}
-		
+		return &CurrNode;
+	}
+
+	const bool bResult = IsElementLessThan(CurrNode->Value);
+	if (bResult)
+	{
+		return SearchV1(CurrNode->Lhs,
+		                OnSelectElement,
+		                IsElementLessThan);
+	}
+	else
+	{
+		return SearchV1(CurrNode->Rhs,
+		                OnSelectElement,
+		                IsElementLessThan);
+	}
+}
+
+template <typename InElementType, typename InAllocatorType>
+template <typename TSumFunc>
+void FAVVMBinaryTree<InElementType, InAllocatorType>::SumV1(TBinaryTreeNodeType* CurrNode,
+                                                            const TSumFunc& Functor) const
+{
+	if (CurrNode != nullptr)
+	{
 		Functor(CurrNode->Value);
-		BST_Recurse(CurrNode->Lhs);
-		BST_Recurse(CurrNode->Rhs);
-	};
-	
-	BST_Recurse(Root);
+		SumV1(CurrNode->Lhs, Functor);
+		SumV1(CurrNode->Rhs, Functor);
+	}
 }
 
 template <typename InElementType, typename InAllocatorType>
