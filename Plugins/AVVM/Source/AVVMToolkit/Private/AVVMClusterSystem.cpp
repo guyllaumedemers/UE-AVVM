@@ -19,7 +19,7 @@
 //SOFTWARE.
 #include "AVVMClusterSystem.h"
 
-#include "WorldPartition/WorldPartitionEditorPerProjectUserSettings.h"
+#include "Chaos/PBDSuspensionConstraintData.h"
 
 FAVVMClusterObjectHandle FAVVMClusterObjectHandle::InvalidHandle{};
 
@@ -52,7 +52,7 @@ void AAVVMBeaconClusterActor::AddToCluster(const AActor* NewTarget)
 	};
 
 	const double NewElement_SquaredMag = NewTarget->GetActorLocation().SquaredLength();
-	const auto IsElementLessThan = [this, &NewElement_SquaredMag](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	const auto IsElementLessThan = [this, NewElement_SquaredMag](const TWeakObjectPtr<const AActor>& OtherClusterElement)
 	{
 		if (!OtherClusterElement.IsValid())
 		{
@@ -93,12 +93,19 @@ const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* Ot
 
 	const auto OnSelectElement = [Target = TWeakObjectPtr(OtherActor)](const auto* CurrNode)
 	{
-		// TODO @gdemers Define how we manage selecting the closest intersect.
-		return false;
+		if ((CurrNode == nullptr) || !CurrNode->Value.IsValid() || !Target.IsValid())
+		{
+			return false;
+		}
+
+		const double SquaredRadius = CurrNode->Value->GetSimpleCollisionRadius() * CurrNode->Value->GetSimpleCollisionRadius();
+		const double DistSquared = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Value->GetActorLocation());
+		const bool bResult = FMath::IsWithin(DistSquared, 0., SquaredRadius);
+		return bResult;
 	};
 
 	const double NewElement_SquaredMag = OtherActor->GetActorLocation().SquaredLength();
-	const auto IsElementLessThan = [Target = TWeakObjectPtr(OtherActor), &NewElement_SquaredMag](const TWeakObjectPtr<const AActor>& OtherClusterElement)
+	const auto IsElementLessThan = [Target = TWeakObjectPtr(OtherActor), NewElement_SquaredMag](const TWeakObjectPtr<const AActor>& OtherClusterElement)
 	{
 		if (!OtherClusterElement.IsValid() || !Target.IsValid())
 		{
@@ -178,7 +185,7 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 
 	// TODO @gdemers try converting this to consteval
 	const double MaxBeaconRadiusSquared{GetMaximumBeaconRadius() * GetMaximumBeaconRadius()};
-	const auto OnSelectElement = [Target = TWeakObjectPtr(PartitionActor), &MaxBeaconRadiusSquared](const auto* CurrNode)
+	const auto OnSelectElement = [Target = TWeakObjectPtr(PartitionActor), MaxBeaconRadiusSquared](const auto* CurrNode)
 	{
 		if ((CurrNode == nullptr) || !CurrNode->Value.IsValid() || !Target.IsValid())
 		{

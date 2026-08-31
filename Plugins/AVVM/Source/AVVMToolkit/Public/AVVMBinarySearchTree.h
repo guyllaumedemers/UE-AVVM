@@ -22,7 +22,9 @@
 #include "CoreMinimal.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	FAVVMBinaryTreeNode is a template class that encapsulate generic type for binary traversal.
  */
 template <typename InElementType> // convert to using concepts later
 struct FAVVMBinaryTreeNode
@@ -35,7 +37,9 @@ struct FAVVMBinaryTreeNode
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	FAVVMBinaryTree is a template class that manage a binary search tree.
  */
 template <typename InElementType, typename InAllocatorType>
 struct FAVVMBinaryTree

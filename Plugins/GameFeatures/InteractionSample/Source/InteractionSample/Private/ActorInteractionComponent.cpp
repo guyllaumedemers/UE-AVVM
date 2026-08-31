@@ -290,13 +290,9 @@ void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveCompon
 	}
 
 	const AActor* Instigator = OwningOuter.Get();
-	if (!UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(GetWorld(), FOverlapContext{Handle, Instigator, OtherActor}))
-	{
-		return;
-	}
+	const AController* Target = OtherActor->GetInstigatorController();
 
 	const UAVVMReplicatedTagComponent* ReplicatedTagComponent = nullptr;
-	const AController* Target = OtherActor->GetInstigatorController();
 	if (IsValid(Target))
 	{
 		const AActor* PlayerState = IsValid(Target) ? Target->PlayerState : nullptr;
