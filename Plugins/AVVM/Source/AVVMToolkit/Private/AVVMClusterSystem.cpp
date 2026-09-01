@@ -99,9 +99,35 @@ const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* Ot
 		}
 
 		const double SquaredRadius = CurrNode->Value->GetSimpleCollisionRadius() * CurrNode->Value->GetSimpleCollisionRadius();
-		const double DistSquared = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Value->GetActorLocation());
-		const bool bResult = FMath::IsWithin(DistSquared, 0., SquaredRadius);
-		return bResult;
+		const double SquaredDist = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Value->GetActorLocation());
+		if (SquaredDist/*Outside bounding box*/ > SquaredRadius)
+		{
+			return false;
+		}
+
+		if ((CurrNode->Lhs != nullptr) && CurrNode->Lhs->Value.IsValid())
+		{
+			const double Lhs_SquaredRadius = CurrNode->Lhs->Value->GetSimpleCollisionRadius() * CurrNode->Lhs->Value->GetSimpleCollisionRadius();
+			const double Lhs_SquaredDist = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Lhs->Value->GetActorLocation());
+			if (Lhs_SquaredDist <= Lhs_SquaredRadius)
+			{
+				const float DotProduct = Target->GetDotProductTo(CurrNode->Lhs->Value.Get());
+				return ((DotProduct < 0.f) && (DotProduct != -2.f)); // looking away
+			}
+		}
+
+		if ((CurrNode->Rhs != nullptr) && CurrNode->Rhs->Value.IsValid())
+		{
+			const double Rhs_SquaredRadius = CurrNode->Rhs->Value->GetSimpleCollisionRadius() * CurrNode->Rhs->Value->GetSimpleCollisionRadius();
+			const double Rhs_SquaredDist = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Rhs->Value->GetActorLocation());
+			if (Rhs_SquaredDist < Rhs_SquaredRadius)
+			{
+				const float DotProduct = Target->GetDotProductTo(CurrNode->Rhs->Value.Get());
+				return ((DotProduct > 0.f) && (DotProduct != -2.f)); // looking toward
+			}
+		}
+
+		return true;
 	};
 
 	const double NewElement_SquaredMag = OtherActor->GetActorLocation().SquaredLength();

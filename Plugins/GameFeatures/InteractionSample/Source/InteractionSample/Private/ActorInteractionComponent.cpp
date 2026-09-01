@@ -24,6 +24,7 @@
 #include "AVVMLogger.h"
 #include "AVVMReplicatedTagComponent.h"
 #include "AVVMTagUtils.h"
+#include "DrawDebugHelpers.h"
 #include "InteractionManagerSubsystem.h"
 #include "InteractionObject.h"
 #include "Components/ShapeComponent.h"
@@ -235,6 +236,11 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
                                                                   bool bFromSweep,
                                                                   const FHitResult& SweepResult)
 {
+#if WITH_EDITOR
+	DrawDebugSphere(GetWorld(), SweepResult.ImpactPoint, 5.f, 5, FColor::Green, false, 20.f);
+	DrawDebugSphere(GetWorld(), SweepResult.Location, 5.f, 5, FColor::Red, false, 20.f);
+#endif
+	
 	if (!IsValid(OtherActor))
 	{
 		return;
@@ -259,7 +265,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	{
 		return;
 	}
-	
+
 	Server_ClearPendingKill();
 	
 	UActorInteractionImpl* Impl = InteractionImpl.Get();
