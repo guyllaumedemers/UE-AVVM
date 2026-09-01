@@ -249,6 +249,7 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	const AActor* Instigator = OwningOuter.Get();
 	if (!UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(GetWorld(), FOverlapContext{Handle, Instigator, OtherActor}))
 	{
+		OnPrimitiveComponentEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
 		return;
 	}
 

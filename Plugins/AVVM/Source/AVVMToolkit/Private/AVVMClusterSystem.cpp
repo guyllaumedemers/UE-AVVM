@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "AVVMClusterSystem.h"
 
-#include "Chaos/PBDSuspensionConstraintData.h"
-
 FAVVMClusterObjectHandle FAVVMClusterObjectHandle::InvalidHandle{};
 
 int32 AAVVMBeaconClusterActor::GetClusterId() const
@@ -98,6 +96,7 @@ const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* Ot
 			return false;
 		}
 
+		// @gdemers here we are validating that the player is within the bounding box of our overlap.
 		const double SquaredRadius = CurrNode->Value->GetSimpleCollisionRadius() * CurrNode->Value->GetSimpleCollisionRadius();
 		const double SquaredDist = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Value->GetActorLocation());
 		if (SquaredDist/*Outside bounding box*/ > SquaredRadius)
@@ -105,6 +104,11 @@ const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* Ot
 			return false;
 		}
 
+		// @gdemers once validated, we are required to evaluate child node position, and confirm if it exists within the bounds range of our player.
+		// Those nodes may ALSO intersect with the inspected cluster element (which would result in conflicting overlaps). Intersect layout may vary, making it hard to react to a player leaving
+		// a cluster element in favor of another.
+		// To address this problem, the child node whose distance from player is smaller than the one between the inspected player, and the evaluated Root will be compared against the dot product
+		// to confirm that the player is either moving toward, or away from the cluster element.
 		if ((CurrNode->Lhs != nullptr) && CurrNode->Lhs->Value.IsValid())
 		{
 			const double Lhs_SquaredRadius = CurrNode->Lhs->Value->GetSimpleCollisionRadius() * CurrNode->Lhs->Value->GetSimpleCollisionRadius();
@@ -120,10 +124,10 @@ const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* Ot
 		{
 			const double Rhs_SquaredRadius = CurrNode->Rhs->Value->GetSimpleCollisionRadius() * CurrNode->Rhs->Value->GetSimpleCollisionRadius();
 			const double Rhs_SquaredDist = FVector::DistSquared(Target->GetActorLocation(), CurrNode->Rhs->Value->GetActorLocation());
-			if (Rhs_SquaredDist < Rhs_SquaredRadius)
+			if (Rhs_SquaredDist <= Rhs_SquaredRadius)
 			{
 				const float DotProduct = Target->GetDotProductTo(CurrNode->Rhs->Value.Get());
-				return ((DotProduct > 0.f) && (DotProduct != -2.f)); // looking toward
+				return ((DotProduct < 0.f) && (DotProduct != -2.f)); // looking away
 			}
 		}
 
