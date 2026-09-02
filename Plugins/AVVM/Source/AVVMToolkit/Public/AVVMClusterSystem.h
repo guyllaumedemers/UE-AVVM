@@ -43,7 +43,7 @@ struct AVVMTOOLKIT_API FAVVMClusterObjectHandle
 	int32 ClusterId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwnedActor = nullptr;
+	TWeakObjectPtr<AActor> OwnedActor = nullptr;
 
 	static FAVVMClusterObjectHandle InvalidHandle;
 };
@@ -98,7 +98,7 @@ protected:
 struct AVVMTOOLKIT_API FAVVMClusterSystem
 {
 	FAVVMClusterObjectHandle PushPartition(UWorld* World, const AActor* PartitionActor);
-	bool PopPartition(const FAVVMClusterObjectHandle& Handle);
+	bool PopPartition(const AActor* PartitionActor, const FAVVMClusterObjectHandle& Handle) const;
 	const AActor* GetClosestOverlappingObject(const FAVVMClusterObjectHandle& Handle, const AActor* OtherActor) const;
 
 protected:

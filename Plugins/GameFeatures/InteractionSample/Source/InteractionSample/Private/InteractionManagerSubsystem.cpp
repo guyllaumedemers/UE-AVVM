@@ -48,10 +48,11 @@ FAVVMClusterObjectHandle UInteractionManagerSubsystem::Static_Register(const UWo
 }
 
 bool UInteractionManagerSubsystem::Static_Unregister(const UWorld* World,
+                                                     const UActorInteractionComponent* InteractionComponent,
                                                      const FAVVMClusterObjectHandle& Handle)
 {
 	auto* Subsystem = UInteractionManagerSubsystem::Get(World);
-	return IsValid(Subsystem) ? Subsystem->Unregister(Handle) : false;
+	return IsValid(Subsystem) ? Subsystem->Unregister(InteractionComponent, Handle) : false;
 }
 
 bool UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(const UWorld* World,
@@ -77,9 +78,15 @@ FAVVMClusterObjectHandle UInteractionManagerSubsystem::Register(const UActorInte
 	return OutHandle;
 }
 
-bool UInteractionManagerSubsystem::Unregister(const FAVVMClusterObjectHandle& Handle)
+bool UInteractionManagerSubsystem::Unregister(const UActorInteractionComponent* InteractionComponent,
+                                              const FAVVMClusterObjectHandle& Handle)
 {
-	const bool bResult = ClusterSystem.PopPartition(Handle);
+	if (!IsValid(InteractionComponent))
+	{
+		return false;
+	}
+	
+	const bool bResult = ClusterSystem.PopPartition(InteractionComponent->GetTypedOuter<AActor>(), Handle);
 	return bResult;
 }
 

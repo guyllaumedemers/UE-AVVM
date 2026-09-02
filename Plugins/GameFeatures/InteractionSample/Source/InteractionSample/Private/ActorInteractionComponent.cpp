@@ -134,7 +134,7 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 		return;
 	}
 
-	UInteractionManagerSubsystem::Static_Unregister(GetWorld(), Handle);
+	UInteractionManagerSubsystem::Static_Unregister(GetWorld(), this, Handle);
 
 	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
 	if (IsValid(CollisionComponent))

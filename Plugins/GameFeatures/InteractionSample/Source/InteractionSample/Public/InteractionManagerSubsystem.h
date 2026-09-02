@@ -80,13 +80,13 @@ public:
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 
 	static FAVVMClusterObjectHandle Static_Register(const UWorld* World, const UActorInteractionComponent* InteractionComponent);
-	static bool Static_Unregister(const UWorld* World, const FAVVMClusterObjectHandle& Handle);
+	static bool Static_Unregister(const UWorld* World, const UActorInteractionComponent* InteractionComponent, const FAVVMClusterObjectHandle& Handle);
 	static bool Static_CheckIfClosestOverlappingObject(const UWorld* World, const FOverlapContext& OverlapContext);
 
 protected:
 	static UInteractionManagerSubsystem* Get(const UWorld* World);
 	FAVVMClusterObjectHandle Register(const UActorInteractionComponent* InteractionComponent);
-	bool Unregister(const FAVVMClusterObjectHandle& Handle);
+	bool Unregister(const UActorInteractionComponent* InteractionComponent, const FAVVMClusterObjectHandle& Handle);
 	bool CheckIfClosestOverlappingObject(const FOverlapContext& OverlapContext) const;
 
 	FInteractionClusterSystem ClusterSystem{};

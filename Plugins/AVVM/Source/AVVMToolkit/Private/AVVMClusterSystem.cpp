@@ -79,7 +79,33 @@ void AAVVMBeaconClusterActor::AddToCluster(const AActor* NewTarget)
 
 bool AAVVMBeaconClusterActor::RemoveFromCluster(const AActor* NewTarget)
 {
-	return true;
+	const auto OnSelectElement = [Target = TWeakObjectPtr(NewTarget)](const auto* CurrNode)
+	{
+		return (CurrNode != nullptr) && CurrNode->Value.IsValid() && Target.IsValid() && (CurrNode->Value.Get() == Target);
+	};
+
+	double MinDistSquared{DBL_MAX};
+	const auto IsElementLessThan = [Target = TWeakObjectPtr(NewTarget), &MinDistSquared](const TWeakObjectPtr<const AActor>& OtherActor)
+	{
+		if (!OtherActor.IsValid() || !Target.IsValid())
+		{
+			return false;
+		}
+
+		const double DistSquared = FVector::DistSquared(OtherActor->GetActorLocation(), Target->GetActorLocation());
+		if (DistSquared < MinDistSquared)
+		{
+			MinDistSquared = DistSquared;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	};
+
+	const bool bResult = ClusterElements.Pop(OnSelectElement, IsElementLessThan);
+	return bResult;
 }
 
 const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* OtherActor) const
@@ -277,9 +303,24 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 	}
 }
 
-bool FAVVMClusterSystem::PopPartition(const FAVVMClusterObjectHandle& Handle)
+bool FAVVMClusterSystem::PopPartition(const AActor* PartitionActor,
+                                      const FAVVMClusterObjectHandle& Handle) const
 {
-	return true;
+	if (!Handle.OwnedActor.IsValid())
+	{
+		return false;
+	}
+
+	auto* Beacon = Cast<AAVVMBeaconClusterActor>(Handle.OwnedActor.Get());
+	if (IsValid(Beacon))
+	{
+		Beacon->RemoveFromCluster(PartitionActor);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 const AActor* FAVVMClusterSystem::GetClosestOverlappingObject(const FAVVMClusterObjectHandle& Handle,
