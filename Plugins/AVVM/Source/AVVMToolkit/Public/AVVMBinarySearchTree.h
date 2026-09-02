@@ -22,11 +22,47 @@
 #include "CoreMinimal.h"
 
 /**
+ *	@gdemers Anonymous namespace to prevent possible ODR across translation units.
+ */
+namespace
+{
+	/**
+	 *	@gdemers constraint against storing container types within the Binary Tree.
+	 */
+	template <typename T>
+	constexpr bool TIsContainer = TIsTArray<T>::Value || TIsTMap<T>::Value || TIsTSet<T>::Value;
+
+	template <typename T>
+	constexpr bool TIsNotContainer = !TIsContainer<T>;
+
+	/**
+	 *	@gdemers compile time evaluation of WeakOrStrong Object usage for compile time branching.
+	 */
+	template <typename T>
+	concept TIsWeakOrStrongObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
+	{
+		Obj.IsValid();
+	};
+
+	/**
+	 *  @gdemers constraint against untracked TObjectPtr usage.
+	 */
+	template <typename T>
+	concept TIsObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
+	{
+		Obj.GetPtrTypeHash();
+	};
+
+	template <typename T>
+	concept TIsNotObjectPtrType = !TIsObjectPtrType<T>;
+}
+
+/**
  *	Class description:
  *	
  *	FAVVMBinaryTreeNode is a template class that encapsulate generic type for binary traversal.
  */
-template <typename InElementType> // convert to using concepts later
+template <typename InElementType> requires(TIsNotObjectPtrType<InElementType> && TIsNotContainer<InElementType>)
 struct FAVVMBinaryTreeNode
 {
 	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
@@ -176,9 +212,19 @@ typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType** 
                                                                                                                                           const TOnSelectElement& OnSelectElement,
                                                                                                                                           const TIsElementLessThan& IsElementLessThan) const
 {
-	if ((CurrNode == nullptr) || !CurrNode->Value.IsValid()/*TODO we need a requirements to a function that validate the value type*/ || OnSelectElement(CurrNode))
+	if constexpr (TIsWeakOrStrongObjectPtrType<InElementType>)
 	{
-		return &CurrNode;
+		if ((CurrNode == nullptr) || !CurrNode->Value.IsValid() || OnSelectElement(CurrNode))
+		{
+			return &CurrNode;
+		}
+	}
+	else
+	{
+		if ((CurrNode == nullptr) || OnSelectElement(CurrNode))
+		{
+			return &CurrNode;
+		}
 	}
 
 	const bool bResult = IsElementLessThan(CurrNode->Value);
