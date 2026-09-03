@@ -22,40 +22,34 @@
 #include "CoreMinimal.h"
 
 /**
- *	@gdemers Anonymous namespace to prevent possible ODR across translation units.
+ *	@gdemers constraint against storing container types within the Binary Tree.
  */
-namespace
+template <typename T>
+constexpr bool TIsContainer = TIsTArray<T>::Value || TIsTMap<T>::Value || TIsTSet<T>::Value;
+
+template <typename T>
+constexpr bool TIsNotContainer = !TIsContainer<T>;
+
+/**
+ *	@gdemers compile time evaluation of WeakOrStrong Object usage for compile time branching.
+ */
+template <typename T>
+concept TIsWeakOrStrongObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
 {
-	/**
-	 *	@gdemers constraint against storing container types within the Binary Tree.
-	 */
-	template <typename T>
-	constexpr bool TIsContainer = TIsTArray<T>::Value || TIsTMap<T>::Value || TIsTSet<T>::Value;
+	Obj.IsValid();
+};
 
-	template <typename T>
-	constexpr bool TIsNotContainer = !TIsContainer<T>;
+/**
+ *  @gdemers constraint against untracked TObjectPtr usage.
+ */
+template <typename T>
+concept TIsObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
+{
+	Obj.GetPtrTypeHash();
+};
 
-	/**
-	 *	@gdemers compile time evaluation of WeakOrStrong Object usage for compile time branching.
-	 */
-	template <typename T>
-	concept TIsWeakOrStrongObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
-	{
-		Obj.IsValid();
-	};
-
-	/**
-	 *  @gdemers constraint against untracked TObjectPtr usage.
-	 */
-	template <typename T>
-	concept TIsObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
-	{
-		Obj.GetPtrTypeHash();
-	};
-
-	template <typename T>
-	concept TIsNotObjectPtrType = !TIsObjectPtrType<T>;
-}
+template <typename T>
+concept TIsNotObjectPtrType = !TIsObjectPtrType<T>;
 
 /**
  *	Class description:
