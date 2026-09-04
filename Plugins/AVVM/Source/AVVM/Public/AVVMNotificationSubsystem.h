@@ -86,8 +86,8 @@ struct AVVM_API FAVVMNotificationPayload
 
 	FAVVMNotificationPayload() = default;
 	FAVVMNotificationPayload(const FAVVMNotificationPayload&) = default;
-	FAVVMNotificationPayload(FAVVMNotificationPayload&&) = default;
-	FAVVMNotificationPayload& operator=(const FAVVMNotificationPayload&) noexcept = default;
+	FAVVMNotificationPayload(FAVVMNotificationPayload&&) noexcept = default;
+	FAVVMNotificationPayload& operator=(const FAVVMNotificationPayload&) = default;
 	FAVVMNotificationPayload& operator=(FAVVMNotificationPayload&&) noexcept = default;
 	// @gdemers defining destructor alone would disable automatic move semantics. Even tho there's no
 	// properties to mutate here, we need to define the above special member functions, otherwise container types reallocation

@@ -70,12 +70,12 @@ protected:
 	// and reduce cache misses created by random access of derived classes.
 	struct FAVVMRunner_Actor
 	{
-		TArray<TWeakObjectPtr<AActor>> Entities;
+		TArray<TWeakObjectPtr<AActor>> Entities{};
 	};
 	
 	struct FAVVMRunner_ActorComponent
 	{
-		TArray<TWeakObjectPtr<UActorComponent>> Entities;
+		TArray<TWeakObjectPtr<UActorComponent>> Entities{};
 	};
 
 	struct FAVVMJobQueue
@@ -93,9 +93,9 @@ protected:
 		int64 Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents);
 		int64 Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors);
 
-		TMap<TWeakObjectPtr<const UClass>, FAVVMRunner_ActorComponent> Jobs_ActorComponent;
+		TMap<TWeakObjectPtr<const UClass>, FAVVMRunner_ActorComponent> Jobs_ActorComponent{};
 		/*Jobs are unique per AActor derived type. Priority is handled by indices*/
-		TMap<TWeakObjectPtr<const UClass>, FAVVMRunner_Actor> Jobs_Actor;
+		TMap<TWeakObjectPtr<const UClass>, FAVVMRunner_Actor> Jobs_Actor{};
 	};
 
 	struct FAVVMMLFQ
@@ -112,14 +112,14 @@ protected:
 		void Pop(const int64 Handle, AActor* Actor) const;
 
 		/*Priority level is handled by indices*/
-		TArray<FAVVMJobQueue> PriorityQueue;
+		TArray<FAVVMJobQueue> PriorityQueue{};
 	};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UAVVMTickSchedulerRule> TickSchedulerRule = nullptr;
 
-	TMap<TWeakObjectPtr<const UClass>, int64> TickerHandles;
-	FAVVMMLFQ MultiLevelFeedbackQueue = FAVVMMLFQ();
+	TMap<TWeakObjectPtr<const UClass>, int64> TickerHandles{};
+	FAVVMMLFQ MultiLevelFeedbackQueue{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	float GlobalResetTimeJobQueuePriority = 0.f;

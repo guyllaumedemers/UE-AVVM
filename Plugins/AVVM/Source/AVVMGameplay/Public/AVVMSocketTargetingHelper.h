@@ -35,8 +35,14 @@ USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMSocketTargetingHelper
 {
 	GENERATED_BODY()
-	
+
+	FAVVMSocketTargetingHelper() = default;
+	FAVVMSocketTargetingHelper(const FAVVMSocketTargetingHelper&) = default;
+	FAVVMSocketTargetingHelper(FAVVMSocketTargetingHelper&&) noexcept = default;
+	FAVVMSocketTargetingHelper& operator=(const FAVVMSocketTargetingHelper&) = default;
+	FAVVMSocketTargetingHelper& operator=(FAVVMSocketTargetingHelper&&) noexcept = default;
 	virtual ~FAVVMSocketTargetingHelper() = default;
+	
 	virtual AActor* GetDesiredTypedInner(AActor* Src, AActor* Target) const PURE_VIRTUAL(GetDesiredTypedInner, return nullptr;);
 
 	static bool Static_AttachToActorAsync(AActor* Src, const FAVVMSocketTargetingDeferralContextArgs& ContextArgs);
@@ -76,7 +82,7 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
 	TWeakObjectPtr<AActor> Parent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
+	FSoftObjectPath SrcAttributeSetSoftObjectPath{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;

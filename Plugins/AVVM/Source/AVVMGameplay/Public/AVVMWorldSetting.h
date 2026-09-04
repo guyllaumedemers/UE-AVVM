@@ -97,13 +97,13 @@ protected:
 	void AsyncLoadProjectRules(const TArray<FSoftObjectPath>& SoftObjectPaths);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="References Plugins Rule tags."))
-	TSet<FGameplayTag> AllowedPluginRuleTags;
+	TSet<FGameplayTag> AllowedPluginRuleTags{};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<FGameplayTag, TSoftClassPtr<UAVVMWorldRule>> ProjectRuleClassPerTag;
+	TMap<FGameplayTag, TSoftClassPtr<UAVVMWorldRule>> ProjectRuleClassPerTag{};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FGameplayTag, TObjectPtr<const UAVVMWorldRule>> RuntimeRules;
+	TMap<FGameplayTag, TObjectPtr<const UAVVMWorldRule>> RuntimeRules{};
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };
