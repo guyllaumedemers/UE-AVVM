@@ -50,7 +50,7 @@ struct AVVM_API FAVVMObserverContextArgs
 	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FAVVMOnChannelNotifiedSingleCastDelegate Callback;
+	FAVVMOnChannelNotifiedSingleCastDelegate Callback{};
 };
 
 /**
@@ -71,7 +71,7 @@ struct AVVM_API FAVVMNotificationContextArgs
 	TWeakObjectPtr<const AActor> Target = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TInstancedStruct<FAVVMNotificationPayload> Payload;
+	TInstancedStruct<FAVVMNotificationPayload> Payload{};
 };
 
 /**
@@ -84,6 +84,14 @@ struct AVVM_API FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMNotificationPayload() = default;
+	FAVVMNotificationPayload(const FAVVMNotificationPayload&) = default;
+	FAVVMNotificationPayload(FAVVMNotificationPayload&&) = default;
+	FAVVMNotificationPayload& operator=(const FAVVMNotificationPayload&) noexcept = default;
+	FAVVMNotificationPayload& operator=(FAVVMNotificationPayload&&) noexcept = default;
+	// @gdemers defining destructor alone would disable automatic move semantics. Even tho there's no
+	// properties to mutate here, we need to define the above special member functions, otherwise container types reallocation
+	// will result in using copy construct.
 	virtual ~FAVVMNotificationPayload() = default;
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMNotificationPayload>::Make<T>
@@ -149,29 +157,41 @@ protected:
 	
 	struct FAVVMObservers
 	{
+		FAVVMObservers() = default;
+		FAVVMObservers(const FAVVMObservers&) = default;
+		FAVVMObservers(FAVVMObservers&&) noexcept = default;
+		FAVVMObservers& operator=(const FAVVMObservers&) = default;
+		FAVVMObservers& operator=(FAVVMObservers&&) noexcept = default;
 		~FAVVMObservers();
+		
 		void Unregister(const AActor* Target);
 		void Register(const AActor* Target, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
 		void BroadcastAll(const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
 		void Broadcast(const AActor* Target, const TInstancedStruct<FAVVMNotificationPayload>& Payload) const;
 		bool IsEmpty() const;
 
-		TMap<TWeakObjectPtr<const AActor>, FAVVMOnChannelNotifiedSingleCastDelegate> Observers;
+		TMap<TWeakObjectPtr<const AActor>, FAVVMOnChannelNotifiedSingleCastDelegate> Observers{};
 	};
 
 	struct FAVVObserversFilteringMechanism
 	{
+		FAVVObserversFilteringMechanism() = default;
+		FAVVObserversFilteringMechanism(const FAVVObserversFilteringMechanism&) = default;
+		FAVVObserversFilteringMechanism(FAVVObserversFilteringMechanism&&) noexcept = default;
+		FAVVObserversFilteringMechanism& operator=(const FAVVObserversFilteringMechanism&) = default;
+		FAVVObserversFilteringMechanism& operator=(FAVVObserversFilteringMechanism&&) noexcept = default;
 		~FAVVObserversFilteringMechanism();
+		
 		void Unregister(const AActor* Target, const FGameplayTag& ChannelTag);
 		void Register(const AActor* Target, const FGameplayTag& ChannelTag, const FAVVMOnChannelNotifiedSingleCastDelegate& Callback);
 		void Broadcast(const FAVVMNotificationContextArgs& NotificationContext);
 		void ExecuteDeferredNotifications();
 
-		TMap<const FGameplayTag, FAVVMObservers> TagToObservers;
-		TArray<FAVVMNotificationContextArgs> PendingRequests;
+		TMap<const FGameplayTag, FAVVMObservers> TagToObservers{};
+		TArray<FAVVMNotificationContextArgs> PendingRequests{};
 	};
 
-	FAVVObserversFilteringMechanism ObserversFilteringMechanism;
+	FAVVObserversFilteringMechanism ObserversFilteringMechanism{};
 };
 
 // @gdemers allow stripping symbols when building server target for dedicated server

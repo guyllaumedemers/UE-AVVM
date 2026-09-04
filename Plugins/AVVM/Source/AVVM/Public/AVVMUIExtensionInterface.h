@@ -76,5 +76,5 @@ protected:
 	FUIExtensionHandle PushContentToExtensionPoint(const FAVVMUIExtensionContextArgs& ContextArgs);
 	void PopContentToExtensionPoint(FUIExtensionHandle& ExtensionHandle);
 
-	FUIExtensionHandle ExtensionRequestHandle;
+	FUIExtensionHandle ExtensionRequestHandle{};
 };

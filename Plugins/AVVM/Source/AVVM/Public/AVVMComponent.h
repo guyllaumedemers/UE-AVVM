@@ -56,11 +56,11 @@ protected:
 
 	// @gdemers A collection of Presenter Classes to be added to a given Actor.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<TSubclassOf<UAVVMPresenter>> PresenterClasses;
+	TArray<TSubclassOf<UAVVMPresenter>> PresenterClasses{};
 
 	// @gdemers A collection of Presenters owned by the Component Outer.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UAVVMPresenter>> TransientPresenters;
+	TArray<TObjectPtr<UAVVMPresenter>> TransientPresenters{};
 
 #if WITH_AUTOMATION_TESTS
 	friend class UAVVMAutomatedTestUtils;

@@ -109,5 +109,5 @@ protected:
 
 	// @gdemers A collection of unique Actors to a set of ViewModel bound by the TypedOuter<AActor>().
 	// TWeakObjectPtr<AACtor> will remain valid throughout the PIE session as the AActor referenced is the TypedOuter.
-	TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> ActorToViewModelCollection;
+	TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> ActorToViewModelCollection{};
 };
