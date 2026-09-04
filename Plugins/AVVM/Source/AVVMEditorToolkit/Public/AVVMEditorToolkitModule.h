@@ -125,7 +125,7 @@ protected:
 		TAttribute<FText> Tooltips = FText::GetEmpty();
 		
 		TSharedPtr<FExtensibilityManager> ExtensibilityManager = nullptr;
-		TArray<TSharedPtr<FUICommandInfo>> Commands;
+		TArray<TSharedPtr<FUICommandInfo>> Commands{};
 		TSharedPtr<FUICommandList> CommandList = nullptr;
 	};
 

@@ -42,7 +42,7 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorBuilderSubsystem : public UEditorSubsyste
 {
 	GENERATED_BODY()
 
-	FOnBuildContextChangedDelegate OnBuildContextChanged;
+	FOnBuildContextChangedDelegate OnBuildContextChanged{};
 	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -72,10 +72,10 @@ protected:
 	
 	// @gdemers IMPORTANT : check DefaultGame.ini to inspect class references.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, config)
-	TArray<TSoftClassPtr<UAVVMEditorToolkitBuilderObject>> ToolkitBuilderClasses;
+	TArray<TSoftClassPtr<UAVVMEditorToolkitBuilderObject>> ToolkitBuilderClasses{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UAVVMEditorToolkitBuilderObject>> ToolkitBuilders;
+	TArray<TObjectPtr<UAVVMEditorToolkitBuilderObject>> ToolkitBuilders{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMEditorToolkitBuilderObject> ActiveToolkitBuilder = nullptr;

@@ -42,8 +42,8 @@ struct AVVMEDITORTOOLKIT_API FAVVMBuilderInfo
 	FName SubSectionName = NAME_None;
 	FText SubSection_Label = FText::GetEmpty();
 	FText SubSection_Tooltips = FText::GetEmpty();
-	FSlateIcon SubSection_Icon = FSlateIcon();
-	TArray<TSharedPtr<FUICommandInfo>> Commands;
+	FSlateIcon SubSection_Icon{};
+	TArray<TSharedPtr<FUICommandInfo>> Commands{};
 };
 
 /**
