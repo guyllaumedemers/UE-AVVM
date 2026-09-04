@@ -138,8 +138,8 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 		return;
 	}
 	
-	const FString UniqueNetIdString = UniqueNetIdPtr->ToString();
-	AddPlayer(UniqueNetIdString);
+	FString StringUniqueNetId = UniqueNetIdPtr->ToString();
+	AddPlayer(StringUniqueNetId);
 
 #if WITH_SIMULATED_BACKEND
 	constexpr int32 PresetId = 0;
@@ -148,7 +148,7 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 	FAVVMPlayerProfile NewProfile
 	{
 			UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(ActorIdentifierId),
-			UniqueNetIdString,
+			MoveTemp(StringUniqueNetId),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKINS),
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_CHARMS),

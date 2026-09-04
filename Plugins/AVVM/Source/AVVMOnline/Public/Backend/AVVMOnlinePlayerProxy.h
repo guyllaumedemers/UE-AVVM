@@ -36,6 +36,11 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerAccountProxy() = default;
+	FAVVMPlayerAccountProxy(const FAVVMPlayerAccountProxy&) = default;
+	FAVVMPlayerAccountProxy(FAVVMPlayerAccountProxy&&) noexcept = default;
+	FAVVMPlayerAccountProxy& operator=(const FAVVMPlayerAccountProxy&) = default;
+	FAVVMPlayerAccountProxy& operator=(FAVVMPlayerAccountProxy&&) noexcept = default;
 	bool operator==(const FAVVMPlayerAccountProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -43,22 +48,22 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 
 	// @gdemers {FAVVMPlayerLoginContext}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Login = FString();
+	FString Login{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Gamertag = FString();
+	FString Gamertag{};
 
 	// @gdemers {FAVVMPlayerWalletProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Wallet = FString();
+	FString Wallet{};
 
 	// @gdemers {FAVVMPlayerProfileProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Profiles;
+	TArray<FString> Profiles{};
 
 	// @gdemers {FAVVMPlayerPresetProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Presets;
+	TArray<FString> Presets{};
 };
 
 /**
@@ -71,6 +76,11 @@ struct AVVMONLINE_API FAVVMPlayerWalletProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerWalletProxy() = default;
+	FAVVMPlayerWalletProxy(const FAVVMPlayerWalletProxy&) = default;
+	FAVVMPlayerWalletProxy(FAVVMPlayerWalletProxy&&) noexcept = default;
+	FAVVMPlayerWalletProxy& operator=(const FAVVMPlayerWalletProxy&) = default;
+	FAVVMPlayerWalletProxy& operator=(FAVVMPlayerWalletProxy&&) noexcept = default;
 	bool operator==(const FAVVMPlayerWalletProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -78,7 +88,7 @@ struct AVVMONLINE_API FAVVMPlayerWalletProxy : public FAVVMNotificationPayload
 
 	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> IrlMoneys;
+	TArray<FString> IrlMoneys{};
 };
 
 /**
@@ -91,6 +101,11 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerProfileProxy() = default;
+	FAVVMPlayerProfileProxy(const FAVVMPlayerProfileProxy&) = default;
+	FAVVMPlayerProfileProxy(FAVVMPlayerProfileProxy&&) noexcept = default;
+	FAVVMPlayerProfileProxy& operator=(const FAVVMPlayerProfileProxy&) = default;
+	FAVVMPlayerProfileProxy& operator=(FAVVMPlayerProfileProxy&&) noexcept = default;
 	bool operator==(const FAVVMPlayerProfileProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -98,23 +113,23 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 
 	// @gdemers may refer to a unique name tied to your playable character.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ProfileId = FString();
+	FString ProfileId{};
 
 	// @gdemers {FAVVMPlayerResource}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Inventories;
+	TArray<FString> Inventories{};
 
 	// @gdemers {FAVVMPlayerResource}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Skills;
+	TArray<FString> Skills{};
 
 	// @gdemers {FAVVMPlayerChallenge}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> Challenges;
+	TArray<FString> Challenges{};
 
 	// @gdemers {FAVVMPlayerPresetProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString EquippedPreset = FString();
+	FString EquippedPreset{};
 };
 
 /**
@@ -127,6 +142,11 @@ struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerPresetProxy() = default;
+	FAVVMPlayerPresetProxy(const FAVVMPlayerPresetProxy&) = default;
+	FAVVMPlayerPresetProxy(FAVVMPlayerPresetProxy&&) noexcept = default;
+	FAVVMPlayerPresetProxy& operator=(const FAVVMPlayerPresetProxy&) = default;
+	FAVVMPlayerPresetProxy& operator=(FAVVMPlayerPresetProxy&&) noexcept = default;
 	bool operator==(const FAVVMPlayerPresetProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -134,11 +154,11 @@ struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
 
 	// @gdemers may refer to a unique name tied to your profile preset.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PresetId = FString();
+	FString PresetId{};
 
 	// @gdemers {FAVVMPlayerResource}.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> EquippedItems;
+	TArray<FString> EquippedItems{};
 };
 
 /**
@@ -151,6 +171,11 @@ struct AVVMONLINE_API FAVVMPartyProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPartyProxy() = default;
+	FAVVMPartyProxy(const FAVVMPartyProxy&) = default;
+	FAVVMPartyProxy(FAVVMPartyProxy&&) noexcept = default;
+	FAVVMPartyProxy& operator=(const FAVVMPartyProxy&) = default;
+	FAVVMPartyProxy& operator=(FAVVMPartyProxy&&) noexcept = default;
 	bool operator==(const FAVVMPartyProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -158,23 +183,23 @@ struct AVVMONLINE_API FAVVMPartyProxy : public FAVVMNotificationPayload
 
 	// @gdemers may represent a party name.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PartyId = FString();
+	FString PartyId{};
 
 	// @gdemers NA, China, Russia, etc...
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString Region = FString();
+	FString Region{};
 
 	// @gdemers sub-identifier to the region.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString District = FString();
+	FString District{};
 
 	// @gdemers {FAVVMHostConfigurationProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString HostConfiguration = FString();
+	FString HostConfiguration{};
 
 	// @gdemers {FAVVMPlayerConnectionProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> PlayerConnections;
+	TArray<FString> PlayerConnections{};
 };
 
 /**
@@ -187,6 +212,11 @@ struct AVVMONLINE_API FAVVMPlayerConnectionProxy : public FAVVMNotificationPaylo
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerConnectionProxy() = default;
+	FAVVMPlayerConnectionProxy(const FAVVMPlayerConnectionProxy&) = default;
+	FAVVMPlayerConnectionProxy(FAVVMPlayerConnectionProxy&&) noexcept = default;
+	FAVVMPlayerConnectionProxy& operator=(const FAVVMPlayerConnectionProxy&) = default;
+	FAVVMPlayerConnectionProxy& operator=(FAVVMPlayerConnectionProxy&&) noexcept = default;
 	bool operator==(const FAVVMPlayerConnectionProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
@@ -194,14 +224,14 @@ struct AVVMONLINE_API FAVVMPlayerConnectionProxy : public FAVVMNotificationPaylo
 
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString UniqueNetId = FString();
+	FString UniqueNetId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
 
 	// @gdemers {FAVVMPlayerProfileProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Profile = FString();
+	FString Profile{};
 };
 
 /**
@@ -214,14 +244,19 @@ struct AVVMONLINE_API FAVVMHostConfigurationProxy : public FAVVMNotificationPayl
 {
 	GENERATED_BODY()
 
+	FAVVMHostConfigurationProxy() = default;
+	FAVVMHostConfigurationProxy(const FAVVMHostConfigurationProxy&) = default;
+	FAVVMHostConfigurationProxy(FAVVMHostConfigurationProxy&&) noexcept = default;
+	FAVVMHostConfigurationProxy& operator=(const FAVVMHostConfigurationProxy&) = default;
+	FAVVMHostConfigurationProxy& operator=(FAVVMHostConfigurationProxy&&) noexcept = default;
 	bool operator==(const FAVVMHostConfigurationProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 UniqueId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString GameMode = FString();
+	FString GameMode{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Options = FString();
+	FString GameModeAdditiveOptions{};
 };

@@ -74,5 +74,5 @@ bool FAVVMHostConfigurationProxy::operator==(const FAVVMHostConfigurationProxy& 
 {
 	return (UniqueId == Rhs.UniqueId)
 			&& (GameMode.Equals(Rhs.GameMode))
-			&& (Options.Equals(Rhs.Options));
+			&& (GameModeAdditiveOptions.Equals(Rhs.GameModeAdditiveOptions));
 }

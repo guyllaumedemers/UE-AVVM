@@ -379,7 +379,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		FAVVMHostConfigurationProxy A;
 		A.UniqueId = FMath::Rand32();
 		A.GameMode = TEXT("MyGameMode");
-		A.Options = TEXT("Free-For-All");
+		A.GameModeAdditiveOptions = TEXT("Free-For-All");
 		Parser->ToString(A, OutPayload);
 
 		FAVVMHostConfigurationProxy B;

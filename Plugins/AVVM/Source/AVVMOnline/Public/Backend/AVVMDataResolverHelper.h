@@ -35,6 +35,11 @@ struct AVVMONLINE_API FAVVMDataResolverHelper
 {
 	GENERATED_BODY()
 
+	FAVVMDataResolverHelper() = default;
+	FAVVMDataResolverHelper(const FAVVMDataResolverHelper&) = default;
+	FAVVMDataResolverHelper(FAVVMDataResolverHelper&&) noexcept = default;
+	FAVVMDataResolverHelper& operator=(const FAVVMDataResolverHelper&) = default;
+	FAVVMDataResolverHelper& operator=(FAVVMDataResolverHelper&&) noexcept = default;
 	virtual ~FAVVMDataResolverHelper() = default;
 
 	virtual TArray<int32> GetElementDependencies(const UObject* Outer,

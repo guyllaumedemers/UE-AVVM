@@ -59,7 +59,14 @@ void UAVVMOnlineCheatExtension::MakePlayerProfile(const int32 PlayerIndex)
 	FAVVMPlayerProfile NewProfile
 	{
 			FMath::Rand()/*rand unique id to globally identify this Profile*/,
-			FString::Printf(TEXT("Player%d"), PlayerIndex)
+			FString::Printf(TEXT("Player%d"), PlayerIndex),
+			{},
+			{},
+			{},
+			{},
+			{},
+			{},
+			{}
 	};
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
@@ -72,7 +79,8 @@ void UAVVMOnlineCheatExtension::MakePlayerPreset(const int32 PlayerIndex)
 	FAVVMPlayerPreset NewPreset
 	{
 			FMath::Rand()/*rand unique id to globally identify this Preset*/,
-			FString::Printf(TEXT("PlayerPreset%d_%d"), PlayerIndex, ++GlobalIdOffset)
+			FString::Printf(TEXT("PlayerPreset%d_%d"), PlayerIndex, ++GlobalIdOffset),
+			{}
 	};
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);

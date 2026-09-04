@@ -87,6 +87,6 @@ protected:
 	static UAVVMOnlineStubDataHelper* Get();
 
 	static TStrongObjectPtr<UAVVMOnlineStubDataHelper> gStubDataHelper;
-	TMap<FGameplayTag, TSubclassOf<UAVVMOnlinePresetStubDataProvider>> PresetStubDataProviders;
-	TMap<FGameplayTag, TSubclassOf<UAVVMOnlineStubDataProvider>> StubDataProviders;
+	TMap<FGameplayTag, TSubclassOf<UAVVMOnlinePresetStubDataProvider>> PresetStubDataProviders{};
+	TMap<FGameplayTag, TSubclassOf<UAVVMOnlineStubDataProvider>> StubDataProviders{};
 };

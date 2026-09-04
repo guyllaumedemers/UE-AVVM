@@ -48,6 +48,11 @@ struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerLoginContext() = default;
+	FAVVMPlayerLoginContext(const FAVVMPlayerLoginContext&) = default;
+	FAVVMPlayerLoginContext(FAVVMPlayerLoginContext&&) noexcept = default;
+	FAVVMPlayerLoginContext& operator=(const FAVVMPlayerLoginContext&) = default;
+	FAVVMPlayerLoginContext& operator=(FAVVMPlayerLoginContext&&) noexcept = default;
 	bool operator==(const FAVVMPlayerLoginContext& Rhs) const;
 	bool operator!=(const FAVVMPlayerLoginContext& Rhs) const;
 
@@ -55,10 +60,10 @@ struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 	int32 UniqueId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Username = {};
+	FString Username{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Password = {};
+	FString Password{};
 };
 
 /*
@@ -72,6 +77,11 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerAccount() = default;
+	FAVVMPlayerAccount(const FAVVMPlayerAccount&) = default;
+	FAVVMPlayerAccount(FAVVMPlayerAccount&&) noexcept = default;
+	FAVVMPlayerAccount& operator=(const FAVVMPlayerAccount&) = default;
+	FAVVMPlayerAccount& operator=(FAVVMPlayerAccount&&) noexcept = default;
 	bool operator==(const FAVVMPlayerAccount& Rhs) const;
 	bool operator!=(const FAVVMPlayerAccount& Rhs) const;
 
@@ -83,7 +93,7 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 	int32 LoginId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Gamertag = {};
+	FString Gamertag{};
 
 	// @gdemers {FAVVMPlayerWallet.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -110,6 +120,11 @@ struct AVVMONLINE_API FAVVMPlayerWallet
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerWallet() = default;
+	FAVVMPlayerWallet(const FAVVMPlayerWallet&) = default;
+	FAVVMPlayerWallet(FAVVMPlayerWallet&&) noexcept = default;
+	FAVVMPlayerWallet& operator=(const FAVVMPlayerWallet&) = default;
+	FAVVMPlayerWallet& operator=(FAVVMPlayerWallet&&) noexcept = default;
 	bool operator==(const FAVVMPlayerWallet& Rhs) const;
 	bool operator!=(const FAVVMPlayerWallet& Rhs) const;
 
@@ -131,12 +146,17 @@ struct AVVMONLINE_API FAVVMCurrency
 {
 	GENERATED_BODY()
 
+	FAVVMCurrency() = default;
+	FAVVMCurrency(const FAVVMCurrency&) = default;
+	FAVVMCurrency(FAVVMCurrency&&) noexcept = default;
+	FAVVMCurrency& operator=(const FAVVMCurrency&) = default;
+	FAVVMCurrency& operator=(FAVVMCurrency&&) noexcept = default;
 	bool operator==(const FAVVMCurrency& Rhs) const;
 	bool operator!=(const FAVVMCurrency& Rhs) const;
 
 	// @gdemers {FDataRegistryId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString CurrencyId = {};
+	FString CurrencyId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	int32 TotalAmount = INDEX_NONE;
@@ -156,6 +176,22 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerProfile() = default;
+	FAVVMPlayerProfile(const FAVVMPlayerProfile&) = default;
+	FAVVMPlayerProfile(FAVVMPlayerProfile&&) noexcept = default;
+	FAVVMPlayerProfile& operator=(const FAVVMPlayerProfile&) = default;
+	FAVVMPlayerProfile& operator=(FAVVMPlayerProfile&&) noexcept = default;
+
+	explicit FAVVMPlayerProfile(const int32 NewUniqueId,
+	                            FString&& NewProfileId,
+	                            TArray<int32>&& NewInventoryIds,
+	                            TArray<int32>&& SkinIds,
+	                            TArray<int32>&& CharmsIds,
+	                            TArray<int32>&& SkillIds,
+	                            TArray<int32>&& ChallengeIds,
+	                            const int32 NewEquippedPresetId,
+	                            TArray<int32>&& NewComplexDependencyLookup);
+	
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 	bool operator!=(const FAVVMPlayerProfile& Rhs) const;
 
@@ -164,7 +200,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 
 	// @gdemers may refer to a unique name tied to your playable character.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ProfileId = {};
+	FString ProfileId{};
 
 	// @gdemers Tightly packed Bitmask. Define information about an Item using bits translation. See AVVMOnlineInventory.h
 	// to inspect bits encoding scheme.
@@ -210,6 +246,16 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerPreset() = default;
+	FAVVMPlayerPreset(const FAVVMPlayerPreset&) = default;
+	FAVVMPlayerPreset(FAVVMPlayerPreset&&) noexcept = default;
+	FAVVMPlayerPreset& operator=(const FAVVMPlayerPreset&) = default;
+	FAVVMPlayerPreset& operator=(FAVVMPlayerPreset&&) noexcept = default;
+
+	explicit FAVVMPlayerPreset(const int32 NewUniqueId,
+	                           FString&& NewPresetId,
+	                           TMap<FGameplayTag/*slot tag*/, int32>&& NewEquippedItems);
+	
 	bool operator==(const FAVVMPlayerPreset& Rhs) const;
 	bool operator!=(const FAVVMPlayerPreset& Rhs) const;
 
@@ -219,7 +265,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 
 	// @gdemers may refer to a unique name tied to your profile preset.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PresetId = {};
+	FString PresetId{};
 
 	// @gdemers aggregate a subset of {FAVVMPlayerProfile::InventoryIds}.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -239,6 +285,11 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerResource() = default;
+	FAVVMPlayerResource(const FAVVMPlayerResource&) = default;
+	FAVVMPlayerResource(FAVVMPlayerResource&&) noexcept = default;
+	FAVVMPlayerResource& operator=(const FAVVMPlayerResource&) = default;
+	FAVVMPlayerResource& operator=(FAVVMPlayerResource&&) noexcept = default;
 	bool operator==(const FAVVMPlayerResource& Rhs) const;
 	bool operator!=(const FAVVMPlayerResource& Rhs) const;
 
@@ -250,7 +301,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 	// Note : Live Services may have an actual POD that defines the properties from an excel sheet or something instead
 	// of RegistryId.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ResourceId = {};
+	FString ResourceId{};
 };
 
 /**
@@ -264,6 +315,11 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerChallenge() = default;
+	FAVVMPlayerChallenge(const FAVVMPlayerChallenge&) = default;
+	FAVVMPlayerChallenge(FAVVMPlayerChallenge&&) noexcept = default;
+	FAVVMPlayerChallenge& operator=(const FAVVMPlayerChallenge&) = default;
+	FAVVMPlayerChallenge& operator=(FAVVMPlayerChallenge&&) noexcept = default;
 	bool operator==(const FAVVMPlayerChallenge& Rhs) const;
 	bool operator!=(const FAVVMPlayerChallenge& Rhs) const;
 
@@ -276,7 +332,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 	// of RegistryId.
 	// Progression tracking should be handled separately.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString ChallengeId = {};
+	FString ChallengeId{};
 };
 
 /**
@@ -318,6 +374,11 @@ struct AVVMONLINE_API FAVVMParty
 {
 	GENERATED_BODY()
 
+	FAVVMParty() = default;
+	FAVVMParty(const FAVVMParty&) = default;
+	FAVVMParty(FAVVMParty&&) noexcept = default;
+	FAVVMParty& operator=(const FAVVMParty&) = default;
+	FAVVMParty& operator=(FAVVMParty&&) noexcept = default;
 	bool operator==(const FAVVMParty& Rhs) const;
 	bool operator!=(const FAVVMParty& Rhs) const;
 
@@ -327,7 +388,7 @@ struct AVVMONLINE_API FAVVMParty
 
 	// @gdemers may represent a party name.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PartyId = {};
+	FString PartyId{};
 
 	// @gdemers NA, China, Russia, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -357,6 +418,11 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 {
 	GENERATED_BODY()
 
+	FAVVMPlayerConnection() = default;
+	FAVVMPlayerConnection(const FAVVMPlayerConnection&) = default;
+	FAVVMPlayerConnection(FAVVMPlayerConnection&&) noexcept = default;
+	FAVVMPlayerConnection& operator=(const FAVVMPlayerConnection&) = default;
+	FAVVMPlayerConnection& operator=(FAVVMPlayerConnection&&) noexcept = default;
 	bool operator==(const FAVVMPlayerConnection& Rhs) const;
 	bool operator!=(const FAVVMPlayerConnection& Rhs) const;
 
@@ -367,7 +433,7 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString UniqueNetId = {};
+	FString UniqueNetId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
@@ -388,6 +454,11 @@ struct AVVMONLINE_API FAVVMHostConfiguration
 {
 	GENERATED_BODY()
 
+	FAVVMHostConfiguration() = default;
+	FAVVMHostConfiguration(const FAVVMHostConfiguration&) = default;
+	FAVVMHostConfiguration(FAVVMHostConfiguration&&) noexcept = default;
+	FAVVMHostConfiguration& operator=(const FAVVMHostConfiguration&) = default;
+	FAVVMHostConfiguration& operator=(FAVVMHostConfiguration&&) noexcept = default;
 	bool operator==(const FAVVMHostConfiguration& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -395,9 +466,9 @@ struct AVVMONLINE_API FAVVMHostConfiguration
 
 	// @gdemers define the experience the players of a party will go through.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString GameMode = {};
+	FString GameMode{};
 
 	// @gdemers may define complex properties tied to the gameplay experience to be run.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString GameModeAdditiveOptions = {};
+	FString GameModeAdditiveOptions{};
 };

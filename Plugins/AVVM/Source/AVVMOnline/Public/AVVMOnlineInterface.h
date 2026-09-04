@@ -93,6 +93,11 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FAVVMPlayerRequest() = default;
+	FAVVMPlayerRequest(const FAVVMPlayerRequest&) = default;
+	FAVVMPlayerRequest(FAVVMPlayerRequest&&) noexcept = default;
+	FAVVMPlayerRequest& operator=(const FAVVMPlayerRequest&) = default;
+	FAVVMPlayerRequest& operator=(FAVVMPlayerRequest&&) noexcept = default;
+	
 	explicit FAVVMPlayerRequest(const FString& NewSrcPlayerUniqueNetId,
 	                            const FString& NewDestPlayerUniqueNetId,
 	                            const EAVVMPlayerRequestType NewRequestType,
@@ -102,18 +107,18 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 
 	// @gdemers caller.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString SrcPlayerUniqueNetId = FString();
+	FString SrcPlayerUniqueNetId{};
 
 	// @gdemers receiver.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString DestPlayerUniqueNetId = FString();
+	FString DestPlayerUniqueNetId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMPlayerRequestType RequestType = EAVVMPlayerRequestType::None;
 
 	// @gdemers payload can represent any data sent over the network, maybe during a trade, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Payload = FString();
+	FString Payload{};
 };
 
 /**
@@ -134,12 +139,17 @@ struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FAVVMStringPayload() = default;
-	FAVVMStringPayload(const FString& NewPayload);
+	FAVVMStringPayload(const FAVVMStringPayload&) = default;
+	FAVVMStringPayload(FAVVMStringPayload&&) noexcept = default;
+	FAVVMStringPayload& operator=(const FAVVMStringPayload&) = default;
+	FAVVMStringPayload& operator=(FAVVMStringPayload&&) noexcept = default;
+	
+	explicit FAVVMStringPayload(const FString& NewPayload);
 	bool operator==(const FAVVMStringPayload& Rhs) const;
 
 	// @gdemers used to prevent creation of an explicit type wrapping a collection of user defined structs.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Payload = FString();
+	FString Payload{};
 };
 
 /**

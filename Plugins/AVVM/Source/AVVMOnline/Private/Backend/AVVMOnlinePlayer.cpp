@@ -75,6 +75,27 @@ bool FAVVMCurrency::operator!=(const FAVVMCurrency& Rhs) const
 	return !(*this == Rhs);
 }
 
+FAVVMPlayerProfile::FAVVMPlayerProfile(const int32 NewUniqueId,
+                                       FString&& NewProfileId,
+                                       TArray<int32>&& NewInventoryIds,
+                                       TArray<int32>&& SkinIds,
+                                       TArray<int32>&& CharmsIds,
+                                       TArray<int32>&& SkillIds,
+                                       TArray<int32>&& ChallengeIds,
+                                       const int32 NewEquippedPresetId,
+                                       TArray<int32>&& NewComplexDependencyLookup)
+	: UniqueId(NewUniqueId),
+	  ProfileId(MoveTemp(NewProfileId)),
+	  InventoryIds(MoveTemp(NewInventoryIds)),
+	  SkinIds(MoveTemp(SkinIds)),
+	  CharmsIds(MoveTemp(CharmsIds)),
+	  SkillIds(MoveTemp(SkillIds)),
+	  ChallengeIds(MoveTemp(ChallengeIds)),
+	  EquippedPresetId(NewEquippedPresetId),
+	  ComplexDependencyLookup(MoveTemp(NewComplexDependencyLookup))
+{
+}
+
 bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 {
 	return (UniqueId == Rhs.UniqueId)
@@ -91,6 +112,15 @@ bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 bool FAVVMPlayerProfile::operator!=(const FAVVMPlayerProfile& Rhs) const
 {
 	return !(*this == Rhs);
+}
+
+FAVVMPlayerPreset::FAVVMPlayerPreset(const int32 NewUniqueId,
+                                     FString&& NewPresetId,
+                                     TMap<FGameplayTag, int32>&& NewEquippedItems)
+	: UniqueId(NewUniqueId),
+	  PresetId(NewPresetId),
+	  EquippedItems(NewEquippedItems)
+{
 }
 
 bool FAVVMPlayerPreset::operator==(const FAVVMPlayerPreset& Rhs) const
