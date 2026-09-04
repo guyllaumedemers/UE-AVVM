@@ -41,6 +41,12 @@ USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMCheatData : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
+
+	FAVVMCheatData() = default;
+	FAVVMCheatData(const FAVVMCheatData&) = default;
+	FAVVMCheatData(FAVVMCheatData&&) noexcept = default;
+	FAVVMCheatData& operator=(const FAVVMCheatData&) = default;
+	FAVVMCheatData& operator=(FAVVMCheatData&&) noexcept = default;
 };
 
 /**
@@ -67,7 +73,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FAVVMCheatData> CheatData;
+	TInstancedStruct<FAVVMCheatData> CheatData{};
 };
 
 /**

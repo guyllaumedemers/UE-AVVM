@@ -69,11 +69,11 @@ protected:
 		void Sample(const FAVVMPositionSample& NewSample);
 
 	private:
-		TArray<FAVVMPositionSample> Samples;
+		TArray<FAVVMPositionSample> Samples{};
 		int32 CurrSampleIndex = 0;
 	};
 
-	TMap<TWeakObjectPtr<const AActor>, FAVVMPositionSampler> AuthoritativePositionSamplers;
+	TMap<TWeakObjectPtr<const AActor>, FAVVMPositionSampler> AuthoritativePositionSamplers{};
 };
 
 /**

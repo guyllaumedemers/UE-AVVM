@@ -83,13 +83,13 @@ protected:
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FGameplayAbilitySpecHandle> AbilitySpecHandles;
+	TArray<FGameplayAbilitySpecHandle> AbilitySpecHandles{};
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const AActor>, TWeakObjectPtr<const UAttributeSet>> OwnerToAttributeSet;
+	TMap<TWeakObjectPtr<const AActor>, TWeakObjectPtr<const UAttributeSet>> OwnerToAttributeSet{};
 
-	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem;
-	TMap<TWeakObjectPtr<const AActor>, TSharedPtr<FStreamableHandle>> AttributeSetHandles;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> AbilityHandleSystem{};
+	TMap<TWeakObjectPtr<const AActor>, TSharedPtr<FStreamableHandle>> AttributeSetHandles{};
 
 private:
 	void SetupAbilities(const TArray<UObject*>& Resources);

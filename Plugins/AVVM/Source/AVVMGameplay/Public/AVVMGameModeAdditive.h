@@ -132,10 +132,10 @@ public:
 protected:
 	// @gdemers for cdo access.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<TSubclassOf<UAVVMPredicateTask>> PredicateTaskClasses;
+	TArray<TSubclassOf<UAVVMPredicateTask>> PredicateTaskClasses{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMPredicateTaskResult PredicateResult = FAVVMPredicateTaskResult{};
+	FAVVMPredicateTaskResult PredicateResult{};
 };
 
 /**

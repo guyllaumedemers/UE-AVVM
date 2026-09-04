@@ -37,7 +37,13 @@ struct AVVMGAMEPLAY_API FAVVMExecutionContextRule
 {
 	GENERATED_BODY()
 
+	FAVVMExecutionContextRule() = default;
+	FAVVMExecutionContextRule(const FAVVMExecutionContextRule&) = default;
+	FAVVMExecutionContextRule(FAVVMExecutionContextRule&&) noexcept = default;
+	FAVVMExecutionContextRule& operator=(const FAVVMExecutionContextRule&) = default;
+	FAVVMExecutionContextRule& operator=(FAVVMExecutionContextRule&&) noexcept = default;
 	virtual ~FAVVMExecutionContextRule() = default;
+	
 	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const PURE_VIRTUAL(Predicate, return false;);
 

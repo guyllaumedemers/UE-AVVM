@@ -40,5 +40,9 @@ struct AVVMGAMEPLAY_API FAVVMGameplayAbilityActorInfo : public FGameplayAbilityA
 	GENERATED_BODY()
 
 	FAVVMGameplayAbilityActorInfo() = default;
+	FAVVMGameplayAbilityActorInfo(const FAVVMGameplayAbilityActorInfo&) = default;
+	FAVVMGameplayAbilityActorInfo(FAVVMGameplayAbilityActorInfo&&) = default;
+	FAVVMGameplayAbilityActorInfo& operator=(const FAVVMGameplayAbilityActorInfo&) = default;
+	FAVVMGameplayAbilityActorInfo& operator=(FAVVMGameplayAbilityActorInfo&&) = default;
 	explicit FAVVMGameplayAbilityActorInfo(const FGameplayAbilityActorInfo& NewAbilityActorInfo);
 };

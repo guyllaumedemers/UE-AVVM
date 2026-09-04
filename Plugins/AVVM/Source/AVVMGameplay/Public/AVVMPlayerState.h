@@ -68,8 +68,11 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStatePayload : public FAVVMNotificationPayloa
 	GENERATED_BODY()
 
 	FAVVMPlayerStatePayload() = default;
-	explicit FAVVMPlayerStatePayload(const APlayerState* NewPlayerState,
-	                                 const bool bNewAddOrRemove);
+	FAVVMPlayerStatePayload(const FAVVMPlayerStatePayload&) = default;
+	FAVVMPlayerStatePayload(FAVVMPlayerStatePayload&&) noexcept = default;
+	FAVVMPlayerStatePayload& operator=(const FAVVMPlayerStatePayload&) = default;
+	FAVVMPlayerStatePayload& operator=(FAVVMPlayerStatePayload&&) noexcept = default;
+	explicit FAVVMPlayerStatePayload(const APlayerState* NewPlayerState, const bool bNewAddOrRemove);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const APlayerState> PlayerState = nullptr;
@@ -97,8 +100,8 @@ class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
 {
 	GENERATED_BODY()
 
-	FOnPostNetClientSynchronizationCompleteDelegate OnPostNetClientSynchronizationComplete;
-	FOnSetPlayerUniqueNetIdDelegate OnSetPlayerUniqueNetIdDelegate;
+	FOnPostNetClientSynchronizationCompleteDelegate OnPostNetClientSynchronizationComplete{};
+	FOnSetPlayerUniqueNetIdDelegate OnSetPlayerUniqueNetIdDelegate{};
 
 public:
 	AAVVMPlayerState(const FObjectInitializer& ObjectInitializer);
@@ -138,7 +141,7 @@ protected:
 	                                          AAVVMPlayerState* SimulatedPlayerState);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FAVVMPlayerStateChannelAggregator RegisteredChannels = FAVVMPlayerStateChannelAggregator();
+	FAVVMPlayerStateChannelAggregator RegisteredChannels{};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
@@ -154,10 +157,10 @@ private:
 	// This should ONLY being used to display runtime representation on Client for TOOLING purposes.
 	// If runtime updates are required, make sure to execute from AVVMGameSession.
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(AllowPrivateAccess="true"))
-	FString ClientSidedPlayerProfilePayload = FString{};
+	FString ClientSidedPlayerProfilePayload{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(AllowPrivateAccess="true"))
-	FString ClientSidedPlayerPresetPayload = FString{};
+	FString ClientSidedPlayerPresetPayload{};
 
 	friend class AAVVMGameSession;
 	// @gdemers friending cross dll works due to being a fwd declaration.

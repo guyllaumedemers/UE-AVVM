@@ -52,6 +52,12 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent
 	 */
 	struct FAVVMInputActionCallbackContext
 	{
+		FAVVMInputActionCallbackContext() = default;
+		FAVVMInputActionCallbackContext(const FAVVMInputActionCallbackContext&) = default;
+		FAVVMInputActionCallbackContext(FAVVMInputActionCallbackContext&&) noexcept = default;
+		FAVVMInputActionCallbackContext& operator=(const FAVVMInputActionCallbackContext&) = default;
+		FAVVMInputActionCallbackContext& operator=(FAVVMInputActionCallbackContext&&) noexcept = default;
+		
 		explicit FAVVMInputActionCallbackContext(const UInputAction* NewInputAction,
 		                                         const ETriggerEvent NewTriggerEvent)
 			: InputAction(NewInputAction),
@@ -93,7 +99,7 @@ protected:
 	void OnInputActionReceived(const FAVVMInputActionCallbackContext InputActionCallbackContext);
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const UInputAction>, FGameplayTag> AbilityTriggerTags;
+	TMap<TWeakObjectPtr<const UInputAction>, FGameplayTag> AbilityTriggerTags{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<APlayerController> OwningOuter = nullptr;
@@ -106,10 +112,10 @@ protected:
 	 */
 	struct FAVVMEnhancedInputEventBindingHandles
 	{
-		TArray<uint32> Handles;
+		TArray<uint32> Handles{};
 	};
 
-	TMap<TWeakObjectPtr<const UInputAction>, FAVVMEnhancedInputEventBindingHandles> BindingHandles;
+	TMap<TWeakObjectPtr<const UInputAction>, FAVVMEnhancedInputEventBindingHandles> BindingHandles{};
 
 private:
 	void UnRegisterGameFrameworkIMCs(const TArray<const UInputMappingContext*>& IMCs);

@@ -38,6 +38,10 @@ struct AVVMGAMEPLAY_API FAVVMHandshakePayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FAVVMHandshakePayload() = default;
+	FAVVMHandshakePayload(const FAVVMHandshakePayload&) = default;
+	FAVVMHandshakePayload(FAVVMHandshakePayload&&) = default;
+	FAVVMHandshakePayload& operator=(const FAVVMHandshakePayload&) = default;
+	FAVVMHandshakePayload& operator=(FAVVMHandshakePayload&&) noexcept = default;
 	explicit FAVVMHandshakePayload(const AActor* NewInstigator,
 	                               const AActor* NewTarget);
 

@@ -81,6 +81,10 @@ struct AVVMGAMEPLAY_API FAVVMActorPayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FAVVMActorPayload() = default;
+	FAVVMActorPayload(const FAVVMActorPayload&) = default;
+	FAVVMActorPayload(FAVVMActorPayload&&) noexcept = default;
+	FAVVMActorPayload& operator=(const FAVVMActorPayload&) = default;
+	FAVVMActorPayload& operator=(FAVVMActorPayload&&) noexcept = default;
 	explicit FAVVMActorPayload(const TScriptInterface<const IAVVMCanExposeActorPayload>& NewPayloadOwner);
 
 	UPROPERTY(Transient, BlueprintReadWrite)

@@ -80,7 +80,13 @@ protected:
 
 	struct FResourceQueueingMechanism
 	{
+		FResourceQueueingMechanism() = default;
+		FResourceQueueingMechanism(const FResourceQueueingMechanism&) = default;
+		FResourceQueueingMechanism(FResourceQueueingMechanism&&) noexcept = default;
+		FResourceQueueingMechanism& operator=(const FResourceQueueingMechanism&) = default;
+		FResourceQueueingMechanism& operator=(FResourceQueueingMechanism&&) noexcept = default;
 		~FResourceQueueingMechanism();
+		
 		bool PushDeferredRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest);
 		bool TryExecuteNextRequest();
 		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback);
@@ -93,9 +99,9 @@ protected:
 		bool HasUnfinishedStreamableHandle() const;
 		bool HasPendingRequest() const;
 
-		TArray<TPair<TSharedPtr<FStreamableHandle>, bool/*IsDoneStreaming*/>> StreamableHandles;
-		TQueue<UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred> PendingRequests;
-		FOnResourceAsyncLoadingComplete CompletionDelegate;
+		TArray<TPair<TSharedPtr<FStreamableHandle>, bool/*IsDoneStreaming*/>> StreamableHandles{};
+		TQueue<UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred> PendingRequests{};
+		FOnResourceAsyncLoadingComplete CompletionDelegate{};
 	};
 
 	TSharedPtr<FResourceQueueingMechanism> QueueingMechanism = nullptr;

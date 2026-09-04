@@ -37,6 +37,10 @@ struct AVVMGAMEPLAY_API FAVVMHearbeatPayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FAVVMHearbeatPayload() = default;
+	FAVVMHearbeatPayload(const FAVVMHearbeatPayload&) = default;
+	FAVVMHearbeatPayload(FAVVMHearbeatPayload&&) noexcept = default;
+	FAVVMHearbeatPayload& operator=(const FAVVMHearbeatPayload&) = default;
+	FAVVMHearbeatPayload& operator=(FAVVMHearbeatPayload&&) noexcept = default;
 	explicit FAVVMHearbeatPayload(const float NewValue);
 
 	UPROPERTY(Transient, BlueprintReadWrite)

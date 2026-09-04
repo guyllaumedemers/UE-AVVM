@@ -54,10 +54,10 @@ protected:
 	TSoftObjectPtr<UDataTable> AttributeMetaDataTable = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
-	FGameplayAttributeData Durability = FGameplayAttributeData();
+	FGameplayAttributeData Durability{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
-	FGameplayAttributeData Weight = FGameplayAttributeData();
+	FGameplayAttributeData Weight{};
 
 	TSharedPtr<FStreamableHandle> AttributeMetaDataTableHandle = nullptr;
 };

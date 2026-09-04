@@ -36,6 +36,11 @@ struct AVVMGAMEPLAY_API FAVVMExecutionContextParams
 {
 	GENERATED_BODY()
 
+	FAVVMExecutionContextParams() = default;
+	FAVVMExecutionContextParams(const FAVVMExecutionContextParams&) = default;
+	FAVVMExecutionContextParams(FAVVMExecutionContextParams&&) noexcept = default;
+	FAVVMExecutionContextParams& operator=(const FAVVMExecutionContextParams&) = default;
+	FAVVMExecutionContextParams& operator=(FAVVMExecutionContextParams&&) noexcept = default;
 	virtual ~FAVVMExecutionContextParams() = default;
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMExecutionContextParams>::Make<T>

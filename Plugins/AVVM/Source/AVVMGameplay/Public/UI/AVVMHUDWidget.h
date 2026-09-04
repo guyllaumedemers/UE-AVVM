@@ -45,7 +45,7 @@ public:
 	void SetHUDVisibilityRequirements(const FGameplayTagContainer& NewVisibilityRequirements);
 
 	UPROPERTY(BlueprintAssignable)
-	FOnVisibilityRequirementsChanged OnHUDVisibilityRequirementsChanged;
+	FOnVisibilityRequirementsChanged OnHUDVisibilityRequirementsChanged{};
 };
 
 /**

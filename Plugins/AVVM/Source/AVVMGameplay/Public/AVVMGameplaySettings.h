@@ -69,16 +69,16 @@ protected:
 	bool bDoesCharacterResourceProviderUseStaticData = false;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryId StubDataProviderActorIdentifierId = FDataRegistryId();
+	FDataRegistryId StubDataProviderActorIdentifierId{};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType ActorIdentifierRegistryType = FDataRegistryType();
+	FDataRegistryType ActorIdentifierRegistryType{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType GameplayEffectIdentifierRegistryType = FDataRegistryType();
+	FDataRegistryType GameplayEffectIdentifierRegistryType{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType ActorDefinitionRegistryType = FDataRegistryType();
+	FDataRegistryType ActorDefinitionRegistryType{};
 
 	// @gdemers defined tags that are able to prevent user from executing actions based on conditions. (i.e Stasis, Down, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -89,5 +89,5 @@ protected:
 	FGameplayTagContainer PlayerAbilityBlockingTags = FGameplayTagContainer::EmptyContainer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType GameModeAdditiveRegistryType = FDataRegistryType();
+	FDataRegistryType GameModeAdditiveRegistryType{};
 };

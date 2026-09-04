@@ -41,6 +41,11 @@ struct AVVMGAMEPLAY_API FAVVMActorUIDefinition
 {
 	GENERATED_BODY()
 
+	FAVVMActorUIDefinition() = default;
+	FAVVMActorUIDefinition(const FAVVMActorUIDefinition&) = default;
+	FAVVMActorUIDefinition(FAVVMActorUIDefinition&&) noexcept = default;
+	FAVVMActorUIDefinition& operator=(const FAVVMActorUIDefinition&) = default;
+	FAVVMActorUIDefinition& operator=(FAVVMActorUIDefinition&&) noexcept = default;
 	virtual ~FAVVMActorUIDefinition() = default;
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FAVVMActorUIDefinition>::Make<T>
@@ -78,7 +83,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FAVVMActorUIDefinition> ActorUIDefinition;
+	TInstancedStruct<FAVVMActorUIDefinition> ActorUIDefinition{};
 };
 
 template <typename T>

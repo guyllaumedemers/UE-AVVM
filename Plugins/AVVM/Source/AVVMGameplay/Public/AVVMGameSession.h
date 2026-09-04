@@ -46,19 +46,19 @@ struct AVVMGAMEPLAY_API FAVVMBackendSessionPayload
 	int32 PartyId = INDEX_NONE;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<FString/*{FUniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds;
+	TMap<FString/*{FUniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<int32/*{FAVVMPlayerConnection::UniqueId}*/, int32/*{FAVVMPlayerProfile::UniqueId}*/> ProfileIds;
+	TMap<int32/*{FAVVMPlayerConnection::UniqueId}*/, int32/*{FAVVMPlayerProfile::UniqueId}*/> ProfileIds{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, int32/*{FAVVMPlayerPreset::UniqueId}*/> PresetIds;
+	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, int32/*{FAVVMPlayerPreset::UniqueId}*/> PresetIds{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, FString/*FAVVMPlayerProfile*/> ResolvedProfiles;
+	TMap<int32/*{FAVVMPlayerProfile::UniqueId}*/, FString/*FAVVMPlayerProfile*/> ResolvedProfiles{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TMap<int32/*{FAVVMPlayerPreset::UniqueId}*/, FString/*FAVVMPlayerPreset*/> ResolvedPresets;
+	TMap<int32/*{FAVVMPlayerPreset::UniqueId}*/, FString/*FAVVMPlayerPreset*/> ResolvedPresets{};
 };
 
 /**

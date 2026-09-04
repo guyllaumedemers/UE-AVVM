@@ -57,5 +57,5 @@ protected:
 	// @gdemers a collection of systems that are fully initialized on the server. ready to RPC
 	// to local PC.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized;
+	TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>> NetFinalized{};
 };

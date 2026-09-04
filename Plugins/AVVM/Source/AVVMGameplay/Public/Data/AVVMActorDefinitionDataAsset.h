@@ -63,13 +63,13 @@ protected:
 	bool bDoesSupportPassiveAbilities = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportPassiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
-	TArray<FDataRegistryId> PassiveAbilityGroupIds;
+	TArray<FDataRegistryId> PassiveAbilityGroupIds{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportActiveAbilities = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
-	TArray<FDataRegistryId> ActiveAbilityGroupIds;
+	TArray<FDataRegistryId> ActiveAbilityGroupIds{};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
 	bool bDoesSupportAttributeSet = false;

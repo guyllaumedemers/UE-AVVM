@@ -70,9 +70,9 @@ public:
 
 private:
 #if !UE_BUILD_SHIPPING
-	FDelegateHandle HandleA;
-	FDelegateHandle HandleB;
-	FDelegateHandle HandleC;
-	FDelegateHandle HandleD;
+	FDelegateHandle HandleA{};
+	FDelegateHandle HandleB{};
+	FDelegateHandle HandleC{};
+	FDelegateHandle HandleD{};
 #endif
 };

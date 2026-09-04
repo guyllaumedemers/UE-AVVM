@@ -113,15 +113,19 @@ USTRUCT(BlueprintType)
 struct AVVMGAMEPLAY_API FAVVMCharacterAnimInstanceProxy : public FAnimInstanceProxy
 {
 	GENERATED_BODY()
-	
+
 	FAVVMCharacterAnimInstanceProxy() = default;
-	FAVVMCharacterAnimInstanceProxy(UAnimInstance* InInstance);
+	FAVVMCharacterAnimInstanceProxy(const FAVVMCharacterAnimInstanceProxy&) = default;
+	FAVVMCharacterAnimInstanceProxy(FAVVMCharacterAnimInstanceProxy&&) noexcept = default;
+	FAVVMCharacterAnimInstanceProxy& operator=(const FAVVMCharacterAnimInstanceProxy&) = default;
+	FAVVMCharacterAnimInstanceProxy& operator=(FAVVMCharacterAnimInstanceProxy&&) noexcept = default;
+	explicit FAVVMCharacterAnimInstanceProxy(UAnimInstance* InInstance);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FAVVMMovementProperties Movement = FAVVMMovementProperties();
+	FAVVMMovementProperties Movement{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FAVVMStatusProperties Status = FAVVMStatusProperties();
+	FAVVMStatusProperties Status{};
 
 protected:
 	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
@@ -161,7 +165,7 @@ protected:
 	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) override;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMCharacterAnimInstanceProxy AnyThreadProxy = FAVVMCharacterAnimInstanceProxy();
+	FAVVMCharacterAnimInstanceProxy AnyThreadProxy{};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AAVVMCharacter> OwningCharacter = nullptr;

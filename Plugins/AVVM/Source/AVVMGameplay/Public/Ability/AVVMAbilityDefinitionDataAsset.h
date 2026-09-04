@@ -123,7 +123,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMAbilityDefinitionDataTableRow"))
-	TArray<FDataRegistryId> AbilityIds;
+	TArray<FDataRegistryId> AbilityIds{};
 };
 
 /**
@@ -139,5 +139,5 @@ struct AVVMGAMEPLAY_API FAVVMAbilityGroupDefinitionDataTableRow : public FAVVMDa
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UAVVMAbilityGroupDefinitionDataAsset> AbilityGroupDefinitionDataAsset;
+	TSoftObjectPtr<UAVVMAbilityGroupDefinitionDataAsset> AbilityGroupDefinitionDataAsset{};
 };

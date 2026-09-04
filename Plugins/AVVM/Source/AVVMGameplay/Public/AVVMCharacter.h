@@ -130,12 +130,12 @@ protected:
 	void BP_PostPlayerStateSet();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FAVVMCharacterChannelAggregator RegisteredChannels = FAVVMCharacterChannelAggregator();
+	FAVVMCharacterChannelAggregator RegisteredChannels{};
 	
 	// @gdemers ActorDefinition allow Actor class overrides, so the ACharacter hierarchy could be
 	// replaced at runtime if setup correctly to support character swapping.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
-	FDataRegistryId ActorDefinitionId = FDataRegistryId();
+	FDataRegistryId ActorDefinitionId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bCanOverrideServerCollision = false;

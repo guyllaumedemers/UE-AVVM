@@ -66,5 +66,5 @@ protected:
 
 	// @gdemers players requesting login in session where the backend isnt expecting them.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FUniqueNetIdRepl> RejectedPlayers;
+	TArray<FUniqueNetIdRepl> RejectedPlayers{};
 };

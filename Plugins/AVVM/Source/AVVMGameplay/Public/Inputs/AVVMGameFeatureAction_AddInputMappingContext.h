@@ -68,7 +68,7 @@ protected:
 	void AddToWorld(const FWorldContext& WorldContext, FContextHandles& Handles);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TArray<TSoftObjectPtr<UInputMappingContext>> IMCs;
+	TArray<TSoftObjectPtr<UInputMappingContext>> IMCs{};
 
-	TMap<FGameFeatureStateChangeContext, FContextHandles> ContextHandles;
+	TMap<FGameFeatureStateChangeContext, FContextHandles> ContextHandles{};
 };

@@ -66,10 +66,10 @@ protected:
 	 */
 	struct FAVVMRegisteredInputMappingContexts
 	{
-		TSharedPtr<FStreamableHandle> StreamableHandle;
-		TArray<FSoftObjectPath> IMCSoftObjectPaths;
+		TSharedPtr<FStreamableHandle> StreamableHandle{};
+		TArray<FSoftObjectPath> IMCSoftObjectPaths{};
 	};
 
-	TMap<TWeakObjectPtr<const ULocalPlayer>, FAVVMRegisteredInputMappingContexts> RegisteredInputMappingContexts;
+	TMap<TWeakObjectPtr<const ULocalPlayer>, FAVVMRegisteredInputMappingContexts> RegisteredInputMappingContexts{};
 	friend class UAVVMGameFeatureAction_AddInputMappingContext;
 };

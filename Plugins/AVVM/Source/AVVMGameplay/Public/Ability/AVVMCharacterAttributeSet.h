@@ -49,22 +49,22 @@ public:
 protected:
 	// ------------------- FCharacterProperties ------------------- //
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
-	FGameplayAttributeData Movement_JumpHeight = FGameplayAttributeData();
+	FGameplayAttributeData Movement_JumpHeight{};
 
 	// @gdemers environment that modify speed properties such as : in water, in powder snow, etc...
 	// should apply modifiers to WalkSpeed/SprintSpeed depending on input pressed.
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
-	FGameplayAttributeData Movement_WalkSpeed = FGameplayAttributeData();
+	FGameplayAttributeData Movement_WalkSpeed{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
-	FGameplayAttributeData Movement_SprintSpeed = FGameplayAttributeData();
+	FGameplayAttributeData Movement_SprintSpeed{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
-	FGameplayAttributeData Movement_DashDistance = FGameplayAttributeData();
+	FGameplayAttributeData Movement_DashDistance{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
-	FGameplayAttributeData Movement_RollDistance = FGameplayAttributeData();
+	FGameplayAttributeData Movement_RollDistance{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
-	FGameplayAttributeData Movement_SlideDistance = FGameplayAttributeData();
+	FGameplayAttributeData Movement_SlideDistance{};
 };

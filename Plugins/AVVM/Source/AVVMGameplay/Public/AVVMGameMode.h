@@ -139,18 +139,18 @@ protected:
 	bool bShouldDeferDefaultPawnCreation = false;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FAVVMGameModeRuleTagAggregator RuleTagAggregator = FAVVMGameModeRuleTagAggregator();
+	FAVVMGameModeRuleTagAggregator RuleTagAggregator{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AAVVMWorldSetting> WorldSetting = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FName, TObjectPtr<UAVVMGameModeAdditive>> RuntimeGameModeAdditives;
+	TMap<FName, TObjectPtr<UAVVMGameModeAdditive>> RuntimeGameModeAdditives{};
 
 	// @gdemers IMPORTANT : If a GFP is added late in the AGameMode loop,
 	// we may still want to add UAVVMGameModeAdditive behaviour based on unused parameters.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FString> FailedProjectOrPluginGameModeAdditiveOptions;
+	TArray<FString> FailedProjectOrPluginGameModeAdditiveOptions{};
 
 private:
 	void Terminate();
