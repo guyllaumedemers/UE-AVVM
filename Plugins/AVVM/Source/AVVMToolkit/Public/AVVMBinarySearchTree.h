@@ -31,32 +31,44 @@ template <typename T>
 constexpr bool TIsNotContainer = !TIsContainer<T>;
 
 /**
- *	@gdemers compile time evaluation of WeakOrStrong Object usage for compile time branching.
+ *	@gdemers compile time evaluation of Smart ptr type usage for compile time branching.
  */
 template <typename T>
-concept TIsWeakOrStrongObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
+concept TIsSharedOrWeakPtrType = requires(T Obj)
 {
-	Obj.IsValid();
+	Obj.GetSharedReferenceCount();
 };
+
+template <typename T>
+concept TIsNotSharedOrWeakPtrType = !TIsSharedOrWeakPtrType<T>;
 
 /**
  *  @gdemers constraint against untracked TObjectPtr usage.
  */
 template <typename T>
-concept TIsObjectPtrType = requires(TIsDerivedFrom<T, UObject> Obj)
+concept TIsObjectOrRawPtrType = requires(T Obj)
 {
-	Obj.GetPtrTypeHash();
+	IsValid(Obj);
 };
 
 template <typename T>
-concept TIsNotObjectPtrType = !TIsObjectPtrType<T>;
+concept TIsNotObjectOrRawPtrType = !TIsObjectOrRawPtrType<T>;
+
+/**
+ *	@gdemers compile time evaluation of TWeakObject or TStrongObject ptr type usage for compile time branching.
+ */
+template <typename T>
+concept TIsWeakObjectOrStrongObjectPtrType = requires(T Obj)
+{
+	Obj.IsValid();
+};
 
 /**
  *	Class description:
  *	
  *	FAVVMBinaryTreeNode is a template class that encapsulate generic type for binary traversal.
  */
-template <typename InElementType> requires(TIsNotObjectPtrType<InElementType> && TIsNotContainer<InElementType>)
+template <typename InElementType> requires(TIsNotObjectOrRawPtrType<InElementType> && TIsNotSharedOrWeakPtrType<InElementType> && TIsNotContainer<InElementType>)
 struct FAVVMBinaryTreeNode
 {
 	using TBinaryTreeNodeType = FAVVMBinaryTreeNode<InElementType>;
@@ -206,7 +218,7 @@ typename FAVVMBinaryTree<InElementType, InAllocatorType>::TBinaryTreeNodeType** 
                                                                                                                                           const TOnSelectElement& OnSelectElement,
                                                                                                                                           const TIsElementLessThan& IsElementLessThan) const
 {
-	if constexpr (TIsWeakOrStrongObjectPtrType<InElementType>)
+	if constexpr (TIsWeakObjectOrStrongObjectPtrType<InElementType>)
 	{
 		if ((CurrNode == nullptr) || !CurrNode->Value.IsValid() || OnSelectElement(CurrNode))
 		{
