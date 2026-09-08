@@ -65,5 +65,5 @@ protected:
 	void ClearHandles();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FGameplayTag, FUIExtensionHandle> ExtensionHandles;
+	TMap<FGameplayTag, FUIExtensionHandle> ExtensionHandles{};
 };

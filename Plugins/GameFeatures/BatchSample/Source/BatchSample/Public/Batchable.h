@@ -55,5 +55,5 @@ public:
 private:
 	// @demers can override but never call in derived type. good example of proper encapsulation.
 	virtual const AActor* GetSelf() const PURE_VIRTUAL(GetSelf, return nullptr;);
-	int32 BatchIndex = INDEX_NONE;
+	int32 BatchIndex{INDEX_NONE};
 };

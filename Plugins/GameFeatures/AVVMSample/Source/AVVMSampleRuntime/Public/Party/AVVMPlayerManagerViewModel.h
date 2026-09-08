@@ -51,5 +51,5 @@ public:
 protected:
 	// @gdemers backend payload resolving into a collection of player connections.
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMPlayerConnectionProxy> PlayerConnections;
+	TArray<FAVVMPlayerConnectionProxy> PlayerConnections{};
 };

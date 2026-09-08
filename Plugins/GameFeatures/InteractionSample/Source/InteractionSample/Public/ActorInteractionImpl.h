@@ -53,16 +53,16 @@ struct INTERACTIONSAMPLE_API FInteractionImplSparseData
 	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	FGameplayTag StartPromptInteractionChannel = FGameplayTag::EmptyTag;
+	FGameplayTag StartPromptInteractionChannel{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	FGameplayTag StopPromptInteractionChannel = FGameplayTag::EmptyTag;
+	FGameplayTag StopPromptInteractionChannel{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	TInstancedStruct<FInteractionExecutionRequirements> Requirements = TInstancedStruct<FInteractionExecutionRequirements>();
+	TInstancedStruct<FInteractionExecutionRequirements> Requirements{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx = TInstancedStruct<FInteractionExecutionContext>();
+	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx{};
 };
 
 /**
@@ -133,7 +133,7 @@ protected:
 															   FInteractionObjectFastArray& OutRecords) const;
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle;
+	TMap<TWeakObjectPtr<const AActor>, FActiveGameplayEffectHandle> ActorToGEActiveHandle{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
@@ -145,15 +145,15 @@ private:
 	TSubclassOf<UGameplayEffect> GameplayEffect_DEPRECATED = nullptr;
 
 	UPROPERTY()
-	FGameplayTag StartPromptInteractionChannel_DEPRECATED = FGameplayTag::EmptyTag;
+	FGameplayTag StartPromptInteractionChannel_DEPRECATED{FGameplayTag::EmptyTag};
 
 	UPROPERTY()
-	FGameplayTag StopPromptInteractionChannel_DEPRECATED = FGameplayTag::EmptyTag;
+	FGameplayTag StopPromptInteractionChannel_DEPRECATED{FGameplayTag::EmptyTag};
 
 	UPROPERTY()
-	TInstancedStruct<FInteractionExecutionRequirements> Requirements_DEPRECATED = TInstancedStruct<FInteractionExecutionRequirements>();
+	TInstancedStruct<FInteractionExecutionRequirements> Requirements_DEPRECATED{};
 
 	UPROPERTY()
-	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx_DEPRECATED = TInstancedStruct<FInteractionExecutionContext>();
+	TInstancedStruct<FInteractionExecutionContext> ExecutionCtx_DEPRECATED{};
 #endif
 };

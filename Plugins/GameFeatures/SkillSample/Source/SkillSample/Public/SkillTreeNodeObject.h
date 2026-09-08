@@ -42,20 +42,25 @@ struct SKILLSAMPLE_API FSkillTreeNodeObject : public FFastArraySerializerItem
 	GENERATED_BODY()
 
 	FSkillTreeNodeObject() = default;
-	FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
-	                     const uint32 NewActiveGameplayEffectHandleTypeHash);
+	FSkillTreeNodeObject(const FSkillTreeNodeObject&) = default;
+	FSkillTreeNodeObject(FSkillTreeNodeObject&&) noexcept = default;
+	FSkillTreeNodeObject& operator=(const FSkillTreeNodeObject&) = default;
+	FSkillTreeNodeObject& operator=(FSkillTreeNodeObject&&) noexcept = default;
+	
+	explicit FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
+	                              const uint32 NewActiveGameplayEffectHandleTypeHash);
 	
 	const uint32 GetActiveEffectHandleTypeHash() const;
 	const int32 GetSkillTreeNodePrivateId() const;
 
 protected:
 	UPROPERTY(Transient)
-	uint32 ActiveGameplayEffectHandleTypeHash = UINT32_MAX;
+	uint32 ActiveGameplayEffectHandleTypeHash{UINT32_MAX};
 
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
 	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 PrivateTreeNodeId = INDEX_NONE;
+	int32 PrivateTreeNodeId{INDEX_NONE};
 	
 	friend class USkillTreeNodeObjectUtils;
 };
@@ -77,7 +82,7 @@ struct SKILLSAMPLE_API FSkillTreeNodeObjectFastArray : public FIrisFastArraySeri
 	}
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FSkillTreeNodeObject> SkillTreeNodeObjects;
+	TArray<FSkillTreeNodeObject> SkillTreeNodeObjects{};
 };
 
 template <>

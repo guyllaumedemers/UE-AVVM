@@ -48,5 +48,5 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMPlayerConnectionProxy PlayerConnection;
+	FAVVMPlayerConnectionProxy PlayerConnection{};
 };

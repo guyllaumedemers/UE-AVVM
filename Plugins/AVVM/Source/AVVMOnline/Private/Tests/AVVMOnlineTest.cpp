@@ -164,7 +164,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->ToString(A, OutPayload);
 
 		TArray<FAVVMPlayerResource> B;
-		Parser->FromString(FAVVMStringPayload{OutPayload}, B);
+		Parser->FromString(FAVVMStringPayload{MoveTemp(OutPayload)}, B);
 
 		UTEST_EQUAL("TArray<FAVVMPlayerResource>", A, B);
 	}
@@ -184,7 +184,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->ToString(A, OutPayload);
 
 		TArray<FAVVMPlayerChallenge> B;
-		Parser->FromString(FAVVMStringPayload{OutPayload}, B);
+		Parser->FromString(FAVVMStringPayload{MoveTemp(OutPayload)}, B);
 
 		UTEST_EQUAL("TArray<FAVVMPlayerChallenge>", A, B);
 	}
@@ -212,7 +212,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->ToString(A, OutPayload);
 
 		TArray<FAVVMParty> B;
-		Parser->FromString(FAVVMStringPayload{OutPayload}, B);
+		Parser->FromString(FAVVMStringPayload{MoveTemp(OutPayload)}, B);
 
 		UTEST_EQUAL("TArray<FAVVMParty>", A, B);
 	}
@@ -236,7 +236,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->ToString(A, OutPayload);
 
 		TArray<FAVVMPlayerConnection> B;
-		Parser->FromString(FAVVMStringPayload{OutPayload}, B);
+		Parser->FromString(FAVVMStringPayload{MoveTemp(OutPayload)}, B);
 
 		UTEST_EQUAL("TArray<FAVVMPlayerConnection>", A, B);
 	}
@@ -344,7 +344,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->ToString(A, OutPayload);
 
 		TArray<FAVVMPartyProxy> B;
-		Parser->FromString(FAVVMStringPayload{OutPayload}, B);
+		Parser->FromString(FAVVMStringPayload{MoveTemp(OutPayload)}, B);
 
 		UTEST_EQUAL("TArray<FAVVMPartyProxy>", A, B);
 	}
@@ -368,7 +368,7 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 		Parser->ToString(A, OutPayload);
 
 		TArray<FAVVMPlayerConnectionProxy> B;
-		Parser->FromString(FAVVMStringPayload{OutPayload}, B);
+		Parser->FromString(FAVVMStringPayload{MoveTemp(OutPayload)}, B);
 
 		UTEST_EQUAL("TArray<FAVVMPlayerConnectionProxy>", A, B);
 	}

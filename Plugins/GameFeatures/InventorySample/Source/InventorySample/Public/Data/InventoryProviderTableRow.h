@@ -47,14 +47,14 @@ struct INVENTORYSAMPLE_API FProviderDefaultItemProperties
 	const int32 GetRelationshipBitmask() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RelationshipTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers see AVVMOnlineInventory.h
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
-	int32 InstancedId = INDEX_NONE;
+	int32 InstancedId{INDEX_NONE};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="127"))
-	int32 StackCount = INDEX_NONE;
+	int32 StackCount{INDEX_NONE};
 };
 
 /**
@@ -77,10 +77,10 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 
 	// @gdemers the unique identifier that represent the inventory provider actor. example : a shop.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
-	FDataRegistryId InventoryProviderActorIdentifierId = FDataRegistryId();
+	FDataRegistryId InventoryProviderActorIdentifierId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanInventoryProviderEquipItems = false;
+	bool bCanInventoryProviderEquipItems{false};
 
 	// @gdemers slot tags used to bind an item to an abstract location within the loadout system.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanInventoryProviderEquipItems"))

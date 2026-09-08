@@ -70,7 +70,7 @@ struct SKILLSAMPLE_API FSkillTreeNodeToken
 	}
 
 	UPROPERTY()
-	uint32 UniqueId = INDEX_NONE;
+	uint32 UniqueId{0};
 };
 
 /**
@@ -85,12 +85,12 @@ struct SKILLSAMPLE_API FSkillTreeModificationContextParams
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
+	FSkillTreeNodeObject TreeNodeObject{};
 
 	// @gdemers level should be clamped by the caller before being provided,
 	// and should handle progression (specific to your project).
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ModifiedLevel = INDEX_NONE;
+	int32 ModifiedLevel{INDEX_NONE};
 };
 
 /**
@@ -158,21 +158,21 @@ protected:
 	void CheckDisk() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldAsyncLoadOnBeginPlay = false;
+	bool bShouldAsyncLoadOnBeginPlay{false};
 
 	UPROPERTY(Transient)
 	TMap<uint32/*FActiveGameplayEffectHandle::GetTypeHash*/, FActiveGameplayEffectHandle> NonReplicatedActiveGameplayEffectHandles;
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
-	FGameplayTagContainer NonReplicatedComponentStateTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer NonReplicatedComponentStateTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FSkillTreeNodeObjectFastArray SkillTree;
+	FSkillTreeNodeObjectFastArray SkillTree{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
-	TMap<uint32, TSharedPtr<FStreamableHandle>> SkillTreeNodeHandleSystem;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> SkillTreeNodeHandleSystem{};
 
 private:
 	void SetupSkillTreeNodeObjects(const TArray<UObject*>& NewResources);
@@ -192,7 +192,7 @@ private:
 	// @gdemers cached representation of what has been attributed during the initialization
 	// phase of our Skill Tree. This address the problem of uniqueness for entries with identical type, and/or owned by different entity.
 	// example : Perks/Traits that are allowed to Stack. Or, shotgun +15% damage vs pistol +15% damage.
-	TArray<int32> PrivateSkillTreeNodeIds;
+	TArray<int32> PrivateSkillTreeNodeIds{};
 
 	friend class AAutomatedTestSkillActor;
 	friend class USkillTreeResourceHandlingImpl;

@@ -51,11 +51,11 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType SkillTreeRegistryType = NAME_None;
+	FDataRegistryType SkillTreeRegistryType{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType SkillTreeNodeRegistryType = NAME_None;
+	FDataRegistryType SkillTreeNodeRegistryType{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RequiredAssetDataTags="RowStructure=/Script/SkillSample.SkillTreeProviderTableRow"))
-	TSoftObjectPtr<UDataTable> DefaultProviderSkillTrees;
+	TSoftObjectPtr<UDataTable> DefaultProviderSkillTrees{};
 };

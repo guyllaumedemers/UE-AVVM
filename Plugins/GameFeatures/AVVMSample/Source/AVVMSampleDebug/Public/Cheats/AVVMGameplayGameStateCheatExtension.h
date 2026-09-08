@@ -69,6 +69,6 @@ public:
 	virtual void Draw() override;
 	
 private:
-	int32 SelectedObjectiveId = INDEX_NONE;
-	int32 SelectedAreaId = INDEX_NONE;
+	int32 SelectedObjectiveId{INDEX_NONE};
+	int32 SelectedAreaId{INDEX_NONE};
 };

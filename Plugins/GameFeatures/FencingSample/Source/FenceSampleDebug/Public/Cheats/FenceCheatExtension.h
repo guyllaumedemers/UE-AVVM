@@ -54,7 +54,7 @@ protected:
 	void LowerFence(const int32 NewIndex);
 
 	UPROPERTY(Transient)
-	TArray<TWeakObjectPtr<const UActorFenceComponent>> FenceComponents;
+	TArray<TWeakObjectPtr<const UActorFenceComponent>> FenceComponents{};
 
-	bool bHasFencesChanged = false;
+	bool bHasFencesChanged{false};
 };

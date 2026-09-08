@@ -47,14 +47,14 @@ struct SKILLSAMPLE_API FSkillTreeNodePhase
 	const int32 GetRelationshipBitmask() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
-	TMap<FDataRegistryId, int32 /*GameplayEffect level*/> SkillTreeNodeIds;
+	TMap<FDataRegistryId, int32 /*GameplayEffect level*/> SkillTreeNodeIds{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RelationshipTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers see AVVMOnlineInventory.h
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
-	int32 InstancedId = INDEX_NONE;
+	int32 InstancedId{INDEX_NONE};
 };
 
 /**
@@ -77,8 +77,8 @@ struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
 
 	// @gdemers the unique identifier that represent the skill tree provider actor. example : a shop.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
-	FDataRegistryId SkillTreeProviderActorIdentifierId = FDataRegistryId();
+	FDataRegistryId SkillTreeProviderActorIdentifierId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<FSkillTreeNodePhase> SkillTreeNodePerPhases;
+	TArray<FSkillTreeNodePhase> SkillTreeNodePerPhases{};
 };

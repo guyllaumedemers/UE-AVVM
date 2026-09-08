@@ -22,7 +22,6 @@
 #include "CoreMinimal.h"
 
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Net/Serialization/FastArraySerializer.h"
 
 #include "InteractionObject.generated.h"
@@ -39,8 +38,13 @@ USTRUCT(BlueprintType)
 struct INTERACTIONSAMPLE_API FInteractionObject : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
-	
+
 	FInteractionObject() = default;
+	FInteractionObject(const FInteractionObject&) = default;
+	FInteractionObject(FInteractionObject&&) noexcept = default;
+	FInteractionObject& operator=(const FInteractionObject&) = default;
+	FInteractionObject& operator=(FInteractionObject&&) noexcept = default;
+	
 	FInteractionObject(const AActor* NewTarget,
 	                   const AActor* NewInstigator,
 	                   UActorInteractionComponent* NewInstigatorComponent);
@@ -75,10 +79,10 @@ protected:
 	TWeakObjectPtr<UActorInteractionComponent> InstigatorComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bIsInteractable = true;
+	bool bIsInteractable{true};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bIsPendingKill = false;
+	bool bIsPendingKill{false};
 };
 
 /**

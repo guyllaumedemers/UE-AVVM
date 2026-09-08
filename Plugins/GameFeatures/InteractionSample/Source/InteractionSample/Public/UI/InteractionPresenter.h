@@ -88,16 +88,16 @@ protected:
 	                             const TInstancedStruct<FAVVMNotificationPayload>& Payload);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	EWidgetPreviewType PreviewType = EWidgetPreviewType::InWorld;
+	EWidgetPreviewType PreviewType{EWidgetPreviewType::InWorld};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="PreviewType == EWidgetPreviewType::InWorld"))
 	TSoftClassPtr<UCommonUserWidget> WorldWidgetClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostInteractionChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostInteractionChannelTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	ESlateVisibility DefaultVisibilityOnStart = ESlateVisibility::SelfHitTestInvisible;
+	ESlateVisibility DefaultVisibilityOnStart{ESlateVisibility::SelfHitTestInvisible};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UCommonUserWidget> WorldWidget = nullptr;

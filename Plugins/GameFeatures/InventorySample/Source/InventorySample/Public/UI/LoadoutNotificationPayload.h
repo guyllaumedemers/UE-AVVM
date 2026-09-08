@@ -36,16 +36,21 @@ struct INVENTORYSAMPLE_API FLoadoutNotificationPayload : public FAVVMNotificatio
 	GENERATED_BODY()
 
 	FLoadoutNotificationPayload() = default;
-	FLoadoutNotificationPayload(const FGameplayTag& NewSrcSlotTag,
-	                            const FGameplayTag& NewDestSlotTag,
-	                            const bool bNewWasSuccess);
+	FLoadoutNotificationPayload(const FLoadoutNotificationPayload&) = default;
+	FLoadoutNotificationPayload(FLoadoutNotificationPayload&&) = default;
+	FLoadoutNotificationPayload& operator=(const FLoadoutNotificationPayload&) = default;
+	FLoadoutNotificationPayload& operator=(FLoadoutNotificationPayload&&) noexcept = default;
+	
+	explicit FLoadoutNotificationPayload(const FGameplayTag& NewSrcSlotTag,
+	                                     const FGameplayTag& NewDestSlotTag,
+	                                     const bool bNewWasSuccess);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag SrcSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag SrcSlotTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag DestSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag DestSlotTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bWasSuccess = false;
+	bool bWasSuccess{false};
 };

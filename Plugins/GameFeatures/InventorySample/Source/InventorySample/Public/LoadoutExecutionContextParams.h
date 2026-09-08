@@ -37,12 +37,12 @@ struct INVENTORYSAMPLE_API FLoadoutExecutionContextParams : public FAVVMExecutio
 	GENERATED_BODY()
 
 	FLoadoutExecutionContextParams() = default;
-	FLoadoutExecutionContextParams(const FGameplayTag& NewSrcSlotTag,
-	                               const FGameplayTag& NewDestSlotTag);
+	explicit FLoadoutExecutionContextParams(const FGameplayTag& NewSrcSlotTag,
+	                                        const FGameplayTag& NewDestSlotTag);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag SrcSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag SrcSlotTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag DestSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag DestSlotTag{FGameplayTag::EmptyTag};
 };

@@ -344,6 +344,17 @@ void UBatchingSubsystem::GarbageNow(TArray<FBatchContext>& NewPendingDestroy) co
 	}
 }
 
+UBatchingSubsystem::FBatchContext::~FBatchContext()
+{
+	Candidates.Reset();
+}
+
+UBatchingSubsystem::FBatchContext::FBatchContext(AActor* Actors, const int32 MaxSize)
+{
+	Candidates.Reserve(MaxSize);
+	Candidates.Add(Actors);
+}
+
 bool UBatchingSubsystem::FBatchContext::DoesQualifyForBatchDestroy(const float MaxSize) const
 {
 	return Candidates.Num() >= MaxSize;

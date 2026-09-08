@@ -70,7 +70,7 @@ struct INVENTORYSAMPLE_API FItemToken
 	}
 
 	UPROPERTY()
-	uint32 UniqueId = INDEX_NONE;
+	uint32 UniqueId{0};
 };
 
 /**
@@ -143,14 +143,20 @@ protected:
 
 	struct FItemSpawnerQueuingMechanism
 	{
+		FItemSpawnerQueuingMechanism() = default;
+		FItemSpawnerQueuingMechanism(const FItemSpawnerQueuingMechanism&) = default;
+		FItemSpawnerQueuingMechanism(FItemSpawnerQueuingMechanism&&) noexcept = default;
+		FItemSpawnerQueuingMechanism& operator=(const FItemSpawnerQueuingMechanism&) = default;
+		FItemSpawnerQueuingMechanism& operator=(FItemSpawnerQueuingMechanism&&) noexcept = default;
 		~FItemSpawnerQueuingMechanism();
+		
 		bool PushDeferredItem(UItemObject* NewItem, const UActorInventoryComponent::FOnAsyncSpawnRequestDeferred& NewRequest);
 		bool TryExecuteNextRequest(const bool bCanDequeueFrontItem = false);
 		bool HasPendingRequest() const;
 		UItemObject* PeekItem() const;
 
-		TArray<UActorInventoryComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests;
-		TArray<TWeakObjectPtr<UItemObject>> QueuedItems;
+		TArray<UActorInventoryComponent::FOnAsyncSpawnRequestDeferred> PendingSpawnRequests{};
+		TArray<TWeakObjectPtr<UItemObject>> QueuedItems{};
 	};
 	
 	UFUNCTION(Server, Reliable)
@@ -176,13 +182,13 @@ protected:
 	void OnRep_OnNonReplicatedLoadoutInit();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldAsyncLoadOnBeginPlay = false;
+	bool bShouldAsyncLoadOnBeginPlay{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UNonReplicatedLoadoutObject> NonReplicatedLoadoutClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer OuterDropConditionTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer OuterDropConditionTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TEnumAsByte<ELifetimeCondition> InventoryRepCondition{};
@@ -191,7 +197,7 @@ protected:
 	TArray<TObjectPtr<UItemObject>> Items{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
-	FGameplayTagContainer ComponentStateTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ComponentStateTags{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers IMPORTANT - we default replicate to support network RPC but there
 	// shouldnt be any property replication done during gameplay here!

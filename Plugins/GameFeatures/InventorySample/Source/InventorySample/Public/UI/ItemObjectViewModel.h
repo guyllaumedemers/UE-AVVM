@@ -62,10 +62,10 @@ protected:
 	void OnItemRuntimeCountChanged(const int32 NewCounter);
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer StateTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	int32 Counter = 1;
+	int32 Counter{1};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UItemObject> Item = nullptr;

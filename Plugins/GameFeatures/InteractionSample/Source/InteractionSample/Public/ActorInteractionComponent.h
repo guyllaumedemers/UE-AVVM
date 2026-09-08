@@ -49,16 +49,16 @@ struct INTERACTIONSAMPLE_API FInteractionSparseData
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Only allow interactions to run for holder of given tags."))
-	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Block any interaction if tags are present."))
-	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldPreventContingency = true;
+	bool bShouldPreventContingency{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Set the default size of our collection type."))
-	int32 DefaultAllocationSize = 6;
+	int32 DefaultAllocationSize{6};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSubclassOf<UActorInteractionImpl> InteractionImplClass = nullptr;
@@ -139,16 +139,16 @@ private:
 #if WITH_EDITORONLY_DATA
 	//~ These properties are moving out to the FMySparseClassData struct:
 	UPROPERTY()
-	FGameplayTagContainer RequiredTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTags_DEPRECATED{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY()
-	FGameplayTagContainer BlockingTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTags_DEPRECATED{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY()
-	bool bShouldPreventContingency_DEPRECATED = true;
+	bool bShouldPreventContingency_DEPRECATED{true};
 
 	UPROPERTY()
-	int32 DefaultAllocationSize_DEPRECATED = 6;
+	int32 DefaultAllocationSize_DEPRECATED{6};
 
 	UPROPERTY()
 	TSubclassOf<UActorInteractionImpl> InteractionImplClass_DEPRECATED = nullptr;

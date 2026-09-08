@@ -61,31 +61,31 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Flag allowing user to define only the Base Class subject to Batch Destroy. Derived Classes with be automatically considered as acceptable for Batch Destroy."))
-	bool bAllowBatchDestroyChildClasses = false;
+	bool bAllowBatchDestroyChildClasses{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Base and Derived Classes subject to BatchDestroy."))
-	TArray<TSoftClassPtr<AActor>> AllowedClasses;
+	TArray<TSoftClassPtr<AActor>> AllowedClasses{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Classes excluded from BatchDestroy."))
-	TArray<TSoftClassPtr<AActor>> IgnoredClasses;
+	TArray<TSoftClassPtr<AActor>> IgnoredClasses{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	int32 MaxSizePerBatchDestroy = INDEX_NONE;
+	int32 MaxSizePerBatchDestroy{INDEX_NONE};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float IntervalBetweenBatchDestroy = 0.f;
+	float IntervalBetweenBatchDestroy{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float MaxLifetimeAllowedToUndersizeBatch = 0.f;
+	float MaxLifetimeAllowedToUndersizeBatch{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldGarbageOnNextTick = true;
+	bool bShouldGarbageOnNextTick{true};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TSubclassOf<AActor>> AllowedActorClasses;
+	TArray<TSubclassOf<AActor>> AllowedActorClasses{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TSubclassOf<AActor>> IgnoredActorClasses;
+	TArray<TSubclassOf<AActor>> IgnoredActorClasses{};
 
 	TSharedPtr<FStreamableHandle> AllowedClasses_StreamableHandle = nullptr;
 	TSharedPtr<FStreamableHandle> IgnoredClasses_StreamableHandle = nullptr;

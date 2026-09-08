@@ -70,11 +70,11 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FIn
 	virtual bool DoesMeetRequirements(const TInstancedStruct<FInteractionExecutionRequirements> Compare) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bRequireInputMashing"))
-	bool bRequireInputHolding = false;
+	bool bRequireInputHolding{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bRequireInputHolding"))
-	bool bRequireInputMashing = false;
+	bool bRequireInputMashing{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float CompletionThreshold = 0.f;
+	float CompletionThreshold{0.f};
 };

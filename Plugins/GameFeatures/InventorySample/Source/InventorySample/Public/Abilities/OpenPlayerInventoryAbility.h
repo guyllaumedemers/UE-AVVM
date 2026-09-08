@@ -66,5 +66,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag ChannelTag{FGameplayTag::EmptyTag};
 };

@@ -52,7 +52,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag CategoryTag = FGameplayTag::EmptyTag;
+	FGameplayTag CategoryTag{FGameplayTag::EmptyTag};
 };
 
 /**
@@ -77,10 +77,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<TSoftClassPtr<UItemRandomizerImpl>> ImplClasses;
+	TArray<TSoftClassPtr<UItemRandomizerImpl>> ImplClasses{};
 
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, TWeakObjectPtr<const UItemRandomizerImpl>/*CDO*/> Impls;
+	TMap<FGameplayTag, TWeakObjectPtr<const UItemRandomizerImpl>/*CDO*/> Impls{};
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

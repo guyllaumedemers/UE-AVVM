@@ -38,9 +38,14 @@ struct INVENTORYSAMPLE_API FInventoryNotificationPayload : public FAVVMNotificat
 	GENERATED_BODY()
 
 	FInventoryNotificationPayload() = default;
-	FInventoryNotificationPayload(const UItemObject* NewSrcItemObject,
-	                              const UItemObject* NewDestItemObject,
-	                              const bool bNewWasSuccess);
+	FInventoryNotificationPayload(const FInventoryNotificationPayload&) = default;
+	FInventoryNotificationPayload(FInventoryNotificationPayload&&) noexcept = default;
+	FInventoryNotificationPayload& operator=(const FInventoryNotificationPayload&) = default;
+	FInventoryNotificationPayload& operator=(FInventoryNotificationPayload&&) noexcept = default;
+
+	explicit FInventoryNotificationPayload(const UItemObject* NewSrcItemObject,
+	                                       const UItemObject* NewDestItemObject,
+	                                       const bool bNewWasSuccess);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const UItemObject> SrcItemObject = nullptr;
@@ -49,5 +54,5 @@ struct INVENTORYSAMPLE_API FInventoryNotificationPayload : public FAVVMNotificat
 	TWeakObjectPtr<const UItemObject> DestItemObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bWasSuccess = false;
+	bool bWasSuccess{false};
 };

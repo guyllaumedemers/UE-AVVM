@@ -38,10 +38,10 @@ struct SKILLSAMPLE_API FGrantContextParams : public FAVVMExecutionContextParams
 	GENERATED_BODY()
 
 	FGrantContextParams() = default;
-	FGrantContextParams(const FSkillTreeNodeObject& NewTreeNodeObject);
+	explicit FGrantContextParams(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
+	FSkillTreeNodeObject TreeNodeObject{};
 };
 
 /**
@@ -56,10 +56,10 @@ struct SKILLSAMPLE_API FRevokeContextParams : public FAVVMExecutionContextParams
 	GENERATED_BODY()
 
 	FRevokeContextParams() = default;
-	FRevokeContextParams(const FSkillTreeNodeObject& NewTreeNodeObject);
+	explicit FRevokeContextParams(const FSkillTreeNodeObject& NewTreeNodeObject);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
+	FSkillTreeNodeObject TreeNodeObject{};
 };
 
 /**
@@ -74,12 +74,12 @@ struct SKILLSAMPLE_API FModifyContextParams : public FAVVMExecutionContextParams
 	GENERATED_BODY()
 
 	FModifyContextParams() = default;
-	FModifyContextParams(const FSkillTreeNodeObject& NewTreeNodeObject,
-	                     const int32 NewModifiedLevel);
+	explicit FModifyContextParams(const FSkillTreeNodeObject& NewTreeNodeObject,
+	                              const int32 NewModifiedLevel);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSkillTreeNodeObject TreeNodeObject = FSkillTreeNodeObject();
+	FSkillTreeNodeObject TreeNodeObject{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ModifiedLevel = INDEX_NONE;
+	int32 ModifiedLevel{INDEX_NONE};
 };

@@ -55,5 +55,5 @@ protected:
 	void OnItemChanged(const UItemObjectViewModel* NewModifiedItem);
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<TObjectPtr<UItemObjectViewModel>> ItemViewModels;
+	TArray<TObjectPtr<UItemObjectViewModel>> ItemViewModels{};
 };

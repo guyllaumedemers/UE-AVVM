@@ -50,18 +50,15 @@ class BATCHSAMPLE_API UBatchingSubsystem : public UTickableWorldSubsystem
 
 	struct FBatchContext
 	{
+		FBatchContext() = default;
+		FBatchContext(const FBatchContext&) = default;
+		FBatchContext(FBatchContext&&) noexcept = default;
+		FBatchContext& operator=(const FBatchContext&) = default;
+		FBatchContext& operator=(FBatchContext&&) noexcept = default;
+		~FBatchContext();
 		// @gdemers default ctor called first, then we reserve size. imply double initialization
 		// of properties, but allow for preallocation of collection type to avoid resizing.
-		FBatchContext(AActor* Actors, const int32 MaxSize)
-		{
-			Candidates.Reserve(MaxSize);
-			Candidates.Add(Actors);
-		}
-
-		~FBatchContext()
-		{
-			Candidates.Reset();
-		}
+		FBatchContext(AActor* Actors, const int32 MaxSize);
 
 		bool DoesQualifyForBatchDestroy(const float MaxSize) const;
 		void Obliterate();
@@ -70,7 +67,7 @@ class BATCHSAMPLE_API UBatchingSubsystem : public UTickableWorldSubsystem
 		void Invalidate() const;
 
 	private:
-		TArray<TWeakObjectPtr<AActor>> Candidates;
+		TArray<TWeakObjectPtr<AActor>> Candidates{};
 	};
 
 public:
@@ -109,25 +106,25 @@ protected:
 	TWeakObjectPtr<const UBatchingRule> BatchingRule = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float Interval = 0.f;
+	float Interval{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float MaxLifetimeAllowedToUndersizeBatch = 0.f;
+	float MaxLifetimeAllowedToUndersizeBatch{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 MaxSizePerBatchDestroy = INDEX_NONE;
+	int32 MaxSizePerBatchDestroy{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float Timestamp = 0.f;
+	float Timestamp{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bShouldGarbageOnNextTick = false;
+	bool bShouldGarbageOnNextTick{false};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FTimerHandle NextTickHandle = FTimerHandle();
+	FTimerHandle NextTickHandle{};
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
-	TArray<FBatchContext> PendingDestroy;
+	TArray<FBatchContext> PendingDestroy{};
 	
 #if WITH_AUTOMATION_TESTS
 	friend class ABatchSampleTest;

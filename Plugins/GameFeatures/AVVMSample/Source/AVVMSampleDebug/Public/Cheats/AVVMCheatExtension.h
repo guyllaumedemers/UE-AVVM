@@ -89,8 +89,8 @@ protected:
 	void OnDataRegistrySubsystemChanged();
 	void OnGameplayTagTreeChanged();
 
-	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles;
-	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests;
-	bool bHasRegistriesChanged = false;
-	bool bHasTagChanged = false;
+	TMap<FDataRegistryId, TSharedPtr<FStreamableHandle>> StreamableHandles{};
+	TArray<TPair<FDataRegistryId, FGameplayTag>> NotificationRequests{};
+	bool bHasRegistriesChanged{false};
+	bool bHasTagChanged{false};
 };

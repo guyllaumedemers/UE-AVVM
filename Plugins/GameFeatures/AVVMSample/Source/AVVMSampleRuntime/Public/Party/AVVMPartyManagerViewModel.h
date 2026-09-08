@@ -52,8 +52,8 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMPartyProxy> Parties;
+	TArray<FAVVMPartyProxy> Parties{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMPartyProxy LocalParty;
+	FAVVMPartyProxy LocalParty{};
 };

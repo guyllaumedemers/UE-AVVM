@@ -39,7 +39,7 @@ struct INVENTORYSAMPLE_API FDropContextParams : public FAVVMExecutionContextPara
 	GENERATED_BODY()
 
 	FDropContextParams() = default;
-	FDropContextParams(UItemObject* NewItemObject);
+	explicit FDropContextParams(UItemObject* NewItemObject);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
@@ -57,7 +57,7 @@ struct INVENTORYSAMPLE_API FPickupContextParams : public FAVVMExecutionContextPa
 	GENERATED_BODY()
 
 	FPickupContextParams() = default;
-	FPickupContextParams(UItemObject* NewItemObject);
+	explicit FPickupContextParams(UItemObject* NewItemObject);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
@@ -75,7 +75,7 @@ struct INVENTORYSAMPLE_API FSwapContextParams : public FAVVMExecutionContextPara
 	GENERATED_BODY()
 
 	FSwapContextParams() = default;
-	FSwapContextParams(UItemObject* NewSrcItemObject, UItemObject* NewDestItemObject);
+	explicit FSwapContextParams(UItemObject* NewSrcItemObject, UItemObject* NewDestItemObject);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> SrcItemObject = nullptr;

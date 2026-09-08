@@ -71,17 +71,17 @@ protected:
 
 	// @gdemers reference the ui definition of the referenced Effect this USkillTreeNodeObject owns.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorUIDefinitionDataTableRow"))
-	FDataRegistryId SkillTreeEffectUIId = FDataRegistryId();
+	FDataRegistryId SkillTreeEffectUIId{};
 
 	// @gdemers tags that define if this entity can be accessed by the actor type.
 	// Example : PlayerClass.Warrior -> Cannot use non-warrior abilities.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RequiredTagsForAccess = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTagsForAccess{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers tags that define if this entity should not be accessed.
 	// Example : Tag.InTutorial
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer BlockingTagsForAccess = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsForAccess{FGameplayTagContainer::EmptyContainer};
 };
 
 /**
@@ -123,7 +123,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
-	TArray<FDataRegistryId> SkillTreeNodeIds;
+	TArray<FDataRegistryId> SkillTreeNodeIds{};
 };
 
 /**

@@ -39,5 +39,5 @@ struct SKILLSAMPLE_API FSkillTreeNotificationPayload : public FAVVMNotificationP
 	FSkillTreeNotificationPayload(const bool bNewWasSuccess);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bWasSuccess = false;
+	bool bWasSuccess{false};
 };

@@ -100,13 +100,13 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType ItemGroupRegistryType = NAME_None;
+	FDataRegistryType ItemGroupRegistryType{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType ItemRegistryType = NAME_None;
+	FDataRegistryType ItemRegistryType{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType InventoryProviderRegistryType = NAME_None;
+	FDataRegistryType InventoryProviderRegistryType{NAME_None};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;
@@ -115,41 +115,41 @@ protected:
 	TSoftObjectPtr<UDataTable> ItemMaxStackCountDataTable = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(ForceInlineRow))
-	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts;
+	TMap<FGameplayTag/*Item Category*/, FName/*RowName*/> ItemMaxStackCounts{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|StackDefinition", meta=(ForceInlineRow))
-	TMap<int32/*StorageId*/, FGameplayTag/*Item Category*/> StorageCapacityTags;
+	TMap<int32/*StorageId*/, FGameplayTag/*Item Category*/> StorageCapacityTags{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer StorageRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer StorageRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer HoldingRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer HoldingRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer EquippedRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer EquippedRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer PassiveRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer PassiveRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer OffensiveRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer OffensiveRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer DefensiveRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer DefensiveRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Ruleset")
-	FGameplayTagContainer ConsumableRuleset = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ConsumableRuleset{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
-	FGameplayTagContainer BlockingTagsWhenEmpty = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsWhenEmpty{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
-	FGameplayTagContainer BlockingTagsWhenFull = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsWhenFull{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryId StubDataProviderInventoryId = FDataRegistryId();
+	FDataRegistryId StubDataProviderInventoryId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryId StubDataProviderComplexLookupId = FDataRegistryId();
+	FDataRegistryId StubDataProviderComplexLookupId{};
 };

@@ -59,5 +59,5 @@ protected:
 	// @gdemers handle data registry/gameplay tag changes at runtime. (most-likely triggered from GFP)
 	void OnDataRegistrySubsystemChanged();
 
-	bool bHasRegistriesChanged = false;
+	bool bHasRegistriesChanged{false};
 };

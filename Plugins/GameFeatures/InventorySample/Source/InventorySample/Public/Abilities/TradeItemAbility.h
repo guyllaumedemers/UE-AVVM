@@ -68,5 +68,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer GEQueryTags{FGameplayTagContainer::EmptyContainer};
 };

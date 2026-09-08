@@ -55,8 +55,8 @@ protected:
 	 */
 	struct FAVVMVoxelCell
 	{
-		FHitResult Result = FHitResult();
-		bool bIsEnabled = false;
+		FHitResult Result{};
+		bool bIsEnabled{false};
 	};
 
 	/**
@@ -73,26 +73,26 @@ protected:
 			Cells.Reserve(NumCells);
 		}
 
-		TArray<FAVVMVoxelCell> Cells;
+		TArray<FAVVMVoxelCell> Cells{};
 	};
 
 	UFUNCTION()
 	void OnOuterCapsuleResized(const UCapsuleComponent* ModifiedCapsule);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers")
-	TEnumAsByte<ECollisionChannel> CollisionChannel = ECollisionChannel::ECC_MAX;
+	TEnumAsByte<ECollisionChannel> CollisionChannel{ECollisionChannel::ECC_MAX};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers", meta=(ClampMin="0", ClampMax="999"))
-	float VoxelCellPadding = 0.f;
+	float VoxelCellPadding{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Designers", meta=(ClampMin="0", ClampMax="999"))
-	float SphereRadius = 0.f;
+	float SphereRadius{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float OuterCapsuleHalfHeight = 0.f;
+	float OuterCapsuleHalfHeight{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
-	FAVVMVoxelGrid VoxelGrid = FAVVMVoxelGrid();
+	FAVVMVoxelGrid VoxelGrid{};
 };

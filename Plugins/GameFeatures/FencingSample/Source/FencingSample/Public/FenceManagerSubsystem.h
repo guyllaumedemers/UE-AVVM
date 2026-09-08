@@ -64,7 +64,7 @@ protected:
 	void Lower(const UActorFenceComponent* NewActorFenceComponent);
 
 	UPROPERTY(Transient)
-	TArray<TWeakObjectPtr<const UActorFenceComponent>> Fences;
+	TArray<TWeakObjectPtr<const UActorFenceComponent>> Fences{};
 
 	friend class UFenceCheatExtension;
 };

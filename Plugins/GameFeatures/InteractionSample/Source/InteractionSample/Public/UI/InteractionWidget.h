@@ -63,23 +63,23 @@ protected:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FSlateBrush PreviewSlateBrush = FSlateBrush();
+	FSlateBrush PreviewSlateBrush{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	bool bDoesPreviewComplexInteraction = false;
+	bool bDoesPreviewComplexInteraction{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesPreviewComplexInteraction"))
-	bool bToggleTextPreview = false;
+	bool bToggleTextPreview{false};
 #endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FText InputPressText = FText();
+	FText InputPressText{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FText InputHoldingText = FText();
+	FText InputHoldingText{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FText InputMashingText = FText();
+	FText InputMashingText{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidgetOptional))
 	TObjectPtr<UAVVMProgressBarWidget> ProgressBar = nullptr;

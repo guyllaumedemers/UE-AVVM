@@ -85,7 +85,7 @@ protected:
 	                             const FGameplayEventData* TriggerEventData);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer GEQueryTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer GEQueryTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UActorInteractionComponent> TargetComponent = nullptr;

@@ -50,16 +50,16 @@ struct INTERACTIONSAMPLE_API FInputProgress
 	TWeakObjectPtr<UInputAction> InputAction = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FSlateBrush SlateBrush = FSlateBrush();
+	FSlateBrush SlateBrush{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bRequireInputHolding = false;
+	bool bRequireInputHolding{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bRequireInputMashing = false;
+	bool bRequireInputMashing{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float CompletionThreshold = 0.f;
+	float CompletionThreshold{0.f};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> Instigator = nullptr;
@@ -87,8 +87,8 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FInputProgress InputContext = FInputProgress();
+	FInputProgress InputContext{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	float InputProgress = 0.f;
+	float InputProgress{0.f};
 };

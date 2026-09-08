@@ -60,20 +60,20 @@ struct INVENTORYSAMPLE_API FItemState
 
 	// @gdemers Complex state. Example : CanBeConsumed & IsAccessible & PendingForTrade
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTagContainer StateTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer StateTags{FGameplayTagContainer::EmptyContainer};
 	
 	// @gdemers the slot tag that reference us NOW.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTag ActiveSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag ActiveSlotTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 StackCount = 1;
+	int32 StackCount{1};
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 StorageId = INDEX_NONE;
+	int32 StorageId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=999))
-	int32 StoragePosition = INDEX_NONE;
+	int32 StoragePosition{INDEX_NONE};
 };
 
 /**
@@ -88,34 +88,34 @@ struct INVENTORYSAMPLE_API FItemSparseData
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Item behaviour. Example : Destroy on Drop, Cannot be trade, NPC owned, etc..."))
-	FGameplayTagContainer ItemBehaviourTypeTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemBehaviourTypeTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Item Category. Example : Passive, Offensive, Defensive, Consumable, etc... Allow building complex types."))
-	FGameplayTagContainer ItemTypeTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemTypeTags{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers its important to enforce that the tag order be from highest priority to lowest. Example : PrimarySlot, SecondarySlot, etc...
 	// an Item can be placed interchangeably in Primary or secondary, and allow context switching between both entries
 	// (but! that's only relevant for the UI, not for gameplay)(Gameplay only care about setting the active slot).
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Slot Tags in which the item can be slotted in the loadout system."))
-	FGameplayTagContainer ItemSlotTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemSlotTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Define the Slot Tags that compose this item. Usefull when attaching Modifiers at Runtime."))
-	FGameplayTagContainer ItemAttachmentSlotTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemAttachmentSlotTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ToolTip="Points to a global mapping of tag to int32."))
-	FGameplayTag MaxStackCount_CategoryTag = FGameplayTag::EmptyTag;
+	FGameplayTag MaxStackCount_CategoryTag{FGameplayTag::EmptyTag};
 
 	// @gdemers UItemObject is not an Actor type as we wouldn't be able to derive from it in other GFP.
 	// Using RegistryId, we are working around boundaries constraint created by GFP dlls.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorDefinitionDataTableRow"))
-	FDataRegistryId ItemActorId = FDataRegistryId();
+	FDataRegistryId ItemActorId{};
 
 	// @gdemers reference the ui definition of the referenced actor this UItemObject owns.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, ItemStruct="AVVMActorUIDefinitionDataTableRow"))
-	FDataRegistryId ItemActorUIId = FDataRegistryId();
+	FDataRegistryId ItemActorUIId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	FName SocketName = NAME_None;
+	FName SocketName{NAME_None};
 };
 
 /**
@@ -133,7 +133,7 @@ struct INVENTORYSAMPLE_API FItemActorSpawnContextArgs
 	const UClass* ActorClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSoftObjectPath AttributeSetSoftObjectPath = FSoftObjectPath();
+	FSoftObjectPath AttributeSetSoftObjectPath{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<AActor> Outer = nullptr;
@@ -316,28 +316,28 @@ private:
 #if WITH_EDITORONLY_DATA
 	//~ These properties are moving out to the FMySparseClassData struct:
 	UPROPERTY()
-	FGameplayTagContainer ItemBehaviourTypeTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemBehaviourTypeTags_DEPRECATED{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY()
-	FGameplayTagContainer ItemTypeTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemTypeTags_DEPRECATED{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY()
-	FGameplayTagContainer ItemSlotTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemSlotTags_DEPRECATED{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY()
-	FGameplayTagContainer ItemAttachmentSlotTags_DEPRECATED = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer ItemAttachmentSlotTags_DEPRECATED{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY()
-	FGameplayTag MaxStackCount_CategoryTag_DEPRECATED = FGameplayTag::EmptyTag;
+	FGameplayTag MaxStackCount_CategoryTag_DEPRECATED{FGameplayTag::EmptyTag};
 
 	UPROPERTY()
-	FDataRegistryId ItemActorId_DEPRECATED = FDataRegistryId();
+	FDataRegistryId ItemActorId_DEPRECATED{};
 
 	UPROPERTY()
-	FDataRegistryId ItemActorUIId_DEPRECATED = FDataRegistryId();
+	FDataRegistryId ItemActorUIId_DEPRECATED{};
 
 	UPROPERTY()
-	FName SocketName_DEPRECATED = NAME_None;
+	FName SocketName_DEPRECATED{NAME_None};
 #endif
 };
 
@@ -353,19 +353,19 @@ struct INVENTORYSAMPLE_API FInsertionContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> OccupiedEntries;
+	TArray<int32> OccupiedEntries{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 StoragePositionBounds = INDEX_NONE;
+	int32 StoragePositionBounds{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 StorageIdBounds = INDEX_NONE;
+	int32 StorageIdBounds{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 TargetStorageId = INDEX_NONE;
+	int32 TargetStorageId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 TargetStoragePosition = INDEX_NONE;
+	int32 TargetStoragePosition{INDEX_NONE};
 };
 
 /**
@@ -380,19 +380,19 @@ struct INVENTORYSAMPLE_API FStorageQualifierContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> PrivateItemIds;
+	TArray<int32> PrivateItemIds{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 StoragePositionBounds = INDEX_NONE;
+	int32 StoragePositionBounds{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 StorageIdBounds = INDEX_NONE;
+	int32 StorageIdBounds{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 CurrentStoragePosition = INDEX_NONE;
+	int32 CurrentStoragePosition{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 CurrentStorageId = INDEX_NONE;
+	int32 CurrentStorageId{INDEX_NONE};
 };
 
 /**
@@ -410,13 +410,13 @@ struct INVENTORYSAMPLE_API FStorageContextArgs
 	TWeakObjectPtr<const UActorInventoryComponent> InventoryComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 StorageId = INDEX_NONE;
+	int32 StorageId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 StartPosition = INDEX_NONE;
+	int32 StartPosition{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> StoragePositions;
+	TArray<int32> StoragePositions{};
 };
 
 /**

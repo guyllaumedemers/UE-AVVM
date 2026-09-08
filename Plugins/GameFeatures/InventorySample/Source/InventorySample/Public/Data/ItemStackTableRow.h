@@ -45,8 +45,8 @@ struct INVENTORYSAMPLE_API FItemStackTableRow : public FAVVMDataTableRow
 #endif
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldRepresentStorageCapacity = false;
+	bool bShouldRepresentStorageCapacity{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	int32 MaxStackCount = INDEX_NONE;
+	int32 MaxStackCount{INDEX_NONE};
 };

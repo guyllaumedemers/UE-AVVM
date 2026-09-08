@@ -59,7 +59,7 @@ protected:
 	virtual void BindViewModel() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer GrantAbilityTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer GrantAbilityTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMAbilitySystemComponent> OwnerASC = nullptr;

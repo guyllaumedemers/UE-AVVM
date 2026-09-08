@@ -46,5 +46,5 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FAVVMHostConfigurationProxy HostConfiguration;
+	FAVVMHostConfigurationProxy HostConfiguration{};
 };

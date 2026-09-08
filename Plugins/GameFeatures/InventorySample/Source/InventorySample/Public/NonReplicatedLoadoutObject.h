@@ -86,7 +86,7 @@ protected:
 	void Server_Cycle(const FGameplayTag& TargetTag);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bDoesSupportItemCycling = false;
+	bool bDoesSupportItemCycling{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bDoesSupportItemCycling", ToolTip="Define the order in which mouse wheel scolling cycles through items."))
 	TArray<FGameplayTag> CyclingSlots{};
@@ -95,7 +95,7 @@ protected:
 	TMap<FGameplayTag, TWeakObjectPtr<UItemObject>> Loadout{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, meta=(ToolTip="Define the slot tag of the item in hand."))
-	FGameplayTag ActiveItemSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag ActiveItemSlotTag{FGameplayTag::EmptyTag};
 
 private:
 	// @gdemers ai version of this object may require different rules.

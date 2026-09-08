@@ -49,5 +49,5 @@ public:
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	TArray<FAVVMPlayerResource> StoreItems;
+	TArray<FAVVMPlayerResource> StoreItems{};
 };

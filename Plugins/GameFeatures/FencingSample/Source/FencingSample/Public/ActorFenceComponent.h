@@ -62,10 +62,10 @@ protected:
 	void BP_Execute() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer FenceRequirements = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer FenceRequirements{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldKeepLoadingScreenUpUntilFenceIsLowered = false;
+	bool bShouldKeepLoadingScreenUpUntilFenceIsLowered{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
