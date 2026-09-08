@@ -85,10 +85,10 @@ struct AVVMGAMEPLAY_API FAVVMSocketTargetingDeferralContextArgs
 	FSoftObjectPath SrcAttributeSetSoftObjectPath{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag AttachmentSlotTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FName SocketName = NAME_None;
+	FName SocketName{NAME_None};
 };
 
 /**

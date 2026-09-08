@@ -43,10 +43,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag AbilityTriggerTag = FGameplayTag::EmptyTag;
+	FGameplayTag AbilityTriggerTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	int32 InputId = INDEX_NONE;
+	int32 InputId{INDEX_NONE};
 
 	friend class UAVVMAbilityInputComponent;
 };

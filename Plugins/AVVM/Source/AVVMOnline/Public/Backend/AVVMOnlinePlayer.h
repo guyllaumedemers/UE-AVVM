@@ -57,7 +57,7 @@ struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 	bool operator!=(const FAVVMPlayerLoginContext& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Username{};
@@ -86,18 +86,18 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 	bool operator!=(const FAVVMPlayerAccount& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers {FAVVMPlayerLoginContext.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 LoginId = INDEX_NONE;
+	int32 LoginId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Gamertag{};
 
 	// @gdemers {FAVVMPlayerWallet.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 WalletId = INDEX_NONE;
+	int32 WalletId{INDEX_NONE};
 
 	// @gdemers {FAVVMPlayerProfile.UniqueId} keep id reference for all owned profiles.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -129,7 +129,7 @@ struct AVVMONLINE_API FAVVMPlayerWallet
 	bool operator!=(const FAVVMPlayerWallet& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -159,7 +159,7 @@ struct AVVMONLINE_API FAVVMCurrency
 	FString CurrencyId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 TotalAmount = INDEX_NONE;
+	int32 TotalAmount{INDEX_NONE};
 };
 
 /**
@@ -196,7 +196,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	bool operator!=(const FAVVMPlayerProfile& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers may refer to a unique name tied to your playable character.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -224,7 +224,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 
 	// @gdemers currently equipped Loadout {FAVVMPlayerPreset.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 EquippedPresetId = INDEX_NONE;
+	int32 EquippedPresetId{INDEX_NONE};
 
 	// @gdemers Define the association between an items referenced in {InventoryIds}, and possible attachments it may hold. {FAVVMPlayerPreset::EquippedItems} will require referencing
 	// of this property during initialization to resolve all attachments that are dependent on the equipped item. See AVVMOnlineInventory.h
@@ -261,7 +261,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 
 	// @gdemers uniquely identified to allow access between profiles owned by player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers may refer to a unique name tied to your profile preset.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -295,7 +295,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers {FDataRegistryId}, {Any information about a Resource}, i.e {Price}, {ResellPrice}, {Stats}, {MaxCapacity}, {CanStack}, etc...
 	// Note : Live Services may have an actual POD that defines the properties from an excel sheet or something instead
@@ -325,7 +325,7 @@ struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers {FDataRegistryId}. {Goal}, TArray{Rewards}
 	// Note : Live Services may have an actual POD that defines the properties from an excel sheet or something instead
@@ -384,7 +384,7 @@ struct AVVMONLINE_API FAVVMParty
 
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers may represent a party name.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -392,15 +392,15 @@ struct AVVMONLINE_API FAVVMParty
 
 	// @gdemers NA, China, Russia, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 RegionId = INDEX_NONE;
+	int32 RegionId{INDEX_NONE};
 
 	// @gdemers sub-identifier to the region.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 DistrictId = INDEX_NONE;
+	int32 DistrictId{INDEX_NONE};
 
 	// @gdemers {FAVVMHostConfiguration.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 HostConfigurationId = INDEX_NONE;
+	int32 HostConfigurationId{INDEX_NONE};
 
 	// @gdemers {FAVVMPlayerConnection.UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -429,18 +429,18 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 	// @gdemers unique id to identify shared POD type. prevent entry duplication on backend.
 	// Could be GetTypeHash(UniqueNetId)
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString UniqueNetId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
+	EAVVMPlayerStatus PlayerStatus{EAVVMPlayerStatus::Default};
 
 	// @gdemers {FAVVMPlayerProfile.UniqueId} keep id reference for selected profile.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 ProfileId = INDEX_NONE;
+	int32 ProfileId{INDEX_NONE};
 };
 
 /**
@@ -462,7 +462,7 @@ struct AVVMONLINE_API FAVVMHostConfiguration
 	bool operator==(const FAVVMHostConfiguration& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers define the experience the players of a party will go through.
 	UPROPERTY(Transient, BlueprintReadWrite)

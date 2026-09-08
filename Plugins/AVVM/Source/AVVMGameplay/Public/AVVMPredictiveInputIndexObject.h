@@ -69,7 +69,7 @@ protected:
 	TArray<EPredictiveState> PredictiveInputIndexes{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 PrevInputIndex = INDEX_NONE;
+	int32 PrevInputIndex{INDEX_NONE};
 
 	TFunction<bool(const int32)> OnPause{};
 	TFunction<bool(const int32)> OnRestore{};

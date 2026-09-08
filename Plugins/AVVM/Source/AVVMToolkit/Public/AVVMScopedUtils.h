@@ -70,8 +70,6 @@ struct AVVMTOOLKIT_API FAVVMGameThreadLock : public FNoncopyable
 	FAVVMGameThreadLock() = default;
 	FAVVMGameThreadLock(FAVVMGameThreadLock&&) noexcept = default;
 	FAVVMGameThreadLock& operator=(FAVVMGameThreadLock&&) noexcept = default;
-	
-	FAVVMScopedLock Make();
 	FAVVMScopedLock Make(FSimpleDelegate&& NewCallback);
 
 	void Lock();
@@ -79,5 +77,5 @@ struct AVVMTOOLKIT_API FAVVMGameThreadLock : public FNoncopyable
 	bool IsLocked() const;
 
 private:
-	bool bIsRunning = false;
+	bool bIsRunning{false};
 };

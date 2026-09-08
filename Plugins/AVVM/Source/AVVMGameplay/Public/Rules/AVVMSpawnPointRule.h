@@ -64,14 +64,14 @@ public:
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanUsePreviousStartPositionOnFailure = false;
+	bool bCanUsePreviousStartPositionOnFailure{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanRetrySearch = false;
+	bool bCanRetrySearch{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanRetrySearch", ClampMin="0", ClampMax="4"))
-	float RetryRate = 0.f;
+	float RetryRate{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanRetrySearch", ClampMin="0", ClampMax="25"))
-	int32 MaxNumRetry = INDEX_NONE;
+	int32 MaxNumRetry{INDEX_NONE};
 };

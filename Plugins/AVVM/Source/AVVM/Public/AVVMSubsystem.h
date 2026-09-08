@@ -103,7 +103,7 @@ protected:
 		TMap<const TSubclassOf<UMVVMViewModelBase>, TStrongObjectPtr<UMVVMViewModelBase>> ViewModelClassToViewModelInstance{};
 
 		// @gdemers RefCount target the number of user of the Actor.
-		uint32 RefCounter = 0;
+		uint32 RefCounter{0};
 	};
 
 	UMVVMViewModelBase* GetOrCreate(const TSubclassOf<UMVVMViewModelBase>& ViewModelClass,

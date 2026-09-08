@@ -66,7 +66,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	bool bDoesCharacterResourceProviderUseStaticData = false;
+	bool bDoesCharacterResourceProviderUseStaticData{false};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryId StubDataProviderActorIdentifierId{};
@@ -82,11 +82,11 @@ protected:
 
 	// @gdemers defined tags that are able to prevent user from executing actions based on conditions. (i.e Stasis, Down, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTagContainer PlayerActionBlockingTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer PlayerActionBlockingTags{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers defined tags that are able to prevent user from modifying a player ability selection based on conditions. (i.e Tutorial, Departing, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FGameplayTagContainer PlayerAbilityBlockingTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer PlayerAbilityBlockingTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType GameModeAdditiveRegistryType{};

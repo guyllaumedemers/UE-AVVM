@@ -43,7 +43,7 @@ struct AVVM_API FAVVMPrimaryGameLayoutContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag LayerTag = FGameplayTag::EmptyTag;
+	FGameplayTag LayerTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TSubclassOf<UCommonActivatableWidget> WidgetClass = nullptr;

@@ -21,6 +21,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlineInterface.h"
+#include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/AVVMPlayerConfigurationViewModel.h"
 
@@ -96,7 +97,7 @@ void UAVVMPlayerConfigurationPresenter::StartPresenting()
 	ContextArgs.ExtensionPointTag = TargetTag;
 	ContextArgs.World = GetWorld();
 	ContextArgs.ContextObject = this;
-	ContextArgs.ViewModel = ViewModel.Get();
+	ContextArgs.ViewModel = ViewModel;
 	ExtensionRequestHandle = PushContentToExtensionPoint(ContextArgs);
 }
 

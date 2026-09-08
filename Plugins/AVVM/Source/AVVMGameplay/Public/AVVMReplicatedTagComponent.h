@@ -68,11 +68,11 @@ protected:
 	void OnRep_FlagsModified(const FGameplayTagContainer OldFlags);
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_FlagsModified")
-	FGameplayTagContainer Flags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer Flags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTagContainer PendingFlags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer PendingFlags{FGameplayTagContainer::EmptyContainer};
 };

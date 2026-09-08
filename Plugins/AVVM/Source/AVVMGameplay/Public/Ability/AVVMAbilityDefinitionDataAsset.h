@@ -63,10 +63,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldInitializeViaExternalPlugin = false;
+	bool bShouldInitializeViaExternalPlugin{false};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldGrantGameplayEffect = false;
+	bool bShouldGrantGameplayEffect{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bShouldGrantGameplayEffect"))
 	TSoftClassPtr<UGameplayAbility> GameplayAbilityClass = nullptr;
@@ -80,12 +80,12 @@ protected:
 	// @gdemers tags that define if this entity can be granted to the actor type.
 	// Example : Tag.IsPlayer, Tag.IsFlyingType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RequiredTagsForGranting = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTagsForGranting{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers tags that define if this entity should not be granted.
 	// Example : Tag.IsWorldWaterLevel -> Blocks Tag.IsFlyingType
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer BlockingTagsForGranting = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsForGranting{FGameplayTagContainer::EmptyContainer};
 };
 
 /**

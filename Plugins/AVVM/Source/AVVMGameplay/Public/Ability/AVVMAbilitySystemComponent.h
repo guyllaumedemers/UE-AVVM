@@ -50,7 +50,7 @@ struct AVVMGAMEPLAY_API FAbilityToken
 	}
 
 	UPROPERTY()
-	uint32 UniqueId = INDEX_NONE;
+	uint32 UniqueId{0};
 };
 
 /**

@@ -43,11 +43,11 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float GlobalResetTimeJobQueuePriority = 0.f;
+	float GlobalResetTimeJobQueuePriority{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float GlobalJobAllotment = 0.f;
+	float GlobalJobAllotment{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float TickRate = 0.f;
+	float TickRate{0.f};
 };

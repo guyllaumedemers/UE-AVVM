@@ -58,8 +58,8 @@ protected:
 
 	struct FAVVMPositionSample
 	{
-		FBoxCenterAndExtent TransformExtent = FBoxCenterAndExtent();
-		double SampleTimestamp = 0;
+		FBoxCenterAndExtent TransformExtent{};
+		double SampleTimestamp{0.f};
 	};
 
 	struct FAVVMPositionSampler
@@ -70,7 +70,7 @@ protected:
 
 	private:
 		TArray<FAVVMPositionSample> Samples{};
-		int32 CurrSampleIndex = 0;
+		int32 CurrSampleIndex{0};
 	};
 
 	TMap<TWeakObjectPtr<const AActor>, FAVVMPositionSampler> AuthoritativePositionSamplers{};
@@ -90,16 +90,16 @@ struct AVVMGAMEPLAY_API FAVVMTraceContextArgs
 	const AActor* HitActor = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	double HitTime = 0.f;
+	double HitTime{0.f};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	double Tolerance = 0.f;
+	double Tolerance{0.f};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FVector TraceStart = FVector::ZeroVector;
+	FVector TraceStart{FVector::ZeroVector};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FVector TraceEnd = FVector::ZeroVector;
+	FVector TraceEnd{FVector::ZeroVector};
 };
 
 /**

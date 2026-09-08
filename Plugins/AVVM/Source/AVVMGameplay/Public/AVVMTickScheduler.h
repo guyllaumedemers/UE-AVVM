@@ -122,14 +122,14 @@ protected:
 	FAVVMMLFQ MultiLevelFeedbackQueue{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float GlobalResetTimeJobQueuePriority = 0.f;
+	float GlobalResetTimeJobQueuePriority{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float GlobalJobAllotment = 0.f;
+	float GlobalJobAllotment{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float TickRate = 0.f;
+	float TickRate{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	float ResetJobQueuePriorityDeltaTime = 0.f;
+	float ResetJobQueuePriorityDeltaTime{0.f};
 };

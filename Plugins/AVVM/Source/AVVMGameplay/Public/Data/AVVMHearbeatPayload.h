@@ -44,5 +44,5 @@ struct AVVMGAMEPLAY_API FAVVMHearbeatPayload : public FAVVMNotificationPayload
 	explicit FAVVMHearbeatPayload(const float NewValue);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	float Value = 0.f;
+	float Value{0.f};
 };

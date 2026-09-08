@@ -52,7 +52,7 @@ struct AVVMTOOLKIT_API FFrameZOrder
 	TWeakObjectPtr<UCommonUserWidget> Frame = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 ZOrder = INDEX_NONE;
+	int32 ZOrder{INDEX_NONE};
 };
 
 /**
@@ -155,60 +155,60 @@ protected:
 	TSoftObjectPtr<UAVVMWidgetPickerDataAsset> WidgetPickerDataAsset = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	bool bOverrideWidgetPicker = false;
+	bool bOverrideWidgetPicker{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bOverrideWidgetPicker"))
 	TSoftClassPtr<UCommonUserWidget> WidgetClass = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	bool bSupportBorderClass = false;
+	bool bSupportBorderClass{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bSupportBorderClass"))
 	TSoftClassPtr<UAVVMFrameBorder> BorderWidgetClass = nullptr;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Designers", meta=(Bitmask, BitmaskEnum="/Script/AVVMToolkit.EFrameBitmask"))
-	int32 PreviewFrameFlags = 0;
+	int32 PreviewFrameFlags{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=1, UIMax=20))
-	int32 NumPreviewEntries = 5;
+	int32 NumPreviewEntries{5};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UObject>> EditorPreviewObjects;
+	TArray<TObjectPtr<UObject>> EditorPreviewObjects{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TSubclassOf<UCommonUserWidget> PreviousWidgetClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bPreviousBorderFlagStatus = false;
+	bool bPreviousBorderFlagStatus{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TSubclassOf<UAVVMFrameBorder> PreviousBorderClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 PreviousNumPreviewEntries = 0;
+	int32 PreviousNumPreviewEntries{0};
 #endif
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FGameplayTag FrameIdTag = FGameplayTag::EmptyTag;
+	FGameplayTag FrameIdTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TArray<TSubclassOf<UAVVMFrameDecorator>> WindowDecoratorClasses;
+	TArray<TSubclassOf<UAVVMFrameDecorator>> WindowDecoratorClasses{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<const UAVVMFrameDecorator>> WindowDecorators;
+	TArray<TObjectPtr<const UAVVMFrameDecorator>> WindowDecorators{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMFrameWidget> Parent = nullptr;
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<UObject>, FFrameZOrder> ViewModelToWindowContext;
+	TMap<TWeakObjectPtr<UObject>, FFrameZOrder> ViewModelToWindowContext{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	EFrameBitmask FrameFlags = EFrameBitmask::None;
+	EFrameBitmask FrameFlags{EFrameBitmask::None};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 ZOrder = INDEX_NONE;
+	int32 ZOrder{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMFrameBorder> OwningBorder = nullptr;

@@ -47,7 +47,7 @@ struct AVVM_API FAVVMObserverContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag ChannelTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FAVVMOnChannelNotifiedSingleCastDelegate Callback{};
@@ -64,7 +64,7 @@ struct AVVM_API FAVVMNotificationContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag ChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag ChannelTag{FGameplayTag::EmptyTag};
 
 	// @gdemers if no target is provided, we broadcast to all observers of the channel tag.
 	UPROPERTY(Transient, BlueprintReadWrite)

@@ -23,13 +23,13 @@
 
 FUIExtensionHandle IAVVMUIExtensionInterface::PushContentToExtensionPoint(const FAVVMUIExtensionContextArgs& ContextArgs)
 {
-	auto* ExtensionSubsystem = UWorld::GetSubsystem<UUIExtensionSubsystem>(ContextArgs.World);
+	auto* ExtensionSubsystem = UWorld::GetSubsystem<UUIExtensionSubsystem>(ContextArgs.World.Get());
 	if (IsValid(ExtensionSubsystem))
 	{
 		return ExtensionSubsystem->RegisterExtensionAsData(
 				ContextArgs.ExtensionPointTag,
-				ContextArgs.ContextObject,
-				ContextArgs.ViewModel,
+				ContextArgs.ContextObject.Get(),
+				ContextArgs.ViewModel.Get(),
 				NULL);
 	}
 	else

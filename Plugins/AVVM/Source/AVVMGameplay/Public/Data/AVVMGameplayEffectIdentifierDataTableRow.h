@@ -52,5 +52,5 @@ struct AVVMGAMEPLAY_API FAVVMGameplayEffectIdentifierDataTableRow : public FAVVM
 
 	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can filter by user class type. (example : warrior, mage, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0"))
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 };

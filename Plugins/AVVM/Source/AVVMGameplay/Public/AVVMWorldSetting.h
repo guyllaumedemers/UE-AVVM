@@ -56,7 +56,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag RuleTag = FGameplayTag::EmptyTag;
+	FGameplayTag RuleTag{FGameplayTag::EmptyTag};
 };
 
 /**

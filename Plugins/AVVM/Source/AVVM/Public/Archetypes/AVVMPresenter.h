@@ -63,7 +63,7 @@ protected:
 	virtual void StopPresenting() PURE_VIRTUAL(StartPresenting, return;);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="GFP may broadcast before the presenter channel is registered. This flag allow OnBeginPlay broadcast for deferred calls."))
-	bool bAllowDeferredBroadcast = false;
+	bool bAllowDeferredBroadcast{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(MustImplement="/Script/AVVM.AVVMViewModelFNameHelper"))
 	TSubclassOf<UMVVMViewModelBase> ViewModelClass = nullptr;
@@ -75,7 +75,7 @@ protected:
 
 	// @gdemers primarylayout.layer.tag or hud.extensionpoint.tag
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag TargetTag = FGameplayTag::EmptyTag;
+	FGameplayTag TargetTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UMVVMViewModelBase> ViewModel = nullptr;

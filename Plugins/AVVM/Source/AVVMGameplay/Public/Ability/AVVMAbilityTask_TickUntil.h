@@ -47,11 +47,11 @@ public:
 	virtual void TickTask(float DeltaTime) override;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnAbilityTaskTickDelegate OnTick;
+	FOnAbilityTaskTickDelegate OnTick{};
 
 protected:
 	virtual void Activate() override;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bTestInitialState = false;
+	bool bTestInitialState{false};
 };

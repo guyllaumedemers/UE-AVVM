@@ -43,7 +43,7 @@ struct AVVMGAMEPLAY_API FAVVMBackendSessionPayload
 
 	// @gdemers {FAVVMParty::UniqueId}
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 PartyId = INDEX_NONE;
+	int32 PartyId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TMap<FString/*{FUniqueNetId}*/, int32/*{FAVVMPlayerConnection::UniqueId}*/> PlayerConnectionIds{};

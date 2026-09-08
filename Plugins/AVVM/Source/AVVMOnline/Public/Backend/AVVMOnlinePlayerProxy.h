@@ -44,7 +44,7 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerAccountProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers {FAVVMPlayerLoginContext}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -84,7 +84,7 @@ struct AVVMONLINE_API FAVVMPlayerWalletProxy : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerWalletProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers {FAVVMCurrency} collection of currencies tied to player account.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -109,7 +109,7 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerProfileProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers may refer to a unique name tied to your playable character.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -150,7 +150,7 @@ struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPlayerPresetProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers may refer to a unique name tied to your profile preset.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -179,7 +179,7 @@ struct AVVMONLINE_API FAVVMPartyProxy : public FAVVMNotificationPayload
 	bool operator==(const FAVVMPartyProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers may represent a party name.
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -220,14 +220,14 @@ struct AVVMONLINE_API FAVVMPlayerConnectionProxy : public FAVVMNotificationPaylo
 	bool operator==(const FAVVMPlayerConnectionProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	// @gdemers convert using FUniqueNetIdString::Create()
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString UniqueNetId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	EAVVMPlayerStatus PlayerStatus = EAVVMPlayerStatus::Default;
+	EAVVMPlayerStatus PlayerStatus{EAVVMPlayerStatus::Default};
 
 	// @gdemers {FAVVMPlayerProfileProxy}
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -252,7 +252,7 @@ struct AVVMONLINE_API FAVVMHostConfigurationProxy : public FAVVMNotificationPayl
 	bool operator==(const FAVVMHostConfigurationProxy& Rhs) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UniqueId = INDEX_NONE;
+	int32 UniqueId{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString GameMode{};

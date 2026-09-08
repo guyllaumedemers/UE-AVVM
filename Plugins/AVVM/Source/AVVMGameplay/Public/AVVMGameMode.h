@@ -44,25 +44,25 @@ struct AVVMGAMEPLAY_API FAVVMGameModeRuleTagAggregator
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag MatchStartTag = FGameplayTag::EmptyTag;
+	FGameplayTag MatchStartTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag MatchEndTag = FGameplayTag::EmptyTag;
+	FGameplayTag MatchEndTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag MatchPostEndTag = FGameplayTag::EmptyTag;
+	FGameplayTag MatchPostEndTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag MatchProgressTag = FGameplayTag::EmptyTag;
+	FGameplayTag MatchProgressTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PlayerAcceptanceTag = FGameplayTag::EmptyTag;
+	FGameplayTag PlayerAcceptanceTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag SpawnPointSelectionTag = FGameplayTag::EmptyTag;
+	FGameplayTag SpawnPointSelectionTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag DefaultPawnSpawnConditionsTag = FGameplayTag::EmptyTag;
+	FGameplayTag DefaultPawnSpawnConditionsTag{FGameplayTag::EmptyTag};
 };
 
 /**
@@ -127,16 +127,16 @@ protected:
 	virtual void FailedToRestartPlayer(AController* NewPlayer) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bAllowServerProcessExit = false;
+	bool bAllowServerProcessExit{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bDoesAcceptAnyPlayerLogin = true;
-	
+	bool bDoesAcceptAnyPlayerLogin{true};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldUseCustomPlayerStartPositionFilters = false;
-	
+	bool bShouldUseCustomPlayerStartPositionFilters{false};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldDeferDefaultPawnCreation = false;
+	bool bShouldDeferDefaultPawnCreation{false};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FAVVMGameModeRuleTagAggregator RuleTagAggregator{};

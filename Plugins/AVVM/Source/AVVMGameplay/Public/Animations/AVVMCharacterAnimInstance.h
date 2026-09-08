@@ -41,43 +41,43 @@ struct AVVMGAMEPLAY_API FAVVMMovementProperties
 	GENERATED_BODY()
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsIdle = false;
+	bool bIsIdle{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsWalking = false;
+	bool bIsWalking{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsSprinting = false;
+	bool bIsSprinting{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsRunning = false;
+	bool bIsRunning{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsSliding = false;
+	bool bIsSliding{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsCharging = false;
+	bool bIsCharging{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsSwimming = false;
+	bool bIsSwimming{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsGliding = false;
+	bool bIsGliding{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsMantling = false;
+	bool bIsMantling{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsVaulting = false;
+	bool bIsVaulting{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsProne = false;
+	bool bIsProne{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsCrouching = false;
+	bool bIsCrouching{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsStanding = false;
+	bool bIsStanding{false};
 };
 
 /**
@@ -92,16 +92,16 @@ struct AVVMGAMEPLAY_API FAVVMStatusProperties
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsGrounded = false;
+	bool bIsGrounded {false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsAired = false;
+	bool bIsAired{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsDown = false;
+	bool bIsDown{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsRagdoll = false;
+	bool bIsRagdoll{false};
 };
 
 /**

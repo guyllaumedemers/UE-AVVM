@@ -50,5 +50,5 @@ protected:
 	// @gdemers will load in memory CDO for the ViewModel class referenced. Make sure to not define
 	// any resources within the referenced class.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSubclassOf<UMVVMViewModelBase>, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass;
+	TMap<TSubclassOf<UMVVMViewModelBase>, TSubclassOf<UCommonUserWidget>> ObjectClassToWidgetClass{};
 };

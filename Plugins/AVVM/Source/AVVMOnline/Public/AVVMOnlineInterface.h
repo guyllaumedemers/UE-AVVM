@@ -114,7 +114,7 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 	FString DestPlayerUniqueNetId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	EAVVMPlayerRequestType RequestType = EAVVMPlayerRequestType::None;
+	EAVVMPlayerRequestType RequestType{EAVVMPlayerRequestType::None};
 
 	// @gdemers payload can represent any data sent over the network, maybe during a trade, etc...
 	UPROPERTY(Transient, BlueprintReadWrite)

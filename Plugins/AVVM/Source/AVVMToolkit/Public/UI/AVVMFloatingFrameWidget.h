@@ -65,10 +65,10 @@ protected:
 	virtual bool AllowInnerBorders() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	bool bSizeToContent = true;
+	bool bSizeToContent{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FAnchorData OverrideAnchorData = FAnchorData();
+	FAnchorData OverrideAnchorData{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UCanvasPanel> Root = nullptr;

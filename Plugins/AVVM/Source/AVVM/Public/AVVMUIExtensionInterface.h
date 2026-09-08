@@ -38,16 +38,16 @@ struct AVVM_API FAVVMUIExtensionContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UWorld* World = nullptr;
+	TWeakObjectPtr<UWorld> World = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UObject* ContextObject = nullptr;
+	TWeakObjectPtr<UObject> ContextObject = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite, meta=(MustImplement="/Script/FieldNotification.NotifyFieldValueChanged"))
-	UObject* ViewModel = nullptr;
+	TWeakObjectPtr<UObject> ViewModel = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag ExtensionPointTag = FGameplayTag::EmptyTag;
+	FGameplayTag ExtensionPointTag{FGameplayTag::EmptyTag};
 };
 
 /**

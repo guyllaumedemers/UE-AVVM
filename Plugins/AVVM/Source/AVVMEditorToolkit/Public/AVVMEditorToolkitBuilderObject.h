@@ -38,10 +38,10 @@ class SWidget;
  */
 struct AVVMEDITORTOOLKIT_API FAVVMBuilderInfo
 {
-	FName SectionName = NAME_None;
-	FName SubSectionName = NAME_None;
-	FText SubSection_Label = FText::GetEmpty();
-	FText SubSection_Tooltips = FText::GetEmpty();
+	FName SectionName{NAME_None};
+	FName SubSectionName{NAME_None};
+	FText SubSection_Label{FText::GetEmpty()};
+	FText SubSection_Tooltips{FText::GetEmpty()};
 	FSlateIcon SubSection_Icon{};
 	TArray<TSharedPtr<FUICommandInfo>> Commands{};
 };
@@ -68,16 +68,16 @@ protected:
 	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const PURE_VIRTUAL(GetUICommands, return {};);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName SectionName = NAME_None;
+	FName SectionName{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName SubSectionName = NAME_None;
+	FName SubSectionName{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText SubSection_Label = FText::GetEmpty();
+	FText SubSection_Label{FText::GetEmpty()};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText SubSection_Tooltips = FText::GetEmpty();
+	FText SubSection_Tooltips{FText::GetEmpty()};
 
 	/** Pointer to the widget that houses the level editor's mode context window */
 	TSharedPtr<SWidget> BuilderContextWidget = nullptr;

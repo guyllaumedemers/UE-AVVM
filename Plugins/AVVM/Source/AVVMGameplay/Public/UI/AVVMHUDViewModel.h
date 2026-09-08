@@ -47,5 +47,5 @@ public:
 	virtual void SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
 
 	UPROPERTY(Transient, BlueprintReadOnly, FieldNotify)
-	FGameplayTagContainer RequirementTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequirementTags{FGameplayTagContainer::EmptyContainer};
 };

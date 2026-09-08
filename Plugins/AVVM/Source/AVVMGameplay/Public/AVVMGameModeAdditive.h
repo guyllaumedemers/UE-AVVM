@@ -45,10 +45,10 @@ struct AVVMGAMEPLAY_API FAVVMPredicateTaskResult
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	double StartTimestamp = 0.f;
+	double StartTimestamp{0.f};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 CurrTaskIndex = 0;
+	int32 CurrTaskIndex{0};
 };
 
 /**
@@ -77,7 +77,7 @@ protected:
 	virtual void NotifyEnd_Implementation() const PURE_VIRTUAL(NotifyEnd_Implementation, return;);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	double Timeout = 0.f;
+	double Timeout{0.f};
 };
 
 /**

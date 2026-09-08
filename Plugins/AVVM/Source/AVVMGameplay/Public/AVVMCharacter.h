@@ -62,16 +62,16 @@ struct AVVMGAMEPLAY_API FAVVMCharacterChannelAggregator
 	GENERATED_BODY()
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostPlayerControllerReplicationTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostPlayerControllerReplicationTag{FGameplayTag::EmptyTag};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostPlayerStateReplicationTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostPlayerStateReplicationTag{FGameplayTag::EmptyTag};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostCharacterBeginTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostCharacterBeginTag{FGameplayTag::EmptyTag};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostCharacterEndTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostCharacterEndTag{FGameplayTag::EmptyTag};
 };
 
 /**
@@ -138,10 +138,10 @@ protected:
 	FDataRegistryId ActorDefinitionId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanOverrideServerCollision = false;
+	bool bCanOverrideServerCollision{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanOverrideServerCollision"))
-	TEnumAsByte<ECollisionEnabled::Type> CollisionEnabled = ECollisionEnabled::QueryAndPhysics;
+	TEnumAsByte<ECollisionEnabled::Type> CollisionEnabled{ECollisionEnabled::QueryAndPhysics};
 
 	// @gdemers Resource Component handle initialization of our Character.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

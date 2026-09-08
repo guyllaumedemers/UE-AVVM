@@ -81,10 +81,10 @@ protected:
 	void BP_OnVisiblityBlocked();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RequiredTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer BlockingTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UAVVMHUDWidget> OwningOuter = nullptr;

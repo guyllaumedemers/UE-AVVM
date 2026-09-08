@@ -58,19 +58,19 @@ protected:
 
 	// @gdemers for hot-reload
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FName, FString> PrevPayloadPerType;
+	TMap<FName, FString> PrevPayloadPerType{};
 
 	// @gdemers property that reference ALL payload delta representation for progression tracking
 	// in story mode.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TMap<FName, FString> CurrPayloadPerType;
+	TMap<FName, FString> CurrPayloadPerType{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	double SessionStartTime = 0.f;
+	double SessionStartTime{0.f};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	double TotalPlayTime = 0.f;
-	
-	UPROPERTY(Transient,  BlueprintReadOnly)
-	bool bIsMarkedDirty = false;
+	double TotalPlayTime{0.f};
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bIsMarkedDirty{false};
 };

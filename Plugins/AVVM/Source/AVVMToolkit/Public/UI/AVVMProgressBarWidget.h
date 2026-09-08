@@ -62,7 +62,7 @@ protected:
 	TSoftObjectPtr<UMaterialInstance> MaterialInstance = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	FName MaterialParameterName = NAME_None;
+	FName MaterialParameterName{NAME_None};
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers", meta=(UIMin=0.f, UIMax=1.f))

@@ -49,7 +49,7 @@ protected:
 	UAVVMSaveGame* GetSetSaveGame();
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FName ActiveSaveGameSlot = NAME_None;
+	FName ActiveSaveGameSlot{NAME_None};
 
 	static TStrongObjectPtr<UAVVMFileHelper> gFileHelper;
 	TStrongObjectPtr<UAVVMSaveGame> SaveGameObject = nullptr;

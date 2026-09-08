@@ -47,13 +47,13 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStateChannelAggregator
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostPlayerControllerClientInitializedTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostPlayerControllerClientInitializedTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostPlayerStateNameClientInitializedTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostPlayerStateNameClientInitializedTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PostPlayerStateUniqueNetIdClientInitializedTag = FGameplayTag::EmptyTag;
+	FGameplayTag PostPlayerStateUniqueNetIdClientInitializedTag{FGameplayTag::EmptyTag};
 };
 
 /**
@@ -78,7 +78,7 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStatePayload : public FAVVMNotificationPayloa
 	TWeakObjectPtr<const APlayerState> PlayerState = nullptr;
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bWasAddedOrRemoved = false;
+	bool bWasAddedOrRemoved{false};
 };
 
 /**

@@ -42,14 +42,14 @@
  */
 struct AVVMEDITORTOOLKIT_API FAVVMBindingContext
 {
-	FName CommandName = NAME_None;
-	FText CommandLabel = FText::GetEmpty();
-	FText CommandDesc = FText::GetEmpty();
-	FSlateIcon Icon = FSlateIcon();
-	EUserInterfaceActionType UserInterfaceType = EUserInterfaceActionType::None;
-	FInputChord DefaultChord = FInputChord();
-	FInputChord AlternateDefaultChord = FInputChord();
-	FName Bundle = NAME_None;
+	FName CommandName{NAME_None};
+	FText CommandLabel{FText::GetEmpty()};
+	FText CommandDesc{FText::GetEmpty()};
+	FSlateIcon Icon{};
+	EUserInterfaceActionType UserInterfaceType{EUserInterfaceActionType::None};
+	FInputChord DefaultChord{};
+	FInputChord AlternateDefaultChord{};
+	FName Bundle{NAME_None};
 };
 
 /**
@@ -119,11 +119,11 @@ protected:
 	
 	struct FAVVMExtensibilityContext
 	{
-		FName ExtensionHook = NAME_None;
-		EExtensionHook::Position Position = EExtensionHook::Position::After;
-		TAttribute<FText> Label = FText::GetEmpty();
-		TAttribute<FText> Tooltips = FText::GetEmpty();
-		
+		FName ExtensionHook{NAME_None};
+		EExtensionHook::Position Position{EExtensionHook::Position::After};
+		TAttribute<FText> Label{FText::GetEmpty()};
+		TAttribute<FText> Tooltips{FText::GetEmpty()};
+
 		TSharedPtr<FExtensibilityManager> ExtensibilityManager = nullptr;
 		TArray<TSharedPtr<FUICommandInfo>> Commands{};
 		TSharedPtr<FUICommandList> CommandList = nullptr;

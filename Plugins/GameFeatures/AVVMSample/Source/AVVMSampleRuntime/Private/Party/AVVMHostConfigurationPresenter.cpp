@@ -24,6 +24,7 @@
 #include "AVVMOnlineUtils.h"
 #include "AVVMSampleRuntimeModule.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
+#include "Engine/World.h"
 #include "GameFramework/GameMode.h"
 #include "Party/AVVMHostConfigurationViewModel.h"
 

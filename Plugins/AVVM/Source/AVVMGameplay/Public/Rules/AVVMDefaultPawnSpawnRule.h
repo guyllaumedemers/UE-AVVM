@@ -58,11 +58,11 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer SpawnConditionTags = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer SpawnConditionTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="4"))
-	float RetryRate = 0.f;
+	float RetryRate{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0", ClampMax="25"))
-	int32 MaxNumRetry = INDEX_NONE;
+	int32 MaxNumRetry{INDEX_NONE};
 };

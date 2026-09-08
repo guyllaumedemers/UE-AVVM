@@ -49,11 +49,6 @@ FAVVMScopedLock::~FAVVMScopedLock()
 	Callback.ExecuteIfBound();
 }
 
-FAVVMScopedLock FAVVMGameThreadLock::Make()
-{
-	return FAVVMScopedLock{this};
-}
-
 FAVVMScopedLock FAVVMGameThreadLock::Make(FSimpleDelegate&& NewCallback)
 {
 	return FAVVMScopedLock{this, MoveTemp(NewCallback)};

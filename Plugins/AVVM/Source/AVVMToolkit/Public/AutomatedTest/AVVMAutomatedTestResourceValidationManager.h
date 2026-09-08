@@ -38,16 +38,16 @@ struct AVVMTOOLKIT_API FAVVMNonTSResourceValidationMechanism
 	FAVVMNonTSResourceValidationMechanism();
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 RegistryIdRequested = INDEX_NONE;
+	int32 RegistryIdRequested{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 RegistryIdLoaded = INDEX_NONE;
+	int32 RegistryIdLoaded{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UObjectRequested = INDEX_NONE;
+	int32 UObjectRequested{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 UObjectLoaded = INDEX_NONE;
+	int32 UObjectLoaded{INDEX_NONE};
 };
 
 /**
@@ -107,5 +107,5 @@ protected:
 	bool IsIntegral(const UActorComponent* SrcComponent);
 
 	UPROPERTY(Transient)
-	TMap<TWeakObjectPtr<const UActorComponent>, FAVVMNonTSResourceValidationMechanism> ValidationMechanisms;
+	TMap<TWeakObjectPtr<const UActorComponent>, FAVVMNonTSResourceValidationMechanism> ValidationMechanisms{};
 };

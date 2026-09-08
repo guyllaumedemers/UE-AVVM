@@ -54,25 +54,25 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportActorOverride = false;
+	bool bDoesSupportActorOverride{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActorOverride"))
 	TSoftClassPtr<AActor> OverrideActorClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportPassiveAbilities = true;
+	bool bDoesSupportPassiveAbilities{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportPassiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
 	TArray<FDataRegistryId> PassiveAbilityGroupIds{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportActiveAbilities = true;
+	bool bDoesSupportActiveAbilities{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportActiveAbilities", ItemStruct="AVVMAbilityGroupDefinitionDataTableRow"))
 	TArray<FDataRegistryId> ActiveAbilityGroupIds{};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesSupportAttributeSet = false;
+	bool bDoesSupportAttributeSet{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportAttributeSet"))
 	TSoftClassPtr<UAttributeSet> ActorAttributeSet = nullptr;

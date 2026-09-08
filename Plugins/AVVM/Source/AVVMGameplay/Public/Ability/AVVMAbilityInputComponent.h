@@ -65,8 +65,8 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent
 		{
 		}
 
-		const TWeakObjectPtr<const UInputAction> InputAction = nullptr;
-		const ETriggerEvent TriggerEvent = ETriggerEvent::None;
+		TWeakObjectPtr<const UInputAction> InputAction = nullptr;
+		ETriggerEvent TriggerEvent{ETriggerEvent::None};
 	};
 
 public:

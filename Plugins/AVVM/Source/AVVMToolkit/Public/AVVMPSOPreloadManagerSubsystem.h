@@ -79,5 +79,5 @@ protected:
 	FAVVMPSOPreloadToken PreloadPSO(const TArray<TSoftObjectPtr<UWorld>>& LevelInstances);
 	void UnloadPSOHandle(const FAVVMPSOPreloadToken& Token);
 	
-	TMap<int32/*PSOPreload.UniqueId*/, TSharedPtr<FStreamableHandle>> PSOHandles;
+	TMap<int32/*PSOPreload.UniqueId*/, TSharedPtr<FStreamableHandle>> PSOHandles{};
 };
