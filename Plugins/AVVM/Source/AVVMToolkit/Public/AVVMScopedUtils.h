@@ -21,25 +21,42 @@
 
 #include "CoreMinimal.h"
 
+struct FAVVMGameThreadLock;
+
 /**
  *	Class description:
  *
  *	FAVVMScopedDelegate is a scoped object that execute a laten delegate during destruction.
  */
-struct AVVMTOOLKIT_API FAVVMScopedDelegate
+struct AVVMTOOLKIT_API FAVVMScopedDelegate : public FNoncopyable
 {
-	FAVVMScopedDelegate(const FSimpleDelegate& Callback)
-		: OutOfScopeDelegate(Callback)
-	{
-	}
-
-	~FAVVMScopedDelegate()
-	{
-		OutOfScopeDelegate.ExecuteIfBound();
-	}
+	FAVVMScopedDelegate(FSimpleDelegate&& NewCallback);
+	FAVVMScopedDelegate() = default;
+	FAVVMScopedDelegate(FAVVMScopedDelegate&&) noexcept = default;
+	FAVVMScopedDelegate& operator=(FAVVMScopedDelegate&&) noexcept = default;
+	~FAVVMScopedDelegate();
 
 private:
-	FSimpleDelegate OutOfScopeDelegate = FSimpleDelegate();
+	FSimpleDelegate OutOfScopeDelegate{};
+};
+
+/**
+ *	Class description:
+ *
+ *	FAVVMScopedLock is a utility offering scope safety for locking/unlocking behaviour.
+ */
+struct AVVMTOOLKIT_API FAVVMScopedLock : public FNoncopyable
+{
+	FAVVMScopedLock(FAVVMGameThreadLock* NewHandle);
+	FAVVMScopedLock(FAVVMGameThreadLock* NewHandle, FSimpleDelegate&& NewCallback);
+	FAVVMScopedLock() = default;
+	FAVVMScopedLock(FAVVMScopedLock&&) noexcept = default;
+	FAVVMScopedLock& operator=(FAVVMScopedLock&&) noexcept = default;
+	~FAVVMScopedLock();
+
+private:
+	FAVVMGameThreadLock* Handle = nullptr;
+	FSimpleDelegate Callback{};
 };
 
 /**
@@ -48,64 +65,18 @@ private:
  *	FAVVMGameThreadLock is a utility allowing management of async processes request, and should be used
  *	to prevent racing condition between game related updates and data received from backend.
  */
-struct AVVMTOOLKIT_API FAVVMGameThreadLock
+struct AVVMTOOLKIT_API FAVVMGameThreadLock : public FNoncopyable
 {
-	void Lock()
-	{
-		bIsRunning = true;
-	}
+	FAVVMGameThreadLock() = default;
+	FAVVMGameThreadLock(FAVVMGameThreadLock&&) noexcept = default;
+	FAVVMGameThreadLock& operator=(FAVVMGameThreadLock&&) noexcept = default;
+	
+	FAVVMScopedLock Make();
+	FAVVMScopedLock Make(FSimpleDelegate&& NewCallback);
 
-	void UnLock()
-	{
-		bIsRunning = false;
-	}
-
-	bool IsLocked() const
-	{
-		return bIsRunning;
-	}
-
-	/**
-	 *	Class description:
-	 *
-	 *	FAVVMScopedLock is a utility offering scope safety for locking/unlocking behaviour.
-	 */
-	struct AVVMTOOLKIT_API FAVVMScopedLock
-	{
-		FAVVMScopedLock(FAVVMGameThreadLock* NewHandle)
-			: Handle(NewHandle)
-		{
-			if (Handle != nullptr) { Handle->Lock(); }
-		}
-
-		FAVVMScopedLock(FAVVMGameThreadLock* NewHandle, const FSimpleDelegate& NewCallback)
-			: Handle(NewHandle)
-			, Callback(NewCallback)
-		{
-			if (Handle != nullptr) { Handle->Lock(); }
-		}
-
-		~FAVVMScopedLock()
-		{
-			// @gdemers order matter, expect unlocking before invocation.
-			if (Handle != nullptr) { Handle->UnLock(); }
-			Callback.ExecuteIfBound();
-		}
-
-	private:
-		FAVVMGameThreadLock* Handle = nullptr;
-		FSimpleDelegate Callback;
-	};
-
-	FAVVMScopedLock Make()
-	{
-		return FAVVMScopedLock(this);
-	}
-
-	FAVVMScopedLock Make(const FSimpleDelegate& NewCallback)
-	{
-		return FAVVMScopedLock(this, NewCallback);
-	}
+	void Lock();
+	void UnLock();
+	bool IsLocked() const;
 
 private:
 	bool bIsRunning = false;

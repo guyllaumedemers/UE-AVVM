@@ -336,8 +336,8 @@ void UGameStateTeamComponent::OnTeamReceived(const bool bWasSuccess,
 		}
 	};
 
-	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, OutOfScopeCallback, TWeakObjectPtr<UGameStateTeamComponent>(this));
-	FAVVMGameThreadLock::FAVVMScopedLock ScopedLock = SynchronizationLock.Make(Callback);
+	auto Callback = FSimpleDelegate::CreateWeakLambda(this, OutOfScopeCallback, TWeakObjectPtr<UGameStateTeamComponent>(this));
+	FAVVMScopedLock ScopedLock = SynchronizationLock.Make(MoveTemp(Callback));
 
 	if (!ensureAlways(bWasSuccess))
 	{

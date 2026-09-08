@@ -18,3 +18,58 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "AVVMScopedUtils.h"
+
+FAVVMScopedDelegate::FAVVMScopedDelegate(FSimpleDelegate&& NewCallback)
+	: OutOfScopeDelegate(MoveTemp(NewCallback))
+{
+}
+
+FAVVMScopedDelegate::~FAVVMScopedDelegate()
+{
+	OutOfScopeDelegate.ExecuteIfBound();
+}
+
+FAVVMScopedLock::FAVVMScopedLock(FAVVMGameThreadLock* NewHandle)
+	: Handle(NewHandle)
+{
+	if (Handle != nullptr) { Handle->Lock(); }
+}
+
+FAVVMScopedLock::FAVVMScopedLock(FAVVMGameThreadLock* NewHandle, FSimpleDelegate&& NewCallback)
+	: Handle(NewHandle),
+	  Callback(MoveTemp(NewCallback))
+{
+	if (Handle != nullptr) { Handle->Lock(); }
+}
+
+FAVVMScopedLock::~FAVVMScopedLock()
+{
+	// @gdemers order matter, expect unlocking before invocation.
+	if (Handle != nullptr) { Handle->UnLock(); }
+	Callback.ExecuteIfBound();
+}
+
+FAVVMScopedLock FAVVMGameThreadLock::Make()
+{
+	return FAVVMScopedLock{this};
+}
+
+FAVVMScopedLock FAVVMGameThreadLock::Make(FSimpleDelegate&& NewCallback)
+{
+	return FAVVMScopedLock{this, MoveTemp(NewCallback)};
+}
+
+void FAVVMGameThreadLock::Lock()
+{
+	bIsRunning = true;
+}
+
+void FAVVMGameThreadLock::UnLock()
+{
+	bIsRunning = false;
+}
+
+bool FAVVMGameThreadLock::IsLocked() const
+{
+	return bIsRunning;
+}

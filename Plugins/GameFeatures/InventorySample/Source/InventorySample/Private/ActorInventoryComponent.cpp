@@ -771,8 +771,8 @@ void UActorInventoryComponent::OnItemActorClassRetrieved(const UClass* NewActorC
 		}
 	};
 
-	const auto Callback = FSimpleDelegate::CreateWeakLambda(this, ScopedSafety, QueueingMechanism);
-	FAVVMScopedDelegate ScopedDelegate{Callback};
+	auto Callback = FSimpleDelegate::CreateWeakLambda(this, ScopedSafety, QueueingMechanism);
+	FAVVMScopedDelegate ScopedDelegate{MoveTemp(Callback)};
 
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer),
