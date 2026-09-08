@@ -46,6 +46,12 @@ struct TRANSACTIONSAMPLE_API FTransactionPayload : public FAVVMNotificationPaylo
 {
 	GENERATED_BODY()
 
+	FTransactionPayload() = default;
+	FTransactionPayload(const FTransactionPayload&) = default;
+	FTransactionPayload(FTransactionPayload&&) noexcept = default;
+	FTransactionPayload& operator=(const FTransactionPayload&) = default;
+	FTransactionPayload& operator=(FTransactionPayload&&) noexcept = default;
+	
 	virtual FString ToString() const PURE_VIRTUAL(ToString, return FString(););
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FTransactionPayload>::Make<T>

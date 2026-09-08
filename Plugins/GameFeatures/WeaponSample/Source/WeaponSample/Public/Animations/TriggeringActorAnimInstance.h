@@ -40,24 +40,24 @@ struct WEAPONSAMPLE_API FTriggeringActorStatusProperties
 	GENERATED_BODY()
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsDraw = false;
+	bool bIsDraw{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsRelaxed = false;
+	bool bIsRelaxed{false};
 	
 	// @gdemers possibly blocking, aiming for gun, or accentuating
 	// next input triggering.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsRaised = false;
+	bool bIsRaised{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsTriggered = false;
+	bool bIsTriggered{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsExhausted = false;
+	bool bIsExhausted{false};
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bIsRecharging = false;
+	bool bIsRecharging{false};
 };
 
 /**
@@ -74,7 +74,7 @@ struct WEAPONSAMPLE_API FAVVMTriggeringActorAnimInstanceProxy : public FAnimInst
 	FAVVMTriggeringActorAnimInstanceProxy(UAnimInstance* InInstance);
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FTriggeringActorStatusProperties Status = FTriggeringActorStatusProperties();
+	FTriggeringActorStatusProperties Status{};
 
 protected:
 	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
@@ -114,7 +114,7 @@ protected:
 	virtual void DestroyAnimInstanceProxy(FAnimInstanceProxy* InProxy) override;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMTriggeringActorAnimInstanceProxy AnyThreadProxy = FAVVMTriggeringActorAnimInstanceProxy();
+	FAVVMTriggeringActorAnimInstanceProxy AnyThreadProxy{};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const ATriggeringActor> OwningActor = nullptr;

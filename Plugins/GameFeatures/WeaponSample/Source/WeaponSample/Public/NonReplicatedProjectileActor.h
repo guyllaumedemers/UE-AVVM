@@ -54,7 +54,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	FOnProjectileShutdownRequestDelegate OnProjectileShutdown;
+	FOnProjectileShutdownRequestDelegate OnProjectileShutdown{};
 
 protected:
 	virtual const FCollisionQueryParams& GetCollisionParams() const;
@@ -65,25 +65,25 @@ protected:
 	void Kill();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag ProjectileFiringMode = FGameplayTag::EmptyTag;
+	FGameplayTag ProjectileFiringMode{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TInstancedStruct<FProjectileParams> ProjectileTemplate;
+	TInstancedStruct<FProjectileParams> ProjectileTemplate{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TInstancedStruct<FExplosionParams> ExplosionTemplate;
+	TInstancedStruct<FExplosionParams> ExplosionTemplate{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FPredictProjectilePathResult PredictedPathResult;
+	FPredictProjectilePathResult PredictedPathResult{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bDoesPredictBlockingHit = false;
+	bool bDoesPredictBlockingHit{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 PointDataIndex = INDEX_NONE;
+	int32 PointDataIndex{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	double Timestamp = 0.f;
+	double Timestamp{0.f};
 
 	friend struct FProjectileParams;
 	friend struct FExplosionParams;

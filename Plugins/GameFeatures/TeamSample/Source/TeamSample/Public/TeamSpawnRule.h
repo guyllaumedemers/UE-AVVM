@@ -30,7 +30,7 @@
 
 #include "TeamSpawnRule.generated.h"
 
-class ACharacter;
+class AController;
 class UAnimInstance;
 class UCameraModifier;
 class UNiagaraSystem;
@@ -48,15 +48,15 @@ struct TEAMSAMPLE_API FWorldContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag WinningTeam = FGameplayTag::EmptyTag;
+	FGameplayTag WinningTeam{FGameplayTag::EmptyTag};
 
 	// @gdemers could be multiple in a split screen coop.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FGameplayTag> LosingTeams;
+	TArray<FGameplayTag> LosingTeams{};
 
 	// @gdemers AI or PC posses
-	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<const ACharacter*> Players;
+	UPROPERTY(Transient)
+	TArray<TWeakObjectPtr<const AController>> Players{};
 };
 
 /**
@@ -125,10 +125,10 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="True in most case, certain lobbies require static players and run simple animation."))
-	bool bShouldEnableMovement = true;
+	bool bShouldEnableMovement{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldOverridePlayerAnimation = false;
+	bool bShouldOverridePlayerAnimation{false};
 
 	// @gdemers to play an ability during the spawn process on top of your output pose, as you would during character selection,
 	// we suggest using AnimNotify embedded in the anim sequences.
@@ -136,31 +136,31 @@ protected:
 	TSoftClassPtr<UAnimInstance> OverrideAnimationClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldAttachVfxOnSpawn = false;
+	bool bShouldAttachVfxOnSpawn{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="To spawn vfx at anchor on a Skeleton Socket or other source type.", EditCondition="bShouldAttachVfxOnSpawn"))
-	TMap<FName/*Socket FName*/, TSoftClassPtr<UNiagaraSystem>> VfxClassesOnSpawn;
+	TMap<FName/*Socket FName*/, TSoftClassPtr<UNiagaraSystem>> VfxClassesOnSpawn{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bShouldPlayAudioCueOnSpawn = false;
+	bool bShouldPlayAudioCueOnSpawn{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bShouldPlayAudioCueOnSpawn"))
-	TMap<FGameplayTag/*Src type*/, FGameplayTag/*Audio cue tag*/> AudioOnSpawn;
+	TMap<FGameplayTag/*Src type*/, FGameplayTag/*Audio cue tag*/> AudioOnSpawn{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldApplyCameraModifier = false;
+	bool bShouldApplyCameraModifier{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bShouldApplyCameraModifier"))
 	TSoftClassPtr<UCameraModifier> SpawnCameraModifierClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldCheckConditionsBeforeSpawn = false;
+	bool bShouldCheckConditionsBeforeSpawn{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditCondition="bShouldCheckConditionsBeforeSpawn"))
-	TArray<TSoftClassPtr<UTeamSpawnCondition>> SpawnConditionClasses;
+	TArray<TSoftClassPtr<UTeamSpawnCondition>> SpawnConditionClasses{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bDoesSupportSpawnWeight = false;
+	bool bDoesSupportSpawnWeight{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesSupportSpawnWeight"))
 	TSoftClassPtr<UTeamSpawnWeightRule> SpawnWeightRuleClass = nullptr;

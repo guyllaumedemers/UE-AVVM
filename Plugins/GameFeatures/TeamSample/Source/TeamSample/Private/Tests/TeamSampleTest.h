@@ -59,7 +59,7 @@ protected:
 	TSubclassOf<UGameStateTeamComponent> TestGameStateTeamComponentClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FAVVMPartyProxy> TestParties;
+	TArray<FAVVMPartyProxy> TestParties{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
@@ -68,11 +68,11 @@ protected:
 	TWeakObjectPtr<const AAVVMWorldSetting> WorldSetting = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bDoesTestRun = false;
+	bool bDoesTestRun{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bHasInitializedGameStateComponent = false;
+	bool bHasInitializedGameStateComponent{false};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	bool bHasAddedAllPlayerStates = false;
+	bool bHasAddedAllPlayerStates{false};
 };

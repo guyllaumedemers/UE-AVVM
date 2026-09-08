@@ -43,7 +43,7 @@ public:
 	FSimpleDelegate OnToggleDebuggerContext;
 
 protected:
-	TArray<FKey> Keys;
+	TArray<FKey> Keys{};
 };
 
 /**
@@ -64,7 +64,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<FKey> Keys;
+	TArray<FKey> Keys{};
 
 	TSharedPtr<FAVVMImGuiInputPreprocessor> DebuggerPreprocessor = nullptr;
 };

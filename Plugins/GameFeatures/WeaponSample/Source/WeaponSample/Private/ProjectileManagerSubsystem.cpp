@@ -140,7 +140,7 @@ void UProjectileManagerSubsystem::CreateProjectile(const FProjectileContextArgs&
 	if (Params != nullptr)
 	{
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = const_cast<AActor*>(ContextArgs.Owner);
+		SpawnParams.Owner = const_cast<AActor*>(ContextArgs.Owner.Get());
 
 		ANonReplicatedProjectileActor* Instance = Factory(ContextArgs.ProjectileClass, SpawnParams, ContextArgs.AimTransform);
 		Params->Init(Instance, ContextArgs.IgnoredActors);

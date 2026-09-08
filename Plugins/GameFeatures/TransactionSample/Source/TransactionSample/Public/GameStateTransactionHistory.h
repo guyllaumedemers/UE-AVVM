@@ -48,10 +48,10 @@ struct TRANSACTIONSAMPLE_API FTransactionContextArgs
 	TWeakObjectPtr<const AActor> Target = nullptr; /*Statistics Owner - whom we aggregate for*/
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	ETransactionType TransactionType = ETransactionType::None;
+	ETransactionType TransactionType{ETransactionType::None};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Payload = FString();
+	FString Payload{};
 };
 
 /**
@@ -73,7 +73,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
-	                                              const FTransactionContextArgs& Args);
+	                                              FTransactionContextArgs Args);
 
 	UFUNCTION(BlueprintCallable)
 	static void Static_RemoveAllTransactionOfType(const UObject* WorldContextObject,
@@ -99,7 +99,7 @@ public:
 
 protected:
 	static UGameStateTransactionHistory* GetActorComponent(const UObject* WorldContextObject);
-	void CreateAndRecordTransaction(const FTransactionContextArgs& Args);
+	void CreateAndRecordTransaction(FTransactionContextArgs&& Args);
 	void RemoveAllTransactionOfType(const AActor* NewTarget, const ETransactionType NewTransactionType);
 	void RemoveAllTransactions(const AActor* NewTarget);
 	TArray<const FTransactionObject*> GetAllTransactionsOfType(const FString& NewTargetId, const ETransactionType TransactionType) const;
@@ -111,7 +111,7 @@ protected:
 	                         TValue& OutResult) const;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FTransactionObjectFastArray Transactions;
+	FTransactionObjectFastArray Transactions{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AGameStateBase> OwningOuter = nullptr;

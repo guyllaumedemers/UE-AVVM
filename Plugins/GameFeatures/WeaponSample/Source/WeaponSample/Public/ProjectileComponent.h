@@ -58,11 +58,11 @@ protected:
 
 	struct FProjectileFiringMode
 	{
-		TInstancedStruct<const FProjectileParams> ProjectileParams;
+		TInstancedStruct<const FProjectileParams> ProjectileParams{};
 		TWeakObjectPtr<const UClass> ProjectileClass = nullptr;
 	};
 
-	TMap<FGameplayTag, FProjectileFiringMode> ProjectileTemplates;
+	TMap<FGameplayTag, FProjectileFiringMode> ProjectileTemplates{};
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 
 private:

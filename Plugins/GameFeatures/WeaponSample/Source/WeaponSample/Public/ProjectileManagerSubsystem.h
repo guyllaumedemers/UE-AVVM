@@ -44,19 +44,19 @@ struct WEAPONSAMPLE_API FProjectileContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	const AActor* Owner = nullptr;
+	TWeakObjectPtr<const AActor> Owner = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	const UClass* ProjectileClass = nullptr;
+	TObjectPtr<const UClass> ProjectileClass = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TInstancedStruct<FProjectileParams> ProjectileParams;
+	TInstancedStruct<FProjectileParams> ProjectileParams{};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FTransform AimTransform = FTransform::Identity;
+	FTransform AimTransform{FTransform::Identity};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<AActor*> IgnoredActors;
+	TArray<TObjectPtr/*required for conversion to "AActor*" type*/<AActor/*non-const required*/>> IgnoredActors{};
 };
 
 /**
@@ -117,5 +117,5 @@ protected:
 	TWeakObjectPtr<const APlayerController> ClientPlayerController = nullptr;
 	
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<ANonReplicatedProjectileActor>> Projectiles;
+	TArray<TObjectPtr<ANonReplicatedProjectileActor>> Projectiles{};
 };

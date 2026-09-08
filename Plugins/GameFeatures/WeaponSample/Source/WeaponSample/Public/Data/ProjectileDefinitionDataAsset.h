@@ -46,17 +46,23 @@ struct WEAPONSAMPLE_API FProjectileParams
 {
 	GENERATED_BODY()
 
+	FProjectileParams() = default;
+	FProjectileParams(const FProjectileParams&) = default;
+	FProjectileParams(FProjectileParams&&) noexcept = default;
+	FProjectileParams& operator=(const FProjectileParams&) = default;
+	FProjectileParams& operator=(FProjectileParams&&) noexcept = default;
 	virtual ~FProjectileParams() = default;
+	
 	virtual void Init(ANonReplicatedProjectileActor* Projectile, const TArray<AActor*>& IgnoredActors) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float Radius = 0.f;
+	float Radius{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float Speed = 0.f;
+	float Speed{0.f};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float MaxSimTime = 0.f;
+	float MaxSimTime{0.f};
 };
 
 template<> struct TBaseStructure<FProjectileParams> 
@@ -74,8 +80,14 @@ USTRUCT(BlueprintType)
 struct WEAPONSAMPLE_API FExplosionParams
 {
 	GENERATED_BODY()
-
+	
+	FExplosionParams() = default;
+	FExplosionParams(const FExplosionParams&) = default;
+	FExplosionParams(FExplosionParams&&) noexcept = default;
+	FExplosionParams& operator=(const FExplosionParams&) = default;
+	FExplosionParams& operator=(FExplosionParams&&) noexcept = default;
 	virtual ~FExplosionParams() = default;
+	
 	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
@@ -110,19 +122,19 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag ProjectileFiringMode = FGameplayTag::EmptyTag;
+	FGameplayTag ProjectileFiringMode{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FProjectileParams> ProjectileParams;
+	TInstancedStruct<FProjectileParams> ProjectileParams{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bDoesExplode = false;
+	bool bDoesExplode{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesExplode"))
-	TInstancedStruct<FExplosionParams> ExplosionParams;
+	TInstancedStruct<FExplosionParams> ExplosionParams{};
 };
 
 /**

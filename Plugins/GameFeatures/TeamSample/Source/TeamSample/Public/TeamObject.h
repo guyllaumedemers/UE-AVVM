@@ -49,6 +49,11 @@ struct TEAMSAMPLE_API FTeamPayload : public FAVVMNotificationPayload
 	GENERATED_BODY()
 
 	FTeamPayload() = default;
+	FTeamPayload(const FTeamPayload&) = default;
+	FTeamPayload(FTeamPayload&&) noexcept = default;
+	FTeamPayload& operator=(const FTeamPayload&) = default;
+	FTeamPayload& operator=(FTeamPayload&&) noexcept = default;
+	
 	explicit FTeamPayload(const TArray<FString>& NewPlayerUniqueNetIds,
 	                      const FGameplayTag& NewTeamTag);
 
@@ -57,10 +62,10 @@ struct TEAMSAMPLE_API FTeamPayload : public FAVVMNotificationPayload
 	static TInstancedStruct<FTeamPayload> Make(TArgs&&... Args);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag TeamTag = FGameplayTag::EmptyTag;
+	FGameplayTag TeamTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<FString> PlayerUniqueNetIds;
+	TArray<FString> PlayerUniqueNetIds{};
 };
 
 template <typename TChild, typename... TArgs>
@@ -106,13 +111,13 @@ protected:
 	void OnRep_OnTeamCompositionChanged(const TArray<FString>& OldPlayerUniqueNetIds);
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamCompositionChanged")
-	TArray<FString> PlayerUniqueNetIds;
+	TArray<FString> PlayerUniqueNetIds{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FGameplayTag TeamTag = FGameplayTag::EmptyTag;
+	FGameplayTag TeamTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	int32 PartyUniqueId = INDEX_NONE;
+	int32 PartyUniqueId{INDEX_NONE};
 
 	friend class UTeamUtils;
 };

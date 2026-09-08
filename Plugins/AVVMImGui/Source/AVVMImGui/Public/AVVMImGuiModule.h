@@ -87,15 +87,15 @@ private:
 	struct FAVVMImGuiDebugProperties
 	{
 		bool CanPresent(const FImGuiModuleProperties* ImGuiProperties) const { return (ImGuiProperties != nullptr) && !ImGuiProperties->ShowDemo() && bShowDebugContext; };
-		bool bShowDebugContext = false;
+		bool bShowDebugContext{false};
 	};
 
 	// @gdemers plugin properties.
-	FAVVMImGuiDebugProperties CustomProperties;
+	FAVVMImGuiDebugProperties CustomProperties{};
 
 	// @gdemers collection type of whats to be rendered in immediate mode.
-	TArray<TScriptInterface<IAVVMImGuiDescriptor>> PIEOrGameDescriptors;
-	TMap<TWeakObjectPtr<const UClass>, TScriptInterface<IAVVMImGuiDescriptor>> FilteredDescriptors;
+	TArray<TScriptInterface<IAVVMImGuiDescriptor>> PIEOrGameDescriptors{};
+	TMap<TWeakObjectPtr<const UClass>, TScriptInterface<IAVVMImGuiDescriptor>> FilteredDescriptors{};
 };
 
 /**
@@ -135,9 +135,9 @@ private:
 	// and whatever key is bound in Project settings cannot be invoked.
 	TStrongObjectPtr<UAVVMImGuiInputHandler> InputHandler = nullptr;
 
-	FAVVMImGuiDebugContext DebugContext;
-	FDelegateHandle GameInstanceDelegateHandle;
-	FDelegateHandle PIEStartDelegateHandle;
-	FDelegateHandle PIEEndDelegateHandle;
-	FDelegateHandle ImGuiDelegateHandle;
+	FAVVMImGuiDebugContext DebugContext{};
+	FDelegateHandle GameInstanceDelegateHandle{};
+	FDelegateHandle PIEStartDelegateHandle{};
+	FDelegateHandle PIEEndDelegateHandle{};
+	FDelegateHandle ImGuiDelegateHandle{};
 };

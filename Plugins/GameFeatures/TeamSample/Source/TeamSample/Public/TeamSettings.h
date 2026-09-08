@@ -61,5 +61,5 @@ protected:
 	// @gdemers Perform TeamSubsystem override and allow its creation process to run on NM_Client
 	// for user-defined level such as Lobby/MainMenu, i.e whenever we are without server connection.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TArray<TSoftClassPtr<ULevel>> LevelOverrides;
+	TArray<TSoftClassPtr<ULevel>> LevelOverrides{};
 };

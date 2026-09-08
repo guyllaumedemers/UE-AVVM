@@ -93,10 +93,15 @@ struct TRANSACTIONSAMPLE_API FTransactionObject : public FFastArraySerializerIte
 	GENERATED_BODY()
 
 	FTransactionObject() = default;
-	FTransactionObject(const FString& NewInstigatorId,
-	                   const FString& NewTargetId,
-	                   const ETransactionType NewTransactionType,
-	                   const FString& NewPayload);
+	FTransactionObject(const FTransactionObject&) = default;
+	FTransactionObject(FTransactionObject&&) noexcept = default;
+	FTransactionObject& operator=(const FTransactionObject&) = default;
+	FTransactionObject& operator=(FTransactionObject&&) noexcept = default;
+
+	explicit FTransactionObject(FString&& NewInstigatorId,
+	                            FString&& NewTargetId,
+	                            const ETransactionType NewTransactionType,
+	                            FString&& NewPayload);
 	
 	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);
 	bool operator==(const FTransactionObject& Rhs) const;
@@ -104,17 +109,17 @@ struct TRANSACTIONSAMPLE_API FTransactionObject : public FFastArraySerializerIte
 protected:
 	// @gdemers he who triggered/caused this transaction event.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString InstigatorId = FString();
+	FString InstigatorId{};
 
 	// @gdemers he who owns this transaction.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString TargetId = FString();
+	FString TargetId{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	ETransactionType TransactionType = ETransactionType::None;
+	ETransactionType TransactionType{ETransactionType::None};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FString Payload = FString();
+	FString Payload{};
 
 	friend class UTransactionObjectUtils;
 };
@@ -136,7 +141,7 @@ struct TRANSACTIONSAMPLE_API FTransactionObjectFastArray : public FIrisFastArray
 	}
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<FTransactionObject> TransactionObjects;
+	TArray<FTransactionObject> TransactionObjects{};
 };
 
 template <>
@@ -176,10 +181,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FString GetUniqueId(const AActor* NewTarget);
-
-	UFUNCTION(BlueprintCallable)
-	static FTransactionObject MakeTransaction(const AActor* NewInstigator,
-	                                          const AActor* NewTarget,
-	                                          const ETransactionType NewTransactionType,
-	                                          const FString& NewPayload);
 };

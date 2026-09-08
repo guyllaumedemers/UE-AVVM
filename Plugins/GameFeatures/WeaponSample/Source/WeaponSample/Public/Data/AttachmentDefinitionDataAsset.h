@@ -51,13 +51,13 @@ public:
 protected:
 	// @gdemers required for supporting AttributeSet initialization of our actor.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
-	FDataRegistryId AttachmentActorId = FDataRegistryId();
+	FDataRegistryId AttachmentActorId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RequiredTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer RequiredTagsForItemAccess{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer BlockingTagsForItemAccess = FGameplayTagContainer::EmptyContainer;
+	FGameplayTagContainer BlockingTagsForItemAccess{FGameplayTagContainer::EmptyContainer};
 };
 
 /**

@@ -49,11 +49,11 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	bool bDoesDebugTraceShowPersistentLine = false;
+	bool bDoesDebugTraceShowPersistentLine{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	float DebugTraceLifetime = false;
+	float DebugTraceLifetime{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	float SquaredDistanceThreshold = false;
+	float SquaredDistanceThreshold{false};
 };

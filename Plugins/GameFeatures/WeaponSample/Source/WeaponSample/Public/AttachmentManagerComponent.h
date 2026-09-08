@@ -43,13 +43,13 @@ struct WEAPONSAMPLE_API FAttachmentSwapContextArgs
 	TWeakObjectPtr<AAttachmentActor> Attachment = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FSoftObjectPath SrcAttributeSetSoftObjectPath = FSoftObjectPath();
+	FSoftObjectPath SrcAttributeSetSoftObjectPath{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayTag AttachmentSlotTag = FGameplayTag::EmptyTag;
+	FGameplayTag AttachmentSlotTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FName SocketName = NAME_None;
+	FName SocketName{NAME_None};
 };
 
 /**
@@ -63,14 +63,18 @@ struct WEAPONSAMPLE_API FAttachmentToken
 {
 	GENERATED_BODY()
 
-	explicit FAttachmentToken()
+	static FAttachmentToken MakeToken()
 	{
 		static uint32 GlobalUniqueId = 0;
-		UniqueId = ++GlobalUniqueId;
+		
+		FAttachmentToken NewToken;
+		NewToken.UniqueId = ++GlobalUniqueId;
+		
+		return NewToken;
 	}
 
 	UPROPERTY()
-	uint32 UniqueId = 0;
+	uint32 UniqueId{0};
 };
 
 /**
@@ -99,22 +103,27 @@ protected:
 	// action occurs, we can pull out the actor and prevent allocation in world of a new actor.
 	struct FAttachmentBatchingMechanism
 	{
+		FAttachmentBatchingMechanism() = default;
+		FAttachmentBatchingMechanism(const FAttachmentBatchingMechanism&) = default;
+		FAttachmentBatchingMechanism(FAttachmentBatchingMechanism&&) noexcept = default;
+		FAttachmentBatchingMechanism& operator=(const FAttachmentBatchingMechanism&) = default;
+		FAttachmentBatchingMechanism& operator=(FAttachmentBatchingMechanism&&) noexcept = default;
 		~FAttachmentBatchingMechanism();
 
 		void PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment);
 		void BatchDestroy();
 
-		TArray<TWeakObjectPtr<AAttachmentActor>> PendingDestroy;
+		TArray<TWeakObjectPtr<AAttachmentActor>> PendingDestroy{};
 	};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	UPROPERTY(Transient)
-	TMap<FName, TWeakObjectPtr<AAttachmentActor>> EquippedAttachments;
+	TMap<FName, TWeakObjectPtr<AAttachmentActor>> EquippedAttachments{};
 
-	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem;
-	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism;
+	TMap<uint32, TSharedPtr<FStreamableHandle>> AttachmentHandleSystem{};
+	TSharedPtr<FAttachmentBatchingMechanism> BatchingMechanism{};
 	
 private:
 	void SetupAttachments(const TArray<UObject*>& NewResources);

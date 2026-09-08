@@ -37,7 +37,7 @@ struct INVENTORYSAMPLE_API FLoadoutNotificationPayload : public FAVVMNotificatio
 
 	FLoadoutNotificationPayload() = default;
 	FLoadoutNotificationPayload(const FLoadoutNotificationPayload&) = default;
-	FLoadoutNotificationPayload(FLoadoutNotificationPayload&&) = default;
+	FLoadoutNotificationPayload(FLoadoutNotificationPayload&&) noexcept = default;
 	FLoadoutNotificationPayload& operator=(const FLoadoutNotificationPayload&) = default;
 	FLoadoutNotificationPayload& operator=(FLoadoutNotificationPayload&&) noexcept = default;
 	

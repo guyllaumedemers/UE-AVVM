@@ -53,17 +53,17 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bDoesAllowForfaiting = false;
+	bool bDoesAllowForfaiting{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditConditionHides="bDoesAllowForfaiting", EditCondition="!bDoesForfaitingRequireAllVotes"))
-	bool bDoesForfaitingRequireMajorityVotes = false;
+	bool bDoesForfaitingRequireMajorityVotes{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(EditConditionHides="bDoesAllowForfaiting", EditCondition="!bDoesForfaitingRequireMajorityVotes"))
-	bool bDoesForfaitingRequireAllVotes = false;
+	bool bDoesForfaitingRequireAllVotes{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bDoesAllowSwitchingTeam = false;
+	bool bDoesAllowSwitchingTeam{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ToolTip="Collection of tags to create teams from."))
-	TArray<FGameplayTag> TeamTags;
+	TArray<FGameplayTag> TeamTags{};
 };

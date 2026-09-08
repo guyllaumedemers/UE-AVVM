@@ -76,7 +76,7 @@ protected:
 	TWeakObjectPtr<const UArrowComponent> WeaponProxyComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FGameplayTag CurrentFiringMode = FGameplayTag::EmptyTag;
+	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};
 };
 
 /**

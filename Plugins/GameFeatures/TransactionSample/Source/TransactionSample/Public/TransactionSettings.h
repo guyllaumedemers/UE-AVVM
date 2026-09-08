@@ -48,5 +48,5 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	TMap<ETransactionType, TSubclassOf<UTransactionFactoryImpl>> Factories;
+	TMap<ETransactionType, TSubclassOf<UTransactionFactoryImpl>> Factories{};
 };

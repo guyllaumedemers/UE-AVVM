@@ -69,10 +69,10 @@ protected:
 	void DeferredPhysicSwap();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TMap<EPhysicState, TObjectPtr<UPhysicsAsset>> PhysicAssets;
+	TMap<EPhysicState, TObjectPtr<UPhysicsAsset>> PhysicAssets{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
-	TMap<FGameplayTag, EPhysicState> MovementTagToPhysicAssets;
+	TMap<FGameplayTag, EPhysicState> MovementTagToPhysicAssets{};
 	
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UPawnMovementComponent> MovementComponent = nullptr;
@@ -84,5 +84,5 @@ protected:
 	TWeakObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	EPhysicState PreviousState = EPhysicState::Default;
+	EPhysicState PreviousState{EPhysicState::Default};
 };

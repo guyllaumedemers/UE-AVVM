@@ -40,10 +40,10 @@ struct FSwitchTeamContext
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag OldTeamTag = FGameplayTag::EmptyTag;
+	FGameplayTag OldTeamTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	FGameplayTag NewTeamTag = FGameplayTag::EmptyTag;
+	FGameplayTag NewTeamTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const APlayerState> PlayerState = nullptr;

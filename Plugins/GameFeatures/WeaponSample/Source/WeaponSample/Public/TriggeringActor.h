@@ -82,16 +82,16 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bShouldSwapAbilityOnBeginPlay = true;
+	bool bShouldSwapAbilityOnBeginPlay{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
-	bool bDoesDefineAttachmentStatically = false;
+	bool bDoesDefineAttachmentStatically{false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesDefineAttachmentStatically", ItemStruct="TriggeringDefinitionDataTableRow"))
-	FDataRegistryId TriggeringDefinitionId = FDataRegistryId();
+	FDataRegistryId TriggeringDefinitionId{};
 };
 
 /**
@@ -183,7 +183,7 @@ protected:
 	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle = FGameplayAbilitySpecHandle();
+	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
@@ -192,7 +192,7 @@ protected:
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
-	FDelegateHandle DeferredSocketParentingDelegateHandle = FDelegateHandle();
+	FDelegateHandle DeferredSocketParentingDelegateHandle{};
 
 private:
 	const FDataRegistryId GetConditionalTriggeringDefinition() const;
@@ -204,13 +204,13 @@ private:
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass_DEPRECATED = nullptr;
 
 	UPROPERTY()
-	bool bShouldSwapAbilityOnBeginPlay_DEPRECATED = true;
+	bool bShouldSwapAbilityOnBeginPlay_DEPRECATED{true};
 
 	UPROPERTY()
 	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass_DEPRECATED = nullptr;
 
 	UPROPERTY()
-	FDataRegistryId TriggeringDefinitionId_DEPRECATED = FDataRegistryId();
+	FDataRegistryId TriggeringDefinitionId_DEPRECATED{};
 #endif
 };
 

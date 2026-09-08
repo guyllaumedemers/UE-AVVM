@@ -87,12 +87,12 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 }
 
 void UGameStateTransactionHistory::Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
-                                                                     const FTransactionContextArgs& Args)
+                                                                     FTransactionContextArgs Args)
 {
 	auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
 	if (IsValid(TransactionHistory))
 	{
-		TransactionHistory->CreateAndRecordTransaction(Args);
+		TransactionHistory->CreateAndRecordTransaction(MoveTemp(Args));
 	}
 }
 
@@ -149,7 +149,7 @@ UGameStateTransactionHistory* UGameStateTransactionHistory::GetActorComponent(co
 	return TransactionHistory.Get();
 }
 
-void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransactionContextArgs& Args)
+void UGameStateTransactionHistory::CreateAndRecordTransaction(FTransactionContextArgs&& Args)
 {
 #if WITH_SERVER_CODE
 	if (!Args.Target.IsValid() || !Args.Target->HasAuthority())
@@ -157,7 +157,14 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(const FTransaction
 		return;
 	}
 
-	FTransactionObject Transaction = UTransactionObjectUtils::MakeTransaction(Args.Instigator.Get(), Args.Target.Get(), Args.TransactionType, Args.Payload);
+	FTransactionObject Transaction
+	{
+			UTransactionObjectUtils::GetUniqueId(Args.Instigator.Get()),
+			UTransactionObjectUtils::GetUniqueId(Args.Target.Get()),
+			Args.TransactionType,
+			MoveTemp(Args.Payload)
+	};
+	
 	Transactions.MarkArrayDirty();
 	Transactions.TransactionObjects.Add(MoveTemp(Transaction));
 

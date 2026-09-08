@@ -85,23 +85,23 @@ protected:
 	void OnRep_OnTeamChanged(const TArray<UTeamObject*>& OldTeams);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag PlayerStateChannelTag = FGameplayTag::EmptyTag;
+	FGameplayTag PlayerStateChannelTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const UTeamRule> TeamRule = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnTeamChanged")
-	TArray<TObjectPtr<UTeamObject>> Teams;
+	TArray<TObjectPtr<UTeamObject>> Teams{};
 
 	UPROPERTY(Transient, meta=(ToolTip="Players waiting to be assigned to a team based on data from backend."))
-	TArray<TWeakObjectPtr<const APlayerState>> PendingPlayerStates;
+	TArray<TWeakObjectPtr<const APlayerState>> PendingPlayerStates{};
 
 	UPROPERTY(Transient, meta=(ToolTip="Players waiting to be assigned to a team based on data from backend. But that came AFTER a backend request was sent."))
-	TArray<TWeakObjectPtr<const APlayerState>> ScopedLockedPlayerStates;
+	TArray<TWeakObjectPtr<const APlayerState>> ScopedLockedPlayerStates{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
-	FAVVMGameThreadLock SynchronizationLock = FAVVMGameThreadLock();
+	FAVVMGameThreadLock SynchronizationLock{};
 };
