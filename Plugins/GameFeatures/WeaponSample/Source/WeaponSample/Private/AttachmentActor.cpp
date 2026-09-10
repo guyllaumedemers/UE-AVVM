@@ -329,11 +329,14 @@ void AAttachmentActor::Bind_Implementation()
 	                Outer,
 	                TEXT("Bind to Target."));
 
-	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
+	if (HasAuthority())
 	{
-		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+		// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
+		auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+		if (IsValid(ASC))
+		{
+			ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+		}
 	}
 
 	// @gdemers allow linking anim instance to driving anim instance.
@@ -360,11 +363,14 @@ void AAttachmentActor::Unbind_Implementation()
 	                Outer,
 	                TEXT("Unbind Target."));
 
-	// @gdemers clear AttributeSet provided by this attachment.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
+	if (HasAuthority())
 	{
-		ASC->UnRegisterAttributeSet(this);
+		// @gdemers clear AttributeSet provided by this attachment.
+		auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+		if (IsValid(ASC))
+		{
+			ASC->UnRegisterAttributeSet(this);
+		}
 	}
 
 	// @gdemers allow unlinking anim instance from driving anim instance.

@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "TriggeringActor.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMLogger.h"
@@ -37,6 +38,7 @@
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
 #include "Resources/AVVMResourceManagerComponent.h"
+#include "Tags/PrivateTags.h"
 
 TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
@@ -257,6 +259,9 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 
 	// @gdemers bind animation, and attribute set with new owning outer
 	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
+	
+	// @gdemers notify loadout system to attempt default equipping ourself if we are targeting the correct slot.
+	NotifyOnNewActorStateBound();
 }
 
 void ATriggeringActor::Detach_Implementation()
@@ -289,14 +294,17 @@ void ATriggeringActor::Bind_Implementation()
 	                Outer,
 	                TEXT("Bind to Target."));
 
-	// @gdemers Unregister/Register ability from owner.
-	Server_SwapAbility(true);
-
-	// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
+	if (HasAuthority())
 	{
-		ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+		// @gdemers Unregister/Register ability from owner.
+		Server_SwapAbility(true);
+
+		// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
+		auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+		if (IsValid(ASC))
+		{
+			ASC->RegisterAttributeSet(OwnedAttributeSet, this);
+		}
 	}
 
 	// @gdemers allow linking anim instance to driving anim instance.
@@ -305,9 +313,6 @@ void ATriggeringActor::Bind_Implementation()
 	{
 		TargetSkeletalMeshComponent->LinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
-	
-	// @gdemers notify loadout system to attempt default equipping ourself if we are targeting the correct slot.
-	NotifyOnNewActorStateBound();
 }
 
 void ATriggeringActor::Unbind_Implementation()
@@ -320,17 +325,21 @@ void ATriggeringActor::Unbind_Implementation()
 
 	AVVM_LOGGER_LOG(LogWeaponSample,
 	                this,
-	                this,
+	                Outer,
 	                TEXT("Unbind Target."));
 
-	// @gdemers Unregister ability from owner.
-	Server_SwapAbility(false);
-
-	// @gdemers clear AttributeSet provided by this attachment.
-	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
-	if (IsValid(ASC))
+	// @gdemers predictive weapon selection will execute both server-client.
+	if (HasAuthority())
 	{
-		ASC->UnRegisterAttributeSet(this);
+		// @gdemers Unregister ability from owner.
+		Server_SwapAbility(false);
+
+		// @gdemers clear AttributeSet provided by this attachment.
+		auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
+		if (IsValid(ASC))
+		{
+			ASC->UnRegisterAttributeSet(this);
+		}
 	}
 
 	// @gdemers allow unlinking anim instance from driving anim instance.
@@ -343,34 +352,84 @@ void ATriggeringActor::Unbind_Implementation()
 
 void ATriggeringActor::Restart_Implementation()
 {
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+	
+	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
 	AVVM_LOGGER_LOG(LogWeaponSample,
 					this,
-					this,
+					Outer,
 					TEXT("Restart animation"));
+	
+	FGameplayEventData GAS_EventData{};
+	GAS_EventData.Instigator = this;
+	GAS_EventData.Target = Outer;
+	// @gdemers notify locally predicted GAS "ToggleEquip" Ability to play "equip" montage.
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_DRAW, MoveTemp(GAS_EventData));
 }
 
 void ATriggeringActor::Pause_Implementation()
 {
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+	
+	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 	AVVM_LOGGER_LOG(LogWeaponSample,
-					this,
-					this,
-					TEXT("Pause animation"));
+	                this,
+	                Outer,
+	                TEXT("Pause animation"));
+	
+	FGameplayEventData GAS_EventData{};
+	GAS_EventData.Instigator = this;
+	GAS_EventData.Target = Outer;
+	GAS_EventData.EventMagnitude = UAVVMToolkitUtils::GetServerWorldTime(this); // timestamp to cache on the ability to pause/resume montage at correct time during pause/resume segment.
+	// @gdemers notify locally predicted GAS "ToggleEquip" Ability to interrupt/cancel "equip" montage. a secondary event will trigger to play the equipping of another instance.
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_HOLSTERED, MoveTemp(GAS_EventData));
 }
 
 void ATriggeringActor::Resume_Implementation()
 {
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+	
+	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
 	AVVM_LOGGER_LOG(LogWeaponSample,
-					this,
-					this,
-					TEXT("Resume animation"));
+	                this,
+	                this,
+	                TEXT("Resume animation"));
+	
+	FGameplayEventData GAS_EventData{};
+	GAS_EventData.Instigator = this;
+	GAS_EventData.Target = Outer;
+	GAS_EventData.EventMagnitude = UAVVMToolkitUtils::GetServerWorldTime(this); // timestamp to cache on the ability to pause/resume montage at correct time during pause/resume segment.
+	// @gdemers notify locally predicted GAS "ToggleEquip" Ability to play "equip" montage.
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_DRAW, MoveTemp(GAS_EventData));
 }
 
 void ATriggeringActor::Flush_Implementation()
 {
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+	
+	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 	AVVM_LOGGER_LOG(LogWeaponSample,
 					this,
-					this,
+					Outer,
 					TEXT("Flush animation"));
+	
+	// TODO @gdemers determine what are the requirements for flushing the pipeline
 }
 
 int32 ATriggeringActor::GetProviderUniqueId_Implementation() const
