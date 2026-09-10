@@ -195,7 +195,7 @@ protected:
 	FDelegateHandle DeferredSocketParentingDelegateHandle{};
 
 private:
-	const FDataRegistryId GetConditionalTriggeringDefinition() const;
+	FDataRegistryId GetConditionalTriggeringDefinition() const;
 	friend class UTriggeringUtils;
 
 #if WITH_EDITORONLY_DATA

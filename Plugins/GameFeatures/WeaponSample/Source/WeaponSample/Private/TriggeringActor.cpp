@@ -474,9 +474,6 @@ void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
 	{
 		return;
 	}
-	
-	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
-	// if the element is active, and not equipped which are two unique states.
 
 	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
@@ -541,7 +538,7 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 	                                               });
 }
 
-const FDataRegistryId ATriggeringActor::GetConditionalTriggeringDefinition() const
+FDataRegistryId ATriggeringActor::GetConditionalTriggeringDefinition() const
 {
 	const bool bResult = GetTriggeringActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bDoesDefineAttachmentStatically;
 	return bResult ? GetTriggeringDefinitionId() : FDataRegistryId{};

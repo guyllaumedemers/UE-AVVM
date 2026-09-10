@@ -290,6 +290,9 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 		const auto Observer = TScriptInterface<const IAVVMDoesActorSupportOnAttachmentNotify>(Target);
 		Observer->NotifyOnNewSocketAttached(NewItemAttachmentSlotTag, this);
 	}
+	
+	// @gdemers notify loadout system to attempt default equipping ourself if we are targeting the correct slot.
+	NotifyOnNewActorStateBound();
 }
 
 void AAttachmentActor::Detach_Implementation()
@@ -345,9 +348,6 @@ void AAttachmentActor::Bind_Implementation()
 	{
 		TargetSkeletalMeshComponent->LinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
-	
-	// @gdemers notify loadout system to attempt default equipping ourself if we are targeting the correct slot.
-	NotifyOnNewActorStateBound();
 }
 
 void AAttachmentActor::Unbind_Implementation()
@@ -436,9 +436,6 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	{
 		return;
 	}
-	
-	// TODO @gdemers we have find a proper root, and can initialize. We however may want to only grant an attribute set
-	// if the element is active, and not equipped which are two unique states.
 
 	// @gdemers Initialized the AttributeSet for the first time based on deferred socketing.
 	auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
@@ -449,13 +446,13 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	}
 }
 
-const FGameplayTag AAttachmentActor::GetConditionalAttachmentSlotTag() const
+FGameplayTag AAttachmentActor::GetConditionalAttachmentSlotTag() const
 {
 	const bool bResult = GetAttachmentActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bDoesAllowDefiningAttachmentSlotTag;
 	return bResult ? GetAttachmentSlotTag() : FGameplayTag::EmptyTag;
 }
 
-const FName AAttachmentActor::GetConditionalSocketName() const
+FName AAttachmentActor::GetConditionalSocketName() const
 {
 	const bool bResult = GetAttachmentActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bDoesAllowDefiningSocketName;
 	return bResult ? GetSocketName() : NAME_None;
