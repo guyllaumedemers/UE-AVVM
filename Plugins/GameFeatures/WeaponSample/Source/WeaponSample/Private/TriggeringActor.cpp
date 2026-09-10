@@ -388,6 +388,7 @@ void ATriggeringActor::Pause_Implementation()
 	FGameplayEventData GAS_EventData{};
 	GAS_EventData.Instigator = this;
 	GAS_EventData.Target = Outer;
+	// @gdemers IMPORTANT possible truncation here.
 	GAS_EventData.EventMagnitude = UAVVMToolkitUtils::GetServerWorldTime(this); // timestamp to cache on the ability to pause/resume montage at correct time during pause/resume segment.
 	// @gdemers notify locally predicted GAS "ToggleEquip" Ability to interrupt/cancel "equip" montage. a secondary event will trigger to play the equipping of another instance.
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_HOLSTERED, MoveTemp(GAS_EventData));
@@ -410,6 +411,7 @@ void ATriggeringActor::Resume_Implementation()
 	FGameplayEventData GAS_EventData{};
 	GAS_EventData.Instigator = this;
 	GAS_EventData.Target = Outer;
+	// @gdemers IMPORTANT possible truncation here.
 	GAS_EventData.EventMagnitude = UAVVMToolkitUtils::GetServerWorldTime(this); // timestamp to cache on the ability to pause/resume montage at correct time during pause/resume segment.
 	// @gdemers notify locally predicted GAS "ToggleEquip" Ability to play "equip" montage.
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGERING_ACTOR_STATUS_STATE_DRAW, MoveTemp(GAS_EventData));
