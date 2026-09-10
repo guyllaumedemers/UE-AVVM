@@ -190,6 +190,22 @@ const AActor* AAVVMBeaconClusterActor::GetClosestClusterElement(const AActor* Ot
 	}
 }
 
+TArray<const AActor*> AAVVMBeaconClusterActor::GetClusterElements(const TArray<const AActor*>& IgnoredActors) const
+{
+	TArray<const AActor*> OutResult{};
+
+	ClusterElements.SumV2([&OutResult, &IgnoredActors](const TWeakObjectPtr<const AActor>& ClusterElement)
+	{
+		auto* Target = ClusterElement.Get();
+		if (!IgnoredActors.Contains(Target))
+		{
+			OutResult.Add(Target);
+		}
+	});
+
+	return OutResult;
+}
+
 void AAVVMBeaconClusterActor::UpdateBeaconTransform()
 {
 	FVector OutAverageLocation{FVector::ZeroVector};
@@ -232,7 +248,7 @@ double FAVVMClusterSystem::GetMaximumBeaconRadius() const
 	return 1000.f;
 }
 
-FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const AActor* PartitionActor)
+FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const AActor* PartitionActor) &
 {
 	if (!IsValid(PartitionActor))
 	{
@@ -304,7 +320,7 @@ FAVVMClusterObjectHandle FAVVMClusterSystem::PushPartition(UWorld* World, const 
 }
 
 bool FAVVMClusterSystem::PopPartition(const AActor* PartitionActor,
-                                      const FAVVMClusterObjectHandle& Handle) const
+                                      const FAVVMClusterObjectHandle& Handle) const &
 {
 	if (!Handle.OwnedActor.IsValid())
 	{
@@ -323,9 +339,15 @@ bool FAVVMClusterSystem::PopPartition(const AActor* PartitionActor,
 	}
 }
 
-const AActor* FAVVMClusterSystem::GetClosestOverlappingObject(const FAVVMClusterObjectHandle& Handle,
-                                                              const AActor* OtherActor) const
+const AActor* FAVVMClusterSystem::GetClosestClusterElement(const FAVVMClusterObjectHandle& Handle,
+                                                              const AActor* OtherActor) const &
 {
 	const auto* Beacon = Cast<AAVVMBeaconClusterActor>(Handle.OwnedActor.Get());
 	return ensureAlwaysMsgf(IsValid(Beacon), TEXT("Invalid Beacon referenced.")) ? Beacon->GetClosestClusterElement(OtherActor) : nullptr;
+}
+
+TArray<const AActor*> FAVVMClusterSystem::GetClusterElements(const FAVVMClusterObjectHandle& Handle, const TArray<const AActor*>& IgnoredActors) const &
+{
+	const auto* Beacon = Cast<AAVVMBeaconClusterActor>(Handle.OwnedActor.Get());
+	return ensureAlwaysMsgf(IsValid(Beacon), TEXT("Invalid Beacon referenced.")) ? Beacon->GetClusterElements(IgnoredActors) : TArray<const AActor*>{};
 }

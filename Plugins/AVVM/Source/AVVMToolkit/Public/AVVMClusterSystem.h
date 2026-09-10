@@ -81,6 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const AActor* GetClosestClusterElement(const AActor* OtherActor) const;
 
+	// @gdemers for some reason, unreal reflection system UFUNCTION(BlueprintCallable) strip away
+	// const-ness which prevent overload resolution when compiling...
+	TArray<const AActor*> GetClusterElements(const TArray<const AActor*>& IgnoredActors) const;
+
 protected:
 	void UpdateBeaconTransform();
 
@@ -97,9 +101,10 @@ protected:
  */
 struct AVVMTOOLKIT_API FAVVMClusterSystem
 {
-	FAVVMClusterObjectHandle PushPartition(UWorld* World, const AActor* PartitionActor);
-	bool PopPartition(const AActor* PartitionActor, const FAVVMClusterObjectHandle& Handle) const;
-	const AActor* GetClosestOverlappingObject(const FAVVMClusterObjectHandle& Handle, const AActor* OtherActor) const;
+	FAVVMClusterObjectHandle PushPartition(UWorld* World, const AActor* PartitionActor) &;
+	bool PopPartition(const AActor* PartitionActor, const FAVVMClusterObjectHandle& Handle) const &;
+	const AActor* GetClosestClusterElement(const FAVVMClusterObjectHandle& Handle, const AActor* OtherActor) const &;
+	TArray<const AActor*> GetClusterElements(const FAVVMClusterObjectHandle& Handle, const TArray<const AActor*>& IgnoredActors) const &;
 
 protected:
 	virtual AAVVMBeaconClusterActor* Factory(UWorld* World, const FTransform& SpawnTransform, const FActorSpawnParameters& SpawnParams);

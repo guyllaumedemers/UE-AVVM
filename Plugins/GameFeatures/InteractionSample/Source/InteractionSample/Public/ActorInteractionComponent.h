@@ -57,6 +57,9 @@ struct INTERACTIONSAMPLE_API FInteractionSparseData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bShouldPreventContingency{true};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bShouldPreventMultipleOverlaps{true};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ToolTip="Set the default size of our collection type."))
 	int32 DefaultAllocationSize{6};
 
@@ -103,18 +106,12 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-	                                      AActor* OtherActor,
-	                                      UPrimitiveComponent* OtherComp,
-	                                      int32 OtherBodyIndex,
-	                                      bool bFromSweep,
-	                                      const FHitResult& SweepResult);
+	void OnPrimitiveComponentBeginOverlap(AActor* OverlappedActor,
+	                                      AActor* OtherActor);
 
 	UFUNCTION()
-	void OnPrimitiveComponentEndOverlap(UPrimitiveComponent* OverlappedComponent,
-	                                    AActor* OtherActor,
-	                                    UPrimitiveComponent* OtherComp,
-	                                    int32 OtherBodyIndex);
+	void OnPrimitiveComponentEndOverlap(AActor* OverlappedActor,
+	                                    AActor* OtherActor);
 
 	void Server_AddRecord(const AActor* NewInstigator,
 	                      const AActor* NewTarget);
@@ -131,7 +128,7 @@ protected:
 	FInteractionObjectFastArray Records{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	TWeakObjectPtr<AActor> OwningOuter = nullptr;
 	
 	FAVVMClusterObjectHandle Handle{};
 

@@ -65,7 +65,7 @@ void UActorInteractionComponent::BeginPlay()
 	// @gdemers allow control over collection size based on user-defined requirements.
 	Records.InteractionObjects.Reset(GetDefaultAllocationSize());
 
-	const auto* Outer = GetTypedOuter<AActor>();
+	auto* Outer = GetTypedOuter<AActor>();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -94,13 +94,8 @@ void UActorInteractionComponent::BeginPlay()
 	}
 
 	Handle = UInteractionManagerSubsystem::Static_Register(GetWorld(), this);
-
-	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-	if (ensureAlwaysMsgf(IsValid(CollisionComponent), TEXT("Outer missing CollisionComponent!")))
-	{
-		CollisionComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
-		CollisionComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
-	}
+	Outer->OnActorBeginOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentBeginOverlap);
+	Outer->OnActorEndOverlap.AddUniqueDynamic(this, &UActorInteractionComponent::OnPrimitiveComponentEndOverlap);
 #endif
 }
 
@@ -114,7 +109,7 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 		InteractionImpl->SafeEnd();
 	}
 
-	const auto* Outer = OwningOuter.Get();
+	auto* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
 	{
 		return;
@@ -135,13 +130,8 @@ void UActorInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReaso
 	}
 
 	UInteractionManagerSubsystem::Static_Unregister(GetWorld(), this, Handle);
-
-	auto* CollisionComponent = Outer->GetComponentByClass<UShapeComponent>();
-	if (IsValid(CollisionComponent))
-	{
-		CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
-		CollisionComponent->OnComponentEndOverlap.RemoveAll(this);
-	}
+	Outer->OnActorBeginOverlap.RemoveAll(this);
+	Outer->OnActorEndOverlap.RemoveAll(this);
 #endif
 }
 
@@ -229,30 +219,32 @@ void UActorInteractionComponent::MoveDataToSparseClassDataStruct() const
 }
 #endif
 
-void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-                                                                  AActor* OtherActor,
-                                                                  UPrimitiveComponent* OtherComp,
-                                                                  int32 OtherBodyIndex,
-                                                                  bool bFromSweep,
-                                                                  const FHitResult& SweepResult)
+void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(AActor* OverlappedActor,
+                                                                  AActor* OtherActor)
 {
-#if WITH_EDITOR
-	DrawDebugSphere(GetWorld(), SweepResult.ImpactPoint, 5.f, 5, FColor::Green, false, 20.f);
-	DrawDebugSphere(GetWorld(), SweepResult.Location, 5.f, 5, FColor::Red, false, 20.f);
-#endif
-	
-	if (!IsValid(OtherActor))
+	const UWorld* World = GetWorld();
+	if (!IsValid(World) || !IsValid(OtherActor))
 	{
 		return;
 	}
 
 	const AActor* Instigator = OwningOuter.Get();
-	if (!UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(GetWorld(), FOverlapContext{Handle, Instigator, OtherActor}))
-	{
-		OnPrimitiveComponentEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
-		return;
-	}
 
+	const bool bDoesPreventMultipleOverlaps = GetInteractionSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldPreventMultipleOverlaps;
+	if (bDoesPreventMultipleOverlaps)
+	{
+		const auto OverlapContext = FOverlapContext{Handle, Instigator, OtherActor};
+		const bool bIsClosestOverlap = UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(World, OverlapContext);
+		if (bIsClosestOverlap)
+		{
+			UInteractionManagerSubsystem::Static_PreventMultipleOverlappingObject(World, OverlapContext);
+		}
+		else
+		{
+			return;
+		}
+	}
+	
 	const UAVVMReplicatedTagComponent* ReplicatedTagComponent = nullptr;
 	const AController* Target = OtherActor->GetInstigatorController();
 	if (IsValid(Target))
@@ -286,10 +278,8 @@ void UActorInteractionComponent::OnPrimitiveComponentBeginOverlap(UPrimitiveComp
 	}
 }
 
-void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(UPrimitiveComponent* OverlappedComponent,
-                                                                AActor* OtherActor,
-                                                                UPrimitiveComponent* OtherComp,
-                                                                int32 OtherBodyIndex)
+void UActorInteractionComponent::OnPrimitiveComponentEndOverlap(AActor* OverlappedActor,
+                                                                AActor* OtherActor)
 {
 	if (!IsValid(OtherActor))
 	{

@@ -62,6 +62,15 @@ bool UInteractionManagerSubsystem::Static_CheckIfClosestOverlappingObject(const 
 	return IsValid(Subsystem) ? Subsystem->CheckIfClosestOverlappingObject(OverlapContext) : false;
 }
 
+void UInteractionManagerSubsystem::Static_PreventMultipleOverlappingObject(const UWorld* World, const FOverlapContext& OverlapContext)
+{
+	auto* Subsystem = UInteractionManagerSubsystem::Get(World);
+	if (IsValid(Subsystem))
+	{
+		Subsystem->PreventMultipleOverlappingObject(OverlapContext);
+	}
+}
+
 UInteractionManagerSubsystem* UInteractionManagerSubsystem::Get(const UWorld* World)
 {
 	return UWorld::GetSubsystem<UInteractionManagerSubsystem>(World);
@@ -92,6 +101,19 @@ bool UInteractionManagerSubsystem::Unregister(const UActorInteractionComponent* 
 
 bool UInteractionManagerSubsystem::CheckIfClosestOverlappingObject(const FOverlapContext& OverlapContext) const
 {
-	const AActor* SearchResult = ClusterSystem.GetClosestOverlappingObject(OverlapContext.Handle, OverlapContext.OtherActor.Get());
+	const AActor* SearchResult = ClusterSystem.GetClosestClusterElement(OverlapContext.Handle, OverlapContext.OtherActor.Get());
 	return IsValid(SearchResult) && (SearchResult == OverlapContext.Instigator);
+}
+
+void UInteractionManagerSubsystem::PreventMultipleOverlappingObject(const FOverlapContext& OverlapContext) const
+{
+	TArray<const AActor*> OutResults = ClusterSystem.GetClusterElements(OverlapContext.Handle, {OverlapContext.OtherActor.Get()});
+	for (const auto* OtherActor : OutResults)
+	{
+		auto* NonConst = const_cast<AActor*>(OtherActor);
+		if (IsValid(OtherActor))
+		{
+			NonConst->OnActorEndOverlap.Broadcast(NonConst, const_cast<AActor*>(OverlapContext.OtherActor.Get()));
+		}
+	}
 }

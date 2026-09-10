@@ -42,7 +42,9 @@ struct INTERACTIONSAMPLE_API FInteractionClusterSystem : public FAVVMClusterSyst
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	FOverlapContext is a context class that encapsulate information about an overlap event.
  */
 USTRUCT(BlueprintType)
 struct INTERACTIONSAMPLE_API FOverlapContext
@@ -82,12 +84,14 @@ public:
 	static FAVVMClusterObjectHandle Static_Register(const UWorld* World, const UActorInteractionComponent* InteractionComponent);
 	static bool Static_Unregister(const UWorld* World, const UActorInteractionComponent* InteractionComponent, const FAVVMClusterObjectHandle& Handle);
 	static bool Static_CheckIfClosestOverlappingObject(const UWorld* World, const FOverlapContext& OverlapContext);
+	static void Static_PreventMultipleOverlappingObject(const UWorld* World, const FOverlapContext& OverlapContext);
 
 protected:
 	static UInteractionManagerSubsystem* Get(const UWorld* World);
 	FAVVMClusterObjectHandle Register(const UActorInteractionComponent* InteractionComponent);
 	bool Unregister(const UActorInteractionComponent* InteractionComponent, const FAVVMClusterObjectHandle& Handle);
 	bool CheckIfClosestOverlappingObject(const FOverlapContext& OverlapContext) const;
+	void PreventMultipleOverlappingObject(const FOverlapContext& OverlapContext) const;
 
 	FInteractionClusterSystem ClusterSystem{};
 };
