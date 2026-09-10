@@ -44,7 +44,7 @@ struct INVENTORYSAMPLE_API FProviderDefaultItemProperties
 {
 	GENERATED_BODY()
 	
-	const int32 GetRelationshipBitmask() const;
+	static const int32 Static_GetRelationshipBitmask(const FProviderDefaultItemProperties& ItemProperties);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};

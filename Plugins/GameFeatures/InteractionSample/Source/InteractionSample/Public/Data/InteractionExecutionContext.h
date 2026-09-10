@@ -35,6 +35,11 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionContext
 {
 	GENERATED_BODY()
 
+	FInteractionExecutionContext() = default;
+	FInteractionExecutionContext(const FInteractionExecutionContext&) = default;
+	FInteractionExecutionContext(FInteractionExecutionContext&&) noexcept = default;
+	FInteractionExecutionContext& operator=(const FInteractionExecutionContext&) = default;
+	FInteractionExecutionContext& operator=(FInteractionExecutionContext&&) noexcept = default;
 	virtual ~FInteractionExecutionContext() = default;
 
 	virtual void PumpHeartbeat(const AActor* NewInstigator,
@@ -62,6 +67,12 @@ USTRUCT()
 struct INTERACTIONSAMPLE_API FInteractionExecutionContextAVVMNotify : public FInteractionExecutionContext
 {
 	GENERATED_BODY()
+
+	FInteractionExecutionContextAVVMNotify() = default;
+	FInteractionExecutionContextAVVMNotify(const FInteractionExecutionContextAVVMNotify&) = default;
+	FInteractionExecutionContextAVVMNotify(FInteractionExecutionContextAVVMNotify&&) noexcept = default;
+	FInteractionExecutionContextAVVMNotify& operator=(const FInteractionExecutionContextAVVMNotify&) = default;
+	FInteractionExecutionContextAVVMNotify& operator=(FInteractionExecutionContextAVVMNotify&&) noexcept = default;
 
 	virtual void PumpHeartbeat(const AActor* NewInstigator,
 	                           const AActor* NewTarget,

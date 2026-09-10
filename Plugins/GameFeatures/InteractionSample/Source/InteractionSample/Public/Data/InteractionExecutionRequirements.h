@@ -38,7 +38,13 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionRequirements
 {
 	GENERATED_BODY()
 
+	FInteractionExecutionRequirements() = default;
+	FInteractionExecutionRequirements(const FInteractionExecutionRequirements&) = default;
+	FInteractionExecutionRequirements(FInteractionExecutionRequirements&&) noexcept = default;
+	FInteractionExecutionRequirements& operator=(const FInteractionExecutionRequirements&) = default;
+	FInteractionExecutionRequirements& operator=(FInteractionExecutionRequirements&&) noexcept = default;
 	virtual ~FInteractionExecutionRequirements() = default;
+	
 	virtual bool DoesMeetRequirements(const TInstancedStruct<FInteractionExecutionRequirements> Compare) const PURE_VIRTUAL(DoesMetRequirements, return false;);
 
 	// @gdemers wrapper function template to avoid writing TInstancedStruct<FInteractionExecutionRequirements>::Make<T>
@@ -66,7 +72,12 @@ struct INTERACTIONSAMPLE_API FInteractionExecutionFloatRequirements : public FIn
 	GENERATED_BODY()
 
 	FInteractionExecutionFloatRequirements() = default;
-	FInteractionExecutionFloatRequirements(const float NewThreshold);
+	FInteractionExecutionFloatRequirements(const FInteractionExecutionFloatRequirements&) = default;
+	FInteractionExecutionFloatRequirements(FInteractionExecutionFloatRequirements&&) noexcept = default;
+	FInteractionExecutionFloatRequirements& operator=(const FInteractionExecutionFloatRequirements&) = default;
+	FInteractionExecutionFloatRequirements& operator=(FInteractionExecutionFloatRequirements&&) noexcept = default;
+	explicit FInteractionExecutionFloatRequirements(const float NewThreshold);
+	
 	virtual bool DoesMeetRequirements(const TInstancedStruct<FInteractionExecutionRequirements> Compare) const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="!bRequireInputMashing"))

@@ -25,20 +25,20 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateItemId.Relationship.Character"));
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateItemId.Relationship.Item"));
 
-const int32 FProviderDefaultItemProperties::GetRelationshipBitmask() const
+const int32 FProviderDefaultItemProperties::Static_GetRelationshipBitmask(const FProviderDefaultItemProperties& ItemProperties)
 {
 	int32 Bitmask = 0; // @gdemers 0 is storage by design
-	if (RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
+	if (ItemProperties.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
 	{
 		Bitmask += (1/*2^0*/);
 	}
 
-	if (RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
+	if (ItemProperties.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
 	{
 		Bitmask += (2/*2^1*/);
 	}
 
-	if (RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ITEM}))
+	if (ItemProperties.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ITEM}))
 	{
 		Bitmask += (4/*2^2*/);
 	}

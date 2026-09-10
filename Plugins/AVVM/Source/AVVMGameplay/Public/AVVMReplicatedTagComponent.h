@@ -61,7 +61,7 @@ public:
 	static UAVVMReplicatedTagComponent* GetActorComponent(const AActor* NewTarget);
 
 	UPROPERTY(BlueprintAssignable)
-	FOnReplicatedTagChanged OnReplicatedTagChanged;
+	FOnReplicatedTagChanged OnReplicatedTagChanged{};
 
 protected:
 	UFUNCTION()

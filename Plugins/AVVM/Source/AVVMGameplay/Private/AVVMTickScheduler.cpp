@@ -380,35 +380,35 @@ void UAVVMTickScheduler::InitRule()
 	}
 }
 
-int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, UActorComponent* ActorComponent)
+int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, UActorComponent* ActorComponent) &
 {
 	FAVVMRunner_ActorComponent& OutResult = Jobs_ActorComponent.FindOrAdd(Class);
 	OutResult.Entities.AddUnique(ActorComponent);
 	return reinterpret_cast<int64>(&OutResult.Entities);
 }
 
-int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, AActor* Actor)
+int64 UAVVMTickScheduler::FAVVMJobQueue::Add(const UClass* Class, AActor* Actor) &
 {
 	FAVVMRunner_Actor& OutResult = Jobs_Actor.FindOrAdd(Class);
 	OutResult.Entities.AddUnique(Actor);
 	return reinterpret_cast<int64>(&OutResult.Entities);
 }
 
-int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents)
+int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents) &
 {
 	FAVVMRunner_ActorComponent& Runner_ActorComponent = Jobs_ActorComponent.FindOrAdd(Class);
 	Runner_ActorComponent.Entities.Append(ActorComponents);
 	return reinterpret_cast<int64>(&Jobs_ActorComponent[Class].Entities);
 }
 
-int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors)
+int64 UAVVMTickScheduler::FAVVMJobQueue::Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors) &
 {
 	FAVVMRunner_Actor& Runner_Actor = Jobs_Actor.FindOrAdd(Class);
 	Runner_Actor.Entities.Append(Actors);
 	return reinterpret_cast<int64>(&Jobs_Actor[Class].Entities);
 }
 
-int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, UActorComponent* ActorComponent)
+int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, UActorComponent* ActorComponent) &
 {
 	if (!IsValid(Class) || !IsValid(ActorComponent))
 	{
@@ -420,7 +420,7 @@ int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, UActorComponent* 
 	return OutHandle;
 }
 
-int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, AActor* Actor)
+int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, AActor* Actor) &
 {
 	if (!IsValid(Class) || !IsValid(Actor))
 	{
@@ -433,7 +433,7 @@ int64 UAVVMTickScheduler::FAVVMMLFQ::Push(const UClass* Class, AActor* Actor)
 	return OutHandle;
 }
 
-void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, UActorComponent* ActorComponent) const
+void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, UActorComponent* ActorComponent) const &
 {
 	auto* PtrToArray = reinterpret_cast<TArray<TWeakObjectPtr<UActorComponent>>*>(Handle);
 	if (ensureAlwaysMsgf(PtrToArray != nullptr,
@@ -443,7 +443,7 @@ void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, UActorComponent* Act
 	}
 }
 
-void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, AActor* Actor) const
+void UAVVMTickScheduler::FAVVMMLFQ::Pop(const int64 Handle, AActor* Actor) const &
 {
 	auto* PtrToArray = reinterpret_cast<TArray<TWeakObjectPtr<AActor>>*>(Handle);
 	if (ensureAlwaysMsgf(PtrToArray != nullptr,

@@ -25,20 +25,20 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateTreeNodeId.Relationship.Character"));
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateTreeNodeId.Relationship.Item"));
 
-const int32 FSkillTreeNodePhase::GetRelationshipBitmask() const
+const int32 FSkillTreeNodePhase::Static_GetRelationshipBitmask(const FSkillTreeNodePhase& SkillTreeNodePhase)
 {
 	int32 Bitmask = 0; // @gdemers 0 is storage by design
-	if (RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
+	if (SkillTreeNodePhase.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
 	{
 		Bitmask += (1/*2^0*/);
 	}
 
-	if (RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
+	if (SkillTreeNodePhase.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
 	{
 		Bitmask += (2/*2^1*/);
 	}
 
-	if (RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM}))
+	if (SkillTreeNodePhase.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM}))
 	{
 		Bitmask += (4/*2^2*/);
 	}

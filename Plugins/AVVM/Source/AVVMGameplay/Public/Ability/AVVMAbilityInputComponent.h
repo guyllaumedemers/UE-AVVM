@@ -59,11 +59,7 @@ class AVVMGAMEPLAY_API UAVVMAbilityInputComponent : public UActorComponent
 		FAVVMInputActionCallbackContext& operator=(FAVVMInputActionCallbackContext&&) noexcept = default;
 		
 		explicit FAVVMInputActionCallbackContext(const UInputAction* NewInputAction,
-		                                         const ETriggerEvent NewTriggerEvent)
-			: InputAction(NewInputAction),
-			  TriggerEvent(NewTriggerEvent)
-		{
-		}
+		                                         const ETriggerEvent NewTriggerEvent);
 
 		TWeakObjectPtr<const UInputAction> InputAction = nullptr;
 		ETriggerEvent TriggerEvent{ETriggerEvent::None};

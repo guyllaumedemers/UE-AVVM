@@ -50,7 +50,7 @@ class AVVMGAMEPLAY_API UAVVMGameFeatureAction_AddInputMappingContext : public UG
 	 */
 	struct FContextHandles
 	{
-		FDelegateHandle GameInstanceStartHandle;
+		FDelegateHandle GameInstanceStartHandle{};
 	};
 
 public:

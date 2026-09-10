@@ -360,7 +360,7 @@ bool UBatchingSubsystem::FBatchContext::DoesQualifyForBatchDestroy(const float M
 	return Candidates.Num() >= MaxSize;
 }
 
-void UBatchingSubsystem::FBatchContext::Obliterate()
+void UBatchingSubsystem::FBatchContext::Obliterate() &
 {
 	for (auto Iterator = Candidates.CreateIterator(); Iterator; ++Iterator)
 	{
@@ -382,17 +382,17 @@ void UBatchingSubsystem::FBatchContext::Obliterate()
 	}
 }
 
-void UBatchingSubsystem::FBatchContext::Add(AActor* Actor)
+void UBatchingSubsystem::FBatchContext::Add(AActor* Actor) &
 {
 	Candidates.Add(Actor);
 }
 
-void UBatchingSubsystem::FBatchContext::Remove(AActor* Actor)
+void UBatchingSubsystem::FBatchContext::Remove(AActor* Actor) &
 {
 	Candidates.Remove(Actor);
 }
 
-void UBatchingSubsystem::FBatchContext::Invalidate() const
+void UBatchingSubsystem::FBatchContext::Invalidate() const &
 {
 	for (auto Iterator = Candidates.CreateConstIterator(); Iterator; ++Iterator)
 	{

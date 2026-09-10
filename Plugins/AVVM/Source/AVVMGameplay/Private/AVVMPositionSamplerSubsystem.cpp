@@ -129,7 +129,7 @@ UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::FAVVMPositionSampler()
 	Samples.Init(FAVVMPositionSample(), SampleSize);
 }
 
-FBoxCenterAndExtent UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::GetClosestSample(const double Timestamp) const
+FBoxCenterAndExtent UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::GetClosestSample(const double Timestamp) const &
 {
 	const FAVVMPositionSample* ClosestLowerBound = nullptr;
 	const FAVVMPositionSample* ClosestUpperBound = nullptr;
@@ -161,7 +161,7 @@ FBoxCenterAndExtent UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::GetClos
 	return Result;
 }
 
-void UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::Sample(const FAVVMPositionSample& NewSample)
+void UAVVMPositionSamplerSubsystem::FAVVMPositionSampler::Sample(const FAVVMPositionSample& NewSample) &
 {
 	Samples[CurrSampleIndex] = NewSample;
 	CurrSampleIndex = ((CurrSampleIndex + 1) % Samples.Num());

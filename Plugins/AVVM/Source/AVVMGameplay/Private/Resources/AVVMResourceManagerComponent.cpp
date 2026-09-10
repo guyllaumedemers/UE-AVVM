@@ -59,14 +59,14 @@ UAVVMResourceManagerComponent::FResourceQueueingMechanism::~FResourceQueueingMec
 	CompletionDelegate.Clear();
 }
 
-bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushDeferredRequest(const FOnAsyncLoadingRequestDeferred& NewRequest)
+bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushDeferredRequest(const FOnAsyncLoadingRequestDeferred& NewRequest) &
 {
 	PendingRequests.Enqueue(NewRequest);
 	TryExecuteNextRequest();
 	return HasPendingRequest();
 }
 
-bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRequest()
+bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::TryExecuteNextRequest() &
 {
 	if (!HasPendingRequest())
 	{
@@ -100,17 +100,17 @@ bool UAVVMResourceManagerComponent::FResourceQueueingMechanism::HasPendingReques
 	return !PendingRequests.IsEmpty();
 }
 
-void UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle)
+void UAVVMResourceManagerComponent::FResourceQueueingMechanism::PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle) &
 {
 	StreamableHandles.Add({NewStreamableHandle, false/*IsDoneStreaming*/});
 }
 
-void UAVVMResourceManagerComponent::FResourceQueueingMechanism::SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback)
+void UAVVMResourceManagerComponent::FResourceQueueingMechanism::SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback) &
 {
 	CompletionDelegate = NewRequestExternalCallback;
 }
 
-void UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const
+void UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const &
 {
 	if (StreamableHandles.IsEmpty())
 	{
@@ -124,7 +124,7 @@ void UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetLoadedAssets(
 	}
 }
 
-void UAVVMResourceManagerComponent::FResourceQueueingMechanism::ModifyStreamableHandle()
+void UAVVMResourceManagerComponent::FResourceQueueingMechanism::ModifyStreamableHandle() &
 {
 	if (!StreamableHandles.IsEmpty())
 	{
@@ -133,7 +133,7 @@ void UAVVMResourceManagerComponent::FResourceQueueingMechanism::ModifyStreamable
 	}
 }
 
-const FOnResourceAsyncLoadingComplete& UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetCompletionDelegate() const
+const FOnResourceAsyncLoadingComplete& UAVVMResourceManagerComponent::FResourceQueueingMechanism::GetCompletionDelegate() const &
 {
 	return CompletionDelegate;
 }

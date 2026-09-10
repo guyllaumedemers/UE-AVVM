@@ -65,8 +65,13 @@ protected:
 	struct FAVVMPositionSampler
 	{
 		FAVVMPositionSampler();
-		FBoxCenterAndExtent GetClosestSample(const double Timestamp) const;
-		void Sample(const FAVVMPositionSample& NewSample);
+		FAVVMPositionSampler(const FAVVMPositionSampler&) = default;
+		FAVVMPositionSampler(FAVVMPositionSampler&&) noexcept = default;
+		FAVVMPositionSampler& operator=(const FAVVMPositionSampler&) = default;
+		FAVVMPositionSampler& operator=(FAVVMPositionSampler&&) noexcept = default;
+		
+		FBoxCenterAndExtent GetClosestSample(const double Timestamp) const &;
+		void Sample(const FAVVMPositionSample& NewSample) &;
 
 	private:
 		TArray<FAVVMPositionSample> Samples{};

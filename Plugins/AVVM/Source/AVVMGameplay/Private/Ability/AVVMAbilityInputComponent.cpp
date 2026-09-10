@@ -34,6 +34,13 @@
 #include "Inputs/AVVMAbilityInputAction.h"
 #include "Inputs/AVVMInputMappingProvider.h"
 
+UAVVMAbilityInputComponent::FAVVMInputActionCallbackContext::FAVVMInputActionCallbackContext(const UInputAction* NewInputAction,
+                                                                                             const ETriggerEvent NewTriggerEvent)
+	: InputAction(NewInputAction),
+	  TriggerEvent(NewTriggerEvent)
+{
+}
+
 UAVVMAbilityInputComponent::UAVVMAbilityInputComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

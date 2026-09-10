@@ -110,8 +110,8 @@ protected:
 		FAttachmentBatchingMechanism& operator=(FAttachmentBatchingMechanism&&) noexcept = default;
 		~FAttachmentBatchingMechanism();
 
-		void PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment);
-		void BatchDestroy();
+		void PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment) &;
+		void BatchDestroy() &;
 
 		TArray<TWeakObjectPtr<AAttachmentActor>> PendingDestroy{};
 	};

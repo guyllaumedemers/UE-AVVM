@@ -23,7 +23,7 @@
 #include "Kismet/GameplayStatics.h"
 
 void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile,
-                             const TArray<AActor*>& IgnoredActors) const
+                             const TArray<AActor*>& IgnoredActors) const &
 {
 	if (!IsValid(Projectile))
 	{
@@ -52,7 +52,7 @@ UScriptStruct* TBaseStructure<FProjectileParams>::Get()
 	return FProjectileParams::StaticStruct();
 }
 
-void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const
+void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const &
 {
 	if (IsValid(Projectile))
 	{

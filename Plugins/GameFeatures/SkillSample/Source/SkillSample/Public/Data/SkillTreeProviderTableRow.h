@@ -44,7 +44,7 @@ struct SKILLSAMPLE_API FSkillTreeNodePhase
 {
 	GENERATED_BODY()
 	
-	const int32 GetRelationshipBitmask() const;
+	static const int32 Static_GetRelationshipBitmask(const FSkillTreeNodePhase& SkillTreeNodePhase);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
 	TMap<FDataRegistryId, int32 /*GameplayEffect level*/> SkillTreeNodeIds{};

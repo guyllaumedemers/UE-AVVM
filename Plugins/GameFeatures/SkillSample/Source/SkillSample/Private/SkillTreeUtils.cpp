@@ -149,7 +149,7 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		TArray<int32> PrivateTreeNodeIds;
 		// @gdemers Only phase 0 matter during initialization. progression tracking will handle replacing data
 		// during player playthrough.
-		const int32 RelationshipBitMask = Row->SkillTreeNodePerPhases[0].GetRelationshipBitmask();
+		const int32 RelationshipBitMask = FSkillTreeNodePhase::Static_GetRelationshipBitmask(Row->SkillTreeNodePerPhases[0]);
 		const int32 InstancedId = Row->SkillTreeNodePerPhases[0].InstancedId;
 		for (const auto& [RegistryId, EffectLevel] : Row->SkillTreeNodePerPhases[0].SkillTreeNodeIds)
 		{

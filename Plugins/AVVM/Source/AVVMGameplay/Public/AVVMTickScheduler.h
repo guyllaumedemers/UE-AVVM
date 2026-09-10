@@ -88,10 +88,10 @@ protected:
 			Jobs_Actor.Reserve(NumJobs_Actor);
 		}
 
-		int64 Add(const UClass* Class, UActorComponent* ActorComponent);
-		int64 Add(const UClass* Class, AActor* Actor);
-		int64 Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents);
-		int64 Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors);
+		int64 Add(const UClass* Class, UActorComponent* ActorComponent) &;
+		int64 Add(const UClass* Class, AActor* Actor) &;
+		int64 Append(const UClass* Class, const TArray<TWeakObjectPtr<UActorComponent>>& ActorComponents) &;
+		int64 Append(const UClass* Class, const TArray<TWeakObjectPtr<AActor>>& Actors) &;
 
 		TMap<TWeakObjectPtr<const UClass>, FAVVMRunner_ActorComponent> Jobs_ActorComponent{};
 		/*Jobs are unique per AActor derived type. Priority is handled by indices*/
@@ -106,10 +106,10 @@ protected:
 			PriorityQueue.Reserve(NumFeedbackLevels);
 		}
 
-		int64 Push(const UClass* Class, UActorComponent* ActorComponent);
-		int64 Push(const UClass* Class, AActor* Actor);
-		void Pop(const int64 Handle, UActorComponent* ActorComponent) const;
-		void Pop(const int64 Handle, AActor* Actor) const;
+		int64 Push(const UClass* Class, UActorComponent* ActorComponent) &;
+		int64 Push(const UClass* Class, AActor* Actor) &;
+		void Pop(const int64 Handle, UActorComponent* ActorComponent) const &;
+		void Pop(const int64 Handle, AActor* Actor) const &;
 
 		/*Priority level is handled by indices*/
 		TArray<FAVVMJobQueue> PriorityQueue{};

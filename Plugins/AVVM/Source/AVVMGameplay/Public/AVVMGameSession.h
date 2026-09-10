@@ -146,7 +146,7 @@ protected:
 	void MakePlayerPresetId(const APlayerState* PlayerState, const FAVVMPlayerPreset& NewPlayerPreset);
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FAVVMBackendSessionPayload SessionPayload = FAVVMBackendSessionPayload();
+	FAVVMBackendSessionPayload SessionPayload{};
 
 private:
 	void AddPlayer(const FString& UniqueNetId);

@@ -44,10 +44,10 @@ struct INTERACTIONSAMPLE_API FInteractionObject : public FFastArraySerializerIte
 	FInteractionObject(FInteractionObject&&) noexcept = default;
 	FInteractionObject& operator=(const FInteractionObject&) = default;
 	FInteractionObject& operator=(FInteractionObject&&) noexcept = default;
-	
-	FInteractionObject(const AActor* NewTarget,
-	                   const AActor* NewInstigator,
-	                   UActorInteractionComponent* NewInstigatorComponent);
+
+	explicit FInteractionObject(const AActor* NewTarget,
+	                            const AActor* NewInstigator,
+	                            UActorInteractionComponent* NewInstigatorComponent);
 
 	bool DoesPartialMatch(const AActor* NewInstigator) const;
 
@@ -56,11 +56,11 @@ struct INTERACTIONSAMPLE_API FInteractionObject : public FFastArraySerializerIte
 
 	bool IsPendingKill() const;
 	bool CanInteract() const;
-	void Lock();
-	void Unlock();
+	void Lock() &;
+	void Unlock() &;
 	const AActor* GetTarget() const;
 	const AActor* GetInstigator() const;
-	void SetPendingKill();
+	void SetPendingKill() &;
 	
 	void PreReplicatedRemove(const struct FFastArraySerializer& InArraySerializer);
 	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);

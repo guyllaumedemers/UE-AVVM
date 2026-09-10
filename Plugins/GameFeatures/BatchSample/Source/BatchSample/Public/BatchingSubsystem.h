@@ -58,13 +58,13 @@ class BATCHSAMPLE_API UBatchingSubsystem : public UTickableWorldSubsystem
 		~FBatchContext();
 		// @gdemers default ctor called first, then we reserve size. imply double initialization
 		// of properties, but allow for preallocation of collection type to avoid resizing.
-		FBatchContext(AActor* Actors, const int32 MaxSize);
+		explicit FBatchContext(AActor* Actors, const int32 MaxSize);
 
 		bool DoesQualifyForBatchDestroy(const float MaxSize) const;
-		void Obliterate();
-		void Add(AActor* Actor);
-		void Remove(AActor* Actor);
-		void Invalidate() const;
+		void Obliterate() &;
+		void Add(AActor* Actor) &;
+		void Remove(AActor* Actor) &;
+		void Invalidate() const &;
 
 	private:
 		TArray<TWeakObjectPtr<AActor>> Candidates{};

@@ -91,7 +91,7 @@ bool FInputProgress::operator==(const FInputProgress& Rhs) const
 			&& (FMath::IsNearlyEqual(CompletionThreshold, Rhs.CompletionThreshold));
 }
 
-float FInputProgress::Tick(const float OldProgress, const float NewDelta) const
+float FInputProgress::Tick(const float OldProgress, const float NewDelta) const &
 {
 	const float NewProgress = FMath::Clamp(OldProgress + (NewDelta / CompletionThreshold), 0.f, CompletionThreshold);
 
@@ -119,8 +119,7 @@ float FInputProgress::Tick(const float OldProgress, const float NewDelta) const
 
 void UInteractionViewModel::SetPayload(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
-	UE_MVVM_SET_PROPERTY_VALUE(InputContext,
-	                           FInputProgress(NewPayload.GetPtr<FAVVMHandshakePayload>()));
+	UE_MVVM_SET_PROPERTY_VALUE(InputContext, FInputProgress{NewPayload.GetPtr<FAVVMHandshakePayload>()});
 }
 
 void UInteractionViewModel::PumpHeartbeat(const float NewHeartbeat)

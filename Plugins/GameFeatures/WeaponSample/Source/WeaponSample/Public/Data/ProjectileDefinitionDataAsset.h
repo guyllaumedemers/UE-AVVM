@@ -53,7 +53,7 @@ struct WEAPONSAMPLE_API FProjectileParams
 	FProjectileParams& operator=(FProjectileParams&&) noexcept = default;
 	virtual ~FProjectileParams() = default;
 	
-	virtual void Init(ANonReplicatedProjectileActor* Projectile, const TArray<AActor*>& IgnoredActors) const;
+	virtual void Init(ANonReplicatedProjectileActor* Projectile, const TArray<AActor*>& IgnoredActors) const &;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	float Radius{0.f};
@@ -88,7 +88,7 @@ struct WEAPONSAMPLE_API FExplosionParams
 	FExplosionParams& operator=(FExplosionParams&&) noexcept = default;
 	virtual ~FExplosionParams() = default;
 	
-	virtual void Init(ANonReplicatedProjectileActor* Projectile) const;
+	virtual void Init(ANonReplicatedProjectileActor* Projectile) const &;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<ANonReplicatedExplosionActor> ExplosionClass = nullptr;

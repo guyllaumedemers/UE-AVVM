@@ -30,7 +30,9 @@ UScriptStruct* TBaseStructure<FInteractionExecutionContext>::Get()
 	return FInteractionExecutionContext::StaticStruct();
 }
 
-void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInstigator, const AActor* NewTarget, const float NewDelta) const
+void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInstigator,
+                                                           const AActor* NewTarget,
+                                                           const float NewDelta) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);
 	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerController!")))
@@ -50,7 +52,8 @@ void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInst
 	}
 }
 
-void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator, const AActor* NewTarget) const
+void FInteractionExecutionContextAVVMNotify::Execute(const AActor* NewInstigator,
+                                                     const AActor* NewTarget) const
 {
 	const auto* PC = Cast<APlayerController>(NewTarget);
 	if (!ensureAlwaysMsgf(IsValid(PC), TEXT("NewTarget doesn't derive from APlayerController!")))

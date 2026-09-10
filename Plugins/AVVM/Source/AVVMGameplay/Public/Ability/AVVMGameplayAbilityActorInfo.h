@@ -41,8 +41,8 @@ struct AVVMGAMEPLAY_API FAVVMGameplayAbilityActorInfo : public FGameplayAbilityA
 
 	FAVVMGameplayAbilityActorInfo() = default;
 	FAVVMGameplayAbilityActorInfo(const FAVVMGameplayAbilityActorInfo&) = default;
-	FAVVMGameplayAbilityActorInfo(FAVVMGameplayAbilityActorInfo&&) = default;
+	FAVVMGameplayAbilityActorInfo(FAVVMGameplayAbilityActorInfo&&) noexcept = default;
 	FAVVMGameplayAbilityActorInfo& operator=(const FAVVMGameplayAbilityActorInfo&) = default;
-	FAVVMGameplayAbilityActorInfo& operator=(FAVVMGameplayAbilityActorInfo&&) = default;
+	FAVVMGameplayAbilityActorInfo& operator=(FAVVMGameplayAbilityActorInfo&&) noexcept = default;
 	explicit FAVVMGameplayAbilityActorInfo(const FGameplayAbilityActorInfo& NewAbilityActorInfo);
 };

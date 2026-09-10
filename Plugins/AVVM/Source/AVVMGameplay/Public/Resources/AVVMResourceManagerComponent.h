@@ -87,13 +87,13 @@ protected:
 		FResourceQueueingMechanism& operator=(FResourceQueueingMechanism&&) noexcept = default;
 		~FResourceQueueingMechanism();
 		
-		bool PushDeferredRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest);
-		bool TryExecuteNextRequest();
-		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback);
-		void PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle);
-		void GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const;
-		void ModifyStreamableHandle();
-		const FOnResourceAsyncLoadingComplete& GetCompletionDelegate() const;
+		bool PushDeferredRequest(const UAVVMResourceManagerComponent::FOnAsyncLoadingRequestDeferred& NewRequest) &;
+		bool TryExecuteNextRequest() &;
+		void SetCompletionCallback(const FOnResourceAsyncLoadingComplete& NewRequestExternalCallback) &;
+		void PushStreamableHandle(TSharedPtr<FStreamableHandle> NewStreamableHandle) &;
+		void GetLoadedAssets(TArray<UObject*>& OutStreamableAssets) const &;
+		void ModifyStreamableHandle() &;
+		const FOnResourceAsyncLoadingComplete& GetCompletionDelegate() const &;
 
 	protected:
 		bool HasUnfinishedStreamableHandle() const;

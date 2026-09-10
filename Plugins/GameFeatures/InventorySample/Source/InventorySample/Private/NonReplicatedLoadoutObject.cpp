@@ -485,7 +485,7 @@ void UNonReplicatedLoadoutObject::Client_Init()
 		Loadout.Add(SlotTag);
 	}
 
-	PredictiveInputIndex =
+	PredictiveInputIndex = FAVVMPredictiveInputIndexObject
 	{
 			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Pause),
 			BIND_PREDICTED_INPUT_INDEX_CHANGED_CLOSURE_TYPE(OnIndex_Resume),

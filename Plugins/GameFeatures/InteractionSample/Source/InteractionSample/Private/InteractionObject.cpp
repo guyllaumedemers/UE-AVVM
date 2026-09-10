@@ -55,7 +55,7 @@ bool FInteractionObject::CanInteract() const
 	return bIsInteractable;
 }
 
-void FInteractionObject::Lock()
+void FInteractionObject::Lock() &
 {
 	bIsInteractable = false;
 
@@ -67,7 +67,7 @@ void FInteractionObject::Lock()
 	                *GetNameSafe(Target.Get()));
 }
 
-void FInteractionObject::Unlock()
+void FInteractionObject::Unlock() &
 {
 	bIsInteractable = true;
 
@@ -89,7 +89,7 @@ const AActor* FInteractionObject::GetInstigator() const
 	return Instigator.Get();
 }
 
-void FInteractionObject::SetPendingKill()
+void FInteractionObject::SetPendingKill() &
 {
 	bIsPendingKill = true;
 

@@ -41,10 +41,14 @@ struct INTERACTIONSAMPLE_API FInputProgress
 	GENERATED_BODY()
 
 	FInputProgress() = default;
-	FInputProgress(const FAVVMHandshakePayload* NewPayload);
+	FInputProgress(const FInputProgress&) = default;
+	FInputProgress(FInputProgress&&) noexcept = default;
+	FInputProgress& operator=(const FInputProgress&) = default;
+	FInputProgress& operator=(FInputProgress&&) noexcept = default;
+	explicit FInputProgress(const FAVVMHandshakePayload* NewPayload);
 	bool operator==(const FInputProgress& Rhs) const;
 
-	float Tick(const float OldProgress, const float NewDelta) const;
+	float Tick(const float OldProgress, const float NewDelta) const &;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<UInputAction> InputAction = nullptr;

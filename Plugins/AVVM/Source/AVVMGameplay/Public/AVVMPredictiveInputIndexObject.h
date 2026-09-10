@@ -59,10 +59,15 @@ struct AVVMGAMEPLAY_API FAVVMPredictiveInputIndexObject
 	GENERATED_BODY()
 
 	FAVVMPredictiveInputIndexObject() = default;
-	FAVVMPredictiveInputIndexObject(TFunction<bool(const int32)> OnNewPause,
-	                                TFunction<bool(const int32)> OnNewRestore,
-	                                TFunction<bool(const int32)> OnNewRestart,
-	                                const int32 ReserveArraySize);
+	FAVVMPredictiveInputIndexObject(const FAVVMPredictiveInputIndexObject&) = default;
+	FAVVMPredictiveInputIndexObject(FAVVMPredictiveInputIndexObject&&) noexcept = default;
+	FAVVMPredictiveInputIndexObject& operator=(const FAVVMPredictiveInputIndexObject&) = default;
+	FAVVMPredictiveInputIndexObject& operator=(FAVVMPredictiveInputIndexObject&&) noexcept = default;
+	
+	explicit FAVVMPredictiveInputIndexObject(TFunction<bool(const int32)> OnNewPause,
+	                                         TFunction<bool(const int32)> OnNewRestore,
+	                                         TFunction<bool(const int32)> OnNewRestart,
+	                                         const int32 ReserveArraySize);
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly)

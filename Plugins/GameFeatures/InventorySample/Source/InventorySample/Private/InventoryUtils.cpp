@@ -492,7 +492,7 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 
 	// @gdemers Relationship bitmask define dependency on another element (example :
 	// an attachment being dependent on a character, or weapon). 
-	const int32 RelationshipBitMask = ProviderItemProperties.GetRelationshipBitmask();
+	const int32 RelationshipBitMask = FProviderDefaultItemProperties::Static_GetRelationshipBitmask(ProviderItemProperties);
 	const int32 PhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
 	const int32 VirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
 

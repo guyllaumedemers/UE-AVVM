@@ -1053,7 +1053,7 @@ UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMech
 }
 
 bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::PushDeferredItem(UItemObject* NewItem,
-                                                                              const UActorInventoryComponent::FOnAsyncSpawnRequestDeferred& NewRequest)
+                                                                              const UActorInventoryComponent::FOnAsyncSpawnRequestDeferred& NewRequest) &
 {
 	QueuedItems.Add(NewItem);
 	PendingSpawnRequests.Add(NewRequest);
@@ -1061,7 +1061,7 @@ bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::PushDeferredItem(UI
 	return HasPendingRequest();
 }
 
-bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::TryExecuteNextRequest(const bool bCanDequeueFrontItem)
+bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::TryExecuteNextRequest(const bool bCanDequeueFrontItem) &
 {
 	if (bCanDequeueFrontItem && !QueuedItems.IsEmpty())
 	{
@@ -1085,12 +1085,12 @@ bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::TryExecuteNextReque
 	return false;
 }
 
-bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::HasPendingRequest() const
+bool UActorInventoryComponent::FItemSpawnerQueuingMechanism::HasPendingRequest() const &
 {
 	return !PendingSpawnRequests.IsEmpty();
 }
 
-UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() const
+UItemObject* UActorInventoryComponent::FItemSpawnerQueuingMechanism::PeekItem() const &
 {
 	TWeakObjectPtr<UItemObject> ItemObject = nullptr;
 	if (!QueuedItems.IsEmpty())

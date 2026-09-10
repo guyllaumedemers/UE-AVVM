@@ -235,7 +235,7 @@ UAttachmentManagerComponent::FAttachmentBatchingMechanism::~FAttachmentBatchingM
 	PendingDestroy.Reset();
 }
 
-void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment)
+void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestroy(const TWeakObjectPtr<AAttachmentActor>& NewAttachment) &
 {
 	if (NewAttachment.IsValid())
 	{
@@ -243,7 +243,7 @@ void UAttachmentManagerComponent::FAttachmentBatchingMechanism::PushPendingDestr
 	}
 }
 
-void UAttachmentManagerComponent::FAttachmentBatchingMechanism::BatchDestroy()
+void UAttachmentManagerComponent::FAttachmentBatchingMechanism::BatchDestroy() &
 {
 	TArray<TWeakObjectPtr<AAttachmentActor>> OldAttachments = MoveTemp(PendingDestroy);
 	for (auto Iterator = OldAttachments.CreateIterator(); Iterator; ++Iterator)
