@@ -269,10 +269,10 @@ public:
 	const TMap<FGameplayTag, TWeakObjectPtr<const AActor>>& GetNonReplicatedItemAttachmentActors() const;
 
 	UPROPERTY(BlueprintAssignable)
-	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged;
+	FOnItemRuntimeStateChanged OnItemRuntimeStateChanged{};
 
 	UPROPERTY(BlueprintAssignable)
-	FOnItemRuntimeCountChanged OnItemRuntimeCountChanged;
+	FOnItemRuntimeCountChanged OnItemRuntimeCountChanged{};
 
 protected:
 	UFUNCTION()
@@ -310,7 +310,7 @@ private:
 	// @gdemers IMPORTANT do not modify the following element id unless you have already serialized your changes
 	// to the backend. This handle is your only way of finding the correct instance serialized with your backend (player/actor profile)
 	// representation. (we do nullify during drop action but that imply we have already released our handle from backend.)
-	int32 PrivateItemId = INDEX_NONE;
+	int32 PrivateItemId{INDEX_NONE};
 	friend class UItemObjectUtils;
 
 #if WITH_EDITORONLY_DATA

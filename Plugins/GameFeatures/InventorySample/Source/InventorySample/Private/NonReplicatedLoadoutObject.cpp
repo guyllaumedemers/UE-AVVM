@@ -177,8 +177,9 @@ void UNonReplicatedLoadoutObject::MouseCycle(const float MouseWheelDelta)
 
 void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 {
-	if (!ensureAlwaysMsgf(bDoesSupportItemCycling,
-	                      TEXT("Attempting to call Cycle on a instance that isnt supporting it.")))
+	if (!ensureAlwaysMsgf(bDoesSupportItemCycling, TEXT("Attempting to call Cycle on a instance that isnt supporting it.")) ||
+		!TargetTag.IsValid() ||
+		(TargetTag.MatchesTagExact(ActiveItemSlotTag)))
 	{
 		return;
 	}

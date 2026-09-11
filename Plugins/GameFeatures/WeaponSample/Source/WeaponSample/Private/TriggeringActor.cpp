@@ -257,8 +257,9 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	ensureAlwaysMsgf(AttachToActor(Target, FAttachmentTransformRules::KeepRelativeTransform, NewSocketName), TEXT("Failed to find socket target."));
 	OwningOuter = Target;
 
+	// EDIT - We shouldnt be binding here. Wait for the loadout system to handle equipping an entry, and binding!
 	// @gdemers bind animation, and attribute set with new owning outer
-	IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
+	// IAVVMDoesActorSupportStateBinding::Execute_Bind(this);
 	
 	// @gdemers notify loadout system to attempt default equipping ourself if we are targeting the correct slot.
 	NotifyOnNewActorStateBound();
@@ -294,6 +295,7 @@ void ATriggeringActor::Bind_Implementation()
 	                Outer,
 	                TEXT("Bind to Target."));
 
+#if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
 		// @gdemers Unregister/Register ability from owner.
@@ -306,6 +308,7 @@ void ATriggeringActor::Bind_Implementation()
 			ASC->RegisterAttributeSet(OwnedAttributeSet, this);
 		}
 	}
+#endif
 
 	// @gdemers allow linking anim instance to driving anim instance.
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
@@ -328,6 +331,7 @@ void ATriggeringActor::Unbind_Implementation()
 	                Outer,
 	                TEXT("Unbind Target."));
 
+#if WITH_SERVER_CODE
 	// @gdemers predictive weapon selection will execute both server-client.
 	if (HasAuthority())
 	{
@@ -341,6 +345,7 @@ void ATriggeringActor::Unbind_Implementation()
 			ASC->UnRegisterAttributeSet(this);
 		}
 	}
+#endif
 
 	// @gdemers allow unlinking anim instance from driving anim instance.
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
@@ -348,6 +353,12 @@ void ATriggeringActor::Unbind_Implementation()
 	{
 		TargetSkeletalMeshComponent->UnlinkAnimClassLayers(GetLinkedAnimInstanceClass());
 	}
+}
+
+void ATriggeringActor::ApplyComplexVisibilityToSelf_Implementation()
+{
+	// @gdemers impl in BP visibility change requirements.
+	BP_SetComplexVisibilityToSelf(IsHidden());
 }
 
 void ATriggeringActor::Restart_Implementation()
@@ -379,6 +390,9 @@ void ATriggeringActor::Pause_Implementation()
 		return;
 	}
 	
+	// @gdemers We will not be support an unequip animation as mentioned in the EquipAbility class description,
+	// which is why we allow Unbinding the linked animation on the active weapon before transitioning with the next target weapon.
+	// example ref : Warhammer 40k - Darktide.
 	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 	AVVM_LOGGER_LOG(LogWeaponSample,
 	                this,
@@ -425,6 +439,9 @@ void ATriggeringActor::Flush_Implementation()
 		return;
 	}
 	
+	// @gdemers We will not be support an unequip animation as mentioned in the EquipAbility class description,
+	// which is why we allow Unbinding the linked animation on the active weapon before transitioning with the next target weapon.
+	// example ref : Warhammer 40k - Darktide.
 	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 	AVVM_LOGGER_LOG(LogWeaponSample,
 					this,

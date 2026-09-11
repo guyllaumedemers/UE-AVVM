@@ -20,12 +20,13 @@
 #include "ActorInteractionImpl.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AbilitySystemComponent.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitUtils.h"
 #include "InteractionObject.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Data/AVVMHandshakePayload.h"
 #include "Data/InteractionExecutionContext.h"
 #include "Data/InteractionExecutionRequirements.h"
@@ -280,7 +281,7 @@ void UActorInteractionImpl::MoveDataToSparseClassDataStruct() const
 	FInteractionImplSparseData* SparseClassData = GetMutableInteractionImplSparseData();
 
 	// Modify these lines to include all Sparse Class Data properties.
-	SparseClassData->GameplayEffect = GameplayEffect_DEPRECATED;
+	SparseClassData->GameplayEffect_GetEffectCauser = GameplayEffect_DEPRECATED;
 	SparseClassData->StartPromptInteractionChannel = StartPromptInteractionChannel_DEPRECATED;
 	SparseClassData->StopPromptInteractionChannel = StopPromptInteractionChannel_DEPRECATED;
 	SparseClassData->Requirements = Requirements_DEPRECATED;
@@ -314,8 +315,8 @@ void UActorInteractionImpl::HandleNewRecord(const FInteractionObject& NewRecord)
 #if WITH_SERVER_CODE
 	if (Controller->HasAuthority())
 	{
-		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GetGameplayEffect(), const_cast<AController*>(Controller), const_cast<AActor*>(Instigator));
-		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GetGameplayEffect_GetEffectCauser(), const_cast<AController*>(Controller), const_cast<AActor*>(Instigator));
+		auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Controller->PlayerState);
 		AddGameplayEffectHandle(ASC, GESpecHandle);
 	}
 #endif
@@ -362,7 +363,7 @@ void UActorInteractionImpl::HandlePendingKillRecord(const FInteractionObject& Pe
 #if WITH_SERVER_CODE
 	if (Controller->HasAuthority())
 	{
-		auto* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Controller->PlayerState);
+		auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Controller->PlayerState);
 		RemoveGameplayEffectHandle(ASC);
 	}
 #endif
@@ -379,7 +380,7 @@ void UActorInteractionImpl::HandlePendingKillRecord(const FInteractionObject& Pe
 	}
 }
 
-void UActorInteractionImpl::AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle)
+void UActorInteractionImpl::AddGameplayEffectHandle(UAVVMAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle)
 {
 	if (!IsValid(ASC))
 	{
@@ -395,7 +396,7 @@ void UActorInteractionImpl::AddGameplayEffectHandle(UAbilitySystemComponent* ASC
 	SearchResult = ASC->BP_ApplyGameplayEffectSpecToSelf(GEHandle);
 }
 
-void UActorInteractionImpl::RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC)
+void UActorInteractionImpl::RemoveGameplayEffectHandle(UAVVMAbilitySystemComponent* ASC)
 {
 	if (!IsValid(ASC))
 	{

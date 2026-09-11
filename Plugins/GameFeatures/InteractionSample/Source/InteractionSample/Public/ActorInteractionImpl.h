@@ -34,7 +34,7 @@ struct FInteractionExecutionContext;
 struct FInteractionExecutionRequirements;
 struct FInteractionObject;
 struct FInteractionObjectFastArray;
-class UAbilitySystemComponent;
+class UAVVMAbilitySystemComponent;
 class UGameplayAbility;
 class UGameplayEffect;
 
@@ -50,7 +50,7 @@ struct INTERACTIONSAMPLE_API FInteractionImplSparseData
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
+	TSubclassOf<UGameplayEffect> GameplayEffect_GetEffectCauser = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	FGameplayTag StartPromptInteractionChannel{FGameplayTag::EmptyTag};
@@ -114,8 +114,8 @@ public:
 #endif // WITH_EDITOR
 
 protected:
-	void AddGameplayEffectHandle(UAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
-	void RemoveGameplayEffectHandle(UAbilitySystemComponent* ASC);
+	void AddGameplayEffectHandle(UAVVMAbilitySystemComponent* ASC, const FGameplayEffectSpecHandle& GEHandle);
+	void RemoveGameplayEffectHandle(UAVVMAbilitySystemComponent* ASC);
 
 	bool Server_LockInteraction(const AActor* NewInstigator,
 	                            const AActor* NewTarget,

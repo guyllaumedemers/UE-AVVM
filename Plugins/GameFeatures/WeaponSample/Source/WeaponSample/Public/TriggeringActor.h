@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AbilitySystemInterface.h"
+#include "AVVMDoesActorRequireComplexVisibilitySupport.h"
 #include "AVVMDoesActorSupportAnimationInterruption.h"
 #include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMModularActor.h"
@@ -78,19 +79,19 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	bool bShouldSwapAbilityOnBeginPlay{true};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, InlineEditConditionToggle))
 	bool bDoesDefineAttachmentStatically{false};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesDefineAttachmentStatically", ItemStruct="TriggeringDefinitionDataTableRow"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, EditCondition="bDoesDefineAttachmentStatically", ItemStruct="TriggeringDefinitionDataTableRow"))
 	FDataRegistryId TriggeringDefinitionId{};
 };
 
@@ -103,6 +104,7 @@ UCLASS(SparseClassDataTypes="TriggeringActorSparseData")
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
+                                          public IAVVMDoesActorRequireComplexVisibilitySupport,
                                           public IAVVMDoesActorSupportAnimationInterruption,
                                           public IAVVMDoesActorSupportDeferredSocketParenting,
                                           public IAVVMDoesActorSupportOnAttachmentNotify,
@@ -141,6 +143,9 @@ public:
 	virtual void Bind_Implementation() override;
 	virtual void Unbind_Implementation() override;
 	
+	// @gdemers IAVVMDoesActorRequireComplexVisibilitySupport
+	virtual void ApplyComplexVisibilityToSelf_Implementation() override;
+	
 	// @gdemers IAVVMDoesActorSupportAnimationInterruption
 	virtual void Restart_Implementation() override;
 	virtual void Pause_Implementation() override;
@@ -169,6 +174,9 @@ protected:
 
 	UFUNCTION()
 	void OnTriggeringAbilityClassAcquired();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_SetComplexVisibilityToSelf(const bool bIsHidden);
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;

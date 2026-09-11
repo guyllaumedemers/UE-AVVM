@@ -57,21 +57,21 @@ struct WEAPONSAMPLE_API FAttachmentActorSparseData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, InlineEditConditionToggle))
 	bool bDoesAllowDefiningAttachmentSlotTag{false};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesAllowDefiningAttachmentSlotTag"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, EditCondition="bDoesAllowDefiningAttachmentSlotTag"))
 	FGameplayTag AttachmentSlotTag{FGameplayTag::EmptyTag};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, InlineEditConditionToggle))
 	bool bDoesAllowDefiningSocketName{false};
 
 	// @gdemers This property handles the attachment to a socket when the element is built-in the owning triggering actors.
 	// This imply that the attachment arent part of the inventory system. They are baked into the representation of its owning actor, and attached at runtime (like a Gun blueprint).
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesAllowDefiningSocketName"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, EditCondition="bDoesAllowDefiningSocketName"))
 	FName SocketName{NAME_None};
 };
 
