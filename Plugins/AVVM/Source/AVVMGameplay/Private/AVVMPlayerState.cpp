@@ -20,6 +20,7 @@
 #include "AVVMPlayerState.h"
 
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/AVVMDoesImplNetSynchronization.h"
@@ -75,6 +76,28 @@ void AAVVMPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+#if WITH_EDITOR
+void AAVVMPlayerState::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FAVVMPlayerStateSparseData* SparseClassData = GetMutableAVVMPlayerStateSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->RegisteredChannels = RegisteredChannels_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif
+
 void AAVVMPlayerState::ClientInitialize(class AController* C)
 {
 	Super::ClientInitialize(C);
@@ -92,7 +115,7 @@ void AAVVMPlayerState::ClientInitialize(class AController* C)
 #endif
 	{
 		UE_AVVM_NOTIFY(this,
-		               RegisteredChannels.PostPlayerControllerClientInitializedTag,
+		               GetRegisteredChannels().PostPlayerControllerClientInitializedTag,
 		               this,
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
@@ -115,7 +138,7 @@ void AAVVMPlayerState::OnRep_PlayerName()
 #endif
 	{
 		UE_AVVM_NOTIFY(this,
-					   RegisteredChannels.PostPlayerStateNameClientInitializedTag,
+					   GetRegisteredChannels().PostPlayerStateNameClientInitializedTag,
 					   this,
 					   FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
@@ -135,7 +158,7 @@ void AAVVMPlayerState::OnSetUniqueId()
 	}
 
 	UE_AVVM_NOTIFY(this,
-	               RegisteredChannels.PostPlayerStateUniqueNetIdClientInitializedTag,
+	               GetRegisteredChannels().PostPlayerStateUniqueNetIdClientInitializedTag,
 	               this,
 	               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 

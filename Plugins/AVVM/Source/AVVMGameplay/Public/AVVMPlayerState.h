@@ -83,6 +83,21 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStatePayload : public FAVVMNotificationPayloa
 
 /**
  *	Class description:
+ *	
+ *	FAVVMPlayerStateSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMPlayerStateSparseData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FAVVMPlayerStateChannelAggregator RegisteredChannels{};
+};
+
+/**
+ *	Class description:
  *
  *	AAVVMPlayerState is a GFP Receiver who registers with the GameFeatureFramework and react to GFP actions. It expects to receive system specific components depending on your project needs.
  *	
@@ -92,7 +107,7 @@ struct AVVMGAMEPLAY_API FAVVMPlayerStatePayload : public FAVVMNotificationPayloa
  *	Note : for your UI systems. We expect to push an AVVMComponent with a pre-defined list of UAVVMPresenter class on it! Additionally, by implementing IAVVMQuicktimeEventPlayerStateInterface base
  *	api, you will be able to forward gameplay information without creating dependencies between modules. However, it comes with a price due to interface dispatch!
  */
-UCLASS()
+UCLASS(SparseClassDataTypes="AVVMPlayerStateSparseData")
 class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
                                           public IAbilitySystemInterface,
                                           public IAVVMCanExposeActorPayload,
@@ -108,6 +123,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
 
 	virtual void ClientInitialize(class AController* C) override;
 	virtual void OnRep_PlayerName() override;
@@ -140,9 +160,6 @@ protected:
 	void Client_OnSimulatedClientNetFinalized(const TArray<TScriptInterface<IAVVMDoesImplNetSynchronization>>& NetFinalized,
 	                                          AAVVMPlayerState* SimulatedPlayerState);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FAVVMPlayerStateChannelAggregator RegisteredChannels{};
-
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
 
@@ -165,4 +182,10 @@ private:
 	friend class AAVVMGameSession;
 	// @gdemers friending cross dll works due to being a fwd declaration.
 	friend class UAVVMOnlineCheatExtension;
+	
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	FAVVMPlayerStateChannelAggregator RegisteredChannels_DEPRECATED{};
+#endif
 };
