@@ -128,7 +128,7 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	}
 
 	EquippedTriggeringActor = NextEquipTargetActor;
-	// @gdemers cancel any running instance that isnt complete so we can run a montage for the next target. 
+	// @gdemers cancel any running instance that isnt complete so we can run a montage for the next target.
 	if (IsValid(AbilityTask_PlayMontage))
 	{
 		AbilityTask_PlayMontage->ExternalCancel();
@@ -164,6 +164,7 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		AbilityTask_PlayMontage->OnInterrupted.AddUniqueDynamic(this, &UEquipAbility_Montage::OnMontage_Interrupted);
 		AbilityTask_PlayMontage->OnCancelled.AddUniqueDynamic(this, &UEquipAbility_Montage::OnMontage_Cancelled);
 		AbilityTask_PlayMontage->OnCompleted.AddUniqueDynamic(this, &UEquipAbility_Montage::OnMontage_Completed);
+		AbilityTask_PlayMontage->ReadyForActivation();
 	}
 
 	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
@@ -190,6 +191,10 @@ void UEquipAbility_Montage::CancelAbility(const FGameplayAbilitySpecHandle Handl
 	                *GetName());
 
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+	if (IsValid(AbilityTask_PlayMontage))
+	{
+		AbilityTask_PlayMontage->ExternalCancel();
+	}
 }
 
 void UEquipAbility_Montage::EndAbility(const FGameplayAbilitySpecHandle Handle,

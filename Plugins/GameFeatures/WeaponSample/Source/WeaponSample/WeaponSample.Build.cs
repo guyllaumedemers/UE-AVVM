@@ -51,6 +51,7 @@ public class WeaponSample : ModuleRules
 			new string[]
 			{
 				"AVVMOnline",
+				"GameplayTasks",
 				"NetCore"
 			}
 		);
