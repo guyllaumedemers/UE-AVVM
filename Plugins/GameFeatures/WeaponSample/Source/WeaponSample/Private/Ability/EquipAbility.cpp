@@ -183,6 +183,8 @@ void UEquipAbility_Montage::CancelAbility(const FGameplayAbilitySpecHandle Handl
                                           const FGameplayAbilityActivationInfo ActivationInfo,
                                           bool bReplicateCancelAbility)
 {
+	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
 	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
 	AVVM_LOGGER_LOG(LogWeaponSample,
 	                PC,
@@ -190,7 +192,6 @@ void UEquipAbility_Montage::CancelAbility(const FGameplayAbilitySpecHandle Handl
 	                TEXT("Abort %s."),
 	                *GetName());
 
-	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 	if (IsValid(AbilityTask_PlayMontage))
 	{
 		AbilityTask_PlayMontage->ExternalCancel();
