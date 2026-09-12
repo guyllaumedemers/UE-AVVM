@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Ability/AVVMGameplayAbility.h"
 
 #include "EquipAbility.generated.h"
@@ -84,6 +85,9 @@ protected:
 	
 	UFUNCTION()
 	void OnMontage_Completed();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag EquipMontageTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> EquippedTriggeringActor = nullptr;

@@ -24,6 +24,7 @@
 #include "AbilitySystemInterface.h"
 #include "AVVMDoesActorRequireComplexVisibilitySupport.h"
 #include "AVVMDoesActorSupportAnimationInterruption.h"
+#include "AVVMDoesActorSupportMontages.h"
 #include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
@@ -88,6 +89,10 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
 
+	// @gdemers Montages such as Equip, Reload, Buttstroke, etc...
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	TMap<FGameplayTag/*MontageTag*/, TSubclassOf<UAnimMontage>> Montages;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, InlineEditConditionToggle))
 	bool bDoesDefineAttachmentStatically{false};
 
@@ -107,6 +112,7 @@ class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAVVMDoesActorRequireComplexVisibilitySupport,
                                           public IAVVMDoesActorSupportAnimationInterruption,
                                           public IAVVMDoesActorSupportDeferredSocketParenting,
+                                          public IAVVMDoesActorSupportMontages,
                                           public IAVVMDoesActorSupportOnAttachmentNotify,
                                           public IAVVMDoesActorSupportStateBinding,
                                           public IAVVMResourceProvider
@@ -138,6 +144,9 @@ public:
 	virtual void DeferredSocketParenting_Implementation(const FAVVMSocketTargetingDeferralContextArgs& ContextArgs) override;
 	virtual void Attach_Implementation(AActor* Target, const FGameplayTag& NewItemAttachmentSlotTag, const FName NewSocketName) override;
 	virtual void Detach_Implementation() override;
+	
+	// @gdemers IAVVMDoesActorSupportMontages
+	virtual TSubclassOf<UAnimMontage> GetMontageClassByTag_Implementation(const FGameplayTag& MontageTag) const override;
 	
 	// @gdemers IAVVMDoesActorSupportStateBinding
 	virtual void Bind_Implementation() override;
@@ -176,7 +185,7 @@ protected:
 	void OnTriggeringAbilityClassAcquired();
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	void BP_SetComplexVisibilityToSelf(const bool bIsHidden);
+	void BP_SetComplexVisibilityToSelf(const bool bNewIsHidden);
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;

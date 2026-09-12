@@ -26,6 +26,7 @@
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
+#include "Animation/AnimMontage.h"
 #include "GameFramework/PlayerController.h"
 
 void UEquipAbility_Montage::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -116,14 +117,27 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		IAVVMDoesActorRequireComplexVisibilitySupport::Execute_ApplyComplexVisibilityToSelf(const_cast<AActor*>(NextEquipTargetActor));
 		EquippedTriggeringActor = NextEquipTargetActor;
 	}
+	else
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
+	}
 
+	TSubclassOf<UAnimMontage> SearchResult = IAVVMDoesActorSupportMontages::Execute_GetMontageClassByTag(EquippedTriggeringActor.Get(), EquipMontageTag);
+	if (!ensureAlwaysMsgf(IsValid(SearchResult), TEXT("Invalid Montage access.")))
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
+	}
+	
+	// TODO @gdemers define how we manage progression tracking, and rate scaling based on stat modifiers.
 	const float StartPosition = 0.f;
 	const float PlayRate = 0.f;
-	UAnimMontage* EquipOrUnequipMontage = nullptr;
-
+	
+	// TODO @gdemers define next how we can cancel running montages that are overriden by another execution
 	AbilityTask_PlayMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,
 	                                                                                         TEXT("EquipOrUnequip_Task"),
-	                                                                                         EquipOrUnequipMontage,
+	                                                                                         SearchResult->GetDefaultObject<UAnimMontage>(),
 	                                                                                         PlayRate,
 	                                                                                         NAME_None,
 	                                                                                         false/*fire-n-forget montage shouldn't tie its lifecycle to the ability*/,

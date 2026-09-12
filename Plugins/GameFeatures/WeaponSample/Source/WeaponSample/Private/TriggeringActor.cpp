@@ -282,6 +282,20 @@ void ATriggeringActor::Detach_Implementation()
 	IAVVMDoesActorSupportStateBinding::Execute_Unbind(this);
 }
 
+TSubclassOf<UAnimMontage> ATriggeringActor::GetMontageClassByTag_Implementation(const FGameplayTag& MontageTag) const
+{
+	const auto& TriggeringActorMontages = GetMontages();
+	if (ensureAlwaysMsgf(TriggeringActorMontages.Contains(MontageTag),
+	                     TEXT("Invalid tag in the montage list.")))
+	{
+		return TriggeringActorMontages[MontageTag];
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
 void ATriggeringActor::Bind_Implementation()
 {
 	const AActor* Outer = OwningOuter.Get();
