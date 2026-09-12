@@ -67,7 +67,7 @@ public:
 	
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Durability);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Weight);
-	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, EquipTime);
+	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, EquipPlayRate);
 
 protected:
 	// ------------------- FAttributeSetProperties ------------------- //
@@ -82,7 +82,7 @@ protected:
 	FGameplayAttributeData Weight{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
-	FGameplayAttributeData EquipTime{};
+	FGameplayAttributeData EquipPlayRate{};
 
 	TSharedPtr<FStreamableHandle> AttributeMetaDataTableHandle = nullptr;
 };

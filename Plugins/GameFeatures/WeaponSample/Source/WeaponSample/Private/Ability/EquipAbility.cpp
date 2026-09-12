@@ -145,7 +145,7 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	// Note : Currently, the skill sample system is very barebone, and would require retrieval via interface query.
 	bool bOutResult = false;
 	const float PlayRate = UAbilitySystemBlueprintLibrary::GetFloatAttribute(EquippedTriggeringActor.Get(),
-	                                                                         GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UAVVMAttributeSet, EquippedTriggeringActor.Get(), EquipTime),
+	                                                                         GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UAVVMAttributeSet, EquippedTriggeringActor.Get(), EquipPlayRate),
 	                                                                         bOutResult);
 
 	ensureAlwaysMsgf(bOutResult, TEXT("Failed to retrieve GameplayAttribute."));
