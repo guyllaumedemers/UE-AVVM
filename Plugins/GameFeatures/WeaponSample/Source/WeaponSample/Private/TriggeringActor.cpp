@@ -197,6 +197,11 @@ UAbilitySystemComponent* ATriggeringActor::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+const UAttributeSet* ATriggeringActor::GetAttributeSet_Implementation() const
+{
+	return OwnedAttributeSet;
+}
+
 void ATriggeringActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
 {
 	OwnedAttributeSet = NewAttributeSet;

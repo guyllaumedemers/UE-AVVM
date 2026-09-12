@@ -23,11 +23,32 @@
 
 #include "AbilitySystemComponent.h"
 #include "AttributeSet.h"
+#include "AVVMToolkitUtils.h"
 
 #include "AVVMAttributeSet.generated.h"
 
 struct FStreamableHandle;
 class UDataTable;
+
+// @gdemers get gameplay attribute using immediately invoked lambda expression.
+#define GET_GAMEPLAY_ATTRIBUTE_USING_IILE(TClass, Actor, GameplayAttributeName)\
+	[](const AActor* AttributeSetOwner)\
+	{\
+		if(!UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMDoesOwnAttributeSet>(AttributeSetOwner))\
+		{\
+			return FGameplayAttribute{};\
+		}\
+		\
+		auto* AttributeSet = Cast<TClass>(IAVVMDoesOwnAttributeSet::Execute_GetAttributeSet(AttributeSetOwner));\
+		if (IsValid(AttributeSet))\
+		{\
+			return AttributeSet->Get##GameplayAttributeName##Attribute();\
+		}\
+		else\
+		{\
+			return FGameplayAttribute{};\
+		}\
+	}(Actor)
 
 /**
  *	Class description:
@@ -46,6 +67,7 @@ public:
 	
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Durability);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Weight);
+	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, EquipTime);
 
 protected:
 	// ------------------- FAttributeSetProperties ------------------- //
@@ -58,6 +80,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
 	FGameplayAttributeData Weight{};
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAttributeSetProperties")
+	FGameplayAttributeData EquipTime{};
 
 	TSharedPtr<FStreamableHandle> AttributeMetaDataTableHandle = nullptr;
 };
@@ -79,6 +104,10 @@ class AVVMGAMEPLAY_API IAVVMDoesOwnAttributeSet
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	const UAttributeSet* GetAttributeSet() const;
+	virtual const UAttributeSet* GetAttributeSet_Implementation() const PURE_VIRTUAL(GetAttributeSet, return nullptr;);
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetAttributeSet(const UAttributeSet* NewAttributeSet);
 	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) PURE_VIRTUAL(SetAttributeSet_Implementation, return;);

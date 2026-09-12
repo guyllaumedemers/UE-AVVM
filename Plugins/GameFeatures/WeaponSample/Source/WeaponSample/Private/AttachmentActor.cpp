@@ -210,6 +210,11 @@ UAbilitySystemComponent* AAttachmentActor::GetAbilitySystemComponent() const
 	return UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
 }
 
+const UAttributeSet* AAttachmentActor::GetAttributeSet_Implementation() const
+{
+	return OwnedAttributeSet;
+}
+
 void AAttachmentActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
 {
 	OwnedAttributeSet = NewAttributeSet;

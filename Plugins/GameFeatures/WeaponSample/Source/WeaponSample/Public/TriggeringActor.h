@@ -136,7 +136,8 @@ public:
 	// @gdemers IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	// @gdemers IAVVMDoesOwnAttributeSet
+	// @gdemers IAVVMDoesOwnAttributeSet<
+	virtual const UAttributeSet* GetAttributeSet_Implementation() const override;
 	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
 
 	// @gdemers IAVVMDoesActorSupportDeferredSocketParenting

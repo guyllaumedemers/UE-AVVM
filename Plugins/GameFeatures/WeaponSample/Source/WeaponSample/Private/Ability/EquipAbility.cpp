@@ -19,12 +19,13 @@
 //SOFTWARE.
 #include "Ability/EquipAbility.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMLogger.h"
 #include "TriggeringActor.h"
 #include "WeaponSampleModule.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
-#include "Ability/AVVMAbilityUtils.h"
+#include "Ability/AVVMAttributeSet.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Animation/AnimMontage.h"
 #include "GameFramework/PlayerController.h"
@@ -111,16 +112,26 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		return;
 	}
 
-	if (NextEquipTargetActor != EquippedTriggeringActor)
+	if (EquippedTriggeringActor.IsValid() && (NextEquipTargetActor != EquippedTriggeringActor))
 	{
 		IAVVMDoesActorRequireComplexVisibilitySupport::Execute_ApplyComplexVisibilityToSelf(const_cast<AActor*>(EquippedTriggeringActor.Get()));
 		IAVVMDoesActorRequireComplexVisibilitySupport::Execute_ApplyComplexVisibilityToSelf(const_cast<AActor*>(NextEquipTargetActor));
-		EquippedTriggeringActor = NextEquipTargetActor;
+	}
+	else if (NextEquipTargetActor != EquippedTriggeringActor)
+	{
+		IAVVMDoesActorRequireComplexVisibilitySupport::Execute_ApplyComplexVisibilityToSelf(const_cast<AActor*>(NextEquipTargetActor));
 	}
 	else
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
+	}
+
+	EquippedTriggeringActor = NextEquipTargetActor;
+	// @gdemers cancel any running instance that isnt complete so we can run a montage for the next target. 
+	if (IsValid(AbilityTask_PlayMontage))
+	{
+		AbilityTask_PlayMontage->ExternalCancel();
 	}
 
 	TSubclassOf<UAnimMontage> SearchResult = IAVVMDoesActorSupportMontages::Execute_GetMontageClassByTag(EquippedTriggeringActor.Get(), EquipMontageTag);
@@ -130,11 +141,14 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		return;
 	}
 	
-	// TODO @gdemers define how we manage progression tracking, and rate scaling based on stat modifiers.
-	const float StartPosition = 0.f;
-	const float PlayRate = 0.f;
-	
-	// TODO @gdemers define next how we can cancel running montages that are overriden by another execution
+	// TODO @gdemers define how we calculate the gameplay attribute for equipping. Each weapon should have a different equip time, which should be scaled based on player skill tree composition.
+	// Note : Currently, the skill sample system is very barebone, and would require retrieval via interface query.
+	bool bOutResult = false;
+	const float PlayRate = UAbilitySystemBlueprintLibrary::GetFloatAttribute(EquippedTriggeringActor.Get(),
+	                                                                         GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UAVVMAttributeSet, EquippedTriggeringActor.Get(), EquipTime),
+	                                                                         bOutResult);
+
+	ensureAlwaysMsgf(bOutResult, TEXT("Failed to retrieve GameplayAttribute."));
 	AbilityTask_PlayMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,
 	                                                                                         TEXT("EquipOrUnequip_Task"),
 	                                                                                         SearchResult->GetDefaultObject<UAnimMontage>(),
@@ -142,7 +156,7 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	                                                                                         NAME_None,
 	                                                                                         false/*fire-n-forget montage shouldn't tie its lifecycle to the ability*/,
 	                                                                                         1.f,
-	                                                                                         StartPosition,
+	                                                                                         0.f,
 	                                                                                         false);
 
 	if (IsValid(AbilityTask_PlayMontage))
