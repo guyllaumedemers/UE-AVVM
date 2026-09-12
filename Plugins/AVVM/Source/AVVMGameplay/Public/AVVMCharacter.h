@@ -76,11 +76,37 @@ struct AVVMGAMEPLAY_API FAVVMCharacterChannelAggregator
 
 /**
  *	Class description:
+ *	
+ *	FAVVMCharacterSparseData is a Shared representation of a class object immutable data. It reduces memory footprint
+ *	by removing the need to allocate that data on instanced class object, and instead reference the shared memory.
+ */
+USTRUCT(BlueprintType)
+struct AVVMGAMEPLAY_API FAVVMCharacterSparseData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FAVVMCharacterChannelAggregator RegisteredChannels{};
+	
+	// @gdemers ActorDefinition allow Actor class overrides, so the ACharacter hierarchy could be
+	// replaced at runtime if setup correctly to support character swapping.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
+	FDataRegistryId ActorDefinitionId{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	bool bCanOverrideServerCollision{false};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanOverrideServerCollision"))
+	TEnumAsByte<ECollisionEnabled::Type> CollisionEnabled{ECollisionEnabled::QueryAndPhysics};
+};
+
+/**
+ *	Class description:
  *
  *	AAVVMCharacter is a derived impl of the ACharacter class that manage resource loading request and forward ASC request to its owning
  *	APlayerState.
  */
-UCLASS()
+UCLASS(SparseClassDataTypes="AVVMCharacterSparseData")
 class AVVMGAMEPLAY_API AAVVMCharacter : public AModularCharacter,
                                         public IAbilitySystemInterface,
                                         public IAVVMCanExposeActorPayload,
@@ -94,6 +120,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#if WITH_EDITOR
+	// ~ This function transfers existing data into FMySparseClassData.
+	virtual void MoveDataToSparseClassDataStruct() const override;
+#endif // WITH_EDITOR
 
 	UFUNCTION(BlueprintCallable)
 	UAVVMAbilitySystemComponent* BP_GetAbilitySystemComponent() const;
@@ -128,28 +159,30 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_PostPlayerStateSet();
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FAVVMCharacterChannelAggregator RegisteredChannels{};
-	
-	// @gdemers ActorDefinition allow Actor class overrides, so the ACharacter hierarchy could be
-	// replaced at runtime if setup correctly to support character swapping.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorDefinitionDataTableRow"))
-	FDataRegistryId ActorDefinitionId{};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bCanOverrideServerCollision{false};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bCanOverrideServerCollision"))
-	TEnumAsByte<ECollisionEnabled::Type> CollisionEnabled{ECollisionEnabled::QueryAndPhysics};
 
 	// @gdemers Resource Component handle initialization of our Character.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 
 	// @gdemers ReplicatedTagComponent handle state tracking and is required to batch handle
 	// TS properties update for animation. the ASC could be a possible candidate for such job, but
 	// would imply support on a per-tag basis, instead of our current Container approach we have.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
+
+private:
+#if WITH_EDITORONLY_DATA
+	//~ These properties are moving out to the FMySparseClassData struct:
+	UPROPERTY()
+	FAVVMCharacterChannelAggregator RegisteredChannels_DEPRECATED{};
+
+	UPROPERTY()
+	FDataRegistryId ActorDefinitionId_DEPRECATED{};
+
+	UPROPERTY()
+	bool bCanOverrideServerCollision_DEPRECATED{false};
+
+	UPROPERTY()
+	TEnumAsByte<ECollisionEnabled::Type> CollisionEnabled_DEPRECATED{ECollisionEnabled::QueryAndPhysics};
+#endif
 };

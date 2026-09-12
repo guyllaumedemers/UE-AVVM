@@ -30,6 +30,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Data/AVVMActorPayload.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "GameFramework/PlayerState.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 
@@ -70,18 +71,18 @@ void AAVVMCharacter::BeginPlay()
 	// @gdemers server don't run animation, unless listen server. so hit detection has to be run against
 	// the capsule. Otherwise, Hit Bone will most-likely mismatch between server-client.
 	USkeletalMeshComponent* NewMeshComponent = GetMesh();
-	if (IsValid(NewMeshComponent) && bCanOverrideServerCollision)
+	if (IsValid(NewMeshComponent) && GetAVVMCharacterSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bCanOverrideServerCollision)
 	{
-		const auto NewCollisionEnabled = IsNetMode(NM_DedicatedServer) ? ECollisionEnabled::NoCollision : CollisionEnabled.GetValue();
+		const auto NewCollisionEnabled = IsNetMode(NM_DedicatedServer) ? ECollisionEnabled::NoCollision : GetCollisionEnabled().GetValue();
 		NewMeshComponent->SetCollisionEnabled(NewCollisionEnabled);
 	}
 
 	// @gdemers which means our fallback for collision detection are capsules. We will be running a segment
 	// intersect against two lines from the center of our capsule, to the close-by instigating actor.
 	UCapsuleComponent* NewCapsuleComponent = GetCapsuleComponent();
-	if (IsValid(NewCapsuleComponent) && bCanOverrideServerCollision)
+	if (IsValid(NewCapsuleComponent) && GetAVVMCharacterSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bCanOverrideServerCollision)
 	{
-		const auto NewCollisionEnabled = IsNetMode(NM_DedicatedServer) ? CollisionEnabled.GetValue() : ECollisionEnabled::NoCollision;
+		const auto NewCollisionEnabled = IsNetMode(NM_DedicatedServer) ? GetCollisionEnabled().GetValue() : ECollisionEnabled::NoCollision;
 		NewCapsuleComponent->SetCollisionEnabled(NewCollisionEnabled);
 	}
 
@@ -90,7 +91,7 @@ void AAVVMCharacter::BeginPlay()
 #endif
 	{
 		UE_AVVM_NOTIFY(this,
-		               RegisteredChannels.PostCharacterBeginTag,
+		               GetRegisteredChannels().PostCharacterBeginTag,
 		               this,
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
@@ -105,11 +106,36 @@ void AAVVMCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #endif
 	{
 		UE_AVVM_NOTIFY(this,
-		               RegisteredChannels.PostCharacterEndTag,
+		               GetRegisteredChannels().PostCharacterEndTag,
 		               this,
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
 }
+
+#if WITH_EDITOR
+void AAVVMCharacter::MoveDataToSparseClassDataStruct() const
+{
+	// make sure we don't overwrite the sparse data if it has been saved already
+	UBlueprintGeneratedClass* BPClass = Cast<UBlueprintGeneratedClass>(GetClass());
+	if (BPClass == nullptr || BPClass->bIsSparseClassDataSerializable == true)
+	{
+		return;
+	}
+
+	Super::MoveDataToSparseClassDataStruct();
+
+#if WITH_EDITORONLY_DATA
+	// Unreal Header Tool (UHT) will create GetMySparseClassData automatically.
+	FAVVMCharacterSparseData* SparseClassData = GetMutableAVVMCharacterSparseData();
+
+	// Modify these lines to include all Sparse Class Data properties.
+	SparseClassData->RegisteredChannels = RegisteredChannels_DEPRECATED;
+	SparseClassData->ActorDefinitionId = ActorDefinitionId_DEPRECATED;
+	SparseClassData->bCanOverrideServerCollision = bCanOverrideServerCollision_DEPRECATED;
+	SparseClassData->CollisionEnabled = CollisionEnabled_DEPRECATED;
+#endif // WITH_EDITORONLY_DATA
+}
+#endif
 
 UAVVMAbilitySystemComponent* AAVVMCharacter::BP_GetAbilitySystemComponent() const
 {
@@ -161,7 +187,7 @@ int32 AAVVMCharacter::GetProviderUniqueId_Implementation() const
 
 TArray<FDataRegistryId> AAVVMCharacter::GetResourceDefinitionRegistryIds_Implementation() const
 {
-	return {ActorDefinitionId};
+	return {GetActorDefinitionId()};
 }
 
 UAVVMResourceManagerComponent* AAVVMCharacter::GetResourceManagerComponent_Implementation() const
@@ -205,7 +231,7 @@ void AAVVMCharacter::OnRep_Controller()
 #endif
 	{
 		UE_AVVM_NOTIFY(this,
-		               RegisteredChannels.PostPlayerControllerReplicationTag,
+		               GetRegisteredChannels().PostPlayerControllerReplicationTag,
 		               this,
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
@@ -220,7 +246,7 @@ void AAVVMCharacter::OnRep_PlayerState()
 #endif
 	{
 		UE_AVVM_NOTIFY(this,
-		               RegisteredChannels.PostPlayerStateReplicationTag,
+		               GetRegisteredChannels().PostPlayerStateReplicationTag,
 		               this,
 		               FAVVMNotificationPayload::Make<FAVVMActorPayload>(TScriptInterface<const IAVVMCanExposeActorPayload>(this)));
 	}
