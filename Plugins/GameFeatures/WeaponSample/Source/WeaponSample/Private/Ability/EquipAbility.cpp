@@ -145,7 +145,7 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 	bool bOutResult = false;
 	// @gdemers WeaponSample will modify this FGameplayAttribute at runtime based on designer configuration, and/or player progression.
 	const float Weapon_EquipPlayRate = UAbilitySystemBlueprintLibrary::GetFloatAttribute(EquippedTriggeringActor.Get(),
-	                                                                                     GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UWeaponBase_AttributeSet, EquippedTriggeringActor.Get(), EquipPlayRate),
+	                                                                                     GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UWeaponBase_AttributeSet, EquippedTriggeringActor.Get(), Animation_EquipPlayRate),
 	                                                                                     bOutResult);
 
 	ensureAlwaysMsgf(bOutResult, TEXT("Failed to retrieve GameplayAttribute."));

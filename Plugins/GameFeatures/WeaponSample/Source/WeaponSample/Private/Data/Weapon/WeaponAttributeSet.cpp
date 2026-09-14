@@ -30,7 +30,7 @@ void UWeaponBase_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetime
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponBase_AttributeSet, EquipPlayRate, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponBase_AttributeSet, Animation_EquipPlayRate, Params);
 }
 
 void UWeaponBase_AttributeSet::Init()

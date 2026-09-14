@@ -43,12 +43,12 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Init() override;
 
-	ATTRIBUTE_ACCESSORS_BASIC(UWeaponBase_AttributeSet, EquipPlayRate);
+	ATTRIBUTE_ACCESSORS_BASIC(UWeaponBase_AttributeSet, Animation_EquipPlayRate);
 
 protected:
 	// ------------------- FAnimationProperties ------------------- //
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
-	FGameplayAttributeData EquipPlayRate{};
+	FGameplayAttributeData Animation_EquipPlayRate{};
 };
 
 /**
