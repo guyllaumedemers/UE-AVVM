@@ -32,10 +32,32 @@ class UCurveFloat;
 /**
  *	Class description:
  *	
+ *	UWeaponBase_AttributeSet is a data type that initialize shared properties on an Actor ASC for any weapon types.
+ */
+UCLASS()
+class WEAPONSAMPLE_API UWeaponBase_AttributeSet : public UAVVMAttributeSet
+{
+	GENERATED_BODY()
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Init() override;
+
+	ATTRIBUTE_ACCESSORS_BASIC(UWeaponBase_AttributeSet, EquipPlayRate);
+
+protected:
+	// ------------------- FAnimationProperties ------------------- //
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
+	FGameplayAttributeData EquipPlayRate{};
+};
+
+/**
+ *	Class description:
+ *	
  *	UWeaponRange_AttributeSet is a data type that initialize properties on an Actor ASC for range weapons.
  */
 UCLASS(Blueprintable)
-class WEAPONSAMPLE_API UWeaponRange_AttributeSet : public UAVVMAttributeSet
+class WEAPONSAMPLE_API UWeaponRange_AttributeSet : public UWeaponBase_AttributeSet
 {
 	GENERATED_BODY()
 

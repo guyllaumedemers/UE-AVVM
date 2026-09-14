@@ -23,6 +23,21 @@
 #include "Engine/StreamableManager.h"
 #include "Net/UnrealNetwork.h"
 
+void UWeaponBase_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponBase_AttributeSet, EquipPlayRate, Params);
+}
+
+void UWeaponBase_AttributeSet::Init()
+{
+	Super::Init();
+}
+
 void UWeaponRange_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

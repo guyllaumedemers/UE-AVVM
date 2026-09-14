@@ -45,6 +45,7 @@ public:
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Movement_DashDistance);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Movement_RollDistance);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Movement_SlideDistance);
+	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Animation_EquipPlayRateModifier);
 
 protected:
 	// ------------------- FCharacterProperties ------------------- //
@@ -67,4 +68,8 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FCharacterProperties")
 	FGameplayAttributeData Movement_SlideDistance{};
+
+	// ------------------- FAnimationProperties ------------------- //
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
+	FGameplayAttributeData Animation_EquipPlayRateModifier{};
 };

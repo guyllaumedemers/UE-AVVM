@@ -25,9 +25,10 @@
 #include "WeaponSampleModule.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
-#include "Ability/AVVMAttributeSet.h"
+#include "Ability/AVVMCharacterAttributeSet.h"
 #include "Ability/AVVMGameplayAbilityActorInfo.h"
 #include "Animation/AnimMontage.h"
+#include "Data/Weapon/WeaponAttributeSet.h"
 #include "GameFramework/PlayerController.h"
 
 void UEquipAbility_Montage::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
@@ -140,19 +141,24 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
 	}
-	
-	// TODO @gdemers define how we calculate the gameplay attribute for equipping. Each weapon should have a different equip time, which should be scaled based on player skill tree composition.
-	// Note : Currently, the skill sample system is very barebone, and would require retrieval via interface query.
+
 	bool bOutResult = false;
-	const float PlayRate = UAbilitySystemBlueprintLibrary::GetFloatAttribute(EquippedTriggeringActor.Get(),
-	                                                                         GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UAVVMAttributeSet, EquippedTriggeringActor.Get(), EquipPlayRate),
-	                                                                         bOutResult);
+	// @gdemers WeaponSample will modify this FGameplayAttribute at runtime based on designer configuration, and/or player progression.
+	const float Weapon_EquipPlayRate = UAbilitySystemBlueprintLibrary::GetFloatAttribute(EquippedTriggeringActor.Get(),
+	                                                                                     GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UWeaponBase_AttributeSet, EquippedTriggeringActor.Get(), EquipPlayRate),
+	                                                                                     bOutResult);
+
+	ensureAlwaysMsgf(bOutResult, TEXT("Failed to retrieve GameplayAttribute."));
+	// @gdemers SkillSample will modify this FGameplayAttribute at runtime based on player Skill Tree configuration.
+	const float Player_EquipPlayRateModifier = UAbilitySystemBlueprintLibrary::GetFloatAttribute(ActorInfo->OwnerActor.Get(),
+	                                                                                             GET_GAMEPLAY_ATTRIBUTE_USING_IILE(UAVVMCharacterAttributeSet, ActorInfo->OwnerActor.Get(), Animation_EquipPlayRateModifier),
+	                                                                                             bOutResult);
 
 	ensureAlwaysMsgf(bOutResult, TEXT("Failed to retrieve GameplayAttribute."));
 	AbilityTask_PlayMontage = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,
 	                                                                                         TEXT("EquipOrUnequip_Task"),
 	                                                                                         SearchResult->GetDefaultObject<UAnimMontage>(),
-	                                                                                         PlayRate,
+	                                                                                         (Weapon_EquipPlayRate * Player_EquipPlayRateModifier),
 	                                                                                         NAME_None,
 	                                                                                         false/*fire-n-forget montage shouldn't tie its lifecycle to the ability*/,
 	                                                                                         1.f,

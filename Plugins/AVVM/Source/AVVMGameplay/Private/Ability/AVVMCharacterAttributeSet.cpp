@@ -34,6 +34,7 @@ void UAVVMCharacterAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifeti
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_DashDistance, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_RollDistance, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Movement_SlideDistance, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMCharacterAttributeSet, Animation_EquipPlayRateModifier, Params);
 }
 
 void UAVVMCharacterAttributeSet::Init()
