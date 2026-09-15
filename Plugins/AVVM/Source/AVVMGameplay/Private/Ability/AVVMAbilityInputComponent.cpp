@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "Ability/AVVMAbilityInputComponent.h"
 
-#include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMGameplayModule.h"
 #include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
@@ -27,6 +26,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -280,8 +280,8 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 		return;
 	}
 
-	UAbilitySystemComponent* AbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(PC->PlayerState);
-	if (!IsValid(AbilitySystemComponent))
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(PC->PlayerState);
+	if (!IsValid(ASC))
 	{
 		return;
 	}
@@ -301,16 +301,16 @@ void UAVVMAbilityInputComponent::OnInputActionReceived(const FAVVMInputActionCal
 	const bool bCanRemoveTag = EnumHasAnyFlags(InputActionCallbackContext.TriggerEvent, ETriggerEvent::Canceled | ETriggerEvent::Completed);
 	if (bCanRemoveTag)
 	{
-		AbilitySystemComponent->ReleaseInputID(InputAction->GetInputId());
-		AbilitySystemComponent->RemoveLooseGameplayTag(*SearchTag);
+		ASC->ReleaseInputID(InputAction->GetInputId());
+		ASC->RemoveLooseGameplayTag(*SearchTag);
 		return;
 	}
 
 	const bool bCanAddTag = EnumHasAnyFlags(InputActionCallbackContext.TriggerEvent, ETriggerEvent::Started);
 	if (bCanAddTag)
 	{
-		AbilitySystemComponent->AddLooseGameplayTag(*SearchTag);
-		AbilitySystemComponent->PressInputID(InputAction->GetInputId());
+		ASC->AddLooseGameplayTag(*SearchTag);
+		ASC->PressInputID(InputAction->GetInputId());
 		return;
 	}
 }

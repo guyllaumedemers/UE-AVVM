@@ -522,11 +522,16 @@ void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
 
 void ATriggeringActor::RegisterAbility()
 {
+	if (TriggeringAbilityClassHandle.IsValid())
+	{
+		return;
+	}
+	
 	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
 	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
 	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
-	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({GetTriggeringAbilityClass().ToSoftObjectPath()});
+	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({GetTriggeringAbilityClass().ToSoftObjectPath()}, OnRequestTriggeringActorAbilityComplete);
 }
 
 void ATriggeringActor::UnRegisterAbility()
@@ -540,6 +545,7 @@ void ATriggeringActor::UnRegisterAbility()
 	if (IsValid(ASC))
 	{
 		ASC->ClearAbility(TriggeringAbilitySpecHandle);
+		TriggeringAbilityClassHandle.Reset();
 	}
 }
 
@@ -570,7 +576,8 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 	                                               {
 			                                               GameplayAbilityClass,
 			                                               1,
-			                                               GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
+			                                               GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId(),
+			                                               this /*provide us as source object so we can differentiate when executing the ability the source of execution*/
 	                                               });
 }
 

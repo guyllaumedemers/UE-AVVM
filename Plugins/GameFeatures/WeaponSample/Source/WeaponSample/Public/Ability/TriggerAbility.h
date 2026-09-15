@@ -58,12 +58,6 @@ public:
 	                                const FGameplayTagContainer* TargetTags = nullptr,
 	                                FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
-	virtual void PreActivate(const FGameplayAbilitySpecHandle Handle,
-	                         const FGameplayAbilityActorInfo* ActorInfo,
-	                         const FGameplayAbilityActivationInfo ActivationInfo,
-	                         FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
-	                         const FGameplayEventData* TriggerEventData = nullptr) override;
-
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	                             const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
