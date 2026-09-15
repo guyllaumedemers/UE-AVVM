@@ -100,17 +100,7 @@ void UTriggerAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	                TEXT("TryActivate %s."),
 	                *GetName());
 
-	// @gdemers CommitAbility should consume whatever cost activating this ability required. This imply :
-	// ammunition, mana, resources, etc...
-	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
-	if (bWasCommitted)
-	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-	}
-	else
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
-	}
+	RunOptionalTask(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
 void UTriggerAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle,
@@ -137,27 +127,49 @@ void UTriggerAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-bool UTriggerAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle,
-                                    const FGameplayAbilityActorInfo* ActorInfo,
-                                    const FGameplayAbilityActivationInfo ActivationInfo,
-                                    FGameplayTagContainer* OptionalRelevantTags)
+void UTriggerAbility::RunOptionalTask(const FGameplayAbilitySpecHandle Handle,
+                                      const FGameplayAbilityActorInfo* ActorInfo,
+                                      const FGameplayAbilityActivationInfo ActivationInfo,
+                                      const FGameplayEventData* TriggerEventData)
 {
-	if (!Super::CommitAbility(Handle, ActorInfo, ActivationInfo, OptionalRelevantTags) ||
-		!ActorInfo->AbilitySystemComponent.IsValid())
+	// @gdemers CommitAbility should consume whatever cost activating this ability required. This imply :
+	// ammunition, mana, resources, etc...
+	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
+	if (bWasCommitted)
 	{
-		return false;
+		Execute(Handle, ActorInfo, ActivationInfo);
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	}
+	else
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+	}
+}
+
+void UTriggerAbility::Execute(const FGameplayAbilitySpecHandle Handle,
+                              const FGameplayAbilityActorInfo* ActorInfo,
+                              const FGameplayAbilityActivationInfo ActivationInfo)
+{
+	const auto* ASC = (ActorInfo != nullptr) ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(ASC),
+	                      TEXT("UTriggerAbility owning ASC invalid!")))
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
 	}
 
-	const auto* GASpec = ActorInfo->AbilitySystemComponent->FindAbilitySpecFromHandle(Handle);
+	const auto* GASpec = ASC->FindAbilitySpecFromHandle(Handle);
 	if (!ensureAlwaysMsgf(GASpec != nullptr, TEXT("Failed to Find Ability Spec from Handle")))
 	{
-		return false;
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
 	}
 
 	auto* TriggeringActor = Cast<ATriggeringActor>(GASpec->SourceObject);
 	if (!ensureAlwaysMsgf(IsValid(TriggeringActor), TEXT("Invalid TriggeringActor.")))
 	{
-		return false;
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+		return;
 	}
 
 	const APlayerController* PC = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
@@ -168,5 +180,4 @@ bool UTriggerAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle,
 	                *GetName());
 
 	TriggeringActor->Trigger();
-	return true;
 }

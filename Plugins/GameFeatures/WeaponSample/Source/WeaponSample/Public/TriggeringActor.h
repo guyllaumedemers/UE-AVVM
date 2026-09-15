@@ -123,6 +123,7 @@ public:
 	ATriggeringActor(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 #if WITH_EDITOR
 	// ~ This function transfers existing data into FMySparseClassData.
@@ -203,7 +204,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle{};
 
-	UPROPERTY(Transient, BlueprintReadOnly)
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)

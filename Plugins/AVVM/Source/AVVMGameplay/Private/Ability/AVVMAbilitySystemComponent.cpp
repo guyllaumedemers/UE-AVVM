@@ -261,7 +261,7 @@ void UAVVMAbilitySystemComponent::RegisterAttributeSet(const UAttributeSet* Attr
 	}
 
 	// @gdemers register AttributeSet with 'this' ASC.
-	const TWeakObjectPtr<const UAttributeSet>& OutResult = OwnerToAttributeSet.FindOrAdd(AttributeSetOwner, AttributeSet);
+	const TWeakObjectPtr<const UAttributeSet>& OutResult = OwnerToAttributeSet.Add(AttributeSetOwner, AttributeSet);
 	AddSpawnedAttribute(const_cast<UAttributeSet*>(OutResult.Get()));
 
 	// @gdemers cache AttributeSet on Owner for possible runtime swap. (Stored as TObjectPtr to prevent gc on the Outer)

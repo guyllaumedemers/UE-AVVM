@@ -28,6 +28,7 @@
 #include "WeaponSampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Ability/AVVMAttributeSet.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
@@ -37,6 +38,7 @@
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/StreamableManager.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Tags/PrivateTags.h"
 
@@ -157,6 +159,17 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #endif
 }
 
+void ATriggeringActor::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	// @gdemers the only thing required for replication here!
+	DOREPLIFETIME_WITH_PARAMS_FAST(ATriggeringActor, OwnedAttributeSet, Params);
+}
+
 #if WITH_EDITOR
 void ATriggeringActor::MoveDataToSparseClassDataStruct() const
 {
@@ -204,6 +217,7 @@ const UAttributeSet* ATriggeringActor::GetAttributeSet_Implementation() const
 
 void ATriggeringActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
 {
+	MARK_PROPERTY_DIRTY_FROM_NAME(ATriggeringActor, OwnedAttributeSet, this);
 	OwnedAttributeSet = NewAttributeSet;
 }
 
