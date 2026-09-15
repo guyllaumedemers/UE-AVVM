@@ -28,7 +28,8 @@ void UWeaponBase_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
-	Params.bIsPushBased = true;
+	// @gdemers IMPORTANT - FGameplayAttribute doesnt support Push Model.
+	// Params.bIsPushBased = true;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponBase_AttributeSet, Animation_EquipPlayRate, Params);
 }
@@ -43,7 +44,8 @@ void UWeaponRange_AttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
-	Params.bIsPushBased = true;
+	// @gdemers IMPORTANT - FGameplayAttribute doesnt support Push Model.
+	// Params.bIsPushBased = true;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, TimeUntilFirstShotReset, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UWeaponRange_AttributeSet, RateOfFire, Params);

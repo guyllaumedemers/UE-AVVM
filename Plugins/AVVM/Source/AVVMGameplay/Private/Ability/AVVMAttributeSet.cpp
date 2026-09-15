@@ -28,7 +28,8 @@ void UAVVMAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
-	Params.bIsPushBased = true;
+	// @gdemers IMPORTANT - FGameplayAttribute doesnt support Push Model.
+	// Params.bIsPushBased = true;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMAttributeSet, Durability, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMAttributeSet, Weight, Params);
