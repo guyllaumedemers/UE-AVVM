@@ -60,6 +60,10 @@ struct WEAPONSAMPLE_API FAttachmentActorSparseData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
 
+	// @gdemers maybe grant an ability, or apply some passive effect to the asc owning outer.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	TSoftClassPtr<UGameplayEffect> AttachmentGameplayEffectClass = nullptr;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, InlineEditConditionToggle))
 	bool bDoesAllowDefiningAttachmentSlotTag{false};
 
