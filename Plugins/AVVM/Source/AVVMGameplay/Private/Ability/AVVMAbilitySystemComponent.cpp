@@ -217,9 +217,9 @@ void UAVVMAbilitySystemComponent::SetupAttributeSet(const FSoftObjectPath& Attri
 			}
 
 			const auto* AttributeSet = Cast<UAVVMAttributeSet>(ASC->GetOrCreateAttributeSubobject(AttributeSetClass));
-			if (IsValid(AttributeSet))
+			if (ensureAlwaysMsgf(IsValid(AttributeSet), TEXT("Failed to GetOrCreate a valid AttributeSet.")))
 			{
-				Caller->RegisterAttributeSet(AttributeSet, AttributeSetOwner);
+				ASC->RegisterAttributeSet(AttributeSet, AttributeSetOwner);
 				const_cast<UAVVMAttributeSet*>(AttributeSet)->Init();
 			}
 		}

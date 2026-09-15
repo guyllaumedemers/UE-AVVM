@@ -25,11 +25,13 @@
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMQuicktimeEventInterface.h"
 #include "ModularPlayerState.h"
+#include "Ability/AVVMAttributeSet.h"
 #include "Data/AVVMActorPayload.h"
 
 #include "AVVMPlayerState.generated.h"
 
 class IAVVMDoesImplNetSynchronization;
+class UAttributeSet;
 class UAVVMAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPostNetClientSynchronizationCompleteDelegate, const AAVVMPlayerState* PlayerState);
@@ -111,6 +113,7 @@ UCLASS(SparseClassDataTypes="AVVMPlayerStateSparseData")
 class AVVMGAMEPLAY_API AAVVMPlayerState : public AModularPlayerState,
                                           public IAbilitySystemInterface,
                                           public IAVVMCanExposeActorPayload,
+                                          public IAVVMDoesOwnAttributeSet,
                                           public IAVVMQuicktimeEventPlayerStateInterface
 {
 	GENERATED_BODY()
@@ -139,6 +142,10 @@ public:
 
 	// IAVVMCanExposeActorPayload
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
+
+	// @gdemers IAVVMDoesOwnAttributeSet
+	virtual const UAttributeSet* GetAttributeSet_Implementation() const override;
+	virtual void SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet) override;
 	
 	// @gdemers Delegate to register on the client side for capturing PlayerState NetSync completion.
 	FOnPostNetClientSynchronizationCompleteDelegate& GetOnPostNetClientSynchronizationComplete();
@@ -162,6 +169,9 @@ protected:
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 
 private:
 #if !UE_BUILD_SHIPPING

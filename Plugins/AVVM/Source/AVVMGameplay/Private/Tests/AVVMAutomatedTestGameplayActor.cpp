@@ -49,7 +49,7 @@ TArray<FDataRegistryId> AAVVMAutomatedTestGameplayActor::CheckIsDoneAcquiringRes
 	TArray<FDataRegistryId> OutResults;
 	OutResults.Append(UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(
 	                                                                                UAVVMActorResourceHandlingImpl::StaticClass(),
-	                                                                                nullptr/*expected*/,
+	                                                                                AbilitySystemComponent,
 	                                                                                Resources));
 
 	OutResults.Append(UAVVMResourceHandlingBlueprintFunctionLibrary::CheckResources(

@@ -55,6 +55,7 @@ void AAVVMPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAVVMPlayerState, OwnedAttributeSet, Params);
 	// @gdemers IMPORTANT : Push model updates will be stripped out of Shipping build.
 	DOREPLIFETIME_WITH_PARAMS_FAST(AAVVMPlayerState, ClientSidedPlayerProfilePayload, Params);
 }
@@ -191,6 +192,17 @@ TInstancedStruct<FAVVMActorContext> AAVVMPlayerState::GetExposedActorContext_Imp
 	// @gdemers Define the PlayerState representation for it's Actor Context.
 	// example : GamerTag, level, ranking, etc... (such as Nameplate information).
 	return IAVVMCanExposeActorPayload::GetExposedActorContext_Implementation();
+}
+
+const UAttributeSet* AAVVMPlayerState::GetAttributeSet_Implementation() const
+{
+	return OwnedAttributeSet;
+}
+
+void AAVVMPlayerState::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(AAVVMPlayerState, OwnedAttributeSet, this);
+	OwnedAttributeSet = NewAttributeSet;
 }
 
 FOnPostNetClientSynchronizationCompleteDelegate& AAVVMPlayerState::GetOnPostNetClientSynchronizationComplete()

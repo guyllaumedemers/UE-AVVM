@@ -32,6 +32,7 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/BlueprintGeneratedClass.h"
+#include "Net/UnrealNetwork.h"
 
 AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AActor* Target) const
 {
@@ -182,6 +183,17 @@ void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 }
 
+void AAttachmentActor::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	// @gdemers the only thing required for replication here!
+	DOREPLIFETIME_WITH_PARAMS_FAST(AAttachmentActor, OwnedAttributeSet, Params);
+}
+
 #if WITH_EDITOR
 void AAttachmentActor::MoveDataToSparseClassDataStruct() const
 {
@@ -217,6 +229,7 @@ const UAttributeSet* AAttachmentActor::GetAttributeSet_Implementation() const
 
 void AAttachmentActor::SetAttributeSet_Implementation(const UAttributeSet* NewAttributeSet)
 {
+	MARK_PROPERTY_DIRTY_FROM_NAME(ATriggeringActor, OwnedAttributeSet, this);
 	OwnedAttributeSet = NewAttributeSet;
 }
 

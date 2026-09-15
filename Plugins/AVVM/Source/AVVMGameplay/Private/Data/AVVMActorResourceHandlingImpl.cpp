@@ -19,19 +19,43 @@
 //SOFTWARE.
 #include "Data/AVVMActorResourceHandlingImpl.h"
 
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
 #include "Components/ActorComponent.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 
 TArray<FDataRegistryId> UAVVMActorResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
-	TArray<FDataRegistryId> OutResources;
+	TArray<FSoftObjectPath> AttributeSetSoftObjectPaths{};
+	TArray<FDataRegistryId> OutResources{};
 
 	for (const UObject* Resource : Resources)
 	{
 		const auto* ActorDefinitionDataAsset = Cast<UAVVMActorDefinitionDataAsset>(Resource);
-		if (IsValid(ActorDefinitionDataAsset))
+		if (!IsValid(ActorDefinitionDataAsset))
 		{
-			OutResources.Append(ActorDefinitionDataAsset->GetAbilityRegistryIds());
+			continue;
+		}
+
+		OutResources.Append(ActorDefinitionDataAsset->GetAbilityRegistryIds());
+
+		const auto& AttributeSoftObjectPath = ActorDefinitionDataAsset->GetActorAttributeSetClassSoftObjectPath();
+		if (AttributeSoftObjectPath.IsValid())
+		{
+			AttributeSetSoftObjectPaths.Add(AttributeSoftObjectPath);
+		}
+	}
+
+	// @gdemers APlayerState or ACharacter based on IsBot or not. Depends on ASC ownership.
+	auto* Owner = IsValid(ActorComponent) ? ActorComponent->GetOwner() : nullptr;
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Owner);
+
+	if (ensureAlwaysMsgf(IsValid(Owner), TEXT("Invalid Owner.")) &&
+		ensureAlwaysMsgf(IsValid(ASC), TEXT("Invalid ASC. Make sure AI also has valid ASC!")))
+	{
+		for (const auto& AttributeSetSoftObjectPath : AttributeSetSoftObjectPaths)
+		{
+			ASC->SetupAttributeSet(AttributeSetSoftObjectPath, Owner);
 		}
 	}
 
