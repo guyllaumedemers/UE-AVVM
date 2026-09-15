@@ -27,6 +27,7 @@
 #include "AVVMToolkitUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
+#include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Data/AVVMActorPayload.h"
@@ -50,6 +51,7 @@ AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)
 {
 	ResourceManagerComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMResourceManagerComponent>(this, TEXT("ResourceManagerComponent"));
 	ReplicatedTagComponent = ObjectInitializer.CreateDefaultSubobject<UAVVMReplicatedTagComponent>(this, TEXT("ReplicatedTagComponent"));
+	AimingComponent = ObjectInitializer.CreateDefaultSubobject<UArrowComponent>(this, TEXT("AimingComponent"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -147,6 +149,11 @@ UAbilitySystemComponent* AAVVMCharacter::GetAbilitySystemComponent() const
 	// @gdemers Note : Override for AI derived class and provide ASC directly.
 	const APlayerState* OwningActor = GetPlayerState();
 	return IsValid(OwningActor) ? UAVVMAbilityUtils::GetAbilitySystemComponent(OwningActor) : nullptr;
+}
+
+const UArrowComponent* AAVVMCharacter::GetAimingComponent() const
+{
+	return AimingComponent;
 }
 
 TInstancedStruct<FAVVMActorContext> AAVVMCharacter::GetExposedActorContext_Implementation() const

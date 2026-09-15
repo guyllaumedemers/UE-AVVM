@@ -36,7 +36,7 @@ class USkeletalMeshComponent;
  *	
  *	AWeaponActor_Range is a system actor that handle behaviour specific to a magic weapon.
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API AWeaponActor_Range final : public ATriggeringActor
 {
 	GENERATED_BODY()
@@ -61,6 +61,8 @@ protected:
 	void RangeTrigger() const;
 	virtual void RangeTrigger_Implementation() const;
 	
+	const UArrowComponent* GetMutableAimingComponent() const;
+	
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
 
@@ -73,7 +75,7 @@ protected:
 	// @gdemers Arrow held by Outer Actor that is aligned with the ACharacter expected World FTransform
 	// when holding this Weapon. Using proxy remove dependency on Animation state being set on the Server.
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const UArrowComponent> WeaponProxyComponent = nullptr;
+	mutable TWeakObjectPtr<const UArrowComponent> WeaponProxyComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};
@@ -84,7 +86,7 @@ protected:
  *	
  *	AWeaponActor_Melee is a system actor that handle behaviour specific to a melee weapon.
  */
-UCLASS()
+UCLASS(Blueprintable)
 class WEAPONSAMPLE_API AWeaponActor_Melee final : public ATriggeringActor
 {
 	GENERATED_BODY()

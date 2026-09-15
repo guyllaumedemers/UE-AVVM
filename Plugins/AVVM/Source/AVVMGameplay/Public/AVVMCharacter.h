@@ -34,6 +34,7 @@
 #include "AVVMCharacter.generated.h"
 
 class UAbilitySystemComponent;
+class UArrowComponent;
 class UAVVMAbilitySystemComponent;
 class UAVVMReplicatedTagComponent;
 
@@ -132,6 +133,9 @@ public:
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
+	UFUNCTION(BlueprintCallable)
+	const UArrowComponent* GetAimingComponent() const;
+
 	// IAVVMCanExposeActorPayload
 	virtual TInstancedStruct<FAVVMActorContext> GetExposedActorContext_Implementation() const override;
 	
@@ -169,6 +173,9 @@ protected:
 	// would imply support on a per-tag basis, instead of our current Container approach we have.
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
+
+	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UArrowComponent> AimingComponent = nullptr;
 
 private:
 #if WITH_EDITORONLY_DATA

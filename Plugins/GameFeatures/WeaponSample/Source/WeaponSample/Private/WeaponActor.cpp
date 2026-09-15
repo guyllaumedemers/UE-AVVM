@@ -20,6 +20,7 @@
 #include "WeaponActor.h"
 
 #include "AttachmentManagerComponent.h"
+#include "AVVMCharacter.h"
 #include "ProjectileComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -48,12 +49,6 @@ void AWeaponActor_Range::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 void AWeaponActor_Range::BeginPlay()
 {
 	Super::BeginPlay();
-
-	const auto* Outer = GetTypedOuter<ACharacter>();
-	if (IsValid(Outer))
-	{
-		WeaponProxyComponent = Outer->GetComponentByClass<UArrowComponent>();
-	}
 }
 
 void AWeaponActor_Range::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -92,7 +87,7 @@ void AWeaponActor_Range::MeleeTrigger_Implementation() const
 
 void AWeaponActor_Range::RangeTrigger_Implementation() const
 {
-	const UArrowComponent* ProxyComponent = WeaponProxyComponent.Get();
+	const UArrowComponent* ProxyComponent = GetMutableAimingComponent();
 	if (!ensureAlwaysMsgf(IsValid(ProxyComponent), TEXT("Missing Proxy Component")))
 	{
 		return;
@@ -104,6 +99,19 @@ void AWeaponActor_Range::RangeTrigger_Implementation() const
 		// and/or alternate animation sequence we execute.
 		ProjectileComponent->Fire(CurrentFiringMode, ProxyComponent->GetComponentTransform());
 	}
+}
+
+const UArrowComponent* AWeaponActor_Range::GetMutableAimingComponent() const
+{
+	if (!WeaponProxyComponent.IsValid() && OwningOuter.IsValid())
+	{
+		//@gdemers mutable since we suffer from race conditions on BeginPlay, and require latent caching
+		// of the member value. Why ? remove the need of violating constness.
+		const auto* Outer = Cast<AAVVMCharacter>(OwningOuter);
+		WeaponProxyComponent = IsValid(Outer) ? Outer->GetAimingComponent() : nullptr;
+	}
+
+	return WeaponProxyComponent.Get();
 }
 
 AWeaponActor_Melee::AWeaponActor_Melee(const FObjectInitializer& ObjectInitializer)

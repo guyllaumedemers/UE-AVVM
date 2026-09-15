@@ -105,7 +105,7 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
  *
  *	ATriggeringActor is a triggering system that executes behaviour such as triggering or targeting.
  */
-UCLASS(SparseClassDataTypes="TriggeringActorSparseData")
+UCLASS(Abstract, NotBlueprintable, SparseClassDataTypes="TriggeringActorSparseData")
 class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAbilitySystemInterface,
                                           public IAVVMDoesOwnAttributeSet,
