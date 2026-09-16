@@ -142,7 +142,7 @@ void UTriggerHoldAbility::OnTick(const float NewDelta)
 			// @gdemers first shot fired.
 			Execute(Handle, ActorInfo, ActivationInfo);
 		}
-		else if (((CurrHeldTime / ((PredictedTriggerCount != 0) ? PredictedTriggerCount : 1)) >= TriggerProgressRate))
+		else if ((CurrHeldTime - ((PredictedTriggerCount - 1) * TriggerProgressRate)) >= TriggerProgressRate)
 		{
 			// @gdemers subsequent shot fired at interval.
 			Execute(Handle, ActorInfo, ActivationInfo);
