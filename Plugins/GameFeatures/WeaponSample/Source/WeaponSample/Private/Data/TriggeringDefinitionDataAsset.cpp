@@ -39,7 +39,6 @@ TArray<FDataRegistryId> UTriggeringDefinitionDataAsset::GetDependentIds() const
 	if (bDoesSupportDefaultAttachments)
 	{
 		DependentIds.Append(DefaultAttachmentIds);
-		DependentIds.Append(ProjectileDefinitionIds);
 	}
 
 	return DependentIds;

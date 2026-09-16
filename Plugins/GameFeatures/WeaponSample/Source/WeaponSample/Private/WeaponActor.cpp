@@ -53,11 +53,37 @@ void AWeaponActor_Range::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 void AWeaponActor_Range::BeginPlay()
 {
 	Super::BeginPlay();
+
+#if WITH_SERVER_CODE
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	auto* ASC = GetAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		ASC->BlockAbilitiesWithTags(GetBlockedTriggeringModes());
+	}
+#endif
 }
 
 void AWeaponActor_Range::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+#if WITH_SERVER_CODE
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	auto* ASC = GetAbilitySystemComponent();
+	if (IsValid(ASC))
+	{
+		ASC->UnBlockAbilitiesWithTags(GetBlockedTriggeringModes());
+	}
+#endif
 }
 
 void AWeaponActor_Range::Trigger_Implementation() const
