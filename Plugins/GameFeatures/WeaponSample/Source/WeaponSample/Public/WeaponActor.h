@@ -60,9 +60,8 @@ protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void MeleeTrigger() const;
 	virtual void MeleeTrigger_Implementation() const;
-	
-	void ApplyProjectileGameplayEffect(const FGameplayTag& NewFiringMode);
-	TSubclassOf<UGameplayEffect> GetProjectileGameplayEffectClass(const FGameplayTag& NewFiringMode) const;
+
+	void ApplyFiringModeGameplayEffect(const FGameplayTag& NewFiringMode);
 	const UArrowComponent* GetMutableAimingComponent() const;
 	
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
@@ -80,9 +79,10 @@ protected:
 	mutable TWeakObjectPtr<const UArrowComponent> WeaponProxyComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};
-	
 	FActiveGameplayEffectHandle FiringModeGameplayEffectHandle{};
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};
 };
 
 /**

@@ -18,3 +18,49 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Effect/GameplayEffect_ProjectileTemplate.h"
+
+#include "NonReplicatedProjectileActor.h"
+#include "Kismet/GameplayStatics.h"
+
+void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile,
+                             const TArray<AActor*>& IgnoredActors) const &
+{
+	if (!IsValid(Projectile))
+	{
+		return;
+	}
+
+	const FTransform& ProjectileWorldTransform = Projectile->GetTransform();
+	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
+
+	auto Params = FPredictProjectilePathParams(Radius, ProjectileWorldTransform.GetLocation(), (NormalizedDirection * Speed), MaxSimTime, ECollisionChannel::ECC_Visibility);
+	Params.ActorsToIgnore.Append(IgnoredActors);
+
+	FPredictProjectilePathResult OutResult;
+	const bool bIsBlockingHit = UGameplayStatics::PredictProjectilePath(Projectile, Params, OutResult);
+
+	Projectile->ProjectileTemplate = TInstancedStruct<FProjectileParams>::Make(*this);
+	Projectile->bDoesPredictBlockingHit = bIsBlockingHit;
+	Projectile->PredictedPathResult = OutResult;
+
+	// TODO @gdemers we may want to not tick and kill right away if theres no blocking hit.
+	Projectile->SetActorTickEnabled(true);
+}
+
+UScriptStruct* TBaseStructure<FProjectileParams>::Get()
+{
+	return FProjectileParams::StaticStruct();
+}
+
+void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const &
+{
+	if (IsValid(Projectile))
+	{
+		Projectile->ExplosionTemplate = TInstancedStruct<FExplosionParams>::Make(*this);
+	}
+}
+
+UScriptStruct* TBaseStructure<FExplosionParams>::Get()
+{
+	return FExplosionParams::StaticStruct();
+}

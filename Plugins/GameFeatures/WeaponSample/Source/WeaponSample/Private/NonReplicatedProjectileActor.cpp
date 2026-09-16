@@ -23,6 +23,7 @@
 #include "ProjectileManagerSubsystem.h"
 #include "TriggeringActor.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
+#include "Effect/GameplayEffect_ProjectileTemplate.h"
 #include "Engine/DamageEvents.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"

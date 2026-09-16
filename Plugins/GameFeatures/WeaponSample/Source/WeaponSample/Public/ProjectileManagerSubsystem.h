@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "GameplayTagContainer.h"
 #include "Engine/World.h"
 #include "StructUtils/InstancedStruct.h"
 #include "Subsystems/WorldSubsystem.h"
@@ -32,6 +33,7 @@ class ANonReplicatedProjectileActor;
 class APlayerController;
 class APlayerState;
 struct FProjectileParams;
+class UGameplayEffect;
 
 /**
  *	Class description:
@@ -92,15 +94,20 @@ public:
 	static void Static_CreateProjectile(const UWorld* World,
 	                                    const FProjectileContextArgs& ContextArgs);
 
+	UFUNCTION(BlueprintCallable)
+	static TSoftClassPtr<UGameplayEffect> Static_GetFiringModeGameplayEffectClass(const UWorld* World,
+	                                                                              const FGameplayTag& NewFiringMode);
+
 protected:
 	static UProjectileManagerSubsystem* Get(const UWorld* World);
 	void Register(ANonReplicatedProjectileActor* Projectile);
 	void Unregister(ANonReplicatedProjectileActor* Projectile);
 	void CreateProjectile(const FProjectileContextArgs& ContextArgs) const;
+	TSoftClassPtr<UGameplayEffect> GetFiringModeGameplayEffectClass(const FGameplayTag& NewFiringMode);
 
 	UFUNCTION(CallInEditor)
 	void OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
-	
+
 	void OnPlayerStateRemoved(const APlayerState* PlayerState);
 	void OnPlayerStateAdded(const APlayerState* PlayerState);
 	void OnProjectileShutdownRequested(ANonReplicatedProjectileActor* Projectile);
@@ -109,13 +116,13 @@ protected:
 	virtual ANonReplicatedProjectileActor* Factory(const UClass* ProjectileClass,
 	                                               const FActorSpawnParameters& SpawnActorParameters,
 	                                               const FTransform& AimTransform) const;
-	
+
 	// @gdemers shutdown method to support pooling or other instancing system specific to your project.
 	virtual void Shutdown(ANonReplicatedProjectileActor* Projectile);
-	
+
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const APlayerController> ClientPlayerController = nullptr;
-	
+
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ANonReplicatedProjectileActor>> Projectiles{};
 };

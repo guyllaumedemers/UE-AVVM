@@ -20,8 +20,11 @@
 #include "ProjectileManagerSubsystem.h"
 
 #include "AVVMPlayerState.h"
+#include "DataRegistrySubsystem.h"
 #include "NonReplicatedProjectileActor.h"
+#include "WeaponSettings.h"
 #include "Data/ProjectileDefinitionDataAsset.h"
+#include "Effect/GameplayEffect_ProjectileTemplate.h"
 #include "Engine/World.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
@@ -116,6 +119,13 @@ void UProjectileManagerSubsystem::Static_CreateProjectile(const UWorld* World,
 	}
 }
 
+TSoftClassPtr<UGameplayEffect> UProjectileManagerSubsystem::Static_GetFiringModeGameplayEffectClass(const UWorld* World,
+                                                                                                    const FGameplayTag& NewFiringMode)
+{
+	auto* ProjectileSubsystem = UProjectileManagerSubsystem::Get(World);
+	return IsValid(ProjectileSubsystem) ? ProjectileSubsystem->GetFiringModeGameplayEffectClass(NewFiringMode) : nullptr;
+}
+
 void UProjectileManagerSubsystem::Register(ANonReplicatedProjectileActor* Projectile)
 {
 	if (IsValid(Projectile))
@@ -147,11 +157,25 @@ void UProjectileManagerSubsystem::CreateProjectile(const FProjectileContextArgs&
 	}
 }
 
+TSoftClassPtr<UGameplayEffect> UProjectileManagerSubsystem::GetFiringModeGameplayEffectClass(const FGameplayTag& NewFiringMode)
+{
+	TSoftClassPtr<UGameplayEffect> OutResult{};
+
+	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
+	if (IsValid(DataRegistrySubsystem))
+	{
+		const auto* SearchResult = DataRegistrySubsystem->GetCachedItem<FProjectileDefinitionDataTableRow>({UWeaponSettings::GetFiringModeDataRegistryType(), NewFiringMode.GetTagName()});
+		OutResult = (SearchResult != nullptr) ? SearchResult->GetFiringModeGameplayEffectClass() : nullptr;
+	}
+
+	return OutResult;
+}
+
 void UProjectileManagerSubsystem::OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload)
 {
 	const auto* Payload = NewPayload.GetPtr<FAVVMPlayerStatePayload>();
 	if (!ensureAlwaysMsgf(Payload != nullptr,
-						  TEXT("Payload couldnt be casted to FAVVMPlayerStatePayload type")))
+	                      TEXT("Payload couldnt be casted to FAVVMPlayerStatePayload type")))
 	{
 		return;
 	}

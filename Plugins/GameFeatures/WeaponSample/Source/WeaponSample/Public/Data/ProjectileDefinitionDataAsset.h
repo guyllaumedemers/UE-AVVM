@@ -21,73 +21,37 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/DataAsset.h"
+#include "Data/AVVMDataTableRow.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif
 
 #include "ProjectileDefinitionDataAsset.generated.h"
 
-class ANonReplicatedExplosionActor;
-class ANonReplicatedProjectileActor;
+class UGameplayEffect_FiringMode;
 
 /**
  *	Class description:
  *
- *	FProjectileParams is a context struct that encapsulate properties specific to a projectile
- *	and offer user extensibility through usage of TInstancedStruct<T>.
+ *	FProjectileDefinitionDataTableRow is a POD asset that reference the GameplayEffect used to define the firing mode of the
+ *	projectile in play.
+ *	
+ *	Note : By being a GameplayEffect, Attachment can contribute to allowing/or blocking specific projectile usage,
+ *	and branch on trigger event using the active Firing mode selected.
  */
 USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FProjectileParams
+struct WEAPONSAMPLE_API FProjectileDefinitionDataTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
-	FProjectileParams() = default;
-	FProjectileParams(const FProjectileParams&) = default;
-	FProjectileParams(FProjectileParams&&) noexcept = default;
-	FProjectileParams& operator=(const FProjectileParams&) = default;
-	FProjectileParams& operator=(FProjectileParams&&) noexcept = default;
-	virtual ~FProjectileParams() = default;
-	
-	virtual void Init(ANonReplicatedProjectileActor* Projectile, const TArray<AActor*>& IgnoredActors) const &;
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
+	const TSoftClassPtr<UGameplayEffect_FiringMode>& GetFiringModeGameplayEffectClass() const;
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float Radius{0.f};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float Speed{0.f};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	float MaxSimTime{0.f};
-};
-
-template<> struct TBaseStructure<FProjectileParams> 
-{
-	static WEAPONSAMPLE_API UScriptStruct* Get(); 
-};
-
-/**
- *	Class description:
- *
- *	FExplosionParams is a context struct that encapsulate properties specific to an explosion
- *	and offer user extensibility through usage of TInstancedStruct<T>.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FExplosionParams
-{
-	GENERATED_BODY()
-	
-	FExplosionParams() = default;
-	FExplosionParams(const FExplosionParams&) = default;
-	FExplosionParams(FExplosionParams&&) noexcept = default;
-	FExplosionParams& operator=(const FExplosionParams&) = default;
-	FExplosionParams& operator=(FExplosionParams&&) noexcept = default;
-	virtual ~FExplosionParams() = default;
-	
-	virtual void Init(ANonReplicatedProjectileActor* Projectile) const &;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<ANonReplicatedExplosionActor> ExplosionClass = nullptr;
-};
-
-template<> struct TBaseStructure<FExplosionParams> 
-{
-	static WEAPONSAMPLE_API UScriptStruct* Get(); 
+	TSoftClassPtr<UGameplayEffect_FiringMode> FiringModeGameplayEffectClass = nullptr;
 };

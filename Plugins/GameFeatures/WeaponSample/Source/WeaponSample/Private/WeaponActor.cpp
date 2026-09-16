@@ -24,6 +24,7 @@
 #include "AVVMCharacter.h"
 #include "AVVMLogger.h"
 #include "ProjectileComponent.h"
+#include "ProjectileManagerSubsystem.h"
 #include "WeaponSampleModule.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -41,10 +42,11 @@ AWeaponActor_Range::AWeaponActor_Range(const FObjectInitializer& ObjectInitializ
 void AWeaponActor_Range::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
-	
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, FiringModeGameplayEffectHandle, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, CurrentFiringMode, Params);
 }
 
@@ -81,7 +83,7 @@ void AWeaponActor_Range::Trigger_Implementation() const
 void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
 {
 	// @gdemers set the active projectile type. example : light rounds, heavy rounds, incendiary, etc...
-	ApplyProjectileGameplayEffect(NewFiringMode);
+	ApplyFiringModeGameplayEffect(NewFiringMode);
 	MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, CurrentFiringMode, this);
 	CurrentFiringMode = NewFiringMode;
 }
@@ -134,7 +136,7 @@ void AWeaponActor_Range::MeleeTrigger_Implementation() const
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGER_TYPE_MELEE, MoveTemp(GAS_EventData));
 }
 
-void AWeaponActor_Range::ApplyProjectileGameplayEffect(const FGameplayTag& NewFiringMode)
+void AWeaponActor_Range::ApplyFiringModeGameplayEffect(const FGameplayTag& NewFiringMode)
 {
 	auto* ASC = GetAbilitySystemComponent();
 	if (!IsValid(ASC))
@@ -143,18 +145,14 @@ void AWeaponActor_Range::ApplyProjectileGameplayEffect(const FGameplayTag& NewFi
 	}
 
 	ASC->RemoveActiveGameplayEffect(FiringModeGameplayEffectHandle);
-	const auto ProjectileGameplayEffectClass = GetProjectileGameplayEffectClass(NewFiringMode);
-	if (IsValid(ProjectileGameplayEffectClass))
+	// @gdemers Allowed to fail when the firing mode doesnt support projectiles. example : bayonet.
+	const TSoftClassPtr<UGameplayEffect> FiringModeGameplayEffectClass = UProjectileManagerSubsystem::Static_GetFiringModeGameplayEffectClass(GetWorld(), NewFiringMode);
+	if (!FiringModeGameplayEffectClass.IsNull())
 	{
-		const FGameplayEffectSpecHandle GEHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(ProjectileGameplayEffectClass, const_cast<AActor*>(OwningOuter.Get()), this);
+		// TODO @gdemers handle the async approach.
+		const FGameplayEffectSpecHandle GEHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(FiringModeGameplayEffectClass.LoadSynchronous(), const_cast<AActor*>(OwningOuter.Get()), this);
 		FiringModeGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(GEHandle);
 	}
-}
-
-TSubclassOf<UGameplayEffect> AWeaponActor_Range::GetProjectileGameplayEffectClass(const FGameplayTag& NewFiringMode) const
-{
-	// TODO @gdemers Define how projectile gameplay effect class is retrieved. Where its hosted, and how static, and dynamic data loads it.
-	return nullptr;
 }
 
 const UArrowComponent* AWeaponActor_Range::GetMutableAimingComponent() const

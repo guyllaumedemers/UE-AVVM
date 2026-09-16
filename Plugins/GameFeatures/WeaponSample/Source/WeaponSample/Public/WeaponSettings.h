@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "Engine/DeveloperSettings.h"
 
 #include "WeaponSettings.generated.h"
@@ -46,6 +47,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Weapon|Settings")
 	static float GetSquaredDistanceThreshold();
+	
+	UFUNCTION(BlueprintCallable, Category="Weapon|Settings")
+	static FDataRegistryType GetFiringModeDataRegistryType();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -56,4 +60,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	float SquaredDistanceThreshold{false};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType FiringModeDataRegistryType{};
 };

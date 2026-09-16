@@ -19,48 +19,21 @@
 //SOFTWARE.
 #include "Data/ProjectileDefinitionDataAsset.h"
 
-#include "NonReplicatedProjectileActor.h"
-#include "Kismet/GameplayStatics.h"
-
-void FProjectileParams::Init(ANonReplicatedProjectileActor* Projectile,
-                             const TArray<AActor*>& IgnoredActors) const &
+#if WITH_EDITOR
+EDataValidationResult FProjectileDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	if (!IsValid(Projectile))
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (FiringModeGameplayEffectClass.IsNull())
 	{
-		return;
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FProjectileDefinitionDataTableRow", "", "Mising Firing mode effect!"));
 	}
 
-	const FTransform& ProjectileWorldTransform = Projectile->GetTransform();
-	const FVector NormalizedDirection = ProjectileWorldTransform.Rotator().Vector();
-
-	auto Params = FPredictProjectilePathParams(Radius, ProjectileWorldTransform.GetLocation(), (NormalizedDirection * Speed), MaxSimTime, ECollisionChannel::ECC_Visibility);
-	Params.ActorsToIgnore.Append(IgnoredActors);
-
-	FPredictProjectilePathResult OutResult;
-	const bool bIsBlockingHit = UGameplayStatics::PredictProjectilePath(Projectile, Params, OutResult);
-
-	Projectile->ProjectileTemplate = TInstancedStruct<FProjectileParams>::Make(*this);
-	Projectile->bDoesPredictBlockingHit = bIsBlockingHit;
-	Projectile->PredictedPathResult = OutResult;
-
-	// TODO @gdemers we may want to not tick and kill right away if theres no blocking hit.
-	Projectile->SetActorTickEnabled(true);
+	return Result;
 }
+#endif
 
-UScriptStruct* TBaseStructure<FProjectileParams>::Get()
+const TSoftClassPtr<UGameplayEffect_FiringMode>& FProjectileDefinitionDataTableRow::GetFiringModeGameplayEffectClass() const
 {
-	return FProjectileParams::StaticStruct();
-}
-
-void FExplosionParams::Init(ANonReplicatedProjectileActor* Projectile) const &
-{
-	if (IsValid(Projectile))
-	{
-		Projectile->ExplosionTemplate = TInstancedStruct<FExplosionParams>::Make(*this);
-	}
-}
-
-UScriptStruct* TBaseStructure<FExplosionParams>::Get()
-{
-	return FExplosionParams::StaticStruct();
+	return FiringModeGameplayEffectClass;
 }

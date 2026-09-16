@@ -38,3 +38,8 @@ float UWeaponSettings::GetSquaredDistanceThreshold()
 {
 	return GetDefault<UWeaponSettings>()->SquaredDistanceThreshold;
 }
+
+FDataRegistryType UWeaponSettings::GetFiringModeDataRegistryType()
+{
+	return GetDefault<UWeaponSettings>()->FiringModeDataRegistryType;
+}
