@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Ability/EquipAbility.h"
+#include "Ability/EquipAbility_Montage.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMLogger.h"

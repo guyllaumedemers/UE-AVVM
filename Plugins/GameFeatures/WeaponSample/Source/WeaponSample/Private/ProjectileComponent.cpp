@@ -20,13 +20,11 @@
 #include "ProjectileComponent.h"
 
 #include "AVVMLogger.h"
-#include "AVVMNotificationSubsystem.h"
 #include "NonReplicatedProjectileActor.h"
 #include "ProjectileManagerSubsystem.h"
-#include "WeaponSampleModule.h"
-#include "Data/ProjectileDefinitionDataAsset.h"
-#include "Engine/AssetManager.h"
-#include "GameFramework/Character.h"
+#include "Ability/AVVMAbilitySystemComponent.h"
+#include "Ability/AVVMAbilityUtils.h"
+#include "Effect/GameplayEffect_ProjectileTemplate.h"
 
 UProjectileComponent::UProjectileComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -41,43 +39,36 @@ UProjectileComponent::UProjectileComponent(const FObjectInitializer& ObjectIniti
 void UProjectileComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	OwningOuter = GetTypedOuter<AActor>();
 }
 
 void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	// @gdemers enforce cancelling running async process during actor destruction.
-	if (StreamableHandle.IsValid())
-	{
-		StreamableHandle->CancelHandle();
-	}
-
-	ProjectileTemplates.Reset();
-	StreamableHandle.Reset();
+	
 	OwningOuter.Reset();
 }
 
-void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
+void UProjectileComponent::Fire(const FActiveGameplayEffectHandle& FiringModeGameplayEffectHandle,
                                 const FTransform& AimTransform) const
 {
-	if (!OwningOuter.IsValid())
+	const auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
+	if (!ensureAlwaysMsgf(IsValid(ASC), TEXT("Invalid ASC on owning outer")))
 	{
 		return;
 	}
 
-	const bool bDoesContains = ProjectileTemplates.Contains(FiringModeTag);
-	if (!bDoesContains)
+	const auto* FiringModeGameplayEffect = Cast<UGameplayEffect_FiringMode>(ASC->GetGameplayEffectCDO(FiringModeGameplayEffectHandle));
+	if (!ensureAlwaysMsgf(IsValid(FiringModeGameplayEffect), TEXT("Invalid Projectile GameplayEffect.")))
 	{
 		return;
 	}
-
-	const FProjectileFiringMode& ProjectileMode = ProjectileTemplates[FiringModeTag];
 
 	FProjectileContextArgs ContextArgs;
 	ContextArgs.Owner = OwningOuter.Get();
-	ContextArgs.ProjectileClass = ProjectileMode.ProjectileClass.Get();
-	ContextArgs.ProjectileParams = ProjectileMode.ProjectileParams;
+	ContextArgs.ProjectileClass = FiringModeGameplayEffect->GetProjectileClass().LoadSynchronous(); // TODO @gdemers handle the async approach.
+	ContextArgs.ProjectileParams = FiringModeGameplayEffect->GetProjectileParams();
 	ContextArgs.AimTransform = AimTransform;
 	ContextArgs.IgnoredActors =
 	{
@@ -86,83 +77,4 @@ void UProjectileComponent::Fire(const FGameplayTag& FiringModeTag,
 	};
 
 	UProjectileManagerSubsystem::Static_CreateProjectile(GetWorld(), ContextArgs);
-}
-
-void UProjectileComponent::SetupProjectiles(const TArray<UObject*>& NewResources)
-{
-	const AActor* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
-	if (!ensureAlwaysMsgf(!NewResources.IsEmpty(),
-						  TEXT("Attempting to load invalid Attachment set on Outer \"%s\"."),
-						  *Outer->GetName()))
-	{
-		return;
-	}
-	
-	TArray<FSoftObjectPath> DeferredItems;
-	for (const UObject* Resource : NewResources)
-	{
-		const auto* ProjectileAsset = Cast<UProjectileDefinitionDataAsset>(Resource);
-		if (!IsValid(ProjectileAsset))
-		{
-			continue;
-		}
-
-		AVVM_LOGGER_LOG(LogWeaponSample,
-						this,
-						Outer,
-						TEXT("%s request for queue."),
-						*GetNameSafe(ProjectileAsset));
-
-		DeferredItems.Add(ProjectileAsset->GetProjectileClass().ToSoftObjectPath());
-
-		// @gdemers cache resources based on Firing mode.
-		FProjectileFiringMode& Out = ProjectileTemplates.FindOrAdd(ProjectileAsset->GetProjectileFiringModeTag());
-		Out.ProjectileParams = ProjectileAsset->GetProjectileParams();
-	}
-
-	if (!DeferredItems.IsEmpty())
-	{
-		const auto Callback = FStreamableDelegate::CreateUObject(this, &UProjectileComponent::OnProjectileClassAcquired);
-		StreamableHandle = UAssetManager::Get().LoadAssetList(DeferredItems, Callback);
-	}
-}
-
-void UProjectileComponent::OnProjectileClassAcquired()
-{
-	if (!StreamableHandle.IsValid())
-	{
-		return;
-	}
-
-	TArray<UObject*> OutResources;
-	StreamableHandle->GetLoadedAssets(OutResources);
-
-	for (const UObject* Resource : OutResources)
-	{
-		const auto* ProjectileClass = Cast<UClass>(Resource);
-		if (!IsValid(ProjectileClass))
-		{
-			continue;
-		}
-
-		const auto* CDO = ProjectileClass->GetDefaultObject<ANonReplicatedProjectileActor>();
-		if (!IsValid(CDO))
-		{
-			continue;
-		}
-
-		const FGameplayTag& ProjectileFiringMode = CDO->ProjectileFiringMode;
-
-		const bool bDoesContains = ProjectileTemplates.Contains(ProjectileFiringMode);
-		if (bDoesContains)
-		{
-			FProjectileFiringMode& Out = ProjectileTemplates[ProjectileFiringMode];
-			Out.ProjectileClass = ProjectileClass;
-		}
-	}
 }

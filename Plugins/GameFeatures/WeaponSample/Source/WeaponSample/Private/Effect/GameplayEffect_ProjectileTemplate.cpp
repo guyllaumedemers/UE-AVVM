@@ -17,35 +17,4 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-#include "Components/SplineComponent.h"
-
-#include "ProjectileComponent.generated.h"
-
-struct FActiveGameplayEffectHandle;
-
-/**
- *	Class description:
- *
- *	UProjectileComponent is a system handling projectile instantiation, and initialization.
- */
-UCLASS(ClassGroup=("Weapon"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class WEAPONSAMPLE_API UProjectileComponent : public USplineComponent
-{
-	GENERATED_BODY()
-
-public:
-	UProjectileComponent(const FObjectInitializer& ObjectInitializer);
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	void Fire(const FActiveGameplayEffectHandle& FiringModeGameplayEffectHandle,
-	          const FTransform& AimTransform) const;
-
-protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
-};
+#include "Effect/GameplayEffect_ProjectileTemplate.h"

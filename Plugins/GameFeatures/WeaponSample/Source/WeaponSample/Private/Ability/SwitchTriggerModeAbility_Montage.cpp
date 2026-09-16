@@ -17,21 +17,21 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Ability/SwitchTriggerModeAbility.h"
+#include "Ability/SwitchTriggerModeAbility_Montage.h"
 
-void USwitchTriggerModeAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
-                                              const FGameplayAbilitySpec& Spec)
+void USwitchTriggerModeAbility_Montage::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+                                                      const FGameplayAbilitySpec& Spec)
 {
 	Super::OnGiveAbility(ActorInfo, Spec);
 }
 
-void USwitchTriggerModeAbility::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
+void USwitchTriggerModeAbility_Montage::OnRemoveAbility(const FGameplayAbilityActorInfo* ActorInfo,
                                                 const FGameplayAbilitySpec& Spec)
 {
 	Super::OnRemoveAbility(ActorInfo, Spec);
 }
 
-bool USwitchTriggerModeAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+bool USwitchTriggerModeAbility_Montage::CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                    const FGameplayAbilityActorInfo* ActorInfo,
                                                    const FGameplayTagContainer* SourceTags,
                                                    const FGameplayTagContainer* TargetTags,
@@ -40,7 +40,7 @@ bool USwitchTriggerModeAbility::CanActivateAbility(const FGameplayAbilitySpecHan
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
-void USwitchTriggerModeAbility::PreActivate(const FGameplayAbilitySpecHandle Handle,
+void USwitchTriggerModeAbility_Montage::PreActivate(const FGameplayAbilitySpecHandle Handle,
                                             const FGameplayAbilityActorInfo* ActorInfo,
                                             const FGameplayAbilityActivationInfo ActivationInfo,
                                             FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
@@ -49,7 +49,7 @@ void USwitchTriggerModeAbility::PreActivate(const FGameplayAbilitySpecHandle Han
 	Super::PreActivate(Handle, ActorInfo, ActivationInfo, OnGameplayAbilityEndedDelegate, TriggerEventData);
 }
 
-void USwitchTriggerModeAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+void USwitchTriggerModeAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                                 const FGameplayAbilityActorInfo* ActorInfo,
                                                 const FGameplayAbilityActivationInfo ActivationInfo,
                                                 const FGameplayEventData* TriggerEventData)
@@ -57,7 +57,7 @@ void USwitchTriggerModeAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void USwitchTriggerModeAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle,
+void USwitchTriggerModeAbility_Montage::CancelAbility(const FGameplayAbilitySpecHandle Handle,
                                               const FGameplayAbilityActorInfo* ActorInfo,
                                               const FGameplayAbilityActivationInfo ActivationInfo,
                                               bool bReplicateCancelAbility)
@@ -65,7 +65,7 @@ void USwitchTriggerModeAbility::CancelAbility(const FGameplayAbilitySpecHandle H
 	Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
 }
 
-void USwitchTriggerModeAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
+void USwitchTriggerModeAbility_Montage::EndAbility(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo,
                                            const FGameplayAbilityActivationInfo ActivationInfo,
                                            bool bReplicateEndAbility,
@@ -74,7 +74,7 @@ void USwitchTriggerModeAbility::EndAbility(const FGameplayAbilitySpecHandle Hand
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-bool USwitchTriggerModeAbility::CommitAbility(const FGameplayAbilitySpecHandle Handle,
+bool USwitchTriggerModeAbility_Montage::CommitAbility(const FGameplayAbilitySpecHandle Handle,
                                               const FGameplayAbilityActorInfo* ActorInfo,
                                               const FGameplayAbilityActivationInfo ActivationInfo,
                                               FGameplayTagContainer* OptionalRelevantTags)

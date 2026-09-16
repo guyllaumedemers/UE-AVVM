@@ -54,13 +54,15 @@ public:
 
 protected:
 	UFUNCTION(BlueprintNativeEvent)
+	void RangeTrigger() const;
+	virtual void RangeTrigger_Implementation() const;
+
+	UFUNCTION(BlueprintNativeEvent)
 	void MeleeTrigger() const;
 	virtual void MeleeTrigger_Implementation() const;
 	
-	UFUNCTION(BlueprintNativeEvent)
-	void RangeTrigger() const;
-	virtual void RangeTrigger_Implementation() const;
-	
+	void ApplyProjectileGameplayEffect(const FGameplayTag& NewFiringMode);
+	TSubclassOf<UGameplayEffect> GetProjectileGameplayEffectClass(const FGameplayTag& NewFiringMode) const;
 	const UArrowComponent* GetMutableAimingComponent() const;
 	
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
@@ -79,6 +81,8 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};
+	
+	FActiveGameplayEffectHandle FiringModeGameplayEffectHandle{};
 };
 
 /**

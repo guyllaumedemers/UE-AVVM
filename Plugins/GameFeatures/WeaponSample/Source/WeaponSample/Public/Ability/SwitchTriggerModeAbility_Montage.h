@@ -23,7 +23,7 @@
 
 #include "Ability/AVVMGameplayAbility.h"
 
-#include "SwitchTriggerModeAbility.generated.h"
+#include "SwitchTriggerModeAbility_Montage.generated.h"
 
 class ATriggeringActor;
 
@@ -36,7 +36,7 @@ class ATriggeringActor;
  *	Example : Bayonet, Grenade launcher, etc...
  */
 UCLASS()
-class WEAPONSAMPLE_API USwitchTriggerModeAbility : public UAVVMGameplayAbility
+class WEAPONSAMPLE_API USwitchTriggerModeAbility_Montage : public UAVVMGameplayAbility
 {
 	GENERATED_BODY()
 

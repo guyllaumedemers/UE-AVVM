@@ -39,7 +39,6 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 
 	TArray<FDataRegistryId> OutResources;
 	TArray<UObject*> OutAttachmentDefinition;
-	TArray<UObject*> OutProjectileDefinition;
 
 	for (UObject* Resource : Resources)
 	{
@@ -63,13 +62,6 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 			OutAttachmentDefinition.Add(Resource);
 			continue;
 		}
-
-		const auto* ProjectileDefinition = Cast<UProjectileDefinitionDataAsset>(Resource);
-		if (IsValid(ProjectileDefinition))
-		{
-			OutProjectileDefinition.Add(Resource);
-			continue;
-		}
 	}
 
 	if (!OutAttachmentDefinition.IsEmpty())
@@ -78,15 +70,6 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 		if (IsValid(AttachmentManagerComponent))
 		{
 			AttachmentManagerComponent->SetupAttachments(OutAttachmentDefinition);
-		}
-	}
-
-	if (!OutProjectileDefinition.IsEmpty())
-	{
-		auto* ProjectileComponent = Cast<UProjectileComponent>(ActorComponent);
-		if (IsValid(ProjectileComponent))
-		{
-			ProjectileComponent->SetupProjectiles(OutProjectileDefinition);
 		}
 	}
 

@@ -511,7 +511,7 @@ void UItemObject::OnNewSocketItemAttached(const FGameplayTag& NewItemAttachmentS
 	                     *NewItemAttachmentSlotTag.GetTagName().ToString(),
 	                     *GetName()))
 	{
-		NonReplicatedItemAttachmentActors.FindOrAdd(NewItemAttachmentSlotTag, NewAttachment);
+		NonReplicatedItemAttachmentActors.Add(NewItemAttachmentSlotTag, NewAttachment);
 	}
 }
 

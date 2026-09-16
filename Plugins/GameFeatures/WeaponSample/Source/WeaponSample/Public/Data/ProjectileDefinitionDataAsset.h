@@ -21,14 +21,7 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayTagContainer.h"
-#include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
-#include "StructUtils/InstancedStruct.h"
-
-#if WITH_EDITOR
-#include "Misc/DataValidation.h"
-#endif
 
 #include "ProjectileDefinitionDataAsset.generated.h"
 
@@ -97,62 +90,4 @@ struct WEAPONSAMPLE_API FExplosionParams
 template<> struct TBaseStructure<FExplosionParams> 
 {
 	static WEAPONSAMPLE_API UScriptStruct* Get(); 
-};
-
-/**
- *	Class description:
- *
- *	UProjectileDefinitionDataAsset is a POD asset that defines the properties of a Projectile Actor.
- */
-UCLASS()
-class WEAPONSAMPLE_API UProjectileDefinitionDataAsset : public UDataAsset
-{
-	GENERATED_BODY()
-
-public:
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	const TSoftClassPtr<ANonReplicatedProjectileActor> GetProjectileClass() const;
-	const TSoftClassPtr<ANonReplicatedExplosionActor> GetExplosionClass() const;
-	const TInstancedStruct<FExplosionParams>& GetExplosionParams() const;
-	const TInstancedStruct<FProjectileParams>& GetProjectileParams() const;
-	const FGameplayTag& GetProjectileFiringModeTag() const;
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTag ProjectileFiringMode{FGameplayTag::EmptyTag};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<ANonReplicatedProjectileActor> ProjectileClass = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TInstancedStruct<FProjectileParams> ProjectileParams{};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	bool bDoesExplode{false};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(EditCondition="bDoesExplode"))
-	TInstancedStruct<FExplosionParams> ExplosionParams{};
-};
-
-/**
- *	Class description:
- *
- *	FProjectileDefinitionDataTableRow is an entry in a DataTableRow for a unique UProjectileDefinitionDataAsset.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FProjectileDefinitionDataTableRow : public FAVVMDataTableRow
-{
-	GENERATED_BODY()
-
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
-
-	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftObjectPtr<UProjectileDefinitionDataAsset> ProjectileDefinition = nullptr;
 };

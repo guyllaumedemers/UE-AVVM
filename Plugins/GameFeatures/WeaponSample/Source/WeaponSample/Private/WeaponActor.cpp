@@ -19,12 +19,14 @@
 //SOFTWARE.
 #include "WeaponActor.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AttachmentManagerComponent.h"
 #include "AVVMCharacter.h"
+#include "AVVMLogger.h"
 #include "ProjectileComponent.h"
+#include "WeaponSampleModule.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "Tags/PrivateTags.h"
 
@@ -61,44 +63,98 @@ void AWeaponActor_Range::Trigger_Implementation() const
 	const bool bUseMeleeMode = CurrentFiringMode.MatchesAnyExact(FGameplayTagContainer{TAG_WEAPONSAMPLE_TRIGGER_TYPE_MELEE});
 	if (bUseMeleeMode)
 	{
-		// @gdemers from an attachment hook onto your weapon.
-		// this is different from the buttstock ability which require usage of a unique keybinding.
+		// @gdemers execute a melee attack based on attachment hook onto weapon.
+		// IMPORTANT - This isnt a buttstroke action. Buttstroke would be set to a unique keybinding, while the current trigger action
+		// shares the same input key as default firing, and execute extended behaviour based on the firing mode.
 		MeleeTrigger();
 	}
 	else
 	{
-		// @gdemers either running from an attachment such as a grenade launcher, or
-		// the normal mode the weapon use. example : full auto, vs single shot, vs burst.
+		// @gdemers execute a range attack. projectile specific information is defined based on currently selected
+		// Firing mode which extend into :
+		// Light Rounds, Heavy Rounds, incendiary, missiles, etc...
+		// IMPORTANT - The fired projectile is managed via GameplayEffect. 
 		RangeTrigger();
 	}
 }
 
 void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
 {
+	// @gdemers set the active projectile type. example : light rounds, heavy rounds, incendiary, etc...
+	ApplyProjectileGameplayEffect(NewFiringMode);
 	MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, CurrentFiringMode, this);
 	CurrentFiringMode = NewFiringMode;
 }
 
-void AWeaponActor_Range::MeleeTrigger_Implementation() const
-{
-	// TODO @gdemers Define what melee triggger imply at this level.
-	// i.e those the attachment have durability ? BP impl will handle the VFX/and FX. 
-}
-
 void AWeaponActor_Range::RangeTrigger_Implementation() const
 {
-	const UArrowComponent* ProxyComponent = GetMutableAimingComponent();
-	if (!ensureAlwaysMsgf(IsValid(ProxyComponent), TEXT("Missing Proxy Component")))
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
 	{
 		return;
 	}
 
+	const UArrowComponent* ProxyComponent = GetMutableAimingComponent();
+	if (!ensureAlwaysMsgf(IsValid(ProxyComponent),
+						  TEXT("Missing Proxy Component")))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogWeaponSample,
+					this,
+					Outer,
+					TEXT("Trigger"));
+
 	if (IsValid(ProjectileComponent))
 	{
-		// @gdemers CurrentFiringMode define the projectile type fired,
-		// and/or alternate animation sequence we execute.
-		ProjectileComponent->Fire(CurrentFiringMode, ProxyComponent->GetComponentTransform());
+		// @gdemers CurrentFiringMode may refer to Default, Light, Heavy Rounds, or even more advance
+		// projectile types such as grenade launcher, or missiles.
+		ProjectileComponent->Fire(FiringModeGameplayEffectHandle, ProxyComponent->GetComponentTransform());
 	}
+}
+
+void AWeaponActor_Range::MeleeTrigger_Implementation() const
+{
+	const AActor* Outer = OwningOuter.Get();
+	if (!IsValid(Outer))
+	{
+		return;
+	}
+
+	AVVM_LOGGER_LOG(LogWeaponSample,
+	                this,
+	                Outer,
+	                TEXT("Pause animation"));
+
+	FGameplayEventData GAS_EventData{};
+	GAS_EventData.Instigator = this;
+	GAS_EventData.Target = Outer;
+	// @gdemers Play montage for melee ability
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGER_TYPE_MELEE, MoveTemp(GAS_EventData));
+}
+
+void AWeaponActor_Range::ApplyProjectileGameplayEffect(const FGameplayTag& NewFiringMode)
+{
+	auto* ASC = GetAbilitySystemComponent();
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	ASC->RemoveActiveGameplayEffect(FiringModeGameplayEffectHandle);
+	const auto ProjectileGameplayEffectClass = GetProjectileGameplayEffectClass(NewFiringMode);
+	if (IsValid(ProjectileGameplayEffectClass))
+	{
+		const FGameplayEffectSpecHandle GEHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(ProjectileGameplayEffectClass, const_cast<AActor*>(OwningOuter.Get()), this);
+		FiringModeGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(GEHandle);
+	}
+}
+
+TSubclassOf<UGameplayEffect> AWeaponActor_Range::GetProjectileGameplayEffectClass(const FGameplayTag& NewFiringMode) const
+{
+	// TODO @gdemers Define how projectile gameplay effect class is retrieved. Where its hosted, and how static, and dynamic data loads it.
+	return nullptr;
 }
 
 const UArrowComponent* AWeaponActor_Range::GetMutableAimingComponent() const

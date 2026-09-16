@@ -24,7 +24,7 @@
 #include "GameplayTagContainer.h"
 #include "Ability/AVVMGameplayAbility.h"
 
-#include "EquipAbility.generated.h"
+#include "EquipAbility_Montage.generated.h"
 
 class UAbilityTask_PlayMontageAndWait;
 
