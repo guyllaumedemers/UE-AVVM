@@ -28,8 +28,7 @@ void UAVVMAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
-	// @gdemers IMPORTANT - FGameplayAttribute doesnt support Push Model.
-	// Params.bIsPushBased = true;
+	Params.bIsPushBased = true;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMAttributeSet, Durability, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMAttributeSet, Weight, Params);
@@ -67,4 +66,42 @@ void UAVVMAttributeSet::Init()
 	FStreamableDelegate Callback;
 	Callback.BindWeakLambda(this, OnAsyncRequestComplete, TWeakObjectPtr(this));
 	AttributeMetaDataTableHandle = UAssetManager::Get().LoadAssetList({AttributeMetaDataTable.ToSoftObjectPath()}, Callback);
+}
+
+void UAVVMAttributeSet::InitFromMetaDataTable(const UDataTable* DataTable)
+{
+	// @gdemers init all properties using data table row values.
+	Super::InitFromMetaDataTable(DataTable);
+
+	static const FString Context = FString(TEXT("UAttribute::BindToMetaDataTable"));
+	// @gdemers mark all properties as dirty for correct initial replication using push model.
+	for (TFieldIterator<FProperty> It(GetClass(), EFieldIteratorFlags::IncludeSuper); It; ++It)
+	{
+		FProperty* Property = *It;
+
+		if (!FGameplayAttribute::IsSupportedProperty(Property))
+		{
+			continue;
+		}
+
+		FString RowNameStr = FString::Printf(TEXT("%s.%s"), *Property->GetOwnerVariant().GetName(), *Property->GetName());
+		const FAttributeMetaData* MetaData = DataTable->FindRow<FAttributeMetaData>(FName(*RowNameStr), Context, false);
+		if (MetaData == nullptr)
+		{
+			continue;
+		}
+
+		FNumericProperty* NumericProperty = CastField<FNumericProperty>(Property);
+		if (NumericProperty)
+		{
+			// Passing FGameplayAttribute::IsSupportedProperty() as numeric property already implies it's floating point
+			check(NumericProperty->IsFloatingPoint());
+			MARK_PROPERTY_DIRTY(this, NumericProperty);
+		}
+		else if (FGameplayAttribute::IsGameplayAttributeDataProperty(Property))
+		{
+			FStructProperty* StructProperty = CastField<FStructProperty>(Property);
+			MARK_PROPERTY_DIRTY(this, StructProperty);
+		}
+	}
 }

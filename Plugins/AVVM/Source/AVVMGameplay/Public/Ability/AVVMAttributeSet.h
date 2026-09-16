@@ -64,6 +64,7 @@ class AVVMGAMEPLAY_API UAVVMAttributeSet : public UAttributeSet
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Init();
+	virtual void InitFromMetaDataTable(const UDataTable* DataTable) override;
 	
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Durability);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMAttributeSet, Weight);
