@@ -24,7 +24,7 @@
 #include "ProjectileManagerSubsystem.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
-#include "Effect/GameplayEffect_ProjectileTemplate.h"
+#include "Effect/GameplayEffect_FiringMode.h"
 
 UProjectileComponent::UProjectileComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

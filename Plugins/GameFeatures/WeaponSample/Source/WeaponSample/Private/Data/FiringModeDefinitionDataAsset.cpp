@@ -17,41 +17,23 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
-
-#include "CoreMinimal.h"
-
-#include "Data/AVVMDataTableRow.h"
+#include "Data/FiringModeDefinitionDataAsset.h"
 
 #if WITH_EDITOR
-#include "Misc/DataValidation.h"
-#endif
-
-#include "ProjectileDefinitionDataAsset.generated.h"
-
-class UGameplayEffect_FiringMode;
-
-/**
- *	Class description:
- *
- *	FProjectileDefinitionDataTableRow is a POD asset that reference the GameplayEffect used to define the firing mode of the
- *	projectile in play.
- *	
- *	Note : By being a GameplayEffect, Attachment can contribute to allowing/or blocking specific projectile usage,
- *	and branch on trigger event using the active Firing mode selected.
- */
-USTRUCT(BlueprintType)
-struct WEAPONSAMPLE_API FProjectileDefinitionDataTableRow : public FAVVMDataTableRow
+EDataValidationResult FFiringModeDefinitionDataTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
-	GENERATED_BODY()
+	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
+	if (FiringModeGameplayEffectClass.IsNull())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("FProjectileDefinitionDataTableRow", "", "Mising Firing mode effect!"));
+	}
 
-#if WITH_EDITOR
-	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+	return Result;
+}
 #endif
 
-	const TSoftClassPtr<UGameplayEffect_FiringMode>& GetFiringModeGameplayEffectClass() const;
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TSoftClassPtr<UGameplayEffect_FiringMode> FiringModeGameplayEffectClass = nullptr;
-};
+const TSoftClassPtr<UGameplayEffect_FiringMode>& FFiringModeDefinitionDataTableRow::GetFiringModeGameplayEffectClass() const
+{
+	return FiringModeGameplayEffectClass;
+}

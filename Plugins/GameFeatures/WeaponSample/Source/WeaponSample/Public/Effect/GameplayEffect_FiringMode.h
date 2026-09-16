@@ -22,10 +22,10 @@
 #include "CoreMinimal.h"
 
 #include "GameplayEffect.h"
-#include "Data/ProjectileDefinitionDataAsset.h"
+#include "Data/FiringModeDefinitionDataAsset.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "GameplayEffect_ProjectileTemplate.generated.h"
+#include "GameplayEffect_FiringMode.generated.h"
 
 class ANonReplicatedExplosionActor;
 class ANonReplicatedProjectileActor;

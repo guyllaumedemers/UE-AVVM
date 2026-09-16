@@ -23,8 +23,8 @@
 #include "DataRegistrySubsystem.h"
 #include "NonReplicatedProjectileActor.h"
 #include "WeaponSettings.h"
-#include "Data/ProjectileDefinitionDataAsset.h"
-#include "Effect/GameplayEffect_ProjectileTemplate.h"
+#include "Data/FiringModeDefinitionDataAsset.h"
+#include "Effect/GameplayEffect_FiringMode.h"
 #include "Engine/World.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
@@ -157,14 +157,14 @@ void UProjectileManagerSubsystem::CreateProjectile(const FProjectileContextArgs&
 	}
 }
 
-TSoftClassPtr<UGameplayEffect> UProjectileManagerSubsystem::GetFiringModeGameplayEffectClass(const FGameplayTag& NewFiringMode)
+TSoftClassPtr<UGameplayEffect> UProjectileManagerSubsystem::GetFiringModeGameplayEffectClass(const FGameplayTag& NewFiringMode) const
 {
 	TSoftClassPtr<UGameplayEffect> OutResult{};
 
 	auto* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (IsValid(DataRegistrySubsystem))
 	{
-		const auto* SearchResult = DataRegistrySubsystem->GetCachedItem<FProjectileDefinitionDataTableRow>({UWeaponSettings::GetFiringModeDataRegistryType(), NewFiringMode.GetTagName()});
+		const auto* SearchResult = DataRegistrySubsystem->GetCachedItem<FFiringModeDefinitionDataTableRow>({UWeaponSettings::GetFiringModeDataRegistryType(), NewFiringMode.GetTagName()});
 		OutResult = (SearchResult != nullptr) ? SearchResult->GetFiringModeGameplayEffectClass() : nullptr;
 	}
 

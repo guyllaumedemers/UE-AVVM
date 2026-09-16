@@ -25,7 +25,7 @@
 #include "Components/ActorComponent.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
-#include "Data/ProjectileDefinitionDataAsset.h"
+#include "Data/FiringModeDefinitionDataAsset.h"
 #include "Data/TriggeringDefinitionDataAsset.h"
 #include "GameFramework/Actor.h"
 

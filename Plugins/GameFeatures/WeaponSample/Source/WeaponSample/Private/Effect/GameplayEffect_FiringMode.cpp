@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Effect/GameplayEffect_ProjectileTemplate.h"
+#include "Effect/GameplayEffect_FiringMode.h"
 
 #include "NonReplicatedProjectileActor.h"
 #include "Kismet/GameplayStatics.h"

@@ -103,7 +103,7 @@ protected:
 	void Register(ANonReplicatedProjectileActor* Projectile);
 	void Unregister(ANonReplicatedProjectileActor* Projectile);
 	void CreateProjectile(const FProjectileContextArgs& ContextArgs) const;
-	TSoftClassPtr<UGameplayEffect> GetFiringModeGameplayEffectClass(const FGameplayTag& NewFiringMode);
+	TSoftClassPtr<UGameplayEffect> GetFiringModeGameplayEffectClass(const FGameplayTag& NewFiringMode) const;
 
 	UFUNCTION(CallInEditor)
 	void OnPlayerStateAddedOrRemoved(const TInstancedStruct<FAVVMNotificationPayload>& NewPayload);
