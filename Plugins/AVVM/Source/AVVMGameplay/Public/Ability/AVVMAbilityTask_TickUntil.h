@@ -42,12 +42,17 @@ public:
 	UAVVMAbilityTask_TickUntil(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable)
-	static UAVVMAbilityTask_TickUntil* TickUntil(UGameplayAbility* OwningAbility, const bool bTestAlreadyReleased = false);
+	static UAVVMAbilityTask_TickUntil* TickUntil(UGameplayAbility* OwningAbility,
+	                                             const bool bNewIsLocalOnly,
+	                                             const bool bNewTestAlreadyReleased = false);
 
 	virtual void TickTask(float DeltaTime) override;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAbilityTaskTickDelegate OnTick{};
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	bool bIsLocalOnly{false};
 
 protected:
 	virtual void Activate() override;

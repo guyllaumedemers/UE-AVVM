@@ -78,7 +78,7 @@ void UTriggerHoldAbility::RunOptionalTask(const FGameplayAbilitySpecHandle Handl
 		ParentTask->ReadyForActivation();
 	}
 
-	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, true);
+	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, false, true);
 	if (IsValid(ChildTask))
 	{
 		ChildTask->OnTick.AddUniqueDynamic(this, &UTriggerHoldAbility::OnTick);

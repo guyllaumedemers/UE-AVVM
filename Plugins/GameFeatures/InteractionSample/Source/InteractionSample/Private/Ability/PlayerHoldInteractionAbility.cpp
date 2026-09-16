@@ -48,7 +48,7 @@ void UPlayerHoldInteractionAbility::RunOptionalTask(const FGameplayAbilitySpecHa
 	}
 
 	// @gdemers handle pumping heartbeat in UI
-	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, true);
+	auto* ChildTask = UAVVMAbilityTask_TickUntil::TickUntil(this, true, true);
 	if (IsValid(ChildTask))
 	{
 		ChildTask->OnTick.AddUniqueDynamic(this, &UPlayerHoldInteractionAbility::OnTick);

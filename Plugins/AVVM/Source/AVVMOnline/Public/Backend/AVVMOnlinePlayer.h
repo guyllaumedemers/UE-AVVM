@@ -69,7 +69,7 @@ struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 /*
  *	Class description:
  *
-*	FAVVMPlayerAccount is a POD representation of the player Account and is Unique. This POD defines the data layout stored
+ *	FAVVMPlayerAccount is a POD representation of the player Account and is Unique. This POD defines the data layout stored
  *	on the backend.
  */
 USTRUCT(BlueprintType)
@@ -112,7 +112,7 @@ struct AVVMONLINE_API FAVVMPlayerAccount
 /*
  *	Class description:
  *
-*	FAVVMPlayerWallet is a POD representation of a player account IRL money. (This includes Crypto, Gems, Token, etc...) This POD defines the data layout stored
+ *	FAVVMPlayerWallet is a POD representation of a player account IRL money. (This includes Crypto, Gems, Token, etc...) This POD defines the data layout stored
  *	on the backend.
  */
 USTRUCT(BlueprintType)
@@ -165,7 +165,7 @@ struct AVVMONLINE_API FAVVMCurrency
 /**
  *	Class description:
  *
-*	FAVVMPlayerProfile is a POD representation of a playable character. This POD defines the data layout stored
+ *	FAVVMPlayerProfile is a POD representation of a playable character. This POD defines the data layout stored
  *	on the backend.
  *
  *	Note : A player profile is NOT an account. An account could hold various Player profiles. These are tied to a
@@ -236,7 +236,7 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 /**
  *	Class description:
  *
-*	FAVVMPlayerPreset is a POD representation of a player preset. This is a build that can equip all items referenced using their id. This POD defines the data layout stored
+ *	FAVVMPlayerPreset is a POD representation of a player preset. This is a build that can equip all items referenced using their id. This POD defines the data layout stored
  *	on the backend.
  *	
  *	Note : It's possible that this POD type be only serialized to disk. Up to the user!
@@ -275,7 +275,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
 /**
  *	Class description:
  *
-*	FAVVMPlayerResource is a POD representation of resources that can be owned by a player profile, consumed, bought, sell, etc... This POD defines the data layout stored
+ *	FAVVMPlayerResource is a POD representation of resources that can be owned by a player profile, consumed, bought, sell, etc... This POD defines the data layout stored
  *	on the backend.
  *	
  *	example : Gear, Weapon, Ammunition, Skills, Potions, etc...
@@ -307,7 +307,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 /**
  *	Class description:
  *
-*	FAVVMPlayerChallenge is a POD representation of a challenge. It contains details information WITHOUT progression. This POD defines the data layout stored
+ *	FAVVMPlayerChallenge is a POD representation of a challenge. It contains details information WITHOUT progression. This POD defines the data layout stored
  *	on the backend.
  */
 USTRUCT(BlueprintType)
@@ -367,7 +367,7 @@ inline const TCHAR* EnumToString(EAVVMPlayerStatus State)
  *	Class description:
  *
  *	FAVVMParty is a POD representation of a group of player connections. It exposed information about the session configuration
-*	to all client connected. This POD defines the data layout stored on the backend.
+ *	to all client connected. This POD defines the data layout stored on the backend.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMParty
@@ -411,7 +411,7 @@ struct AVVMONLINE_API FAVVMParty
  *	Class description:
  *
  *	FAVVMPlayerConnection is a POD representation of a player being connected with a party. It exposes information about the
-*	user to other connected members. This POD defines the data layout stored on the backend.
+ *	user to other connected members. This POD defines the data layout stored on the backend.
  */
 USTRUCT(BlueprintType)
 struct AVVMONLINE_API FAVVMPlayerConnection
@@ -446,7 +446,7 @@ struct AVVMONLINE_API FAVVMPlayerConnection
 /**
  *	Class description:
  *
-*	FAVVMHostConfiguration is a POD representation of the Session configuration. This POD defines the data layout stored
+ *	FAVVMHostConfiguration is a POD representation of the Session configuration. This POD defines the data layout stored
  *	on the backend.
  */
 USTRUCT(BlueprintType)

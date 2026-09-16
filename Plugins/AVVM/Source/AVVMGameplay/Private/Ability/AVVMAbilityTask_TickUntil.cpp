@@ -25,10 +25,13 @@ UAVVMAbilityTask_TickUntil::UAVVMAbilityTask_TickUntil(const FObjectInitializer&
 	bTickingTask = true;
 }
 
-UAVVMAbilityTask_TickUntil* UAVVMAbilityTask_TickUntil::TickUntil(UGameplayAbility* OwningAbility, const bool bTestAlreadyReleased)
+UAVVMAbilityTask_TickUntil* UAVVMAbilityTask_TickUntil::TickUntil(UGameplayAbility* OwningAbility,
+                                                                  const bool bNewIsLocalOnly,
+                                                                  const bool bNewTestAlreadyReleased)
 {
-	UAVVMAbilityTask_TickUntil* Task = NewAbilityTask<UAVVMAbilityTask_TickUntil>(OwningAbility);
-	Task->bTestInitialState = bTestAlreadyReleased;
+	auto* Task = NewAbilityTask<UAVVMAbilityTask_TickUntil>(OwningAbility);
+	Task->bIsLocalOnly = bNewIsLocalOnly;
+	Task->bTestInitialState = bNewTestAlreadyReleased;
 	return Task;
 }
 
@@ -42,7 +45,7 @@ void UAVVMAbilityTask_TickUntil::Activate()
 {
 	Super::Activate();
 
-	if (!IsLocallyControlled())
+	if (!IsLocallyControlled() && bIsLocalOnly)
 	{
 		EndTask();
 		return;
