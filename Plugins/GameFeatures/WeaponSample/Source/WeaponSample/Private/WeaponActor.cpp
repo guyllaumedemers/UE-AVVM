@@ -82,6 +82,13 @@ void AWeaponActor_Range::Trigger_Implementation() const
 
 void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
 {
+	auto* ASC = GetAbilitySystemComponent();
+	if (!IsValid(ASC) || !ensureAlwaysMsgf(false == ASC->AreAbilityTagsBlocked(FGameplayTagContainer{NewFiringMode}),
+	                                       TEXT("Invalid Firing Mode. Mode not supported.")))
+	{
+		return;
+	}
+
 	// @gdemers set the active projectile type. example : light rounds, heavy rounds, incendiary, etc...
 	ApplyFiringModeGameplayEffect(NewFiringMode);
 	MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, CurrentFiringMode, this);
