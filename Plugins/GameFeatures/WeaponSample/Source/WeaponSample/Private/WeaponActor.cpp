@@ -55,20 +55,24 @@ void AWeaponActor_Range::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (IsValid(ReplicatedTagComponent))
+#if WITH_SERVER_CODE
+	if (HasAuthority() && IsValid(ReplicatedTagComponent))
 	{
 		ReplicatedTagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &AWeaponActor_Range::OnAvailableFiringModeCollectionChange);
 	}
+#endif
 }
 
 void AWeaponActor_Range::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	if (IsValid(ReplicatedTagComponent))
+#if WITH_SERVER_CODE
+	if (HasAuthority() && IsValid(ReplicatedTagComponent))
 	{
 		ReplicatedTagComponent->OnReplicatedTagChanged.RemoveAll(this);
 	}
+#endif
 }
 
 void AWeaponActor_Range::Trigger_Implementation() const
