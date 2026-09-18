@@ -148,7 +148,7 @@ void AWeaponActor_Range::MeleeTrigger_Implementation() const
 	AVVM_LOGGER_LOG(LogWeaponSample,
 	                this,
 	                Outer,
-	                TEXT("Pause animation"));
+	                TEXT("Melee Trigger"));
 
 	FGameplayEventData GAS_EventData{};
 	GAS_EventData.Instigator = this;

@@ -21,11 +21,12 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "Ability/AVVMGameplayAbility.h"
 
 #include "SwitchTriggerModeAbility_Montage.generated.h"
 
-class ATriggeringActor;
+class UAbilityTask_PlayMontageAndWait;
 
 /**
  *	Class description:
@@ -53,12 +54,6 @@ public:
 	                                const FGameplayTagContainer* TargetTags = nullptr,
 	                                FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
-	virtual void PreActivate(const FGameplayAbilitySpecHandle Handle,
-	                         const FGameplayAbilityActorInfo* ActorInfo,
-	                         const FGameplayAbilityActivationInfo ActivationInfo,
-	                         FOnGameplayAbilityEnded::FDelegate* OnGameplayAbilityEndedDelegate,
-	                         const FGameplayEventData* TriggerEventData = nullptr) override;
-
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	                             const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
@@ -81,9 +76,21 @@ public:
 	                           FGameplayTagContainer* OptionalRelevantTags = nullptr) override;
 
 protected:
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
+	UFUNCTION()
+	void OnMontage_Interrupted();
+
+	UFUNCTION()
+	void OnMontage_Cancelled();
+
+	UFUNCTION()
+	void OnMontage_Completed();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag SwitchFiringModeMontageTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<ATriggeringActor> EquippedTriggeringActor = nullptr;
+	TWeakObjectPtr<const AActor> EquippedTriggeringActor = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TObjectPtr<UAbilityTask_PlayMontageAndWait> AbilityTask_PlayMontage = nullptr;
 };

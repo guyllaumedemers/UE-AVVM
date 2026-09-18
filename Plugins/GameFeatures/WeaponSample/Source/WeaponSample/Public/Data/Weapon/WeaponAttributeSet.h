@@ -44,11 +44,15 @@ public:
 	virtual void Init() override;
 
 	ATTRIBUTE_ACCESSORS_BASIC(UWeaponBase_AttributeSet, Animation_EquipPlayRate);
+	ATTRIBUTE_ACCESSORS_BASIC(UWeaponBase_AttributeSet, Animation_SwitchFiringModePlayRate);
 
 protected:
 	// ------------------- FAnimationProperties ------------------- //
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
 	FGameplayAttributeData Animation_EquipPlayRate{};
+	
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
+	FGameplayAttributeData Animation_SwitchFiringModePlayRate{};
 };
 
 /**

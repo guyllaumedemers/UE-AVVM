@@ -74,7 +74,7 @@ bool UEquipAbility_Montage::CanActivateAbility(const FGameplayAbilitySpecHandle 
                                                FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (!ensureAlwaysMsgf(ActorInfo != nullptr,
-	                      TEXT("UEquipAbility FGameplayAbilityActorInfo invalid!")))
+	                      TEXT("UEquipAbility_Montage FGameplayAbilityActorInfo invalid!")))
 	{
 		return false;
 	}
@@ -94,7 +94,7 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 
 	const AActor* Controller = (ActorInfo != nullptr) ? ActorInfo->PlayerController.Get() : nullptr;
 	if (!ensureAlwaysMsgf(IsValid(Controller),
-	                      TEXT("UEquipAbility PlayerController invalid!")))
+	                      TEXT("UEquipAbility_Montage PlayerController invalid!")))
 	{
 		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 		return;
@@ -171,16 +171,6 @@ void UEquipAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		AbilityTask_PlayMontage->OnCancelled.AddUniqueDynamic(this, &UEquipAbility_Montage::OnMontage_Cancelled);
 		AbilityTask_PlayMontage->OnCompleted.AddUniqueDynamic(this, &UEquipAbility_Montage::OnMontage_Completed);
 		AbilityTask_PlayMontage->ReadyForActivation();
-	}
-
-	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
-	if (bWasCommitted)
-	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-	}
-	else
-	{
-		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
 	}
 }
 
@@ -259,10 +249,24 @@ void UEquipAbility_Montage::OnMontage_Cancelled()
 
 void UEquipAbility_Montage::OnMontage_Completed()
 {
+	const FGameplayAbilitySpecHandle Handle = GetCurrentAbilitySpecHandle();
+	const FGameplayAbilityActorInfo* ActorInfo = GetCurrentActorInfo();
+	const FGameplayAbilityActivationInfo ActivationInfo = GetCurrentActivationInfo();
+	
 	const APlayerController* PC = (CurrentActorInfo != nullptr) ? CurrentActorInfo->PlayerController.Get() : nullptr;
 	AVVM_LOGGER_LOG(LogWeaponSample,
 	                PC,
 	                this,
 	                TEXT("%s Complete."),
 	                *GetName());
+
+	const bool bWasCommitted = CommitAbility(Handle, ActorInfo, ActivationInfo);
+	if (bWasCommitted)
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	}
+	else
+	{
+		CancelAbility(Handle, ActorInfo, ActivationInfo, true);
+	}
 }

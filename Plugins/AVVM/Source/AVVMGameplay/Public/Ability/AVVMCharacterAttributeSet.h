@@ -46,6 +46,7 @@ public:
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Movement_RollDistance);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Movement_SlideDistance);
 	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Animation_EquipPlayRateModifier);
+	ATTRIBUTE_ACCESSORS_BASIC(UAVVMCharacterAttributeSet, Animation_SwitchFiringModePlayRateModifier);
 
 protected:
 	// ------------------- FCharacterProperties ------------------- //
@@ -72,4 +73,7 @@ protected:
 	// ------------------- FAnimationProperties ------------------- //
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
 	FGameplayAttributeData Animation_EquipPlayRateModifier{};
+	
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Designers|FAnimationProperties")
+	FGameplayAttributeData Animation_SwitchFiringModePlayRateModifier{};
 };
