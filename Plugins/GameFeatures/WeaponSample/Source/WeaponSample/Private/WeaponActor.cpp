@@ -47,7 +47,7 @@ void AWeaponActor_Range::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, FiringModeGameplayEffectSpecHandle, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, FiringModeGameplayEffectSpec, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(AWeaponActor_Range, CurrentFiringMode, Params);
 }
 
@@ -111,11 +111,6 @@ void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
 
 void AWeaponActor_Range::RangeTrigger_Implementation() const
 {
-	if (!NonReplicatedFiringModeActiveGameplayEffectHandle.IsValid())
-	{
-		return;
-	}
-	
 	const AActor* Outer = OwningOuter.Get();
 	if (!IsValid(Outer))
 	{
@@ -138,7 +133,7 @@ void AWeaponActor_Range::RangeTrigger_Implementation() const
 	{
 		// @gdemers CurrentFiringMode may refer to Default, Light, Heavy Rounds, or even more advance
 		// projectile types such as grenade launcher, or missiles.
-		ProjectileComponent->Fire(FiringModeGameplayEffectSpecHandle, ProxyComponent->GetComponentTransform());
+		ProjectileComponent->Fire(FiringModeGameplayEffectSpec, ProxyComponent->GetComponentTransform());
 	}
 }
 
@@ -173,11 +168,18 @@ void AWeaponActor_Range::ApplyFiringModeGameplayEffect(const FGameplayTag& NewFi
 	ASC->RemoveActiveGameplayEffect(NonReplicatedFiringModeActiveGameplayEffectHandle);
 	// @gdemers Allowed to fail when the firing mode doesnt support projectiles. example : bayonet.
 	const TSoftClassPtr<UGameplayEffect> FiringModeGameplayEffectClass = UProjectileManagerSubsystem::Static_GetFiringModeGameplayEffectClass(GetWorld(), NewFiringMode);
-	if (!FiringModeGameplayEffectClass.IsNull())
+	if (FiringModeGameplayEffectClass.IsNull())
 	{
-		MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, FiringModeGameplayEffectSpecHandle, this);
-		FiringModeGameplayEffectSpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(FiringModeGameplayEffectClass.LoadSynchronous(), const_cast<AActor*>(OwningOuter.Get()), this);
-		NonReplicatedFiringModeActiveGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(FiringModeGameplayEffectSpecHandle);
+		return;
+	}
+
+	const auto SpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(FiringModeGameplayEffectClass.LoadSynchronous(), const_cast<AActor*>(OwningOuter.Get()), this);
+	NonReplicatedFiringModeActiveGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(SpecHandle);
+
+	if (SpecHandle.Data.IsValid())
+	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, FiringModeGameplayEffectSpec, this);
+		FiringModeGameplayEffectSpec = *SpecHandle.Data.Get();
 	}
 }
 

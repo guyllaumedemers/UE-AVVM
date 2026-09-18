@@ -48,16 +48,10 @@ void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
-void UProjectileComponent::Fire(const FGameplayEffectSpecHandle& FiringModeGameplayEffectSpecHandle,
+void UProjectileComponent::Fire(const FGameplayEffectSpec& FiringModeGameplayEffectSpec,
                                 const FTransform& AimTransform) const
 {
-	if (!ensureAlwaysMsgf(FiringModeGameplayEffectSpecHandle.Data.IsValid(),
-	                      TEXT("Invalid Spec Handle.")))
-	{
-		return;
-	}
-
-	const auto* FiringModeGameplayEffect = Cast<UGameplayEffect_FiringMode>(FiringModeGameplayEffectSpecHandle.Data->Def);
+	const auto* FiringModeGameplayEffect = Cast<UGameplayEffect_FiringMode>(FiringModeGameplayEffectSpec.Def);
 	if (!ensureAlwaysMsgf(IsValid(FiringModeGameplayEffect), TEXT("Invalid Projectile GameplayEffect.")))
 	{
 		return;

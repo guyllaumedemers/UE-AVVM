@@ -85,7 +85,7 @@ protected:
 	FActiveGameplayEffectHandle NonReplicatedFiringModeActiveGameplayEffectHandle{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FGameplayEffectSpecHandle FiringModeGameplayEffectSpecHandle{};
+	FGameplayEffectSpec FiringModeGameplayEffectSpec{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};
