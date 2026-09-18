@@ -210,12 +210,12 @@ const TInstancedStruct<FAVVMDataResolverHelper>& AAVVMCharacter::GetCharacterDat
 
 bool AAVVMCharacter::HasPartialMatch(const FGameplayTagContainer& Compare) const
 {
-	return IsValid(ReplicatedTagComponent) ? ReplicatedTagComponent->HasAnyExact(Compare) : false;
+	return IsValid(ReplicatedTagComponent) ? ReplicatedTagComponent->HasAnyExactRuntimeTags(Compare) : false;
 }
 
 bool AAVVMCharacter::HasExactMatch(const FGameplayTagContainer& Compare) const
 {
-	return IsValid(ReplicatedTagComponent) ? ReplicatedTagComponent->HasAllExact(Compare) : false;
+	return IsValid(ReplicatedTagComponent) ? ReplicatedTagComponent->HasAllExactRuntimeTags(Compare) : false;
 }
 
 void AAVVMCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)

@@ -284,7 +284,7 @@ void AAttachmentActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	// @gdemers Actor creation should invoke begin play ONLY upon attaching,
 	// and not on creation.
 	Rename(nullptr, Target);
-	if (!IsActorBeginningPlay())
+	if (!IsActorInitialized())
 	{
 		FinishSpawning(GetTransform());
 	}

@@ -22,9 +22,9 @@
 #include "CoreMinimal.h"
 
 #include "DataRegistryId.h"
+#include "GameplayTagContainer.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Engine/DataAsset.h"
-#include "StructUtils/InstancedStruct.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -47,9 +47,15 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	TArray<FDataRegistryId> GetDependentIds() const;
+	const FGameplayTagContainer& GetDefaultTriggeringModeTags() const;
+	const TArray<FDataRegistryId>& GetAttachmentIds() const;
 
 protected:
+	// @gdemers a subset of Supported Triggering modes that are the actor type is initialized with.
+	// example : light rounds, incendiary, etc...
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	FGameplayTagContainer DefaultTriggeringModeTags{FGameplayTagContainer::EmptyContainer};
+	
 	// @gdemers IMPORTANT : If the Attachment is composing the actor such as a weapon, and cannot be detached
 	// from the owner, then use this! OTHERWISE, the inventory system will handle creation of the attachment actor as the attachment
 	// information is likely to come from external src such as backend inventory loadout (example : as a list of registry id).

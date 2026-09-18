@@ -46,19 +46,27 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable)
-	void Append(const FGameplayTagContainer& NewTags);
+	void ModifyFilteredTags(const FGameplayTagContainer& AddedTags,
+	                        const FGameplayTagContainer& RemovedTags);
 
 	UFUNCTION(BlueprintCallable)
-	void Remove(const FGameplayTagContainer& NewTags);
+	void ModifyRuntimeTags(const FGameplayTagContainer& AddedTags,
+	                       const FGameplayTagContainer& RemovedTags);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAnyExact(const FGameplayTagContainer& Compare) const;
+	bool HasAnyExactFilteredTags(const FGameplayTagContainer& Compare);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasAllExact(const FGameplayTagContainer& Compare) const;
+	bool HasAllExactFilteredTags(const FGameplayTagContainer& Compare);
 
 	UFUNCTION(BlueprintCallable)
-	static UAVVMReplicatedTagComponent* GetActorComponent(const AActor* NewTarget);
+	bool HasAnyExactRuntimeTags(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	bool HasAllExactRuntimeTags(const FGameplayTagContainer& Compare) const;
+
+	UFUNCTION(BlueprintCallable)
+	static UAVVMReplicatedTagComponent* Static_GetActorComponent(const AActor* NewTarget);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnReplicatedTagChanged OnReplicatedTagChanged{};
@@ -69,6 +77,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_FlagsModified")
 	FGameplayTagContainer Flags{FGameplayTagContainer::EmptyContainer};
+
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	FGameplayTagContainer FilteredTags{FGameplayTagContainer::EmptyContainer};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;

@@ -109,7 +109,7 @@ void UActorFenceComponent::TryRaise()
 	UAVVMReplicatedTagComponent* NewReplicatedTagComponent = ReplicatedTagComponent.Get();
 	if (!IsValid(NewReplicatedTagComponent))
 	{
-		NewReplicatedTagComponent = UAVVMReplicatedTagComponent::GetActorComponent(Outer);
+		NewReplicatedTagComponent = UAVVMReplicatedTagComponent::Static_GetActorComponent(Outer);
 		ReplicatedTagComponent = NewReplicatedTagComponent;
 	}
 
@@ -119,7 +119,7 @@ void UActorFenceComponent::TryRaise()
 		return;
 	}
 
-	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
+	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExactRuntimeTags(FenceRequirements);
 	if (!bDoesMeetAllRequirements)
 	{
 		AVVM_LOGGER_LOG(LogFencingSample,
@@ -163,7 +163,7 @@ void UActorFenceComponent::TryLower()
 		ReplicatedTagComponent = NewReplicatedTagComponent;
 	}
 
-	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExact(FenceRequirements);
+	const bool bDoesMeetAllRequirements = NewReplicatedTagComponent->HasAllExactRuntimeTags(FenceRequirements);
 	if (bDoesMeetAllRequirements)
 	{
 		AVVM_LOGGER_LOG(LogFencingSample,
@@ -188,6 +188,6 @@ void UActorFenceComponent::ForceLowering() const
 	UAVVMReplicatedTagComponent* TagComponent = ReplicatedTagComponent.Get();
 	if (IsValid(TagComponent))
 	{
-		TagComponent->Append(FenceRequirements);
+		TagComponent->ModifyRuntimeTags(FenceRequirements, {});
 	}
 }

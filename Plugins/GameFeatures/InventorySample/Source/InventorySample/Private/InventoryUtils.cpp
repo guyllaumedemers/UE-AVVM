@@ -428,7 +428,14 @@ TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int
 
 TArray<FDataRegistryId> UInventoryUtils::GetProviderInventoryRegistryIds(const int32 NewProviderId)
 {
-	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return UInventoryUtils::CreateDefaultInventoryProviders();
+	};
+	
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, GenerateDefaultContent);
 	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
 
 	NSJsonInventory::FJsonInventoryProvider OutProvider;
@@ -448,7 +455,14 @@ TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderInventoryRegistryIds(
 
 TArray<FDataRegistryId> UInventoryUtils::GetProviderLoadoutRegistryIds(const int32 NewProviderId)
 {
-	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, {});
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return UInventoryUtils::CreateDefaultInventoryProviders();
+	};
+	
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, GenerateDefaultContent);
 	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
 
 	NSJsonInventory::FJsonInventoryProvider OutProvider;

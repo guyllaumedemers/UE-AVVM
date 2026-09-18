@@ -89,9 +89,10 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
 	
-	// @gdemers Triggering modes that are incompatible with the actor type.
+	// @gdemers Triggering modes that are compatible with the actor type.
+	// IMPORTANT : Not the ones we run, but those allowed to be run if ever applied.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	FGameplayTagContainer BlockedTriggeringModes{FGameplayTagContainer::EmptyContainer};
+	FGameplayTagContainer SupportedTriggeringModes{FGameplayTagContainer::EmptyContainer};
 
 	// @gdemers Montages such as Equip, Reload, Buttstroke, etc...
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))

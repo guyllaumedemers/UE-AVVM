@@ -20,12 +20,12 @@
 #include "TriggeringResourceImpl.h"
 
 #include "AttachmentManagerComponent.h"
+#include "AVVMReplicatedTagComponent.h"
 #include "AVVMToolkitUtils.h"
 #include "ProjectileComponent.h"
 #include "Components/ActorComponent.h"
 #include "Data/AttachmentDefinitionDataAsset.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
-#include "Data/FiringModeDefinitionDataAsset.h"
 #include "Data/TriggeringDefinitionDataAsset.h"
 #include "GameFramework/Actor.h"
 
@@ -45,7 +45,24 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 		const auto* TriggeringDefinition = Cast<UTriggeringDefinitionDataAsset>(Resource);
 		if (IsValid(TriggeringDefinition))
 		{
-			OutResources.Append(TriggeringDefinition->GetDependentIds());
+			OutResources.Append(TriggeringDefinition->GetAttachmentIds());
+
+			const FGameplayTagContainer& DefaultTriggeringModeTags = TriggeringDefinition->GetDefaultTriggeringModeTags();
+			if (!ensureAlwaysMsgf(DefaultTriggeringModeTags.IsValid(),
+			                      TEXT("Triggering modes not supported. Check your Tags configuration!")))
+			{
+				continue;
+			}
+
+			// @gdemers based on the definition of the TriggeringActor Class. We have defined a set of supported tags that prevent incompatible Triggering Mode
+			//being initialized with the actor representation.
+			auto* ReplicatedTagComponent = UAVVMReplicatedTagComponent::Static_GetActorComponent(ActorComponent->GetTypedOuter<AActor>());
+			if (IsValid(ReplicatedTagComponent) && ensureAlwaysMsgf(ReplicatedTagComponent->HasAnyExactFilteredTags(DefaultTriggeringModeTags),
+			                                                        TEXT("Triggering Actor doesnt support all Modes defined in this tag container.")))
+			{
+				ReplicatedTagComponent->ModifyRuntimeTags(DefaultTriggeringModeTags, {});
+			}
+
 			continue;
 		}
 

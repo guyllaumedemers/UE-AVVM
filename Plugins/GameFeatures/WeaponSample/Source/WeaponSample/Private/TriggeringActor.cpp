@@ -112,18 +112,19 @@ void ATriggeringActor::BeginPlay()
 
 	OwningOuter = Outer;
 	AVVM_LOGGER_LOG(LogWeaponSample,
-					Outer,
-					Outer,
-					TEXT("Adding %s."),
-					*GetNameSafe(ATriggeringActor::StaticClass()));
+	                Outer,
+	                Outer,
+	                TEXT("Adding %s."),
+	                *GetNameSafe(ATriggeringActor::StaticClass()));
 
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
-		auto* ASC = GetAbilitySystemComponent();
-		if (IsValid(ASC))
+		if (IsValid(ReplicatedTagComponent))
 		{
-			ASC->BlockAbilitiesWithTags(GetBlockedTriggeringModes());
+			// @gdemers better use this custom Tag component than the ASC as handling
+			// Allowed Tags is simpler, than Blocked Tags which is only what the ASC has exposed.
+			ReplicatedTagComponent->ModifyFilteredTags(GetSupportedTriggeringModes(), {});
 		}
 
 		auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Outer);
@@ -161,11 +162,9 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (HasAuthority())
 	{
 		IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
-
-		auto* ASC = GetAbilitySystemComponent();
-		if (IsValid(ASC))
+		if (IsValid(ReplicatedTagComponent))
 		{
-			ASC->UnBlockAbilitiesWithTags(GetBlockedTriggeringModes());
+			ReplicatedTagComponent->ModifyFilteredTags({}, GetSupportedTriggeringModes());
 		}
 	}
 #endif
@@ -276,7 +275,7 @@ void ATriggeringActor::Attach_Implementation(AActor* Target, const FGameplayTag&
 	// @gdemers Actor creation should invoke begin play ONLY upon attaching,
 	// and not on creation.
 	Rename(nullptr, Target);
-	if (!IsActorBeginningPlay())
+	if (!IsActorInitialized())
 	{
 		FinishSpawning(GetTransform());
 	}

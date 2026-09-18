@@ -23,6 +23,7 @@
 #include "AttachmentManagerComponent.h"
 #include "AVVMCharacter.h"
 #include "AVVMLogger.h"
+#include "AVVMReplicatedTagComponent.h"
 #include "ProjectileComponent.h"
 #include "ProjectileManagerSubsystem.h"
 #include "WeaponSampleModule.h"
@@ -82,9 +83,8 @@ void AWeaponActor_Range::Trigger_Implementation() const
 
 void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
 {
-	auto* ASC = GetAbilitySystemComponent();
-	if (!IsValid(ASC) || !ensureAlwaysMsgf(false == ASC->AreAbilityTagsBlocked(FGameplayTagContainer{NewFiringMode}),
-	                                       TEXT("Invalid Firing Mode. Mode not supported.")))
+	if (!IsValid(ReplicatedTagComponent) || !ensureAlwaysMsgf(ReplicatedTagComponent->HasAnyExactRuntimeTags(FGameplayTagContainer{NewFiringMode}),
+	                                                          TEXT("Invalid Firing Mode. Mode not supported.")))
 	{
 		return;
 	}

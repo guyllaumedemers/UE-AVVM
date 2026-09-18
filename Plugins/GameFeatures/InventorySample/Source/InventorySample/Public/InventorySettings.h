@@ -147,9 +147,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Tags")
 	FGameplayTagContainer BlockingTagsWhenFull{FGameplayTagContainer::EmptyContainer};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Backend")
 	FDataRegistryId StubDataProviderInventoryId{};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Backend")
 	FDataRegistryId StubDataProviderComplexLookupId{};
 };

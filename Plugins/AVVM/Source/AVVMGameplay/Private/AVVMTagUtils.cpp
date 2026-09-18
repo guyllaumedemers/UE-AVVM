@@ -30,7 +30,7 @@ bool UAVVMTagUtils::DoesMeetRequirements(const UAVVMReplicatedTagComponent* NewT
 		return false;
 	}
 
-	const bool bHasAllRequiredTags = NewTagComponent->HasAllExact(NewRequiredTags);
-	const bool bHasAnyBlockingTags = NewTagComponent->HasAnyExact(NewBlockingTags);
+	const bool bHasAllRequiredTags = NewTagComponent->HasAllExactRuntimeTags(NewRequiredTags);
+	const bool bHasAnyBlockingTags = NewTagComponent->HasAnyExactRuntimeTags(NewBlockingTags);
 	return bHasAllRequiredTags && !bHasAnyBlockingTags;
 }

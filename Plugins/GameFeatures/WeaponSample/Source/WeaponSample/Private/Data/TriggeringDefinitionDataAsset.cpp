@@ -29,19 +29,25 @@ EDataValidationResult UTriggeringDefinitionDataAsset::IsDataValid(class FDataVal
 		Context.AddError(NSLOCTEXT("UTriggeringDefinitionDataAsset", "", "FDataRegistry Collection is Empty. No valid entries detected!"));
 	}
 
+	if (DefaultTriggeringModeTags.IsEmpty())
+	{
+		Result = EDataValidationResult::Invalid;
+		Context.AddError(NSLOCTEXT("UTriggeringDefinitionDataAsset", "", "Missing Tag detected!"));
+	}
+
 	return Result;
 }
 #endif
 
-TArray<FDataRegistryId> UTriggeringDefinitionDataAsset::GetDependentIds() const
+const FGameplayTagContainer& UTriggeringDefinitionDataAsset::GetDefaultTriggeringModeTags() const
 {
-	TArray<FDataRegistryId> DependentIds;
-	if (bDoesSupportDefaultAttachments)
-	{
-		DependentIds.Append(DefaultAttachmentIds);
-	}
+	return DefaultTriggeringModeTags;
+}
 
-	return DependentIds;
+const TArray<FDataRegistryId>& UTriggeringDefinitionDataAsset::GetAttachmentIds() const
+{
+	static TArray<FDataRegistryId> Empty{};
+	return bDoesSupportDefaultAttachments ? DefaultAttachmentIds : Empty;
 }
 
 #if WITH_EDITOR

@@ -42,6 +42,7 @@ void UAVVMReplicatedTagComponent::GetLifetimeReplicatedProps(TArray<class FLifet
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
+	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMReplicatedTagComponent, FilteredTags, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(UAVVMReplicatedTagComponent, Flags, Params);
 }
 
@@ -65,7 +66,7 @@ void UAVVMReplicatedTagComponent::BeginPlay()
 
 	const FGameplayTagContainer CachePendingTags = PendingFlags;
 	PendingFlags.Reset();
-	Append(CachePendingTags);
+	ModifyRuntimeTags(CachePendingTags, {});
 }
 
 void UAVVMReplicatedTagComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -87,58 +88,78 @@ void UAVVMReplicatedTagComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	OwningOuter.Reset();
 }
 
-void UAVVMReplicatedTagComponent::Append(const FGameplayTagContainer& NewTags)
+void UAVVMReplicatedTagComponent::ModifyFilteredTags(const FGameplayTagContainer& AddedTags,
+                                                     const FGameplayTagContainer& RemovedTags)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, FilteredTags, this);
+	if (AddedTags.IsValid())
+	{
+		FilteredTags.AppendTags(AddedTags);
+	}
+
+	if (RemovedTags.IsValid())
+	{
+		FilteredTags.RemoveTags(RemovedTags);
+	}
+}
+
+void UAVVMReplicatedTagComponent::ModifyRuntimeTags(const FGameplayTagContainer& AddedTags,
+                                                    const FGameplayTagContainer& RemovedTags)
 {
 	if (!OwningOuter.IsValid())
 	{
 		// @gdemers  There is cases in which we try appending as soon as the local player gets assigned a PC so to be able
 		// to track adding primary game layout to the viewport resulting in the fence system lowering a condition.
 		// The problem however is that Actor construction of the PC which initialize the component above only happens later after receiving the local player.
-		PendingFlags.AppendTags(NewTags);
+		PendingFlags.AppendTags(AddedTags);
 		return;
 	}
 
-	const FGameplayTagContainer OldTags = Flags;
-	Flags.AppendTags(NewTags);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, Flags, this);
+	const FGameplayTagContainer OldTags = Flags;
+
+	if (AddedTags.IsValid())
+	{
+		Flags.AppendTags(AddedTags);
+	}
+
+	if (RemovedTags.IsValid())
+	{
+		Flags.RemoveTags(RemovedTags);
+	}
 
 	AVVM_LOGGER_LOG(LogGameplay,
 	                OwningOuter.Get(),
 	                OwningOuter.Get(),
-	                TEXT("Adding Tag %s. Active Tags %s"),
-	                *NewTags.ToString(),
+	                TEXT("Adding Tags %s. Removed Tags %s. Active Tags %s."),
+	                *AddedTags.ToString(),
+	                *RemovedTags.ToString(),
 	                *Flags.ToString());
 
 	OnRep_FlagsModified(OldTags);
 }
 
-void UAVVMReplicatedTagComponent::Remove(const FGameplayTagContainer& NewTags)
+bool UAVVMReplicatedTagComponent::HasAnyExactFilteredTags(const FGameplayTagContainer& Compare)
 {
-	const FGameplayTagContainer OldTags = Flags;
-	Flags.RemoveTags(NewTags);
-	MARK_PROPERTY_DIRTY_FROM_NAME(UAVVMReplicatedTagComponent, Flags, this);
-
-	AVVM_LOGGER_LOG(LogGameplay,
-					OwningOuter.Get(),
-					OwningOuter.Get(),
-					TEXT("Removing Tag %s. Active Tags %s"),
-					*NewTags.ToString(),
-					*Flags.ToString());
-
-	OnRep_FlagsModified(OldTags);
+	return Compare.HasAnyExact(FilteredTags);
 }
 
-bool UAVVMReplicatedTagComponent::HasAnyExact(const FGameplayTagContainer& Compare) const
+bool UAVVMReplicatedTagComponent::HasAllExactFilteredTags(const FGameplayTagContainer& Compare)
+{
+	return Compare.HasAllExact(FilteredTags);
+}
+
+bool UAVVMReplicatedTagComponent::HasAnyExactRuntimeTags(const FGameplayTagContainer& Compare) const
 {
 	return Compare.HasAnyExact(Flags);
 }
 
-bool UAVVMReplicatedTagComponent::HasAllExact(const FGameplayTagContainer& Compare) const
+bool UAVVMReplicatedTagComponent::HasAllExactRuntimeTags(const FGameplayTagContainer& Compare) const
 {
 	return Compare.HasAllExact(Flags);
 }
 
-UAVVMReplicatedTagComponent* UAVVMReplicatedTagComponent::GetActorComponent(const AActor* NewTarget)
+UAVVMReplicatedTagComponent* UAVVMReplicatedTagComponent::Static_GetActorComponent(const AActor* NewTarget)
 {
 	return IsValid(NewTarget) ? NewTarget->GetComponentByClass<UAVVMReplicatedTagComponent>() : nullptr;
 }
