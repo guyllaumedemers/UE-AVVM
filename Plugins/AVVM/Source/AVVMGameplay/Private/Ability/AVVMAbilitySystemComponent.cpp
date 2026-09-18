@@ -327,7 +327,8 @@ void UAVVMAbilitySystemComponent::OnAbilityGrantingDeferred(FAbilityToken Abilit
 		{
 				GameplayAbilityClass,
 				1,
-				GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId()
+				GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId(),
+				const_cast<AActor*>(Outer) /*provide us as source object so we can differentiate when executing the ability the source of execution*/
 		};
 
 		const FGameplayAbilitySpecHandle NewAbilitySpecHandle = GiveAbility(GameplayAbilitySpec);

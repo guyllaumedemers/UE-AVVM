@@ -200,7 +200,6 @@ void ATriggeringActor::MoveDataToSparseClassDataStruct() const
 	// Modify these lines to include all Sparse Class Data properties.
 	SparseClassData->LinkedAnimInstanceClass = LinkedAnimInstanceClass_DEPRECATED;
 	SparseClassData->bShouldSwapAbilityOnBeginPlay = bShouldSwapAbilityOnBeginPlay_DEPRECATED;
-	SparseClassData->TriggeringAbilityClass = TriggeringAbilityClass_DEPRECATED;
 	SparseClassData->TriggeringDefinitionId = TriggeringDefinitionId_DEPRECATED;
 #endif // WITH_EDITORONLY_DATA
 }
@@ -551,27 +550,39 @@ void ATriggeringActor::RegisterAbility()
 	{
 		return;
 	}
-	
+
+	TArray<FSoftObjectPath> ResourcePaths{};
+	for (const auto& AbilityClass : GetAbilityClasses())
+	{
+		ResourcePaths.Add(AbilityClass.ToSoftObjectPath());
+	}
+
 	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
 	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
 	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
-	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList({GetTriggeringAbilityClass().ToSoftObjectPath()}, OnRequestTriggeringActorAbilityComplete);
+	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, OnRequestTriggeringActorAbilityComplete);
 }
 
 void ATriggeringActor::UnRegisterAbility()
 {
-	if (!TriggeringAbilitySpecHandle.IsValid())
+	if (TriggeringAbilitySpecHandles.IsEmpty())
 	{
 		return;
 	}
 
 	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
-	if (IsValid(ASC))
+	if (!IsValid(ASC))
 	{
-		ASC->ClearAbility(TriggeringAbilitySpecHandle);
-		TriggeringAbilityClassHandle.Reset();
+		return;
 	}
+
+	for (const auto& Handle : TriggeringAbilitySpecHandles)
+	{
+		ASC->ClearAbility(Handle);
+	}
+
+	TriggeringAbilityClassHandle.Reset();
 }
 
 void ATriggeringActor::OnTriggeringAbilityClassAcquired()
@@ -586,24 +597,24 @@ void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 	TArray<UObject*> OutStreamableAssets;
 	TriggeringAbilityClassHandle->GetLoadedAssets(OutStreamableAssets);
 
-	if (OutStreamableAssets.IsEmpty())
+	for (auto* OutStreamableAsset : OutStreamableAssets)
 	{
-		return;
-	}
+		auto* GameplayAbilityClass = Cast<UClass>(OutStreamableAsset);
+		if (!IsValid(GameplayAbilityClass))
+		{
+			return;
+		}
 
-	auto* GameplayAbilityClass = Cast<UClass>(OutStreamableAssets[0]);
-	if (!IsValid(GameplayAbilityClass))
-	{
-		return;
-	}
+		const auto AbilitySpec = FGameplayAbilitySpec
+		{
+				GameplayAbilityClass,
+				1,
+				GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId(),
+				this /*provide us as source object so we can differentiate when executing the ability the source of execution*/
+		};
 
-	TriggeringAbilitySpecHandle = ASC->GiveAbility(FGameplayAbilitySpec
-	                                               {
-			                                               GameplayAbilityClass,
-			                                               1,
-			                                               GameplayAbilityClass->GetDefaultObject<UAVVMGameplayAbility>()->GetInputId(),
-			                                               this /*provide us as source object so we can differentiate when executing the ability the source of execution*/
-	                                               });
+		TriggeringAbilitySpecHandles.Add(ASC->GiveAbility(AbilitySpec));
+	}
 }
 
 FDataRegistryId ATriggeringActor::GetConditionalTriggeringDefinition() const

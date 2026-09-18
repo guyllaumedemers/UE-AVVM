@@ -87,7 +87,7 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 	bool bShouldSwapAbilityOnBeginPlay{true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	TSoftClassPtr<UTriggerAbility> TriggeringAbilityClass = nullptr;
+	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClasses{};
 	
 	// @gdemers Triggering modes that are compatible with the actor type.
 	// IMPORTANT : Not the ones we run, but those allowed to be run if ever applied.
@@ -207,7 +207,7 @@ protected:
 	TObjectPtr<UAVVMReplicatedTagComponent> ReplicatedTagComponent = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	FGameplayAbilitySpecHandle TriggeringAbilitySpecHandle{};
+	TArray<FGameplayAbilitySpecHandle> TriggeringAbilitySpecHandles{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
