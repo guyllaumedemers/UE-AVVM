@@ -120,6 +120,12 @@ void ATriggeringActor::BeginPlay()
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
+		auto* ASC = GetAbilitySystemComponent();
+		if (IsValid(ASC))
+		{
+			ASC->BlockAbilitiesWithTags(GetBlockedTriggeringModes());
+		}
+
 		auto SocketDeferral = TScriptInterface<IAVVMSocketProcessHandler>(Outer);
 		if (ensureAlwaysMsgf(UAVVMToolkitUtils::IsNativeScriptInterfaceValid(SocketDeferral),
 		                     TEXT("Outer doesn't implement required interface.")))
@@ -155,6 +161,12 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (HasAuthority())
 	{
 		IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
+
+		auto* ASC = GetAbilitySystemComponent();
+		if (IsValid(ASC))
+		{
+			ASC->UnBlockAbilitiesWithTags(GetBlockedTriggeringModes());
+		}
 	}
 #endif
 }
