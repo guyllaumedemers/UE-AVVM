@@ -22,8 +22,6 @@
 #include "AVVMLogger.h"
 #include "NonReplicatedProjectileActor.h"
 #include "ProjectileManagerSubsystem.h"
-#include "Ability/AVVMAbilitySystemComponent.h"
-#include "Ability/AVVMAbilityUtils.h"
 #include "Effect/GameplayEffect_FiringMode.h"
 
 UProjectileComponent::UProjectileComponent(const FObjectInitializer& ObjectInitializer)
@@ -50,16 +48,16 @@ void UProjectileComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OwningOuter.Reset();
 }
 
-void UProjectileComponent::Fire(const FActiveGameplayEffectHandle& FiringModeGameplayEffectHandle,
+void UProjectileComponent::Fire(const FGameplayEffectSpecHandle& FiringModeGameplayEffectSpecHandle,
                                 const FTransform& AimTransform) const
 {
-	const auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
-	if (!ensureAlwaysMsgf(IsValid(ASC), TEXT("Invalid ASC on owning outer")))
+	if (!ensureAlwaysMsgf(FiringModeGameplayEffectSpecHandle.Data.IsValid(),
+	                      TEXT("Invalid Spec Handle.")))
 	{
 		return;
 	}
 
-	const auto* FiringModeGameplayEffect = Cast<UGameplayEffect_FiringMode>(ASC->GetGameplayEffectCDO(FiringModeGameplayEffectHandle));
+	const auto* FiringModeGameplayEffect = Cast<UGameplayEffect_FiringMode>(FiringModeGameplayEffectSpecHandle.Data->Def);
 	if (!ensureAlwaysMsgf(IsValid(FiringModeGameplayEffect), TEXT("Invalid Projectile GameplayEffect.")))
 	{
 		return;

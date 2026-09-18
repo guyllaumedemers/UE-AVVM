@@ -81,8 +81,11 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	mutable TWeakObjectPtr<const UArrowComponent> WeaponProxyComponent = nullptr;
 
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FActiveGameplayEffectHandle NonReplicatedFiringModeActiveGameplayEffectHandle{};
+
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
-	FActiveGameplayEffectHandle FiringModeGameplayEffectHandle{};
+	FGameplayEffectSpecHandle FiringModeGameplayEffectSpecHandle{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	FGameplayTag CurrentFiringMode{FGameplayTag::EmptyTag};

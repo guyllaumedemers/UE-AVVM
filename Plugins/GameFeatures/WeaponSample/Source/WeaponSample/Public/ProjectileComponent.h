@@ -25,7 +25,7 @@
 
 #include "ProjectileComponent.generated.h"
 
-struct FActiveGameplayEffectHandle;
+struct FGameplayEffectSpecHandle;
 
 /**
  *	Class description:
@@ -42,7 +42,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	void Fire(const FActiveGameplayEffectHandle& FiringModeGameplayEffectHandle,
+	void Fire(const FGameplayEffectSpecHandle& FiringModeGameplayEffectSpecHandle,
 	          const FTransform& AimTransform) const;
 
 protected:
