@@ -54,11 +54,21 @@ void AWeaponActor_Range::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 void AWeaponActor_Range::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsValid(ReplicatedTagComponent))
+	{
+		ReplicatedTagComponent->OnReplicatedTagChanged.AddUniqueDynamic(this, &AWeaponActor_Range::OnAvailableFiringModeCollectionChange);
+	}
 }
 
 void AWeaponActor_Range::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	if (IsValid(ReplicatedTagComponent))
+	{
+		ReplicatedTagComponent->OnReplicatedTagChanged.RemoveAll(this);
+	}
 }
 
 void AWeaponActor_Range::Trigger_Implementation() const
@@ -173,6 +183,14 @@ const UArrowComponent* AWeaponActor_Range::GetMutableAimingComponent() const
 	}
 
 	return WeaponProxyComponent.Get();
+}
+
+void AWeaponActor_Range::OnAvailableFiringModeCollectionChange(const FGameplayTagContainer& NewTags)
+{
+	if (!CurrentFiringMode.IsValid() && ensureAlwaysMsgf(NewTags.IsValid(), TEXT("Invalid Tags")))
+	{
+		ToggleFiringMode(NewTags.First());
+	}
 }
 
 AWeaponActor_Melee::AWeaponActor_Melee(const FObjectInitializer& ObjectInitializer)

@@ -64,6 +64,9 @@ protected:
 	void ApplyFiringModeGameplayEffect(const FGameplayTag& NewFiringMode);
 	const UArrowComponent* GetMutableAimingComponent() const;
 	
+	UFUNCTION()
+	void OnAvailableFiringModeCollectionChange(const FGameplayTagContainer& NewTags);
+	
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAttachmentManagerComponent> AttachmentManagerComponent = nullptr;
 

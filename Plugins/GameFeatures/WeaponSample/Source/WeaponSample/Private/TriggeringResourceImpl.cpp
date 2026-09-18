@@ -55,7 +55,7 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 			}
 
 			// @gdemers based on the definition of the TriggeringActor Class. We have defined a set of supported tags that prevent incompatible Triggering Mode
-			//being initialized with the actor representation.
+			// being initialized with the actor representation.
 			auto* ReplicatedTagComponent = UAVVMReplicatedTagComponent::Static_GetActorComponent(ActorComponent->GetTypedOuter<AActor>());
 			if (IsValid(ReplicatedTagComponent) && ensureAlwaysMsgf(ReplicatedTagComponent->HasAnyExactFilteredTags(DefaultTriggeringModeTags),
 			                                                        TEXT("Triggering Actor doesnt support all Modes defined in this tag container.")))
