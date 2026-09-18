@@ -159,6 +159,11 @@ bool UAVVMReplicatedTagComponent::HasAllExactRuntimeTags(const FGameplayTagConta
 	return Compare.HasAllExact(Flags);
 }
 
+void UAVVMReplicatedTagComponent::GetRuntimeTagsArray(TArray<FGameplayTag>& Tags)
+{
+	Flags.GetGameplayTagArray(Tags);
+}
+
 UAVVMReplicatedTagComponent* UAVVMReplicatedTagComponent::Static_GetActorComponent(const AActor* NewTarget)
 {
 	return IsValid(NewTarget) ? NewTarget->GetComponentByClass<UAVVMReplicatedTagComponent>() : nullptr;

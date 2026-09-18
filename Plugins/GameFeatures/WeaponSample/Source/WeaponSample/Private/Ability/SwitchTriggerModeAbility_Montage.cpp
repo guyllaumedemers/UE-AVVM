@@ -22,7 +22,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AVVMLogger.h"
-#include "TriggeringActor.h"
+#include "WeaponActor.h"
 #include "WeaponSampleModule.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Ability/AVVMCharacterAttributeSet.h"
@@ -210,6 +210,12 @@ bool USwitchTriggerModeAbility_Montage::CommitAbility(const FGameplayAbilitySpec
 	                this,
 	                TEXT("Commit %s."),
 	                *GetName());
+
+	auto* TriggeringActor = Cast<AWeaponActor_Range>(EquippedTriggeringActor.Get());
+	if (ensureAlwaysMsgf(IsValid(TriggeringActor), TEXT("Failed to commit on invalid actor.")))
+	{
+		TriggeringActor->ToggleFiringMode();
+	}
 
 	return true;
 }

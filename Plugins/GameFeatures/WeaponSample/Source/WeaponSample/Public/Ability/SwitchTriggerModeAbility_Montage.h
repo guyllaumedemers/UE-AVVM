@@ -89,7 +89,7 @@ protected:
 	FGameplayTag SwitchFiringModeMontageTag{FGameplayTag::EmptyTag};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<const AActor> EquippedTriggeringActor = nullptr;
+	TWeakObjectPtr<AActor> EquippedTriggeringActor = nullptr;
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UAbilityTask_PlayMontageAndWait> AbilityTask_PlayMontage = nullptr;

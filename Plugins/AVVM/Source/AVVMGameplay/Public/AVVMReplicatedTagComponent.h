@@ -66,6 +66,9 @@ public:
 	bool HasAllExactRuntimeTags(const FGameplayTagContainer& Compare) const;
 
 	UFUNCTION(BlueprintCallable)
+	void GetRuntimeTagsArray(TArray<FGameplayTag>& Tags);
+
+	UFUNCTION(BlueprintCallable)
 	static UAVVMReplicatedTagComponent* Static_GetActorComponent(const AActor* NewTarget);
 
 	UPROPERTY(BlueprintAssignable)

@@ -95,18 +95,23 @@ void AWeaponActor_Range::Trigger_Implementation() const
 	}
 }
 
-void AWeaponActor_Range::ToggleFiringMode(const FGameplayTag& NewFiringMode)
+void AWeaponActor_Range::ToggleFiringMode()
 {
-	if (!IsValid(ReplicatedTagComponent) || !ensureAlwaysMsgf(ReplicatedTagComponent->HasAnyExactRuntimeTags(FGameplayTagContainer{NewFiringMode}),
-	                                                          TEXT("Invalid Firing Mode. Mode not supported.")))
+	if (!IsValid(ReplicatedTagComponent))
 	{
 		return;
 	}
 
-	// @gdemers set the active projectile type. example : light rounds, heavy rounds, incendiary, etc...
-	ApplyFiringModeGameplayEffect(NewFiringMode);
-	MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, CurrentFiringMode, this);
-	CurrentFiringMode = NewFiringMode;
+	TArray<FGameplayTag> OutTags{};
+	ReplicatedTagComponent->GetRuntimeTagsArray(OutTags);
+
+	int32 CurrIndex = OutTags.IndexOfByKey(CurrentFiringMode);
+	if (ensureAlwaysMsgf(CurrIndex != INDEX_NONE,
+	                     TEXT("Invalid Tag lookup.")))
+	{
+		CurrIndex = ((CurrIndex + 1) % OutTags.Num());
+		SetFiringMode(OutTags[CurrIndex]);
+	}
 }
 
 void AWeaponActor_Range::RangeTrigger_Implementation() const
@@ -157,6 +162,20 @@ void AWeaponActor_Range::MeleeTrigger_Implementation() const
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Outer), TAG_WEAPONSAMPLE_TRIGGER_TYPE_MELEE, MoveTemp(GAS_EventData));
 }
 
+void AWeaponActor_Range::SetFiringMode(const FGameplayTag& NewFiringMode)
+{
+	if (!IsValid(ReplicatedTagComponent) || !ensureAlwaysMsgf(ReplicatedTagComponent->HasAnyExactRuntimeTags(FGameplayTagContainer{NewFiringMode}),
+	                                                          TEXT("Invalid Firing Mode. Mode not supported.")))
+	{
+		return;
+	}
+
+	// @gdemers set the active projectile type. example : light rounds, heavy rounds, incendiary, etc...
+	ApplyFiringModeGameplayEffect(NewFiringMode);
+	MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, CurrentFiringMode, this);
+	CurrentFiringMode = NewFiringMode;
+}
+
 void AWeaponActor_Range::ApplyFiringModeGameplayEffect(const FGameplayTag& NewFiringMode)
 {
 	auto* ASC = GetAbilitySystemComponent();
@@ -200,7 +219,7 @@ void AWeaponActor_Range::OnAvailableFiringModeCollectionChange(const FGameplayTa
 {
 	if (!CurrentFiringMode.IsValid() && ensureAlwaysMsgf(NewTags.IsValid(), TEXT("Invalid Tags")))
 	{
-		ToggleFiringMode(NewTags.First());
+		SetFiringMode(NewTags.First());
 	}
 }
 

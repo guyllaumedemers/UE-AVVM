@@ -50,7 +50,7 @@ public:
 	virtual void Trigger_Implementation() const override;
 
 	UFUNCTION(BlueprintCallable)
-	void ToggleFiringMode(const FGameplayTag& NewFiringMode);
+	void ToggleFiringMode();
 
 protected:
 	UFUNCTION(BlueprintNativeEvent)
@@ -61,6 +61,7 @@ protected:
 	void MeleeTrigger() const;
 	virtual void MeleeTrigger_Implementation() const;
 
+	void SetFiringMode(const FGameplayTag& NewFiringMode);
 	void ApplyFiringModeGameplayEffect(const FGameplayTag& NewFiringMode);
 	const UArrowComponent* GetMutableAimingComponent() const;
 	
