@@ -447,7 +447,7 @@ AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		return RuntimeItemActor;
 	}
 
-	UAVVMAbilitySystemComponent* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(RuntimeItemActor);
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(RuntimeItemActor);
 	if (IsValid(ASC))
 	{
 		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, RuntimeItemActor);

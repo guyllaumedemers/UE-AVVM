@@ -476,7 +476,8 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 #if WITH_AUTOMATION_TESTS
 	UAVVMAutomatedTestResourceValidationManager::Static_IncrementUObjectLoaded(GetWorld(), this, OutStreamableAssets.Num());
 #endif
-
+	
+	SkillTree.MarkArrayDirty();
 	for (UObject* StreamableAsset : OutStreamableAssets)
 	{
 		const auto* SkillTreeNodeEffectClass = Cast<UClass>(StreamableAsset);
@@ -524,8 +525,6 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 			PrivateSkillTreeNodeIds.Add(PrivateItemId);
 		}
 	}
-
-	SkillTree.MarkArrayDirty();
 }
 
 FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
@@ -550,10 +549,9 @@ FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(con
 	// @gdemers filter the level bitmask of our encoded bitmask so we can support progression scaling using GAS.
 	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateTreeNodeId, GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
 	// @gdemers manually grant the GameplayEffect to the ASC, and store the ActiveHandle so we can remove the effect when the owning Outer is no longer referenced
-	// within the outer chain of ACharacter, or when a user swap Skill Node entries in UI.
+	// within the outer chain of ACharacter/AActor (AWeapon, or other), or when a user swap Skill Node entries in UI.
 	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
-	const FActiveGameplayEffectHandle ActiveGEHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
-	return ActiveGEHandle;
+	return ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
 }
 
 bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FAVVMExecutionContextParams>& Params,
