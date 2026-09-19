@@ -215,7 +215,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AActor> OwningOuter = nullptr;
 
-	TSharedPtr<FStreamableHandle> TriggeringAbilityClassHandle = nullptr;
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	FDelegateHandle DeferredSocketParentingDelegateHandle{};
 
 private:

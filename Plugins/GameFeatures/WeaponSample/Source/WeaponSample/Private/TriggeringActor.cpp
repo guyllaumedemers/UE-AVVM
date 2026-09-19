@@ -546,7 +546,7 @@ void ATriggeringActor::OnSocketParentingDeferred(AActor* Parent,
 
 void ATriggeringActor::RegisterAbility()
 {
-	if (TriggeringAbilityClassHandle.IsValid())
+	if (StreamableHandle.IsValid())
 	{
 		return;
 	}
@@ -561,7 +561,7 @@ void ATriggeringActor::RegisterAbility()
 	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
 	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
-	TriggeringAbilityClassHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, OnRequestTriggeringActorAbilityComplete);
+	StreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, OnRequestTriggeringActorAbilityComplete);
 }
 
 void ATriggeringActor::UnRegisterAbility()
@@ -582,20 +582,20 @@ void ATriggeringActor::UnRegisterAbility()
 		ASC->ClearAbility(Handle);
 	}
 
-	TriggeringAbilityClassHandle.Reset();
+	StreamableHandle.Reset();
 }
 
 void ATriggeringActor::OnTriggeringAbilityClassAcquired()
 {
 	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
-	if (!TriggeringAbilityClassHandle.IsValid() || !ensureAlwaysMsgf(IsValid(ASC),
+	if (!StreamableHandle.IsValid() || !ensureAlwaysMsgf(IsValid(ASC),
 	                                                                 TEXT("Owning Outer missing valid ASC.")))
 	{
 		return;
 	}
 
 	TArray<UObject*> OutStreamableAssets;
-	TriggeringAbilityClassHandle->GetLoadedAssets(OutStreamableAssets);
+	StreamableHandle->GetLoadedAssets(OutStreamableAssets);
 
 	for (auto* OutStreamableAsset : OutStreamableAssets)
 	{

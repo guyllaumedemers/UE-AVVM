@@ -70,7 +70,7 @@ TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject
 		return TArray<int32>{};
 	}
 
-	TArray<int32> OutResults;
+	TArray<int32> OutResults{};
 
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character) && Character->IsPlayerControlled())
