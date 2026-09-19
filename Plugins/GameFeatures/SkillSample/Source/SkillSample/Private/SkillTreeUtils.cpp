@@ -21,6 +21,7 @@
 
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMGameSession.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "GameplayEffect.h"
@@ -266,7 +267,7 @@ int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& Tre
 {
 	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
 	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
-	const int32 VirtualGlobalId = USkillTreeUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
+	const int32 VirtualGlobalId = UAVVMOnlineSkillTreeUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
 	
 	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
 	
@@ -345,29 +346,50 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 	}
 }
 
-int32 USkillTreeUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMask,
-                                                   const int32 PhysicalGlobalId)
+TArray<FDataRegistryId> USkillTreeUtils::TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds)
 {
-	constexpr int32 BitRange = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE;
-	constexpr int32 BitShift = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT;
-	int32 BaseId = PhysicalGlobalId;
+	static const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
+										 const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
+										 const int32 NewPrivateItemId)
+	{
+		if (!DataRegistrySubsystem.IsValid())
+		{
+			return FDataRegistryId{};
+		}
 
-	// TODO @gdemers until proven otherwise, SkillTreeNode GlobalId dont require offset calculation.
-	// if ((RelationshipBitMask & (1 << 0/*attachment bit-index*/)))
-	// {
-	// 	BaseId = (PhysicalGlobalId & ~0);
-	// }
-	// else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
-	// {
-	// 	BaseId = (PhysicalGlobalId & ~0);
-	// }
-	// else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
-	// {
-	// 	BaseId = (PhysicalGlobalId & ~0);
-	// }
+		const int32 PhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(NewPrivateItemId);
+		for (const auto& RegistryId : NewRegistryIds)
+		{
+			const auto* Row = DataRegistrySubsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(RegistryId);
+			if (ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row.")) && (Row->UniqueId == PhysicalGlobalId))
+			{
+				return RegistryId;
+			}
+		}
 
-	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32(BaseId, BitRange, BitShift);
-	return VirtualGlobalId;
+		return FDataRegistryId{};
+	};
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return TArray<FDataRegistryId>{};
+	}
+
+	TArray<FDataRegistryId> OutRegistryIds;
+	Subsystem->GetPossibleDataRegistryIdList(UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), OutRegistryIds);
+
+	TArray<FDataRegistryId> OutResults;
+	for (const int32 PrivateItemId : NewPrivateItemIds)
+	{
+		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
+		if (ensureAlwaysMsgf(ItemRegistryId.IsValid(), TEXT("Invalid Registry Id.")))
+		{
+			OutResults.Add(ItemRegistryId);
+		}
+	}
+
+	return OutResults;
 }
 
 bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType)
@@ -386,4 +408,21 @@ bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType&
 	}
 
 	return true;
+}
+
+TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderSkillTreeRegistryIds(const UObject* WorldContextObject,
+                                                                                const int32 NewProfileId)
+{
+	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(WorldContextObject, NewProfileId);
+	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
+	return OutResults;
+}
+
+TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
+                                                                                         const int32 NewProfileId,
+                                                                                         const int32 NewPrivateItemId)
+{
+	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetActorSkillTreeNodes(WorldContextObject, NewProfileId, NewPrivateItemId);
+	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
+	return OutResults;
 }

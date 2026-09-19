@@ -21,6 +21,10 @@
 // ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
 #pragma once
 
+#include "Kismet/BlueprintFunctionLibrary.h"
+
+#include "AVVMOnlineSkillTree.generated.h"
+
 // @gdemers Skill Tree Nodes are referenced by {FAVVMPlayerResource}. More advance encoding are put in place to parse information
 // within the {FAVVMPlayerProfile::SkillIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_SKILL_TREE_ENCODING
@@ -43,6 +47,15 @@
 // @gdemers entry position within a skill tree (255)
 #define GET_SKILL_TREE_NODE_POSITION_BIT_RANGE (7)
 #define GET_SKILL_TREE_NODE_POSITION_RSHIFT (24)
+// @gdemers check relationship
+#define FILTER_CHARACTER_RELATIONSHIP_BIT (2/*2^1*/)
+#endif
+
+#ifdef AVVMONLINE_USE_DEFAULT_SKILL_TREE_DATATABLE_BASE_ADDRESSING
+// @gdemers addressing offset we expect implementers of the Data Table to use when defining global id.
+#define GET_CHARACTER_DEPENDENT_PHYSICAL_ADDRESSING_OFFSET (1000)
+#define GET_ITEM_DEPENENT_PHYSICAL_ADDRESSING_OFFSET (4000)
+#define GET_ATTACHMENT_DEPENDENT_PHYSICAL_ADDRESSING_OFFSET (7000)
 #endif
 
 // @gdemers element lookup for supporting the socketing process -- identify dependencies between an attachment and an owner (which may have more than one instance)
@@ -60,3 +73,23 @@
 #define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE (2)
 #define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT (25)
 #endif
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMOnlineSkillTreeUtils is a function library for operation on bit addressing specific to the Backend Skill Tree system.
+ */
+UCLASS()
+class AVVMONLINE_API UAVVMOnlineSkillTreeUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static int32 GetPhysicalGlobalId(const int32 EncodedBits);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
+											 const int32 PhysicalGlobalId);
+};
+

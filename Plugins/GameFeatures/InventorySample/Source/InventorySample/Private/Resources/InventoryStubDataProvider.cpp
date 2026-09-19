@@ -26,6 +26,7 @@
 #include "IPropertyTable.h"
 #include "ItemObject.h"
 #include "StorageHelper.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Data/InventoryProviderTableRow.h"
 #include "Data/InventoryStubDataProviderTableRow.h"
@@ -157,7 +158,7 @@ TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() c
 
 		const auto* ItemObjectCDO = ItemClass->GetDefaultObject<UItemObject>();
 		const int32 ItemPhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
-		const int32 ItemVirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing((1 << 2/*item bit-index*/), ItemPhysicalGlobalId);
+		const int32 ItemVirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing((1 << 2/*item bit-index*/), ItemPhysicalGlobalId);
 		int32& OutItemCount = InstanceCount.FindOrAdd(ItemObjectCDO);
 		++OutItemCount;
 
@@ -177,7 +178,7 @@ TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() c
 
 			const auto* AttachmentObjectCDO = DependencyClass->GetDefaultObject<UItemObject>();
 			const int32 AttachmentPhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(AttachmentObjectCDO);
-			const int32 AttachmentVirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(1 << 0/*attachment bit-index*/, AttachmentPhysicalGlobalId);
+			const int32 AttachmentVirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing(1 << 0/*attachment bit-index*/, AttachmentPhysicalGlobalId);
 			int32& OutAttachmentCount = InstanceCount.FindOrAdd(AttachmentObjectCDO);
 			++OutAttachmentCount;
 

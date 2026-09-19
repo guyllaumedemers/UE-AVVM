@@ -381,7 +381,7 @@ TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int
 			return FDataRegistryId{};
 		}
 
-		const int32 PhysicalGlobalId = UItemObjectUtils::FilterItemPrivateId(NewPrivateItemId);
+		const int32 PhysicalGlobalId = UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId);
 		for (const auto& RegistryId : NewRegistryIds)
 		{
 			const auto* Row = DataRegistrySubsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(RegistryId);
@@ -407,7 +407,7 @@ TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int
 	for (const int32 PrivateItemId : NewPrivateItemIds)
 	{
 		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
-		if (!ItemRegistryId.IsValid())
+		if (!ensureAlwaysMsgf(ItemRegistryId.IsValid(), TEXT("Invalid Registry Id.")))
 		{
 			continue;
 		}
@@ -508,7 +508,7 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 	// an attachment being dependent on a character, or weapon). 
 	const int32 RelationshipBitMask = FProviderDefaultItemProperties::Static_GetRelationshipBitmask(ProviderItemProperties);
 	const int32 PhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
-	const int32 VirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
+	const int32 VirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
 
 	const int32 InstancedId = UAVVMOnlineEncodingUtils::EncodeInt32(ProviderItemProperties.InstancedId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
 
@@ -549,7 +549,7 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
 	{
 		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
 		// from the integer into a physical id for comparison.
-		const int32 OutPhysicalGlobalId = UItemObjectUtils::FilterItemPrivateId(NewPrivateItemId);
+		const int32 OutPhysicalGlobalId = UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId);
 		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
@@ -603,30 +603,6 @@ int32 UInventoryUtils::GetObjectUniqueIdentifier(const UItemObject* Item)
 		const FDataRegistryId RegistryId = {UAVVMGameplaySettings::GetActorIdentifierRegistryType(), Item->BP_GetItemActorId().ItemName};
 		return UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(RegistryId);
 	}
-}
-
-int32 UInventoryUtils::TranslatePhysicalAddressing(const int32 RelationshipBitMask,
-                                                   const int32 PhysicalGlobalId)
-{
-	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
-	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
-	int32 BaseId = 0;
-
-	if ((RelationshipBitMask & (1 << 0/*attachment bit-index*/)))
-	{
-		BaseId = (PhysicalGlobalId & ~GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET);
-	}
-	else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
-	{
-		BaseId = (PhysicalGlobalId & ~GET_ITEM_PHYSICAL_ADDRESSING_OFFSET);
-	}
-	else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
-	{
-		BaseId = (PhysicalGlobalId & ~GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
-	}
-
-	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32(BaseId, BitRange, BitShift);
-	return VirtualGlobalId;
 }
 
 bool UInventoryUtils::GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType)

@@ -77,9 +77,17 @@ public:
 	                                       const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
-	                                         const int32 PhysicalGlobalId);
+	static TArray<FDataRegistryId> TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds);
 
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetBackendProviderSkillTreeRegistryIds(const UObject* WorldContextObject,
+	                                                                      const int32 NewProfileId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FDataRegistryId> GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
+	                                                                               const int32 NewProfileId,
+	                                                                               const int32 NewPrivateItemId);
 };

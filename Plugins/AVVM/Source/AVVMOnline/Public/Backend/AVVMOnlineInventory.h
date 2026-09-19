@@ -21,6 +21,10 @@
 // ReSharper disable CppDefaultCaseNotHandledInSwitchStatement
 #pragma once
 
+#include "Kismet/BlueprintFunctionLibrary.h"
+
+#include "AVVMOnlineInventory.generated.h"
+
 // @gdemers Inventory Items are referenced by {FAVVMPlayerResource}. More advance encoding are put in place to parse information
 // within the {FAVVMPlayerProfile::InventoryIds}. The preprocessors available below are symbols defining the constraints of the bits encoding used.
 #ifdef AVVMONLINE_USE_DEFAULT_INVENTORY_ENCODING
@@ -80,3 +84,22 @@
 #define GET_ATTACHMENT_LOOKUP_INSTANCED_ID_BIT_RANGE (5)
 #define GET_ATTACHMENT_LOOKUP_INSTANCED_ID_RSHIFT (22)
 #endif
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMOnlineInventoryUtils is a function library for operation on bit addressing specific to the Backend Inventory system.
+ */
+UCLASS()
+class AVVMONLINE_API UAVVMOnlineInventoryUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static int32 GetPhysicalGlobalId(const int32 EncodedBits);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
+	                                         const int32 PhysicalGlobalId);
+};

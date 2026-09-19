@@ -72,12 +72,12 @@ class SKILLSAMPLE_API ISkillTreeProvider
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RequestItemsFromDataAsset() const;
-	virtual void RequestItemsFromDataAsset_Implementation() const PURE_VIRTUAL(RequestItemsFromDataAsset_Implementation, return;);
+	void RequestTreeNodesFromDataAsset() const;
+	virtual void RequestTreeNodesFromDataAsset_Implementation() const PURE_VIRTUAL(RequestTreeNodesFromDataAsset_Implementation, return;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void RequestItemsFromMicroService() const;
-	virtual void RequestItemsFromMicroService_Implementation() const PURE_VIRTUAL(RequestItemsFromMicroService_Implementation, return;);
+	void RequestTreeNodesFromMicroService() const;
+	virtual void RequestTreeNodesFromMicroService_Implementation() const PURE_VIRTUAL(RequestTreeNodesFromMicroService_Implementation, return;);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	ESkillTreeSrcType GetSkillTreeSrcType() const;

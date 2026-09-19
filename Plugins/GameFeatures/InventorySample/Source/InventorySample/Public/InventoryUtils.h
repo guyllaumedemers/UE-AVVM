@@ -110,10 +110,6 @@ public:
 	static int32 GetObjectUniqueIdentifier(const UItemObject* Item);
 
 	UFUNCTION(BlueprintCallable)
-	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
-	                                         const int32 PhysicalGlobalId);
-
-	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, EItemSrcType& OutSrcType);
 
 	UFUNCTION(BlueprintCallable)

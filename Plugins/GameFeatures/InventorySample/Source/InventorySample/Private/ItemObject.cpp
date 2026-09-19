@@ -623,7 +623,7 @@ int32 UItemObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	{
 		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
 		// from the integer into a physical id for comparison.
-		const int32 OutPhysicalGlobalId = UItemObjectUtils::FilterItemPrivateId(NewPrivateItemId);
+		const int32 OutPhysicalGlobalId = UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId);
 		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
@@ -660,37 +660,12 @@ int32 UItemObjectUtils::FilterItem(const UItemObject* ItemObject)
 	{
 		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
 		// from the integer into a physical id for comparison.
-		return UItemObjectUtils::FilterItemPrivateId(ItemObject->PrivateItemId);
+		return UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(ItemObject->PrivateItemId);
 	}
 	else
 	{
 		return INDEX_NONE;
 	}
-}
-
-int32 UItemObjectUtils::FilterItemPrivateId(const int32 EncodedBits/*PrivateItemId*/)
-{
-	constexpr int32 BitRange = GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE;
-	constexpr int32 BitShift = GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT;
-	int32 PhysicalOffset = 0;
-
-	// @gdemers Order matter for parsing the relationship bitmask.
-	if (UItemObjectUtils::IsAttachment(EncodedBits))
-	{
-		PhysicalOffset = GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET;
-	}
-	else if (UItemObjectUtils::IsItem(EncodedBits))
-	{
-		PhysicalOffset = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET;
-	}
-	else if (UItemObjectUtils::IsStorage(EncodedBits))
-	{
-		PhysicalOffset = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET;
-	}
-
-	// @gdemers translate the virtual id stored in the encoded bits into globally defined physical id
-	const int32 BaseId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, BitRange, BitShift);
-	return (BaseId + PhysicalOffset);
 }
 
 int32 UItemObjectUtils::FilterStoragePosition(const int32 EncodedBits)
@@ -1080,25 +1055,6 @@ void UItemObjectUtils::DestroyWorldItemActor(const UItemObject* SrcItem)
 	}
 }
 
-bool UItemObjectUtils::IsItem(const int32 EncodedBits)
-{
-	// @gdemers See AVVMOnlineInventory.h for possible attachment encoding scheme
-	// 100 (non-assigned, i.e in storage)
-	// 110 (character dependent)
-	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
-	return (RelationshipBitmask & (1 << 2/*item bit-index*/));
-}
-
-bool UItemObjectUtils::IsAttachment(const int32 EncodedBits)
-{
-	// @gdemers See AVVMOnlineInventory.h for possible attachment encoding scheme
-	// 001 (non-assigned, i.e in storage)
-	// 011 (character dependent)
-	// 101 (item dependent)
-	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::FilterInt32(EncodedBits, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
-	return (RelationshipBitmask & (1 << 0/*attachment bit-index*/));
-}
-
 bool UItemObjectUtils::IsStorage(const int32 EncodedBits)
 {
 	// @gdemers See AVVMOnlineInventory.h for possible attachment encoding scheme
@@ -1117,7 +1073,7 @@ UItemObject* UItemObjectUtils::MakeZeroInitItemObject(UObject* Outer)
 		return nullptr;
 	}
 
-	const int32 VirtualGlobalId = UInventoryUtils::TranslatePhysicalAddressing(4/*item bitmask*/, GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + 1/*PhysicalGlobalId*/);
+	const int32 VirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing(4/*item bitmask*/, GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + 1/*PhysicalGlobalId*/);
 	const int32 InstancedId = UAVVMOnlineEncodingUtils::EncodeInt32(1, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
 	TestObject->PrivateItemId = (VirtualGlobalId + InstancedId);
 

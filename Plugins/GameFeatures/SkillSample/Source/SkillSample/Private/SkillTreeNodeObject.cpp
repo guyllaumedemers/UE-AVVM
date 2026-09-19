@@ -107,7 +107,6 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	// @gdemers target any actor type referencing this inventory component that may have a backend representation.
 	const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Outer);
 	if (!ensureAlwaysMsgf(TargetUniqueId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid UniqueId based on IAVVMResourceProvider::GetProviderUniqueId implementation."),

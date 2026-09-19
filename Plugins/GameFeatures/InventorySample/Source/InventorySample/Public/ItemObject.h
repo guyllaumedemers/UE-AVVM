@@ -448,9 +448,6 @@ public:
 	static int32 FilterItem(const UItemObject* ItemObject);
 	
 	UFUNCTION(BlueprintCallable)
-	static int32 FilterItemPrivateId(const int32 EncodedBits);
-	
-	UFUNCTION(BlueprintCallable)
 	static int32 FilterStoragePosition(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
@@ -500,12 +497,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void DestroyWorldItemActor(const UItemObject* SrcItem);
-	
-	UFUNCTION(BlueprintCallable)
-	static bool IsItem(const int32 EncodedBits);
-	
-	UFUNCTION(BlueprintCallable)
-	static bool IsAttachment(const int32 EncodedBits);
 	
 	UFUNCTION(BlueprintCallable)
 	static bool IsStorage(const int32 EncodedBits);

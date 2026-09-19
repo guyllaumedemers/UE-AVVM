@@ -25,7 +25,9 @@
 #include "AVVMOnlineUtils.h"
 #include "AVVMPlayerState.h"
 #include "NativeGameplayTags.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -123,6 +125,21 @@ FGameplayTag AAVVMGameSession::Static_GetActorPresetSlot(const UObject* WorldCon
 {
 	AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetActorPresetSlot(ProfileId, PrivateItemId) : FGameplayTag::EmptyTag;
+}
+
+TArray<int32> AAVVMGameSession::Static_GetPlayerSkillTreeNodes(const UObject* WorldContextObject,
+                                                               const int32 ProfileId)
+{
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
+	return IsValid(GameSession) ? GameSession->GetPlayerSkillTreeNodes(ProfileId) : TArray<int32>{};
+}
+
+TArray<int32> AAVVMGameSession::Static_GetActorSkillTreeNodes(const UObject* WorldContextObject,
+                                                              const int32 ProfileId,
+                                                              const int32 PrivateItemId)
+{
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
+	return IsValid(GameSession) ? GameSession->GetActorSkillTreeNodes(ProfileId, PrivateItemId) : TArray<int32>{};
 }
 
 void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
@@ -339,6 +356,44 @@ TArray<int32> AAVVMGameSession::GetActorInventoryItems(const int32 ProfileId) co
 	// TODO @gdemers access backend representation of our actor, and their inventory
 	// this may apply to NPC types, Shops, Boxes, etc... 
 	return TArray<int32>{};
+}
+
+TArray<int32> AAVVMGameSession::GetPlayerSkillTreeNodes(const int32 ProfileId) const
+{
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
+	if (!ensureAlwaysMsgf(bHasResolvedProfile,
+	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
+
+	FAVVMPlayerProfile OutPlayerProfile;
+	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
+
+	const TArray<int32> OutResults = OutPlayerProfile.SkillIds.FilterByPredicate([](const int32 SkillPrivateId)
+	{
+		// @gdemers filter the SkillId, and extract the relationship so we can return all Skill Tree Nodes that are ACharacter specific.
+		const int32 OutRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(SkillPrivateId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
+		return (false == (OutRelationshipBitmask ^ FILTER_CHARACTER_RELATIONSHIP_BIT));
+	});
+
+	return OutResults;
+}
+
+TArray<int32> AAVVMGameSession::GetActorSkillTreeNodes(const int32 ProfileId,
+                                                       const int32 PrivateItemId) const
+{
+	// TODO @gdemers impl retrieval of sub-set of skills based on owning item id
+	return {};
 }
 
 FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,

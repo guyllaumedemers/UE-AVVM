@@ -20,6 +20,8 @@
 #include "ActorSkillTreeComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AVVMCharacter.h"
+#include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitUtils.h"
@@ -54,7 +56,34 @@ TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillT
 
 TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
-	return FAVVMDataResolverHelper::GetElementDependencies(Outer, ElementId);
+	if (!IsValid(Outer))
+	{
+		return TArray<int32>{};
+	}
+
+	TArray<int32> OutResults{};
+
+	const auto* Character = Cast<AAVVMCharacter>(Outer);
+	if (IsValid(Character) && Character->IsPlayerControlled())
+	{
+		// @gdemers we are attempting to initialize the skill tree nodes of our character.
+		OutResults = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(Outer, ElementId/*calling Player UniqueId*/);
+	}
+	else
+	{
+		// @gdemers we are attempting to initialize the skill tree nodes of the character dependent actors. example : a weapon owned by the player. 
+		// Actor without UNetConnection should be initialized via Data Asset, not backend which is why we are NOT supporting
+		// fetching backend information for actor not owned by ACharacter.
+		const auto* OwningCharacter = Outer->GetTypedOuter<AAVVMCharacter>();
+		if (ensureAlwaysMsgf(IsValid(OwningCharacter),
+		                     TEXT("Failed to retrieved element dependencies. Not owned by a valid UNetConnection.")))
+		{
+			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningCharacter);
+			OutResults = AAVVMGameSession::Static_GetActorSkillTreeNodes(Outer, TargetUniqueId/*owning Player UniqueId*/, ElementId/*calling Actor PhysicalGlobalId*/);
+		}
+	}
+
+	return OutResults;
 }
 
 UActorSkillTreeComponent::UActorSkillTreeComponent(const FObjectInitializer& ObjectInitializer)
@@ -178,11 +207,11 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 	const bool bIsTreeNodeSrcStatic = EnumHasAnyFlags(OutSrcType, ESkillTreeSrcType::Static);
 	if (bIsTreeNodeSrcStatic)
 	{
-		ISkillTreeProvider::Execute_RequestItemsFromDataAsset(Outer);
+		ISkillTreeProvider::Execute_RequestTreeNodesFromDataAsset(Outer);
 	}
 	else
 	{
-		ISkillTreeProvider::Execute_RequestItemsFromMicroService(Outer);
+		ISkillTreeProvider::Execute_RequestTreeNodesFromMicroService(Outer);
 	}
 }
 

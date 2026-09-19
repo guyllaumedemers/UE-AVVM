@@ -79,7 +79,7 @@ struct SKILLSAMPLE_API FSkillTreeNodeToken
  *	FSkillTreeModificationContextParams is a struct context encapsulating information
  *	about the tree node modified level.
  */
-USTRUCT(BLueprintType)
+USTRUCT(BlueprintType)
 struct SKILLSAMPLE_API FSkillTreeModificationContextParams
 {
 	GENERATED_BODY()
@@ -102,7 +102,7 @@ struct SKILLSAMPLE_API FSkillTreeModificationContextParams
  *	Note : This component should exist on Character, and/or weapons, items, etc... any element that require data progression, and reference an ASC
  *	on itself, or it's owning Outer.
  */
-UCLASS()
+UCLASS(ClassGroup=("SkillTree"), Blueprintable, meta=(BlueprintSpawnableComponent))
 class SKILLSAMPLE_API UActorSkillTreeComponent : public UActorComponent
 {
 	GENERATED_BODY()

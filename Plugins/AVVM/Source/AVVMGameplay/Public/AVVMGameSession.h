@@ -129,6 +129,15 @@ public:
 	                                              const int32 ProfileId,
 	                                              const int32 PrivateItemId);
 
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> Static_GetPlayerSkillTreeNodes(const UObject* WorldContextObject,
+	                                                    const int32 ProfileId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> Static_GetActorSkillTreeNodes(const UObject* WorldContextObject,
+	                                                   const int32 ProfileId,
+	                                                   const int32 PrivateItemId);
+
 protected:
 	static AAVVMGameSession* Get(const UObject* WorldContextObject);
 	int32 GetPlayerConnectionId(const APlayerState* PlayerState) const;
@@ -138,6 +147,8 @@ protected:
 	TArray<int32> GetPlayerComplexDependencyLookup(const int32 ProfileId) const;
 	TArray<int32> GetPlayerInventoryItems(const int32 ProfileId) const;
 	TArray<int32> GetActorInventoryItems(const int32 ProfileId) const;
+	TArray<int32> GetPlayerSkillTreeNodes(const int32 ProfileId) const;
+	TArray<int32> GetActorSkillTreeNodes(const int32 ProfileId, const int32 PrivateItemId) const;
 
 	FString ModifyPlayerProfileInventory(const int32 ProfileId, const TArray<int32>& NewItems);
 	FGameplayTag GetPlayerPresetSlot(const int32 ProfileId, const int32 PrivateItemId) const;
