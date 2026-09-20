@@ -23,7 +23,7 @@ TArray<int32> UAVVMOnlineBackendUtils::GetElementDependencies(const UObject* Out
                                                               const int32 ElementUniqueId,
                                                               const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper)
 {
-	TArray<int32> OutResults;
+	TArray<int32> OutResults{};
 
 	const auto* Helper = DataResolverHelper.GetPtr<FAVVMDataResolverHelper>();
 	if (ensureAlwaysMsgf(Helper != nullptr, TEXT("Invalid Helper.")))

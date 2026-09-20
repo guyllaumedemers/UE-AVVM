@@ -114,17 +114,15 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 		return INDEX_NONE;
 	}
 
-	const TArray<int32> OuterDependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
 	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByGameplayEffect(SkillTreeNodeEffectCDO);
-
-	if (OuterDependencies.IsEmpty() || !ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
-	                                                     TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
+	if (!ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
+	                      TEXT("Couldn't retrieve a valid TreeNodeId. Are you missing a valid FDataRegistryId reference within this Object Class definition ?")))
 	{
 		return INDEX_NONE;
 	}
 
 	// @gdemers filter the backend set to ensure we dont reallocate an item that was already configured.
-	TArray<int32> FilteredSet = OuterDependencies;
+	TArray<int32> FilteredSet = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, DataResolverHelper);
 	for (const int32 ReservedItemId : NewPrivateIds)
 	{
 		FilteredSet.Remove(ReservedItemId);
