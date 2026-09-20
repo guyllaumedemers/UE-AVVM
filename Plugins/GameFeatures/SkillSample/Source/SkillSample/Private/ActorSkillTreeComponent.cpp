@@ -53,6 +53,8 @@
 #endif
 
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
+// @gdemers external linkage for property FName sharing.
+SKILLSAMPLE_API const FName SkillTreeProviderPayloads = TEXT("SkillTreeProviderPayloads");
 
 TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {

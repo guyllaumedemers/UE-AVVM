@@ -22,15 +22,14 @@
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
+#include "AVVMSaveGame.h"
 #include "AVVMToolkitUtils.h"
 #include "DataRegistrySubsystem.h"
 #include "GameplayEffect.h"
-#include "SkillTreeNodeObject.h"
 #include "SkillTreeProvider.h"
 #include "SkillTreeSettings.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
-#include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Data/SkillTreeProviderTableRow.h"
 #include "Dom/JsonObject.h"
@@ -48,10 +47,10 @@ namespace NSJsonSkillTree
 {
 	struct FJsonSkillTreeProvider
 	{
-		int32 Id = INDEX_NONE;
+		int32 Id{INDEX_NONE};
 		// @gdemers IMPORTANT we only care about tracking the current set of tree node effects
 		// applied at the given phase.
-		TArray<int32> PrivateTreeNodeIds;
+		TArray<int32> PrivateTreeNodeIds{};
 	};
 
 	void ToString(const FJsonSkillTreeProvider& NewSkillTreeProvider,
@@ -60,23 +59,22 @@ namespace NSJsonSkillTree
 		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 		JsonData->SetNumberField(TEXT("Id"), NewSkillTreeProvider.Id);
 
-		TArray<TSharedPtr<FJsonValue>> PrivateTreeNodeIds;
+		TArray<TSharedPtr<FJsonValue>> PrivateTreeNodeIds{};
 		for (const int32 PrivateTreeNodeId : NewSkillTreeProvider.PrivateTreeNodeIds)
 		{
 			PrivateTreeNodeIds.Add(MakeShareable(new FJsonValueNumber(PrivateTreeNodeId)));
 		}
 
-		JsonData->SetArrayField(TEXT("PrivateTreeNodeIds"), PrivateTreeNodeIds);
+		JsonData->SetArrayField(TEXT("PrivateTreeNodeIds"), MoveTemp(PrivateTreeNodeIds));
 
-		FString JsonOutput;
-
+		FString JsonOutput{};
 		auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 		if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 		{
 			return;
 		}
 
-		OutFormat = JsonOutput;
+		OutFormat = MoveTemp(JsonOutput);
 	}
 
 	void FromString(const FString& NewPayload,
@@ -95,18 +93,19 @@ namespace NSJsonSkillTree
 			return;
 		}
 
-		FJsonSkillTreeProvider SkillTreeProvider;
+		FJsonSkillTreeProvider SkillTreeProvider{};
 		SkillTreeProvider.Id = JsonData->GetIntegerField(TEXT("Id"));
-
-		const TArray<TSharedPtr<FJsonValue>> PrivateTreeNodeIds = JsonData->GetArrayField(TEXT("PrivateTreeNodeIds"));
-		for (const auto& PrivateTreeNodeId : PrivateTreeNodeIds)
+		for (const auto& PrivateTreeNodeId : JsonData->GetArrayField(TEXT("PrivateTreeNodeIds")))
 		{
 			SkillTreeProvider.PrivateTreeNodeIds.Add(PrivateTreeNodeId->AsNumber());
 		}
 
-		OutSkillTreeProvider = SkillTreeProvider;
+		OutSkillTreeProvider = MoveTemp(SkillTreeProvider);
 	}
 }
+
+// @gdemers external linkage for property FName sharing.
+extern const FName SkillTreeProviderPayloads;
 
 FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 {
@@ -114,20 +113,20 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 	if (!ensureAlwaysMsgf(!ProviderDataTable.IsNull(),
 	                      TEXT("Project doesn't reference a valid Data Table to initialize the Provider Skill Tree on Disk.")))
 	{
-		return FString();
+		return FString{};
 	}
 
 	// TODO @gdemers Improve on this. I dont like that its synchronous.
 	const UDataTable* DataTable = ProviderDataTable.LoadSynchronous();
 	if (!IsValid(DataTable))
 	{
-		return FString();
+		return FString{};
 	}
 
-	TArray<FSkillTreeProviderTableRow*> OutRows;
+	TArray<FSkillTreeProviderTableRow*> OutRows{};
 	DataTable->GetAllRows<FSkillTreeProviderTableRow>(TEXT(""), OutRows);
 
-	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
 	for (const FSkillTreeProviderTableRow* Row : OutRows)
 	{
 		if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row entry.")))
@@ -147,7 +146,7 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 			continue;
 		}
 
-		TArray<int32> PrivateTreeNodeIds;
+		TArray<int32> PrivateTreeNodeIds{};
 		// @gdemers Only phase 0 matter during initialization. progression tracking will handle replacing data
 		// during player playthrough.
 		const int32 RelationshipBitMask = FSkillTreeNodePhase::Static_GetRelationshipBitmask(Row->SkillTreeNodePerPhases[0]);
@@ -158,19 +157,18 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 			PrivateTreeNodeIds.Add(PrivateTreeNodeId);
 		}
 
-		const FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, PrivateTreeNodeIds);
-		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
+		FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, PrivateTreeNodeIds);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(MoveTemp(OutProvider))));
 	}
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetArrayField(TEXT("SkillTreeProviders"), OutModifiedPayloads);
+	JsonData->SetArrayField(TEXT("SkillTreeProviders"), MoveTemp(OutModifiedPayloads));
 
-	FString JsonOutput;
-
+	FString JsonOutput{};
 	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 	{
-		return FString();
+		return FString{};
 	}
 	else
 	{
@@ -181,13 +179,8 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 FString USkillTreeUtils::CreateSkillTreeProvider(const int32 ProviderId,
                                                  const TArray<int32>& NewPrivateTreeNodeIds)
 {
-	NSJsonSkillTree::FJsonSkillTreeProvider SkillTreeProvider;
-	SkillTreeProvider.Id = ProviderId;
-	SkillTreeProvider.PrivateTreeNodeIds = NewPrivateTreeNodeIds;
-
-	FString OutProvider;
-	NSJsonSkillTree::ToString(SkillTreeProvider, OutProvider);
-
+	FString OutProvider{};
+	NSJsonSkillTree::ToString(NSJsonSkillTree::FJsonSkillTreeProvider{ProviderId, NewPrivateTreeNodeIds}, OutProvider);
 	return OutProvider;
 }
 
@@ -195,12 +188,11 @@ FString USkillTreeUtils::ModifySkillTreeProvider(const FString& NewPayload,
                                                  const int32 ProviderId,
                                                  const TArray<int32>& NewPrivateTreeNodeIds)
 {
-	TArray<NSJsonSkillTree::FJsonSkillTreeProvider> SkillTreeProviders;
+	TArray<NSJsonSkillTree::FJsonSkillTreeProvider> SkillTreeProviders{};
 	for (const FString& Payload : GetSkillTreeProviderPayloads(NewPayload))
 	{
 		NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
 		NSJsonSkillTree::FromString(Payload, OutProvider);
-
 		SkillTreeProviders.Add(OutProvider);
 	}
 
@@ -215,23 +207,22 @@ FString USkillTreeUtils::ModifySkillTreeProvider(const FString& NewPayload,
 		SearchResult->PrivateTreeNodeIds = NewPrivateTreeNodeIds;
 	}
 
-	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
 	for (const auto& ModifiedProvider : SkillTreeProviders)
 	{
-		FString OutFormat;
+		FString OutFormat{};
 		NSJsonSkillTree::ToString(ModifiedProvider, OutFormat);
-		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(MoveTemp(OutFormat))));
 	}
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetArrayField(TEXT("SkillTreeProviders"), OutModifiedPayloads);
+	JsonData->SetArrayField(TEXT("SkillTreeProviders"), MoveTemp(OutModifiedPayloads));
 
-	FString JsonOutput;
-
+	FString JsonOutput{};
 	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 	{
-		return FString();
+		return FString{};
 	}
 	else
 	{
@@ -246,13 +237,11 @@ TArray<FString> USkillTreeUtils::GetSkillTreeProviderPayloads(const FString& New
 	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
-		return TArray<FString>();
+		return TArray<FString>{};
 	}
 
-	TArray<FString> OutProviders;
-
-	const TArray<TSharedPtr<FJsonValue>> SkillTreeProviders = JsonData->GetArrayField(TEXT("SkillTreeProviders"));
-	for (const auto& SkillTreeProvider : SkillTreeProviders)
+	TArray<FString> OutProviders{};
+	for (const auto& SkillTreeProvider : JsonData->GetArrayField(TEXT("SkillTreeProviders")))
 	{
 		OutProviders.Add(SkillTreeProvider->AsString());
 	}
@@ -285,7 +274,7 @@ FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
 	const TArray<FString> SkillTreeProviders = GetSkillTreeProviderPayloads(NewPayload);
 	if (SkillTreeProviders.IsEmpty())
 	{
-		return FString();
+		return FString{};
 	}
 
 	const FString* SearchResult = SkillTreeProviders.FindByPredicate([SearchId = NewProviderId](const FString& Payload)
@@ -301,7 +290,7 @@ FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
 	}
 	else
 	{
-		return TEXT("");
+		return FString{};
 	}
 }
 
@@ -309,7 +298,7 @@ void USkillTreeUtils::GetSkillTreeProvider(const FString& NewPayload,
                                            int32& OutProviderId,
                                            TArray<int32>& OutPrivateTreeNodeIds)
 {
-	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
 	NSJsonSkillTree::FromString(NewPayload, OutProvider);
 
 	OutProviderId = OutProvider.Id;
@@ -320,7 +309,7 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
                                                  const TArray<int32>& NewPrivateIds,
                                                  const int32 PhysicalGlobalId)
 {
-	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider;
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
 	NSJsonSkillTree::FromString(NewPayload, OutProvider);
 
 	TArray<int32> FilteredSet = OutProvider.PrivateTreeNodeIds;
@@ -377,17 +366,13 @@ TArray<FDataRegistryId> USkillTreeUtils::TranslatePrivateItemId(const TArray<int
 		return TArray<FDataRegistryId>{};
 	}
 
-	TArray<FDataRegistryId> OutRegistryIds;
+	TArray<FDataRegistryId> OutRegistryIds{};
 	Subsystem->GetPossibleDataRegistryIdList(UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), OutRegistryIds);
 
-	TArray<FDataRegistryId> OutResults;
+	TArray<FDataRegistryId> OutResults{};
 	for (const int32 PrivateItemId : NewPrivateItemIds)
 	{
-		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
-		if (ensureAlwaysMsgf(ItemRegistryId.IsValid(), TEXT("Invalid Registry Id.")))
-		{
-			OutResults.Add(ItemRegistryId);
-		}
+		OutResults.Add(GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId));
 	}
 
 	return OutResults;
@@ -411,12 +396,48 @@ bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType&
 	return true;
 }
 
+TArray<FDataRegistryId> USkillTreeUtils::GetProviderSkillTreeRegistryIds(const int32 NewProviderId)
+{
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+	};
+
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
+	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
+
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+	NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+	return TranslatePrivateItemId(OutProvider.PrivateTreeNodeIds);
+}
+
 TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderSkillTreeRegistryIds(const UObject* WorldContextObject,
                                                                                 const int32 NewProfileId)
 {
 	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(WorldContextObject, NewProfileId);
-	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
-	return OutResults;
+	return TranslatePrivateItemId(PrivateItemIds);
+}
+
+TArray<FDataRegistryId> USkillTreeUtils::GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId,
+                                                                                  const int32 NewPrivateItemId)
+{
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+	};
+
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
+	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
+
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+	NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+
+	const TArray<int32> FilteredSet = USkillTreeUtils::FilterSkillIds(OutProvider.PrivateTreeNodeIds, NewPrivateItemId);
+	return TranslatePrivateItemId(FilteredSet);
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
@@ -424,6 +445,18 @@ TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentSkillTreeReg
                                                                                          const int32 NewPrivateItemId)
 {
 	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetActorSkillTreeNodes(WorldContextObject, NewProfileId, NewPrivateItemId);
-	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
+	return TranslatePrivateItemId(PrivateItemIds);
+}
+
+TArray<int32> USkillTreeUtils::FilterSkillIds(const TArray<int32>& SkillIds,
+                                              const int32 NewPrivateItemId)
+{
+	TArray<int32> OutResults{SkillIds};
+	OutResults.RemoveAll([DependentID = NewPrivateItemId](const int32 Value)
+	{
+		// TODO @gdemers add impl.
+		return false;
+	});
+
 	return OutResults;
 }

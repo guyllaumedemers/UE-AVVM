@@ -48,9 +48,9 @@ namespace NSJsonInventory
 {
 	struct FJsonInventoryProvider
 	{
-		int32 Id = INDEX_NONE;
-		TMap<FGameplayTag, int32> Loadout;
-		TArray<int32> PrivateItemIds;
+		int32 Id{INDEX_NONE};
+		TMap<FGameplayTag, int32> Loadout{};
+		TArray<int32> PrivateItemIds{};
 	};
 
 	void ToString(const FJsonInventoryProvider& NewInventoryProvider,
@@ -59,7 +59,7 @@ namespace NSJsonInventory
 		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 		JsonData->SetNumberField(TEXT("Id"), NewInventoryProvider.Id);
 
-		TArray<TSharedPtr<FJsonValue>> Loadout;
+		TArray<TSharedPtr<FJsonValue>> Loadout{};
 		for (const auto& [SlotTag, PrivateItemId] : NewInventoryProvider.Loadout)
 		{
 			TSharedPtr<FJsonObject> KVPJsonObject = MakeShareable(new FJsonObject);
@@ -68,18 +68,17 @@ namespace NSJsonInventory
 			Loadout.Add(MakeShareable(new FJsonValueObject(KVPJsonObject)));
 		}
 
-		JsonData->SetArrayField(TEXT("Loadout"), Loadout);
+		JsonData->SetArrayField(TEXT("Loadout"), MoveTemp(Loadout));
 
-		TArray<TSharedPtr<FJsonValue>> PrivateItemIds;
+		TArray<TSharedPtr<FJsonValue>> PrivateItemIds{};
 		for (const int32 PrivateItemId : NewInventoryProvider.PrivateItemIds)
 		{
 			PrivateItemIds.Add(MakeShareable(new FJsonValueNumber(PrivateItemId)));
 		}
 
-		JsonData->SetArrayField(TEXT("PrivateItemIds"), PrivateItemIds);
+		JsonData->SetArrayField(TEXT("PrivateItemIds"), MoveTemp(PrivateItemIds));
 
-		FString JsonOutput;
-
+		FString JsonOutput{};
 		auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 		if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 		{
@@ -105,11 +104,10 @@ namespace NSJsonInventory
 			return;
 		}
 
-		FJsonInventoryProvider InventoryProvider;
+		FJsonInventoryProvider InventoryProvider{};
 		InventoryProvider.Id = JsonData->GetIntegerField(TEXT("Id"));
-
-		const TArray<TSharedPtr<FJsonValue>> Loadout = JsonData->GetArrayField(TEXT("Loadout"));
-		for (const auto& Item : Loadout)
+		
+		for (const auto& Item : JsonData->GetArrayField(TEXT("Loadout")))
 		{
 			const TSharedPtr<FJsonObject>* OutKVPJsonObject = nullptr;
 			Item->TryGetObject(OutKVPJsonObject);
@@ -122,8 +120,7 @@ namespace NSJsonInventory
 			}
 		}
 
-		const TArray<TSharedPtr<FJsonValue>> PrivateItemIds = JsonData->GetArrayField(TEXT("PrivateItemIds"));
-		for (const auto& PrivateItemId : PrivateItemIds)
+		for (const auto& PrivateItemId : JsonData->GetArrayField(TEXT("PrivateItemIds")))
 		{
 			InventoryProvider.PrivateItemIds.Add(PrivateItemId->AsNumber());
 		}
@@ -149,10 +146,10 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		return FString{};
 	}
 	
-	TArray<const FInventoryProviderTableRow*> OutRows;
+	TArray<const FInventoryProviderTableRow*> OutRows{};
 	DataRegistry->GetAllItems<FInventoryProviderTableRow>(TEXT(""), OutRows);
 
-	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
 	for (const FInventoryProviderTableRow* Row : OutRows)
 	{
 		if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row entry.")))
@@ -167,20 +164,19 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 			continue;
 		}
 
-		TMap<FGameplayTag, int32> OutLoadout;
-		TArray<int32> OutItems;
+		TMap<FGameplayTag, int32> OutLoadout{};
+		TArray<int32> OutItems{};
 
 		UInventoryUtils::CreateInventoryProvider(Row, OutLoadout, OutItems);
 
-		const FString OutProvider = UInventoryUtils::CreateInventoryProviderJSON(ProviderId, OutLoadout, OutItems);
-		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutProvider)));
+		FString OutProvider = UInventoryUtils::CreateInventoryProviderJSON(ProviderId, OutLoadout, OutItems);
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(MoveTemp(OutProvider))));
 	}
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
+	JsonData->SetArrayField(TEXT("InventoryProviders"), MoveTemp(OutModifiedPayloads));
 
-	FString JsonOutput;
-
+	FString JsonOutput{};
 	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 	{
@@ -201,8 +197,8 @@ void UInventoryUtils::CreateInventoryProvider(const FInventoryProviderTableRow* 
 		return;
 	}
 
-	TMap<int32/*PrivateItemId_WithoutStorage*/, TWeakObjectPtr<const UItemObject>> ItemCDOs;
-	TArray<TWeakObjectPtr<const UItemObject>> OrderedItemCDOs;
+	TMap<int32/*PrivateItemId_WithoutStorage*/, TWeakObjectPtr<const UItemObject>> ItemCDOs{};
+	TArray<TWeakObjectPtr<const UItemObject>> OrderedItemCDOs{};
 	// @gdemers generate PrivateItemIds for all entries defined for a given Provider
 	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : TableRowEntry->DefaultInventory)
 	{
@@ -264,14 +260,8 @@ FString UInventoryUtils::CreateInventoryProviderJSON(const int32 ProviderId,
                                                      const TMap<FGameplayTag, int32>& Loadout,
                                                      const TArray<int32>& PrivateItemIds)
 {
-	NSJsonInventory::FJsonInventoryProvider InventoryProvider;
-	InventoryProvider.Id = ProviderId;
-	InventoryProvider.Loadout = Loadout;
-	InventoryProvider.PrivateItemIds = PrivateItemIds;
-
-	FString OutProvider;
-	NSJsonInventory::ToString(InventoryProvider, OutProvider);
-
+	FString OutProvider{};
+	NSJsonInventory::ToString(NSJsonInventory::FJsonInventoryProvider{ProviderId, Loadout, PrivateItemIds}, OutProvider);
 	return OutProvider;
 }
 
@@ -279,12 +269,11 @@ FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
                                                  const int32 ProviderId,
                                                  const TArray<int32>& NewPrivateIds)
 {
-	TArray<NSJsonInventory::FJsonInventoryProvider> InventoryProviders;
+	TArray<NSJsonInventory::FJsonInventoryProvider> InventoryProviders{};
 	for (const FString& Payload : UInventoryUtils::GetInventoryProviderPayloads(NewPayload))
 	{
-		NSJsonInventory::FJsonInventoryProvider OutProvider;
+		NSJsonInventory::FJsonInventoryProvider OutProvider{};
 		NSJsonInventory::FromString(Payload, OutProvider);
-
 		InventoryProviders.Add(OutProvider);
 	}
 
@@ -299,23 +288,22 @@ FString UInventoryUtils::ModifyInventoryProvider(const FString& NewPayload,
 		SearchResult->PrivateItemIds = NewPrivateIds;
 	}
 
-	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads;
+	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
 	for (const auto& ModifiedProvider : InventoryProviders)
 	{
-		FString OutFormat;
+		FString OutFormat{};
 		NSJsonInventory::ToString(ModifiedProvider, OutFormat);
-		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(OutFormat)));
+		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(MoveTemp(OutFormat))));
 	}
 
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetArrayField(TEXT("InventoryProviders"), OutModifiedPayloads);
+	JsonData->SetArrayField(TEXT("InventoryProviders"), MoveTemp(OutModifiedPayloads));
 
-	FString JsonOutput;
-
+	FString JsonOutput{};
 	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
 	if (!FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
 	{
-		return FString();
+		return FString{};
 	}
 	else
 	{
@@ -330,13 +318,11 @@ TArray<FString> UInventoryUtils::GetInventoryProviderPayloads(const FString& New
 	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
-		return TArray<FString>();
+		return TArray<FString>{};
 	}
 
-	TArray<FString> OutProviders;
-
-	const TArray<TSharedPtr<FJsonValue>> InventoryProviders = JsonData->GetArrayField(TEXT("InventoryProviders"));
-	for (const auto& InventoryProvider : InventoryProviders)
+	TArray<FString> OutProviders{};
+	for (const auto& InventoryProvider : JsonData->GetArrayField(TEXT("InventoryProviders")))
 	{
 		OutProviders.Add(InventoryProvider->AsString());
 	}
@@ -350,12 +336,12 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 	const TArray<FString> InventoryProviders = UInventoryUtils::GetInventoryProviderPayloads(NewPayload);
 	if (InventoryProviders.IsEmpty())
 	{
-		return FString();
+		return FString{};
 	}
 
 	const FString* SearchResult = InventoryProviders.FindByPredicate([SearchId = NewProviderId](const FString& Payload)
 	{
-		NSJsonInventory::FJsonInventoryProvider OutProvider;
+		NSJsonInventory::FJsonInventoryProvider OutProvider{};
 		NSJsonInventory::FromString(Payload, OutProvider);
 		return (false == (OutProvider.Id ^ SearchId));
 	});
@@ -400,10 +386,10 @@ TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int
 		return TArray<FDataRegistryId>{};
 	}
 
-	TArray<FDataRegistryId> OutRegistryIds;
+	TArray<FDataRegistryId> OutRegistryIds{};
 	Subsystem->GetPossibleDataRegistryIdList(UAVVMGameplaySettings::GetActorIdentifierRegistryType(), OutRegistryIds);
 
-	TArray<FDataRegistryId> OutResults;
+	TArray<FDataRegistryId> OutResults{};
 	for (const int32 PrivateItemId : NewPrivateItemIds)
 	{
 		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
@@ -415,11 +401,11 @@ TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int
 		// @gdemers hard rule : we expect users to define UItemObject DataTable entries with _ItemObject,
 		// and ActorIdentifier, ActorDefinition with _ItemActor. This string replace allow conversion from ItemActor
 		// to ItemObject using PrivateItemId.
-		const FString ModifiedString = ItemRegistryId.ItemName.ToString().Replace(TEXT("ItemActor"), TEXT("ItemObject"));
+		FString ModifiedString = ItemRegistryId.ItemName.ToString().Replace(TEXT("ItemActor"), TEXT("ItemObject"));
 		OutResults.Add(FDataRegistryId
 		               {
 				               UInventorySettings::GetItemRegistryType(),
-				               FName(ModifiedString)
+				               FName(MoveTemp(ModifiedString))
 		               });
 	}
 
@@ -438,19 +424,16 @@ TArray<FDataRegistryId> UInventoryUtils::GetProviderInventoryRegistryIds(const i
 	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, GenerateDefaultContent);
 	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
 
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FJsonInventoryProvider OutProvider{};
 	NSJsonInventory::FromString(SearchPayload, OutProvider);
-
-	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(OutProvider.PrivateItemIds);
-	return OutResults;
+	return TranslatePrivateItemId(OutProvider.PrivateItemIds);
 }
 
 TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderInventoryRegistryIds(const UObject* WorldContextObject,
                                                                                 const int32 NewProfileId)
 {
 	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerInventoryItems(WorldContextObject, NewProfileId);
-	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
-	return OutResults;
+	return TranslatePrivateItemId(PrivateItemIds);
 }
 
 TArray<FDataRegistryId> UInventoryUtils::GetProviderLoadoutRegistryIds(const int32 NewProviderId)
@@ -461,26 +444,23 @@ TArray<FDataRegistryId> UInventoryUtils::GetProviderLoadoutRegistryIds(const int
 	{
 		return UInventoryUtils::CreateDefaultInventoryProviders();
 	};
-	
+
 	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(InventoryProviderPayloads, GenerateDefaultContent);
 	const FString SearchPayload = UInventoryUtils::GetInventoryProviderById(FileContent.GetData(), NewProviderId);
 
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FJsonInventoryProvider OutProvider{};
 	NSJsonInventory::FromString(SearchPayload, OutProvider);
 
-	TArray<int32> PrivateItemIds;
+	TArray<int32> PrivateItemIds{};
 	OutProvider.Loadout.GenerateValueArray(PrivateItemIds);
-
-	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
-	return OutResults;
+	return TranslatePrivateItemId(PrivateItemIds);
 }
 
 TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderLoadoutRegistryIds(const UObject* WorldContextObject,
                                                                               const int32 NewProfileId)
 {
 	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerPresetItems(WorldContextObject, NewProfileId);
-	const TArray<FDataRegistryId> OutResults = TranslatePrivateItemId(PrivateItemIds);
-	return OutResults;
+	return TranslatePrivateItemId(PrivateItemIds);
 }
 
 void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
@@ -488,7 +468,7 @@ void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
                                            TMap<FGameplayTag, int32>& OutLoadout,
                                            TArray<int32>& OutPrivateItemIds)
 {
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FJsonInventoryProvider OutProvider{};
 	NSJsonInventory::FromString(NewPayload, OutProvider);
 
 	OutProviderId = OutProvider.Id;
@@ -536,7 +516,7 @@ int32 UInventoryUtils::GetItemPrivateId(const FString& NewPayload,
                                         const TArray<int32>& NewPrivateIds,
                                         const int32 PhysicalGlobalId)
 {
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FJsonInventoryProvider OutProvider{};
 	NSJsonInventory::FromString(NewPayload, OutProvider);
 
 	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
@@ -567,7 +547,7 @@ int32 UInventoryUtils::GetItemPrivateIdUsingStoragePosition(const FString& NewPa
                                                             const TArray<int32>& NewPrivateIds,
                                                             const int32 ItemStoragePosition)
 {
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FJsonInventoryProvider OutProvider{};
 	NSJsonInventory::FromString(NewPayload, OutProvider);
 
 	TArray<int32> FilteredSet = OutProvider.PrivateItemIds;
@@ -652,7 +632,7 @@ FGameplayTag UInventoryUtils::GetItemSlotTag(const UObject* Outer,
 FGameplayTag UInventoryUtils::GetItemSlotTagFromPayload(const FString& NewPayload,
                                                         const int32 PrivateItemId)
 {
-	NSJsonInventory::FJsonInventoryProvider OutProvider;
+	NSJsonInventory::FJsonInventoryProvider OutProvider{};
 	NSJsonInventory::FromString(NewPayload, OutProvider);
 
 	const auto* SearchResult = OutProvider.Loadout.FindKey(PrivateItemId);
@@ -668,7 +648,7 @@ FGameplayTag UInventoryUtils::GetItemSlotTagFromPayload(const FString& NewPayloa
 
 TArray<int32> UInventoryUtils::GetRuntimeUniqueIds(const TArray<UItemObject*>& Items)
 {
-	TArray<int32> OutResults;
+	TArray<int32> OutResults{};
 	for (const UItemObject* Item : Items)
 	{
 		// @gdemers return the runtime version of our UItemObject::PrivateItemId

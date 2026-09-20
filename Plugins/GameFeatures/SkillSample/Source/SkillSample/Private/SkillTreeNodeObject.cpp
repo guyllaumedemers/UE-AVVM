@@ -26,13 +26,12 @@
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
-#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceProvider.h"
 
 // @gdemers external linkage for property FName sharing.
-SKILLSAMPLE_API const FName SkillTreeProviderPayloads = TEXT("SkillTreeProviderPayloads");
+extern const FName SkillTreeProviderPayloads;
 
 FSkillTreeNodeObject::FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
                                            const uint32 NewActiveGameplayEffectHandleTypeHash)
