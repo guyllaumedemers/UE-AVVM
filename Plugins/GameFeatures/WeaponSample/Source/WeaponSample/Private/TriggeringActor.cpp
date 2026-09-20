@@ -120,6 +120,10 @@ void ATriggeringActor::BeginPlay()
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
+		// @gdemers Resource loading process has race conditions due to requiring Outer actor being cached.
+		// This early out the process, and require deferral/secondary invocation.
+		BP_PostOuterSet();
+		
 		if (IsValid(ReplicatedTagComponent))
 		{
 			// @gdemers better use this custom Tag component than the ASC as handling

@@ -27,7 +27,8 @@
 TArray<FDataRegistryId> UAVVMAbilityResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	auto* AbilitySystemComponent = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
-	if (!IsValid(AbilitySystemComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
+	if (!ensureAlwaysMsgf(IsValid(AbilitySystemComponent), TEXT("Component Cast Failed.")) ||
+		!UAVVMToolkitUtils::HasNetworkAuthority(AbilitySystemComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}

@@ -32,7 +32,9 @@
 TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponent* ActorComponent,
                                                                   const TArray<UObject*>& Resources) const
 {
-	if (!IsValid(ActorComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(ActorComponent->GetTypedOuter<AActor>()))
+	auto* AttachmentManagerComponent = Cast<UAttachmentManagerComponent>(ActorComponent);
+	if (!ensureAlwaysMsgf(IsValid(AttachmentManagerComponent), TEXT("Component invalid.")) ||
+		!UAVVMToolkitUtils::HasNetworkAuthority(AttachmentManagerComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}
@@ -56,7 +58,7 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 
 			// @gdemers based on the definition of the TriggeringActor Class. We have defined a set of supported tags that prevent incompatible Triggering Mode
 			// being initialized with the actor representation.
-			auto* ReplicatedTagComponent = UAVVMReplicatedTagComponent::Static_GetActorComponent(ActorComponent->GetTypedOuter<AActor>());
+			auto* ReplicatedTagComponent = UAVVMReplicatedTagComponent::Static_GetActorComponent(AttachmentManagerComponent->GetTypedOuter<AActor>());
 			if (IsValid(ReplicatedTagComponent) && ensureAlwaysMsgf(ReplicatedTagComponent->HasAnyExactFilteredTags(DefaultTriggeringModeTags),
 			                                                        TEXT("Triggering Actor doesnt support all Modes defined in this tag container.")))
 			{
@@ -83,11 +85,7 @@ TArray<FDataRegistryId> UTriggeringResourceImpl::ProcessResources(UActorComponen
 
 	if (!OutAttachmentDefinition.IsEmpty())
 	{
-		auto* AttachmentManagerComponent = Cast<UAttachmentManagerComponent>(ActorComponent);
-		if (IsValid(AttachmentManagerComponent))
-		{
-			AttachmentManagerComponent->SetupAttachments(OutAttachmentDefinition);
-		}
+		AttachmentManagerComponent->SetupAttachments(OutAttachmentDefinition);
 	}
 
 	return OutResources;

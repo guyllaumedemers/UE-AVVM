@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "Data/AVVMActorResourceHandlingImpl.h"
 
+#include "AVVMToolkitUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
 #include "Components/ActorComponent.h"
@@ -26,6 +27,13 @@
 
 TArray<FDataRegistryId> UAVVMActorResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
+	auto* ASC = Cast<UAVVMAbilitySystemComponent>(ActorComponent);
+	if (!ensureAlwaysMsgf(IsValid(ASC), TEXT("Component Cast Failed.")) ||
+		!UAVVMToolkitUtils::HasNetworkAuthority(ASC->GetTypedOuter<AActor>()))
+	{
+		return TArray<FDataRegistryId>{};
+	}
+
 	TArray<FSoftObjectPath> AttributeSetSoftObjectPaths{};
 	TArray<FDataRegistryId> OutResources{};
 
@@ -47,16 +55,10 @@ TArray<FDataRegistryId> UAVVMActorResourceHandlingImpl::ProcessResources(UActorC
 	}
 
 	// @gdemers APlayerState or ACharacter based on IsBot or not. Depends on ASC ownership.
-	auto* Owner = IsValid(ActorComponent) ? ActorComponent->GetOwner() : nullptr;
-	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Owner);
-
-	if (ensureAlwaysMsgf(IsValid(Owner), TEXT("Invalid Owner.")) &&
-		ensureAlwaysMsgf(IsValid(ASC), TEXT("Invalid ASC. Make sure AI also has valid ASC!")))
+	auto* Owner = ASC->GetOwner();
+	for (const auto& AttributeSetSoftObjectPath : AttributeSetSoftObjectPaths)
 	{
-		for (const auto& AttributeSetSoftObjectPath : AttributeSetSoftObjectPaths)
-		{
-			ASC->SetupAttributeSet(AttributeSetSoftObjectPath, Owner);
-		}
+		ASC->SetupAttributeSet(AttributeSetSoftObjectPath, Owner);
 	}
 
 	return OutResources;

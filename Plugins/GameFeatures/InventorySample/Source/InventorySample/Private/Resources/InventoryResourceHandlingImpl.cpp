@@ -28,7 +28,8 @@
 TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (!IsValid(InventoryComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Component Cast Failed.")) ||
+		!UAVVMToolkitUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}

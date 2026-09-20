@@ -192,6 +192,9 @@ protected:
 	void OnTriggeringAbilityClassAcquired();
 	
 	UFUNCTION(BlueprintImplementableEvent)
+	void BP_PostOuterSet() const;
+	
+	UFUNCTION(BlueprintImplementableEvent)
 	void BP_SetComplexVisibilityToSelf(const bool bNewIsHidden);
 
 	UPROPERTY(Transient, VisibleAnywhere, BlueprintReadOnly)

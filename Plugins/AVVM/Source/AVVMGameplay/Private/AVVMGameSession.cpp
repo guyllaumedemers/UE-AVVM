@@ -289,10 +289,10 @@ TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) cons
 
 		const FString PresetPayload = SessionPayload.ResolvedPresets[PresetId];
 
-		FAVVMPlayerPreset OutPlayerPreset;
+		FAVVMPlayerPreset OutPlayerPreset{};
 		JsonParser->FromString(PresetPayload, OutPlayerPreset);
 
-		TArray<int32> OutEquippedItems;
+		TArray<int32> OutEquippedItems{};
 		OutPlayerPreset.EquippedItems.GenerateValueArray(OutEquippedItems);
 
 		return OutEquippedItems;
@@ -321,7 +321,7 @@ TArray<int32> AAVVMGameSession::GetPlayerComplexDependencyLookup(const int32 Pro
 
 	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
 
-	FAVVMPlayerProfile OutPlayerProfile;
+	FAVVMPlayerProfile OutPlayerProfile{};
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
 	return OutPlayerProfile.ComplexDependencyLookup;
@@ -345,7 +345,7 @@ TArray<int32> AAVVMGameSession::GetPlayerInventoryItems(const int32 ProfileId) c
 
 	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
 
-	FAVVMPlayerProfile OutPlayerProfile;
+	FAVVMPlayerProfile OutPlayerProfile{};
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
 	return OutPlayerProfile.InventoryIds;
@@ -376,7 +376,7 @@ TArray<int32> AAVVMGameSession::GetPlayerSkillTreeNodes(const int32 ProfileId) c
 
 	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
 
-	FAVVMPlayerProfile OutPlayerProfile;
+	FAVVMPlayerProfile OutPlayerProfile{};
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
 	const TArray<int32> OutResults = OutPlayerProfile.SkillIds.FilterByPredicate([](const int32 SkillPrivateId)
@@ -403,17 +403,17 @@ FString AAVVMGameSession::ModifyPlayerProfileInventory(const int32 ProfileId,
 	if (!ensureAlwaysMsgf(IsValid(JsonParser),
 	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
 	{
-		return FString();
+		return FString{};
 	}
 
 	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
 	if (!ensureAlwaysMsgf(bHasResolvedProfile,
 	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
 	{
-		return FString();
+		return FString{};
 	}
 
-	FAVVMPlayerProfile OutOldProfile;
+	FAVVMPlayerProfile OutOldProfile{};
 
 	FString& OldProfile = SessionPayload.ResolvedProfiles[ProfileId];
 	JsonParser->FromString(OldProfile, OutOldProfile);
@@ -444,7 +444,7 @@ FGameplayTag AAVVMGameSession::GetPlayerPresetSlot(const int32 ProfileId,
 
 	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
 
-	FAVVMPlayerProfile OutPlayerProfile;
+	FAVVMPlayerProfile OutPlayerProfile{};
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
 	const bool bHasResolvedPreset = SessionPayload.ResolvedPresets.Contains(OutPlayerProfile.EquippedPresetId);
@@ -456,7 +456,7 @@ FGameplayTag AAVVMGameSession::GetPlayerPresetSlot(const int32 ProfileId,
 
 	const FString PresetPayload = SessionPayload.ResolvedPresets[OutPlayerProfile.EquippedPresetId];
 
-	FAVVMPlayerPreset OutPlayerPreset;
+	FAVVMPlayerPreset OutPlayerPreset{};
 	JsonParser->FromString(PresetPayload, OutPlayerPreset);
 
 	const FGameplayTag* SearchResult = OutPlayerPreset.EquippedItems.FindKey(PrivateItemId);

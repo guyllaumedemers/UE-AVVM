@@ -27,7 +27,8 @@
 TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
 	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(ActorComponent);
-	if (!IsValid(SkillTreeComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(SkillTreeComponent->GetTypedOuter<AActor>()))
+	if (!ensureAlwaysMsgf(IsValid(SkillTreeComponent), TEXT("Component Cast failed.")) ||
+		!UAVVMToolkitUtils::HasNetworkAuthority(SkillTreeComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}
