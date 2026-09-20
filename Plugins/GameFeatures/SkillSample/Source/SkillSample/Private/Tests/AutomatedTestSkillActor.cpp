@@ -24,6 +24,7 @@
 #include "SkillTreeSettings.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Backend/AVVMOnlineSkillTree.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Engine/StreamableManager.h"
 #include "Resources/SkillTreeResourceHandlingImpl.h"
@@ -139,7 +140,7 @@ bool AAutomatedTestSkillActor::RunTest_SkillTreeNodeUniqueId(const TArray<const 
 	bool bResult = true;
 	for (const FSkillTreeNodeObject& SkillTreeObject : SkillTreeComponent->SkillTree.SkillTreeNodeObjects)
 	{
-		const int32 PhysicalGlobalId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(SkillTreeObject.GetSkillTreeNodePrivateId());
+		const int32 PhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(SkillTreeObject.GetSkillTreeNodePrivateId());
 		bResult &= CheckGameplayEffectIdentifier(PhysicalGlobalId, GameplayEffectIdentifiers);
 	}
 

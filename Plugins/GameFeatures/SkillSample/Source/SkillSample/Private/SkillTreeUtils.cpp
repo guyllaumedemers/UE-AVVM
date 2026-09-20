@@ -268,13 +268,14 @@ int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& Tre
 	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
 	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
 	const int32 VirtualGlobalId = UAVVMOnlineSkillTreeUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
+	const int32 NewInstancedId = UAVVMOnlineEncodingUtils::EncodeInt32(InstancedId, GET_SKILL_TREE_NODE_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_INSTANCED_ID_RSHIFT);
 	
 	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
 	
 	// TODO @gdemers we are missing position support.
 	return (RelationshipBitMask
 		+ VirtualGlobalId
-		+ InstancedId
+		+ NewInstancedId
 		+ NewEffectLevel);
 }
 
@@ -332,7 +333,7 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 	{
 		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
 		// from the integer into a physical id for comparison.
-		const int32 OutPhysicalGlobalId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
+		const int32 OutPhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(Value);
 		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 

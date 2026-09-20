@@ -135,7 +135,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	{
 		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
 		// from the integer into a physical id for comparison.
-		const int32 OutPhysicalGlobalId = USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(Value);
+		const int32 OutPhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(Value);
 		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
@@ -149,17 +149,6 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	{
 		return INDEX_NONE;
 	}
-}
-
-int32 USkillTreeNodeObjectUtils::FilterTreeNodePrivateId(const int32 EncodedBits/*PrivateTreeNodeId*/)
-{
-	constexpr int32 BitRange = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE;
-	constexpr int32 BitShift = GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT;
-	int32 PhysicalOffset = 0;
-
-	// @gdemers translate the virtual id stored in the encoded bits into globally defined physical id
-	const int32 BaseId = UAVVMOnlineEncodingUtils::DecodeInt32(EncodedBits, BitRange, BitShift);
-	return (BaseId + PhysicalOffset);
 }
 
 FGameplayTag USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(const int32 EncodedBits)

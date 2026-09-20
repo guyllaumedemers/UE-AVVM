@@ -115,9 +115,6 @@ public:
 	                                   const TArray<int32>& NewPrivateIds,
 	                                   const TInstancedStruct<FAVVMDataResolverHelper>& DataResolverHelper,
 	                                   const UGameplayEffect* SkillTreeNodeEffectCDO);
-	
-	UFUNCTION(BlueprintCallable)
-	static int32 FilterTreeNodePrivateId(const int32 EncodedBits);
 
 	UFUNCTION(BlueprintCallable)
 	static FGameplayTag GetPrivateIdBlockingTag(const int32 EncodedBits); 
