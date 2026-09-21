@@ -173,6 +173,7 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 			{},
 			PresetId,
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_DEPENDENCY_LOOKUP),
+			{}
 	};
 
 	const APlayerState* Player = IsValid(NewPlayer) ? NewPlayer->PlayerState : nullptr;
@@ -324,7 +325,7 @@ TArray<int32> AAVVMGameSession::GetPlayerComplexDependencyLookup(const int32 Pro
 	FAVVMPlayerProfile OutPlayerProfile{};
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
-	return OutPlayerProfile.ComplexDependencyLookup;
+	return OutPlayerProfile.InventoryDependencyGraph;
 }
 
 TArray<int32> AAVVMGameSession::GetPlayerInventoryItems(const int32 ProfileId) const

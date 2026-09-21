@@ -66,6 +66,7 @@ void UAVVMOnlineCheatExtension::MakePlayerProfile(const int32 PlayerIndex)
 			{},
 			{},
 			{},
+			{},
 			{}
 	};
 

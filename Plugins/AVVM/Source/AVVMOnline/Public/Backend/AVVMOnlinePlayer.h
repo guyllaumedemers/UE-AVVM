@@ -190,7 +190,8 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	                            TArray<int32>&& SkillIds,
 	                            TArray<int32>&& ChallengeIds,
 	                            const int32 NewEquippedPresetId,
-	                            TArray<int32>&& NewComplexDependencyLookup);
+	                            TArray<int32>&& NewInventoryDependencyGraph,
+	                            TArray<int32>&& NewSkillDependencyGraph);
 	
 	bool operator==(const FAVVMPlayerProfile& Rhs) const;
 	bool operator!=(const FAVVMPlayerProfile& Rhs) const;
@@ -230,7 +231,12 @@ struct AVVMONLINE_API FAVVMPlayerProfile
 	// of this property during initialization to resolve all attachments that are dependent on the equipped item. See AVVMOnlineInventory.h
 	// AVVMONLINE_USE_DEFAULT_INVENTORY_LOOKUP_ENCODING section for more details.
 	UPROPERTY(Transient, BlueprintReadWrite)
-	TArray<int32> ComplexDependencyLookup{};
+	TArray<int32> InventoryDependencyGraph{};
+
+	// @gdemers Define the association between a skill referenced in {SkillIds}, and it's owner (Character, Item or Attachment). See AVVMOnlineSkillTree.h
+	// AVVMONLINE_USE_DEFAULT_SKILL_TREE_LOOKUP_ENCODING section for more details.
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TArray<int32> SkillDependencyGraph{};
 };
 
 /**

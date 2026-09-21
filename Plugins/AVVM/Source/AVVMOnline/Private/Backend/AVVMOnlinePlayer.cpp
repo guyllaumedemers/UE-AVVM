@@ -83,7 +83,8 @@ FAVVMPlayerProfile::FAVVMPlayerProfile(const int32 NewUniqueId,
                                        TArray<int32>&& SkillIds,
                                        TArray<int32>&& ChallengeIds,
                                        const int32 NewEquippedPresetId,
-                                       TArray<int32>&& NewComplexDependencyLookup)
+                                       TArray<int32>&& NewInventoryDependencyGraph,
+                                       TArray<int32>&& NewSkillDependencyGraph)
 	: UniqueId(NewUniqueId),
 	  ProfileId(MoveTemp(NewProfileId)),
 	  InventoryIds(MoveTemp(NewInventoryIds)),
@@ -92,7 +93,8 @@ FAVVMPlayerProfile::FAVVMPlayerProfile(const int32 NewUniqueId,
 	  SkillIds(MoveTemp(SkillIds)),
 	  ChallengeIds(MoveTemp(ChallengeIds)),
 	  EquippedPresetId(NewEquippedPresetId),
-	  ComplexDependencyLookup(MoveTemp(NewComplexDependencyLookup))
+	  InventoryDependencyGraph(MoveTemp(NewInventoryDependencyGraph)),
+	  SkillDependencyGraph(MoveTemp(NewSkillDependencyGraph))
 {
 }
 
@@ -106,7 +108,8 @@ bool FAVVMPlayerProfile::operator==(const FAVVMPlayerProfile& Rhs) const
 			&& (SkillIds == Rhs.SkillIds)
 			&& (ChallengeIds == Rhs.ChallengeIds)
 			&& (EquippedPresetId == Rhs.EquippedPresetId)
-			&& (ComplexDependencyLookup == Rhs.ComplexDependencyLookup);
+			&& (InventoryDependencyGraph == Rhs.InventoryDependencyGraph)
+			&& (SkillDependencyGraph == Rhs.SkillDependencyGraph);
 }
 
 bool FAVVMPlayerProfile::operator!=(const FAVVMPlayerProfile& Rhs) const
