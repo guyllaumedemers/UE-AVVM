@@ -272,6 +272,7 @@ void UAVVMResourceManagerComponent::OnRegistryIdAcquired(const FDataRegistryAcqu
 	if (!ensureAlwaysMsgf(DataTableRow != nullptr,
 	                      TEXT("Resource loaded doesn't derive from %s."), *GetNameSafe(FAVVMDataTableRow::StaticStruct())))
 	{
+		OnRequestCompleteCallback.ExecuteIfBound();
 		return;
 	}
 

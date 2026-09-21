@@ -32,3 +32,8 @@ EDataValidationResult FAVVMGameplayEffectIdentifierDataTableRow::IsDataValid(cla
 	return Result;
 }
 #endif
+
+TArray<FSoftObjectPath> FAVVMGameplayEffectIdentifierDataTableRow::GetResourcesPaths() const
+{
+	return {};
+}

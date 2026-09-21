@@ -109,22 +109,20 @@ extern const FName SkillTreeProviderPayloads;
 
 FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 {
-	const TSoftObjectPtr<UDataTable>& ProviderDataTable = USkillTreeSettings::GetDefaultProviderSkillTrees();
-	if (!ensureAlwaysMsgf(!ProviderDataTable.IsNull(),
-	                      TEXT("Project doesn't reference a valid Data Table to initialize the Provider Skill Tree on Disk.")))
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
 	{
 		return FString{};
 	}
 
-	// TODO @gdemers Improve on this. I dont like that its synchronous.
-	const UDataTable* DataTable = ProviderDataTable.LoadSynchronous();
-	if (!IsValid(DataTable))
+	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(USkillTreeSettings::GetSkillTreeProviderRegistryType());
+	if (!IsValid(DataRegistry))
 	{
 		return FString{};
 	}
 
-	TArray<FSkillTreeProviderTableRow*> OutRows{};
-	DataTable->GetAllRows<FSkillTreeProviderTableRow>(TEXT(""), OutRows);
+	TArray<const FSkillTreeProviderTableRow*> OutRows{};
+	DataRegistry->GetAllItems<FSkillTreeProviderTableRow>(TEXT(""), OutRows);
 
 	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
 	for (const FSkillTreeProviderTableRow* Row : OutRows)
@@ -372,7 +370,17 @@ TArray<FDataRegistryId> USkillTreeUtils::TranslatePrivateItemId(const TArray<int
 	TArray<FDataRegistryId> OutResults{};
 	for (const int32 PrivateItemId : NewPrivateItemIds)
 	{
-		OutResults.Add(GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId));
+		const FDataRegistryId ItemRegistryId = GetRegistryId(OutRegistryIds, Subsystem, PrivateItemId);
+		if (!ensureAlwaysMsgf(ItemRegistryId.IsValid(), TEXT("Invalid Registry Id.")))
+		{
+			continue;
+		}
+
+		OutResults.Add(FDataRegistryId
+		               {
+				               USkillTreeSettings::GetSkillTreeNodeRegistryType(),
+				               ItemRegistryId.ItemName
+		               });
 	}
 
 	return OutResults;

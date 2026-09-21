@@ -49,6 +49,8 @@ struct AVVMGAMEPLAY_API FAVVMGameplayEffectIdentifierDataTableRow : public FAVVM
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+	
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can filter by user class type. (example : warrior, mage, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0"))

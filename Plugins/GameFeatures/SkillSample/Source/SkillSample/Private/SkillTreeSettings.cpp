@@ -29,7 +29,7 @@ const FDataRegistryType& USkillTreeSettings::GetSkillTreeNodeRegistryType()
 	return GetDefault<USkillTreeSettings>()->SkillTreeNodeRegistryType;
 }
 
-const TSoftObjectPtr<UDataTable>& USkillTreeSettings::GetDefaultProviderSkillTrees()
+const FDataRegistryType& USkillTreeSettings::GetSkillTreeProviderRegistryType()
 {
-	return GetDefault<USkillTreeSettings>()->DefaultProviderSkillTrees;
+	return GetDefault<USkillTreeSettings>()->SkillTreeProviderRegistryType;
 }

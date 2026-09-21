@@ -23,11 +23,8 @@
 
 #include "DataRegistryId.h"
 #include "Engine/DeveloperSettings.h"
-#include "UObject/SoftObjectPtr.h"
 
 #include "SkillTreeSettings.generated.h"
-
-class UDataTable;
 
 /**
  *	Class description:
@@ -46,8 +43,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Team|Settings")
 	static const FDataRegistryType& GetSkillTreeNodeRegistryType();
 
-	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const TSoftObjectPtr<UDataTable>& GetDefaultProviderSkillTrees();
+	UFUNCTION(BlueprintCallable, Category="Team|Settings")
+	static const FDataRegistryType& GetSkillTreeProviderRegistryType();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -56,6 +53,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType SkillTreeNodeRegistryType{NAME_None};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers", meta=(RequiredAssetDataTags="RowStructure=/Script/SkillSample.SkillTreeProviderTableRow"))
-	TSoftObjectPtr<UDataTable> DefaultProviderSkillTrees{};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType SkillTreeProviderRegistryType{NAME_None};
 };
