@@ -103,8 +103,8 @@ public:
 	                                                 const int32 ProfileId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<int32> Static_GetPlayerComplexDependencyLookup(const UObject* WorldContextObject,
-	                                                             const int32 ProfileId);
+	static TArray<int32> Static_GetPlayerInventoryDependencyGraph(const UObject* WorldContextObject,
+	                                                              const int32 ProfileId);
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> Static_GetPlayerInventoryItems(const UObject* WorldContextObject,
@@ -130,6 +130,10 @@ public:
 	                                              const int32 PrivateItemId);
 
 	UFUNCTION(BlueprintCallable)
+	static TArray<int32> Static_GetPlayerSkillDependencyGraph(const UObject* WorldContextObject,
+	                                                          const int32 ProfileId);
+
+	UFUNCTION(BlueprintCallable)
 	static TArray<int32> Static_GetPlayerSkillTreeNodes(const UObject* WorldContextObject,
 	                                                    const int32 ProfileId);
 
@@ -144,9 +148,10 @@ protected:
 	int32 GetPlayerProfileId(const APlayerState* PlayerState) const;
 	int32 GetPlayerPresetId(const APlayerState* PlayerState) const;
 	TArray<int32> GetPlayerPresetItems(const int32 ProfileId) const;
-	TArray<int32> GetPlayerComplexDependencyLookup(const int32 ProfileId) const;
+	TArray<int32> GetPlayerInventoryDependencyGraph(const int32 ProfileId) const;
 	TArray<int32> GetPlayerInventoryItems(const int32 ProfileId) const;
 	TArray<int32> GetActorInventoryItems(const int32 ProfileId) const;
+	TArray<int32> GetPlayerSkillDependencyGraph(const int32 ProfileId) const;
 	TArray<int32> GetPlayerSkillTreeNodes(const int32 ProfileId) const;
 	TArray<int32> GetActorSkillTreeNodes(const int32 ProfileId, const int32 PrivateItemId) const;
 

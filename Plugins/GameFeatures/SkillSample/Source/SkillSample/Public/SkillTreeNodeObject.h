@@ -21,13 +21,13 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayEffect.h"
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "SkillTreeNodeObject.generated.h"
 
-class UGameplayEffect;
 struct FStreamableHandle;
 
 /**
@@ -46,16 +46,16 @@ struct SKILLSAMPLE_API FSkillTreeNodeObject : public FFastArraySerializerItem
 	FSkillTreeNodeObject(FSkillTreeNodeObject&&) noexcept = default;
 	FSkillTreeNodeObject& operator=(const FSkillTreeNodeObject&) = default;
 	FSkillTreeNodeObject& operator=(FSkillTreeNodeObject&&) noexcept = default;
-	
+
 	explicit FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
-	                              const uint32 NewActiveGameplayEffectHandleTypeHash);
+	                              const FGameplayEffectSpec& NewGameplayEffectSpec);
 	
-	const uint32 GetActiveEffectHandleTypeHash() const;
+	const FGameplayEffectSpec& GetGameplayEffectSpec() const;
 	const int32 GetSkillTreeNodePrivateId() const;
 
 protected:
 	UPROPERTY(Transient)
-	uint32 ActiveGameplayEffectHandleTypeHash{UINT32_MAX};
+	FGameplayEffectSpec GameplayEffectSpec{};
 
 	// @gdemers this flag aggregate the relevant information that defines our TreeNode. Are we a Skill, a Perk, or a Trait.
 	// More importantly, are we unlocked/purchased ? What is our level requirements for unlocking, etc... 
@@ -64,6 +64,15 @@ protected:
 	
 	friend class USkillTreeNodeObjectUtils;
 };
+
+/**
+ *	@gdemers global hash function so we can uniquely identify our Tree Node Object
+ */
+SKILLSAMPLE_API FORCEINLINE uint32 GetTypeHash(const FSkillTreeNodeObject& SkillTreeNodeObject)
+{
+	return HashCombine(SkillTreeNodeObject.GetSkillTreeNodePrivateId(),
+	                   GetTypeHash(SkillTreeNodeObject.GetGameplayEffectSpec().Def));
+}
 
 /**
  *	Class description:

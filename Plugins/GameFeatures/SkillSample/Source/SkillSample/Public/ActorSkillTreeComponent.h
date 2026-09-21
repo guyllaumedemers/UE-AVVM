@@ -132,8 +132,8 @@ protected:
 	UFUNCTION()
 	void OnSkillTreeNodeRetrieved(FSkillTreeNodeToken SkillTreeNodeToken);
 
-	FActiveGameplayEffectHandle TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
-	                                                   const int32 PrivateTreeNodeId);
+	void TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
+	                            const int32 PrivateTreeNodeId);
 
 	bool CanExecute(const TInstancedStruct<FAVVMExecutionContextParams>& Params,
 	                const TInstancedStruct<FAVVMExecutionContextRule>& Rule) const;
@@ -147,12 +147,12 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_ModifyTreeNodeObject(const FSkillTreeModificationContextParams& Params);
 
-	void ModifyRuntimeState(const uint32 SkillTreeNodeTypeHash,
-							const FGameplayTagContainer& AddedTags,
-							const FGameplayTagContainer& RemovedTags);
+	void ModifyRuntimeState(const FSkillTreeNodeObject& SkillTreeNodeObject,
+	                        const FGameplayTagContainer& AddedTags,
+	                        const FGameplayTagContainer& RemovedTags);
 
-	void ModifyRuntimeLevel(const uint32 SkillTreeNodeTypeHash,
-							const int32 NewLevel);
+	void ModifyRuntimeLevel(const FSkillTreeNodeObject& SkillTreeNodeObject,
+	                        const int32 NewLevel);
 	
 	void CheckBackend() const;
 	void CheckDisk() const;
@@ -161,7 +161,7 @@ protected:
 	bool bShouldAsyncLoadOnBeginPlay{false};
 
 	UPROPERTY(Transient)
-	TMap<uint32/*FActiveGameplayEffectHandle::GetTypeHash*/, FActiveGameplayEffectHandle> NonReplicatedActiveGameplayEffectHandles;
+	TMap<uint32/*FSkillTreeNodeObject::TypeHash*/, FActiveGameplayEffectHandle> NonReplicatedActiveGameplayEffectHandles{};
 
 	UPROPERTY(Transient, BlueprintReadOnly, meta=(ToolTip="GameplayTagContainer that define the state of the Outer Actor. Example : InTutorial, Pre-BossFight-X, etc..."))
 	FGameplayTagContainer NonReplicatedComponentStateTags{FGameplayTagContainer::EmptyContainer};

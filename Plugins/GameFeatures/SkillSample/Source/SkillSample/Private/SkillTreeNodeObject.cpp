@@ -24,7 +24,6 @@
 #include "AVVMSaveGame.h"
 #include "AVVMToolkitUtils.h"
 #include "SkillTreeUtils.h"
-#include "Ability/AVVMAbilityDefinitionDataAsset.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
@@ -34,15 +33,15 @@
 extern const FName SkillTreeProviderPayloads;
 
 FSkillTreeNodeObject::FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
-                                           const uint32 NewActiveGameplayEffectHandleTypeHash)
-	: ActiveGameplayEffectHandleTypeHash(NewActiveGameplayEffectHandleTypeHash),
+                                           const FGameplayEffectSpec& NewGameplayEffectSpec)
+	: GameplayEffectSpec(NewGameplayEffectSpec),
 	  PrivateTreeNodeId(NewPrivateTreeNodeId)
 {
 }
 
-const uint32 FSkillTreeNodeObject::GetActiveEffectHandleTypeHash() const
+const FGameplayEffectSpec& FSkillTreeNodeObject::GetGameplayEffectSpec() const
 {
-	return ActiveGameplayEffectHandleTypeHash;
+	return GameplayEffectSpec;
 }
 
 const int32 FSkillTreeNodeObject::GetSkillTreeNodePrivateId() const

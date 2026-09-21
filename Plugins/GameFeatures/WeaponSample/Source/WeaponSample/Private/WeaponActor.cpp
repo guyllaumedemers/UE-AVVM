@@ -195,7 +195,8 @@ void AWeaponActor_Range::ApplyFiringModeGameplayEffect(const FGameplayTag& NewFi
 	const auto SpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(FiringModeGameplayEffectClass.LoadSynchronous(), const_cast<AActor*>(OwningOuter.Get()), this);
 	NonReplicatedFiringModeActiveGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(SpecHandle);
 
-	if (SpecHandle.Data.IsValid())
+	if (ensureAlwaysMsgf(SpecHandle.IsValid(),
+	                     TEXT("Failed to create a valid GameplayEffectSpecHandle")))
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(AWeaponActor_Range, FiringModeGameplayEffectSpec, this);
 		FiringModeGameplayEffectSpec = *SpecHandle.Data.Get();

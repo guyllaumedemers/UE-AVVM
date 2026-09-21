@@ -43,7 +43,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
-#include "Resources/AVVMResourceManagerComponent.h"
 #include "Tags/PrivateTags.h"
 
 #if !UE_BUILD_SHIPPING
@@ -167,6 +166,22 @@ void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	                Outer,
 	                TEXT("Removing %s."),
 	                *GetNameSafe(UActorSkillTreeComponent::StaticClass()));
+
+#if WITH_SERVER_CODE
+	if (Outer->HasAuthority())
+	{
+		auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Outer);
+		if (!IsValid(ASC))
+		{
+			return;
+		}
+
+		for (const auto& [SkillTreeNodeObjectTypeHash, ActiveGameplayEffectHandle] : NonReplicatedActiveGameplayEffectHandles)
+		{
+			ASC->RemoveActiveGameplayEffect(ActiveGameplayEffectHandle);
+		}
+	}
+#endif
 
 	OwningOuter.Reset();
 }
@@ -398,7 +413,7 @@ void UActorSkillTreeComponent::OnGrant(const FSkillTreeNodeObject& NewTreeNodeOb
 	// Answer : when opening a menu context, we load them all (based on a Graph Asset definition), and disable
 	// what isn't registered with our backend/or disk definition.
 	const FGameplayTag BlockingTag = USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(NewTreeNodeObject.GetSkillTreeNodePrivateId());
-	ModifyRuntimeState(NewTreeNodeObject.GetActiveEffectHandleTypeHash(), {}, FGameplayTagContainer{BlockingTag});
+	ModifyRuntimeState(NewTreeNodeObject, {}, FGameplayTagContainer{BlockingTag});
 
 	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
 	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
@@ -430,7 +445,7 @@ void UActorSkillTreeComponent::OnRevoke(const FSkillTreeNodeObject& NewTreeNodeO
 	// Answer : when opening a menu context, we load them all (based on a Graph Asset definition), and disable
 	// what isn't registered with our backend/or disk definition.
 	const FGameplayTag BlockingTag = USkillTreeNodeObjectUtils::GetPrivateIdBlockingTag(NewTreeNodeObject.GetSkillTreeNodePrivateId());
-	ModifyRuntimeState(NewTreeNodeObject.GetActiveEffectHandleTypeHash(), FGameplayTagContainer{BlockingTag}, {});
+	ModifyRuntimeState(NewTreeNodeObject, FGameplayTagContainer{BlockingTag}, {});
 
 	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
 	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
@@ -460,7 +475,7 @@ void UActorSkillTreeComponent::OnModify(const FSkillTreeModificationContextParam
 
 	// @gdemers Modify the GameplayEffect level, scaling property values, etc...
 	// Level bounds are expected to be handled from within the caller.
-	ModifyRuntimeLevel(Params.TreeNodeObject.GetActiveEffectHandleTypeHash(), Params.ModifiedLevel);
+	ModifyRuntimeLevel(Params.TreeNodeObject, Params.ModifiedLevel);
 
 	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
 	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
@@ -549,29 +564,26 @@ void UActorSkillTreeComponent::OnSkillTreeNodeRetrieved(FSkillTreeNodeToken Skil
 		if (ensureAlwaysMsgf(PrivateItemId != INDEX_NONE, TEXT("Couldn't initialize Tree Node with a valid PrivateId.")) ||
 			ensureAlwaysMsgf(!PrivateSkillTreeNodeIds.Contains(PrivateItemId), TEXT("Attempting to initialized a FSkillTreeNodeObject with duplicated PrivateItemId value.")))
 		{
-			const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TryApplyGameplayEffect(SkillTreeNodeEffectClass, PrivateItemId);
-			const uint32 TypeHash = GetTypeHash(ActiveGameplayEffectHandle);
-			SkillTree.SkillTreeNodeObjects.Add(FSkillTreeNodeObject{PrivateItemId, TypeHash}/*rvalue*/);
-			NonReplicatedActiveGameplayEffectHandles.Add(TypeHash, ActiveGameplayEffectHandle);
+			TryApplyGameplayEffect(SkillTreeNodeEffectClass, PrivateItemId);
 			PrivateSkillTreeNodeIds.Add(PrivateItemId);
 		}
 	}
 }
 
-FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
-                                                                             const int32 PrivateTreeNodeId)
+void UActorSkillTreeComponent::TryApplyGameplayEffect(const UClass* NewGameplayEffectClass,
+                                                      const int32 PrivateTreeNodeId)
 {
 	const AActor* Outer = OwningOuter.Get();
 	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Owning Actor invalid!")))
 	{
-		return {};
+		return;
 	}
 
 	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(Outer);
 	if (!ensureAlwaysMsgf(IsValid(ASC),
 	                      TEXT("Missing a valid ASC on the owning outer of the current SkillTreeComponent!")))
 	{
-		return {};
+		return;
 	}
 
 	TSubclassOf<UGameplayEffect> GameplayEffectClass = const_cast<UClass*>(NewGameplayEffectClass);
@@ -581,8 +593,16 @@ FActiveGameplayEffectHandle UActorSkillTreeComponent::TryApplyGameplayEffect(con
 	const int32 Level = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateTreeNodeId, GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
 	// @gdemers manually grant the GameplayEffect to the ASC, and store the ActiveHandle so we can remove the effect when the owning Outer is no longer referenced
 	// within the outer chain of ACharacter/AActor (AWeapon, or other), or when a user swap Skill Node entries in UI.
-	const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
-	return ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle);
+	const auto SpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
+	const auto ActiveGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(SpecHandle);
+
+	if (ensureAlwaysMsgf(SpecHandle.IsValid(),
+	                     TEXT("Failed to create a valid GameplayEffectSpecHandle")))
+	{
+		auto SkillTreeNodeObject = FSkillTreeNodeObject{PrivateTreeNodeId, *SpecHandle.Data};
+		NonReplicatedActiveGameplayEffectHandles.Add(GetTypeHash(SkillTreeNodeObject), ActiveGameplayEffectHandle);
+		SkillTree.SkillTreeNodeObjects.Add(MoveTemp(SkillTreeNodeObject));
+	}
 }
 
 bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FAVVMExecutionContextParams>& Params,
@@ -613,17 +633,19 @@ void UActorSkillTreeComponent::Server_ModifyTreeNodeObject_Implementation(const 
 	ModifyTreeNodeObject(Params);
 }
 
-void UActorSkillTreeComponent::ModifyRuntimeState(const uint32 SkillTreeNodeTypeHash,
+void UActorSkillTreeComponent::ModifyRuntimeState(const FSkillTreeNodeObject& SkillTreeNodeObject,
                                                   const FGameplayTagContainer& AddedTags,
                                                   const FGameplayTagContainer& RemovedTags)
 {
-	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
+	const uint32 TypeHash = GetTypeHash(SkillTreeNodeObject);
+	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(TypeHash);
 	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
 	{
 		return;
 	}
 
-	auto* ASC = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash].GetOwningAbilitySystemComponent();
+	auto& ActiveGameplayEffectHandle = NonReplicatedActiveGameplayEffectHandles[TypeHash];
+	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
 	if (!IsValid(ASC))
 	{
 		return;
@@ -640,16 +662,17 @@ void UActorSkillTreeComponent::ModifyRuntimeState(const uint32 SkillTreeNodeType
 	}
 }
 
-void UActorSkillTreeComponent::ModifyRuntimeLevel(const uint32 SkillTreeNodeTypeHash,
+void UActorSkillTreeComponent::ModifyRuntimeLevel(const FSkillTreeNodeObject& SkillTreeNodeObject,
                                                   const int32 NewLevel)
 {
-	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(SkillTreeNodeTypeHash);
+	const uint32 TypeHash = GetTypeHash(SkillTreeNodeObject);
+	const bool bDoesContains = NonReplicatedActiveGameplayEffectHandles.Contains(TypeHash);
 	if (!ensureAlwaysMsgf(bDoesContains, TEXT("Attempting to access invalid Type Hash")))
 	{
 		return;
 	}
 
-	auto& ActiveGameplayEffectHandle = NonReplicatedActiveGameplayEffectHandles[SkillTreeNodeTypeHash];
+	auto& ActiveGameplayEffectHandle = NonReplicatedActiveGameplayEffectHandles[TypeHash];
 	auto* ASC = ActiveGameplayEffectHandle.GetOwningAbilitySystemComponent();
 	if (IsValid(ASC))
 	{

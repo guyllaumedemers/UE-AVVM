@@ -82,11 +82,11 @@ TArray<int32> AAVVMGameSession::Static_GetPlayerPresetItems(const UObject* World
 	return IsValid(GameSession) ? GameSession->GetPlayerPresetItems(ProfileId) : TArray<int32>{};
 }
 
-TArray<int32> AAVVMGameSession::Static_GetPlayerComplexDependencyLookup(const UObject* WorldContextObject,
+TArray<int32> AAVVMGameSession::Static_GetPlayerInventoryDependencyGraph(const UObject* WorldContextObject,
                                                                         const int32 ProfileId)
 {
 	const AAVVMGameSession* GameSession = Get(WorldContextObject);
-	return IsValid(GameSession) ? GameSession->GetPlayerComplexDependencyLookup(ProfileId) : TArray<int32>{};
+	return IsValid(GameSession) ? GameSession->GetPlayerInventoryDependencyGraph(ProfileId) : TArray<int32>{};
 }
 
 TArray<int32> AAVVMGameSession::Static_GetPlayerInventoryItems(const UObject* WorldContextObject,
@@ -108,7 +108,7 @@ FString AAVVMGameSession::Static_ModifyPlayerProfileInventory(const UObject* Wor
                                                               const TArray<int32>& NewItems)
 {
 	AAVVMGameSession* GameSession = Get(WorldContextObject);
-	return IsValid(GameSession) ? GameSession->ModifyPlayerProfileInventory(ProfileId, NewItems) : FString();
+	return IsValid(GameSession) ? GameSession->ModifyPlayerProfileInventory(ProfileId, NewItems) : FString{};
 }
 
 FGameplayTag AAVVMGameSession::Static_GetPlayerPresetSlot(const UObject* WorldContextObject,
@@ -125,6 +125,13 @@ FGameplayTag AAVVMGameSession::Static_GetActorPresetSlot(const UObject* WorldCon
 {
 	AAVVMGameSession* GameSession = Get(WorldContextObject);
 	return IsValid(GameSession) ? GameSession->GetActorPresetSlot(ProfileId, PrivateItemId) : FGameplayTag::EmptyTag;
+}
+
+TArray<int32> AAVVMGameSession::Static_GetPlayerSkillDependencyGraph(const UObject* WorldContextObject,
+                                                                     const int32 ProfileId)
+{
+	const AAVVMGameSession* GameSession = Get(WorldContextObject);
+	return IsValid(GameSession) ? GameSession->GetPlayerSkillDependencyGraph(ProfileId) : TArray<int32>{};
 }
 
 TArray<int32> AAVVMGameSession::Static_GetPlayerSkillTreeNodes(const UObject* WorldContextObject,
@@ -304,7 +311,7 @@ TArray<int32> AAVVMGameSession::GetPlayerPresetItems(const int32 ProfileId) cons
 	}
 }
 
-TArray<int32> AAVVMGameSession::GetPlayerComplexDependencyLookup(const int32 ProfileId) const
+TArray<int32> AAVVMGameSession::GetPlayerInventoryDependencyGraph(const int32 ProfileId) const
 {
 	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
 	if (!ensureAlwaysMsgf(IsValid(JsonParser),
@@ -359,6 +366,30 @@ TArray<int32> AAVVMGameSession::GetActorInventoryItems(const int32 ProfileId) co
 	return TArray<int32>{};
 }
 
+TArray<int32> AAVVMGameSession::GetPlayerSkillDependencyGraph(const int32 ProfileId) const
+{
+	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
+	if (!ensureAlwaysMsgf(IsValid(JsonParser),
+	                      TEXT("FAVVMOnlineModule::GetJsonParser doesn't reference a valid parser.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const bool bHasResolvedProfile = SessionPayload.ResolvedProfiles.Contains(ProfileId);
+	if (!ensureAlwaysMsgf(bHasResolvedProfile,
+	                      TEXT("Cannot resolve the Backend representation referenced by the provided Id.")))
+	{
+		return TArray<int32>{};
+	}
+
+	const FString ProfilePayload = SessionPayload.ResolvedProfiles[ProfileId];
+
+	FAVVMPlayerProfile OutPlayerProfile{};
+	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
+
+	return OutPlayerProfile.SkillDependencyGraph;
+}
+
 TArray<int32> AAVVMGameSession::GetPlayerSkillTreeNodes(const int32 ProfileId) const
 {
 	UAVVMOnlinePlayerStringParser* JsonParser = FAVVMOnlineModule::GetJsonParser_Player();
@@ -380,14 +411,7 @@ TArray<int32> AAVVMGameSession::GetPlayerSkillTreeNodes(const int32 ProfileId) c
 	FAVVMPlayerProfile OutPlayerProfile{};
 	JsonParser->FromString(ProfilePayload, OutPlayerProfile);
 
-	const TArray<int32> OutResults = OutPlayerProfile.SkillIds.FilterByPredicate([](const int32 SkillPrivateId)
-	{
-		// @gdemers filter the SkillId, and extract the relationship so we can return all Skill Tree Nodes that are ACharacter specific.
-		const int32 OutRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(SkillPrivateId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
-		return (false == (OutRelationshipBitmask ^ FILTER_CHARACTER_RELATIONSHIP_BIT));
-	});
-
-	return OutResults;
+	return OutPlayerProfile.SkillIds;
 }
 
 TArray<int32> AAVVMGameSession::GetActorSkillTreeNodes(const int32 ProfileId,

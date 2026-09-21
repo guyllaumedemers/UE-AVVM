@@ -42,7 +42,7 @@ TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UOb
 		return TArray<int32>{};
 	}
 
-	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerComplexDependencyLookup(Outer, ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
+	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerInventoryDependencyGraph(Outer, ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
 	return OutResults;
 }
 
