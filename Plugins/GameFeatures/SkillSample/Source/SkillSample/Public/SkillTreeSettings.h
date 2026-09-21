@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const FDataRegistryId& GetStubDataProviderSkillTreeId();
 
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FDataRegistryId& GetStubDataSkillTreeDependencyGraphId();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	FDataRegistryType SkillTreeRegistryType{NAME_None};
@@ -61,4 +64,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Backend")
 	FDataRegistryId StubDataProviderSkillTreeId{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Backend")
+	FDataRegistryId StubDataSkillTreeDependencyGraphId{};
 };

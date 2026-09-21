@@ -26,9 +26,6 @@
 
 #include "SkillTreeUtils.generated.h"
 
-struct FSkillTreeNodeDefinition;
-class UGameplayEffect;
-
 /**
  *	Class description:
  *
@@ -86,15 +83,24 @@ public:
 	static TArray<FDataRegistryId> GetProviderSkillTreeRegistryIds(const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> GetBackendProviderSkillTreeRegistryIds(const UObject* WorldContextObject,
-	                                                                      const int32 NewProfileId);
+	static TArray<FDataRegistryId> GetBackendProviderPlayerFilteredSkillRegistryIds(const UObject* WorldContextObject,
+	                                                                                const int32 NewProfileId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId, 
+	static TArray<FDataRegistryId> GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId,
 	                                                                        const int32 NewPrivateItemId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
-	                                                                               const int32 NewProfileId,
-	                                                                               const int32 NewPrivateItemId);
+	static TArray<FDataRegistryId> GetBackendProviderDependentActorFilteredSkillRegistryIds(const UObject* WorldContextObject,
+	                                                                                        const int32 NewProfileId,
+	                                                                                        const int32 NewPrivateItemId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> GetBackendProviderPlayerFilteredSkillIds(const UObject* WorldContextObject,
+	                                                              const int32 NewProfileId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> GetBackendProviderDependentActorFilteredSkillIds(const UObject* WorldContextObject,
+	                                                                      const int32 NewProfileId,
+	                                                                      const int32 NewPrivateItemId);
 };

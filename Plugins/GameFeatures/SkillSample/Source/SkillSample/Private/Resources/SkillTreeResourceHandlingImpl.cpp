@@ -26,8 +26,9 @@
 
 TArray<FDataRegistryId> USkillTreeResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
+	// @gdemers since we load by gfp we may suffer from race conditions here.
 	auto* SkillTreeComponent = Cast<UActorSkillTreeComponent>(ActorComponent);
-	if (!ensureAlwaysMsgf(IsValid(SkillTreeComponent), TEXT("Component Cast failed.")) ||
+	if (!IsValid(SkillTreeComponent) ||
 		!UAVVMToolkitUtils::HasNetworkAuthority(SkillTreeComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};

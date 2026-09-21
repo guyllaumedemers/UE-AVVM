@@ -144,9 +144,9 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		{
 			const int32 RelationshipBitmask = FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
 			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(SkillTreeNodeDefinition.SkillTreeNodeId,
-																							RelationshipBitmask,
-																							SkillTreeNodeDefinition.InstancedId,
-																							SkillTreeNodeDefinition.EffectLevel);
+			                                                                                RelationshipBitmask,
+			                                                                                SkillTreeNodeDefinition.InstancedId,
+			                                                                                SkillTreeNodeDefinition.EffectLevel);
 
 			PrivateTreeNodeIds.Add(PrivateTreeNodeId);
 		}
@@ -249,15 +249,16 @@ int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& Tre
                                                       const int32 EffectLevel)
 {
 	const FDataRegistryId GameplayEffectUniqueIdentifierRegistryId = {UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName};
-	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
-	const int32 VirtualGlobalId = UAVVMOnlineSkillTreeUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
+	// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
+	// We want design to be able to reuse gameplay effect on ANY actor they want.
+	const int32 VirtualGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(GameplayEffectUniqueIdentifierRegistryId);
 	const int32 NewInstancedId = UAVVMOnlineEncodingUtils::EncodeInt32(InstancedId, GET_SKILL_TREE_NODE_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_INSTANCED_ID_RSHIFT);
-	
+
 	const int32 NewEffectLevel = UAVVMOnlineEncodingUtils::EncodeInt32(FMath::Clamp(EffectLevel, 1/*min required level*/, INT32_MAX), GET_SKILL_TREE_NODE_LEVEL_BIT_RANGE, GET_SKILL_TREE_NODE_LEVEL_RSHIFT);
-	
+
 	// TODO @gdemers we are missing position support.
 	return (RelationshipBitMask
-		+ VirtualGlobalId
+		+ UAVVMOnlineEncodingUtils::EncodeInt32(VirtualGlobalId, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT)
 		+ NewInstancedId
 		+ NewEffectLevel);
 }
@@ -314,10 +315,10 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = PhysicalGlobalId](const int32 Value)
 	{
-		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
-		// from the integer into a physical id for comparison.
-		const int32 OutPhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(Value);
-		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
+		// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
+		// We want design to be able to reuse gameplay effect on ANY actor they want.
+		const int32 OutVirtualGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		return (false == (OutVirtualGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (SearchResult != nullptr)
@@ -333,15 +334,17 @@ int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,
 TArray<FDataRegistryId> USkillTreeUtils::TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds)
 {
 	static const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
-										 const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
-										 const int32 NewPrivateItemId)
+	                                     const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
+	                                     const int32 NewPrivateItemId)
 	{
 		if (!DataRegistrySubsystem.IsValid())
 		{
 			return FDataRegistryId{};
 		}
 
-		const int32 PhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(NewPrivateItemId);
+		// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
+		// We want design to be able to reuse gameplay effect on ANY actor they want.
+		const int32 PhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
 		for (const auto& RegistryId : NewRegistryIds)
 		{
 			const auto* Row = DataRegistrySubsystem->GetCachedItem<FAVVMGameplayEffectIdentifierDataTableRow>(RegistryId);
@@ -419,17 +422,11 @@ TArray<FDataRegistryId> USkillTreeUtils::GetProviderSkillTreeRegistryIds(const i
 	return {};
 }
 
-TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderSkillTreeRegistryIds(const UObject* WorldContextObject,
-                                                                                const int32 NewProfileId)
+TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderPlayerFilteredSkillRegistryIds(const UObject* WorldContextObject,
+                                                                                          const int32 NewProfileId)
 {
-	TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(WorldContextObject, NewProfileId);
-	PrivateItemIds.RemoveAll([](const int32 PrivateItemId)
-	{
-		const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
-		return (false != (RelationshipBitmask ^ FILTER_CHARACTER_RELATIONSHIP_BIT)/*XOR 1 for elements that arent Character dependent*/);
-	});
-
-	return TranslatePrivateItemId(PrivateItemIds);
+	const auto SkillDependencyGraphElements = GetBackendProviderPlayerFilteredSkillIds(WorldContextObject, NewProfileId);
+	return TranslatePrivateItemId(SkillDependencyGraphElements);
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId,
@@ -454,37 +451,61 @@ TArray<FDataRegistryId> USkillTreeUtils::GetProviderDependentSkillTreeRegistryId
 	return {};
 }
 
-TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
-                                                                                         const int32 NewProfileId,
-                                                                                         const int32 NewPrivateItemId)
+TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentActorFilteredSkillRegistryIds(const UObject* WorldContextObject,
+                                                                                                  const int32 NewProfileId,
+                                                                                                  const int32 NewPrivateItemId)
+{
+	const auto SkillDependencyGraphElements = GetBackendProviderDependentActorFilteredSkillIds(WorldContextObject, NewProfileId, NewPrivateItemId);
+	return TranslatePrivateItemId(SkillDependencyGraphElements);
+}
+
+TArray<int32> USkillTreeUtils::GetBackendProviderPlayerFilteredSkillIds(const UObject* WorldContextObject,
+                                                                        const int32 NewProfileId)
+{
+	// @gdemers get ALL the skills referenced on the player profiles.
+	// IMPORTANT - There is no distinction on the profile for whose referencing the skill in this collection set, we can however
+	// use the relationship bitmask to resolve if we depend on character, item, or attachment.
+	TArray<int32> SkillDependencyGraphElements = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(WorldContextObject, NewProfileId);
+	SkillDependencyGraphElements.RemoveAll([](const int32 PrivateItemId)
+	{
+		const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
+		return (false == (RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*Remove those that arent Character dependent*/);
+	});
+
+	return SkillDependencyGraphElements;
+}
+
+TArray<int32> USkillTreeUtils::GetBackendProviderDependentActorFilteredSkillIds(const UObject* WorldContextObject,
+                                                                                const int32 NewProfileId,
+                                                                                const int32 NewPrivateItemId)
 {
 	// @gdemers Parse the dependency graph to retrieved skills tied to the given target actor.
 	TArray<int32> SkillDependencyGraphElements = AAVVMGameSession::Static_GetPlayerSkillDependencyGraph(WorldContextObject, NewProfileId);
 	SkillDependencyGraphElements.RemoveAll([OwnerPrivateItemId = NewPrivateItemId](const int32 SkillDependencyGraphElementId)
 	{
 		const int32 OwnerRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
-		const int32 ElementOwnerRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_RSHIFT);
+		const int32 ElementOwnerRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_RSHIFT);
 		const bool bDoesShareRelationship = (ElementOwnerRelationshipBitmask/*Attachment*/ & OwnerRelationshipBitmask/*example : Attachment+Item*/);
 		if (!bDoesShareRelationship)
 		{
-			return false;
+			return true;
 		}
 
 		// @gdemers we use DecodeInt32 instead of FilterInt32 due to the encoding scheme being different between both entity.
 		const int32 OwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
 		const int32 ElementOwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT);
-		const bool bAreSameActorType = (false == (OwnerVirtualId ^ ElementOwnerVirtualId));
-		if (bAreSameActorType)
+		const bool bDoesShareOwner = (false == (OwnerVirtualId ^ ElementOwnerVirtualId));
+		if (bDoesShareOwner)
 		{
 			const int32 DependantInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_INSTANCED_ID_RSHIFT);
 			const int32 TargetInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT);
-			return (false == (DependantInstancedId ^ TargetInstancedId));
+			return (false != (DependantInstancedId ^ TargetInstancedId))/*XOR 1 for elements that arent Actor dependent*/;
 		}
 		else
 		{
-			return false;
+			return true;
 		}
 	});
 
-	return TranslatePrivateItemId(SkillDependencyGraphElements);
+	return SkillDependencyGraphElements;
 }

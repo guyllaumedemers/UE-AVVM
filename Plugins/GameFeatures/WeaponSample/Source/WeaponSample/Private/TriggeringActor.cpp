@@ -28,7 +28,6 @@
 #include "WeaponSampleModule.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "Ability/AVVMAbilityUtils.h"
-#include "Ability/AVVMAttributeSet.h"
 #include "Ability/AVVMGameplayAbility.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
 #include "Backend/AVVMOnlineEncodingUtils.h"
@@ -49,7 +48,7 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 		return TArray<int32>{};
 	}
 
-	TArray<int32> Dependencies;
+	TArray<int32> Dependencies{};
 
 	// @gdemers retrieve the character preset, and all items that compose it.
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
@@ -61,12 +60,12 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 
 	// @gdemers translate physical addressing into virtual addressing for running searches.
 	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((ElementId/*PhysicalGlobalId*/ - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET),
-	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
+	                                                                    GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+	                                                                    GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
 
 	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT,
+	                                                      GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+	                                                      GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT,
 	                                                      VirtualGlobalId);
 
 	return Dependencies;

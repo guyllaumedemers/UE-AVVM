@@ -21,52 +21,59 @@
 
 #include "CoreMinimal.h"
 
-#include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
-#include "Data/AVVMDataTableRow.h"
+#include "Engine/DataTable.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
 #endif
 
-#include "SkillTreeProviderTableRow.generated.h"
+#include "SkillTreeStubDataProviderTableRow.generated.h"
+
+class UGameplayEffect;
 
 /**
  *	Class description:
  *	
- *	FSkillTreeNodeData define the Tree Node GameplayEffect an actor owns.
+ *	FStubData_SkillDependencyGraphElement are user defined values that participate in the generation of a complex
+ *	bitmask scheme representing a dependency between a skill, and an item, attachment, or character.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeNodeDefinition
+struct SKILLSAMPLE_API FStubData_SkillDependencyGraphElement
 {
 	GENERATED_BODY()
 
-	static const int32 Static_GetRelationshipBitmask(const FSkillTreeNodeDefinition& SkillTreeNodeDefinition);
-
+	static const int32 Static_GetRelationshipBitmask(const FStubData_SkillDependencyGraphElement& SkillTreeNodeElement);
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TSoftClassPtr<AActor> DependentActorClass{};
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
-	FDataRegistryId SkillTreeNodeId{};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
-	int32 InstancedId{INDEX_NONE};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
-	int32 EffectLevel{INDEX_NONE};
 };
 
 /**
  *	Class description:
  *	
- *	FSkillTreeProviderTableRow is a Row type that define the default values used to initialize an
- *	SkillTree Provider entry on disk.
- *	
- *	Note : This is used to default initialize an actor representation Skill Tree based on design configuration.
- *	Example : A boss in elden ring.
+ *	FStubData_SkillDependencyGraphElements is a collection of FStubData_SkillDependencyGraphElement;
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
+struct SKILLSAMPLE_API FStubData_SkillDependencyGraphElements
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TArray<FStubData_SkillDependencyGraphElement> Dependencies{};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FStubData_SkillDependencyGraphTableRow is a Row type that define the dependency between a UGameplayEffect class,
+ *	and any actors.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FStubData_SkillDependencyGraphTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -74,10 +81,6 @@ struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers the unique identifier that represent the skill tree provider actor. example : a shop.
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
-	FDataRegistryId SkillTreeProviderActorIdentifierId{};
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<FSkillTreeNodeDefinition> SkillTreeNodeDefinitions{};
+	TMap<TSoftClassPtr<UGameplayEffect>, FStubData_SkillDependencyGraphElements> SkillDependencyGraph{};
 };

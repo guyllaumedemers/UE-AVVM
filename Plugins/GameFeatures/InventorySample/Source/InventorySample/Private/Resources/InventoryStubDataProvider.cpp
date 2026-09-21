@@ -26,6 +26,7 @@
 #include "IPropertyTable.h"
 #include "ItemObject.h"
 #include "StorageHelper.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Data/InventoryProviderTableRow.h"
@@ -115,16 +116,16 @@ TMap<FGameplayTag/*Slot Tag*/, int32> UPresetLoadoutStubDataProvider::MakeProper
 	return OutLoadout;
 }
 
-UComplexDependencyLookupStubDataProvider::UComplexDependencyLookupStubDataProvider(const FObjectInitializer& ObjectInitializer)
+UInventoryDependencyGraphStubDataProvider::UInventoryDependencyGraphStubDataProvider(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	if (IsTemplate(RF_ClassDefaultObject))
 	{
-		UAVVMOnlineStubDataHelper::Static_RegisterPropertyProvider(TAG_AVVMONLINE_BACKEND_STUB_DEPENDENCY_LOOKUP, GetClass());
+		UAVVMOnlineStubDataHelper::Static_RegisterPropertyProvider(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY_DEPENDENCY_GRAPH, GetClass());
 	}
 }
 
-TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() const
+TArray<int32> UInventoryDependencyGraphStubDataProvider::MakePropertyStubData() const
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -132,17 +133,17 @@ TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() c
 		return TArray<int32>{};
 	}
 
-	const auto* Row = Subsystem->GetCachedItem<FComplexDependencyLookupStubDataTableRow>(UInventorySettings::GetStubDataProviderComplexLookupId());
+	const auto* Row = Subsystem->GetCachedItem<FStubData_InventoryStubDataProviderTableRow>(UInventorySettings::GetStubDataInventoryDependencyGraphId());
 	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider Complex Lookup.")))
 	{
 		return TArray<int32>{};
 	}
 
 	// @gdemers allow assigning proper instance id to items.
-	TMap<const UItemObject*/*CDO*/, int32/*Counter*/> InstanceCount;
+	TMap<const UItemObject*/*CDO*/, int32/*Counter*/> InstanceCount{};
 
-	TArray<int32> OutComplexDependencies;
-	for (const auto& [ItemObjectClass, ComplexDependencies] : Row->ComplexDependencyLookup)
+	TArray<int32> OutComplexDependencies{};
+	for (const auto& [ItemObjectClass, ComplexDependencies] : Row->InventoryDependencyGraph)
 	{
 		if (ItemObjectClass.IsNull())
 		{
@@ -158,7 +159,12 @@ TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() c
 
 		const auto* ItemObjectCDO = ItemClass->GetDefaultObject<UItemObject>();
 		const int32 ItemPhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
-		const int32 ItemVirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing((1 << 2/*item bit-index*/), ItemPhysicalGlobalId);
+
+		const int32 ItemVirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressingDependencyGraph((1 << 2/*item bit-index*/),
+		                                                                                                        ItemPhysicalGlobalId,
+		                                                                                                        GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+		                                                                                                        GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+		
 		int32& OutItemCount = InstanceCount.FindOrAdd(ItemObjectCDO);
 		++OutItemCount;
 
@@ -178,15 +184,22 @@ TArray<int32> UComplexDependencyLookupStubDataProvider::MakePropertyStubData() c
 
 			const auto* AttachmentObjectCDO = DependencyClass->GetDefaultObject<UItemObject>();
 			const int32 AttachmentPhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(AttachmentObjectCDO);
-			const int32 AttachmentVirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing(1 << 0/*attachment bit-index*/, AttachmentPhysicalGlobalId);
+
+			const int32 AttachmentVirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressingDependencyGraph((1 << 0/*attachment bit-index*/),
+			                                                                                                              AttachmentPhysicalGlobalId,
+			                                                                                                              GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+			                                                                                                              GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+			
 			int32& OutAttachmentCount = InstanceCount.FindOrAdd(AttachmentObjectCDO);
 			++OutAttachmentCount;
 
+			// @gdemers IMPORTANT - Both bit encoding are different. virtual address translation
+			// is required to generate the proper lookup.
 			const int32 DependencyBitmask = (
 				ItemVirtualGlobalId +
-				OutItemCount +
+				UAVVMOnlineEncodingUtils::EncodeInt32(OutItemCount, GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT) +
 				AttachmentVirtualGlobalId +
-				OutAttachmentCount
+				UAVVMOnlineEncodingUtils::EncodeInt32(OutAttachmentCount, GET_ATTACHMENT_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ATTACHMENT_LOOKUP_INSTANCED_ID_RSHIFT)
 			);
 
 			OutComplexDependencies.Add(DependencyBitmask);

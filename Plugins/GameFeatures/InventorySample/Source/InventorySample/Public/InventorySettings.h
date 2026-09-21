@@ -96,7 +96,7 @@ public:
 	static const FDataRegistryId& GetStubDataProviderInventoryId();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FDataRegistryId& GetStubDataProviderComplexLookupId();
+	static const FDataRegistryId& GetStubDataInventoryDependencyGraphId();
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
@@ -151,5 +151,5 @@ protected:
 	FDataRegistryId StubDataProviderInventoryId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers|Backend")
-	FDataRegistryId StubDataProviderComplexLookupId{};
+	FDataRegistryId StubDataInventoryDependencyGraphId{};
 };

@@ -38,3 +38,8 @@ const FDataRegistryId& USkillTreeSettings::GetStubDataProviderSkillTreeId()
 {
 	return GetDefault<USkillTreeSettings>()->StubDataProviderSkillTreeId;
 }
+
+const FDataRegistryId& USkillTreeSettings::GetStubDataSkillTreeDependencyGraphId()
+{
+	return GetDefault<USkillTreeSettings>()->StubDataSkillTreeDependencyGraphId;
+}

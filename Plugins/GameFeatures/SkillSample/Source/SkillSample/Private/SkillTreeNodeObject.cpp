@@ -25,6 +25,7 @@
 #include "AVVMToolkitUtils.h"
 #include "SkillTreeUtils.h"
 #include "Backend/AVVMOnlineBackendUtils.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceProvider.h"
@@ -129,10 +130,10 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 
 	const int32* SearchResult = FilteredSet.FindByPredicate([SearchId = PhysicalGlobalId](const int32 Value)
 	{
-		// @gdemers filter the PrivateItemId that represent our complex encoding, and translate the virtual id parsed
-		// from the integer into a physical id for comparison.
-		const int32 OutPhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(Value);
-		return (false == (OutPhysicalGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
+		// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
+		// We want design to be able to reuse gameplay effect on ANY actor they want.
+		const int32 OutVirtualGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		return (false == (OutVirtualGlobalId ^ SearchId))/*if both bits are identical, return 0.*/;
 	});
 
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldn't retrieve the TreeNodeId.")))

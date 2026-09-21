@@ -85,6 +85,15 @@ public:
 	                                                                    const int32 NewProfileId);
 
 	UFUNCTION(BlueprintCallable)
+	static TArray<int32> GetBackendProviderPlayerFilteredInventoryIds(const UObject* WorldContextObject,
+	                                                                  const int32 NewProfileId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> GetBackendProviderDependentActorFilteredInventoryIds(const UObject* WorldContextObject,
+	                                                                          const int32 NewProfileId,
+	                                                                          const int32 NewPrivateItemId);
+
+	UFUNCTION(BlueprintCallable)
 	static void GetInventoryProvider(const FString& NewPayload,
 	                                 int32& OutProviderId,
 	                                 TMap<FGameplayTag, int32>& OutLoadout,

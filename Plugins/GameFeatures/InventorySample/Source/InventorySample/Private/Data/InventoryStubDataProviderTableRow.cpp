@@ -20,13 +20,13 @@
 #include "Data/InventoryStubDataProviderTableRow.h"
 
 #if WITH_EDITOR
-EDataValidationResult FComplexDependencyLookupStubDataTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FStubData_InventoryStubDataProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (ComplexDependencyLookup.IsEmpty())
+	if (InventoryDependencyGraph.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FComplexDependencyLookupStubDataTableRow", "", "Missing Lookup. No valid mapping recorded!"));
+		Context.AddError(NSLOCTEXT("FStubData_InventoryStubDataProviderTableRow", "", "Missing Lookup. No valid mapping recorded!"));
 	}
 
 	return Result;

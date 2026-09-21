@@ -69,3 +69,25 @@ int32 UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing(const int32 Relatio
 
 	return UAVVMOnlineEncodingUtils::EncodeInt32(VirtualId, BitRange, BitShift);
 }
+
+int32 UAVVMOnlineInventoryUtils::TranslatePhysicalAddressingDependencyGraph(const int32 RelationshipBitMask,
+                                                                            const int32 PhysicalGlobalId,
+                                                                            const int32 BitRange,
+                                                                            const int32 BitShift)
+{;
+	int32 VirtualId = INT32_MAX;
+	if ((RelationshipBitMask & (1 << 0/*attachment bit-index*/)))
+	{
+		VirtualId = (PhysicalGlobalId & ~GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET);
+	}
+	else if ((RelationshipBitMask & (1 << 2/*item bit-index*/)))
+	{
+		VirtualId = (PhysicalGlobalId & ~GET_ITEM_PHYSICAL_ADDRESSING_OFFSET);
+	}
+	else if (false == !!RelationshipBitMask/*storage, or 000 bitmask*/)
+	{
+		VirtualId = (PhysicalGlobalId & ~GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET);
+	}
+
+	return UAVVMOnlineEncodingUtils::EncodeInt32(VirtualId, BitRange, BitShift);
+}

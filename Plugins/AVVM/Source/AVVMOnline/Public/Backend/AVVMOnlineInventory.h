@@ -102,4 +102,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static int32 TranslatePhysicalAddressing(const int32 RelationshipBitMask,
 	                                         const int32 PhysicalGlobalId);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 TranslatePhysicalAddressingDependencyGraph(const int32 RelationshipBitMask,
+	                                                        const int32 PhysicalGlobalId,
+	                                                        const int32 BitRange,
+	                                                        const int32 BitShift);
 };

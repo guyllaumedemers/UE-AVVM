@@ -37,13 +37,7 @@
 
 TArray<int32> FAVVMCharacterDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {
-	if (!IsValid(Outer))
-	{
-		return TArray<int32>{};
-	}
-
-	const TArray<int32> OutResults = AAVVMGameSession::Static_GetPlayerInventoryDependencyGraph(Outer, ElementId/*{FAVVMPlayerProfile.UniqueId}*/);
-	return OutResults;
+	return IsValid(Outer) ? AAVVMGameSession::Static_GetPlayerInventoryDependencyGraph(Outer, ElementId/*{FAVVMPlayerProfile.UniqueId}*/) : TArray<int32>{};
 }
 
 AAVVMCharacter::AAVVMCharacter(const FObjectInitializer& ObjectInitializer)

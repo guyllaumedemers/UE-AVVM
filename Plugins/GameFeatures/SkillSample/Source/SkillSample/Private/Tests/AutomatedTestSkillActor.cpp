@@ -24,6 +24,7 @@
 #include "SkillTreeSettings.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Engine/StreamableManager.h"
@@ -140,8 +141,10 @@ bool AAutomatedTestSkillActor::RunTest_SkillTreeNodeUniqueId(const TArray<const 
 	bool bResult = true;
 	for (const FSkillTreeNodeObject& SkillTreeObject : SkillTreeComponent->SkillTree.SkillTreeNodeObjects)
 	{
-		const int32 PhysicalGlobalId = UAVVMOnlineSkillTreeUtils::GetPhysicalGlobalId(SkillTreeObject.GetSkillTreeNodePrivateId());
-		bResult &= CheckGameplayEffectIdentifier(PhysicalGlobalId, GameplayEffectIdentifiers);
+		// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
+		// We want design to be able to reuse gameplay effect on ANY actor they want.
+		const int32 OutVirtualGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillTreeObject.GetSkillTreeNodePrivateId(), GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		bResult &= CheckGameplayEffectIdentifier(OutVirtualGlobalId, GameplayEffectIdentifiers);
 	}
 
 	return bResult;

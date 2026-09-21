@@ -75,13 +75,22 @@ TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject
 	const auto* Character = Cast<AAVVMCharacter>(Outer);
 	if (IsValid(Character) && Character->IsPlayerControlled())
 	{
-		OutResults = AAVVMGameSession::Static_GetPlayerInventoryItems(Outer, ElementId/*calling Player UniqueId*/);
+		OutResults = UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds(Outer, ElementId/*calling Player UniqueId*/);
 	}
 	else
 	{
-		// @gdemers we may attempt retrieving the inventory for an NPC actor
-		// (or any other actor type) that are defined in backend.
-		OutResults = AAVVMGameSession::Static_GetActorInventoryItems(Outer, ElementId/*calling Actor UniqueId*/);
+		// @gdemers we are attempting to initialize the skill tree nodes of the character dependent actors. example : a weapon owned by the player. 
+		// Actor without UNetConnection should be initialized via Data Asset, not backend which is why we are NOT supporting
+		// fetching backend information for actor not owned by ACharacter.
+		const auto* OwningCharacter = Outer->GetTypedOuter<AAVVMCharacter>();
+		if (ensureAlwaysMsgf(IsValid(OwningCharacter),
+		                     TEXT("Failed to retrieved element dependencies. Not owned by a valid UNetConnection.")))
+		{
+			// @gdemers we may attempt retrieving the inventory for an NPC actor
+			// (or any other actor type) that are defined in backend.
+			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningCharacter);
+			OutResults = UInventoryUtils::GetBackendProviderDependentActorFilteredInventoryIds(Outer, TargetUniqueId, ElementId/*calling Actor UniqueId*/);
+		}
 	}
 
 	return OutResults;

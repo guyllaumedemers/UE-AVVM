@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "Data/SkillTreeProviderTableRow.h"
+#include "Data/SkillTreeStubDataProviderTableRow.h"
 
 #include "NativeGameplayTags.h"
 
@@ -25,20 +25,20 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateTreeNodeId.Relationship.Character"));
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateTreeNodeId.Relationship.Item"));
 
-const int32 FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(const FSkillTreeNodeDefinition& SkillTreeNodeDefinition)
+const int32 FStubData_SkillDependencyGraphElement::Static_GetRelationshipBitmask(const FStubData_SkillDependencyGraphElement& SkillTreeNodeElement)
 {
 	int32 Bitmask{0}; // @gdemers 0 is storage by design
-	if (SkillTreeNodeDefinition.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
+	if (SkillTreeNodeElement.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
 	{
 		Bitmask = (1/*2^0*/);
 	}
 
-	if (SkillTreeNodeDefinition.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
+	if (SkillTreeNodeElement.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
 	{
 		Bitmask = (2/*2^1*/);
 	}
 
-	if (SkillTreeNodeDefinition.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM}))
+	if (SkillTreeNodeElement.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM}))
 	{
 		Bitmask = (4/*2^2*/);
 	}
@@ -47,19 +47,13 @@ const int32 FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(const FSkill
 }
 
 #if WITH_EDITOR
-EDataValidationResult FSkillTreeProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FStubData_SkillDependencyGraphTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!SkillTreeProviderActorIdentifierId.IsValid())
+	if (SkillDependencyGraph.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FSkillTreeProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
-	}
-
-	if (SkillTreeNodeDefinitions.IsEmpty())
-	{
-		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FSkillTreeProviderTableRow", "", "Empty Skill referencing."));
+		Context.AddError(NSLOCTEXT("FStubData_SkillDependencyGraphTableRow", "", "Missing Lookup. No valid mapping recorded!"));
 	}
 
 	return Result;

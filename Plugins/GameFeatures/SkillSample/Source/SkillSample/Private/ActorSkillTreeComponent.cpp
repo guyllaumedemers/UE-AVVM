@@ -68,7 +68,7 @@ TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject
 	if (IsValid(Character) && Character->IsPlayerControlled())
 	{
 		// @gdemers we are attempting to initialize the skill tree nodes of our character.
-		OutResults = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(Outer, ElementId/*calling Player UniqueId*/);
+		OutResults = USkillTreeUtils::GetBackendProviderPlayerFilteredSkillIds(Outer, ElementId/*calling Player UniqueId*/);
 	}
 	else
 	{
@@ -80,7 +80,7 @@ TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject
 		                     TEXT("Failed to retrieved element dependencies. Not owned by a valid UNetConnection.")))
 		{
 			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningCharacter);
-			OutResults = AAVVMGameSession::Static_GetActorSkillTreeNodes(Outer, TargetUniqueId/*owning Player UniqueId*/, ElementId/*calling Actor PhysicalGlobalId*/);
+			OutResults = USkillTreeUtils::GetBackendProviderDependentActorFilteredSkillIds(Outer, TargetUniqueId/*owning Player UniqueId*/, ElementId/*calling Actor PhysicalGlobalId*/);
 		}
 	}
 
@@ -596,13 +596,22 @@ void UActorSkillTreeComponent::TryApplyGameplayEffect(const UClass* NewGameplayE
 	const auto SpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(GameplayEffectClass, NonConstOuter, NonConstOuter, Level);
 	const auto ActiveGameplayEffectHandle = ASC->BP_ApplyGameplayEffectSpecToSelf(SpecHandle);
 
-	if (ensureAlwaysMsgf(SpecHandle.IsValid(),
-	                     TEXT("Failed to create a valid GameplayEffectSpecHandle")))
+	if (!ensureAlwaysMsgf(SpecHandle.IsValid(),
+	                      TEXT("Failed to create a valid GameplayEffectSpecHandle")))
 	{
-		auto SkillTreeNodeObject = FSkillTreeNodeObject{PrivateTreeNodeId, *SpecHandle.Data};
-		NonReplicatedActiveGameplayEffectHandles.Add(GetTypeHash(SkillTreeNodeObject), ActiveGameplayEffectHandle);
-		SkillTree.SkillTreeNodeObjects.Add(MoveTemp(SkillTreeNodeObject));
+		return;
 	}
+
+	AVVM_LOGGER_LOG(LogSkillSample,
+	                Outer,
+	                Outer,
+	                TEXT("Applying %s onto %s."),
+	                *GetNameSafe(GameplayEffectClass),
+	                *GetNameSafe(Outer));
+
+	auto SkillTreeNodeObject = FSkillTreeNodeObject{PrivateTreeNodeId, *SpecHandle.Data};
+	NonReplicatedActiveGameplayEffectHandles.Add(GetTypeHash(SkillTreeNodeObject), ActiveGameplayEffectHandle);
+	SkillTree.SkillTreeNodeObjects.Add(MoveTemp(SkillTreeNodeObject));
 }
 
 bool UActorSkillTreeComponent::CanExecute(const TInstancedStruct<FAVVMExecutionContextParams>& Params,

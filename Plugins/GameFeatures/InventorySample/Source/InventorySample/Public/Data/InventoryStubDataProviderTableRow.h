@@ -34,11 +34,11 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	FComplexDependencies are user defined values that participate in the generation of a complex
+ *	FStubData_InventoryDependencyGraphElements are user defined values that participate in the generation of a complex
  *	bitmask scheme representing a dependency between an attachment, and an item.  (See AVVMOnlineInventory.h)
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FComplexDependencies
+struct INVENTORYSAMPLE_API FStubData_InventoryDependencyGraphElements
 {
 	GENERATED_BODY()
 	
@@ -49,7 +49,7 @@ struct INVENTORYSAMPLE_API FComplexDependencies
 /**
  *	Class description:
  *	
- *	FComplexDependencyLookupStubDataTableRow is a Row type that define the dependency between a UItemObject class,
+ *	FStubData_InventoryStubDataProviderTableRow is a Row type that define the dependency between a UItemObject class,
  *	and many attachments.
  *	
  *	IMPORTANT : THIS ROW TYPE IS PURELY FOR BACKEND SIMULATION DURING HEADLESS PROJECT DEVELOPMENT! IF YOU REQUIRE
@@ -57,7 +57,7 @@ struct INVENTORYSAMPLE_API FComplexDependencies
  *	(See WeaponSample ATriggeringActor for reference.)
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FComplexDependencyLookupStubDataTableRow : public FTableRowBase
+struct INVENTORYSAMPLE_API FStubData_InventoryStubDataProviderTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -66,5 +66,5 @@ struct INVENTORYSAMPLE_API FComplexDependencyLookupStubDataTableRow : public FTa
 #endif
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSoftClassPtr<UItemObject>, FComplexDependencies> ComplexDependencyLookup{};
+	TMap<TSoftClassPtr<UItemObject>, FStubData_InventoryDependencyGraphElements> InventoryDependencyGraph{};
 };

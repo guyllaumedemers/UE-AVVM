@@ -60,16 +60,16 @@ public:
 /**
  *	Class description:
  *	
- *	UComplexDependencyLookupStubDataProvider is the impl UObject that handle returning a stub representation
- *	of a {FAVVMPlayerProfile::ComplexDependencyLookup}. i.e it provide stub information about dependencies between an item, and
+ *	UInventoryDependencyGraphStubDataProvider is the impl UObject that handle returning a stub representation
+ *	of a {FAVVMPlayerProfile::InventoryDependencyGraph}. i.e it provide stub information about dependencies between an item, and
  *	attachments that are socket to it.
  */
 UCLASS()
-class INVENTORYSAMPLE_API UComplexDependencyLookupStubDataProvider : public UAVVMOnlineStubDataProvider
+class INVENTORYSAMPLE_API UInventoryDependencyGraphStubDataProvider : public UAVVMOnlineStubDataProvider
 {
 	GENERATED_BODY()
 
 public:
-	UComplexDependencyLookupStubDataProvider(const FObjectInitializer& ObjectInitializer);
+	UInventoryDependencyGraphStubDataProvider(const FObjectInitializer& ObjectInitializer);
 	virtual TArray<int32> MakePropertyStubData() const override;
 };

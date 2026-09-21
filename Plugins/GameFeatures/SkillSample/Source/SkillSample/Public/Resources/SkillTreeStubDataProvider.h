@@ -40,3 +40,20 @@ public:
 	USkillTreeStubDataProvider(const FObjectInitializer& ObjectInitializer);
 	virtual TArray<int32> MakePropertyStubData() const override;
 };
+
+/**
+ *	Class description:
+ *	
+ *	USkillDependencyGraphStubDataProvider is the impl UObject that handle returning a stub representation
+ *	of a {FAVVMPlayerProfile::SkillDependencyGraph}. i.e it provide stub information about dependencies between a skill, and
+ *	an item, or attachment that reference it.
+ */
+UCLASS()
+class SKILLSAMPLE_API USkillDependencyGraphStubDataProvider : public UAVVMOnlineStubDataProvider
+{
+	GENERATED_BODY()
+
+public:
+	USkillDependencyGraphStubDataProvider(const FObjectInitializer& ObjectInitializer);
+	virtual TArray<int32> MakePropertyStubData() const override;
+};

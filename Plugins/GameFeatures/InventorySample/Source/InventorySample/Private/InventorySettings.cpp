@@ -125,7 +125,7 @@ const FDataRegistryId& UInventorySettings::GetStubDataProviderInventoryId()
 	return GetDefault<UInventorySettings>()->StubDataProviderInventoryId;
 }
 
-const FDataRegistryId& UInventorySettings::GetStubDataProviderComplexLookupId()
+const FDataRegistryId& UInventorySettings::GetStubDataInventoryDependencyGraphId()
 {
-	return GetDefault<UInventorySettings>()->StubDataProviderComplexLookupId;
+	return GetDefault<UInventorySettings>()->StubDataInventoryDependencyGraphId;
 }

@@ -25,9 +25,7 @@
 #include "AVVMOnlineUtils.h"
 #include "AVVMPlayerState.h"
 #include "NativeGameplayTags.h"
-#include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlinePlayer.h"
-#include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -179,8 +177,8 @@ void AAVVMGameSession::RegisterPlayer(APlayerController* NewPlayer,
 			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKILLS),
 			{},
 			PresetId,
-			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_DEPENDENCY_LOOKUP),
-			{}
+			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_INVENTORY_DEPENDENCY_GRAPH),
+			UAVVMOnlineStubDataHelper::Static_MakePropertyData(TAG_AVVMONLINE_BACKEND_STUB_SKILL_DEPENDENCY_GRAPH)
 	};
 
 	const APlayerState* Player = IsValid(NewPlayer) ? NewPlayer->PlayerState : nullptr;

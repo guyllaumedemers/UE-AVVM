@@ -62,20 +62,31 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		return nullptr;
 	}
 
-	TArray<int32> Dependencies;
+	TArray<int32> Dependencies{};
 
 	const auto* Character = Cast<AAVVMCharacter>(Target);
 	if (IsValid(Character))
 	{
-		// @gdemers aggregate dependencies defined in backend representation.
-		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		// @gdemers we need to validate that the parent we are looking for hasnt been created yet.
+		TArray<AActor*> OutChildren;
+		Target->GetAttachedActors(OutChildren, false);
 
-		// @gdemers character dependencies should validate their encoding so the input id we are comparing against
-		// isnt an attachment that target a triggering actor.
-		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-		                                                      GET_ELEMENT_RELATIONSHIP_BIT_RANGE,
-		                                                      GET_ELEMENT_RELATIONSHIP_RSHIFT,
-		                                                      FILTER_CHARACTER_RELATIONSHIP_BIT);
+		OutChildren = OutChildren.FilterByPredicate([](const AActor* Child)
+		{
+			return IsValid(Child) && Child->IsA<ATriggeringActor>();
+		});
+
+		for (AActor* Child : OutChildren)
+		{
+			// @gdemers recursively search for parent that are already spawned, and may own the current attachment.
+			AActor* SearchResult = FAttachmentSocketTargetingHelper::GetDesiredTypedInner(Src, Child);
+			if (IsValid(SearchResult))
+			{
+				return SearchResult;
+			}
+		}
+
+		return nullptr;
 	}
 	else
 	{
@@ -85,54 +96,24 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 			return nullptr;
 		}
 
-		// @gdemers aggregate dependencies defined in backend representation.
+		// @gdemers retrieve the sub-set from the player inventory that reference our current target actor.
 		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
 		                                                               TargetUniqueId/*ProviderId of target is the PhysicalGlobalId*/,
 		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
+
+		// @gdemers translate our attachment PhysicalGlobalId into a VirtualGlobalId.
+		const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET),
+		                                                                    GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+		                                                                    GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+
+		// @gdemers search for the translate address.
+		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
+		                                                      GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
+		                                                      GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT,
+		                                                      VirtualGlobalId);
+
+		return !Dependencies.IsEmpty() ? Target : nullptr;
 	}
-
-	// @gdemers translate physical addressing into virtual addressing for running searches.
-	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET),
-	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-	                                                                    GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
-
-	// @gdemers search for virtual address within bit range
-	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-	                                                      GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT,
-	                                                      VirtualGlobalId);
-
-	if (!Dependencies.IsEmpty())
-	{
-		return Target;
-	}
-
-	// @gdemers early out for the recursive case so we avoid calling GetAttachedActors.
-	if (Target->IsA<ATriggeringActor>())
-	{
-		return nullptr;
-	}
-
-	// @gdemers we need to validate that the parent we are looking for hasnt been created yet.
-	TArray<AActor*> OutChildren;
-	Target->GetAttachedActors(OutChildren, false);
-
-	OutChildren = OutChildren.FilterByPredicate([](const AActor* Child)
-	{
-		return IsValid(Child) && Child->IsA<ATriggeringActor>();
-	});
-
-	for (AActor* Child : OutChildren)
-	{
-		// @gdemers recursively search for parent that are already spawned, and may own the current attachment.
-		AActor* SearchResult = FAttachmentSocketTargetingHelper::GetDesiredTypedInner(Src, Child);
-		if (IsValid(SearchResult))
-		{
-			return SearchResult;
-		}
-	}
-
-	return nullptr;
 }
 
 AAttachmentActor::AAttachmentActor(const FObjectInitializer& ObjectInitializer)

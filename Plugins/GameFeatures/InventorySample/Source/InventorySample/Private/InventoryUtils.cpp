@@ -463,6 +463,56 @@ TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderLoadoutRegistryIds(co
 	return TranslatePrivateItemId(PrivateItemIds);
 }
 
+TArray<int32> UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds(const UObject* WorldContextObject,
+                                                                            const int32 NewProfileId)
+{
+	// @gdemers STAY COMMENT OUT! We cant parse Character specific entries due to bit encoding
+	// expecting Storage entries be at 0.
+	 
+	// // @gdemers get ALL the items referenced on the player profiles.
+	// // IMPORTANT - There is no distinction on the profile for whose referencing the item in this collection set, we can however
+	// // use the relationship bitmask to resolve if we depend on character, item, or attachment.
+	// TArray<int32> InventoryDependencyGraphElements = AAVVMGameSession::Static_GetPlayerInventoryItems(WorldContextObject, NewProfileId);
+	// InventoryDependencyGraphElements.RemoveAll([](const int32 PrivateItemId)
+	// {
+	// 	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
+	// 	return (false != !!RelationshipBitmask)/*exception case - storage has no relationship*/ && (false == (RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*Remove those that arent Character dependent*/);
+	// });
+
+	return AAVVMGameSession::Static_GetPlayerInventoryItems(WorldContextObject, NewProfileId);
+}
+
+TArray<int32> UInventoryUtils::GetBackendProviderDependentActorFilteredInventoryIds(const UObject* WorldContextObject,
+                                                                                    const int32 NewProfileId,
+                                                                                    const int32 NewPrivateItemId)
+{
+	// @gdemers Parse the dependency graph to retrieved attachment tied to the given target actor.
+	TArray<int32> InventoryDependencyGraphElements = AAVVMGameSession::Static_GetPlayerInventoryDependencyGraph(WorldContextObject, NewProfileId);
+	InventoryDependencyGraphElements.RemoveAll([OwnerPrivateItemId = NewPrivateItemId](const int32 InventoryDependencyGraphElementId)
+	{
+		// @gdemers IMPORTANT - RelationshipBitmask is irrelevant here. Our dependency graph can only bind attachment to items. Other combination
+		// default to an item being dependent on a character, or an attachment on a character.
+		// That filtering scheme is handled within UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds.
+
+		// @gdemers we use DecodeInt32 instead of FilterInt32 due to the encoding scheme being different between both entity.
+		const int32 OwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 ElementOwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const bool bDoesShareOwner = (false == (OwnerVirtualId ^ ElementOwnerVirtualId));
+		if (bDoesShareOwner)
+		{
+			const int32 DependantInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
+			const int32 TargetInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT);
+			return (false != (DependantInstancedId ^ TargetInstancedId))/*XOR 1 for elements that arent Actor dependent*/;
+		}
+		else
+		{
+			return true;
+		}
+	});
+
+	return InventoryDependencyGraphElements;
+}
+
 void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
                                            int32& OutProviderId,
                                            TMap<FGameplayTag, int32>& OutLoadout,

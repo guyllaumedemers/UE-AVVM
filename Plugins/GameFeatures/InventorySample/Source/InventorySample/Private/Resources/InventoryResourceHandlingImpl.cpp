@@ -27,9 +27,9 @@
 
 TArray<FDataRegistryId> UInventoryResourceHandlingImpl::ProcessResources(UActorComponent* ActorComponent, const TArray<UObject*>& Resources) const
 {
+	// @gdemers since we load by gfp we may suffer from race conditions here.
 	auto* InventoryComponent = Cast<UActorInventoryComponent>(ActorComponent);
-	if (!ensureAlwaysMsgf(IsValid(InventoryComponent), TEXT("Component Cast Failed.")) ||
-		!UAVVMToolkitUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
+	if (!IsValid(InventoryComponent) || !UAVVMToolkitUtils::HasNetworkAuthority(InventoryComponent->GetTypedOuter<AActor>()))
 	{
 		return TArray<FDataRegistryId>{};
 	}
