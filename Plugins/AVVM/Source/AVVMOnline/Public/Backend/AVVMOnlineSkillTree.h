@@ -60,18 +60,25 @@
 
 // @gdemers element lookup for supporting the socketing process -- identify dependencies between an attachment and an owner (which may have more than one instance)
 #ifdef AVVMONLINE_USE_DEFAULT_SKILL_TREE_LOOKUP_ENCODING
+// @gdemers RELATIONSHIP Bitmask (7)
+// Tree Node	000
+// attachment	001
+// character	010
+// item			100
+#define GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_BIT_RANGE (2)
+#define GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_RSHIFT (0)
 // @gdemers physical id that represent the element we are evaluating dependencies for
 #define GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE (10)
-#define GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT (0)
+#define GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT (3)
 // @gdemers the instance id that uniquely identify 'this' element
 #define GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_BIT_RANGE (2)
-#define GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_RSHIFT (11)
+#define GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_RSHIFT (14)
 // @gdemers the virtual id of a dependency that reference our element we evaluate
 #define GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE (10)
-#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT (14)
+#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT (17)
 // @gdemers the instance id of a dependency that reference our element we evaluate
 #define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE (2)
-#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT (25)
+#define GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT (28)
 #endif
 
 /**

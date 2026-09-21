@@ -33,3 +33,8 @@ const FDataRegistryType& USkillTreeSettings::GetSkillTreeProviderRegistryType()
 {
 	return GetDefault<USkillTreeSettings>()->SkillTreeProviderRegistryType;
 }
+
+const FDataRegistryId& USkillTreeSettings::GetStubDataProviderSkillTreeId()
+{
+	return GetDefault<USkillTreeSettings>()->StubDataProviderSkillTreeId;
+}

@@ -34,27 +34,26 @@
 /**
  *	Class description:
  *	
- *	FSkillTreeNodePhase define the Tree Node GameplayEffects an actor owns during a given phase.
- *	
- *	Note : Here we expect designers to manage properly Tree Node referencing, and respect class specific
- *	skills. Example : Don't reference a Mage skill onto a warrior, unless your project support sub-classing.
+ *	FSkillTreeNodeData define the Tree Node GameplayEffect an actor owns.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeNodePhase
+struct SKILLSAMPLE_API FSkillTreeNodeDefinition
 {
 	GENERATED_BODY()
-	
-	static const int32 Static_GetRelationshipBitmask(const FSkillTreeNodePhase& SkillTreeNodePhase);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
-	TMap<FDataRegistryId, int32 /*GameplayEffect level*/> SkillTreeNodeIds{};
+	static const int32 Static_GetRelationshipBitmask(const FSkillTreeNodeDefinition& SkillTreeNodePhase);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
 
-	// @gdemers see AVVMOnlineInventory.h
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="SkillTreeNodeObjectDefinitionDataTableRow"))
+	FDataRegistryId SkillTreeNodeId{};
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
 	int32 InstancedId{INDEX_NONE};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
+	int32 EffectLevel{INDEX_NONE};
 };
 
 /**
@@ -80,5 +79,5 @@ struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
 	FDataRegistryId SkillTreeProviderActorIdentifierId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<FSkillTreeNodePhase> SkillTreeNodePerPhases{};
+	TArray<FSkillTreeNodeDefinition> SkillTreeNodeDefinitions{};
 };

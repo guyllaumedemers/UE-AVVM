@@ -138,20 +138,16 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		{
 			continue;
 		}
-		
-		if (Row->SkillTreeNodePerPhases.IsEmpty())
-		{
-			continue;
-		}
 
 		TArray<int32> PrivateTreeNodeIds{};
-		// @gdemers Only phase 0 matter during initialization. progression tracking will handle replacing data
-		// during player playthrough.
-		const int32 RelationshipBitMask = FSkillTreeNodePhase::Static_GetRelationshipBitmask(Row->SkillTreeNodePerPhases[0]);
-		const int32 InstancedId = Row->SkillTreeNodePerPhases[0].InstancedId;
-		for (const auto& [RegistryId, EffectLevel] : Row->SkillTreeNodePerPhases[0].SkillTreeNodeIds)
+		for (const auto& SkillTreeNodeDefinition : Row->SkillTreeNodeDefinitions)
 		{
-			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(RegistryId, RelationshipBitMask, InstancedId, EffectLevel);
+			const int32 RelationshipBitmask = FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
+			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(SkillTreeNodeDefinition.SkillTreeNodeId,
+																							RelationshipBitmask,
+																							SkillTreeNodeDefinition.InstancedId,
+																							SkillTreeNodeDefinition.EffectLevel);
+
 			PrivateTreeNodeIds.Add(PrivateTreeNodeId);
 		}
 
@@ -406,65 +402,89 @@ bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType&
 
 TArray<FDataRegistryId> USkillTreeUtils::GetProviderSkillTreeRegistryIds(const int32 NewProviderId)
 {
-	// @gdemers lambda to conditionally generate our default provider content
-	// for serialization to disk.
-	static const auto GenerateDefaultContent = []()
-	{
-		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
-	};
-
-	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
-	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
-
-	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
-	NSJsonSkillTree::FromString(SearchPayload, OutProvider);
-	return TranslatePrivateItemId(OutProvider.PrivateTreeNodeIds);
+	// TODO @gdemers These require rework!
+	// // @gdemers lambda to conditionally generate our default provider content
+	// // for serialization to disk.
+	// static const auto GenerateDefaultContent = []()
+	// {
+	// 	return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+	// };
+	//
+	// const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
+	// const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
+	//
+	// NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+	// NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+	// return TranslatePrivateItemId(OutProvider.PrivateTreeNodeIds);
+	return {};
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderSkillTreeRegistryIds(const UObject* WorldContextObject,
                                                                                 const int32 NewProfileId)
 {
-	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(WorldContextObject, NewProfileId);
+	TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerSkillTreeNodes(WorldContextObject, NewProfileId);
+	PrivateItemIds.RemoveAll([](const int32 PrivateItemId)
+	{
+		const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
+		return (false != (RelationshipBitmask ^ FILTER_CHARACTER_RELATIONSHIP_BIT)/*XOR 1 for elements that arent Character dependent*/);
+	});
+
 	return TranslatePrivateItemId(PrivateItemIds);
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId,
                                                                                   const int32 NewPrivateItemId)
 {
-	// @gdemers lambda to conditionally generate our default provider content
-	// for serialization to disk.
-	static const auto GenerateDefaultContent = []()
-	{
-		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
-	};
-
-	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
-	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
-
-	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
-	NSJsonSkillTree::FromString(SearchPayload, OutProvider);
-
-	const TArray<int32> FilteredSet = USkillTreeUtils::FilterSkillIds(OutProvider.PrivateTreeNodeIds, NewPrivateItemId);
-	return TranslatePrivateItemId(FilteredSet);
+	// TODO @gdemers These require rework!
+	// // @gdemers lambda to conditionally generate our default provider content
+	// // for serialization to disk.
+	// static const auto GenerateDefaultContent = []()
+	// {
+	// 	return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+	// };
+	//
+	// const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
+	// const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
+	//
+	// NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+	// NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+	//
+	// const TArray<int32> FilteredSet = USkillTreeUtils::FilterSkillIds(OutProvider.PrivateTreeNodeIds, NewPrivateItemId);
+	// return TranslatePrivateItemId(FilteredSet);
+	return {};
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
                                                                                          const int32 NewProfileId,
                                                                                          const int32 NewPrivateItemId)
 {
-	const TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetActorSkillTreeNodes(WorldContextObject, NewProfileId, NewPrivateItemId);
-	return TranslatePrivateItemId(PrivateItemIds);
-}
-
-TArray<int32> USkillTreeUtils::FilterSkillIds(const TArray<int32>& SkillIds,
-                                              const int32 NewPrivateItemId)
-{
-	TArray<int32> OutResults{SkillIds};
-	OutResults.RemoveAll([DependentID = NewPrivateItemId](const int32 Value)
+	// @gdemers Parse the dependency graph to retrieved skills tied to the given target actor.
+	TArray<int32> SkillDependencyGraphElements = AAVVMGameSession::Static_GetPlayerSkillDependencyGraph(WorldContextObject, NewProfileId);
+	SkillDependencyGraphElements.RemoveAll([OwnerPrivateItemId = NewPrivateItemId](const int32 SkillDependencyGraphElementId)
 	{
-		// TODO @gdemers add impl.
-		return false;
+		const int32 OwnerRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_RELATIONSHIP_RSHIFT);
+		const int32 ElementOwnerRelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_RELATIONSHIP_RSHIFT);
+		const bool bDoesShareRelationship = (ElementOwnerRelationshipBitmask/*Attachment*/ & OwnerRelationshipBitmask/*example : Attachment+Item*/);
+		if (!bDoesShareRelationship)
+		{
+			return false;
+		}
+
+		// @gdemers we use DecodeInt32 instead of FilterInt32 due to the encoding scheme being different between both entity.
+		const int32 OwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 ElementOwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const bool bAreSameActorType = (false == (OwnerVirtualId ^ ElementOwnerVirtualId));
+		if (bAreSameActorType)
+		{
+			const int32 DependantInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_SKILL_TREE_NODE_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_INSTANCED_ID_RSHIFT);
+			const int32 TargetInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT);
+			return (false == (DependantInstancedId ^ TargetInstancedId));
+		}
+		else
+		{
+			return false;
+		}
 	});
 
-	return OutResults;
+	return TranslatePrivateItemId(SkillDependencyGraphElements);
 }

@@ -26,7 +26,7 @@
 
 #include "SkillTreeUtils.generated.h"
 
-struct FSkillTreeNodePhase;
+struct FSkillTreeNodeDefinition;
 class UGameplayEffect;
 
 /**
@@ -97,8 +97,4 @@ public:
 	static TArray<FDataRegistryId> GetBackendProviderDependentSkillTreeRegistryIds(const UObject* WorldContextObject,
 	                                                                               const int32 NewProfileId,
 	                                                                               const int32 NewPrivateItemId);
-
-	UFUNCTION(BlueprintCallable)
-	static TArray<int32> FilterSkillIds(const TArray<int32>& SkillIds,
-	                                    const int32 NewPrivateItemId);
 };

@@ -19,7 +19,11 @@
 //SOFTWARE.
 #include "Resources/SkillTreeStubDataProvider.h"
 
+#include "DataRegistrySubsystem.h"
+#include "SkillTreeSettings.h"
+#include "SkillTreeUtils.h"
 #include "Backend/AVVMOnlinePlayer.h"
+#include "Data/SkillTreeProviderTableRow.h"
 
 USkillTreeStubDataProvider::USkillTreeStubDataProvider(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -32,5 +36,29 @@ USkillTreeStubDataProvider::USkillTreeStubDataProvider(const FObjectInitializer&
 
 TArray<int32> USkillTreeStubDataProvider::MakePropertyStubData() const
 {
-	return {2001};
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return TArray<int32>{};
+	}
+
+	const auto* Row = Subsystem->GetCachedItem<FSkillTreeProviderTableRow>(USkillTreeSettings::GetStubDataProviderSkillTreeId());
+	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider.")))
+	{
+		return TArray<int32>{};
+	}
+
+	TArray<int32> PrivateTreeNodeIds{};
+	for (const auto& SkillTreeNodeDefinition : Row->SkillTreeNodeDefinitions)
+	{
+		const int32 RelationshipBitmask = FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
+		const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(SkillTreeNodeDefinition.SkillTreeNodeId,
+		                                                                                RelationshipBitmask,
+		                                                                                SkillTreeNodeDefinition.InstancedId,
+		                                                                                SkillTreeNodeDefinition.EffectLevel);
+
+		PrivateTreeNodeIds.Add(PrivateTreeNodeId);
+	}
+
+	return PrivateTreeNodeIds;
 }
