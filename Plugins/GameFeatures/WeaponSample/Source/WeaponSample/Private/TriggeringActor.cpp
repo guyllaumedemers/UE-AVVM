@@ -165,6 +165,9 @@ void ATriggeringActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 #if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
+		// @gdemers unbind abilities from owning outer.
+		UnRegisterAbility();
+
 		IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 		if (IsValid(ReplicatedTagComponent))
 		{
@@ -561,11 +564,9 @@ void ATriggeringActor::RegisterAbility()
 		ResourcePaths.Add(AbilityClass.ToSoftObjectPath());
 	}
 
-	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
-	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
-	FStreamableDelegate OnRequestTriggeringActorAbilityComplete;
-	OnRequestTriggeringActorAbilityComplete.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
-	StreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, OnRequestTriggeringActorAbilityComplete);
+	FStreamableDelegate Callback{};
+	Callback.BindUObject(this, &ATriggeringActor::OnTriggeringAbilityClassAcquired);
+	StreamableHandle = UAssetManager::Get().LoadAssetList(ResourcePaths, Callback);
 }
 
 void ATriggeringActor::UnRegisterAbility()
@@ -586,6 +587,7 @@ void ATriggeringActor::UnRegisterAbility()
 		ASC->ClearAbility(Handle);
 	}
 
+	TriggeringAbilitySpecHandles.Reset();
 	StreamableHandle.Reset();
 }
 

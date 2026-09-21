@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "AttachmentActor.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMLogger.h"
@@ -31,6 +32,7 @@
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/AssetManager.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Net/UnrealNetwork.h"
 
@@ -162,6 +164,16 @@ void AAttachmentActor::BeginPlay()
 	                *GetNameSafe(AAttachmentActor::StaticClass()));
 
 	OwningOuter = Outer;
+	
+#if WITH_SERVER_CODE
+	if (HasAuthority())
+	{
+		if (GetAttachmentActorSparseData(EGetSparseClassDataMethod::ArchetypeIfNull)->bShouldSwapGameplayEffectOnBeginPlay)
+		{
+			Server_SwapGameplayEffect(true);
+		}
+	}
+#endif
 }
 
 void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -175,10 +187,18 @@ void AAttachmentActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 
 	AVVM_LOGGER_LOG(LogWeaponSample,
-					this,
-					Outer,
+	                this,
+	                Outer,
 	                TEXT("Removing %s."),
 	                *GetNameSafe(AAttachmentActor::StaticClass()));
+
+#if WITH_SERVER_CODE
+	if (HasAuthority())
+	{
+		// @gdemers unbind gameplay effect from owning outer.
+		UnRegisterGameplayEffect();
+	}
+#endif
 
 	IAVVMDoesActorSupportDeferredSocketParenting::Execute_Detach(this);
 }
@@ -350,8 +370,12 @@ void AAttachmentActor::Bind_Implementation()
 	                Outer,
 	                TEXT("Bind to Target."));
 
+#if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
+		// @gdemers Unregister/Register gameplay effect from owner.
+		Server_SwapGameplayEffect(true);
+		
 		// @gdemers attempt registering AttributeSet with ASC. may fail but thats alright! the inventory system handle that case.
 		auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 		if (IsValid(ASC))
@@ -359,6 +383,7 @@ void AAttachmentActor::Bind_Implementation()
 			ASC->RegisterAttributeSet(OwnedAttributeSet, this);
 		}
 	}
+#endif
 
 	// @gdemers allow linking anim instance to driving anim instance.
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
@@ -381,8 +406,12 @@ void AAttachmentActor::Unbind_Implementation()
 	                Outer,
 	                TEXT("Unbind Target."));
 
+#if WITH_SERVER_CODE
 	if (HasAuthority())
 	{
+		// @gdemers Unregister gameplay effect from owner.
+		Server_SwapGameplayEffect(false);
+		
 		// @gdemers clear AttributeSet provided by this attachment.
 		auto* ASC = Cast<UAVVMAbilitySystemComponent>(GetAbilitySystemComponent());
 		if (IsValid(ASC))
@@ -390,6 +419,7 @@ void AAttachmentActor::Unbind_Implementation()
 			ASC->UnRegisterAttributeSet(this);
 		}
 	}
+#endif
 
 	// @gdemers allow unlinking anim instance from driving anim instance.
 	auto* TargetSkeletalMeshComponent = Outer->GetComponentByClass<USkeletalMeshComponent>();
@@ -461,6 +491,78 @@ void AAttachmentActor::OnSocketParentingDeferred(AActor* Parent,
 	                     TEXT("New OwningOuter doesn't own a valid ASC.")))
 	{
 		ASC->SetupAttributeSet(RecursiveContextArgs.SrcAttributeSetSoftObjectPath, Target);
+	}
+}
+
+void AAttachmentActor::RegisterGameplayEffect()
+{
+	if (StreamableHandle.IsValid())
+	{
+		return;
+	}
+
+	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
+	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
+	FStreamableDelegate Callback{};
+	Callback.BindUObject(this, &AAttachmentActor::OnAttachmentGameplayEffectClassAcquired);
+	StreamableHandle = UAssetManager::Get().LoadAssetList({GetAttachmentGameplayEffectClass().ToSoftObjectPath()}, Callback);
+}
+
+void AAttachmentActor::UnRegisterGameplayEffect()
+{
+	if (ActiveGameplayEffectHandles.IsEmpty())
+	{
+		return;
+	}
+
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
+	if (!IsValid(ASC))
+	{
+		return;
+	}
+
+	for (const auto& Handle : ActiveGameplayEffectHandles)
+	{
+		ASC->RemoveActiveGameplayEffect(Handle);
+	}
+
+	ActiveGameplayEffectHandles.Reset();
+	StreamableHandle.Reset();
+}
+
+void AAttachmentActor::OnAttachmentGameplayEffectClassAcquired()
+{
+	auto* ASC = UAVVMAbilityUtils::GetAbilitySystemComponent(OwningOuter.Get());
+	if (!StreamableHandle.IsValid() || !ensureAlwaysMsgf(IsValid(ASC),
+	                                                     TEXT("Owning Outer missing valid ASC.")))
+	{
+		return;
+	}
+
+	TArray<UObject*> OutStreamableAssets;
+	StreamableHandle->GetLoadedAssets(OutStreamableAssets);
+
+	for (auto* OutStreamableAsset : OutStreamableAssets)
+	{
+		auto* NewGameplayEffectClass = Cast<UClass>(OutStreamableAsset);
+		if (!IsValid(NewGameplayEffectClass))
+		{
+			return;
+		}
+
+		AActor* NonConstOuter = const_cast<AActor*>(OwningOuter.Get());
+		const FGameplayEffectSpecHandle GESpecHandle = UAbilitySystemBlueprintLibrary::MakeSpecHandleByClass(NewGameplayEffectClass, NonConstOuter, NonConstOuter, 1);
+		ActiveGameplayEffectHandles.Add(ASC->BP_ApplyGameplayEffectSpecToSelf(GESpecHandle));
+	}
+}
+
+void AAttachmentActor::Server_SwapGameplayEffect_Implementation(const bool bIsActive)
+{
+	UnRegisterGameplayEffect();
+
+	if (bIsActive)
+	{
+		RegisterGameplayEffect();
 	}
 }
 

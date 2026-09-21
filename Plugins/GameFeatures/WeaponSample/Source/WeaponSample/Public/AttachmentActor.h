@@ -32,6 +32,8 @@
 
 #include "AttachmentActor.generated.h"
 
+struct FStreamableHandle;
+
 /**
  *	Class description:
  *	
@@ -59,6 +61,9 @@ struct WEAPONSAMPLE_API FAttachmentActorSparseData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TSubclassOf<UAnimInstance> LinkedAnimInstanceClass = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
+	bool bShouldSwapGameplayEffectOnBeginPlay{true};
 
 	// @gdemers maybe grant an ability, or apply some passive effect to the asc owning outer.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
@@ -135,6 +140,15 @@ protected:
 	                               AActor* Target,
 	                               const FAVVMSocketTargetingDeferralContextArgs ContextArgs);
 
+	UFUNCTION(Server, Reliable)
+	void Server_SwapGameplayEffect(const bool bIsActive);
+	
+	void RegisterGameplayEffect();
+	void UnRegisterGameplayEffect();
+
+	UFUNCTION()
+	void OnAttachmentGameplayEffectClassAcquired();
+
 	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
 	TObjectPtr<const UAttributeSet> OwnedAttributeSet = nullptr;
 
@@ -144,6 +158,10 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FGameplayTag OwningSocketSlotTag{FGameplayTag::EmptyTag};
 
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<FActiveGameplayEffectHandle> ActiveGameplayEffectHandles{};
+
+	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 	FDelegateHandle DeferredSocketParentingDelegateHandle{};
 
 private:

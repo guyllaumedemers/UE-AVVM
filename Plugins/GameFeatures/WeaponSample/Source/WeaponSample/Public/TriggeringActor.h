@@ -85,7 +85,9 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	bool bShouldSwapAbilityOnBeginPlay{true};
-
+	
+	// @gdemers IMPORTANT : we are not passing through the AVVMResourceManagerComponent here to async load the GameplayAbility class.
+	// Doing so would prevent caching of the Ability and removal of it during context switching of triggering actors. (i.e during weapon switch, etc...)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClasses{};
 	
