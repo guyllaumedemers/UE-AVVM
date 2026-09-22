@@ -22,6 +22,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMCharacter.h"
 #include "AVVMGameplayUtils.h"
+#include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMToolkitUtils.h"
 #include "TriggeringActor.h"
@@ -67,6 +68,23 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 	const auto* Character = Cast<AAVVMCharacter>(Target);
 	if (IsValid(Character))
 	{
+		// @gdemers retrieve all the items within the player inventory.
+		// IMPORTANT - this is our regular bit encoding scheme with reference to the relationship bitmask.
+		TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerInventoryItems(Character, TargetUniqueId);
+		PrivateItemIds.RemoveAll([SearchId = PhysicalGlobalId](const int32 NewPrivateItemId)
+		{
+			// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
+			const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
+			const bool bDependOnCharacter = (false == !!RelationshipBitmask)/*storage*/ || (false != (RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*reference character ownership*/);
+			const int32 OutPhysicalGlobalId = UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId);
+			return (false != (OutPhysicalGlobalId ^ SearchId)) || !bDependOnCharacter;
+		});
+
+		if (!PrivateItemIds.IsEmpty())
+		{
+			return Target;
+		}
+		
 		// @gdemers we need to validate that the parent we are looking for hasnt been created yet.
 		TArray<AActor*> OutChildren;
 		Target->GetAttachedActors(OutChildren, false);
@@ -112,6 +130,7 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		                                                      GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT,
 		                                                      VirtualGlobalId);
 
+		// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
 		return !Dependencies.IsEmpty() ? Target : nullptr;
 	}
 }
