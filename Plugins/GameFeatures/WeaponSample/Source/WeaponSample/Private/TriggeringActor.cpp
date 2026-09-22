@@ -58,15 +58,17 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
 	}
 
-	// @gdemers translate physical addressing into virtual addressing for running searches.
+	// @gdemers translate our triggering actor PhysicalGlobalId into a VirtualGlobalId.
 	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((ElementId/*PhysicalGlobalId*/ - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET),
 	                                                                    GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
 	                                                                    GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
 
-	Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-	                                                      GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-	                                                      GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT,
-	                                                      VirtualGlobalId);
+	Dependencies.RemoveAll([SearchId = VirtualGlobalId](const int32 NewPrivateItemId)
+	{
+		// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
+		const int32 FilteredId = UAVVMOnlineEncodingUtils::FilterInt32(NewPrivateItemId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+		return (SearchId != (FilteredId & SearchId));
+	});
 
 	return Dependencies;
 }

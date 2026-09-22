@@ -113,23 +113,23 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 			return nullptr;
 		}
 
-		// @gdemers retrieve the sub-set from the player inventory that reference our current target actor.
-		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
-		                                                               TargetUniqueId/*ProviderId of target is the PhysicalGlobalId*/,
-		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
-
 		// @gdemers translate our attachment PhysicalGlobalId into a VirtualGlobalId.
 		const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET),
 		                                                                    GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
 		                                                                    GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
 
-		// @gdemers search for the translate address.
-		Dependencies = UAVVMOnlineEncodingUtils::SearchValues(Dependencies,
-		                                                      GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-		                                                      GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT,
-		                                                      VirtualGlobalId);
+		// @gdemers retrieve the inventory dependency graph, and lookup for our attachment.
+		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
+		                                                               TargetUniqueId/*ProviderId of target is the PhysicalGlobalId*/,
+		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
 
-		// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
+		Dependencies.RemoveAll([SearchId = VirtualGlobalId](const int32 NewPrivateItemId)
+		{
+			// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
+			const int32 FilteredId = UAVVMOnlineEncodingUtils::FilterInt32(NewPrivateItemId, GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+			return (SearchId != (FilteredId & SearchId));
+		});
+
 		return !Dependencies.IsEmpty() ? Target : nullptr;
 	}
 }
