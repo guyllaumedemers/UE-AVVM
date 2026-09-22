@@ -466,19 +466,10 @@ TArray<FDataRegistryId> UInventoryUtils::GetBackendProviderLoadoutRegistryIds(co
 TArray<int32> UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds(const UObject* WorldContextObject,
                                                                             const int32 NewProfileId)
 {
-	// @gdemers STAY COMMENT OUT! We cant parse Character specific entries due to bit encoding
-	// expecting Storage entries be at 0.
-	 
-	// // @gdemers get ALL the items referenced on the player profiles.
-	// // IMPORTANT - There is no distinction on the profile for whose referencing the item in this collection set, we can however
-	// // use the relationship bitmask to resolve if we depend on character, item, or attachment.
-	// TArray<int32> InventoryDependencyGraphElements = AAVVMGameSession::Static_GetPlayerInventoryItems(WorldContextObject, NewProfileId);
-	// InventoryDependencyGraphElements.RemoveAll([](const int32 PrivateItemId)
-	// {
-	// 	const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
-	// 	return (false != !!RelationshipBitmask)/*exception case - storage has no relationship*/ && (false == (RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*Remove those that arent Character dependent*/);
-	// });
-
+	// @gdemers load the full inventory list from the owning profile. this will initialize any child item socket
+	// to the character, AND their dependent child.
+	// We resolve attachment ownership via our bit encoding in during the loading process of the inventory system.
+	// See : FAttachmentSocketTargetingHelper::GetDesiredTypedInner.
 	return AAVVMGameSession::Static_GetPlayerInventoryItems(WorldContextObject, NewProfileId);
 }
 
