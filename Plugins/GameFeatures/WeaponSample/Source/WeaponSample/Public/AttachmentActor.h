@@ -23,6 +23,7 @@
 
 #include "AbilitySystemInterface.h"
 #include "AVVMDoesActorSupportAnimationInterruption.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
@@ -96,6 +97,7 @@ class WEAPONSAMPLE_API AAttachmentActor : public AAVVMModularActor,
                                           public IAVVMDoesOwnAttributeSet,
                                           public IAVVMDoesActorSupportAnimationInterruption,
                                           public IAVVMDoesActorSupportDeferredSocketParenting,
+                                          public IAVVMDoesActorSupportInstanceIdentifier,
                                           public IAVVMDoesActorSupportStateBinding
 {
 	GENERATED_BODY()

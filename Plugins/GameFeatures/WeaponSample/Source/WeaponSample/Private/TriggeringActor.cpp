@@ -48,26 +48,29 @@ TArray<int32> FTriggeringActorDataResolverHelper::GetElementDependencies(const U
 		return TArray<int32>{};
 	}
 
-	TArray<int32> Dependencies{};
-
-	// @gdemers retrieve the character preset, and all items that compose it.
-	const auto* Character = Cast<AAVVMCharacter>(Outer);
-	if (IsValid(Character) && UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
+	const int32 TargetInstancedId = IAVVMDoesActorSupportInstanceIdentifier::Execute_GetInstancedId(Outer);
+	if (!ensureAlwaysMsgf(TargetInstancedId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid instanced id."),
+	                      *GetNameSafe(Outer)))
 	{
-		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
-		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Outer, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+		return TArray<int32>{};
 	}
 
-	// @gdemers translate our triggering actor PhysicalGlobalId into a VirtualGlobalId.
-	const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((ElementId/*PhysicalGlobalId*/ - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET),
-	                                                                    GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-	                                                                    GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+	TArray<int32> Dependencies{};
 
-	Dependencies.RemoveAll([SearchId = VirtualGlobalId](const int32 NewPrivateItemId)
+	const auto* Character = Cast<AAVVMCharacter>(Outer->GetTypedOuter<AAVVMCharacter>());
+	if (IsValid(Character) && UAVVMToolkitUtils::IsNativeScriptInterfaceValid<const IAVVMResourceProvider>(Character))
 	{
-		// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
-		const int32 FilteredId = UAVVMOnlineEncodingUtils::FilterInt32(NewPrivateItemId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
-		return (SearchId != (FilteredId & SearchId));
+		// @gdemers retrieve the inventory dependency graph, and lookup for our attachment.
+		const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(Character);
+		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(Character, TargetUniqueId, AAVVMCharacter::GetCharacterDataResolverHelper());
+	}
+
+	Dependencies.RemoveAll([SearchVirtualGlobalId = (ElementId/*PhysicalGlobalId*/ - GET_ITEM_PHYSICAL_ADDRESSING_OFFSET), SearchInstancedId = TargetInstancedId](const int32 NewPrivateItemId)
+	{
+		const int32 OtherVirtualGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 OtherInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT);
+		return (true == !!(SearchVirtualGlobalId ^ OtherVirtualGlobalId)) || (true == !!(SearchInstancedId ^ OtherInstancedId)/*XOR 0 on equality, 1 on inequality*/);
 	});
 
 	return Dependencies;

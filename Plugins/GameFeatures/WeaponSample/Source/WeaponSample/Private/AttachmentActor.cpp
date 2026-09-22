@@ -21,6 +21,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMCharacter.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
 #include "AVVMLogger.h"
@@ -46,9 +47,17 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 
 	// @gdemers src (attachment) unique id defined in global table. Note : attachment shouldn't be considered
 	// as resource provider. They are instanced from a resource provider which is different.
-	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(Src);
-	if (!ensureAlwaysMsgf(PhysicalGlobalId != INDEX_NONE,
+	const int32 SrcPhysicalGlobalId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(Src);
+	if (!ensureAlwaysMsgf(SrcPhysicalGlobalId != INDEX_NONE,
 	                      TEXT("Actor \"%s\" isn't referencing a valid Class in the Actor Identifier Data Table."),
+	                      *GetNameSafe(Src)))
+	{
+		return nullptr;
+	}
+
+	const int32 SrcInstancedId = IAVVMDoesActorSupportInstanceIdentifier::Execute_GetInstancedId(Src);
+	if (!ensureAlwaysMsgf(SrcInstancedId != INDEX_NONE,
+	                      TEXT("Actor \"%s\" isn't referencing a valid instanced id."),
 	                      *GetNameSafe(Src)))
 	{
 		return nullptr;
@@ -71,12 +80,13 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		// @gdemers retrieve all the items within the player inventory.
 		// IMPORTANT - this is our regular bit encoding scheme with reference to the relationship bitmask.
 		TArray<int32> PrivateItemIds = AAVVMGameSession::Static_GetPlayerInventoryItems(Character, TargetUniqueId);
-		PrivateItemIds.RemoveAll([SearchId = PhysicalGlobalId](const int32 NewPrivateItemId)
+		PrivateItemIds.RemoveAll([SearchId = SrcPhysicalGlobalId, SearchInstancedId = SrcInstancedId](const int32 NewPrivateItemId)
 		{
-			// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
 			const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
 			const bool bDependOnCharacter = (false == !!RelationshipBitmask)/*storage*/ || (true == !!(RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*reference character ownership*/);
-			return !!(UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId) ^ SearchId) || !bDependOnCharacter;
+			const bool bDoesShareSrcPhysicalGlobalId = (false == (UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId) ^ SearchId));
+			const int32 OtherInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
+			return (false == bDependOnCharacter) || (false == bDoesShareSrcPhysicalGlobalId) || (true == !!(SearchInstancedId ^ OtherInstancedId)/*XOR 0 on equality, 1 on inequality*/);
 		});
 
 		if (!PrivateItemIds.IsEmpty())
@@ -113,21 +123,16 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 			return nullptr;
 		}
 
-		// @gdemers translate our attachment PhysicalGlobalId into a VirtualGlobalId.
-		const int32 VirtualGlobalId = UAVVMOnlineEncodingUtils::EncodeInt32((PhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET),
-		                                                                    GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE,
-		                                                                    GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
-
 		// @gdemers retrieve the inventory dependency graph, and lookup for our attachment.
-		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor->GetTypedOuter<AAVVMCharacter>(),
+		Dependencies = UAVVMOnlineBackendUtils::GetElementDependencies(TriggeringActor,
 		                                                               TargetUniqueId/*ProviderId of target is the PhysicalGlobalId*/,
 		                                                               ATriggeringActor::GetTriggeringActorDataResolverHelper());
 
-		Dependencies.RemoveAll([SearchId = VirtualGlobalId](const int32 NewPrivateItemId)
+		Dependencies.RemoveAll([SearchVirtualGlobalId = (SrcPhysicalGlobalId - GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET), SearchInstancedId = SrcInstancedId](const int32 NewPrivateItemId)
 		{
-			// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
-			const int32 FilteredId = UAVVMOnlineEncodingUtils::FilterInt32(NewPrivateItemId, GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
-			return (SearchId != (FilteredId & SearchId));
+			const int32 OtherVirtualGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ATTACHMENT_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+			const int32 OtherInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ATTACHMENT_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ATTACHMENT_LOOKUP_INSTANCED_ID_RSHIFT);
+			return (true == !!(SearchVirtualGlobalId ^ OtherVirtualGlobalId)) || (true == !!(SearchInstancedId ^ OtherInstancedId)/*XOR 0 on equality, 1 on inequality*/);
 		});
 
 		return !Dependencies.IsEmpty() ? Target : nullptr;

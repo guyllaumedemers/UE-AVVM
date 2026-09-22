@@ -24,6 +24,7 @@
 #include "AbilitySystemInterface.h"
 #include "AVVMDoesActorRequireComplexVisibilitySupport.h"
 #include "AVVMDoesActorSupportAnimationInterruption.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMDoesActorSupportMontages.h"
 #include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMModularActor.h"
@@ -119,6 +120,7 @@ class WEAPONSAMPLE_API ATriggeringActor : public AAVVMModularActor,
                                           public IAVVMDoesActorRequireComplexVisibilitySupport,
                                           public IAVVMDoesActorSupportAnimationInterruption,
                                           public IAVVMDoesActorSupportDeferredSocketParenting,
+                                          public IAVVMDoesActorSupportInstanceIdentifier,
                                           public IAVVMDoesActorSupportMontages,
                                           public IAVVMDoesActorSupportOnAttachmentNotify,
                                           public IAVVMDoesActorSupportStateBinding,

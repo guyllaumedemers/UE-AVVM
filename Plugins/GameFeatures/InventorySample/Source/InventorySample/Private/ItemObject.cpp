@@ -20,6 +20,7 @@
 #include "ItemObject.h"
 
 #include "ActorInventoryComponent.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMLogger.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "AVVMToolkitUtils.h"
@@ -393,9 +394,9 @@ AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		return nullptr;
 	}
 
-	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateDeferredItemActor(GetWorld(), ActorClass, Outer);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UItemObject, RuntimeItemActor, this);
-
+	RuntimeItemActor = UInventoryManagerSubsystem::Static_CreateDeferredItemActor(GetWorld(), ActorClass, Outer);
+	
 	if (!ensureAlwaysMsgf(IsValid(RuntimeItemActor),
 	                      TEXT("Item Actor Class Failed to create an instance in World!")))
 	{
@@ -433,6 +434,9 @@ AActor* UItemObject::SpawnActor(const FItemActorSpawnContextArgs& ContextArgs)
 		Params.AttachmentSlotTag = GetItemAttachmentSlotTags().First();
 		Params.SrcAttributeSetSoftObjectPath = AttributeSetSoftObjectPath;
 
+		// @gdemers we require retrieval of the instanced id which is hidden within the private item id.
+		const int32 InstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
+		IAVVMDoesActorSupportInstanceIdentifier::Execute_SetInstancedId(RuntimeItemActor, InstancedId);
 		// @gdemers We use this so we can handle more complex case that require traversal of our root actor
 		// to find attached actors, and used them as targets.
 		bCanRegisterAttributeSet = FAVVMSocketTargetingHelper::Static_AttachToActorAsync(RuntimeItemActor, Params);
