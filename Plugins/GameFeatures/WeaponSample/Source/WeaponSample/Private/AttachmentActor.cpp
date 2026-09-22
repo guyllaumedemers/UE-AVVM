@@ -75,9 +75,8 @@ AActor* FAttachmentSocketTargetingHelper::GetDesiredTypedInner(AActor* Src, AAct
 		{
 			// TODO @gdemers Add parsing of the instanced id. Note : we currently dont have this information accessible on the current actor.
 			const int32 RelationshipBitmask = UAVVMOnlineEncodingUtils::DecodeInt32(NewPrivateItemId, GET_ELEMENT_RELATIONSHIP_BIT_RANGE, GET_ELEMENT_RELATIONSHIP_RSHIFT);
-			const bool bDependOnCharacter = (false == !!RelationshipBitmask)/*storage*/ || (false != (RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*reference character ownership*/);
-			const int32 OutPhysicalGlobalId = UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId);
-			return (false != (OutPhysicalGlobalId ^ SearchId)) || !bDependOnCharacter;
+			const bool bDependOnCharacter = (false == !!RelationshipBitmask)/*storage*/ || (true == !!(RelationshipBitmask & FILTER_CHARACTER_RELATIONSHIP_BIT)/*reference character ownership*/);
+			return !!(UAVVMOnlineInventoryUtils::GetPhysicalGlobalId(NewPrivateItemId) ^ SearchId) || !bDependOnCharacter;
 		});
 
 		if (!PrivateItemIds.IsEmpty())
