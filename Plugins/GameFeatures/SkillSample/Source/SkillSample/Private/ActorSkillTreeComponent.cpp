@@ -21,6 +21,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMCharacter.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
@@ -72,15 +73,16 @@ TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject
 	}
 	else
 	{
-		// @gdemers we are attempting to initialize the skill tree nodes of the character dependent actors. example : a weapon owned by the player. 
-		// Actor without UNetConnection should be initialized via Data Asset, not backend which is why we are NOT supporting
-		// fetching backend information for actor not owned by ACharacter.
-		const auto* OwningCharacter = Outer->GetTypedOuter<AAVVMCharacter>();
-		if (ensureAlwaysMsgf(IsValid(OwningCharacter),
-		                     TEXT("Failed to retrieved element dependencies. Not owned by a valid UNetConnection.")))
+		// @gdemers we are attempting to initialize the skill tree nodes of a child actor that depends on a resource provider.
+		// example : a weapon.
+		const auto* OwningOuter = Outer->GetTypedOuter<AAVVMCharacter>();
+		if (IsValid(OwningOuter) && UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(OwningOuter))
 		{
-			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningCharacter);
-			OutResults = USkillTreeUtils::GetBackendProviderDependentActorFilteredSkillIds(Outer, TargetUniqueId/*owning Player UniqueId*/, ElementId/*calling Actor PhysicalGlobalId*/);
+			const int32 OuterInstancedId = IAVVMDoesActorSupportInstanceIdentifier::Execute_GetInstancedId(Outer);
+			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningOuter);
+			const TArray<int32> SkillDependencyGraph = USkillTreeUtils::GetBackendProviderDependentActorFilteredSkillIds(Outer, TargetUniqueId/*owning Player UniqueId*/, ElementId/*calling Actor PhysicalGlobalId*/, OuterInstancedId);
+			const TArray<int32> PrivateTreeNodeIds = USkillTreeUtils::GetBackendProviderPlayerFilteredSkillIds(Outer, TargetUniqueId);
+			OutResults = USkillTreeUtils::FilterSet(PrivateTreeNodeIds, SkillDependencyGraph);
 		}
 	}
 

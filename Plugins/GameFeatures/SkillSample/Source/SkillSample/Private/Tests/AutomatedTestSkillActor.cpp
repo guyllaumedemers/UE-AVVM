@@ -141,10 +141,8 @@ bool AAutomatedTestSkillActor::RunTest_SkillTreeNodeUniqueId(const TArray<const 
 	bool bResult = true;
 	for (const FSkillTreeNodeObject& SkillTreeObject : SkillTreeComponent->SkillTree.SkillTreeNodeObjects)
 	{
-		// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
-		// We want design to be able to reuse gameplay effect on ANY actor they want.
-		const int32 OutVirtualGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillTreeObject.GetSkillTreeNodePrivateId(), GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_VIRTUAL_GLOBAL_ID_RSHIFT);
-		bResult &= CheckGameplayEffectIdentifier(OutVirtualGlobalId, GameplayEffectIdentifiers);
+		const int32 OutPhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillTreeObject.GetSkillTreeNodePrivateId(), GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_RSHIFT);
+		bResult &= CheckGameplayEffectIdentifier(OutPhysicalGlobalId, GameplayEffectIdentifiers);
 	}
 
 	return bResult;

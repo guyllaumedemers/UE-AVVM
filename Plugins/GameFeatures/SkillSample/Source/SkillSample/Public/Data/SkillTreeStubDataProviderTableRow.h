@@ -43,13 +43,8 @@ struct SKILLSAMPLE_API FStubData_SkillDependencyGraphElement
 {
 	GENERATED_BODY()
 
-	static const int32 Static_GetRelationshipBitmask(const FStubData_SkillDependencyGraphElement& SkillTreeNodeElement);
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftClassPtr<AActor> DependentActorClass{};
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
 };
 
 /**

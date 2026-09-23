@@ -70,11 +70,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,
-	                                       const TArray<int32>& NewPrivateIds,
+	                                       const TArray<int32>& NewPrivateTreeNodeIds,
 	                                       const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
-	static TArray<FDataRegistryId> TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds);
+	static TArray<FDataRegistryId> TranslatePrivateItemId(const TArray<int32>& NewPrivateTreeNodeIds,
+	                                                      const int32 BitRange,
+	                                                      const int32 BitShift);
 
 	UFUNCTION(BlueprintCallable)
 	static bool GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType& OutSrcType);
@@ -93,7 +95,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<FDataRegistryId> GetBackendProviderDependentActorFilteredSkillRegistryIds(const UObject* WorldContextObject,
 	                                                                                        const int32 NewProfileId,
-	                                                                                        const int32 NewPrivateItemId);
+	                                                                                        const int32 PhysicalGlobalId,
+	                                                                                        const int32 InstancedId);
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetBackendProviderPlayerFilteredSkillIds(const UObject* WorldContextObject,
@@ -102,5 +105,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetBackendProviderDependentActorFilteredSkillIds(const UObject* WorldContextObject,
 	                                                                      const int32 NewProfileId,
-	                                                                      const int32 NewPrivateItemId);
+	                                                                      const int32 PhysicalGlobalId,
+	                                                                      const int32 InstancedId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> FilterSet(const TArray<int32>& PrivateTreeNodeIds,
+	                               const TArray<int32>& SkillDependencyGraphElementIds);
 };

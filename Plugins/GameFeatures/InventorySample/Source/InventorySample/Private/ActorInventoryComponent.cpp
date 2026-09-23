@@ -20,6 +20,7 @@
 #include "ActorInventoryComponent.h"
 
 #include "AVVMCharacter.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMDoesActorSupportStateBinding.h"
 #include "AVVMGameSession.h"
 #include "AVVMLogger.h"
@@ -79,17 +80,16 @@ TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject
 	}
 	else
 	{
-		// @gdemers we are attempting to initialize the skill tree nodes of the character dependent actors. example : a weapon owned by the player. 
-		// Actor without UNetConnection should be initialized via Data Asset, not backend which is why we are NOT supporting
-		// fetching backend information for actor not owned by ACharacter.
-		const auto* OwningCharacter = Outer->GetTypedOuter<AAVVMCharacter>();
-		if (ensureAlwaysMsgf(IsValid(OwningCharacter),
-		                     TEXT("Failed to retrieved element dependencies. Not owned by a valid UNetConnection.")))
+		// @gdemers we are attempting to initialize the inventory of a child actor that depends on a resource provider.
+		// example : if a weapon had an inventory component (which isnt the case, but could be).
+		const auto* OwningOuter = Outer->GetTypedOuter<AAVVMCharacter>();
+		if (IsValid(OwningOuter) && UAVVMToolkitUtils::IsBlueprintScriptInterfaceValid<UAVVMResourceProvider>(OwningOuter))
 		{
-			// @gdemers we may attempt retrieving the inventory for an NPC actor
-			// (or any other actor type) that are defined in backend.
-			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningCharacter);
-			OutResults = UInventoryUtils::GetBackendProviderDependentActorFilteredInventoryIds(Outer, TargetUniqueId, ElementId/*calling Actor UniqueId*/);
+			const int32 OuterInstancedId = IAVVMDoesActorSupportInstanceIdentifier::Execute_GetInstancedId(Outer);
+			const int32 TargetUniqueId = IAVVMResourceProvider::Execute_GetProviderUniqueId(OwningOuter);
+			const TArray<int32> InventoryDependencyGraph = UInventoryUtils::GetBackendProviderDependentActorFilteredInventoryIds(Outer, TargetUniqueId/*owning Player UniqueId*/, ElementId/*calling Actor PhysicalGlobalId*/, OuterInstancedId);
+			const TArray<int32> PrivateItemIds = UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds(Outer, TargetUniqueId);
+			OutResults = UInventoryUtils::FilterSet(PrivateItemIds, InventoryDependencyGraph);
 		}
 	}
 

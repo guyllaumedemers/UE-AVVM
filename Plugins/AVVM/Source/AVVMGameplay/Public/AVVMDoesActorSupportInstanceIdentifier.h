@@ -45,7 +45,7 @@ class AVVMGAMEPLAY_API IAVVMDoesActorSupportInstanceIdentifier
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	int32 GetInstancedId() const;
 	virtual int32 GetInstancedId_Implementation() const;
 

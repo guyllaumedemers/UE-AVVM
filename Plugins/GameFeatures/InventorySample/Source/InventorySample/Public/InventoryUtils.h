@@ -91,7 +91,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<int32> GetBackendProviderDependentActorFilteredInventoryIds(const UObject* WorldContextObject,
 	                                                                          const int32 NewProfileId,
-	                                                                          const int32 NewPrivateItemId);
+	                                                                          const int32 PhysicalGlobalId,
+	                                                                          const int32 InstancedId);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> FilterSet(const TArray<int32>& PrivateItemIds,
+	                               const TArray<int32>& InventoryDependencyGraphElementIds);
 
 	UFUNCTION(BlueprintCallable)
 	static void GetInventoryProvider(const FString& NewPayload,

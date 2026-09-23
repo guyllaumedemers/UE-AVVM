@@ -358,9 +358,9 @@ FString UInventoryUtils::GetInventoryProviderById(const FString& NewPayload,
 
 TArray<FDataRegistryId> UInventoryUtils::TranslatePrivateItemId(const TArray<int32>& NewPrivateItemIds)
 {
-	static const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
-	                                     const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
-	                                     const int32 NewPrivateItemId)
+	const auto GetRegistryId = [](const TArray<FDataRegistryId>& NewRegistryIds,
+	                              const TWeakObjectPtr<const UDataRegistrySubsystem>& DataRegistrySubsystem,
+	                              const int32 NewPrivateItemId)
 	{
 		if (!DataRegistrySubsystem.IsValid())
 		{
@@ -475,33 +475,41 @@ TArray<int32> UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds(cons
 
 TArray<int32> UInventoryUtils::GetBackendProviderDependentActorFilteredInventoryIds(const UObject* WorldContextObject,
                                                                                     const int32 NewProfileId,
-                                                                                    const int32 NewPrivateItemId)
+                                                                                    const int32 PhysicalGlobalId,
+                                                                                    const int32 InstancedId)
 {
-	// @gdemers Parse the dependency graph to retrieved attachment tied to the given target actor.
+	// @gdemers parse the dependency graph to retrieve all entries that reference the actor we inspect.
 	TArray<int32> InventoryDependencyGraphElements = AAVVMGameSession::Static_GetPlayerInventoryDependencyGraph(WorldContextObject, NewProfileId);
-	InventoryDependencyGraphElements.RemoveAll([OwnerPrivateItemId = NewPrivateItemId](const int32 InventoryDependencyGraphElementId)
+	InventoryDependencyGraphElements.RemoveAll([SearchPhysicalGlobalId = PhysicalGlobalId, SearchInstancedId = InstancedId](const int32 InventoryDependencyGraphElementId)
 	{
-		// @gdemers IMPORTANT - RelationshipBitmask is irrelevant here. Our dependency graph can only bind attachment to items. Other combination
-		// default to an item being dependent on a character, or an attachment on a character.
-		// That filtering scheme is handled within UInventoryUtils::GetBackendProviderPlayerFilteredInventoryIds.
-
-		// @gdemers we use DecodeInt32 instead of FilterInt32 due to the encoding scheme being different between both entity.
-		const int32 OwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
-		const int32 ElementOwnerVirtualId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
-		const bool bDoesShareOwner = (false == (OwnerVirtualId ^ ElementOwnerVirtualId));
-		if (bDoesShareOwner)
-		{
-			const int32 DependantInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(OwnerPrivateItemId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
-			const int32 TargetInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT);
-			return (false != (DependantInstancedId ^ TargetInstancedId))/*XOR 1 for elements that arent Actor dependent*/;
-		}
-		else
-		{
-			return true;
-		}
+		const int32 InventoryOwnerPhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 InventoryOwnerInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT);
+		return (true == !!(SearchPhysicalGlobalId ^ InventoryOwnerPhysicalGlobalId) && (true == !!(SearchInstancedId ^ InventoryOwnerInstancedId)));
 	});
 
 	return InventoryDependencyGraphElements;
+}
+
+TArray<int32> UInventoryUtils::FilterSet(const TArray<int32>& PrivateItemIds,
+                                         const TArray<int32>& InventoryDependencyGraphElementIds)
+{
+	TSet<FString/*PhysicalGlobalId_InstancedId*/> QuickAccess{};
+	for (const int32 InventoryDependencyGraphElementId : InventoryDependencyGraphElementIds)
+	{
+		const int32 PhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 InstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_ITEM_LOOKUP_INSTANCED_ID_RSHIFT);
+		QuickAccess.Add(FString::Printf(TEXT("%d_%d"), PhysicalGlobalId, InstancedId));
+	}
+
+	TArray<int32> OutResults{PrivateItemIds};
+	OutResults.RemoveAll([&](const int32 PrivateItemId)
+	{
+		const int32 PhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ELEMENT_VIRTUAL_GLOBAL_ID_RSHIFT);
+		const int32 InstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(PrivateItemId, GET_ELEMENT_INSTANCED_ID_BIT_RANGE, GET_ELEMENT_INSTANCED_ID_RSHIFT);
+		return (false == QuickAccess.Contains(FString::Printf(TEXT("%d_%d"), PhysicalGlobalId, InstancedId)));
+	});
+
+	return OutResults;
 }
 
 void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,

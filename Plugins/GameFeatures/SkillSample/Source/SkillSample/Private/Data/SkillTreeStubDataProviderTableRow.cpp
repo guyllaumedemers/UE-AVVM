@@ -19,33 +19,6 @@
 //SOFTWARE.
 #include "Data/SkillTreeStubDataProviderTableRow.h"
 
-#include "NativeGameplayTags.h"
-
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT("PrivateTreeNodeId.Relationship.Attachment"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateTreeNodeId.Relationship.Character"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateTreeNodeId.Relationship.Item"));
-
-const int32 FStubData_SkillDependencyGraphElement::Static_GetRelationshipBitmask(const FStubData_SkillDependencyGraphElement& SkillTreeNodeElement)
-{
-	int32 Bitmask{0}; // @gdemers 0 is storage by design
-	if (SkillTreeNodeElement.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
-	{
-		Bitmask = (1/*2^0*/);
-	}
-
-	if (SkillTreeNodeElement.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER}))
-	{
-		Bitmask = (2/*2^1*/);
-	}
-
-	if (SkillTreeNodeElement.RelationshipTags.HasAnyExact(FGameplayTagContainer{TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM}))
-	{
-		Bitmask = (4/*2^2*/);
-	}
-
-	return Bitmask;
-}
-
 #if WITH_EDITOR
 EDataValidationResult FStubData_SkillDependencyGraphTableRow::IsDataValid(class FDataValidationContext& Context) const
 {

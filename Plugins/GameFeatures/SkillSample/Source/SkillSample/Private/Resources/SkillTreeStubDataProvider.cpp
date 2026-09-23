@@ -132,13 +132,11 @@ TArray<int32> USkillDependencyGraphStubDataProvider::MakePropertyStubData() cons
 				continue;
 			}
 
-			// @gdemers IMPORTANT - PhysicalGlobalId & VirtualGlobalId are identical in Skill Sample due to flexibility requirements.
-			// We want design to be able to reuse gameplay effect on ANY actor they want.
+			// @gdemers here we are storing PhysicalGlobalId that represent an actor, not virtual as we cannot parse
+			// information about an unknown system. We however havew made available a range of ids that cover the expected bounds
+			// of the inventory bit encoding scheme for item PhysicalGlobalId.
 			const auto* ActorCDO = ActorClass->GetDefaultObject<AActor>();
-			const int32 DependentVirtualGlobalId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(ActorCDO);
-			
-			const int32 RelationshipBitmask = FStubData_SkillDependencyGraphElement::Static_GetRelationshipBitmask(SkillDependencyGraphElement);
-			const int32 EffectVirtualGlobalId = EffectPhysicalGlobalId;
+			const int32 DependentPhysicalGlobalId = UAVVMGameplayUtils::GetActorUniqueIdentifierByActor(ActorCDO);
 
 			int32& OutGameplayEffectCount = GameplayEffectInstanceCount.FindOrAdd(EffectCDO);
 			++OutGameplayEffectCount;
@@ -149,10 +147,9 @@ TArray<int32> USkillDependencyGraphStubDataProvider::MakePropertyStubData() cons
 			// @gdemers IMPORTANT - Both bit encoding are different. virtual address translation
 			// is required to generate the proper lookup.
 			const int32 DependencyBitmask = (
-				RelationshipBitmask +
-				UAVVMOnlineEncodingUtils::EncodeInt32(EffectVirtualGlobalId, GET_SKILL_TREE_NODE_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT) +
+				UAVVMOnlineEncodingUtils::EncodeInt32(EffectPhysicalGlobalId, GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT) +
 				UAVVMOnlineEncodingUtils::EncodeInt32(OutGameplayEffectCount, GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_RSHIFT) +
-				UAVVMOnlineEncodingUtils::EncodeInt32(DependentVirtualGlobalId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_VIRTUAL_GLOBAL_ID_RSHIFT) +
+				UAVVMOnlineEncodingUtils::EncodeInt32(DependentPhysicalGlobalId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_RSHIFT) +
 				UAVVMOnlineEncodingUtils::EncodeInt32(OutDependentActorCount, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT)
 			);
 
