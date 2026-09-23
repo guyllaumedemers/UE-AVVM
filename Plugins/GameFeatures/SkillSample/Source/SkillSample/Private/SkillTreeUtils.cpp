@@ -491,6 +491,8 @@ TArray<int32> USkillTreeUtils::FilterSet(const TArray<int32>& PrivateTreeNodeIds
                                          const TArray<int32>& SkillDependencyGraphElementIds)
 {
 	TSet<FString/*PhysicalGlobalId_InstancedId*/> QuickAccess{};
+	QuickAccess.Reserve(SkillDependencyGraphElementIds.Num());
+	
 	for (const int32 SkillDependencyGraphElementId : SkillDependencyGraphElementIds)
 	{
 		const int32 PhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT);

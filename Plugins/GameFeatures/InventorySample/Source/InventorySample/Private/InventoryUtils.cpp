@@ -494,6 +494,8 @@ TArray<int32> UInventoryUtils::FilterSet(const TArray<int32>& PrivateItemIds,
                                          const TArray<int32>& InventoryDependencyGraphElementIds)
 {
 	TSet<FString/*PhysicalGlobalId_InstancedId*/> QuickAccess{};
+	QuickAccess.Reserve(InventoryDependencyGraphElementIds.Num());
+	
 	for (const int32 InventoryDependencyGraphElementId : InventoryDependencyGraphElementIds)
 	{
 		const int32 PhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(InventoryDependencyGraphElementId, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_BIT_RANGE, GET_ITEM_LOOKUP_VIRTUAL_GLOBAL_ID_RSHIFT);
