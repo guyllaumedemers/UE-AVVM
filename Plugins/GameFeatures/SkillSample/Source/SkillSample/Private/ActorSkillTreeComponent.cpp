@@ -22,7 +22,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AVVMCharacter.h"
 #include "AVVMDoesActorSupportInstanceIdentifier.h"
-#include "AVVMGameSession.h"
 #include "AVVMLogger.h"
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitUtils.h"

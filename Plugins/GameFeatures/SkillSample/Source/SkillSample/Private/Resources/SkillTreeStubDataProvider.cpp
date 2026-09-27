@@ -48,16 +48,16 @@ TArray<int32> USkillTreeStubDataProvider::MakePropertyStubData() const
 		return TArray<int32>{};
 	}
 
-	const auto* Row = Subsystem->GetCachedItem<FSkillTreeProviderTableRow>(USkillTreeSettings::GetStubDataProviderSkillTreeId());
+	const auto* Row = Subsystem->GetCachedItem<FFtue_SkillTreeProviderTableRow>(USkillTreeSettings::GetStubDataProviderSkillTreeId());
 	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider.")))
 	{
 		return TArray<int32>{};
 	}
 
 	TArray<int32> PrivateTreeNodeIds{};
-	for (const auto& SkillTreeNodeDefinition : Row->SkillTreeNodeDefinitions)
+	for (const auto& SkillTreeNodeDefinition : Row->ParentFtueSkillTreeDefinition.SkillTreeNodeDefinitions)
 	{
-		const int32 RelationshipBitmask = FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
+		const int32 RelationshipBitmask = FFtue_SkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
 		const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(SkillTreeNodeDefinition.SkillTreeNodeId,
 		                                                                                RelationshipBitmask,
 		                                                                                SkillTreeNodeDefinition.InstancedId,

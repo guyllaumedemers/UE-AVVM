@@ -25,7 +25,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateItemId.Relationship.Character"));
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateItemId.Relationship.Item"));
 
-const int32 FProviderDefaultItemProperties::Static_GetRelationshipBitmask(const FProviderDefaultItemProperties& ItemProperties)
+const int32 FFtue_ItemObjectProperties::Static_GetRelationshipBitmask(const FFtue_ItemObjectProperties& ItemProperties)
 {
 	int32 Bitmask = 0; // @gdemers 0 is storage by design
 	if (ItemProperties.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
@@ -47,10 +47,10 @@ const int32 FProviderDefaultItemProperties::Static_GetRelationshipBitmask(const 
 }
 
 #if WITH_EDITOR
-EDataValidationResult FInventoryProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FFtue_InventoryProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!InventoryProviderActorIdentifierId.IsValid())
+	if (!ParentActorIdentifierId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
@@ -62,7 +62,7 @@ EDataValidationResult FInventoryProviderTableRow::IsDataValid(class FDataValidat
 		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "Slot Tags empty. No valid Slot Tags specified!"));
 	}
 
-	if (DefaultInventory.IsEmpty())
+	if (ParentFtueInventory.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(NSLOCTEXT("FInventoryProviderTableRow", "", "DefaultInventory empty. No valid entries specified!"));

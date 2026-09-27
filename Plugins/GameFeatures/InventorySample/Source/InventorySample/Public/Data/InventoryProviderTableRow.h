@@ -36,15 +36,15 @@ class UItemObject;
 /**
  *	Class description:
  *	
- *	FProviderDefaultItemProperties are user defined values that participate in the generation of a
+ *	FFtue_ItemObjectProperties are user defined values that participate in the generation of a
  *	PrivateItemId for providers such as NPC, shops, etc...
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FProviderDefaultItemProperties
+struct INVENTORYSAMPLE_API FFtue_ItemObjectProperties
 {
 	GENERATED_BODY()
 	
-	static const int32 Static_GetRelationshipBitmask(const FProviderDefaultItemProperties& ItemProperties);
+	static const int32 Static_GetRelationshipBitmask(const FFtue_ItemObjectProperties& ItemProperties);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
@@ -60,14 +60,14 @@ struct INVENTORYSAMPLE_API FProviderDefaultItemProperties
 /**
  *	Class description:
  *	
- *	FInventoryProviderTableRow is a Row type that define the default values used to initialize an
- *	Inventory Provider entry on disk (based on Data Asset).
+ *	FFtue_InventoryProviderTableRow is a Row type that define the Ftue values used to initialize an
+ *	Inventory Provider when first launching the game, and serializing to disk.
  *	
  *	Notes : Item defined in this Row Table are unique elements. Complex scheme, such as a weapon with attachments
  *	are pre-baked from the Item Actor definition a UItemObject reference. There shouldn't be any relationship between items here!
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
+struct INVENTORYSAMPLE_API FFtue_InventoryProviderTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
@@ -77,7 +77,7 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 
 	// @gdemers the unique identifier that represent the inventory provider actor. example : a shop.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
-	FDataRegistryId InventoryProviderActorIdentifierId{};
+	FDataRegistryId ParentActorIdentifierId{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	bool bCanInventoryProviderEquipItems{false};
@@ -87,5 +87,5 @@ struct INVENTORYSAMPLE_API FInventoryProviderTableRow : public FTableRowBase
 	TArray<FGameplayTag> DefaultSlotTags{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TMap<TSoftClassPtr<UItemObject>, FProviderDefaultItemProperties> DefaultInventory{};
+	TMap<TSoftClassPtr<UItemObject>, FFtue_ItemObjectProperties> ParentFtueInventory{};
 };

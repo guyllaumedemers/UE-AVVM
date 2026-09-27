@@ -48,8 +48,8 @@ namespace NSJsonSkillTree
 	struct FJsonSkillTreeProvider
 	{
 		int32 Id{INDEX_NONE};
-		// @gdemers IMPORTANT we only care about tracking the current set of tree node effects
-		// applied at the given phase.
+		// @gdemers see AVVMOnlineSkillTree.h
+		TArray<int32> SkillTreeNodeLookup{};
 		TArray<int32> PrivateTreeNodeIds{};
 	};
 
@@ -58,6 +58,14 @@ namespace NSJsonSkillTree
 	{
 		TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 		JsonData->SetNumberField(TEXT("Id"), NewSkillTreeProvider.Id);
+
+		TArray<TSharedPtr<FJsonValue>> SkillTreeNodeLookup{};
+		for (const int32 SkillTreeNodeLookupEntry : NewSkillTreeProvider.SkillTreeNodeLookup)
+		{
+			SkillTreeNodeLookup.Add(MakeShareable(new FJsonValueNumber(SkillTreeNodeLookupEntry)));
+		}
+
+		JsonData->SetArrayField(TEXT("SkillTreeNodeLookup"), MoveTemp(SkillTreeNodeLookup));
 
 		TArray<TSharedPtr<FJsonValue>> PrivateTreeNodeIds{};
 		for (const int32 PrivateTreeNodeId : NewSkillTreeProvider.PrivateTreeNodeIds)
@@ -95,6 +103,11 @@ namespace NSJsonSkillTree
 
 		FJsonSkillTreeProvider SkillTreeProvider{};
 		SkillTreeProvider.Id = JsonData->GetIntegerField(TEXT("Id"));
+		for (const auto& SkillTreeNodeLookupEntry : JsonData->GetArrayField(TEXT("SkillTreeNodeLookup")))
+		{
+			SkillTreeProvider.SkillTreeNodeLookup.Add(SkillTreeNodeLookupEntry->AsNumber());
+		}
+		
 		for (const auto& PrivateTreeNodeId : JsonData->GetArrayField(TEXT("PrivateTreeNodeIds")))
 		{
 			SkillTreeProvider.PrivateTreeNodeIds.Add(PrivateTreeNodeId->AsNumber());
@@ -121,18 +134,18 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		return FString{};
 	}
 
-	TArray<const FSkillTreeProviderTableRow*> OutRows{};
-	DataRegistry->GetAllItems<FSkillTreeProviderTableRow>(TEXT(""), OutRows);
+	TArray<const FFtue_SkillTreeProviderTableRow*> OutRows{};
+	DataRegistry->GetAllItems<FFtue_SkillTreeProviderTableRow>(TEXT(""), OutRows);
 
 	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
-	for (const FSkillTreeProviderTableRow* Row : OutRows)
+	for (const auto* Row : OutRows)
 	{
 		if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row entry.")))
 		{
 			continue;
 		}
 
-		const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->SkillTreeProviderActorIdentifierId);
+		const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->ParentActorIdentifierId);
 		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
 		                      TEXT("Missing valid Id for Provider entry.")))
 		{
@@ -140,9 +153,10 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 		}
 
 		TArray<int32> PrivateTreeNodeIds{};
-		for (const auto& SkillTreeNodeDefinition : Row->SkillTreeNodeDefinitions)
+		// @gdemers instance private ids for skills tied to the owning parent actor.
+		for (const auto& SkillTreeNodeDefinition : Row->ParentFtueSkillTreeDefinition.SkillTreeNodeDefinitions)
 		{
-			const int32 RelationshipBitmask = FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
+			const int32 RelationshipBitmask = FFtue_SkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition);
 			const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(SkillTreeNodeDefinition.SkillTreeNodeId,
 			                                                                                RelationshipBitmask,
 			                                                                                SkillTreeNodeDefinition.InstancedId,
@@ -151,7 +165,38 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 			PrivateTreeNodeIds.Add(PrivateTreeNodeId);
 		}
 
-		FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, PrivateTreeNodeIds);
+		TArray<int32> SkillDependencyGraph{};
+		// @gdemers instance private ids for skills tied to the children actors.
+		for (const auto& [DependentActorIdentifierId, SkillTreeDefinition] : Row->ChildrenFtueSkillTreeDefinitions)
+		{
+			const int32 DependentActorProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(DependentActorIdentifierId);
+			if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
+			                      TEXT("Missing valid Id for Provider child entry.")))
+			{
+				continue;
+			}
+
+			// @gdemers extend the SkillDependencyGraph so we can retrieve any relationship between a child actor (example : weapon, attachment, etc...),
+			// and the skill it owns. Note : We must expand our global private id collection with the new entry to manage properly skills at the global level.
+			for (const auto& SkillTreeNodeDefinition : SkillTreeDefinition.SkillTreeNodeDefinitions)
+			{
+				const int32 PrivateTreeNodeId = USkillTreeUtils::CreateDefaultPrivateTreeNodeId(SkillTreeNodeDefinition.SkillTreeNodeId,
+				                                                                                FFtue_SkillTreeNodeDefinition::Static_GetRelationshipBitmask(SkillTreeNodeDefinition),
+				                                                                                SkillTreeNodeDefinition.InstancedId,
+				                                                                                SkillTreeNodeDefinition.EffectLevel);
+
+				PrivateTreeNodeIds.Add(PrivateTreeNodeId);
+
+				const int32 PrivateTreeNodeLookupId = USkillTreeUtils::CreateDependencyGraphPrivateId(SkillTreeNodeDefinition.SkillTreeNodeId,
+				                                                                                      SkillTreeNodeDefinition.InstancedId,
+				                                                                                      DependentActorProviderId,
+				                                                                                      SkillTreeDefinition.ActorInstancedId);
+
+				SkillDependencyGraph.Add(PrivateTreeNodeLookupId);
+			}
+		}
+
+		FString OutProvider = USkillTreeUtils::CreateSkillTreeProvider(ProviderId, PrivateTreeNodeIds, SkillDependencyGraph);
 		OutModifiedPayloads.Add(MakeShareable(new FJsonValueString(MoveTemp(OutProvider))));
 	}
 
@@ -171,10 +216,11 @@ FString USkillTreeUtils::CreateDefaultSkillTreeProviders()
 }
 
 FString USkillTreeUtils::CreateSkillTreeProvider(const int32 ProviderId,
-                                                 const TArray<int32>& NewPrivateTreeNodeIds)
+                                                 const TArray<int32>& NewPrivateTreeNodeIds,
+                                                 const TArray<int32>& NewSkillTreeNodeLookup)
 {
 	FString OutProvider{};
-	NSJsonSkillTree::ToString(NSJsonSkillTree::FJsonSkillTreeProvider{ProviderId, NewPrivateTreeNodeIds}, OutProvider);
+	NSJsonSkillTree::ToString(NSJsonSkillTree::FJsonSkillTreeProvider{ProviderId, NewSkillTreeNodeLookup, NewPrivateTreeNodeIds}, OutProvider);
 	return OutProvider;
 }
 
@@ -259,6 +305,18 @@ int32 USkillTreeUtils::CreateDefaultPrivateTreeNodeId(const FDataRegistryId& Tre
 		+ NewEffectLevel);
 }
 
+int32 USkillTreeUtils::CreateDependencyGraphPrivateId(const FDataRegistryId& TreeNodeEffectRegistryId,
+                                                               const int32 InstancedId,
+                                                               const int32 OwnerPhysicalGlobalId,
+                                                               const int32 OwnerInstancedId)
+{
+	const int32 PhysicalGlobalId = UAVVMGameplayUtils::GetGameplayEffectUniqueIdentifierByRegistryId(FDataRegistryId{UAVVMGameplaySettings::GetGameplayEffectIdentifierRegistryType(), TreeNodeEffectRegistryId.ItemName});
+	return UAVVMOnlineEncodingUtils::EncodeInt32(PhysicalGlobalId, GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_PHYSICAL_GLOBAL_ID_RSHIFT)
+			+ UAVVMOnlineEncodingUtils::EncodeInt32(InstancedId, GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_INSTANCED_ID_RSHIFT)
+			+ UAVVMOnlineEncodingUtils::EncodeInt32(OwnerPhysicalGlobalId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_RSHIFT)
+			+ UAVVMOnlineEncodingUtils::EncodeInt32(OwnerInstancedId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT);
+}
+
 FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
                                                   const int32 NewProviderId)
 {
@@ -287,13 +345,15 @@ FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
 
 void USkillTreeUtils::GetSkillTreeProvider(const FString& NewPayload,
                                            int32& OutProviderId,
-                                           TArray<int32>& OutPrivateTreeNodeIds)
+                                           TArray<int32>& OutPrivateTreeNodeIds,
+                                           TArray<int32>& OutSkillTreeNodeLookup)
 {
 	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
 	NSJsonSkillTree::FromString(NewPayload, OutProvider);
 
 	OutProviderId = OutProvider.Id;
 	OutPrivateTreeNodeIds = OutProvider.PrivateTreeNodeIds;
+	OutSkillTreeNodeLookup = OutProvider.SkillTreeNodeLookup;
 }
 
 int32 USkillTreeUtils::GetSkillTreeNodePrivateId(const FString& NewPayload,

@@ -34,14 +34,14 @@
 /**
  *	Class description:
  *	
- *	FSkillTreeNodeData define the Tree Node GameplayEffect an actor owns.
+ *	FFtue_SkillTreeNodeDefinition define the Tree Node GameplayEffect an actor owns.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeNodeDefinition
+struct SKILLSAMPLE_API FFtue_SkillTreeNodeDefinition
 {
 	GENERATED_BODY()
 
-	static const int32 Static_GetRelationshipBitmask(const FSkillTreeNodeDefinition& SkillTreeNodeDefinition);
+	static const int32 Static_GetRelationshipBitmask(const FFtue_SkillTreeNodeDefinition& SkillTreeNodeDefinition);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer RelationshipTags{FGameplayTagContainer::EmptyContainer};
@@ -59,14 +59,31 @@ struct SKILLSAMPLE_API FSkillTreeNodeDefinition
 /**
  *	Class description:
  *	
- *	FSkillTreeProviderTableRow is a Row type that define the default values used to initialize an
- *	SkillTree Provider entry on disk.
+ *	FFtue_DependentActorSkillTreeDefinition is a context class that encapsulate tree node information for an Actor Skill tree.
+ */
+USTRUCT(BlueprintType)
+struct SKILLSAMPLE_API FFtue_DependentActorSkillTreeDefinition
+{
+	GENERATED_BODY()
+
+	// @gdemers all skills dependent on the above actor type.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	TArray<FFtue_SkillTreeNodeDefinition> SkillTreeNodeDefinitions{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="1", ClampMax="63"))
+	int32 ActorInstancedId{INDEX_NONE};
+};
+
+/**
+ *	Class description:
  *	
- *	Note : This is used to default initialize an actor representation Skill Tree based on design configuration.
+ *	FFtue_SkillTreeProviderTableRow is a Row type that define the Ftue values used to initialize an
+ *	Skill Tree Provider when first launching the game, and serializing to disk.
+ *	
  *	Example : A boss in elden ring.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
+struct SKILLSAMPLE_API FFtue_SkillTreeProviderTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
@@ -74,10 +91,15 @@ struct SKILLSAMPLE_API FSkillTreeProviderTableRow : public FAVVMDataTableRow
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
-	// @gdemers the unique identifier that represent the skill tree provider actor. example : a shop.
+	// @gdemers top-level actor that require a full definition rundown for ftue. example : a character of type.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
-	FDataRegistryId SkillTreeProviderActorIdentifierId{};
+	FDataRegistryId ParentActorIdentifierId{};
 
+	// @gdemers all skills dependent on the above actor type.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
-	TArray<FSkillTreeNodeDefinition> SkillTreeNodeDefinitions{};
+	FFtue_DependentActorSkillTreeDefinition ParentFtueSkillTreeDefinition{};
+
+	// @gdemers actors that compose our outer parent, and their dependent skills.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))
+	TMap<FDataRegistryId/*ActorIdentifier*/, FFtue_DependentActorSkillTreeDefinition> ChildrenFtueSkillTreeDefinitions{};
 };

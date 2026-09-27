@@ -49,7 +49,7 @@ TArray<int32> UInventoryStubDataProvider::MakePropertyStubData() const
 		return TArray<int32>{};
 	}
 
-	const auto* Row = Subsystem->GetCachedItem<FInventoryProviderTableRow>(UInventorySettings::GetStubDataProviderInventoryId());
+	const auto* Row = Subsystem->GetCachedItem<FFtue_InventoryProviderTableRow>(UInventorySettings::GetStubDataProviderInventoryId());
 	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider.")))
 	{
 		return TArray<int32>{};
@@ -59,7 +59,7 @@ TArray<int32> UInventoryStubDataProvider::MakePropertyStubData() const
 	TArray<int32> Items;
 
 	// @gdemers generate PrivateItemIds for all entries defined for a given Provider
-	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : Row->DefaultInventory)
+	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : Row->ParentFtueInventory)
 	{
 		if (ItemObjectClass.IsNull())
 		{
@@ -103,7 +103,7 @@ TMap<FGameplayTag/*Slot Tag*/, int32> UPresetLoadoutStubDataProvider::MakeProper
 		return TMap<FGameplayTag, int32>{};
 	}
 
-	const auto* Row = Subsystem->GetCachedItem<FInventoryProviderTableRow>(UInventorySettings::GetStubDataProviderInventoryId());
+	const auto* Row = Subsystem->GetCachedItem<FFtue_InventoryProviderTableRow>(UInventorySettings::GetStubDataProviderInventoryId());
 	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Stub Data Provider.")))
 	{
 		return TMap<FGameplayTag, int32>{};

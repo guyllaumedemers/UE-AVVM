@@ -84,16 +84,20 @@ public:
 		// @gdemers test data serialization/deserialization to disk using stub data.
 		const int32 StubProviderId_A = FMath::Rand32();
 		const TArray<int32> StubTreeNodes_A = {FMath::Rand32()};
+		const TArray<int32> StubTreeDependencyLookup_A = {FMath::Rand32()};
 
 		const FString Payload = USkillTreeUtils::CreateSkillTreeProvider(StubProviderId_A,
-		                                                                 StubTreeNodes_A);
+		                                                                 StubTreeNodes_A,
+		                                                                 StubTreeDependencyLookup_A);
 
-		int32 OutStubProviderId_B = INDEX_NONE;
-		TArray<int32> OutStubTreeNodes_B;
+		int32 OutStubProviderId_B{INDEX_NONE};
+		TArray<int32> OutStubTreeNodes_B{};
+		TArray<int32> OutStubTreeDependencyLookup_B{};
 
 		USkillTreeUtils::GetSkillTreeProvider(Payload,
 		                                      OutStubProviderId_B,
-		                                      OutStubTreeNodes_B);
+		                                      OutStubTreeNodes_B,
+		                                      OutStubTreeDependencyLookup_B);
 
 		TestEqual("Skill ProviderId Equality",
 		          StubProviderId_A,
@@ -102,6 +106,10 @@ public:
 		TestEqual("Skill Tree Equality",
 		          StubTreeNodes_A,
 		          OutStubTreeNodes_B);
+
+		TestEqual("Skill Tree Dependency Lookup Equality",
+				  StubTreeDependencyLookup_A,
+				  OutStubTreeDependencyLookup_B);
 	}
 
 	void RWDataTableSkillTree()
@@ -142,10 +150,11 @@ public:
 		// @gdemers validate that our providers from data table exist in the ActorIdentifier Data Table.
 		for (const FString& Payload : OutSkillTreeProviders)
 		{
-			int32 OutProviderId = INDEX_NONE;
-			TArray<int32> OutSkillTreeNodes;
+			int32 OutProviderId{INDEX_NONE};
+			TArray<int32> OutSkillTreeNodes{};
+			TArray<int32> OutSkillTreeDependencyLookup{};
 
-			USkillTreeUtils::GetSkillTreeProvider(Payload, OutProviderId, OutSkillTreeNodes);
+			USkillTreeUtils::GetSkillTreeProvider(Payload, OutProviderId, OutSkillTreeNodes, OutSkillTreeDependencyLookup);
 
 			const bool bResult = CheckActorIdentifier(OutProviderId, OutActorIdentifiers);
 			TestTrue("ActorIdentifier missing", bResult);

@@ -25,7 +25,7 @@ UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateTreeNodeId.Relationship.Character"));
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateTreeNodeId.Relationship.Item"));
 
-const int32 FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(const FSkillTreeNodeDefinition& SkillTreeNodeDefinition)
+const int32 FFtue_SkillTreeNodeDefinition::Static_GetRelationshipBitmask(const FFtue_SkillTreeNodeDefinition& SkillTreeNodeDefinition)
 {
 	int32 Bitmask{0}; // @gdemers 0 is storage by design
 	if (SkillTreeNodeDefinition.RelationshipTags.HasAnyExact(FGameplayTagContainer(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT)))
@@ -47,21 +47,22 @@ const int32 FSkillTreeNodeDefinition::Static_GetRelationshipBitmask(const FSkill
 }
 
 #if WITH_EDITOR
-EDataValidationResult FSkillTreeProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult FFtue_SkillTreeProviderTableRow::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
-	if (!SkillTreeProviderActorIdentifierId.IsValid())
+	if (!ParentActorIdentifierId.IsValid())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FSkillTreeProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
+		Context.AddError(NSLOCTEXT("FFtue_SkillTreeProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
 	}
-
-	if (SkillTreeNodeDefinitions.IsEmpty())
+	
+	if (ParentFtueSkillTreeDefinition.SkillTreeNodeDefinitions.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(NSLOCTEXT("FSkillTreeProviderTableRow", "", "Empty Skill referencing."));
+		Context.AddError(NSLOCTEXT("FFtue_SkillTreeProviderTableRow", "", "FDataRegistryId missing. No valid RegistryId specified!"));
 	}
 
+	// @gdemers we do not want to validate child entries. we can accept empty collection here!
 	return Result;
 }
 #endif

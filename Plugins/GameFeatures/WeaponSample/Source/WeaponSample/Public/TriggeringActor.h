@@ -99,7 +99,7 @@ struct WEAPONSAMPLE_API FTriggeringActorSparseData
 
 	// @gdemers Montages such as Equip, Reload, Buttstroke, etc...
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef))
-	TMap<FGameplayTag/*MontageTag*/, TSubclassOf<UAnimMontage>> Montages;
+	TMap<FGameplayTag/*MontageTag*/, TSubclassOf<UAnimMontage>> Montages{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(GetByRef, InlineEditConditionToggle))
 	bool bDoesDefineAttachmentStatically{false};

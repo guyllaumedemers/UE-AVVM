@@ -146,18 +146,18 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		return FString{};
 	}
 	
-	TArray<const FInventoryProviderTableRow*> OutRows{};
-	DataRegistry->GetAllItems<FInventoryProviderTableRow>(TEXT(""), OutRows);
+	TArray<const FFtue_InventoryProviderTableRow*> OutRows{};
+	DataRegistry->GetAllItems<FFtue_InventoryProviderTableRow>(TEXT(""), OutRows);
 
 	TArray<TSharedPtr<FJsonValue>> OutModifiedPayloads{};
-	for (const FInventoryProviderTableRow* Row : OutRows)
+	for (const FFtue_InventoryProviderTableRow* Row : OutRows)
 	{
 		if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Invalid Row entry.")))
 		{
 			continue;
 		}
 
-		const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->InventoryProviderActorIdentifierId);
+		const int32 ProviderId = UAVVMGameplayUtils::GetActorUniqueIdentifierByRegistryId(Row->ParentActorIdentifierId);
 		if (!ensureAlwaysMsgf(ProviderId != INDEX_NONE,
 		                      TEXT("Missing valid Id for Provider entry.")))
 		{
@@ -188,7 +188,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 	}
 }
 
-void UInventoryUtils::CreateInventoryProvider(const FInventoryProviderTableRow* TableRowEntry,
+void UInventoryUtils::CreateInventoryProvider(const FFtue_InventoryProviderTableRow* TableRowEntry,
                                               TMap<FGameplayTag, int32>& OutLoadout,
                                               TArray<int32>& OutItems)
 {
@@ -200,7 +200,7 @@ void UInventoryUtils::CreateInventoryProvider(const FInventoryProviderTableRow* 
 	TMap<int32/*PrivateItemId_WithoutStorage*/, TWeakObjectPtr<const UItemObject>> ItemCDOs{};
 	TArray<TWeakObjectPtr<const UItemObject>> OrderedItemCDOs{};
 	// @gdemers generate PrivateItemIds for all entries defined for a given Provider
-	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : TableRowEntry->DefaultInventory)
+	for (auto& [ItemObjectClass, ProviderDefaultItemProperties] : TableRowEntry->ParentFtueInventory)
 	{
 		if (ItemObjectClass.IsNull())
 		{
@@ -528,7 +528,7 @@ void UInventoryUtils::GetInventoryProvider(const FString& NewPayload,
 }
 
 int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-                                                  const FProviderDefaultItemProperties& ProviderItemProperties)
+                                                  const FFtue_ItemObjectProperties& ProviderItemProperties)
 {
 	if (!IsValid(ItemObjectCDO))
 	{
@@ -537,7 +537,7 @@ int32 UInventoryUtils::CreateDefaultPrivateItemId(const UItemObject* ItemObjectC
 
 	// @gdemers Relationship bitmask define dependency on another element (example :
 	// an attachment being dependent on a character, or weapon). 
-	const int32 RelationshipBitMask = FProviderDefaultItemProperties::Static_GetRelationshipBitmask(ProviderItemProperties);
+	const int32 RelationshipBitMask = FFtue_ItemObjectProperties::Static_GetRelationshipBitmask(ProviderItemProperties);
 	const int32 PhysicalGlobalId = UInventoryUtils::GetObjectUniqueIdentifier(ItemObjectCDO);
 	const int32 VirtualGlobalId = UAVVMOnlineInventoryUtils::TranslatePhysicalAddressing(RelationshipBitMask, PhysicalGlobalId);
 

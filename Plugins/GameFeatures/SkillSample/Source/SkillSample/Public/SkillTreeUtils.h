@@ -43,7 +43,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static FString CreateSkillTreeProvider(const int32 ProviderId,
-	                                       const TArray<int32>& NewPrivateTreeNodeIds);
+	                                       const TArray<int32>& NewPrivateTreeNodeIds,
+	                                       const TArray<int32>& NewSkillTreeNodeLookup);
 
 	UFUNCTION(BlueprintCallable)
 	static FString ModifySkillTreeProvider(const FString& NewPayload,
@@ -60,13 +61,20 @@ public:
 	                                            const int32 EffectLevel);
 
 	UFUNCTION(BlueprintCallable)
+	static int32 CreateDependencyGraphPrivateId(const FDataRegistryId& TreeNodeEffectRegistryId,
+	                                            const int32 InstancedId,
+	                                            const int32 OwnerPhysicalGlobalId,
+	                                            const int32 OwnerInstancedId);
+
+	UFUNCTION(BlueprintCallable)
 	static FString GetSkillTreeProviderById(const FString& NewPayload,
 	                                        const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
 	static void GetSkillTreeProvider(const FString& NewPayload,
 	                                 int32& OutProviderId,
-	                                 TArray<int32>& OutPrivateTreeNodeIds);
+	                                 TArray<int32>& OutPrivateTreeNodeIds,
+	                                 TArray<int32>& OutSkillTreeNodeLookup);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,

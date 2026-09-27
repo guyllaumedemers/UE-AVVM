@@ -27,7 +27,7 @@
 #include "InventoryUtils.generated.h"
 
 struct FDataRegistryId;
-struct FInventoryProviderTableRow;
+struct FFtue_InventoryProviderTableRow;
 struct FStorageHelper;
 class UItemObject;
 
@@ -46,7 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static FString CreateDefaultInventoryProviders();
 
-	static void CreateInventoryProvider(const FInventoryProviderTableRow* TableRowEntry,
+	static void CreateInventoryProvider(const FFtue_InventoryProviderTableRow* TableRowEntry,
 	                                    TMap<FGameplayTag, int32>& OutLoadout,
 	                                    TArray<int32>& OutItems);
 
@@ -106,7 +106,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static int32 CreateDefaultPrivateItemId(const UItemObject* ItemObjectCDO,
-	                                        const FProviderDefaultItemProperties& ProviderItemProperties);
+	                                        const FFtue_ItemObjectProperties& ProviderItemProperties);
 
 	UFUNCTION(BlueprintCallable)
 	static int32 GetItemPrivateId(const FString& NewPayload,
