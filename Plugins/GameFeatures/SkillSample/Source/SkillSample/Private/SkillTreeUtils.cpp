@@ -19,6 +19,7 @@
 //SOFTWARE.
 #include "SkillTreeUtils.h"
 
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMGameplaySettings.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMGameSession.h"
@@ -35,6 +36,7 @@
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "GameFramework/Actor.h"
+#include "Resources/AVVMResourceProvider.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -343,6 +345,73 @@ FString USkillTreeUtils::GetSkillTreeProviderById(const FString& NewPayload,
 	}
 }
 
+int32 USkillTreeUtils::GetSkillTreeNodePrivateIdFromProvider(const FString& NewPayload,
+                                                             const UObject* Provider,
+                                                             const TArray<int32>& NewPrivateIds,
+                                                             const int32 ProviderId,
+                                                             const int32 PhysicalGlobalId)
+{
+	if (!IsValid(Provider))
+	{
+		return INDEX_NONE;
+	}
+
+	const TScriptInterface<IAVVMResourceProvider> ParentProvider{Provider->GetTypedOuter<AActor>()};
+	// @gdemers attempt retrieval of possible parent unique id. Doing so allow access to dependent actor representation which are uniquely defined based
+	// on their owner.
+	// example : for character, there is no parent IAVVMResourceProvider, but for dependent actor owned by a character, the parent is the character.
+	const int32 OuterParentUniqueId = ((ParentProvider.GetInterface() != nullptr) && IsValid(ParentProvider.GetObject())) ? IAVVMResourceProvider::Execute_GetProviderUniqueId(ParentProvider.GetObject()) : ProviderId;
+	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(NewPayload, OuterParentUniqueId);
+
+	if (!ensureAlwaysMsgf(!SearchPayload.IsEmpty(),
+	                      TEXT("Invalid Payload retrieved.")))
+	{
+		return INDEX_NONE;
+	}
+
+	if (OuterParentUniqueId == ProviderId)
+	{
+		// @gdemers we have no parent that may require nested JSON access. we can retrieve our skill directly from the received payload.
+		// example : character loading skills tied to himself.
+		return USkillTreeUtils::GetSkillTreeNodePrivateId(SearchPayload, NewPrivateIds, PhysicalGlobalId);
+	}
+	else
+	{
+		// @gdemers we have a parent, and may require nested JSON access. 
+		// example : weapon owned by a character. skills are cached in a Dependency graph on the character JSON representation.
+		NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+		NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+
+		OutProvider.SkillTreeNodeLookup.RemoveAll([SearchPhysicalGlobalId = ProviderId, SearchInstancedId = IAVVMDoesActorSupportInstanceIdentifier::Execute_GetInstancedId(Provider)](const int32 SkillDependencyGraphElementId)
+		{
+			const int32 SkillOwnerPhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_RSHIFT);
+			const int32 SkillOwnerInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT);
+			return (true == !!(SearchPhysicalGlobalId ^ SkillOwnerPhysicalGlobalId) && (true == !!(SearchInstancedId ^ SkillOwnerInstancedId)));
+		});
+
+		TArray<int32> FilteredSet = USkillTreeUtils::FilterSet(OutProvider.PrivateTreeNodeIds, OutProvider.SkillTreeNodeLookup);
+		for (const int32 PrivateTreeNodeId : NewPrivateIds)
+		{
+			FilteredSet.Remove(PrivateTreeNodeId);
+		}
+
+		const int32* SearchResult = FilteredSet.FindByPredicate([SearchPhysicalGlobalId = PhysicalGlobalId](const int32 Value)
+		{
+			const int32 OutPhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(Value, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_RSHIFT);
+			return (false == (OutPhysicalGlobalId ^ SearchPhysicalGlobalId))/*if both bits are identical, return 0.*/;
+		});
+
+		if (SearchResult != nullptr)
+		{
+			return *SearchResult;
+		}
+		else
+		{
+			return INDEX_NONE;
+		}
+	}
+}
+
 void USkillTreeUtils::GetSkillTreeProvider(const FString& NewPayload,
                                            int32& OutProviderId,
                                            TArray<int32>& OutPrivateTreeNodeIds,
@@ -459,21 +528,19 @@ bool USkillTreeUtils::GetOuterSourceType(const AActor* Outer, ESkillTreeSrcType&
 
 TArray<FDataRegistryId> USkillTreeUtils::GetProviderSkillTreeRegistryIds(const int32 NewProviderId)
 {
-	// TODO @gdemers These require rework!
-	// // @gdemers lambda to conditionally generate our default provider content
-	// // for serialization to disk.
-	// static const auto GenerateDefaultContent = []()
-	// {
-	// 	return USkillTreeUtils::CreateDefaultSkillTreeProviders();
-	// };
-	//
-	// const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
-	// const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
-	//
-	// NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
-	// NSJsonSkillTree::FromString(SearchPayload, OutProvider);
-	// return TranslatePrivateItemId(OutProvider.PrivateTreeNodeIds);
-	return {};
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+	};
+	
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
+	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
+	
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+	NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+	return TranslatePrivateItemId(OutProvider.PrivateTreeNodeIds, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_RSHIFT);
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderPlayerFilteredSkillRegistryIds(const UObject* WorldContextObject,
@@ -484,25 +551,31 @@ TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderPlayerFilteredSkillRe
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId,
-                                                                                  const int32 NewPrivateItemId)
+                                                                                  const int32 PhysicalGlobalId,
+                                                                                  const int32 InstancedId)
 {
-	// TODO @gdemers These require rework!
-	// // @gdemers lambda to conditionally generate our default provider content
-	// // for serialization to disk.
-	// static const auto GenerateDefaultContent = []()
-	// {
-	// 	return USkillTreeUtils::CreateDefaultSkillTreeProviders();
-	// };
-	//
-	// const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
-	// const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
-	//
-	// NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
-	// NSJsonSkillTree::FromString(SearchPayload, OutProvider);
-	//
-	// const TArray<int32> FilteredSet = USkillTreeUtils::FilterSkillIds(OutProvider.PrivateTreeNodeIds, NewPrivateItemId);
-	// return TranslatePrivateItemId(FilteredSet);
-	return {};
+	// @gdemers lambda to conditionally generate our default provider content
+	// for serialization to disk.
+	static const auto GenerateDefaultContent = []()
+	{
+		return USkillTreeUtils::CreateDefaultSkillTreeProviders();
+	};
+	
+	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
+	const FString SearchPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), NewProviderId);
+	
+	NSJsonSkillTree::FJsonSkillTreeProvider OutProvider{};
+	NSJsonSkillTree::FromString(SearchPayload, OutProvider);
+	
+	OutProvider.SkillTreeNodeLookup.RemoveAll([SearchPhysicalGlobalId = PhysicalGlobalId, SearchInstancedId = InstancedId](const int32 SkillDependencyGraphElementId)
+	{
+		const int32 SkillOwnerPhysicalGlobalId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_PHYSICAL_GLOBAL_ID_RSHIFT);
+		const int32 SkillOwnerInstancedId = UAVVMOnlineEncodingUtils::DecodeInt32(SkillDependencyGraphElementId, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_BIT_RANGE, GET_SKILL_TREE_NODE_LOOKUP_OWNER_INSTANCED_ID_RSHIFT);
+		return (true == !!(SearchPhysicalGlobalId ^ SkillOwnerPhysicalGlobalId) && (true == !!(SearchInstancedId ^ SkillOwnerInstancedId)));
+	});
+	
+	const TArray<int32> FilteredSet = USkillTreeUtils::FilterSet(OutProvider.PrivateTreeNodeIds, OutProvider.SkillTreeNodeLookup);
+	return TranslatePrivateItemId(FilteredSet, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_BIT_RANGE, GET_SKILL_TREE_NODE_PHYSICAL_GLOBAL_ID_RSHIFT);
 }
 
 TArray<FDataRegistryId> USkillTreeUtils::GetBackendProviderDependentActorFilteredSkillRegistryIds(const UObject* WorldContextObject,

@@ -20,6 +20,7 @@
 #include "SkillTreeNodeObject.h"
 
 #include "AbilitySystemComponent.h"
+#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMSaveGame.h"
 #include "AVVMToolkitUtils.h"
@@ -83,16 +84,12 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitStaticItem(const UObject* Outer,
 	// @gdemers get-set file from disk caching all skill tree providers representation.
 	const FStringView FileContent = UAVVMSaveGame::Static_GetSetFileContent(SkillTreeProviderPayloads, GenerateDefaultContent);
 
-	// @gdemers fetch provider payload from disk representation.
-	const FString SkillTreeProviderPayload = USkillTreeUtils::GetSkillTreeProviderById(FileContent.GetData(), TargetUniqueId);
-	if (SkillTreeProviderPayload.IsEmpty())
-	{
-		return INDEX_NONE;
-	}
-
-	// @gdemers read private tree node id from payload.
-	const int32 PrivateItemId = USkillTreeUtils::GetSkillTreeNodePrivateId(SkillTreeProviderPayload, NewPrivateIds, PhysicalGlobalId);
-	return PrivateItemId;
+	// @gdemers fetch provider payload from disk representation for outer character, or dependant actor.
+	return USkillTreeUtils::GetSkillTreeNodePrivateIdFromProvider(FileContent.GetData(),
+	                                                              Outer,
+	                                                              NewPrivateIds,
+	                                                              TargetUniqueId,
+	                                                              PhysicalGlobalId);
 }
 
 int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
@@ -137,8 +134,7 @@ int32 USkillTreeNodeObjectUtils::RuntimeInitOnlineItem(const UObject* Outer,
 	if (ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Couldn't retrieve the TreeNodeId.")))
 	{
 		// @gdemers your backend private id that represent the allocated USkillTreeNodeObject.
-		const int32 PrivateItemId = (*SearchResult);
-		return PrivateItemId;
+		return (*SearchResult);
 	}
 	else
 	{

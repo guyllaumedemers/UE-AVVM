@@ -23,6 +23,7 @@
 
 #include "DataRegistryId.h"
 #include "UObject/Object.h"
+#include "UObject/ScriptInterface.h"
 
 #include "SkillTreeUtils.generated.h"
 
@@ -71,15 +72,22 @@ public:
 	                                        const int32 NewProviderId);
 
 	UFUNCTION(BlueprintCallable)
+	static int32 GetSkillTreeNodePrivateIdFromProvider(const FString& NewPayload,
+	                                                   const UObject* Provider,
+	                                                   const TArray<int32>& NewPrivateIds,
+	                                                   const int32 ProviderId,
+	                                                   const int32 PhysicalGlobalId);
+
+	UFUNCTION(BlueprintCallable)
+	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,
+										   const TArray<int32>& NewPrivateTreeNodeIds,
+										   const int32 PhysicalGlobalId);
+
+	UFUNCTION(BlueprintCallable)
 	static void GetSkillTreeProvider(const FString& NewPayload,
 	                                 int32& OutProviderId,
 	                                 TArray<int32>& OutPrivateTreeNodeIds,
 	                                 TArray<int32>& OutSkillTreeNodeLookup);
-
-	UFUNCTION(BlueprintCallable)
-	static int32 GetSkillTreeNodePrivateId(const FString& NewPayload,
-	                                       const TArray<int32>& NewPrivateTreeNodeIds,
-	                                       const int32 PhysicalGlobalId);
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<FDataRegistryId> TranslatePrivateItemId(const TArray<int32>& NewPrivateTreeNodeIds,
@@ -98,7 +106,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<FDataRegistryId> GetProviderDependentSkillTreeRegistryIds(const int32 NewProviderId,
-	                                                                        const int32 NewPrivateItemId);
+	                                                                        const int32 PhysicalGlobalId,
+	                                                                        const int32 InstancedId);
 
 	UFUNCTION(BlueprintCallable)
 	static TArray<FDataRegistryId> GetBackendProviderDependentActorFilteredSkillRegistryIds(const UObject* WorldContextObject,
