@@ -29,7 +29,7 @@
 class UAVVMEditorToolkitBuilderObject;
 class UEditorEngine;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnBuildContextChangedDelegate, UAVVMEditorToolkitBuilderObject* NewBuilderContext);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBuildContextChangedDelegate, const UAVVMEditorToolkitBuilderObject* NewBuilderContext);
 
 /**
  *	Class description:
@@ -48,18 +48,10 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
-	UFUNCTION(BlueprintCallable)
-	static TArray<UAVVMEditorToolkitBuilderObject*> Static_GetAllBuilders(const UEditorEngine* Editor);
-	
-	UFUNCTION(BlueprintCallable)
-	static UAVVMEditorToolkitBuilderObject* Static_GetActiveBuilder(const UEditorEngine* Editor);
-
-	UFUNCTION(BlueprintCallable)
-	static void Static_SelectBuilder(const UEditorEngine* Editor,
-	                                 UAVVMEditorToolkitBuilderObject* Builder);
-
-	static FDelegateHandle Static_CallOrRegisterOnBuildContextChanged(const UEditorEngine* Editor,
-	                                                                  const FOnBuildContextChangedDelegate::FDelegate& Delegate);
+	static TArray<const UAVVMEditorToolkitBuilderObject*> Static_GetAllBuilders(const UEditorEngine* Editor);
+	static const UAVVMEditorToolkitBuilderObject* Static_GetActiveBuilder(const UEditorEngine* Editor);
+	static void Static_SelectBuilder(const UEditorEngine* Editor, const UAVVMEditorToolkitBuilderObject* Builder);
+	static FDelegateHandle Static_CallOrRegisterOnBuildContextChanged(const UEditorEngine* Editor, const FOnBuildContextChangedDelegate::FDelegate& Delegate);
 
 protected:
 	static UAVVMEditorBuilderSubsystem* Get(const UEditorEngine* Editor);
@@ -75,10 +67,10 @@ protected:
 	TArray<TSoftClassPtr<UAVVMEditorToolkitBuilderObject>> ToolkitBuilderClasses{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<TObjectPtr<UAVVMEditorToolkitBuilderObject>> ToolkitBuilders{};
+	TArray<TObjectPtr<const UAVVMEditorToolkitBuilderObject>> ToolkitBuilders{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TWeakObjectPtr<UAVVMEditorToolkitBuilderObject> ActiveToolkitBuilder = nullptr;
+	TWeakObjectPtr<const UAVVMEditorToolkitBuilderObject> ActiveToolkitBuilder = nullptr;
 
 	TSharedPtr<FStreamableHandle> StreamableHandle = nullptr;
 };

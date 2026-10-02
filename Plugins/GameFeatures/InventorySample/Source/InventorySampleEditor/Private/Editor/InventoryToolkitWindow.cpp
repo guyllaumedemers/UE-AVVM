@@ -20,23 +20,53 @@
 #include "InventoryToolkitWindow.h"
 
 #include "Widgets/SOverlay.h"
-#include "Widgets/Images/SImage.h"
-
-#if WITH_EDITORONLY_DATA
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 {
-	// TODO @gdemers create a viewport slate widget thats loads the required Data Table for
-	// populating our inventory system.
+	// @gdemers Note : im unsure if that is dangerous in the slate framework ?
+	auto Callback = [this]()
+	{
+		return OnRegisterDataImporterSourceChangeDelegate();
+	};
+
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SImage)
-			.ColorAndOpacity(FColor::Green)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SAVVMEditorToolkitDataImporter)
+				.DataSourceTypes(GetInventoryDataImporterSourceTypes())
+				.OnDataImporterSourceChanged_Lambda(MoveTemp(Callback))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
+			.FillContentHeight(1.f)
+			[
+				SNew(SBorder)
+				.Padding(12.f)
+				.BorderImage(FAppStyle::Get().GetBrush("NoBorder"))
+			]
 		]
 	];
 }
 
-#endif
+SOnDataImporterSourceChangedDelegate SInventoryToolkitWindow::OnRegisterDataImporterSourceChangeDelegate()
+{
+	SOnDataImporterSourceChangedDelegate OutDelegate{};
+	OutDelegate.AddRaw(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged);
+	return OutDelegate;
+}
+
+TArray<FName> SInventoryToolkitWindow::GetInventoryDataImporterSourceTypes() const
+{
+	return {TEXT("Data Asset"), TEXT("Backend")};
+}
+
+void SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)
+{
+}

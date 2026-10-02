@@ -41,9 +41,10 @@ void UAVVMEditorBuilderSubsystem::Deinitialize()
 	ToolkitBuilders.Reset();
 }
 
-TArray<UAVVMEditorToolkitBuilderObject*> UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(const UEditorEngine* Editor)
+TArray<const UAVVMEditorToolkitBuilderObject*> UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(const UEditorEngine* Editor)
 {
-	TArray<UAVVMEditorToolkitBuilderObject*> OutResults;
+	TArray<const UAVVMEditorToolkitBuilderObject*> OutResults{};
+	
 	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
 	if (IsValid(Subsystem))
 	{
@@ -53,14 +54,14 @@ TArray<UAVVMEditorToolkitBuilderObject*> UAVVMEditorBuilderSubsystem::Static_Get
 	return OutResults;
 }
 
-UAVVMEditorToolkitBuilderObject* UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(const UEditorEngine* Editor)
+const UAVVMEditorToolkitBuilderObject* UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(const UEditorEngine* Editor)
 {
 	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
 	return IsValid(Subsystem) ? Subsystem->ActiveToolkitBuilder.Get() : nullptr;
 }
 
 void UAVVMEditorBuilderSubsystem::Static_SelectBuilder(const UEditorEngine* Editor,
-                                                       UAVVMEditorToolkitBuilderObject* Builder)
+                                                       const UAVVMEditorToolkitBuilderObject* Builder)
 {
 	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
 	if (IsValid(Subsystem) && (Subsystem->ActiveToolkitBuilder != Builder))
@@ -84,7 +85,7 @@ UAVVMEditorBuilderSubsystem* UAVVMEditorBuilderSubsystem::Get(const UEditorEngin
 
 void UAVVMEditorBuilderSubsystem::OnAssetManagerInitialized()
 {
-	TArray<FSoftObjectPath> SoftObjectPaths;
+	TArray<FSoftObjectPath> SoftObjectPaths{};
 	for (const auto& ToolkitBuilderClass : ToolkitBuilderClasses)
 	{
 		SoftObjectPaths.Add(ToolkitBuilderClass.ToSoftObjectPath());
@@ -104,7 +105,7 @@ void UAVVMEditorBuilderSubsystem::OnSoftObjectAcquired()
 		return;
 	}
 
-	TArray<UObject*> OutStreamableAssets;
+	TArray<UObject*> OutStreamableAssets{};
 	StreamableHandle->GetLoadedAssets(OutStreamableAssets);
 
 	ToolkitBuilders.Reset();

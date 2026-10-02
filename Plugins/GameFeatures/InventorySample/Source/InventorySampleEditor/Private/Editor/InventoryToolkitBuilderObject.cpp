@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "Editor/InventoryToolkitBuilderObject.h"
 
-#define LOCTEXT_NAMESPACE "AVVMEditorToolkit"
-
 #include "AVVMEditorToolkitModule.h"
 #include "InventoryToolkitWindow.h"
 #include "Framework/Commands/UICommandInfo.h"
@@ -37,7 +35,7 @@ inline namespace NS_InventoryDataTableEditor
 	// and expose to the parent scope.
 	namespace
 	{
-		void OpenTool(UInventoryToolkitBuilderObject* BuilderContextObject)
+		void OpenTool(const UInventoryToolkitBuilderObject* BuilderContextObject)
 		{
 			if (IsValid(BuilderContextObject))
 			{
@@ -48,13 +46,17 @@ inline namespace NS_InventoryDataTableEditor
 	}
 }
 
-TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget()
+TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget() const
 {
-	BuilderContextWidget = SNew(SInventoryToolkitWindow);
+	if (!BuilderContextWidget.IsValid())
+	{
+		BuilderContextWidget = SNew(SInventoryToolkitWindow);
+	}
+
 	return BuilderContextWidget;
 }
 
-void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core)
+void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const 
 {
 	if (OpenTool.IsValid())
 	{
@@ -68,7 +70,9 @@ void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorTool
 
 	if (Core.IsValid())
 	{
-		Core->GetToolkitCommands()->MapAction(OpenTool, FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::OpenTool, this), FCanExecuteAction());
+		Core->GetToolkitCommands()->MapAction(OpenTool,
+		                                      FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::OpenTool, this),
+		                                      FCanExecuteAction{});
 	}
 }
 
@@ -79,5 +83,3 @@ TArray<TSharedPtr<FUICommandInfo>> UInventoryToolkitBuilderObject::GetUICommands
 			OpenTool
 	};
 }
-
-#undef LOCTEXT_NAMESPACE

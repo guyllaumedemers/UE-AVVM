@@ -59,10 +59,10 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitBuilderObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> BuildWidget() PURE_VIRTUAL(BuildWidget, return BuilderContextWidget;);
-	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) PURE_VIRTUAL(RegisterCommands, return;);
+	virtual TSharedPtr<SWidget> BuildWidget() const PURE_VIRTUAL(BuildWidget, return BuilderContextWidget;);
+	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const PURE_VIRTUAL(RegisterCommands, return;);
 	void GetBuilderInfo(FAVVMBuilderInfo& OutBuilderInfo) const;
-	void SetActiveSelf();
+	void SetActiveSelf() const;
 
 protected:
 	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const PURE_VIRTUAL(GetUICommands, return {};);
@@ -80,5 +80,5 @@ protected:
 	FText SubSection_Tooltips{FText::GetEmpty()};
 
 	/** Pointer to the widget that houses the level editor's mode context window */
-	TSharedPtr<SWidget> BuilderContextWidget = nullptr;
+	mutable TSharedPtr<SWidget> BuilderContextWidget = nullptr;
 };

@@ -31,7 +31,7 @@ void UAVVMEditorToolkitBuilderObject::GetBuilderInfo(FAVVMBuilderInfo& OutBuilde
 	OutBuilderInfo.Commands = GetUICommands();
 }
 
-void UAVVMEditorToolkitBuilderObject::SetActiveSelf()
+void UAVVMEditorToolkitBuilderObject::SetActiveSelf() const
 {
 	UAVVMEditorBuilderSubsystem::Static_SelectBuilder(GEditor, this);
 }

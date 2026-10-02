@@ -59,8 +59,7 @@ void SAVVMEditorToolkitToolbar::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
 		ToolkitMenuBar->SetStyleSet(&FAppStyle::Get());
 		ToolkitMenuBar->StyleName = MainMenuStyleName;
 
-		const TArray<UAVVMEditorToolkitBuilderObject*> BuilderObjects = UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(GEditor);
-		for (auto* BuilderObject : BuilderObjects)
+		for (const auto* BuilderObject : UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(GEditor))
 		{
 			// @gdemers build module extensions using the provided builder object.
 			MakeGenericMenuEntry(BuilderObject, Core, *ToolkitMenuBar);
@@ -97,7 +96,7 @@ void SAVVMEditorToolkitToolbar::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
 	];
 }
 
-void SAVVMEditorToolkitToolbar::MakeGenericMenuEntry(UAVVMEditorToolkitBuilderObject* BuilderObject,
+void SAVVMEditorToolkitToolbar::MakeGenericMenuEntry(const UAVVMEditorToolkitBuilderObject* BuilderObject,
                                                      TSharedPtr<FAVVMEditorToolkit_Core> Core,
                                                      UToolMenu& OutMenu)
 {
@@ -106,7 +105,7 @@ void SAVVMEditorToolkitToolbar::MakeGenericMenuEntry(UAVVMEditorToolkitBuilderOb
 		return;
 	}
 
-	FAVVMBuilderInfo OutBuilderInfo;
+	FAVVMBuilderInfo OutBuilderInfo{};
 	BuilderObject->RegisterCommands(Core);
 	BuilderObject->GetBuilderInfo(OutBuilderInfo);
 

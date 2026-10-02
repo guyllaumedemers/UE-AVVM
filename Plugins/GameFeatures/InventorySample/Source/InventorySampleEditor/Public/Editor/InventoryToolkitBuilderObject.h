@@ -39,13 +39,13 @@ class INVENTORYSAMPLEEDITOR_API UInventoryToolkitBuilderObject : public UAVVMEdi
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> BuildWidget() override;
-	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) override;
+	virtual TSharedPtr<SWidget> BuildWidget() const override;
+	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const override;
 
 protected:
 	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const override;
 	// @gdemers data table editor commands
 	// Notes : it's expected that the following commands create a context object that's plugin specific
 	// so RowTable actions are following rules specific plugin implementation details.
-	TSharedPtr<FUICommandInfo> OpenTool = nullptr;
+	mutable TSharedPtr<FUICommandInfo> OpenTool = nullptr;
 };

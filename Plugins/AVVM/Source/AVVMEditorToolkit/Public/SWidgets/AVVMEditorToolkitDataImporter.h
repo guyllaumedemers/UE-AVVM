@@ -20,8 +20,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SListViewSelectorDropdownMenu.h"
 #include "Widgets/SCompoundWidget.h"
-#include "SWidgets/AVVMEditorToolkitDataImporter.h"
+
+class SComboButton;
+class STextBlock;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(SOnDataImporterSourceChangedDelegate, FName);
 
 /**
  *	Class description:
@@ -29,17 +34,33 @@
  *	SInventoryToolkitWindow is a slate context for handling data table edits for the inventory
  *	system.
  */
-class INVENTORYSAMPLEEDITOR_API SInventoryToolkitWindow : public SCompoundWidget
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SInventoryToolkitWindow){};
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
+	SLATE_ATTRIBUTE(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
+	SLATE_ATTRIBUTE(TArray<FName>, DataSourceTypes)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+
+	void SelectName(FName NameToSelect, ESelectInfo::Type SelectionInfo = ESelectInfo::Direct);
+	void UpdateListViewEntries(TArray<FName>&& NewNameList);
 	
 private:
-	SOnDataImporterSourceChangedDelegate OnRegisterDataImporterSourceChangeDelegate();
-	TArray<FName> GetInventoryDataImporterSourceTypes() const;
-	void OnDataImporterSourceChanged(FName SelectedSourceType);
+	void OnMouseButtonClick(FName Item);
+	TSharedRef<ITableRow> OnGenerateRow(FName Name, const TSharedRef<STableViewBase>& OwnerTable);
+	FText OnRowSelectionChanged() const;
+	bool DoesComboBoxHaveElements() const;
+	void OnComboBoxOpened();
+	
+	TSharedPtr<SListViewSelectorDropdownMenu<FName>> DropdownWidget{nullptr};
+	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
+	TSharedPtr<STextBlock> ComboButtonLabelWidget{nullptr};
+	TSharedPtr<SComboButton> ComboButtonWidget{nullptr};
+	
+	SOnDataImporterSourceChangedDelegate OnSourceTypeSelectionChangedDelegate{}; 
+	FName SelectedSourceType{NAME_None};
+	TArray<FName> SourceTypes{};
 };

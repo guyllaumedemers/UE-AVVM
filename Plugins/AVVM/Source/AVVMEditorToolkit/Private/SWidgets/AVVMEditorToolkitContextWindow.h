@@ -41,7 +41,7 @@ public:
 	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core);
 	
 protected:
-	void OnBuildContextChanged(UAVVMEditorToolkitBuilderObject* BuilderContextObject);
+	void OnBuildContextChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject);
 	
 	FDelegateHandle Handle{};
 };

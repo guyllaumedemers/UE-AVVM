@@ -35,11 +35,11 @@ void SAVVMEditorToolkitContextWindow::Setup(TSharedPtr<FAVVMEditorToolkit_Core> 
 		Handle = UAVVMEditorBuilderSubsystem::Static_CallOrRegisterOnBuildContextChanged(GEditor, Callback);
 	}
 
-	UAVVMEditorToolkitBuilderObject* BuilderObject = UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(GEditor);
+	const UAVVMEditorToolkitBuilderObject* BuilderObject = UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(GEditor);
 	OnBuildContextChanged(BuilderObject);
 }
 
-void SAVVMEditorToolkitContextWindow::OnBuildContextChanged(UAVVMEditorToolkitBuilderObject* BuilderContextObject)
+void SAVVMEditorToolkitContextWindow::OnBuildContextChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject)
 {
 	if (!IsValid(BuilderContextObject))
 	{
