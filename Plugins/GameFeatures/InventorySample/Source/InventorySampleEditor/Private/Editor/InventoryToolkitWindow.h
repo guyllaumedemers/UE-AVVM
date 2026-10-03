@@ -20,14 +20,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Widgets/SCompoundWidget.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
 /**
  *	Class description:
  *	
- *	SInventoryToolkitWindow is a slate context for handling data table edits for the inventory
- *	system.
+ *	SInventoryToolkitWindow is a slate context for handling data table edits
+ *	for the inventory system.
  */
 class INVENTORYSAMPLEEDITOR_API SInventoryToolkitWindow : public SCompoundWidget
 {
@@ -40,6 +41,6 @@ public:
 	
 private:
 	SOnDataImporterSourceChangedDelegate OnRegisterDataImporterSourceChangeDelegate();
-	TArray<FName> GetInventoryDataImporterSourceTypes() const;
+	TArray<FName> GetInventoryDataTypes() const;
 	void OnDataImporterSourceChanged(FName SelectedSourceType);
 };

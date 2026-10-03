@@ -19,6 +19,9 @@
 //SOFTWARE.
 #include "InventoryToolkitWindow.h"
 
+#include "Data/InventoryProviderTableRow.h"
+#include "Data/InventoryStubDataProviderTableRow.h"
+#include "Data/ItemDefinitionDataAsset.h"
 #include "Widgets/SOverlay.h"
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
@@ -40,7 +43,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			[
 				SNew(SAVVMEditorToolkitDataImporter)
-				.DataSourceTypes(GetInventoryDataImporterSourceTypes())
+				.DataTypes(GetInventoryDataTypes())
 				.OnDataImporterSourceChanged_Lambda(MoveTemp(Callback))
 			]
 			+ SVerticalBox::Slot()
@@ -62,9 +65,13 @@ SOnDataImporterSourceChangedDelegate SInventoryToolkitWindow::OnRegisterDataImpo
 	return OutDelegate;
 }
 
-TArray<FName> SInventoryToolkitWindow::GetInventoryDataImporterSourceTypes() const
+TArray<FName> SInventoryToolkitWindow::GetInventoryDataTypes() const
 {
-	return {TEXT("Data Asset"), TEXT("Backend")};
+	return {
+			FStubData_InventoryStubDataProviderTableRow::StaticStruct()->GetFName(),
+			FFtue_InventoryProviderTableRow::StaticStruct()->GetFName(),
+			FItemDefinitionDataTableRow::StaticStruct()->GetFName()
+	};
 }
 
 void SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)

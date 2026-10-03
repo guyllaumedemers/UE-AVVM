@@ -43,6 +43,7 @@ public class InventorySampleEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"InventorySample"
 			}
 		);
 	}

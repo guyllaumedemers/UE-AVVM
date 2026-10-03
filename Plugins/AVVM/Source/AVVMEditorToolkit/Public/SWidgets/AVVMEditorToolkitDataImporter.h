@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "SListViewSelectorDropdownMenu.h"
 #include "Widgets/SCompoundWidget.h"
 
@@ -39,7 +40,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWid
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
 	SLATE_ATTRIBUTE(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
-	SLATE_ATTRIBUTE(TArray<FName>, DataSourceTypes)
+	SLATE_ATTRIBUTE(TArray<FName>, DataTypes)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -60,7 +61,7 @@ private:
 	TSharedPtr<STextBlock> ComboButtonLabelWidget{nullptr};
 	TSharedPtr<SComboButton> ComboButtonWidget{nullptr};
 	
-	SOnDataImporterSourceChangedDelegate OnSourceTypeSelectionChangedDelegate{}; 
-	FName SelectedSourceType{NAME_None};
-	TArray<FName> SourceTypes{};
+	SOnDataImporterSourceChangedDelegate OnDataTypeSelectionChangedDelegate{}; 
+	FName SelectedDataType{NAME_None};
+	TArray<FName> DataTypes{};
 };

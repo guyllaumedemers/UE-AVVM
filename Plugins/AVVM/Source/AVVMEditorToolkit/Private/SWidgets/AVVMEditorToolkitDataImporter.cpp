@@ -26,8 +26,8 @@
 
 void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 {
-	OnSourceTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged.Get();
-	SourceTypes = InArgs._DataSourceTypes.Get();
+	OnDataTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged.Get();
+	DataTypes = InArgs._DataTypes.Get();
 	
 	// Dropdown Button
 	SAssignNew(ComboButtonLabelWidget, STextBlock)
@@ -36,7 +36,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 	// Name List
 	SAssignNew(ListViewWidget, SListView<FName>)
-	.ListItemsSource(&SourceTypes)
+	.ListItemsSource(&DataTypes)
 	.SelectionMode(ESelectionMode::Single)
 	.OnMouseButtonClick(this, &SAVVMEditorToolkitDataImporter::OnMouseButtonClick)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
@@ -94,10 +94,10 @@ void SAVVMEditorToolkitDataImporter::SelectName(FName NameToSelect,
 
 void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNameList)
 {
-	SourceTypes = MoveTemp(NewNameList);
+	DataTypes = MoveTemp(NewNameList);
 	if (!DoesComboBoxHaveElements())
 	{
-		SelectedSourceType = NAME_None;
+		SelectedDataType = NAME_None;
 	}
 
 	if (ListViewWidget.IsValid())
@@ -108,13 +108,13 @@ void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNa
 
 void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 {
-	SelectedSourceType = MoveTemp(Item);
+	SelectedDataType = MoveTemp(Item);
 	if (ComboButtonWidget.IsValid())
 	{
 		ComboButtonWidget->SetIsOpen(false);
 	}
 	
-	OnSourceTypeSelectionChangedDelegate.Broadcast(Item);
+	OnDataTypeSelectionChangedDelegate.Broadcast(Item);
 }
 
 TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
@@ -138,9 +138,9 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
 
 FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 {
-	if (SelectedSourceType.IsValid())
+	if (SelectedDataType.IsValid())
 	{
-		return FText::FromName(SelectedSourceType);
+		return FText::FromName(SelectedDataType);
 	}
 	else
 	{
@@ -150,14 +150,14 @@ FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 
 bool SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements() const
 {
-	return SourceTypes.Num() > 0;
+	return DataTypes.Num() > 0;
 }
 
 void SAVVMEditorToolkitDataImporter::OnComboBoxOpened()
 {
 	if (ListViewWidget.IsValid())
 	{
-		ListViewWidget->SetSelection(SelectedSourceType, ESelectInfo::OnKeyPress);
-		ListViewWidget->RequestScrollIntoView(SelectedSourceType);
+		ListViewWidget->SetSelection(SelectedDataType, ESelectInfo::OnKeyPress);
+		ListViewWidget->RequestScrollIntoView(SelectedDataType);
 	}
 }
