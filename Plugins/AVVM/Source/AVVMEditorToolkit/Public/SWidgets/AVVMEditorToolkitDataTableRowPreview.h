@@ -20,9 +20,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "DataRegistryId.h"
 #include "Widgets/SCompoundWidget.h"
 
-struct FAVVMDataTableRow;
+class IDetailsView;
 
 /**
  *	Class description:
@@ -36,10 +38,15 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataTableRowPreview : public SComp
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataTableRowPreview){};
-	SLATE_ATTRIBUTE(const FAVVMDataTableRow*, TableRowData)
-	SLATE_ATTRIBUTE(FName, TableRowName)
+	SLATE_ATTRIBUTE(FDataRegistryId, RegistryId)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	
+private:
+	UObject* GetAssetDefinitionFromRegistryId() const;
+	
+	TSharedPtr<IDetailsView> ObjectPropertyView{nullptr};
+	FDataRegistryId RegistryId{};
 };

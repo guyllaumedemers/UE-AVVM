@@ -21,13 +21,15 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistry.h"
+#include "UObject/StrongObjectPtr.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Views/SListView.h"
 
 struct FDataRegistryType;
-class SVerticalBox;
 
 /**
-*	Class description:
+ *	Class description:
  *	
  *	SAVVMEditorToolkitDataVisualizer is a slate context displaying content tied to the active DataRegistryType selection.
  */
@@ -35,13 +37,20 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataVisualizer : public SCompoundW
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataVisualizer){};
+	SLATE_ATTRIBUTE(TArray<TSharedPtr<const FDataRegistryId>>, ListViewRowEntries)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
-	
+
 private:
-	// Holds the persistent reference to the vertical box
-	TSharedPtr<SVerticalBox> DynamicBox{nullptr};
+	TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<const FDataRegistryId> RegistryId,
+	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
+
+	// Holds the persistent reference to the list view
+	TSharedPtr<SListView<TSharedPtr<const FDataRegistryId>>> ListViewWidget{nullptr};
+	TArray<TSharedPtr<const FDataRegistryId>> ListViewRowEntries{};
+	TArray<FDataRegistryId> RegistryIds{};
+	TStrongObjectPtr<const UDataRegistry> DataRegistry{nullptr};
 };

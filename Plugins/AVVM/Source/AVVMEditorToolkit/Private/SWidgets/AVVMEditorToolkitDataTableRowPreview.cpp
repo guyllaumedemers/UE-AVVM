@@ -19,35 +19,77 @@
 //SOFTWARE.
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
 
+#include "DataRegistrySubsystem.h"
 #include "Components/HorizontalBox.h"
+#include "Data/AVVMDataTableRow.h"
+#include "Editor/PropertyEditor/Private/SDetailsView.h"
+#include "Modules/ModuleManager.h"
 #include "Widgets/SOverlay.h"
-#include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
 
 void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 {
+	RegistryId = InArgs._RegistryId.Get();
+	
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+		FDetailsViewArgs DetailsViewArgs{};
+		DetailsViewArgs.bAllowSearch = false;
+		DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+		DetailsViewArgs.bHideSelectionTip = true;
+
+		ObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
+		if (ensureAlwaysMsgf(ObjectPropertyView.IsValid(), TEXT("Invalid DetailView.")))
+		{
+			ObjectPropertyView->SetObject(GetAssetDefinitionFromRegistryId());
+		}
+	}
+
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
 			.Padding(12.f)
-			.HAlign(EHorizontalAlignment::HAlign_Left)
-			[
-				SNew(SImage)
-				.ColorAndOpacity(FLinearColor::Green)
-				.DesiredSizeOverride(FVector2d{64.f, 64.f})
-			]
-			+ SHorizontalBox::Slot()
-			.Padding(12.f)
-			.HAlign(EHorizontalAlignment::HAlign_Left)
+			.AutoHeight()
 			[
 				SNew(STextBlock)
-				.Text(FText::FromName(InArgs._TableRowName.Get()))
-				.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.NormalFont")))
+				.Text(FText::FromName(InArgs._RegistryId.Get().ItemName))
+				.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.BoldFont")))
+			]
+			+ SVerticalBox::Slot()
+			[
+				SNew(SSplitter)
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				ObjectPropertyView.ToSharedRef()
 			]
 		]
 	];
+}
+
+UObject* SAVVMEditorToolkitDataTableRowPreview::GetAssetDefinitionFromRegistryId() const
+{
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return nullptr;
+	}
+
+	const auto* RowData = Subsystem->GetCachedItem<FAVVMDataTableRow>(RegistryId);
+	if (ensureAlwaysMsgf(RowData != nullptr, TEXT("Invalid Payload.")))
+	{
+		return RowData->GetMutableAssetDefinition().LoadSynchronous();
+	}
+	else
+	{
+		return nullptr;
+	}
 }

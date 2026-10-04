@@ -27,20 +27,26 @@
 
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 {
+	SAssignNew(ListViewWidget, SListView<TSharedPtr<const FDataRegistryId>>)
+	.ListItemsSource(&ListViewRowEntries)
+	.SelectionMode(ESelectionMode::Single)
+	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
+	.OnGenerateRow(this, &SAVVMEditorToolkitDataVisualizer::OnGenerateRow);
+	
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			// SAssignNew binds the created SVerticalBox to DynamicBox
-			SAssignNew(DynamicBox, SVerticalBox)
+			ListViewWidget.ToSharedRef()
 		]
 	];
 }
 
 void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryType& NewRegistryType)
 {
-	if (!DynamicBox.IsValid() || !ensureAlwaysMsgf(NewRegistryType.IsValid(), TEXT("Invalid RegistryType.")))
+	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
+	                      TEXT("Invalid RegistryType.")))
 	{
 		return;
 	}
@@ -51,22 +57,40 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 		return;
 	}
 
-	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(NewRegistryType);
-	if (!IsValid(DataRegistry))
+	DataRegistry = TStrongObjectPtr(Subsystem->GetRegistryForType(NewRegistryType));
+	if (!DataRegistry.IsValid())
 	{
 		return;
 	}
 
-	DynamicBox->ClearChildren();
-	DataRegistry->ForEachCachedItem<FAVVMDataTableRow>(TEXT(""), [&](const FName& Name, const auto& Item)
+	DataRegistry->GetPossibleRegistryIds(RegistryIds);
+	if (RegistryIds.IsEmpty())
 	{
-		DynamicBox->AddSlot()
-		          .AutoHeight()
-		          .Padding(2.0f, 4.0f)
+		return;
+	}
+
+	ListViewRowEntries.Reset();
+	for (const auto& RegistryId : RegistryIds)
+	{
+		ListViewRowEntries.Add(MakeShareable<const FDataRegistryId>(&RegistryId));
+	}
+}
+
+TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(TSharedPtr<const FDataRegistryId> RegistryId,
+                                                                      const TSharedRef<STableViewBase>& OwnerTable) const
+{
+	TSharedPtr<STableRow<TSharedPtr<FDataRegistryId>>> OutListTableRow{};
+	SAssignNew(OutListTableRow, STableRow<TSharedPtr<FDataRegistryId>>, OwnerTable)
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 		[
 			SNew(SAVVMEditorToolkitDataTableRowPreview)
-			.TableRowData(&Item)
-			.TableRowName(Name)
-		];
-	});
+			.RegistryId(RegistryId.IsValid() ? *RegistryId : FDataRegistryId{})
+		]
+	];
+
+	return OutListTableRow.ToSharedRef();
 }

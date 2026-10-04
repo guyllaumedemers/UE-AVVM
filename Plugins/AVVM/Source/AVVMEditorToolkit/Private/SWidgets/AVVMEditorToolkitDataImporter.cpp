@@ -166,7 +166,7 @@ void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 }
 
 TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
-                                                                    const TSharedRef<STableViewBase>& OwnerTable)
+                                                                    const TSharedRef<STableViewBase>& OwnerTable) const
 {
 	TSharedPtr<STableRow<FName>> OutListTableRow{};
 	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)

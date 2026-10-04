@@ -50,7 +50,7 @@ public:
 	
 private:
 	void OnMouseButtonClick(FName Item);
-	TSharedRef<ITableRow> OnGenerateRow(FName Name, const TSharedRef<STableViewBase>& OwnerTable);
+	TSharedRef<ITableRow> OnGenerateRow(FName Name, const TSharedRef<STableViewBase>& OwnerTable) const;
 	FText OnRowSelectionChanged() const;
 	bool DoesComboBoxHaveElements() const;
 	void OnComboBoxOpened();
