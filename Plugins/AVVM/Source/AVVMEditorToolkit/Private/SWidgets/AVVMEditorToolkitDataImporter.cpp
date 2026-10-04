@@ -28,7 +28,7 @@
 void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 {
 	OnDataRegistryTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged.Get();
-	RegistryTypes = InArgs._DataRegistryTypes.Get();
+	DataRegistryTypes = InArgs._DataRegistryTypes.Get();
 	
 	// Dropdown Button
 	SAssignNew(ComboButtonLabelWidget, STextBlock)
@@ -37,7 +37,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 	// Name List
 	SAssignNew(ListViewWidget, SListView<FName>)
-	.ListItemsSource(&RegistryTypes)
+	.ListItemsSource(&DataRegistryTypes)
 	.SelectionMode(ESelectionMode::Single)
 	.OnMouseButtonClick(this, &SAVVMEditorToolkitDataImporter::OnMouseButtonClick)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
@@ -80,7 +80,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
 					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Create)
-					.IsEnabled_Lambda([this]() { return (false == RegistryTypeSelected.IsNone()); })
+					.IsEnabled_Lambda([this]() { return (false == DataRegistryTypeSelected.IsNone()); })
 				]
 				+ SHorizontalBox::Slot()
 				[
@@ -89,7 +89,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
 					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Edit)
-					.IsEnabled_Lambda([this]() { return (false == RegistryTypeSelected.IsNone()) && bDoesRegistryTypeHaveRows; })
+					.IsEnabled_Lambda([this]() { return (false == DataRegistryTypeSelected.IsNone()) && bDoesDataRegistryHaveRows; })
 				]
 				+ SHorizontalBox::Slot()
 				[
@@ -98,7 +98,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
 					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Delete)
-					.IsEnabled_Lambda([this]() { return (false == RegistryTypeSelected.IsNone()) && bDoesRegistryTypeHaveRows; })
+					.IsEnabled_Lambda([this]() { return (false == DataRegistryTypeSelected.IsNone()) && bDoesDataRegistryHaveRows; })
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -138,10 +138,10 @@ void SAVVMEditorToolkitDataImporter::SelectName(FName NameToSelect,
 
 void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNameList)
 {
-	RegistryTypes = MoveTemp(NewNameList);
+	DataRegistryTypes = MoveTemp(NewNameList);
 	if (!DoesComboBoxHaveElements())
 	{
-		RegistryTypeSelected = NAME_None;
+		DataRegistryTypeSelected = NAME_None;
 	}
 
 	if (ListViewWidget.IsValid())
@@ -152,7 +152,7 @@ void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNa
 
 void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 {
-	RegistryTypeSelected = MoveTemp(Item);
+	DataRegistryTypeSelected = MoveTemp(Item);
 	if (ComboButtonWidget.IsValid())
 	{
 		ComboButtonWidget->SetIsOpen(false);
@@ -161,7 +161,7 @@ void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 	if (ensureAlwaysMsgf(OnDataRegistryTypeSelectionChangedDelegate.IsBound(),
 	                     TEXT("Unbound delegate.")))
 	{
-		bDoesRegistryTypeHaveRows = OnDataRegistryTypeSelectionChangedDelegate.Execute(Item);
+		bDoesDataRegistryHaveRows = OnDataRegistryTypeSelectionChangedDelegate.Execute(Item);
 	}
 }
 
@@ -186,9 +186,9 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
 
 FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 {
-	if (RegistryTypeSelected.IsValid())
+	if (DataRegistryTypeSelected.IsValid())
 	{
-		return FText::FromName(RegistryTypeSelected);
+		return FText::FromName(DataRegistryTypeSelected);
 	}
 	else
 	{
@@ -198,15 +198,15 @@ FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 
 bool SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements() const
 {
-	return RegistryTypes.Num() > 0;
+	return DataRegistryTypes.Num() > 0;
 }
 
 void SAVVMEditorToolkitDataImporter::OnComboBoxOpened()
 {
 	if (ListViewWidget.IsValid())
 	{
-		ListViewWidget->SetSelection(RegistryTypeSelected, ESelectInfo::OnKeyPress);
-		ListViewWidget->RequestScrollIntoView(RegistryTypeSelected);
+		ListViewWidget->SetSelection(DataRegistryTypeSelected, ESelectInfo::OnKeyPress);
+		ListViewWidget->RequestScrollIntoView(DataRegistryTypeSelected);
 	}
 }
 

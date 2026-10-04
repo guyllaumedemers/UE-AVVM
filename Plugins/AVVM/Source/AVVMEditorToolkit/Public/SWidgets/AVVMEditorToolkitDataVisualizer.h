@@ -24,20 +24,24 @@
 #include "Widgets/SCompoundWidget.h"
 
 struct FDataRegistryType;
+class SVerticalBox;
 
 /**
- *	Class description:
+*	Class description:
+ *	
+ *	SAVVMEditorToolkitDataVisualizer is a slate context displaying content tied to the active DataRegistryType selection.
  */
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataVisualizer : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataVisualizer){};
-	SLATE_ATTRIBUTE(TSharedPtr<FDataRegistryType>, SelectedDataRegistryType)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
 	
 private:
-	TSharedPtr<FDataRegistryType> SelectedDataRegistryType{nullptr};
+	// Holds the persistent reference to the vertical box
+	TSharedPtr<SVerticalBox> DynamicBox{nullptr};
 };

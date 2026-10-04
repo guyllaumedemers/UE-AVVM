@@ -32,8 +32,7 @@ DECLARE_DELEGATE_RetVal_OneParam(bool, SOnDataImporterSourceChangedDelegate, FNa
 /**
  *	Class description:
  *	
- *	SInventoryToolkitWindow is a slate context for handling data table edits for the inventory
- *	system.
+ *	SAVVMEditorToolkitDataImporter is a slate context handling DataRegistryType selection.
  */
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWidget
 {
@@ -66,7 +65,7 @@ private:
 	TSharedPtr<SComboButton> ComboButtonWidget{nullptr};
 	
 	SOnDataImporterSourceChangedDelegate OnDataRegistryTypeSelectionChangedDelegate{}; 
-	bool bDoesRegistryTypeHaveRows{false};
-	FName RegistryTypeSelected{NAME_None};
-	TArray<FName> RegistryTypes{};
+	bool bDoesDataRegistryHaveRows{false};
+	FName DataRegistryTypeSelected{NAME_None};
+	TArray<FName> DataRegistryTypes{};
 };

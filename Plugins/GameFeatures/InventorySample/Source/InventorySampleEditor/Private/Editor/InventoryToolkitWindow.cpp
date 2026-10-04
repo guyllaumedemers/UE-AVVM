@@ -19,8 +19,6 @@
 //SOFTWARE.
 #include "InventoryToolkitWindow.h"
 
-#include "CommonHardwareVisibilityBorder.h"
-#include "DataRegistrySubsystem.h"
 #include "InventorySettings.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
@@ -52,8 +50,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
 			.FillContentHeight(1.f)
 			[
-				SNew(SAVVMEditorToolkitDataVisualizer)
-				.SelectedDataRegistryType(SelectedDataRegistryType)
+				SAssignNew(DataVisualizer, SAVVMEditorToolkitDataVisualizer)
 				.Visibility_Raw(this, &SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged)
 			]
 		]
@@ -69,20 +66,15 @@ SOnDataImporterSourceChangedDelegate SInventoryToolkitWindow::OnRegisterDataImpo
 
 bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)
 {
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
+	const FDataRegistryType RegistryType{SelectedSourceType};
+
+	SelectedDataRegistryType = MakeShared<FDataRegistryType>(RegistryType);
+	if (SelectedDataRegistryType.IsValid() && DataVisualizer.IsValid())
 	{
-		return false;
+		DataVisualizer->UpdateDataVisualizer(*SelectedDataRegistryType);
 	}
 
-	SelectedDataRegistryType = MakeShared<FDataRegistryType>(SelectedSourceType);
-	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(*SelectedDataRegistryType);
-	if (!IsValid(DataRegistry))
-	{
-		return false;
-	}
-
-	return true;
+	return RegistryType.IsValid();
 }
 
 EVisibility SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged() const
@@ -93,9 +85,9 @@ EVisibility SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged() co
 TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
 {
 	return {
-		UInventorySettings::GetItemGroupRegistryType(),
-		UInventorySettings::GetItemRegistryType(),
-		UInventorySettings::GetFtueInventoryProviderRegistryType(),
-		UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
-};
+			UInventorySettings::GetItemGroupRegistryType(),
+			UInventorySettings::GetItemRegistryType(),
+			UInventorySettings::GetFtueInventoryProviderRegistryType(),
+			UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
+	};
 }

@@ -19,20 +19,54 @@
 //SOFTWARE.
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 
+#include "DataRegistrySubsystem.h"
+#include "Components/VerticalBox.h"
+#include "Data/AVVMDataTableRow.h"
+#include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
 #include "Widgets/SOverlay.h"
-#include "Widgets/Images/SImage.h"
 
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 {
-	SelectedDataRegistryType = InArgs._SelectedDataRegistryType.Get();
-	
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SImage)
-			.ColorAndOpacity(FSlateColor{FLinearColor::Green})
+			// SAssignNew binds the created SVerticalBox to DynamicBox
+			SAssignNew(DynamicBox, SVerticalBox)
 		]
 	];
+}
+
+void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryType& NewRegistryType)
+{
+	if (!DynamicBox.IsValid() || !ensureAlwaysMsgf(NewRegistryType.IsValid(), TEXT("Invalid RegistryType.")))
+	{
+		return;
+	}
+
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return;
+	}
+
+	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(NewRegistryType);
+	if (!IsValid(DataRegistry))
+	{
+		return;
+	}
+
+	DynamicBox->ClearChildren();
+	DataRegistry->ForEachCachedItem<FAVVMDataTableRow>(TEXT(""), [&](const FName& Name, const auto& Item)
+	{
+		DynamicBox->AddSlot()
+		          .AutoHeight()
+		          .Padding(2.0f, 4.0f)
+		[
+			SNew(SAVVMEditorToolkitDataTableRowPreview)
+			.TableRowData(&Item)
+			.TableRowName(Name)
+		];
+	});
 }

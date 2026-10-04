@@ -25,6 +25,7 @@
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
 struct FDataRegistryType;
+class SAVVMEditorToolkitDataVisualizer;
 
 /**
  *	Class description:
@@ -47,5 +48,6 @@ private:
 	EVisibility OnDataVisualizerVisibilityStateChanged() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;
 
+	TSharedPtr<SAVVMEditorToolkitDataVisualizer> DataVisualizer{nullptr};
 	TSharedPtr<FDataRegistryType> SelectedDataRegistryType{nullptr};
 };
