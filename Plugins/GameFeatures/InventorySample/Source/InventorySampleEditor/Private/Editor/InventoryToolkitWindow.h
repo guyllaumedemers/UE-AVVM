@@ -24,6 +24,8 @@
 #include "Widgets/SCompoundWidget.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
+struct FDataRegistryType;
+
 /**
  *	Class description:
  *	
@@ -38,9 +40,12 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-	
+
 private:
 	SOnDataImporterSourceChangedDelegate OnRegisterDataImporterSourceChangeDelegate();
-	TArray<FName> GetInventoryDataTypes() const;
-	void OnDataImporterSourceChanged(FName SelectedSourceType);
+	bool OnDataImporterSourceChanged(FName SelectedSourceType);
+	EVisibility OnDataVisualizerVisibilityStateChanged() const;
+	TArray<FName> GetInventoryDataRegistryTypes() const;
+
+	TSharedPtr<FDataRegistryType> SelectedDataRegistryType{nullptr};
 };

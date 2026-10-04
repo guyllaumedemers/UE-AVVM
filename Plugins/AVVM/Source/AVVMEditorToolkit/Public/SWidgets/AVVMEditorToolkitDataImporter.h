@@ -27,7 +27,7 @@
 class SComboButton;
 class STextBlock;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(SOnDataImporterSourceChangedDelegate, FName);
+DECLARE_DELEGATE_RetVal_OneParam(bool, SOnDataImporterSourceChangedDelegate, FName);
 
 /**
  *	Class description:
@@ -40,7 +40,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWid
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
 	SLATE_ATTRIBUTE(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
-	SLATE_ATTRIBUTE(TArray<FName>, DataTypes)
+	SLATE_ATTRIBUTE(TArray<FName>, DataRegistryTypes)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -56,12 +56,17 @@ private:
 	bool DoesComboBoxHaveElements() const;
 	void OnComboBoxOpened();
 	
+	FReply OnButtonClick_Create();
+	FReply OnButtonClick_Edit();
+	FReply OnButtonClick_Delete();
+	
 	TSharedPtr<SListViewSelectorDropdownMenu<FName>> DropdownWidget{nullptr};
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
 	TSharedPtr<STextBlock> ComboButtonLabelWidget{nullptr};
 	TSharedPtr<SComboButton> ComboButtonWidget{nullptr};
 	
-	SOnDataImporterSourceChangedDelegate OnDataTypeSelectionChangedDelegate{}; 
-	FName SelectedDataType{NAME_None};
-	TArray<FName> DataTypes{};
+	SOnDataImporterSourceChangedDelegate OnDataRegistryTypeSelectionChangedDelegate{}; 
+	bool bDoesRegistryTypeHaveRows{false};
+	FName RegistryTypeSelected{NAME_None};
+	TArray<FName> RegistryTypes{};
 };

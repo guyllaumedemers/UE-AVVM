@@ -48,7 +48,10 @@ public:
 	static const FDataRegistryType& GetItemRegistryType();
 	
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
-	static const FDataRegistryType& GetInventoryProviderRegistryType();
+	static const FDataRegistryType& GetFtueInventoryProviderRegistryType();
+	
+	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
+	static const FDataRegistryType& GetStubDataInventoryDependencyGraphRegistryType();
 	
 	UFUNCTION(BlueprintCallable, Category="Inventory|Settings")
 	static const TSoftClassPtr<UItemRandomizerRule>& GetItemRandomizerRuleClass();
@@ -106,7 +109,10 @@ protected:
 	FDataRegistryType ItemRegistryType{NAME_None};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
-	FDataRegistryType InventoryProviderRegistryType{NAME_None};
+	FDataRegistryType FtueInventoryProviderRegistryType{NAME_None};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
+	FDataRegistryType StubDataInventoryDependencyGraphRegistryType{NAME_None};
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category="Designers")
 	TSoftClassPtr<UItemRandomizerRule> ItemRandomizerRuleClass = nullptr;

@@ -19,9 +19,11 @@
 //SOFTWARE.
 #include "InventoryToolkitWindow.h"
 
-#include "Data/InventoryProviderTableRow.h"
-#include "Data/InventoryStubDataProviderTableRow.h"
+#include "CommonHardwareVisibilityBorder.h"
+#include "DataRegistrySubsystem.h"
+#include "InventorySettings.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "Widgets/SOverlay.h"
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
@@ -43,16 +45,16 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			[
 				SNew(SAVVMEditorToolkitDataImporter)
-				.DataTypes(GetInventoryDataTypes())
+				.DataRegistryTypes(GetInventoryDataRegistryTypes())
 				.OnDataImporterSourceChanged_Lambda(MoveTemp(Callback))
 			]
 			+ SVerticalBox::Slot()
 			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
 			.FillContentHeight(1.f)
 			[
-				SNew(SBorder)
-				.Padding(12.f)
-				.BorderImage(FAppStyle::Get().GetBrush("NoBorder"))
+				SNew(SAVVMEditorToolkitDataVisualizer)
+				.SelectedDataRegistryType(SelectedDataRegistryType)
+				.Visibility_Raw(this, &SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged)
 			]
 		]
 	];
@@ -61,19 +63,39 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 SOnDataImporterSourceChangedDelegate SInventoryToolkitWindow::OnRegisterDataImporterSourceChangeDelegate()
 {
 	SOnDataImporterSourceChangedDelegate OutDelegate{};
-	OutDelegate.AddRaw(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged);
+	OutDelegate.BindRaw(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged);
 	return OutDelegate;
 }
 
-TArray<FName> SInventoryToolkitWindow::GetInventoryDataTypes() const
+bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)
 {
-	return {
-			FStubData_InventoryStubDataProviderTableRow::StaticStruct()->GetFName(),
-			FFtue_InventoryProviderTableRow::StaticStruct()->GetFName(),
-			FItemDefinitionDataTableRow::StaticStruct()->GetFName()
-	};
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return false;
+	}
+
+	SelectedDataRegistryType = MakeShared<FDataRegistryType>(SelectedSourceType);
+	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(*SelectedDataRegistryType);
+	if (!IsValid(DataRegistry))
+	{
+		return false;
+	}
+
+	return true;
 }
 
-void SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)
+EVisibility SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged() const
 {
+	return (SelectedDataRegistryType.IsValid() && SelectedDataRegistryType->IsValid()) ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
+{
+	return {
+		UInventorySettings::GetItemGroupRegistryType(),
+		UInventorySettings::GetItemRegistryType(),
+		UInventorySettings::GetFtueInventoryProviderRegistryType(),
+		UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
+};
 }

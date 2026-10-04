@@ -140,7 +140,7 @@ FString UInventoryUtils::CreateDefaultInventoryProviders()
 		return FString{};
 	}
 
-	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(UInventorySettings::GetInventoryProviderRegistryType());
+	const UDataRegistry* DataRegistry = Subsystem->GetRegistryForType(UInventorySettings::GetFtueInventoryProviderRegistryType());
 	if (!IsValid(DataRegistry))
 	{
 		return FString{};

@@ -29,9 +29,14 @@ const FDataRegistryType& UInventorySettings::GetItemRegistryType()
 	return GetDefault<UInventorySettings>()->ItemRegistryType;
 }
 
-const FDataRegistryType& UInventorySettings::GetInventoryProviderRegistryType()
+const FDataRegistryType& UInventorySettings::GetFtueInventoryProviderRegistryType()
 {
-	return GetDefault<UInventorySettings>()->InventoryProviderRegistryType;
+	return GetDefault<UInventorySettings>()->FtueInventoryProviderRegistryType;
+}
+
+const FDataRegistryType& UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
+{
+	return GetDefault<UInventorySettings>()->StubDataInventoryDependencyGraphRegistryType;
 }
 
 const TSoftClassPtr<UItemRandomizerRule>& UInventorySettings::GetItemRandomizerRuleClass()

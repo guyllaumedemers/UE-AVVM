@@ -21,13 +21,14 @@
 
 #include "Widgets/SOverlay.h"
 #include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Views/SListView.h"
 
 void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 {
-	OnDataTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged.Get();
-	DataTypes = InArgs._DataTypes.Get();
+	OnDataRegistryTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged.Get();
+	RegistryTypes = InArgs._DataRegistryTypes.Get();
 	
 	// Dropdown Button
 	SAssignNew(ComboButtonLabelWidget, STextBlock)
@@ -36,7 +37,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 	// Name List
 	SAssignNew(ListViewWidget, SListView<FName>)
-	.ListItemsSource(&DataTypes)
+	.ListItemsSource(&RegistryTypes)
 	.SelectionMode(ESelectionMode::Single)
 	.OnMouseButtonClick(this, &SAVVMEditorToolkitDataImporter::OnMouseButtonClick)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
@@ -63,20 +64,63 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		// Combo button that summons the dropdown menu
-		SAssignNew(ComboButtonWidget, SComboButton)
-		.IsEnabled_Raw(this, &SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements)
-		.ButtonContent()
+		SNew(SOverlay)
+		+ SOverlay::Slot()
 		[
-			ComboButtonLabelWidget.ToSharedRef()
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Create"))
+					.TextStyle(FAppStyle::Get(), "DialogButtonText")
+					.HAlign(HAlign_Center)
+					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Create)
+					.IsEnabled_Lambda([this]() { return (false == RegistryTypeSelected.IsNone()); })
+				]
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Edit"))
+					.TextStyle(FAppStyle::Get(), "DialogButtonText")
+					.HAlign(HAlign_Center)
+					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Edit)
+					.IsEnabled_Lambda([this]() { return (false == RegistryTypeSelected.IsNone()) && bDoesRegistryTypeHaveRows; })
+				]
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Delete"))
+					.TextStyle(FAppStyle::Get(), "DialogButtonText")
+					.HAlign(HAlign_Center)
+					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Delete)
+					.IsEnabled_Lambda([this]() { return (false == RegistryTypeSelected.IsNone()) && bDoesRegistryTypeHaveRows; })
+				]
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				// Combo button that summons the dropdown menu
+				SAssignNew(ComboButtonWidget, SComboButton)
+				.IsEnabled_Raw(this, &SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements)
+				.ButtonContent()
+				[
+					ComboButtonLabelWidget.ToSharedRef()
+				]
+				.MenuContent()
+				[
+					DropdownWidget.ToSharedRef()
+				]
+				.IsFocusable(true)
+				.ContentPadding(2.0f)
+				.OnComboBoxOpened(this, &SAVVMEditorToolkitDataImporter::OnComboBoxOpened)
+			]
 		]
-		.MenuContent()
-		[
-			DropdownWidget.ToSharedRef()
-		]
-		.IsFocusable(true)
-		.ContentPadding(2.0f)
-		.OnComboBoxOpened(this, &SAVVMEditorToolkitDataImporter::OnComboBoxOpened)
 	];
 }
 
@@ -94,10 +138,10 @@ void SAVVMEditorToolkitDataImporter::SelectName(FName NameToSelect,
 
 void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNameList)
 {
-	DataTypes = MoveTemp(NewNameList);
+	RegistryTypes = MoveTemp(NewNameList);
 	if (!DoesComboBoxHaveElements())
 	{
-		SelectedDataType = NAME_None;
+		RegistryTypeSelected = NAME_None;
 	}
 
 	if (ListViewWidget.IsValid())
@@ -108,13 +152,17 @@ void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNa
 
 void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 {
-	SelectedDataType = MoveTemp(Item);
+	RegistryTypeSelected = MoveTemp(Item);
 	if (ComboButtonWidget.IsValid())
 	{
 		ComboButtonWidget->SetIsOpen(false);
 	}
-	
-	OnDataTypeSelectionChangedDelegate.Broadcast(Item);
+
+	if (ensureAlwaysMsgf(OnDataRegistryTypeSelectionChangedDelegate.IsBound(),
+	                     TEXT("Unbound delegate.")))
+	{
+		bDoesRegistryTypeHaveRows = OnDataRegistryTypeSelectionChangedDelegate.Execute(Item);
+	}
 }
 
 TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
@@ -138,9 +186,9 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
 
 FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 {
-	if (SelectedDataType.IsValid())
+	if (RegistryTypeSelected.IsValid())
 	{
-		return FText::FromName(SelectedDataType);
+		return FText::FromName(RegistryTypeSelected);
 	}
 	else
 	{
@@ -150,14 +198,29 @@ FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 
 bool SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements() const
 {
-	return DataTypes.Num() > 0;
+	return RegistryTypes.Num() > 0;
 }
 
 void SAVVMEditorToolkitDataImporter::OnComboBoxOpened()
 {
 	if (ListViewWidget.IsValid())
 	{
-		ListViewWidget->SetSelection(SelectedDataType, ESelectInfo::OnKeyPress);
-		ListViewWidget->RequestScrollIntoView(SelectedDataType);
+		ListViewWidget->SetSelection(RegistryTypeSelected, ESelectInfo::OnKeyPress);
+		ListViewWidget->RequestScrollIntoView(RegistryTypeSelected);
 	}
+}
+
+FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Create()
+{
+	return FReply::Handled();
+}
+
+FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Edit()
+{
+	return FReply::Handled();
+}
+
+FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Delete()
+{
+	return FReply::Handled();
 }
