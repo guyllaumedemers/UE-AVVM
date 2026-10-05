@@ -26,12 +26,6 @@
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 {
-	// @gdemers Note : im unsure if that is dangerous in the slate framework ?
-	auto Callback = [this]()
-	{
-		return OnRegisterDataImporterSourceChangeDelegate();
-	};
-
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -44,24 +38,17 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			[
 				SNew(SAVVMEditorToolkitDataImporter)
 				.DataRegistryTypes(GetInventoryDataRegistryTypes())
-				.OnDataImporterSourceChanged_Lambda(MoveTemp(Callback))
+				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged)
 			]
 			+ SVerticalBox::Slot()
 			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
 			.FillContentHeight(1.f)
 			[
 				SAssignNew(DataVisualizer, SAVVMEditorToolkitDataVisualizer)
-				.Visibility_Raw(this, &SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged)
+				.Visibility(this, &SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged)
 			]
 		]
 	];
-}
-
-SOnDataImporterSourceChangedDelegate SInventoryToolkitWindow::OnRegisterDataImporterSourceChangeDelegate()
-{
-	SOnDataImporterSourceChangedDelegate OutDelegate{};
-	OutDelegate.BindRaw(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged);
-	return OutDelegate;
 }
 
 bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)

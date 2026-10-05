@@ -43,7 +43,6 @@ public:
 	void Construct(const FArguments& InArgs);
 
 private:
-	SOnDataImporterSourceChangedDelegate OnRegisterDataImporterSourceChangeDelegate();
 	bool OnDataImporterSourceChanged(FName SelectedSourceType);
 	EVisibility OnDataVisualizerVisibilityStateChanged() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;

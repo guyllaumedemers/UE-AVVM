@@ -27,7 +27,7 @@
 
 void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 {
-	OnDataRegistryTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged.Get();
+	OnDataRegistryTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged;
 	DataRegistryTypes = InArgs._DataRegistryTypes.Get();
 	
 	// Dropdown Button
@@ -80,7 +80,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
 					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Create)
-					.IsEnabled_Lambda([this]() { return (false == DataRegistryTypeSelected.IsNone()); })
+					.IsEnabled(this, &SAVVMEditorToolkitDataImporter::OnEnable_ButtonCreate)
 				]
 				+ SHorizontalBox::Slot()
 				[
@@ -89,7 +89,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
 					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Edit)
-					.IsEnabled_Lambda([this]() { return (false == DataRegistryTypeSelected.IsNone()) && bDoesDataRegistryHaveRows; })
+					.IsEnabled(this, &SAVVMEditorToolkitDataImporter::OnEnable_ButtonEdit)
 				]
 				+ SHorizontalBox::Slot()
 				[
@@ -98,7 +98,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
 					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Delete)
-					.IsEnabled_Lambda([this]() { return (false == DataRegistryTypeSelected.IsNone()) && bDoesDataRegistryHaveRows; })
+					.IsEnabled(this, &SAVVMEditorToolkitDataImporter::OnEnable_ButtonDelete)
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -107,7 +107,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 			[
 				// Combo button that summons the dropdown menu
 				SAssignNew(ComboButtonWidget, SComboButton)
-				.IsEnabled_Raw(this, &SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements)
+				.IsEnabled(this, &SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements)
 				.ButtonContent()
 				[
 					ComboButtonLabelWidget.ToSharedRef()
@@ -223,4 +223,19 @@ FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Edit()
 FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Delete()
 {
 	return FReply::Handled();
+}
+
+bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonCreate() const
+{
+	return DataRegistryTypeSelected.IsNone();
+}
+
+bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonEdit() const
+{
+	return DataRegistryTypeSelected.IsNone() && bDoesDataRegistryHaveRows;
+}
+
+bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonDelete() const
+{
+	return OnEnable_ButtonEdit();
 }

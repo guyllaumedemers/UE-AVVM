@@ -38,7 +38,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWid
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
-	SLATE_ATTRIBUTE(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
+	SLATE_EVENT(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
 	SLATE_ATTRIBUTE(TArray<FName>, DataRegistryTypes)
 	SLATE_END_ARGS()
 
@@ -58,6 +58,10 @@ private:
 	FReply OnButtonClick_Create();
 	FReply OnButtonClick_Edit();
 	FReply OnButtonClick_Delete();
+
+	bool OnEnable_ButtonCreate() const;
+	bool OnEnable_ButtonEdit() const;
+	bool OnEnable_ButtonDelete() const;
 	
 	TSharedPtr<SListViewSelectorDropdownMenu<FName>> DropdownWidget{nullptr};
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
