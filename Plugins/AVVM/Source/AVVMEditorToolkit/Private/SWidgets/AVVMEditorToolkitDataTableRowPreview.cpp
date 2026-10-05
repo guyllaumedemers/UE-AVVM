@@ -23,6 +23,7 @@
 #include "Components/HorizontalBox.h"
 #include "Data/AVVMDataTableRow.h"
 #include "Editor/PropertyEditor/Private/SDetailsView.h"
+#include "Engine/AssetManager.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
@@ -43,7 +44,7 @@ void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 		ObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
 		if (ensureAlwaysMsgf(ObjectPropertyView.IsValid(), TEXT("Invalid DetailView.")))
 		{
-			ObjectPropertyView->SetObject(GetAssetDefinitionFromRegistryId());
+			ObjectPropertyView->SetObjects(GetAssetsFromRegistryId());
 		}
 	}
 
@@ -75,21 +76,28 @@ void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 	];
 }
 
-UObject* SAVVMEditorToolkitDataTableRowPreview::GetAssetDefinitionFromRegistryId() const
+TArray<UObject*> SAVVMEditorToolkitDataTableRowPreview::GetAssetsFromRegistryId() const
 {
 	auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
 	{
-		return nullptr;
+		return TArray<UObject*>{};
 	}
 
+	// TODO @gdemers make loading process more efficient using async query
 	const auto* RowData = Subsystem->GetCachedItem<FAVVMDataTableRow>(RegistryId);
 	if (ensureAlwaysMsgf(RowData != nullptr, TEXT("Invalid Payload.")))
 	{
-		return RowData->GetMutableAssetDefinition().LoadSynchronous();
+		TArray<UObject*> Objects{};
+		for (const FSoftObjectPath& Path : RowData->GetResourcesPaths())
+		{
+			Objects.Add(Path.TryLoad());
+		}
+
+		return Objects;
 	}
 	else
 	{
-		return nullptr;
+		return TArray<UObject*>{};
 	}
 }

@@ -20,6 +20,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/AVVMDataTableRow.h"
 
 #include "Engine/DataTable.h"
 
@@ -57,13 +58,15 @@ struct INVENTORYSAMPLE_API FStubData_InventoryDependencyGraphElements
  *	(See WeaponSample ATriggeringActor for reference.)
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FStubData_InventoryStubDataProviderTableRow : public FTableRowBase
+struct INVENTORYSAMPLE_API FStubData_InventoryStubDataProviderTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+	
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TMap<TSoftClassPtr<UItemObject>, FStubData_InventoryDependencyGraphElements> InventoryDependencyGraph{};

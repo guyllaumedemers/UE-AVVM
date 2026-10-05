@@ -89,7 +89,6 @@ struct INVENTORYSAMPLE_API FItemDefinitionDataTableRow : public FAVVMDataTableRo
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-	virtual TSoftObjectPtr<UObject> GetMutableAssetDefinition() const override;
 #endif
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;

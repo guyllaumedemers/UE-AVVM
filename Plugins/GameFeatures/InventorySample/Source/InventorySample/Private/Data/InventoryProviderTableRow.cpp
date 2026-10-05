@@ -71,3 +71,8 @@ EDataValidationResult FFtue_InventoryProviderTableRow::IsDataValid(class FDataVa
 	return Result;
 }
 #endif
+
+TArray<FSoftObjectPath> FFtue_InventoryProviderTableRow::GetResourcesPaths() const
+{
+	return {};
+}

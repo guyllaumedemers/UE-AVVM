@@ -58,11 +58,6 @@ EDataValidationResult FItemDefinitionDataTableRow::IsDataValid(class FDataValida
 
 	return Result;
 }
-
-TSoftObjectPtr<UObject> FItemDefinitionDataTableRow::GetMutableAssetDefinition() const
-{
-	return ItemDefinition;
-}
 #endif
 
 TArray<FSoftObjectPath> FItemDefinitionDataTableRow::GetResourcesPaths() const

@@ -39,8 +39,4 @@ struct AVVMGAMEPLAY_API FAVVMDataTableRow : public FTableRowBase
 	GENERATED_BODY()
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const PURE_VIRTUAL(GetResourcesPaths, return TArray<FSoftObjectPath>{};);
-
-#if WITH_EDITOR
-	virtual TSoftObjectPtr<UObject> GetMutableAssetDefinition() const PURE_VIRTUAL(GetMutableAssetDefinition, return TSoftObjectPtr<UObject>{};);
-#endif
 };

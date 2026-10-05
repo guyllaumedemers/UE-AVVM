@@ -32,3 +32,8 @@ EDataValidationResult FStubData_InventoryStubDataProviderTableRow::IsDataValid(c
 	return Result;
 }
 #endif
+
+TArray<FSoftObjectPath> FStubData_InventoryStubDataProviderTableRow::GetResourcesPaths() const
+{
+	return {};
+}

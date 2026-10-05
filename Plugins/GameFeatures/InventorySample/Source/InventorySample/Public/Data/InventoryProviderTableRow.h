@@ -23,6 +23,7 @@
 
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
+#include "Data/AVVMDataTableRow.h"
 #include "Engine/DataTable.h"
 
 #if WITH_EDITOR
@@ -67,13 +68,15 @@ struct INVENTORYSAMPLE_API FFtue_ItemObjectProperties
  *	are pre-baked from the Item Actor definition a UItemObject reference. There shouldn't be any relationship between items here!
  */
 USTRUCT(BlueprintType)
-struct INVENTORYSAMPLE_API FFtue_InventoryProviderTableRow : public FTableRowBase
+struct INVENTORYSAMPLE_API FFtue_InventoryProviderTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	// @gdemers the unique identifier that represent the inventory provider actor. example : a shop.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))

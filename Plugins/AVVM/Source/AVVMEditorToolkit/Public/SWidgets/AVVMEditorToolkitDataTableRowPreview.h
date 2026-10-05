@@ -45,7 +45,7 @@ public:
 	void Construct(const FArguments& InArgs);
 	
 private:
-	UObject* GetAssetDefinitionFromRegistryId() const;
+	TArray<UObject*> GetAssetsFromRegistryId() const;
 	
 	TSharedPtr<IDetailsView> ObjectPropertyView{nullptr};
 	FDataRegistryId RegistryId{};
