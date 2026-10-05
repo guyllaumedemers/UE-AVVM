@@ -45,12 +45,13 @@ public:
 	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
 
 private:
-	TSharedRef<ITableRow> OnGenerateRow(TSharedPtr<const FDataRegistryId> RegistryId,
+	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName,
 	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
 
 	// Holds the persistent reference to the list view
-	TSharedPtr<SListView<TSharedPtr<const FDataRegistryId>>> ListViewWidget{nullptr};
-	TArray<TSharedPtr<const FDataRegistryId>> ListViewRowEntries{};
-	TArray<FDataRegistryId> RegistryIds{};
+	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
+	TArray<FName> ListViewRowEntries{};
 	TStrongObjectPtr<const UDataRegistry> DataRegistry{nullptr};
+	TArray<FDataRegistryId> RegistryIds{};
+	FName SelectedRegistryType{NAME_None};
 };

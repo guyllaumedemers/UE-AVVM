@@ -30,8 +30,8 @@
 
 void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 {
-	RegistryId = InArgs._RegistryId.Get();
-	
+	RegistryId = FDataRegistryId{InArgs._RegistryType.Get(), InArgs._RegistryItemName.Get()};
+
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		FPropertyEditorModule& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -59,7 +59,7 @@ void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 			.AutoHeight()
 			[
 				SNew(STextBlock)
-				.Text(FText::FromName(InArgs._RegistryId.Get().ItemName))
+				.Text(FText::FromName(RegistryId.ItemName))
 				.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.BoldFont")))
 			]
 			+ SVerticalBox::Slot()

@@ -38,7 +38,8 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataTableRowPreview : public SComp
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataTableRowPreview){};
-	SLATE_ATTRIBUTE(FDataRegistryId, RegistryId)
+	SLATE_ATTRIBUTE(FName, RegistryType)
+	SLATE_ATTRIBUTE(FName, RegistryItemName)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */

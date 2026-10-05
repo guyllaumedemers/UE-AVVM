@@ -27,7 +27,7 @@
 
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 {
-	SAssignNew(ListViewWidget, SListView<TSharedPtr<const FDataRegistryId>>)
+	SAssignNew(ListViewWidget, SListView<FName>)
 	.ListItemsSource(&ListViewRowEntries)
 	.SelectionMode(ESelectionMode::Single)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
@@ -63,24 +63,30 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 		return;
 	}
 
+	SelectedRegistryType = DataRegistry->GetRegistryType();
 	DataRegistry->GetPossibleRegistryIds(RegistryIds);
-	if (RegistryIds.IsEmpty())
+	if (RegistryIds.IsEmpty() || !SelectedRegistryType.IsValid())
 	{
 		return;
 	}
 
-	ListViewRowEntries.Reset();
+	ListViewRowEntries.Empty(RegistryIds.Num());
 	for (const auto& RegistryId : RegistryIds)
 	{
-		ListViewRowEntries.Add(MakeShareable<const FDataRegistryId>(&RegistryId));
+		ListViewRowEntries.Add(RegistryId.ItemName);
+	}
+
+	if (ListViewWidget.IsValid())
+	{
+		ListViewWidget->RebuildList();
 	}
 }
 
-TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(TSharedPtr<const FDataRegistryId> RegistryId,
+TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName RegistryItemName,
                                                                       const TSharedRef<STableViewBase>& OwnerTable) const
 {
-	TSharedPtr<STableRow<TSharedPtr<FDataRegistryId>>> OutListTableRow{};
-	SAssignNew(OutListTableRow, STableRow<TSharedPtr<FDataRegistryId>>, OwnerTable)
+	TSharedPtr<STableRow<FName>> OutListTableRow{};
+	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)
 	[
 		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
@@ -88,7 +94,8 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(TSharedPtr
 		.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 		[
 			SNew(SAVVMEditorToolkitDataTableRowPreview)
-			.RegistryId(RegistryId.IsValid() ? *RegistryId : FDataRegistryId{})
+			.RegistryType(SelectedRegistryType)
+			.RegistryItemName(RegistryItemName)
 		]
 	];
 

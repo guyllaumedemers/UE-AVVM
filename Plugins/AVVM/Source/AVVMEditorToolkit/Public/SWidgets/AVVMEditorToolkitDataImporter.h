@@ -67,9 +67,9 @@ private:
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
 	TSharedPtr<STextBlock> ComboButtonLabelWidget{nullptr};
 	TSharedPtr<SComboButton> ComboButtonWidget{nullptr};
-	
-	SOnDataImporterSourceChangedDelegate OnDataRegistryTypeSelectionChangedDelegate{}; 
-	bool bDoesDataRegistryHaveRows{false};
-	FName DataRegistryTypeSelected{NAME_None};
+
+	SOnDataImporterSourceChangedDelegate OnDataRegistryTypeSelectionChangedDelegate{};
 	TArray<FName> DataRegistryTypes{};
+	FName DataRegistryTypeSelected{NAME_None};
+	bool bDoesDataRegistryHaveRows{false};
 };
