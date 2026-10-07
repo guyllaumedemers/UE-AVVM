@@ -45,6 +45,7 @@ void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 		if (ensureAlwaysMsgf(ObjectPropertyView.IsValid(), TEXT("Invalid DetailView.")))
 		{
 			ObjectPropertyView->SetObjects(GetAssetsFromRegistryId());
+			ObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindRaw(this, &SAVVMEditorToolkitDataTableRowPreview::OnEnable_DetailView);
 		}
 	}
 
@@ -100,4 +101,9 @@ TArray<UObject*> SAVVMEditorToolkitDataTableRowPreview::GetAssetsFromRegistryId(
 	{
 		return TArray<UObject*>{};
 	}
+}
+
+bool SAVVMEditorToolkitDataTableRowPreview::OnEnable_DetailView() const
+{
+	return false;
 }

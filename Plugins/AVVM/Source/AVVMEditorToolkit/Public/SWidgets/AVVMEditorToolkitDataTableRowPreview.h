@@ -48,6 +48,8 @@ public:
 private:
 	TArray<UObject*> GetAssetsFromRegistryId() const;
 	
+	bool OnEnable_DetailView() const;
+	
 	TSharedPtr<IDetailsView> ObjectPropertyView{nullptr};
 	FDataRegistryId RegistryId{};
 };

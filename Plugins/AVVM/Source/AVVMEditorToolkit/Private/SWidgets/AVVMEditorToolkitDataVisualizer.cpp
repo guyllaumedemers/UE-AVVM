@@ -23,22 +23,50 @@
 #include "Components/VerticalBox.h"
 #include "Data/AVVMDataTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
-#include "Widgets/SOverlay.h"
+#include "Widgets/Layout/SScrollBorder.h"
+#include "Widgets/Layout/SScrollBox.h"
 
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 {
+	SAssignNew(ScrollBar, SScrollBar)
+	.AlwaysShowScrollbar(true)
+	.Orientation(EOrientation::Orient_Vertical);
+
 	SAssignNew(ListViewWidget, SListView<FName>)
 	.ListItemsSource(&ListViewRowEntries)
+	.ExternalScrollbar(ScrollBar)
+	.ConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible)
 	.SelectionMode(ESelectionMode::Single)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
 	.OnGenerateRow(this, &SAVVMEditorToolkitDataVisualizer::OnGenerateRow);
-	
+
 	ChildSlot
 	[
-		SNew(SOverlay)
-		+ SOverlay::Slot()
+		SNew(SBorder)
+		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
+		.Padding(6.0f)
 		[
-			ListViewWidget.ToSharedRef()
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.FillHeight(1.0f)
+			.Padding(0.f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					ListViewWidget.ToSharedRef()
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SBox)
+					.WidthOverride(FOptionalSize(16))
+					[
+						ScrollBar.ToSharedRef()
+					]
+				]
+			]
 		]
 	];
 }
@@ -100,4 +128,9 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName Regi
 	];
 
 	return OutListTableRow.ToSharedRef();
+}
+
+FVector2D SAVVMEditorToolkitDataVisualizer::GetListBorderFadeDistance() const
+{
+	return FVector2D(0.01f, 0.01f);
 }

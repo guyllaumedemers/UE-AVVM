@@ -24,6 +24,7 @@
 #include "DataRegistry.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Layout/SScrollBorder.h"
 #include "Widgets/Views/SListView.h"
 
 struct FDataRegistryType;
@@ -48,8 +49,11 @@ private:
 	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName,
 	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
 
+	FVector2D GetListBorderFadeDistance() const;
+
 	// Holds the persistent reference to the list view
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
+	TSharedPtr<SScrollBar> ScrollBar{nullptr};
 	TArray<FName> ListViewRowEntries{};
 	TStrongObjectPtr<const UDataRegistry> DataRegistry{nullptr};
 	TArray<FDataRegistryId> RegistryIds{};
