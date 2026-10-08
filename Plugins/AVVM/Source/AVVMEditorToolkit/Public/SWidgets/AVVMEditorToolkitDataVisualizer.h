@@ -48,14 +48,15 @@ public:
 private:
 	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName,
 	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
-
-	FVector2D GetListBorderFadeDistance() const;
+	
+	void OnSearchTextChanged(const FText& NewText);
 
 	// Holds the persistent reference to the list view
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
 	TSharedPtr<SScrollBar> ScrollBar{nullptr};
-	TArray<FName> ListViewRowEntries{};
 	TStrongObjectPtr<const UDataRegistry> DataRegistry{nullptr};
 	TArray<FDataRegistryId> RegistryIds{};
 	FName SelectedRegistryType{NAME_None};
+	TArray<FName> FilteredEntries{};
+	TArray<FName> SourceEntries{};
 };

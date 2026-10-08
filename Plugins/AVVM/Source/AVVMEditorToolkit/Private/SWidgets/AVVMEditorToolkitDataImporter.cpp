@@ -227,12 +227,12 @@ FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Delete()
 
 bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonCreate() const
 {
-	return DataRegistryTypeSelected.IsNone();
+	return (false == DataRegistryTypeSelected.IsNone());
 }
 
 bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonEdit() const
 {
-	return DataRegistryTypeSelected.IsNone() && bDoesDataRegistryHaveRows;
+	return (false == DataRegistryTypeSelected.IsNone()) && bDoesDataRegistryHaveRows;
 }
 
 bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonDelete() const

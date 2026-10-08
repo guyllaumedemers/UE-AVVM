@@ -23,7 +23,7 @@
 #include "Components/VerticalBox.h"
 #include "Data/AVVMDataTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
-#include "Widgets/Layout/SScrollBorder.h"
+#include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
@@ -33,7 +33,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 	.Orientation(EOrientation::Orient_Vertical);
 
 	SAssignNew(ListViewWidget, SListView<FName>)
-	.ListItemsSource(&ListViewRowEntries)
+	.ListItemsSource(&FilteredEntries)
 	.ExternalScrollbar(ScrollBar)
 	.ConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible)
 	.SelectionMode(ESelectionMode::Single)
@@ -47,6 +47,14 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 		.Padding(6.0f)
 		[
 			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(4.0f)
+			[
+				SNew(SSearchBox)
+				.HintText(FText::FromString(TEXT("Search elements...")))
+				.OnTextChanged(this, &SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged)
+			]
 			+ SVerticalBox::Slot()
 			.FillHeight(1.0f)
 			.Padding(0.f)
@@ -98,12 +106,14 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 		return;
 	}
 
-	ListViewRowEntries.Empty(RegistryIds.Num());
+	SourceEntries.Empty(RegistryIds.Num());
 	for (const auto& RegistryId : RegistryIds)
 	{
-		ListViewRowEntries.Add(RegistryId.ItemName);
+		SourceEntries.Add(RegistryId.ItemName);
 	}
-
+	
+	// @gdemers copy dont move
+	FilteredEntries = SourceEntries;
 	if (ListViewWidget.IsValid())
 	{
 		ListViewWidget->RebuildList();
@@ -130,7 +140,28 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName Regi
 	return OutListTableRow.ToSharedRef();
 }
 
-FVector2D SAVVMEditorToolkitDataVisualizer::GetListBorderFadeDistance() const
+void SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged(const FText& NewText)
 {
-	return FVector2D(0.01f, 0.01f);
+	FilteredEntries.Reset(SourceEntries.Num());
+
+	const FString FilterString = NewText.ToString().TrimStartAndEnd();
+	if (FilterString.IsEmpty())
+	{
+		FilteredEntries = SourceEntries;
+	}
+	else
+	{
+		for (const auto& Item : SourceEntries)
+		{
+			if (Item.IsValid() && Item.ToString().Contains(FilterString, ESearchCase::IgnoreCase))
+			{
+				FilteredEntries.Add(Item);
+			}
+		}
+	}
+
+	if (ListViewWidget.IsValid())
+	{
+		ListViewWidget->RequestListRefresh();
+	}
 }
