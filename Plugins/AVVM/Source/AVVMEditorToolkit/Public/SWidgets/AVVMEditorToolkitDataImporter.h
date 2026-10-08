@@ -39,6 +39,9 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWid
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
 	SLATE_EVENT(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
+	SLATE_EVENT(FOnClicked, OnButtonClick_Create)
+	SLATE_EVENT(FOnClicked, OnButtonClick_Edit)
+	SLATE_EVENT(FOnClicked, OnButtonClick_Delete)
 	SLATE_ATTRIBUTE(TArray<FName>, DataRegistryTypes)
 	SLATE_END_ARGS()
 
@@ -54,10 +57,6 @@ private:
 	FText OnRowSelectionChanged() const;
 	bool DoesComboBoxHaveElements() const;
 	void OnComboBoxOpened();
-	
-	FReply OnButtonClick_Create();
-	FReply OnButtonClick_Edit();
-	FReply OnButtonClick_Delete();
 
 	bool OnEnable_ButtonCreate() const;
 	bool OnEnable_ButtonEdit() const;

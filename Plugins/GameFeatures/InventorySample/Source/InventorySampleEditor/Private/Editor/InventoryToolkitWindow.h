@@ -21,10 +21,10 @@
 
 #include "CoreMinimal.h"
 
+#include "DataRegistryId.h"
 #include "Widgets/SCompoundWidget.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
-struct FDataRegistryType;
 class SAVVMEditorToolkitDataVisualizer;
 
 /**
@@ -46,7 +46,14 @@ private:
 	bool OnDataImporterSourceChanged(FName SelectedSourceType);
 	EVisibility OnDataVisualizerVisibilityStateChanged() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;
+	
+	FReply OnButtonClick_Create();
+	FReply OnButtonClick_Edit();
+	FReply OnButtonClick_Delete();
+
+	void OpenCreateWindow(const FName RegistryType);
+	void OpenEditWindow(const FName RegistryType, const FName ItemName);
 
 	TSharedPtr<SAVVMEditorToolkitDataVisualizer> DataVisualizer{nullptr};
-	TSharedPtr<FDataRegistryType> SelectedDataRegistryType{nullptr};
+	FDataRegistryType SelectedDataRegistryType{};
 };

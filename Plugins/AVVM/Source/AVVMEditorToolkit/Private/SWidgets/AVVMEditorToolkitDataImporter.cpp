@@ -79,7 +79,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Create"))
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
-					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Create)
+					.OnClicked(InArgs._OnButtonClick_Create)
 					.IsEnabled(this, &SAVVMEditorToolkitDataImporter::OnEnable_ButtonCreate)
 				]
 				+ SHorizontalBox::Slot()
@@ -88,7 +88,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Edit"))
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
-					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Edit)
+					.OnClicked(InArgs._OnButtonClick_Edit)
 					.IsEnabled(this, &SAVVMEditorToolkitDataImporter::OnEnable_ButtonEdit)
 				]
 				+ SHorizontalBox::Slot()
@@ -97,7 +97,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Delete"))
 					.TextStyle(FAppStyle::Get(), "DialogButtonText")
 					.HAlign(HAlign_Center)
-					.OnClicked(this, &SAVVMEditorToolkitDataImporter::OnButtonClick_Delete)
+					.OnClicked(InArgs._OnButtonClick_Delete)
 					.IsEnabled(this, &SAVVMEditorToolkitDataImporter::OnEnable_ButtonDelete)
 				]
 			]
@@ -208,21 +208,6 @@ void SAVVMEditorToolkitDataImporter::OnComboBoxOpened()
 		ListViewWidget->SetSelection(DataRegistryTypeSelected, ESelectInfo::OnKeyPress);
 		ListViewWidget->RequestScrollIntoView(DataRegistryTypeSelected);
 	}
-}
-
-FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Create()
-{
-	return FReply::Handled();
-}
-
-FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Edit()
-{
-	return FReply::Handled();
-}
-
-FReply SAVVMEditorToolkitDataImporter::OnButtonClick_Delete()
-{
-	return FReply::Handled();
 }
 
 bool SAVVMEditorToolkitDataImporter::OnEnable_ButtonCreate() const

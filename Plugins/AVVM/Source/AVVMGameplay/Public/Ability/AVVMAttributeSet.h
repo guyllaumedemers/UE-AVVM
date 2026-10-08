@@ -23,7 +23,6 @@
 
 #include "AbilitySystemComponent.h"
 #include "AttributeSet.h"
-#include "AVVMToolkitUtils.h"
 
 #include "AVVMAttributeSet.generated.h"
 
@@ -31,6 +30,7 @@ struct FStreamableHandle;
 class UDataTable;
 
 // @gdemers get gameplay attribute using immediately invoked lambda expression.
+#ifndef GET_GAMEPLAY_ATTRIBUTE_USING_IILE
 #define GET_GAMEPLAY_ATTRIBUTE_USING_IILE(TClass, Actor, GameplayAttributeName)\
 	[](const AActor* AttributeSetOwner)\
 	{\
@@ -49,6 +49,7 @@ class UDataTable;
 			return FGameplayAttribute{};\
 		}\
 	}(Actor)
+#endif
 
 /**
  *	Class description:

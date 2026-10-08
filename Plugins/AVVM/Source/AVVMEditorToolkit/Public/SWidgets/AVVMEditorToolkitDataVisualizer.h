@@ -44,6 +44,7 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
+	bool GetSelectedItems(TArray<FName>& OutSelectedItems) const;
 
 private:
 	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName,

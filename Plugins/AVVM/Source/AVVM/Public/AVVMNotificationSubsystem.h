@@ -196,11 +196,25 @@ protected:
 
 // @gdemers allow stripping symbols when building server target for dedicated server
 #ifdef UE_AVVM_RUNNING_DEDICATED_SERVER
+
+#ifndef UE_AVVM_NOTIFY
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, Target, Payload)
+#endif
+
+#ifndef UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED
 #define UE_AVVM_NOTIFY_IF_LOCALLYCONTROLLED(WorldContextObject, ChannelTag, LocallyControlledActor, ActorBoundToChannel, Payload)
+#endif
+
 #else
+
+#ifndef UE_AVVM_NOTIFY
 #define UE_AVVM_NOTIFY(WorldContextObject, ChannelTag, ActorBoundToChannel, Payload)\
 UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload});
+#endif
+
+#ifndef UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED
 #define UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(WorldContextObject, ChannelTag, PC, ActorBoundToChannel, Payload)\
 if(IsValid(PC) && PC->IsLocalPlayerController()) { UAVVMNotificationSubsystem::Static_BroadcastChannel(WorldContextObject, FAVVMNotificationContextArgs{ChannelTag, ActorBoundToChannel, Payload}); }
+#endif
+
 #endif

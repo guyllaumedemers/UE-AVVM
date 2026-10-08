@@ -25,12 +25,12 @@
 
 #include "AVVMTSAnimInstanceUtils.generated.h"
 
-// @gdemers macro
-#define DOES_NATIVE_TAG_MATCH(MovementStateTag, Compare)\
-MovementStateTag.GetTag().MatchesAnyExact(Compare);\
-
-#define UPDATE_TS_PROPERTY(StructName, PropertyName, MovementStateTag, Compare)\
-StructName.PropertyName = DOES_NATIVE_TAG_MATCH(MovementStateTag, Compare);\
+// @gdemers macro for animation proxy update of boolean state properties that rely on gameplaytags presence
+// to set the state.
+#ifndef UPDATE_TS_BOOLEAN_PROPERTY
+#define UPDATE_TS_BOOLEAN_PROPERTY(StructName, PropertyName, MovementStateTag, Compare)\
+StructName.PropertyName = MovementStateTag.GetTag().MatchesAnyExact(Compare);
+#endif
 
 /**
  *	Class description:

@@ -25,6 +25,8 @@
 
 #include "AVVMLogger.generated.h"
 
+AVVMTOOLKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogAVVMEditor, Log, All);
+
 /**
  *	Class Description :
  *
@@ -45,6 +47,38 @@ public:
 	static FString PrintConnectionInfo(const UNetConnection* Connection);
 };
 
+/**
+ *	@gdemers editor logger targeting a specific channel.
+ */
+#ifndef AVVM_EDITOR_LOGGER
+#define AVVM_EDITOR_LOGGER(Verbosity, Format, ...)\
+	UE_LOG(LogAVVMEditor,\
+	Verbosity,\
+	TEXT("%hs line:%d. Msg: %s"),\
+	__FUNCTION__,\
+	__LINE__,\
+	*FString::Printf(Format, ##__VA_ARGS__))
+#endif
+
+#ifndef AVVM_EDITOR_LOGGER_LOG
+#define AVVM_EDITOR_LOGGER_LOG(Format, ...)\
+AVVM_EDITOR_LOGGER(Log, Format, ##__VA_ARGS__)
+#endif
+
+#ifndef AVVM_EDITOR_LOGGER_WARNING
+#define AVVM_EDITOR_LOGGER_WARNING(Format, ...)\
+AVVM_EDITOR_LOGGER(Warning, Format, ##__VA_ARGS__)
+#endif
+
+#ifndef AVVM_EDITOR_LOGGER_ERROR
+#define AVVM_EDITOR_LOGGER_ERROR(Format, ...)\
+AVVM_EDITOR_LOGGER(Error, Format, ##__VA_ARGS__)
+#endif
+
+/**
+ *	@gdemers gameplay logger targeting user provided channel.
+ */
+#ifndef AVVM_LOGGER
 #define AVVM_LOGGER(CategoryName, Verbosity, NetObject, TargetObject, Format, ...)\
 	UE_LOG(CategoryName,\
 	Verbosity,\
@@ -53,13 +87,20 @@ public:
 	__LINE__,\
 	UAVVMLoggerUtils::PrintNetSource(NetObject).GetData(),\
 	*GetNameSafe(TargetObject),\
-	*FString::Printf(Format, ##__VA_ARGS__))\
+	*FString::Printf(Format, ##__VA_ARGS__))
+#endif
 
+#ifndef AVVM_LOGGER_LOG
 #define AVVM_LOGGER_LOG(CategoryName, NetObject, TargetObject, Format, ...)\
 AVVM_LOGGER(CategoryName, Log, NetObject, TargetObject, Format, ##__VA_ARGS__)
+#endif
 
+#ifndef AVVM_LOGGER_WARNING
 #define AVVM_LOGGER_WARNING(CategoryName, NetObject, TargetObject, Format, ...)\
 AVVM_LOGGER(CategoryName, Warning, NetObject, TargetObject, Format, ##__VA_ARGS__)
+#endif
 
+#ifndef AVVM_LOGGER_ERROR
 #define AVVM_LOGGER_ERROR(CategoryName, NetObject, TargetObject, Format, ...)\
 AVVM_LOGGER(CategoryName, Error, NetObject, TargetObject, Format, ##__VA_ARGS__)
+#endif

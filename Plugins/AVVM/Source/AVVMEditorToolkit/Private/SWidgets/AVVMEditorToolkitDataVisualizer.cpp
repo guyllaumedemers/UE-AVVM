@@ -120,6 +120,18 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 	}
 }
 
+bool SAVVMEditorToolkitDataVisualizer::GetSelectedItems(TArray<FName>& OutSelectedItems) const
+{
+	if (ListViewWidget.IsValid())
+	{
+		return (ListViewWidget->GetSelectedItems(OutSelectedItems) > 0);
+	}
+	else
+	{
+		return false;
+	}
+}
+
 TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName RegistryItemName,
                                                                       const TSharedRef<STableViewBase>& OwnerTable) const
 {

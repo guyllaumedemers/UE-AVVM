@@ -22,6 +22,8 @@
 #include "Engine/NetConnection.h"
 #include "Subsystems/Subsystem.h"
 
+DEFINE_LOG_CATEGORY(LogAVVMEditor);
+
 FString UAVVMLoggerUtils::BP_PrintNetSource(const UObject* NetObject)
 {
 	return FString{UAVVMLoggerUtils::PrintNetSource(NetObject)};

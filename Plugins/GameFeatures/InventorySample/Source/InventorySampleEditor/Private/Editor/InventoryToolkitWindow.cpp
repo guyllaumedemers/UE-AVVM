@@ -19,8 +19,8 @@
 //SOFTWARE.
 #include "InventoryToolkitWindow.h"
 
+#include "AVVMLogger.h"
 #include "InventorySettings.h"
-#include "Data/ItemDefinitionDataAsset.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "Widgets/SOverlay.h"
 
@@ -39,6 +39,9 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				SNew(SAVVMEditorToolkitDataImporter)
 				.DataRegistryTypes(GetInventoryDataRegistryTypes())
 				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged)
+				.OnButtonClick_Create(this, &SInventoryToolkitWindow::OnButtonClick_Create)
+				.OnButtonClick_Edit(this, &SInventoryToolkitWindow::OnButtonClick_Edit)
+				.OnButtonClick_Delete(this, &SInventoryToolkitWindow::OnButtonClick_Delete)
 			]
 			+ SVerticalBox::Slot()
 			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
@@ -53,20 +56,18 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 
 bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)
 {
-	const FDataRegistryType RegistryType{SelectedSourceType};
-
-	SelectedDataRegistryType = MakeShared<FDataRegistryType>(RegistryType);
-	if (SelectedDataRegistryType.IsValid() && DataVisualizer.IsValid())
+	SelectedDataRegistryType = FDataRegistryType{SelectedSourceType};
+	if (DataVisualizer.IsValid())
 	{
-		DataVisualizer->UpdateDataVisualizer(*SelectedDataRegistryType);
+		DataVisualizer->UpdateDataVisualizer(SelectedDataRegistryType);
 	}
 
-	return RegistryType.IsValid();
+	return SelectedDataRegistryType.IsValid();
 }
 
 EVisibility SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged() const
 {
-	return (SelectedDataRegistryType.IsValid() && SelectedDataRegistryType->IsValid()) ? EVisibility::Visible : EVisibility::Collapsed;
+	return SelectedDataRegistryType.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
@@ -77,4 +78,64 @@ TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
 			UInventorySettings::GetFtueInventoryProviderRegistryType(),
 			UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
 	};
+}
+
+FReply SInventoryToolkitWindow::OnButtonClick_Create()
+{
+	if (!SelectedDataRegistryType.IsValid())
+	{
+		return FReply::Unhandled();
+	}
+	else
+	{
+		OpenCreateWindow(SelectedDataRegistryType);
+		return FReply::Handled();
+	}
+}
+
+FReply SInventoryToolkitWindow::OnButtonClick_Edit()
+{
+	if (!SelectedDataRegistryType.IsValid() || !DataVisualizer.IsValid())
+	{
+		return FReply::Unhandled();
+	}
+
+	bool bResult{false};
+
+	TArray<FName> OutItemNames{};
+	bResult = DataVisualizer->GetSelectedItems(OutItemNames);
+
+	for (const auto& ItemName : OutItemNames)
+	{
+		OpenEditWindow(SelectedDataRegistryType, ItemName);
+	}
+
+	return bResult ? FReply::Handled() : FReply::Unhandled();
+}
+
+FReply SInventoryToolkitWindow::OnButtonClick_Delete()
+{
+	if (SelectedDataRegistryType.IsValid())
+	{
+		return FReply::Handled();
+	}
+	else
+	{
+		return FReply::Unhandled();
+	}
+}
+
+void SInventoryToolkitWindow::OpenCreateWindow(const FName RegistryType)
+{
+	// TODO @gdemers make a context window for creating element
+	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
+	                       *RegistryType.ToString());
+}
+
+void SInventoryToolkitWindow::OpenEditWindow(const FName RegistryType, const FName ItemName)
+{
+	// TODO @gdemers make a context window for editing element
+	AVVM_EDITOR_LOGGER_LOG(TEXT("Edit entry of RegistryType: %s, ItemName: %s."),
+	                       *RegistryType.ToString(),
+	                       *ItemName.ToString());
 }

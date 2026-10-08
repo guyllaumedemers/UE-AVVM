@@ -22,6 +22,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AVVMLogger.h"
+#include "AVVMToolkitUtils.h"
 #include "WeaponActor.h"
 #include "WeaponSampleModule.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
