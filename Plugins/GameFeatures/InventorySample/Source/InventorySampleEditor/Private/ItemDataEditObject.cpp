@@ -27,8 +27,28 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent() const
 		.ColorAndOpacity(FLinearColor::Blue);
 }
 
+FText UItemDataEditObject::GetModalMessage_OnClosure() const
+{
+	return Super::GetModalMessage_OnClosure();
+}
+
+FText UItemDataEditObject::GetModalTitle_OnClosure() const
+{
+	return Super::GetModalTitle_OnClosure();
+}
+
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent() const
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::White);
+}
+
+FText UItemGroupDataEditObject::GetModalMessage_OnClosure() const
+{
+	return Super::GetModalMessage_OnClosure();
+}
+
+FText UItemGroupDataEditObject::GetModalTitle_OnClosure() const
+{
+	return Super::GetModalTitle_OnClosure();
 }

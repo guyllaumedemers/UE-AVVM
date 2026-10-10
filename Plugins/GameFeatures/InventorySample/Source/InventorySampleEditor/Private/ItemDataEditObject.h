@@ -26,7 +26,10 @@
 #include "ItemDataEditObject.generated.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UItemDataEditObject is a context class that define how Item creation/edit should be managed
+ *	when using AVVMEditorToolkit.
  */
 UCLASS()
 class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitDataEditObject
@@ -35,10 +38,15 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual FText GetModalMessage_OnClosure() const override;
+	virtual FText GetModalTitle_OnClosure() const override;
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UItemGroupDataEditObject is a context class that define how ItemGroup creation/edit should be managed
+ *	when using AVVMEditorToolkit.
  */
 UCLASS()
 class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToolkitDataEditObject
@@ -47,4 +55,6 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual FText GetModalMessage_OnClosure() const override;
+	virtual FText GetModalTitle_OnClosure() const override;
 };

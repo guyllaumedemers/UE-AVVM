@@ -26,7 +26,10 @@
 #include "InventoryProviderDataEditObject.generated.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UFtueInventoryProviderDataEditObject is a context class that define how Ftue InventoryProvider creation/edit should be managed
+ *	when using AVVMEditorToolkit.
  */
 UCLASS()
 class INVENTORYSAMPLEEDITOR_API UFtueInventoryProviderDataEditObject : public UAVVMEditorToolkitDataEditObject
@@ -35,10 +38,15 @@ class INVENTORYSAMPLEEDITOR_API UFtueInventoryProviderDataEditObject : public UA
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual FText GetModalMessage_OnClosure() const override;
+	virtual FText GetModalTitle_OnClosure() const override;
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UStubDataInventoryDependencyGraphEditObject is a context class that define how Stub Data (Backend) Inventory Dependency Graph creation/edit should be managed
+ *	when using AVVMEditorToolkit.
  */
 UCLASS()
 class INVENTORYSAMPLEEDITOR_API UStubDataInventoryDependencyGraphEditObject : public UAVVMEditorToolkitDataEditObject
@@ -47,4 +55,6 @@ class INVENTORYSAMPLEEDITOR_API UStubDataInventoryDependencyGraphEditObject : pu
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual FText GetModalMessage_OnClosure() const override;
+	virtual FText GetModalTitle_OnClosure() const override;
 };

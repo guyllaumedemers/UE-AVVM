@@ -27,8 +27,28 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent() c
 		.ColorAndOpacity(FLinearColor::Yellow);
 }
 
+FText UFtueInventoryProviderDataEditObject::GetModalMessage_OnClosure() const
+{
+	return Super::GetModalMessage_OnClosure();
+}
+
+FText UFtueInventoryProviderDataEditObject::GetModalTitle_OnClosure() const
+{
+	return Super::GetModalTitle_OnClosure();
+}
+
 TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditContent() const
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Red);
+}
+
+FText UStubDataInventoryDependencyGraphEditObject::GetModalMessage_OnClosure() const
+{
+	return Super::GetModalMessage_OnClosure();
+}
+
+FText UStubDataInventoryDependencyGraphEditObject::GetModalTitle_OnClosure() const
+{
+	return Super::GetModalTitle_OnClosure();
 }
