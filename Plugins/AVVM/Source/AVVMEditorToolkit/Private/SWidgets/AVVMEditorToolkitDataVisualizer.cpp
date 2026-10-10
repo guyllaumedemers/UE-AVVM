@@ -219,7 +219,7 @@ bool SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonCreate() const
 
 bool SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonEdit() const
 {
-	return (false == SelectedRegistryType.IsNone()) && (SourceEntries.Num() > 0);
+	return (false == SelectedRegistryType.IsNone()) && (SourceEntries.Num() > 0) && (ListViewWidget.IsValid() && (ListViewWidget->GetNumItemsSelected() > 0));
 }
 
 bool SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonDelete() const

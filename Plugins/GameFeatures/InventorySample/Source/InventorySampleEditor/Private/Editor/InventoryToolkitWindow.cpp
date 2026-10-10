@@ -196,7 +196,7 @@ void SInventoryToolkitWindow::OpenCreateWindow(const FName RegistryType)
 	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
 
 	auto NewFloatingWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle", "Floating Window"))
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_Create", "SInventoryToolkitWindow::Factory"))
 		.CreateTitleBar(true)
 		.SupportsMaximize(true)
 		.SupportsMinimize(true)
@@ -209,8 +209,10 @@ void SInventoryToolkitWindow::OpenCreateWindow(const FName RegistryType)
 		.Content()
 		[
 			SNew(SAVVMEditorToolkitDataEditor)
-			.DataEditObject(GetDataEditObject(RegistryType))
 			.SelectedDataRegistryType(FDataRegistryType{RegistryType})
+			.SelectedItemName(NAME_None)
+			.DataEditObject(GetDataEditObject(RegistryType))
+			.Mode(EAVVMDataEditorModes::Create)
 		];
 
 	NewFloatingWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
@@ -230,6 +232,44 @@ void SInventoryToolkitWindow::OpenEditWindow(const FName RegistryType, const FNa
 	AVVM_EDITOR_LOGGER_LOG(TEXT("Edit entry of RegistryType: %s, ItemName: %s."),
 	                       *RegistryType.ToString(),
 	                       *ItemName.ToString());
+	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
+						   *RegistryType.ToString());
+
+	FDisplayMetrics DisplayMetrics{};
+	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
+	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
+
+	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
+
+	auto NewFloatingWindow = SNew(SWindow)
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_Edit", "SInventoryToolkitWindow::Editing"))
+		.CreateTitleBar(true)
+		.SupportsMaximize(true)
+		.SupportsMinimize(true)
+		.IsInitiallyMaximized(false)
+		.IsInitiallyMinimized(false)
+		.SizingRule(ESizingRule::UserSized)
+		.AutoCenter(EAutoCenter::PreferredWorkArea)
+		.ClientSize(ClientSize)
+		.AdjustInitialSizeAndPositionForDPIScale(false)
+		.Content()
+		[
+			SNew(SAVVMEditorToolkitDataEditor)
+			.SelectedDataRegistryType(FDataRegistryType{RegistryType})
+			.SelectedItemName(ItemName)
+			.DataEditObject(GetDataEditObject(RegistryType))
+			.Mode(EAVVMDataEditorModes::Edit)
+		];
+
+	NewFloatingWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
+	NewFloatingWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
+
+	FloatingWindows.Add(NewFloatingWindow);
+
+	FSlateApplication::Get().AddWindow(NewFloatingWindow, true);
+	FGlobalTabmanager::Get()->SetRootWindow(NewFloatingWindow);
+	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
+	FSlateNotificationManager::Get().SetRootWindow(NewFloatingWindow);
 }
 
 void SInventoryToolkitWindow::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const

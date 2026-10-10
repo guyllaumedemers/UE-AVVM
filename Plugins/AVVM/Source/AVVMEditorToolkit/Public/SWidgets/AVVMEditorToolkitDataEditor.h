@@ -32,7 +32,7 @@
  *	UAVVMEditorToolkitDataEditObject is an abstract UObject type that define the internal behaviour
  *	to editing plugin specific data types.
  */
-UCLASS(Abstract)
+UCLASS(Abstract, NotBlueprintType, NotBlueprintable)
 class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 {
 	GENERATED_BODY()
@@ -46,6 +46,19 @@ public:
 /**
  *	Class description:
  *	
+ *	EAVVMDataEditorModes is an Enum type to track active mode of an active Window instance.
+ */
+UENUM(NotBlueprintType)
+enum class EAVVMDataEditorModes : uint8
+{
+	None UMETA(Hidden),
+	Create,
+	Edit
+};
+
+/**
+ *	Class description:
+ *	
  *	SAVVMEditorToolkitDataEditor is a slate context handling data edit modes.
  */
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataEditor : public SCompoundWidget
@@ -53,7 +66,9 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataEditor : public SCompoundWidge
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataEditor){}
 	SLATE_ATTRIBUTE(FDataRegistryType, SelectedDataRegistryType)
+	SLATE_ATTRIBUTE(FName, SelectedItemName)
 	SLATE_ATTRIBUTE(TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject>, DataEditObject)
+	SLATE_ATTRIBUTE(EAVVMDataEditorModes, Mode)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
