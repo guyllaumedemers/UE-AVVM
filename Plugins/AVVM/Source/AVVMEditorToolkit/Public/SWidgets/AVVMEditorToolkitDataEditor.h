@@ -23,45 +23,44 @@
 
 #include "DataRegistryId.h"
 #include "Widgets/SCompoundWidget.h"
-#include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
-class SAVVMEditorToolkitDataVisualizer;
-class UAVVMEditorToolkitDataEditObject;
+#include "AVVMEditorToolkitDataEditor.generated.h"
 
 /**
  *	Class description:
  *	
- *	SInventoryToolkitWindow is a slate context for handling data table edits
- *	for the inventory system.
+ *	UAVVMEditorToolkitDataEditObject is an abstract UObject type that define the internal behaviour
+ *	to editing plugin specific data types.
  */
-class INVENTORYSAMPLEEDITOR_API SInventoryToolkitWindow : public SCompoundWidget
+UCLASS(Abstract)
+class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
+	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
+};
+
+/**
+ *	Class description:
+ *	
+ *	SAVVMEditorToolkitDataEditor is a slate context handling data edit modes.
+ */
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataEditor : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SInventoryToolkitWindow){};
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataEditor){}
+	SLATE_ATTRIBUTE(FDataRegistryType, SelectedDataRegistryType)
+	SLATE_ATTRIBUTE(const UAVVMEditorToolkitDataEditObject*, DataEditObject)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-
+	
+	FText GetModalMessage_OnClosure() const;
+	FText GetModalTitle_OnClosure() const;
+	
 private:
-	FText OnPresentPlugin() const;
-	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
-	bool OnDataImporterSourceChanged(FName SelectedSourceType);
-	EVisibility OnDataVisualizerVisibilityStateChanged() const;
-	TArray<FName> GetInventoryDataRegistryTypes() const;
-	
-	FReply OnButtonClick_Create();
-	FReply OnButtonClick_Edit();
-	FReply OnButtonClick_Delete();
-
-	void OpenCreateWindow(const FName RegistryType);
-	void OpenEditWindow(const FName RegistryType, const FName ItemName);
-	
-	/** Override to handle confirming if the user wants to quit. */
-	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
-	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
-	
-	TArray<TSharedPtr<SWindow>> FloatingWindows{};
-	TSharedPtr<SAVVMEditorToolkitDataVisualizer> DataVisualizer{nullptr};
-	FDataRegistryType SelectedDataRegistryType{};
+	TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject> DataEditObject{nullptr};
 };

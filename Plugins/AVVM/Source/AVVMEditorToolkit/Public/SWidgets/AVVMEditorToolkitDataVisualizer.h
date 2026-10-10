@@ -39,6 +39,9 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataVisualizer : public SCompoundW
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataVisualizer){};
 	SLATE_ATTRIBUTE(TArray<TSharedPtr<const FDataRegistryId>>, ListViewRowEntries)
+	SLATE_EVENT(FOnClicked, OnButtonClick_Create)
+	SLATE_EVENT(FOnClicked, OnButtonClick_Edit)
+	SLATE_EVENT(FOnClicked, OnButtonClick_Delete)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -51,6 +54,10 @@ private:
 	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
 	
 	void OnSearchTextChanged(const FText& NewText);
+
+	bool OnEnable_ButtonCreate() const;
+	bool OnEnable_ButtonEdit() const;
+	bool OnEnable_ButtonDelete() const;
 
 	// Holds the persistent reference to the list view
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};

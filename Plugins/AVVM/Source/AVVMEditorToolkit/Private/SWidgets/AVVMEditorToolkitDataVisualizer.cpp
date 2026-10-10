@@ -23,6 +23,7 @@
 #include "Components/VerticalBox.h"
 #include "Data/AVVMDataTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -47,6 +48,39 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 		.Padding(6.0f)
 		[
 			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Create"))
+					.TextStyle(FAppStyle::Get(), "DialogButtonText")
+					.HAlign(HAlign_Center)
+					.OnClicked(InArgs._OnButtonClick_Create)
+					.IsEnabled(this, &SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonCreate)
+				]
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Edit"))
+					.TextStyle(FAppStyle::Get(), "DialogButtonText")
+					.HAlign(HAlign_Center)
+					.OnClicked(InArgs._OnButtonClick_Edit)
+					.IsEnabled(this, &SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonEdit)
+				]
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Delete"))
+					.TextStyle(FAppStyle::Get(), "DialogButtonText")
+					.HAlign(HAlign_Center)
+					.OnClicked(InArgs._OnButtonClick_Delete)
+					.IsEnabled(this, &SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonDelete)
+				]
+			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			.Padding(4.0f)
@@ -111,7 +145,7 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 	{
 		SourceEntries.Add(RegistryId.ItemName);
 	}
-	
+
 	// @gdemers copy dont move
 	FilteredEntries = SourceEntries;
 	if (ListViewWidget.IsValid())
@@ -176,4 +210,19 @@ void SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged(const FText& NewText)
 	{
 		ListViewWidget->RequestListRefresh();
 	}
+}
+
+bool SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonCreate() const
+{
+	return (false == SelectedRegistryType.IsNone());
+}
+
+bool SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonEdit() const
+{
+	return (false == SelectedRegistryType.IsNone()) && (SourceEntries.Num() > 0);
+}
+
+bool SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonDelete() const
+{
+	return OnEnable_ButtonEdit();
 }

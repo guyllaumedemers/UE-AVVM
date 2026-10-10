@@ -39,16 +39,11 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWid
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
 	SLATE_EVENT(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
-	SLATE_EVENT(FOnClicked, OnButtonClick_Create)
-	SLATE_EVENT(FOnClicked, OnButtonClick_Edit)
-	SLATE_EVENT(FOnClicked, OnButtonClick_Delete)
 	SLATE_ATTRIBUTE(TArray<FName>, DataRegistryTypes)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-
-	void SelectName(FName NameToSelect, ESelectInfo::Type SelectionInfo = ESelectInfo::Direct);
 	void UpdateListViewEntries(TArray<FName>&& NewNameList);
 	
 private:
@@ -57,10 +52,6 @@ private:
 	FText OnRowSelectionChanged() const;
 	bool DoesComboBoxHaveElements() const;
 	void OnComboBoxOpened();
-
-	bool OnEnable_ButtonCreate() const;
-	bool OnEnable_ButtonEdit() const;
-	bool OnEnable_ButtonDelete() const;
 	
 	TSharedPtr<SListViewSelectorDropdownMenu<FName>> DropdownWidget{nullptr};
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
@@ -69,6 +60,5 @@ private:
 
 	SOnDataImporterSourceChangedDelegate OnDataRegistryTypeSelectionChangedDelegate{};
 	TArray<FName> DataRegistryTypes{};
-	FName DataRegistryTypeSelected{NAME_None};
-	bool bDoesDataRegistryHaveRows{false};
+	FName SelectedDataRegistryType{NAME_None};
 };
