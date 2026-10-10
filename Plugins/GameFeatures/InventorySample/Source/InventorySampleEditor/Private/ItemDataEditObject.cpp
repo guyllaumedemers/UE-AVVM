@@ -29,12 +29,12 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent() const
 
 FText UItemDataEditObject::GetModalMessage_OnClosure() const
 {
-	return Super::GetModalMessage_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved Items will be lost?");
 }
 
 FText UItemDataEditObject::GetModalTitle_OnClosure() const
 {
-	return Super::GetModalTitle_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureTitle", "UItemDataEditObject");
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent() const
@@ -45,10 +45,10 @@ TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent() const
 
 FText UItemGroupDataEditObject::GetModalMessage_OnClosure() const
 {
-	return Super::GetModalMessage_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemGroupDataEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved ItemGroups will be lost?");
 }
 
 FText UItemGroupDataEditObject::GetModalTitle_OnClosure() const
 {
-	return Super::GetModalTitle_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemGroupDataEditObject::DataEditor_ClosureTitle", "UItemGroupDataEditObject");
 }

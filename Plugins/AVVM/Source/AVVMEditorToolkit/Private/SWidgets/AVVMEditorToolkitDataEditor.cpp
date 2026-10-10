@@ -65,6 +65,6 @@ FText SAVVMEditorToolkitDataEditor::GetModalTitle_OnClosure() const
 	}
 	else
 	{
-		return NSLOCTEXT("AVVMEditorToolkitDataEditor", "DataEditor_ClosureMessage", "Missing Source!");
+		return NSLOCTEXT("AVVMEditorToolkitDataEditor", "DataEditor_ClosureTitle", "Missing Source!");
 	}
 }

@@ -29,12 +29,12 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent() c
 
 FText UFtueInventoryProviderDataEditObject::GetModalMessage_OnClosure() const
 {
-	return Super::GetModalMessage_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UFtueInventoryProviderDataEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved InventoryProviders will be lost?");
 }
 
 FText UFtueInventoryProviderDataEditObject::GetModalTitle_OnClosure() const
 {
-	return Super::GetModalTitle_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UFtueInventoryProviderDataEditObject::DataEditor_ClosureTitle", "UFtueInventoryProviderDataEditObject");
 }
 
 TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditContent() const
@@ -45,10 +45,10 @@ TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditCont
 
 FText UStubDataInventoryDependencyGraphEditObject::GetModalMessage_OnClosure() const
 {
-	return Super::GetModalMessage_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UStubDataInventoryDependencyGraphEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved Dependency Graph Entries will be lost?");
 }
 
 FText UStubDataInventoryDependencyGraphEditObject::GetModalTitle_OnClosure() const
 {
-	return Super::GetModalTitle_OnClosure();
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UStubDataInventoryDependencyGraphEditObject::DataEditor_ClosureTitle", "UStubDataInventoryDependencyGraphEditObject");
 }
