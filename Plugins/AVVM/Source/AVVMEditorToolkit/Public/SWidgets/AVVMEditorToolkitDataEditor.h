@@ -38,6 +38,7 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
+	virtual TSharedPtr<SWidget> GetDataEditContent() const PURE_VIRTUAL(GetDataEditContent, return nullptr;)
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
 };
@@ -52,12 +53,13 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataEditor : public SCompoundWidge
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataEditor){}
 	SLATE_ATTRIBUTE(FDataRegistryType, SelectedDataRegistryType)
-	SLATE_ATTRIBUTE(const UAVVMEditorToolkitDataEditObject*, DataEditObject)
+	SLATE_ATTRIBUTE(TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject>, DataEditObject)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-	
+
+	TSharedPtr<SWidget> GetDataEditContent() const;
 	FText GetModalMessage_OnClosure() const;
 	FText GetModalTitle_OnClosure() const;
 	

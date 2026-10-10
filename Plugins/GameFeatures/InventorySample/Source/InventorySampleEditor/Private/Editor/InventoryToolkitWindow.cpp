@@ -20,7 +20,9 @@
 #include "InventoryToolkitWindow.h"
 
 #include "AVVMLogger.h"
+#include "InventoryProviderDataEditObject.h"
 #include "InventorySettings.h"
+#include "ItemDataEditObject.h"
 #include "Android/AndroidPlatformApplicationMisc.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Docking/TabManager.h"
@@ -85,23 +87,27 @@ const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObje
 		return nullptr;
 	}
 
-	// TODO @gdemers Return Data Edit Object of specific type so we can produce Window context
-	// specific to the edit type, and requirements thats are bound to the registry type.
+	const auto GetClassCDO = []<typename TClass>()
+	{
+		const UClass* TargetClass = TClass::StaticClass();
+		return IsValid(TargetClass) ? TargetClass->GetDefaultObject<TClass>() : nullptr;
+	};
+
 	if (RegistryType.IsEqual(UInventorySettings::GetItemGroupRegistryType()))
 	{
-		return nullptr;
+		return GetClassCDO.operator()<UItemGroupDataEditObject>();
 	}
 	else if (RegistryType.IsEqual(UInventorySettings::GetItemRegistryType()))
 	{
-		return nullptr;
+		return GetClassCDO.operator()<UItemDataEditObject>();
 	}
 	else if (RegistryType.IsEqual(UInventorySettings::GetFtueInventoryProviderRegistryType()))
 	{
-		return nullptr;
+		return GetClassCDO.operator()<UFtueInventoryProviderDataEditObject>();
 	}
 	else if (RegistryType.IsEqual(UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()))
 	{
-		return nullptr;
+		return GetClassCDO.operator()<UStubDataInventoryDependencyGraphEditObject>();
 	}
 
 	return nullptr;

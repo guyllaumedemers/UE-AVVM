@@ -17,54 +17,18 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "SWidgets/AVVMEditorToolkitDataEditor.h"
+#include "ItemDataEditObject.h"
 
 #include "Widgets/Images/SImage.h"
-#include "Widgets/Layout/SBorder.h"
 
-void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
+TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent() const
 {
-	DataEditObject = InArgs._DataEditObject.Get();
-
-	ChildSlot
-	[
-		GetDataEditContent().ToSharedRef()
-	];
+	return SNew(SImage)
+		.ColorAndOpacity(FLinearColor::Blue);
 }
 
-TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent() const
+TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent() const
 {
-	if (DataEditObject.IsValid())
-	{
-		return DataEditObject->GetDataEditContent();
-	}
-	else
-	{
-		return SNew(SImage)
-			.ColorAndOpacity(FLinearColor::Green);
-	}
-}
-
-FText SAVVMEditorToolkitDataEditor::GetModalMessage_OnClosure() const
-{
-	if (DataEditObject.IsValid())
-	{
-		return DataEditObject->GetModalMessage_OnClosure();
-	}
-	else
-	{
-		return NSLOCTEXT("AVVMEditorToolkitDataEditor", "DataEditor_ClosureMessage", "Are you sure you want to close this window?");
-	}
-}
-
-FText SAVVMEditorToolkitDataEditor::GetModalTitle_OnClosure() const
-{
-	if (DataEditObject.IsValid())
-	{
-		return DataEditObject->GetModalTitle_OnClosure();
-	}
-	else
-	{
-		return NSLOCTEXT("AVVMEditorToolkitDataEditor", "DataEditor_ClosureMessage", "Missing Source!");
-	}
+	return SNew(SImage)
+		.ColorAndOpacity(FLinearColor::White);
 }
