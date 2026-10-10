@@ -12,6 +12,12 @@
   ],
   "Plugins": [
     {
+      "Name": "AutoSizeComments",
+      "Enabled": true,
+      "Optional": true,
+      "MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/ae89a2c4ab384de0a3f213b23de324f3"
+    },
+    {
       "Name": "AVVM",
       "Enabled": true
     },
@@ -44,6 +50,12 @@
       "Enabled": true
     },
     {
+      "Name": "BlueprintAssist",
+      "Enabled": true,
+      "Optional": true,
+      "MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/9e895371fa3a471c87337860d6f341ff"
+    },
+    {
       "Name": "CommonGame",
       "Enabled": true
     },
@@ -74,6 +86,12 @@
     {
       "Name": "DLCSample",
       "Enabled": true
+    },
+    {
+      "Name": "ElectronicNodes",
+      "Enabled": true,
+      "Optional": true,
+      "MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/5cb2a394d0c04e73891762be4cbd7216"
     },
     {
       "Name": "EnhancedInput",
