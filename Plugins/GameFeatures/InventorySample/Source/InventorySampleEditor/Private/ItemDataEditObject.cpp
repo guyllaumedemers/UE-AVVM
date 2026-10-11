@@ -19,8 +19,14 @@
 //SOFTWARE.
 #include "ItemDataEditObject.h"
 
+#include "AVVMGameplaySettings.h"
+#include "ContentBrowserModule.h"
+#include "DataRegistrySubsystem.h"
+#include "IContentBrowserSingleton.h"
+#include "InventorySettings.h"
 #include "PropertyEditorModule.h"
 #include "Components/VerticalBox.h"
+#include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 #include "Widgets/Images/SImage.h"
@@ -32,7 +38,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEdito
 {
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
-		FPropertyEditorModule& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		auto& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
 		FDetailsViewArgs DetailsViewArgs{};
 		DetailsViewArgs.bAllowSearch = false;
@@ -45,7 +51,20 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEdito
 		TableRowItemObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
 		TableRowItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_TableRowItemObjectDetailView);
 	}
-	
+
+	TSharedPtr<SWidget> PathPicker{nullptr};
+	if (FModuleManager::Get().IsModuleLoaded("ContentBrowser"))
+	{
+		// Configure the path picker
+		FPathPickerConfig PathPickerConfig;
+		PathPickerConfig.DefaultPath = TEXT("/Game");
+		PathPickerConfig.OnPathSelected = FOnPathSelected::CreateUObject(this, &UItemDataEditObject::OnAssetPathSelected);
+
+		// Load the Content Browser module
+		auto& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+		PathPicker = ContentBrowserModule.Get().CreatePathPicker(PathPickerConfig);
+	}
+
 	return SNew(SBorder)
 		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
 		.Padding(6.0f)
@@ -64,20 +83,65 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEdito
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SNew(SAVVMEditorToolkitDataImporter)
-				.Elements(GetItemTypes())
-				.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnDataCategoryTypeChanged)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-			[
-				SNew(SEditableTextBox)
-				.Justification(ETextJustify::Center)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
-				.HintText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName_Hint", "ItemObject FName must follow a strict naming convention. A new entry with _ItemObject will be created under the hood for your new Object."))
-				.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
-				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::OutputPath", "Select an Output Path for generated assets. Sub-directories will be created for dependent assets."))
+					]
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						PathPicker.ToSharedRef()
+					]
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1.f)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(SAVVMEditorToolkitDataImporter)
+						.Elements(GetItemTypes())
+						.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnDataCategoryTypeChanged)
+					]
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(SEditableTextBox)
+						.Justification(ETextJustify::Center)
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
+						.HintText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName_Hint", "ItemObject FName must follow a strict naming convention. A new entry with _ItemObject will be created under the hood for your new Object."))
+						.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
+						.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
+					]
+					+ SVerticalBox::Slot()
+					.FillHeight(1.f)
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
+						.Text_UObject(this, &UItemDataEditObject::GetAssetOutputPath)
+					]
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
+						.Text_UObject(this, &UItemDataEditObject::GetItemObjectNameGenerated)
+					]
+				]
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
@@ -91,27 +155,19 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEdito
 				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_ButtonGenerateElementId)
 			]
 			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-			[
-				SNew(STextBlock)
-				.Justification(ETextJustify::Left)
-				.Text(GetItemObjectNameGenerated())
-				.Visibility_UObject(this, &UItemDataEditObject::OnItemObjectNameGenerated)
-			]
-			+ SVerticalBox::Slot()
 			.FillHeight(1.f)
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
 				.FillWidth(0.5f)
-				.Padding(10.f)
+				.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 				[
 					BlueprintItemObjectPropertyView.ToSharedRef()
 				]
 				+ SHorizontalBox::Slot()
 				.FillWidth(0.5f)
+				.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 				[
 					TableRowItemObjectPropertyView.ToSharedRef()
 				]
@@ -154,9 +210,14 @@ void UItemDataEditObject::OnTextFieldChanged(const FText& NewText)
 	ItemRowName = NewText.ToString().TrimStartAndEnd();
 }
 
+void UItemDataEditObject::OnAssetPathSelected(const FString& NewPath)
+{
+	AssetOutputPath = NewPath;
+}
+
 bool UItemDataEditObject::OnEnable_ButtonGenerateElementId() const
 {
-	return (false == SelectedItemCategoryType.IsNone()) && (false == ItemRowName.IsEmpty());
+	return (false == SelectedItemCategoryType.IsNone()) && (false == ItemRowName.IsEmpty()) && (false == AssetOutputPath.IsEmpty());
 }
 
 bool UItemDataEditObject::OnEnable_EditableText() const
@@ -174,24 +235,68 @@ bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
 	return OnEnable_ButtonGenerateElementId();
 }
 
-EVisibility UItemDataEditObject::OnItemObjectNameGenerated() const
+FText UItemDataEditObject::GetAssetOutputPath() const
 {
-	// TODO @gdemers further define visibility requirements
-	return ItemRowName.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
+	const FText OutputMsg = AssetOutputPath.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetAssetOutputPath", "No Asset path provided.") : FText::FromString(AssetOutputPath);
+	return FText::Format(FTextFormat::FromString(TEXT("Asset Output Path:{0}")), OutputMsg);
 }
 
 FText UItemDataEditObject::GetItemObjectNameGenerated() const
 {
 	// TODO @gdemers make the system generate a Row Name that fits the requirements of the system
-	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), FText::FromString(ItemRowName));
+	const FText OutputMsg = ItemRowName.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetItemObjectNameGenerated", "No Row Name provided.") : FText::FromString(ItemRowName);
+	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), OutputMsg);
 }
 
 bool UItemDataEditObject::TryCreateNewItemObject() const
 {
+	const FString NewItemObjectName = MakeNewItemObjectName();
+
+	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
+	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
+	{
+		return false;
+	}
+
 	// TODO @gdemers run validation on new item object.
 	// i.e do we have remaining space in the bit encoding for the item object type
 	// does the name fits our requirements, etc...
 	return true;
+}
+
+FString UItemDataEditObject::MakeNewItemObjectName() const
+{
+	static const FString ProjPrefix{TEXT("AVVM")};
+
+	FString PluginName{TEXT("Error")};
+
+	TSharedPtr<IPlugin> OwningPlugin = IPluginManager::Get().GetModuleOwnerPlugin(FName(TEXT("InventorySampleEditor")));
+	if (OwningPlugin.IsValid())
+	{
+		PluginName = OwningPlugin->GetName();
+	}
+
+	return FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemCategoryType.ToString(), *ItemRowName);
+}
+
+bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return true;
+	}
+
+	bool bResult{false};
+	// @gdemers check if item object of name exist.
+	bResult |= Subsystem->IsValidDataRegistryId(FDataRegistryId{UInventorySettings::GetItemRegistryType(), FName(NewValue)});
+
+	// @gdemers check if actor of name exist.
+	const FString ModifiedString = NewValue.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
+	bResult |= Subsystem->IsValidDataRegistryId(FDataRegistryId{UAVVMGameplaySettings::GetActorIdentifierRegistryType(), FName(ModifiedString)});
+	bResult |= Subsystem->IsValidDataRegistryId(FDataRegistryId{UAVVMGameplaySettings::GetActorDefinitionRegistryType(), FName(ModifiedString)});
+
+	return bResult;
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)

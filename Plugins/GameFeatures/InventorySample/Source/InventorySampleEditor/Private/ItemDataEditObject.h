@@ -48,20 +48,25 @@ private:
 	FReply OnButtonClick_GenerateElementId() const;
 	bool OnDataCategoryTypeChanged(FName NewItemCategoryType);
 	void OnTextFieldChanged(const FText& NewText);
+	void OnAssetPathSelected(const FString& NewPath);
 	bool OnEnable_ButtonGenerateElementId() const;
 	bool OnEnable_EditableText() const;
 	bool OnEnable_BlueprintItemObjectDetailView() const;
 	bool OnEnable_TableRowItemObjectDetailView() const;
 	
-	EVisibility OnItemObjectNameGenerated() const;
+	FText GetAssetOutputPath() const;
 	FText GetItemObjectNameGenerated() const;
 	
 	bool TryCreateNewItemObject() const;
+	
+	FString MakeNewItemObjectName() const;
+	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
 	FName SelectedItemCategoryType{NAME_None};
 	FString ItemRowName{};
+	FString AssetOutputPath{};
 };
 
 /**
