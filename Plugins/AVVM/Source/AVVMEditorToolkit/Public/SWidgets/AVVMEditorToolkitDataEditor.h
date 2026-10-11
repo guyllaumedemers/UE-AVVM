@@ -31,6 +31,19 @@
 /**
  *	Class description:
  *	
+ *	EAVVMDataEditorModes is an Enum type to track active mode of an active Window instance.
+ */
+UENUM(NotBlueprintType)
+enum class EAVVMDataEditorModes : uint8
+{
+	None UMETA(Hidden),
+	Create,
+	Edit
+};
+
+/**
+ *	Class description:
+ *	
  *	UAVVMEditorToolkitDataEditObject is an abstract UObject type that define the internal behaviour
  *	to editing plugin specific data types.
  */
@@ -40,22 +53,9 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
-};
-
-/**
- *	Class description:
- *	
- *	EAVVMDataEditorModes is an Enum type to track active mode of an active Window instance.
- */
-UENUM(NotBlueprintType)
-enum class EAVVMDataEditorModes : uint8
-{
-	None UMETA(Hidden),
-	Create,
-	Edit
 };
 
 /**
@@ -76,7 +76,7 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	TSharedPtr<SWidget> GetDataEditContent() const;
+	TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) const;
 	FText GetModalMessage_OnClosure() const;
 	FText GetModalTitle_OnClosure() const;
 	

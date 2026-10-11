@@ -25,6 +25,8 @@
 
 #include "ItemDataEditObject.generated.h"
 
+class IDetailsView;
+
 /**
  *	Class description:
  *	
@@ -37,7 +39,7 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
@@ -48,7 +50,16 @@ private:
 	void OnTextFieldChanged(const FText& NewText);
 	bool OnEnable_ButtonGenerateElementId() const;
 	bool OnEnable_EditableText() const;
-
+	bool OnEnable_BlueprintItemObjectDetailView() const;
+	bool OnEnable_TableRowItemObjectDetailView() const;
+	
+	EVisibility OnItemObjectNameGenerated() const;
+	FText GetItemObjectNameGenerated() const;
+	
+	bool TryCreateNewItemObject() const;
+	
+	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
+	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
 	FName SelectedItemCategoryType{NAME_None};
 	FString ItemRowName{};
 };
@@ -65,7 +76,7 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };

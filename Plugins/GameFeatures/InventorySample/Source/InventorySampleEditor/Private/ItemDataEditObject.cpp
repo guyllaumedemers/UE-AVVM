@@ -19,16 +19,33 @@
 //SOFTWARE.
 #include "ItemDataEditObject.h"
 
+#include "PropertyEditorModule.h"
 #include "Components/VerticalBox.h"
+#include "Modules/ModuleManager.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
-#include "Widgets/SOverlay.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Text/STextBlock.h"
 
-TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent()
+TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
 {
+	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	{
+		FPropertyEditorModule& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+		FDetailsViewArgs DetailsViewArgs{};
+		DetailsViewArgs.bAllowSearch = false;
+		DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+		DetailsViewArgs.bHideSelectionTip = true;
+
+		BlueprintItemObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
+		BlueprintItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView);
+
+		TableRowItemObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
+		TableRowItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_TableRowItemObjectDetailView);
+	}
+	
 	return SNew(SBorder)
 		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
 		.Padding(6.0f)
@@ -41,7 +58,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent()
 				SNew(STextBlock)
 				.Justification(ETextJustify::Center)
 				.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::Hint", "Select the Item type to be created"))
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::Hint", "Select the ItemObject category type to create!"))
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
@@ -55,8 +72,19 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
+				SNew(SEditableTextBox)
+				.Justification(ETextJustify::Center)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
+				.HintText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName_Hint", "ItemObject FName must follow a strict naming convention. A new entry with _ItemObject will be created under the hood for your new Object."))
+				.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
+				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+			[
 				SNew(SButton)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GenerateElementId", "Click to generate new Actor Id for Item Type selected."))
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GenerateElementId", "Generate ItemObject unique Id"))
 				.TextStyle(FAppStyle::Get(), "DialogButtonText")
 				.HAlign(HAlign_Center)
 				.OnClicked_UObject(this, &UItemDataEditObject::OnButtonClick_GenerateElementId)
@@ -66,12 +94,27 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SNew(SEditableTextBox)
-				.Justification(ETextJustify::Center)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input the FDataRegistryId::ItemName to be generate."))
-				.HintText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName_Hint", "ItemName must follow a strict naming convention. As such, a modified version of your ItemName will be generated from the current value provided."))
-				.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
-				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
+				SNew(STextBlock)
+				.Justification(ETextJustify::Left)
+				.Text(GetItemObjectNameGenerated())
+				.Visibility_UObject(this, &UItemDataEditObject::OnItemObjectNameGenerated)
+			]
+			+ SVerticalBox::Slot()
+			.FillHeight(1.f)
+			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.FillWidth(0.5f)
+				.Padding(10.f)
+				[
+					BlueprintItemObjectPropertyView.ToSharedRef()
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(0.5f)
+				[
+					TableRowItemObjectPropertyView.ToSharedRef()
+				]
 			]
 		];
 }
@@ -97,7 +140,7 @@ TArray<FName> UItemDataEditObject::GetItemTypes() const
 
 FReply UItemDataEditObject::OnButtonClick_GenerateElementId() const
 {
-	return FReply::Handled();
+	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
 }
 
 bool UItemDataEditObject::OnDataCategoryTypeChanged(FName NewItemCategoryType)
@@ -121,7 +164,37 @@ bool UItemDataEditObject::OnEnable_EditableText() const
 	return (false == SelectedItemCategoryType.IsNone());
 }
 
-TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent()
+bool UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView() const
+{
+	return OnEnable_ButtonGenerateElementId();
+}
+
+bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
+{
+	return OnEnable_ButtonGenerateElementId();
+}
+
+EVisibility UItemDataEditObject::OnItemObjectNameGenerated() const
+{
+	// TODO @gdemers further define visibility requirements
+	return ItemRowName.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+FText UItemDataEditObject::GetItemObjectNameGenerated() const
+{
+	// TODO @gdemers make the system generate a Row Name that fits the requirements of the system
+	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), FText::FromString(ItemRowName));
+}
+
+bool UItemDataEditObject::TryCreateNewItemObject() const
+{
+	// TODO @gdemers run validation on new item object.
+	// i.e do we have remaining space in the bit encoding for the item object type
+	// does the name fits our requirements, etc...
+	return true;
+}
+
+TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Blue);

@@ -28,15 +28,15 @@ void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		GetDataEditContent().ToSharedRef()
+		GetDataEditContent(InArgs._Mode.Get()).ToSharedRef()
 	];
 }
 
-TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent() const
+TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const EAVVMDataEditorModes CurrentMode) const
 {
 	if (DataEditObject.IsValid())
 	{
-		return DataEditObject->GetDataEditContent();
+		return DataEditObject->GetDataEditContent(CurrentMode);
 	}
 	else
 	{
