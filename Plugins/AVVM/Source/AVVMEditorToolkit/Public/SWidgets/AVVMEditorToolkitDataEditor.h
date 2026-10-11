@@ -21,7 +21,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMEditorToolkitDataImporter.h"
 #include "DataRegistryId.h"
+#include "UObject/StrongObjectPtr.h"
 #include "Widgets/SCompoundWidget.h"
 
 #include "AVVMEditorToolkitDataEditor.generated.h"
@@ -38,7 +40,7 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() const PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+	virtual TSharedPtr<SWidget> GetDataEditContent() PURE_VIRTUAL(GetDataEditContent, return nullptr;)
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
 };
@@ -79,5 +81,5 @@ public:
 	FText GetModalTitle_OnClosure() const;
 	
 private:
-	TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject> DataEditObject{nullptr};
+	TStrongObjectPtr<UAVVMEditorToolkitDataEditObject> DataEditObject{nullptr};
 };

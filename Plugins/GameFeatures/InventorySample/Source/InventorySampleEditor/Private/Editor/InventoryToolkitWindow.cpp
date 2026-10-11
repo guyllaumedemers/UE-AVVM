@@ -54,8 +54,10 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
+				// @gdemers reusing data importer type here as a way of selecting from a collection
+				// of item types, instead of FDataRegistryType.
 				SNew(SAVVMEditorToolkitDataImporter)
-				.DataRegistryTypes(GetInventoryDataRegistryTypes())
+				.Elements(GetInventoryDataRegistryTypes())
 				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged)
 			]
 			+ SVerticalBox::Slot()
@@ -113,9 +115,9 @@ const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObje
 	return nullptr;
 }
 
-bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedSourceType)
+bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedRegistryType)
 {
-	SelectedDataRegistryType = FDataRegistryType{SelectedSourceType};
+	SelectedDataRegistryType = FDataRegistryType{SelectedRegistryType};
 	if (DataVisualizer.IsValid())
 	{
 		DataVisualizer->UpdateDataVisualizer(SelectedDataRegistryType);

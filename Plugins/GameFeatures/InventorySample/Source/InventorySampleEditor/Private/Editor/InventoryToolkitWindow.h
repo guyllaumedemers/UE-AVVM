@@ -46,7 +46,7 @@ public:
 private:
 	FText OnPresentPlugin() const;
 	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
-	bool OnDataImporterSourceChanged(FName SelectedSourceType);
+	bool OnDataImporterSourceChanged(FName SelectedRegistryType);
 	EVisibility OnDataVisualizerVisibilityStateChanged() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;
 	

@@ -37,9 +37,20 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual TSharedPtr<SWidget> GetDataEditContent() override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
+
+private:
+	TArray<FName> GetItemTypes() const;
+	FReply OnButtonClick_GenerateElementId() const;
+	bool OnDataCategoryTypeChanged(FName NewItemCategoryType);
+	void OnTextFieldChanged(const FText& NewText);
+	bool OnEnable_ButtonGenerateElementId() const;
+	bool OnEnable_EditableText() const;
+
+	FName SelectedItemCategoryType{NAME_None};
+	FString ItemRowName{};
 };
 
 /**
@@ -54,7 +65,7 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual TSharedPtr<SWidget> GetDataEditContent() override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };

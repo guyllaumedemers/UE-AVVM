@@ -20,11 +20,11 @@
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
 #include "Widgets/Images/SImage.h"
-#include "Widgets/Layout/SBorder.h"
 
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 {
-	DataEditObject = InArgs._DataEditObject.Get();
+	auto* Copy = DuplicateObject<UAVVMEditorToolkitDataEditObject>(InArgs._DataEditObject.Get().Get(), nullptr);
+	DataEditObject = TStrongObjectPtr(Copy);
 
 	ChildSlot
 	[
@@ -41,7 +41,7 @@ TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent() const
 	else
 	{
 		return SNew(SImage)
-			.ColorAndOpacity(FLinearColor::Green);
+			.ColorAndOpacity(FLinearColor::Transparent);
 	}
 }
 

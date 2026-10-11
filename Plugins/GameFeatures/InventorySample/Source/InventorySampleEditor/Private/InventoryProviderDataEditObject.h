@@ -37,7 +37,7 @@ class INVENTORYSAMPLEEDITOR_API UFtueInventoryProviderDataEditObject : public UA
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual TSharedPtr<SWidget> GetDataEditContent() override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };
@@ -54,7 +54,7 @@ class INVENTORYSAMPLEEDITOR_API UStubDataInventoryDependencyGraphEditObject : pu
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent() const override;
+	virtual TSharedPtr<SWidget> GetDataEditContent() override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };

@@ -32,14 +32,16 @@ DECLARE_DELEGATE_RetVal_OneParam(bool, SOnDataImporterSourceChangedDelegate, FNa
 /**
  *	Class description:
  *	
- *	SAVVMEditorToolkitDataImporter is a slate context handling DataRegistryType selection.
+ *	SAVVMEditorToolkitDataImporter is a slate context handling FName selection.
+ *	
+ *	Notes : the primary use of these FName are FDataRegistryType.
  */
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
 	SLATE_EVENT(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
-	SLATE_ATTRIBUTE(TArray<FName>, DataRegistryTypes)
+	SLATE_ATTRIBUTE(TArray<FName>, Elements)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -58,7 +60,7 @@ private:
 	TSharedPtr<STextBlock> ComboButtonLabelWidget{nullptr};
 	TSharedPtr<SComboButton> ComboButtonWidget{nullptr};
 
-	SOnDataImporterSourceChangedDelegate OnDataRegistryTypeSelectionChangedDelegate{};
-	TArray<FName> DataRegistryTypes{};
-	FName SelectedDataRegistryType{NAME_None};
+	SOnDataImporterSourceChangedDelegate OnDataSourceChangedDelegate{};
+	TArray<FName> Elements{};
+	FName SelectedElement{NAME_None};
 };

@@ -25,8 +25,8 @@
 
 void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 {
-	OnDataRegistryTypeSelectionChangedDelegate = InArgs._OnDataImporterSourceChanged;
-	DataRegistryTypes = InArgs._DataRegistryTypes.Get();
+	OnDataSourceChangedDelegate = InArgs._OnDataImporterSourceChanged;
+	Elements = InArgs._Elements.Get();
 	
 	// Dropdown Button
 	SAssignNew(ComboButtonLabelWidget, STextBlock)
@@ -35,7 +35,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 	// Name List
 	SAssignNew(ListViewWidget, SListView<FName>)
-	.ListItemsSource(&DataRegistryTypes)
+	.ListItemsSource(&Elements)
 	.SelectionMode(ESelectionMode::Single)
 	.OnMouseButtonClick(this, &SAVVMEditorToolkitDataImporter::OnMouseButtonClick)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
@@ -91,10 +91,10 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNameList)
 {
-	DataRegistryTypes = MoveTemp(NewNameList);
+	Elements = MoveTemp(NewNameList);
 	if (!DoesComboBoxHaveElements())
 	{
-		SelectedDataRegistryType = NAME_None;
+		SelectedElement = NAME_None;
 	}
 
 	if (ListViewWidget.IsValid())
@@ -105,14 +105,14 @@ void SAVVMEditorToolkitDataImporter::UpdateListViewEntries(TArray<FName>&& NewNa
 
 void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 {
-	SelectedDataRegistryType = MoveTemp(Item);
+	SelectedElement = MoveTemp(Item);
 	if (ComboButtonWidget.IsValid())
 	{
 		ComboButtonWidget->SetIsOpen(false);
 	}
 
-	ensureAlwaysMsgf(OnDataRegistryTypeSelectionChangedDelegate.IsBound() &&
-	                 OnDataRegistryTypeSelectionChangedDelegate.Execute(Item),
+	ensureAlwaysMsgf(OnDataSourceChangedDelegate.IsBound() &&
+	                 OnDataSourceChangedDelegate.Execute(Item),
 	                 TEXT("Failed to update Registry Type selection."));
 }
 
@@ -137,9 +137,9 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataImporter::OnGenerateRow(FName Name,
 
 FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 {
-	if (SelectedDataRegistryType.IsValid())
+	if (SelectedElement.IsValid())
 	{
-		return FText::FromName(SelectedDataRegistryType);
+		return FText::FromName(SelectedElement);
 	}
 	else
 	{
@@ -149,14 +149,14 @@ FText SAVVMEditorToolkitDataImporter::OnRowSelectionChanged() const
 
 bool SAVVMEditorToolkitDataImporter::DoesComboBoxHaveElements() const
 {
-	return (DataRegistryTypes.Num() > 0);
+	return (Elements.Num() > 0);
 }
 
 void SAVVMEditorToolkitDataImporter::OnComboBoxOpened()
 {
 	if (ListViewWidget.IsValid())
 	{
-		ListViewWidget->SetSelection(SelectedDataRegistryType, ESelectInfo::OnKeyPress);
-		ListViewWidget->RequestScrollIntoView(SelectedDataRegistryType);
+		ListViewWidget->SetSelection(SelectedElement, ESelectInfo::OnKeyPress);
+		ListViewWidget->RequestScrollIntoView(SelectedElement);
 	}
 }
