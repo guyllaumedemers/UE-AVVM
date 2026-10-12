@@ -20,13 +20,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Factories/DataAssetFactory.h"
 
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
 #include "ItemDataEditObject.generated.h"
 
+struct FItemDefinitionDataTableRow;
 class IDetailsView;
 class UDataTable;
+class UFactory;
 class SAVVMEditorToolkitOutputPathPicker;
 
 /**
@@ -49,7 +52,7 @@ private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
 	TArray<FName> GetItemTypes() const;
-	FReply OnButtonClick_GenerateElementId() const;
+	FReply OnButtonClick_GenerateElementId();
 	bool OnDataCategoryTypeChanged(FName NewItemCategoryType);
 	void OnTextFieldChanged(const FText& NewText);
 	void OnAssetPathSelected(const FString& NewPath);
@@ -60,14 +63,17 @@ private:
 	
 	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	
-	FText GetAssetOutputPath() const;
 	FText GetItemObjectNameGenerated() const;
-	
-	bool TryCreateNewItemObject() const;
+	FText GetAssetOutputPath() const;
 	
 	FString MakeNewItemObjectName() const;
-	int32 GenerateNewPhysicalGlobalId() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
+	bool TryCreateNewItemObject();
+
+	void OnDataAssetCreationCompleted(UFactory* Factory, UObject* NewObject, FItemDefinitionDataTableRow* NewElement);
+	void OnDataAssetCreationCancelled(UFactory* Factory);
+	
+	int32 GenerateNewPhysicalGlobalId() const;
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
@@ -93,4 +99,16 @@ public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
+};
+
+/**
+ * 
+ */
+UCLASS()
+class INVENTORYSAMPLEEDITOR_API UItemDefinitionDataAssetFactory : public UDataAssetFactory
+{
+	GENERATED_BODY()
+
+public:
+	UItemDefinitionDataAssetFactory(const FObjectInitializer& ObjectInitializer);
 };

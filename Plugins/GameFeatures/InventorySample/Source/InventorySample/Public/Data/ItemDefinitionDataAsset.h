@@ -47,7 +47,7 @@ class UItemObject;
  *	This POD references the BP Class that will be instanced during gameplay.
  *	See UItemObject for details!
  */
-UCLASS(BlueprintType, NotBlueprintable)
+UCLASS(BlueprintType, Blueprintable)
 class INVENTORYSAMPLE_API UItemDefinitionDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

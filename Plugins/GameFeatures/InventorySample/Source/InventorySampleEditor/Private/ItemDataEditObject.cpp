@@ -19,15 +19,19 @@
 //SOFTWARE.
 #include "ItemDataEditObject.h"
 
+#include "AssetToolsModule.h"
+#include "AVVMEditorToolkitUtils.h"
 #include "AVVMGameplaySettings.h"
 #include "ContentBrowserModule.h"
 #include "DataRegistrySubsystem.h"
+#include "DataTableEditorUtils.h"
 #include "InventorySettings.h"
 #include "PropertyEditorModule.h"
 #include "Components/VerticalBox.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "Factories/DataAssetFactory.h"
 #include "Interfaces/IPluginManager.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
@@ -161,7 +165,7 @@ TArray<FName> UItemDataEditObject::GetItemTypes() const
 	};
 }
 
-FReply UItemDataEditObject::OnButtonClick_GenerateElementId() const
+FReply UItemDataEditObject::OnButtonClick_GenerateElementId()
 {
 	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
 }
@@ -169,7 +173,7 @@ FReply UItemDataEditObject::OnButtonClick_GenerateElementId() const
 bool UItemDataEditObject::OnDataCategoryTypeChanged(FName NewItemCategoryType)
 {
 	SelectedItemCategoryType = NewItemCategoryType;
-	return false;
+	return (false == SelectedItemCategoryType.IsNone());
 }
 
 void UItemDataEditObject::OnTextFieldChanged(const FText& NewText)
@@ -184,7 +188,7 @@ void UItemDataEditObject::OnAssetPathSelected(const FString& NewPath)
 
 bool UItemDataEditObject::OnEnable_ButtonGenerateElementId() const
 {
-	return (false == SelectedItemCategoryType.IsNone()) && (false == ItemRowName.IsEmpty()) && (false == AssetOutputPath.IsEmpty());
+	return (false == SelectedItemCategoryType.IsNone()) && (false == ItemRowName.IsEmpty()) && (false == AssetOutputPath.IsEmpty()) && SelectedDataTable.IsValid();
 }
 
 bool UItemDataEditObject::OnEnable_EditableText() const
@@ -212,40 +216,16 @@ void UItemDataEditObject::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable>
 	}
 }
 
-FText UItemDataEditObject::GetAssetOutputPath() const
-{
-	const FText OutputMsg = AssetOutputPath.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetAssetOutputPath", "No Asset path provided.") : FText::FromString(AssetOutputPath);
-	return FText::Format(FTextFormat::FromString(TEXT("Asset Output Path:{0}")), OutputMsg);
-}
-
 FText UItemDataEditObject::GetItemObjectNameGenerated() const
 {
 	const FText OutputMsg = ItemRowName.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetItemObjectNameGenerated", "No Row Name provided.") : FText::FromString(MakeNewItemObjectName());
 	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), OutputMsg);
 }
 
-bool UItemDataEditObject::TryCreateNewItemObject() const
+FText UItemDataEditObject::GetAssetOutputPath() const
 {
-	const FString NewItemObjectName = MakeNewItemObjectName();
-
-	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
-	if (!ensureAlwaysMsgf((false == bIsDuplicate),
-	                      TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
-	{
-		return false;
-	}
-
-	const int32 NewPhysicalGlobalId = GenerateNewPhysicalGlobalId();
-	if (!ensureAlwaysMsgf((NewPhysicalGlobalId > 1) && (NewPhysicalGlobalId < INT32_MAX),
-	                      TEXT("Failed to generate proper Physical Global Id.")))
-	{
-		return false;
-	}
-
-	// TODO @gdemers run validation on new item object.
-	// i.e do we have remaining space in the bit encoding for the item object type
-	// does the name fits our requirements, etc...
-	return true;
+	const FText OutputMsg = AssetOutputPath.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetAssetOutputPath", "No Asset path provided.") : FText::FromString(AssetOutputPath);
+	return FText::Format(FTextFormat::FromString(TEXT("Asset Output Path:{0}")), OutputMsg);
 }
 
 FString UItemDataEditObject::MakeNewItemObjectName() const
@@ -261,11 +241,6 @@ FString UItemDataEditObject::MakeNewItemObjectName() const
 	}
 
 	return FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemCategoryType.ToString(), *ItemRowName);
-}
-
-int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
-{
-	return INDEX_NONE;
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
@@ -288,6 +263,86 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 	return bResult;
 }
 
+bool UItemDataEditObject::TryCreateNewItemObject()
+{
+	if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
+	                      TEXT("Data Table Output missing. Please select a target.")))
+	{
+		return false;
+	}
+
+	const FString NewItemObjectName = MakeNewItemObjectName();
+	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
+	if (!ensureAlwaysMsgf((false == bIsDuplicate),
+	                      TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
+	{
+		return false;
+	}
+
+	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable.Get(), FName(NewItemObjectName)));
+	if (!ensureAlwaysMsgf(NewItemDefinition != nullptr,
+	                      TEXT("Failed to cast Row Type.")))
+	{
+		return false;
+	}
+
+	bool bResult{false};
+	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		auto* Factory = NewObject<UItemDefinitionDataAssetFactory>();
+		if (IsValid(Factory))
+		{
+			Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
+		}
+
+		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+		const FString ModifiedAssetName = NewItemObjectName.Replace(TEXT("BP"), TEXT("DA"));
+
+		bResult = ensureAlwaysMsgf(AssetTools.Get().CreateAssetWithDialogAsync(ModifiedAssetName,
+			                           AssetOutputPath,
+			                           UItemDefinitionDataAsset::StaticClass(),
+			                           Factory,
+			                           FAssetCreateComplete::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCompleted, NewItemDefinition),
+			                           FAssetCreateCancelled::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCancelled)),
+		                           TEXT("Failed to create new Data Asset."));
+	}
+
+	return bResult;
+}
+
+void UItemDataEditObject::OnDataAssetCreationCompleted(UFactory* Factory,
+                                                       UObject* NewObject,
+                                                       FItemDefinitionDataTableRow* NewElement)
+{
+	if (!ensureAlwaysMsgf(NewElement != nullptr,
+	                      TEXT("Invalid Row entry.")))
+	{
+		return;
+	}
+
+	NewElement->ItemDefinition = Cast<UItemDefinitionDataAsset>(NewObject);
+
+	const int32 NewPhysicalGlobalId = GenerateNewPhysicalGlobalId();
+	if (!ensureAlwaysMsgf((NewPhysicalGlobalId > 1) && (NewPhysicalGlobalId < INT32_MAX),
+	                      TEXT("Failed to generate proper Physical Global Id.")))
+	{
+		return;
+	}
+
+	// TODO @gdemers run validation on new item object.
+	// i.e do we have remaining space in the bit encoding for the item object type
+	// does the name fits our requirements, etc...
+}
+
+void UItemDataEditObject::OnDataAssetCreationCancelled(UFactory* Factory)
+{
+}
+
+int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
+{
+	return INDEX_NONE;
+}
+
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
 {
 	return SNew(SImage)
@@ -302,4 +357,13 @@ FText UItemGroupDataEditObject::GetModalMessage_OnClosure() const
 FText UItemGroupDataEditObject::GetModalTitle_OnClosure() const
 {
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemGroupDataEditObject::DataEditor_ClosureTitle", "UItemGroupDataEditObject");
+}
+
+UItemDefinitionDataAssetFactory::UItemDefinitionDataAssetFactory(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bCreateNew = true;
+	bEditAfterNew = true;
+	SupportedClass = UItemDefinitionDataAsset::StaticClass();
+	SupportedWorkflows = static_cast<uint8>(EFactoryCreateWorkflow::Asynchronous);
 }
