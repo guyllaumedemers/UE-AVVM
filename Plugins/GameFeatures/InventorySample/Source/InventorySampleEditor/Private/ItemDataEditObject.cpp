@@ -22,7 +22,6 @@
 #include "AVVMGameplaySettings.h"
 #include "ContentBrowserModule.h"
 #include "DataRegistrySubsystem.h"
-#include "IContentBrowserSingleton.h"
 #include "InventorySettings.h"
 #include "PropertyEditorModule.h"
 #include "Components/VerticalBox.h"
@@ -30,12 +29,11 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Interfaces/IPluginManager.h"
-#include "Modules/ModuleManager.h"
-#include "SWidgets/AVVMEditorToolkitDataImporter.h"
+#include "SWidgets/AVVMEditorToolkitDataTableSelector.h"
+#include "SWidgets/AVVMEditorToolkitOutputSelector.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBorder.h"
-#include "Widgets/Text/STextBlock.h"
 
 TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
 {
@@ -83,19 +81,6 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 		TableRowItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_TableRowItemObjectDetailView);
 	}
 
-	TSharedPtr<SWidget> PathPicker{nullptr};
-	if (FModuleManager::Get().IsModuleLoaded("ContentBrowser"))
-	{
-		// Configure the path picker
-		FPathPickerConfig PathPickerConfig;
-		PathPickerConfig.DefaultPath = TEXT("/Game");
-		PathPickerConfig.OnPathSelected = FOnPathSelected::CreateUObject(this, &UItemDataEditObject::OnAssetPathSelected);
-
-		// Load the Content Browser module
-		auto& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-		PathPicker = ContentBrowserModule.Get().CreatePathPicker(PathPickerConfig);
-	}
-
 	return SNew(SBorder)
 		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
 		.Padding(6.0f)
@@ -103,90 +88,44 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
 			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SNew(STextBlock)
-				.Justification(ETextJustify::Center)
-				.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::Hint", "Select the ItemObject category type to create!"))
+				SNew(SAVVMEditorToolkitDataImporter)
+				.Elements(GetItemTypes())
+				.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnDataCategoryTypeChanged)
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Left)
-						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-						.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::OutputPath", "Select an Output Path for generated assets. Sub-directories will be created for dependent assets."))
-					]
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						PathPicker.ToSharedRef()
-					]
-				]
-				+ SHorizontalBox::Slot()
-				.FillWidth(1.f)
-				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(SAVVMEditorToolkitDataImporter)
-						.Elements(GetItemTypes())
-						.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnDataCategoryTypeChanged)
-					]
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(SEditableTextBox)
-						.Justification(ETextJustify::Center)
-						.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
-						.HintText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName_Hint", "ItemObject FName must follow a strict naming convention. A new entry with _ItemObject will be created under the hood for your new Object."))
-						.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
-						.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
-					]
-					+ SVerticalBox::Slot()
-					.FillHeight(1.f)
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Left)
-						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-						.Text_UObject(this, &UItemDataEditObject::GetAssetOutputPath)
-					]
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Left)
-						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-						.Text_UObject(this, &UItemDataEditObject::GetItemObjectNameGenerated)
-					]
-				]
+				SAssignNew(OutputSelectorWidget, SAVVMEditorToolkitOutputSelector)
+				.OnPathSelected_UObject(this, &UItemDataEditObject::OnAssetPathSelected)
+				.OutputHeader(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::Hint", "Select the ItemObject category type to create!"))
+				.EditableItemText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
+				.OnEditableTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
+				.IsEditableTextEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
+				.OutputAssetPathText_UObject(this, &UItemDataEditObject::GetAssetOutputPath)
+				.OutputItemText_UObject(this, &UItemDataEditObject::GetItemObjectNameGenerated)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+			[
+				SNew(SAVVMEditorToolkitDataTableSelector)
+				.RegistryType(UInventorySettings::GetItemRegistryType())
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
 				SNew(SButton)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GenerateElementId", "Generate ItemObject unique Id"))
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::Create", "Create ItemObject"))
 				.TextStyle(FAppStyle::Get(), "DialogButtonText")
 				.HAlign(HAlign_Center)
 				.OnClicked_UObject(this, &UItemDataEditObject::OnButtonClick_GenerateElementId)
 				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_ButtonGenerateElementId)
 			]
 			+ SVerticalBox::Slot()
-			.FillHeight(1.f)
+			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
 				SNew(SHorizontalBox)
@@ -229,7 +168,7 @@ FReply UItemDataEditObject::OnButtonClick_GenerateElementId() const
 bool UItemDataEditObject::OnDataCategoryTypeChanged(FName NewItemCategoryType)
 {
 	SelectedItemCategoryType = NewItemCategoryType;
-	return true;
+	return false;
 }
 
 void UItemDataEditObject::OnTextFieldChanged(const FText& NewText)
@@ -270,7 +209,6 @@ FText UItemDataEditObject::GetAssetOutputPath() const
 
 FText UItemDataEditObject::GetItemObjectNameGenerated() const
 {
-	// TODO @gdemers make the system generate a Row Name that fits the requirements of the system
 	const FText OutputMsg = ItemRowName.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetItemObjectNameGenerated", "No Row Name provided.") : FText::FromString(MakeNewItemObjectName());
 	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), OutputMsg);
 }
@@ -280,7 +218,15 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 	const FString NewItemObjectName = MakeNewItemObjectName();
 
 	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
-	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
+	if (!ensureAlwaysMsgf((false == bIsDuplicate),
+	                      TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
+	{
+		return false;
+	}
+
+	const int32 NewPhysicalGlobalId = GenerateNewPhysicalGlobalId();
+	if (!ensureAlwaysMsgf((NewPhysicalGlobalId > 1) && (NewPhysicalGlobalId < INT32_MAX),
+	                      TEXT("Failed to generate proper Physical Global Id.")))
 	{
 		return false;
 	}
@@ -304,6 +250,11 @@ FString UItemDataEditObject::MakeNewItemObjectName() const
 	}
 
 	return FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemCategoryType.ToString(), *ItemRowName);
+}
+
+int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
+{
+	return INDEX_NONE;
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const

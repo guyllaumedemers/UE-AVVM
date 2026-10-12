@@ -26,6 +26,7 @@
 #include "ItemDataEditObject.generated.h"
 
 class IDetailsView;
+class SAVVMEditorToolkitOutputSelector;
 
 /**
  *	Class description:
@@ -62,10 +63,12 @@ private:
 	bool TryCreateNewItemObject() const;
 	
 	FString MakeNewItemObjectName() const;
+	int32 GenerateNewPhysicalGlobalId() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
+	TSharedPtr<SAVVMEditorToolkitOutputSelector> OutputSelectorWidget{nullptr};
 	FName SelectedItemCategoryType{NAME_None};
 	FString ItemRowName{};
 	FString AssetOutputPath{};
