@@ -54,6 +54,7 @@ private:
 	bool OnDataImporterSourceChanged(FName SelectedRegistryType);
 	EVisibility OnDataVisualizerVisibilityStateChanged() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;
+	FText OnDataSourcePropertyTooltipChanged() const;
 	
 	FReply OnButtonClick_Create();
 	FReply OnButtonClick_Edit();

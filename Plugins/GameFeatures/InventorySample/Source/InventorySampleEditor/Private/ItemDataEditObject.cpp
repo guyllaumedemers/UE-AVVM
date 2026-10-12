@@ -36,6 +36,34 @@
 
 TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
 {
+	TSharedPtr<SWidget> Out{nullptr};
+	switch (CurrentMode)
+	{
+		case EAVVMDataEditorModes::None:
+			break;
+		case EAVVMDataEditorModes::Create:
+			Out = GetCreationMode();
+			break;
+		case EAVVMDataEditorModes::Edit:
+			Out = GetEditMode();
+			break;
+	}
+
+	return Out;
+}
+
+FText UItemDataEditObject::GetModalMessage_OnClosure() const
+{
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved Items will be lost?");
+}
+
+FText UItemDataEditObject::GetModalTitle_OnClosure() const
+{
+	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureTitle", "UItemDataEditObject");
+}
+
+TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
+{
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
 		auto& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -175,14 +203,10 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEdito
 		];
 }
 
-FText UItemDataEditObject::GetModalMessage_OnClosure() const
+TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 {
-	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved Items will be lost?");
-}
-
-FText UItemDataEditObject::GetModalTitle_OnClosure() const
-{
-	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureTitle", "UItemDataEditObject");
+	return SNew(SImage)
+		.ColorAndOpacity(FLinearColor::Green);
 }
 
 TArray<FName> UItemDataEditObject::GetItemTypes() const

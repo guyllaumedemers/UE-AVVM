@@ -44,6 +44,8 @@ public:
 	virtual FText GetModalTitle_OnClosure() const override;
 
 private:
+	TSharedPtr<SWidget> GetCreationMode();
+	TSharedPtr<SWidget> GetEditMode();
 	TArray<FName> GetItemTypes() const;
 	FReply OnButtonClick_GenerateElementId() const;
 	bool OnDataCategoryTypeChanged(FName NewItemCategoryType);

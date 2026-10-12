@@ -31,6 +31,7 @@
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
+#include "SWidgets/AVVMEditorToolkitPropertyTooltipPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/SRichTextBlock.h"
@@ -57,11 +58,37 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				// @gdemers reusing data importer type here as a way of selecting from a collection
-				// of item types, instead of FDataRegistryType.
-				SNew(SAVVMEditorToolkitDataImporter)
-				.Elements(GetInventoryDataRegistryTypes())
-				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.FillWidth(0.5f)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.Padding(12.f)
+					.AutoHeight()
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "PropertyHeader", "Select a Data Source:"))
+					]
+					+ SVerticalBox::Slot()
+					.Padding(12.f)
+					.AutoHeight()
+					[
+						// @gdemers reusing data importer type here as a way of selecting from a collection
+						// of item types, instead of FDataRegistryType.
+						SNew(SAVVMEditorToolkitDataImporter)
+						.Elements(GetInventoryDataRegistryTypes())
+						.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged)
+					]
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(0.5f)
+				[
+					SNew(SAVVMEditorToolkitPropertyTooltipPanel)
+					.Tooltip(this, &SInventoryToolkitWindow::OnDataSourcePropertyTooltipChanged)
+				]
 			]
 			+ SVerticalBox::Slot()
 			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
@@ -159,6 +186,11 @@ TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
 	};
 }
 
+FText SInventoryToolkitWindow::OnDataSourcePropertyTooltipChanged() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "SInventoryToolkitWindow::OnDataImporterTooltipChanged", "Lorem ipsum");
+}
+
 FReply SInventoryToolkitWindow::OnButtonClick_Create()
 {
 	if (!SelectedDataRegistryType.IsValid())
@@ -253,7 +285,7 @@ void SInventoryToolkitWindow::OpenEditWindow(const FName RegistryType, const FNa
 	                       *RegistryType.ToString(),
 	                       *ItemName.ToString());
 	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
-						   *RegistryType.ToString());
+	                       *RegistryType.ToString());
 
 	FDisplayMetrics DisplayMetrics{};
 	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
