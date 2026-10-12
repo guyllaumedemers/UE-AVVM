@@ -25,6 +25,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
+struct FSlateBrush;
 class SAVVMEditorToolkitDataVisualizer;
 class UAVVMEditorToolkitDataEditObject;
 
@@ -44,7 +45,11 @@ public:
 	void Construct(const FArguments& InArgs);
 
 private:
-	FText OnPresentPlugin() const;
+	FText PluginTitle() const;
+	FText PluginDescription() const;
+	FText PluginVersion() const;
+	FSlateBrush* PluginIcon() const;
+	
 	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
 	bool OnDataImporterSourceChanged(FName SelectedRegistryType);
 	EVisibility OnDataVisualizerVisibilityStateChanged() const;

@@ -30,8 +30,10 @@
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
+#include "SWidgets/AVVMEditorToolkitPluginHeader.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
+#include "Widgets/Text/SRichTextBlock.h"
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 {
@@ -45,10 +47,11 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				SNew(STextBlock)
-				.Justification(ETextJustify::Center)
-				.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-				.Text(this, &SInventoryToolkitWindow::OnPresentPlugin)
+				SNew(SAVVMEditorToolkitPluginHeader)
+				.Title(this, &SInventoryToolkitWindow::PluginTitle)
+				.Description(this, &SInventoryToolkitWindow::PluginDescription)
+				.Version(this, &SInventoryToolkitWindow::PluginVersion)
+				.Icon(this, &SInventoryToolkitWindow::PluginIcon)
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -74,9 +77,24 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 	];
 }
 
-FText SInventoryToolkitWindow::OnPresentPlugin() const
+FText SInventoryToolkitWindow::PluginTitle() const
 {
-	return NSLOCTEXT("AVVMEditorToolkit", "Plugin Presentation", "Welcome! lorem ipsum...");
+	return NSLOCTEXT("AVVMEditorToolkit", "SInventoryToolkitWindow::PluginDescription", "Inventory Editor");
+}
+
+FText SInventoryToolkitWindow::PluginDescription() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "SInventoryToolkitWindow::PluginDescription", "A toolkit for generating data-driven items for gameplay.");
+}
+
+FText SInventoryToolkitWindow::PluginVersion() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "SInventoryToolkitWindow::PluginDescription", "v0.0.1");
+}
+
+FSlateBrush* SInventoryToolkitWindow::PluginIcon() const
+{
+	return nullptr;
 }
 
 const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObject(const FName RegistryType) const
