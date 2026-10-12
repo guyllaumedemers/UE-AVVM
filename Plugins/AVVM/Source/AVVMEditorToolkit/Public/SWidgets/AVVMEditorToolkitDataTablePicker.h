@@ -23,11 +23,13 @@
 
 #include "AssetThumbnail.h"
 #include "DataRegistryId.h"
+#include "Framework/SlateDelegates.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Layout/SScrollBorder.h"
 #include "Widgets/Views/SListView.h"
 
 class UDataTable;
+using FOnDataTableSelectionChanged = TSlateDelegates<TListTypeTraits<TWeakObjectPtr<UDataTable>>::NullableType>::FOnSelectionChanged;
 
 /**
  *	Class description:
@@ -38,6 +40,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataTablePicker : public SCompound
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataTablePicker){}
+	SLATE_EVENT(FOnDataTableSelectionChanged, OnSelectionChanged)
 	SLATE_ATTRIBUTE(FDataRegistryType, RegistryType)
 	SLATE_END_ARGS()
 

@@ -36,9 +36,10 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 	.ListItemsSource(&FilteredEntries)
 	.ExternalScrollbar(ScrollBar)
 	.ConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible)
-	.SelectionMode(ESelectionMode::Single)
+	.SelectionMode(ESelectionMode::SingleToggle)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
-	.OnGenerateRow(this, &SAVVMEditorToolkitDataTablePicker::OnGenerateRow);
+	.OnGenerateRow(this, &SAVVMEditorToolkitDataTablePicker::OnGenerateRow)
+	.OnSelectionChanged(InArgs._OnSelectionChanged);
 
 	ThumbnailPool = MakeShareable(new FAssetThumbnailPool(32));
 	UpdateDataTableCollection(InArgs._RegistryType.Get());
@@ -120,9 +121,8 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataTablePicker::OnGenerateRow(TWeakObje
 	TSharedPtr<STableRow<TWeakObjectPtr<UDataTable>>> OutListTableRow{};
 	SAssignNew(OutListTableRow, STableRow<TWeakObjectPtr<UDataTable>>, OwnerTable)
 	[
-		SNew(SBorder)
-		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
-		.Padding(6.0f)
+		SNew(SOverlay)
+		+ SOverlay::Slot()
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()

@@ -37,7 +37,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 	.ListItemsSource(&FilteredEntries)
 	.ExternalScrollbar(ScrollBar)
 	.ConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible)
-	.SelectionMode(ESelectionMode::Single)
+	.SelectionMode(ESelectionMode::SingleToggle)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
 	.OnGenerateRow(this, &SAVVMEditorToolkitDataVisualizer::OnGenerateRow);
 
@@ -172,15 +172,9 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName Regi
 	TSharedPtr<STableRow<FName>> OutListTableRow{};
 	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-		[
-			SNew(SAVVMEditorToolkitDataTableRowPreview)
-			.RegistryType(SelectedRegistryType)
-			.RegistryItemName(RegistryItemName)
-		]
+		SNew(SAVVMEditorToolkitDataTableRowPreview)
+		.RegistryType(SelectedRegistryType)
+		.RegistryItemName(RegistryItemName)
 	];
 
 	return OutListTableRow.ToSharedRef();

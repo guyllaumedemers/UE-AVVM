@@ -280,7 +280,6 @@ void SInventoryToolkitWindow::OpenCreateWindow(const FName RegistryType)
 
 void SInventoryToolkitWindow::OpenEditWindow(const FName RegistryType, const FName ItemName)
 {
-	// TODO @gdemers make a context window for editing element
 	AVVM_EDITOR_LOGGER_LOG(TEXT("Edit entry of RegistryType: %s, ItemName: %s."),
 	                       *RegistryType.ToString(),
 	                       *ItemName.ToString());

@@ -26,6 +26,7 @@
 #include "ItemDataEditObject.generated.h"
 
 class IDetailsView;
+class UDataTable;
 class SAVVMEditorToolkitOutputPathPicker;
 
 /**
@@ -57,6 +58,8 @@ private:
 	bool OnEnable_BlueprintItemObjectDetailView() const;
 	bool OnEnable_TableRowItemObjectDetailView() const;
 	
+	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
+	
 	FText GetAssetOutputPath() const;
 	FText GetItemObjectNameGenerated() const;
 	
@@ -69,6 +72,7 @@ private:
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
 	TSharedPtr<SAVVMEditorToolkitOutputPathPicker> OutputSelectorWidget{nullptr};
+	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
 	FName SelectedItemCategoryType{NAME_None};
 	FString ItemRowName{};
 	FString AssetOutputPath{};

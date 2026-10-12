@@ -112,6 +112,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			[
 				SNew(SAVVMEditorToolkitDataTablePicker)
 				.RegistryType(UInventorySettings::GetItemRegistryType())
+				.OnSelectionChanged_UObject(this, &UItemDataEditObject::OnDataTableSelectionChanged)
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
@@ -199,6 +200,16 @@ bool UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView() const
 bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
 {
 	return OnEnable_ButtonGenerateElementId();
+}
+
+void UItemDataEditObject::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection,
+                                                      ESelectInfo::Type SelectInfo)
+{
+	if (ensureAlwaysMsgf(NewSelection.IsValid(),
+	                     TEXT("Failed to retrieve reference to Data Table.")))
+	{
+		SelectedDataTable = NewSelection;
+	}
 }
 
 FText UItemDataEditObject::GetAssetOutputPath() const
