@@ -271,7 +271,7 @@ FText UItemDataEditObject::GetAssetOutputPath() const
 FText UItemDataEditObject::GetItemObjectNameGenerated() const
 {
 	// TODO @gdemers make the system generate a Row Name that fits the requirements of the system
-	const FText OutputMsg = ItemRowName.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetItemObjectNameGenerated", "No Row Name provided.") : FText::FromString(ItemRowName);
+	const FText OutputMsg = ItemRowName.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetItemObjectNameGenerated", "No Row Name provided.") : FText::FromString(MakeNewItemObjectName());
 	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), OutputMsg);
 }
 
