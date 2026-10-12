@@ -26,6 +26,9 @@
 #include "InventorySettings.h"
 #include "PropertyEditorModule.h"
 #include "Components/VerticalBox.h"
+#include "Data/AVVMActorDefinitionDataAsset.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/ItemDefinitionDataAsset.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
@@ -313,12 +316,12 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 
 	bool bResult{false};
 	// @gdemers check if item object of name exist.
-	bResult |= Subsystem->IsValidDataRegistryId(FDataRegistryId{UInventorySettings::GetItemRegistryType(), FName(NewValue)});
+	bResult |= (Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{UInventorySettings::GetItemRegistryType(), FName(NewValue)}) != nullptr);
 
 	// @gdemers check if actor of name exist.
 	const FString ModifiedString = NewValue.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
-	bResult |= Subsystem->IsValidDataRegistryId(FDataRegistryId{UAVVMGameplaySettings::GetActorIdentifierRegistryType(), FName(ModifiedString)});
-	bResult |= Subsystem->IsValidDataRegistryId(FDataRegistryId{UAVVMGameplaySettings::GetActorDefinitionRegistryType(), FName(ModifiedString)});
+	bResult |= (Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(FDataRegistryId{UAVVMGameplaySettings::GetActorIdentifierRegistryType(), FName(ModifiedString)}) != nullptr);
+	bResult |= (Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{UAVVMGameplaySettings::GetActorDefinitionRegistryType(), FName(ModifiedString)}) != nullptr);
 
 	return bResult;
 }
