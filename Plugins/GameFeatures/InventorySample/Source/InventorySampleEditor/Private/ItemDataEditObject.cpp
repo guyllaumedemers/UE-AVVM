@@ -29,8 +29,8 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Interfaces/IPluginManager.h"
-#include "SWidgets/AVVMEditorToolkitDataTableSelector.h"
-#include "SWidgets/AVVMEditorToolkitOutputSelector.h"
+#include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
+#include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBorder.h"
@@ -97,7 +97,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SAssignNew(OutputSelectorWidget, SAVVMEditorToolkitOutputSelector)
+				SAssignNew(OutputSelectorWidget, SAVVMEditorToolkitOutputPathPicker)
 				.OnPathSelected_UObject(this, &UItemDataEditObject::OnAssetPathSelected)
 				.OutputHeader(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::Hint", "Select the ItemObject category type to create!"))
 				.EditableItemText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
@@ -110,7 +110,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SNew(SAVVMEditorToolkitDataTableSelector)
+				SNew(SAVVMEditorToolkitDataTablePicker)
 				.RegistryType(UInventorySettings::GetItemRegistryType())
 			]
 			+ SVerticalBox::Slot()

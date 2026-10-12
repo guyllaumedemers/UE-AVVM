@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "SWidgets/AVVMEditorToolkitOutputSelector.h"
+#include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
@@ -25,7 +25,7 @@
 #include "Modules/ModuleManager.h"
 #include "Widgets/Text/STextBlock.h"
 
-void SAVVMEditorToolkitOutputSelector::Construct(const FArguments& InArgs)
+void SAVVMEditorToolkitOutputPathPicker::Construct(const FArguments& InArgs)
 {
 	TSharedPtr<SWidget> PathPicker{nullptr};
 	if (FModuleManager::Get().IsModuleLoaded("ContentBrowser"))

@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "SWidgets/AVVMEditorToolkitDataTableSelector.h"
+#include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 
 #include "AVVMEditorToolkitUtils.h"
 #include "DataRegistrySource_DataTable.h"
@@ -26,7 +26,7 @@
 #include "Widgets/Layout/SScrollBar.h"
 #include "Widgets/Views/SListView.h"
 
-void SAVVMEditorToolkitDataTableSelector::Construct(const FArguments& InArgs)
+void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 {
 	SAssignNew(ScrollBar, SScrollBar)
 	.AlwaysShowScrollbar(true)
@@ -38,8 +38,9 @@ void SAVVMEditorToolkitDataTableSelector::Construct(const FArguments& InArgs)
 	.ConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible)
 	.SelectionMode(ESelectionMode::Single)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
-	.OnGenerateRow(this, &SAVVMEditorToolkitDataTableSelector::OnGenerateRow);
-	
+	.OnGenerateRow(this, &SAVVMEditorToolkitDataTablePicker::OnGenerateRow);
+
+	ThumbnailPool = MakeShareable(new FAssetThumbnailPool(32));
 	UpdateDataTableCollection(InArgs._RegistryType.Get());
 
 	ChildSlot
@@ -55,7 +56,7 @@ void SAVVMEditorToolkitDataTableSelector::Construct(const FArguments& InArgs)
 			[
 				SNew(SSearchBox)
 				.HintText(FText::FromString(TEXT("Search elements...")))
-				.OnTextChanged(this, &SAVVMEditorToolkitDataTableSelector::OnSearchTextChanged)
+				.OnTextChanged(this, &SAVVMEditorToolkitDataTablePicker::OnSearchTextChanged)
 			]
 			+ SVerticalBox::Slot()
 			.FillHeight(1.0f)
@@ -81,7 +82,7 @@ void SAVVMEditorToolkitDataTableSelector::Construct(const FArguments& InArgs)
 	];
 }
 
-void SAVVMEditorToolkitDataTableSelector::UpdateDataTableCollection(const FDataRegistryType& NewRegistryType)
+void SAVVMEditorToolkitDataTablePicker::UpdateDataTableCollection(const FDataRegistryType& NewRegistryType)
 {
 	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
 	                      TEXT("Invalid RegistryType.")))
@@ -111,26 +112,63 @@ void SAVVMEditorToolkitDataTableSelector::UpdateDataTableCollection(const FDataR
 	}
 }
 
-TSharedRef<ITableRow> SAVVMEditorToolkitDataTableSelector::OnGenerateRow(TWeakObjectPtr<UDataTable> DataTable,
-                                                                         const TSharedRef<STableViewBase>& OwnerTable) const
+TSharedRef<ITableRow> SAVVMEditorToolkitDataTablePicker::OnGenerateRow(TWeakObjectPtr<UDataTable> DataTable,
+                                                                       const TSharedRef<STableViewBase>& OwnerTable) const
 {
+	TSharedPtr<FAssetThumbnail> NewThumbnail = MakeShareable(new FAssetThumbnail(DataTable.Get(), 64, 64, ThumbnailPool));
+
 	TSharedPtr<STableRow<TWeakObjectPtr<UDataTable>>> OutListTableRow{};
 	SAssignNew(OutListTableRow, STableRow<TWeakObjectPtr<UDataTable>>, OwnerTable)
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+		SNew(SBorder)
+		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
+		.Padding(6.0f)
 		[
-			SNew(STextBlock)
-			.Text(FText::FromString(DataTable.IsValid() ? DataTable->GetName() : TEXT("Invalid")))
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.HAlign(EHorizontalAlignment::HAlign_Left)
+				.AutoWidth()
+				[
+					NewThumbnail.IsValid() ? NewThumbnail->MakeThumbnailWidget() : SNullWidget::NullWidget
+				]
+				+ SHorizontalBox::Slot()
+				.HAlign(EHorizontalAlignment::HAlign_Left)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				.AutoWidth()
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.FillHeight(1.f)
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.TextStyle(FAppStyle::Get(), "LargeText")
+						.Text(FText::FromString(DataTable.IsValid() ? DataTable->GetName() : TEXT("Error")))
+					]
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.TextStyle(FAppStyle::Get(), "SmallText")
+						.ColorAndOpacity(FSlateColor::UseSubduedForeground())
+						.Text(FText::FromString(DataTable.IsValid() ? DataTable->GetPathName() : TEXT("No Path")))
+					]
+				]
+			]
 		]
 	];
 
+	Thumbnails.Add(MoveTemp(NewThumbnail));
 	return OutListTableRow.ToSharedRef();
 }
 
-void SAVVMEditorToolkitDataTableSelector::OnSearchTextChanged(const FText& NewText)
+void SAVVMEditorToolkitDataTablePicker::OnSearchTextChanged(const FText& NewText)
 {
 	FilteredEntries.Reset(SourceEntries.Num());
 

@@ -26,7 +26,7 @@
 #include "ItemDataEditObject.generated.h"
 
 class IDetailsView;
-class SAVVMEditorToolkitOutputSelector;
+class SAVVMEditorToolkitOutputPathPicker;
 
 /**
  *	Class description:
@@ -68,7 +68,7 @@ private:
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
-	TSharedPtr<SAVVMEditorToolkitOutputSelector> OutputSelectorWidget{nullptr};
+	TSharedPtr<SAVVMEditorToolkitOutputPathPicker> OutputSelectorWidget{nullptr};
 	FName SelectedItemCategoryType{NAME_None};
 	FString ItemRowName{};
 	FString AssetOutputPath{};

@@ -21,38 +21,29 @@
 
 #include "CoreMinimal.h"
 
-#include "DataRegistryId.h"
-#include "Widgets/SCompoundWidget.h"
-#include "Widgets/Layout/SScrollBorder.h"
-#include "Widgets/Views/SListView.h"
+#include "AVVMEditorToolkitDataImporter.h"
+#include "ContentBrowserDelegates.h"
 
-class UDataTable;
+#include "Widgets/SCompoundWidget.h"
 
 /**
  *	Class description:
  *	
- *	SAVVMEditorToolkitDataTableSelector is a slate context handling DataTable selection.
+ *	SAVVMEditorToolkitOutputPathPicker is a slate context displaying information about a selected output path.
  */
-class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataTableSelector : public SCompoundWidget
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitOutputPathPicker : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataTableSelector){}
-	SLATE_ATTRIBUTE(FDataRegistryType, RegistryType)
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitOutputPathPicker){}
+	SLATE_EVENT(FOnPathSelected, OnPathSelected)
+	SLATE_ATTRIBUTE(FText, OutputHeader)
+	SLATE_ATTRIBUTE(FText, EditableItemText)
+	SLATE_EVENT(FOnTextChanged, OnEditableTextChanged)
+	SLATE_ATTRIBUTE(bool, IsEditableTextEnabled)
+	SLATE_ATTRIBUTE(FText, OutputAssetPathText)
+	SLATE_ATTRIBUTE(FText, OutputItemText)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-	void UpdateDataTableCollection(const FDataRegistryType& NewRegistryType);
-
-private:
-	TSharedRef<ITableRow> OnGenerateRow(TWeakObjectPtr<UDataTable> DataTable,
-	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
-	
-	void OnSearchTextChanged(const FText& NewText);
-	
-	// Holds the persistent reference to the list view
-	TSharedPtr<SListView<TWeakObjectPtr<UDataTable>>> ListViewWidget{nullptr};
-	TSharedPtr<SScrollBar> ScrollBar{nullptr};
-	TArray<TWeakObjectPtr<UDataTable>> FilteredEntries{};
-	TArray<TWeakObjectPtr<UDataTable>> SourceEntries{};
 };
