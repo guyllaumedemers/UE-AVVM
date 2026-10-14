@@ -25,6 +25,7 @@
 
 #include "InventoryExecutionContextParams.generated.h"
 
+class UNonReplicatedLoadoutObject;
 class UItemObject;
 
 /**
@@ -82,4 +83,25 @@ struct INVENTORYSAMPLE_API FSwapContextParams : public FAVVMExecutionContextPara
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<UItemObject> DestItemObject = nullptr;
+};
+
+/**
+ *	Class description:
+ *
+ *	FConsumeContextParams is a context struct that defines the properties to be
+ *	involved in executing a consumption action.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FConsumeContextParams : public FAVVMExecutionContextParams
+{
+	GENERATED_BODY()
+
+	FConsumeContextParams() = default;
+	explicit FConsumeContextParams(const UNonReplicatedLoadoutObject* NewLoadoutObject, const int32 NewValue);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const UNonReplicatedLoadoutObject> SrcLoadoutObject = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Value{INDEX_NONE};
 };

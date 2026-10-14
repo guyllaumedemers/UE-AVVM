@@ -74,3 +74,19 @@ struct INVENTORYSAMPLE_API FSwapRule : public FAVVMExecutionContextRule
 	virtual bool Predicate(const UObject* WorldContextObject,
 	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
 };
+
+/**
+ *	Class description:
+ *
+ *	FConsumeRule is a context struct that define the parameters of a consumption action,
+ *	and it's requirements to be successful.
+ */
+USTRUCT(BlueprintType)
+struct INVENTORYSAMPLE_API FConsumeRule : public FAVVMExecutionContextRule
+{
+	GENERATED_BODY()
+
+	FConsumeRule() = default;
+	virtual bool Predicate(const UObject* WorldContextObject,
+	                       const TInstancedStruct<FAVVMExecutionContextParams>& Params) const override;
+};

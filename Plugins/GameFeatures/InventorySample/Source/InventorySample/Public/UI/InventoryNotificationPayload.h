@@ -25,6 +25,7 @@
 
 #include "InventoryNotificationPayload.generated.h"
 
+class UNonReplicatedLoadoutObject;
 class UItemObject;
 
 /**
@@ -52,6 +53,36 @@ struct INVENTORYSAMPLE_API FInventoryNotificationPayload : public FAVVMNotificat
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	TWeakObjectPtr<const UItemObject> DestItemObject = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	bool bWasSuccess{false};
+};
+
+/**
+ *	Class description:
+ *
+ *	FConsumptionPayload is a context payload encapsulating consumption event between end-points for UI updates.
+ */
+USTRUCT()
+struct INVENTORYSAMPLE_API FConsumptionPayload : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	FConsumptionPayload() = default;
+	FConsumptionPayload(const FConsumptionPayload&) = default;
+	FConsumptionPayload(FConsumptionPayload&&) noexcept = default;
+	FConsumptionPayload& operator=(const FConsumptionPayload&) = default;
+	FConsumptionPayload& operator=(FConsumptionPayload&&) noexcept = default;
+
+	explicit FConsumptionPayload(const UNonReplicatedLoadoutObject* NewLoadoutObject,
+	                             const int32 NewValue,
+	                             const bool bNewWasSuccess);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const UNonReplicatedLoadoutObject> SrcLoadoutObject = nullptr;
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Value{INDEX_NONE};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	bool bWasSuccess{false};

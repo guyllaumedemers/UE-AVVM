@@ -236,6 +236,17 @@ void UNonReplicatedLoadoutObject::Cycle(const FGameplayTag& TargetTag)
 	}
 }
 
+UItemObject* UNonReplicatedLoadoutObject::GetActiveItemObject() const
+{
+	return Loadout.Contains(ActiveItemSlotTag) ? Loadout[ActiveItemSlotTag].Get() : nullptr;
+}
+
+AActor* UNonReplicatedLoadoutObject::GetActiveItemActor() const
+{
+	auto* CurrentItem = GetActiveItemObject();
+	return IsValid(CurrentItem) ? CurrentItem->GetRuntimeItemActor() : nullptr;
+}
+
 void UNonReplicatedLoadoutObject::HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,
                                                               const TArray<UItemObject*>& OldItemObjects)
 {

@@ -20,12 +20,22 @@
 #include "UI/InventoryNotificationPayload.h"
 
 #include "ItemObject.h"
+#include "NonReplicatedLoadoutObject.h"
 
 FInventoryNotificationPayload::FInventoryNotificationPayload(const UItemObject* NewSrcItemObject,
                                                              const UItemObject* NewDestItemObject,
                                                              const bool bNewWasSuccess)
 	: SrcItemObject(NewSrcItemObject),
 	  DestItemObject(NewDestItemObject),
+	  bWasSuccess(bNewWasSuccess)
+{
+}
+
+FConsumptionPayload::FConsumptionPayload(const UNonReplicatedLoadoutObject* NewLoadoutObject,
+                                         const int32 NewValue,
+                                         const bool bNewWasSuccess)
+	: SrcLoadoutObject(NewLoadoutObject),
+	  Value(NewValue),
 	  bWasSuccess(bNewWasSuccess)
 {
 }

@@ -148,3 +148,11 @@ bool FSwapRule::Predicate(const UObject* WorldContextObject,
 
 	return true;
 }
+
+bool FConsumeRule::Predicate(const UObject* WorldContextObject,
+                             const TInstancedStruct<FAVVMExecutionContextParams>& Params) const
+{
+	
+	// TODO @gdemers check if we are able to consume the item.
+	return false;
+}

@@ -72,6 +72,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Cycle(const FGameplayTag& TargetTag);
+	
+	UFUNCTION(BlueprintCallable)
+	UItemObject* GetActiveItemObject() const;
+	
+	UFUNCTION(BlueprintCallable)
+	AActor* GetActiveItemActor() const;
 
 protected:
 	void HandleItemCollectionChanged(const TArray<UItemObject*>& NewItemObjects,

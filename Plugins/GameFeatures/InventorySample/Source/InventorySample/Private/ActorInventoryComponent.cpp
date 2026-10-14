@@ -422,6 +422,11 @@ TInstancedStruct<FAVVMExecutionContextRule> UActorInventoryComponent::GetSwapRul
 	return FAVVMExecutionContextRule::Make<FSwapRule>();
 }
 
+TInstancedStruct<FAVVMExecutionContextRule> UActorInventoryComponent::GetConsumeRule() const
+{
+	return FAVVMExecutionContextRule::Make<FConsumeRule>();
+}
+
 const TArray<UItemObject*>& UActorInventoryComponent::GetItems() const
 {
 	return Items;
@@ -521,6 +526,35 @@ void UActorInventoryComponent::Swap(UItemObject* SrcItemObject, UItemObject* Des
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
 		                                        FAVVMNotificationPayload::Make<FInventoryNotificationPayload>(SrcItemObject, DestItemObject, bWasSuccess));
+	}
+}
+
+void UActorInventoryComponent::Consume(const int32 Value)
+{
+	const auto Ctx = FAVVMExecutionContextParams::Make<FConsumeContextParams>(NonReplicatedLoadout, Value);
+	const auto Rule = GetConsumeRule();
+	const bool bWasSuccess = UAVVMExecutionContextUtils::CanExecute(this, Ctx, Rule);
+	if (bWasSuccess)
+	{
+		if ((GetOwnerRole() == ROLE_Authority))
+		{
+			OnConsume(Value);
+		}
+		else
+		{
+			Server_Consume(Value);
+		}
+	}
+
+#if WITH_EDITOR
+	if (!IsNetMode(NM_DedicatedServer))
+#endif
+	{
+		UE_AVVM_NOTIFY_IF_PC_LOCALLY_CONTROLLED(this,
+		                                        TAG_INVENTORYSAMPLE_ITEM_NOTIFICATION_CONSUME,
+		                                        GetTypedOuter<APlayerController>(),
+		                                        IsValid(NonReplicatedLoadout) ? NonReplicatedLoadout->GetActiveItemActor() : nullptr,
+		                                        FAVVMNotificationPayload::Make<FConsumptionPayload>( NonReplicatedLoadout, Value, bWasSuccess));
 	}
 }
 
@@ -1055,6 +1089,21 @@ void UActorInventoryComponent::OnSwap(UItemObject* SrcItemObject,
 	DestItemObject->ModifyRuntimeStorageId(SrcStorageId);
 }
 
+void UActorInventoryComponent::OnConsume(const int32 Value)
+{
+	if (!IsValid(NonReplicatedLoadout))
+	{
+		return;
+	}
+
+	auto* CurrentItem = NonReplicatedLoadout->GetActiveItemObject();
+	if (IsValid(CurrentItem))
+	{
+		const int32 OldStackCount = CurrentItem->GetRuntimeCount();
+		CurrentItem->ModifyRuntimeStackCount(OldStackCount - Value, true);
+	}
+}
+
 UActorInventoryComponent::FItemSpawnerQueuingMechanism::~FItemSpawnerQueuingMechanism()
 {
 	PendingSpawnRequests.Empty();
@@ -1123,6 +1172,11 @@ void UActorInventoryComponent::Server_Pickup_Implementation(UItemObject* Pending
 void UActorInventoryComponent::Server_Swap_Implementation(UItemObject* SrcItemObject, UItemObject* DestItemObject)
 {
 	Swap(SrcItemObject, DestItemObject);
+}
+
+void UActorInventoryComponent::Server_Consume_Implementation(const int32 Value)
+{
+	Consume(Value);
 }
 
 void UActorInventoryComponent::ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags)

@@ -20,6 +20,7 @@
 #include "InventoryExecutionContextParams.h"
 
 #include "ItemObject.h"
+#include "NonReplicatedLoadoutObject.h"
 
 FDropContextParams::FDropContextParams(UItemObject* NewItemObject)
 	: ItemObject(NewItemObject)
@@ -35,5 +36,12 @@ FSwapContextParams::FSwapContextParams(UItemObject* NewSrcItemObject,
                                        UItemObject* NewDestItemObject)
 	: SrcItemObject(NewSrcItemObject),
 	  DestItemObject(NewDestItemObject)
+{
+}
+
+FConsumeContextParams::FConsumeContextParams(const UNonReplicatedLoadoutObject* NewLoadoutObject,
+                                             const int32 NewValue)
+	: SrcLoadoutObject(NewLoadoutObject),
+	  Value(NewValue)
 {
 }

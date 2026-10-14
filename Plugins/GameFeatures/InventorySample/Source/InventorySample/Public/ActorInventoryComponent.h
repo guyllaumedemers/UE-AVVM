@@ -121,6 +121,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
 
+	UFUNCTION(BlueprintCallable)
+	void Consume(const int32 Value);
+
 protected:
 	UFUNCTION()
 	void OnItemsRetrieved(FItemToken ItemToken);
@@ -167,6 +170,9 @@ protected:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_Swap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Consume(const int32 Value);
 
 	UFUNCTION(BlueprintCallable)
 	void ModifyRuntimeState(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
@@ -224,11 +230,13 @@ private:
 	virtual TInstancedStruct<FAVVMExecutionContextRule> GetDropRule() const;
 	virtual TInstancedStruct<FAVVMExecutionContextRule> GetPickupRule() const;
 	virtual TInstancedStruct<FAVVMExecutionContextRule> GetSwapRule() const;
+	virtual TInstancedStruct<FAVVMExecutionContextRule> GetConsumeRule() const;
 
 	// @gdemers virtual overrides are available. respect property access modifiers.
 	virtual void OnDrop(UItemObject* ItemObject);
 	virtual void OnPickup(UItemObject* ItemObject);
 	virtual void OnSwap(UItemObject* SrcItemObject, UItemObject* DestItemObject);
+	virtual void OnConsume(const int32 Value);
 	
 	UFUNCTION(meta=(AllowPrivateAccess))
 	void OnOuterTagChanged(const FGameplayTagContainer& NewTags);
