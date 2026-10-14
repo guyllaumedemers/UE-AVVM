@@ -243,7 +243,7 @@ UItemObject* UNonReplicatedLoadoutObject::GetActiveItemObject() const
 
 AActor* UNonReplicatedLoadoutObject::GetActiveItemActor() const
 {
-	auto* CurrentItem = GetActiveItemObject();
+	const auto* CurrentItem = GetActiveItemObject();
 	return IsValid(CurrentItem) ? CurrentItem->GetRuntimeItemActor() : nullptr;
 }
 
