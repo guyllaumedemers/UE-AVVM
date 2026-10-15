@@ -36,14 +36,18 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitOutputPathPicker : public SCompoun
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitOutputPathPicker){}
 	SLATE_EVENT(FOnPathSelected, OnPathSelected)
-	SLATE_ATTRIBUTE(FText, OutputHeader)
-	SLATE_ATTRIBUTE(FText, EditableItemText)
-	SLATE_EVENT(FOnTextChanged, OnEditableTextChanged)
-	SLATE_ATTRIBUTE(bool, IsEditableTextEnabled)
-	SLATE_ATTRIBUTE(FText, OutputAssetPathText)
-	SLATE_ATTRIBUTE(FText, OutputItemText)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+
+private:
+	void OnOutputPathChanged(const FString& NewOutputPath);
+	FText GetOutputPathText() const;
+	FReply OnMouseDoubleClicked(const FGeometry& Geometry, const FPointerEvent& PointerEvent);
+	FReply OnButtonClicked();
+	
+	TSharedPtr<SWindow> PathPickerWindow{nullptr};
+	FText OutputPathText{FText::GetEmpty()};
+	FOnPathSelected OnPathSelected{};
 };

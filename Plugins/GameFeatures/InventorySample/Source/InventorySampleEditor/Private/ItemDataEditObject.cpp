@@ -103,12 +103,6 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			[
 				SAssignNew(OutputSelectorWidget, SAVVMEditorToolkitOutputPathPicker)
 				.OnPathSelected_UObject(this, &UItemDataEditObject::OnAssetPathSelected)
-				.OutputHeader(NSLOCTEXT("AVVMEditorToolkit", "UItemGroupDataEditObject::Hint", "Select the ItemObject category type to create!"))
-				.EditableItemText(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::SetItemName", "Input new ItemObject FName"))
-				.OnEditableTextChanged_UObject(this, &UItemDataEditObject::OnTextFieldChanged)
-				.IsEditableTextEnabled_UObject(this, &UItemDataEditObject::OnEnable_EditableText)
-				.OutputAssetPathText_UObject(this, &UItemDataEditObject::GetAssetOutputPath)
-				.OutputItemText_UObject(this, &UItemDataEditObject::GetItemObjectNameGenerated)
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()

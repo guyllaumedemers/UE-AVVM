@@ -27,73 +27,139 @@
 
 void SAVVMEditorToolkitOutputPathPicker::Construct(const FArguments& InArgs)
 {
-	TSharedPtr<SWidget> PathPicker{nullptr};
-	if (FModuleManager::Get().IsModuleLoaded("ContentBrowser"))
-	{
-		// Configure the path picker
-		FPathPickerConfig PathPickerConfig;
-		PathPickerConfig.DefaultPath = TEXT("/Game");
-		PathPickerConfig.OnPathSelected = InArgs._OnPathSelected;
-
-		// Load the Content Browser module
-		auto& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-		PathPicker = ContentBrowserModule.Get().CreatePathPicker(PathPickerConfig);
-	}
+	OnPathSelected = InArgs._OnPathSelected;
 
 	ChildSlot
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-		[
-			SNew(STextBlock)
-			.Justification(ETextJustify::Center)
-			.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-			.Text(InArgs._OutputHeader)
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+		SNew(SBorder)
+		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+		.Padding(8.0f)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
-			.FillWidth(0.5f)
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			.Padding(0.0f, 0.0f, 8.0f, 0.0f)
 			[
-				PathPicker.ToSharedRef()
+				SNew(STextBlock)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "OutputLabel", "Output Path:"))
+				.Font(FAppStyle::GetFontStyle("NormalFontBold"))
 			]
 			+ SHorizontalBox::Slot()
-			.FillWidth(0.5f)
+			.FillWidth(1.0f)
+			.VAlign(VAlign_Center)
+			.Padding(0.0f, 0.0f, 8.0f, 0.0f)
 			[
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot()
-				.AutoHeight()
+				SNew(SBorder)
+				.Padding(6.0f)
+				.OnMouseDoubleClick(this, &SAVVMEditorToolkitOutputPathPicker::OnMouseDoubleClicked)
 				[
-					SNew(SEditableTextBox)
-					.Justification(ETextJustify::Center)
-					.Text(InArgs._EditableItemText)
-					.OnTextChanged(InArgs._OnEditableTextChanged)
-					.IsEnabled(InArgs._IsEditableTextEnabled)
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SNew(SImage)
+						.Image(FAppStyle::GetBrush("Icons.Folder"))
+					]
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+						.Text(this, &SAVVMEditorToolkitOutputPathPicker::GetOutputPathText)
+					]
 				]
-				+ SVerticalBox::Slot()
-				.FillHeight(1.f)
-				+ SVerticalBox::Slot()
-				.AutoHeight()
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			[
+				SNew(SButton)
+				.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "BrowseTooltip", "Choose output directory"))
+				.OnClicked(this, &SAVVMEditorToolkitOutputPathPicker::OnButtonClicked)
+				.Content()
 				[
-					SNew(STextBlock)
-					.Justification(ETextJustify::Left)
-					.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-					.Text(InArgs._OutputAssetPathText)
-				]
-				+ SVerticalBox::Slot()
-				.AutoHeight()
-				[
-					SNew(STextBlock)
-					.Justification(ETextJustify::Left)
-					.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-					.Text(InArgs._OutputItemText)
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					.Padding(0.0f, 0.0f, 4.0f, 0.0f)
+					[
+						SNew(SImage)
+						.Image(FAppStyle::GetBrush("Icons.Folder"))
+					]
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "BrowseButton", "Browse..."))
+					]
 				]
 			]
 		]
 	];
+}
+
+void SAVVMEditorToolkitOutputPathPicker::OnOutputPathChanged(const FString& NewOutputPath)
+{
+	OutputPathText = FText::FromString(NewOutputPath);
+	OnPathSelected.ExecuteIfBound(NewOutputPath);
+
+	if (PathPickerWindow.IsValid())
+	{
+		PathPickerWindow->RequestDestroyWindow();
+	}
+}
+
+FText SAVVMEditorToolkitOutputPathPicker::GetOutputPathText() const
+{
+	return OutputPathText.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "Output Path", "Select an output directory...") : OutputPathText;
+}
+
+FReply SAVVMEditorToolkitOutputPathPicker::OnMouseDoubleClicked(const FGeometry& Geometry,
+                                                                const FPointerEvent& PointerEvent)
+{
+	return OnButtonClicked();
+}
+
+FReply SAVVMEditorToolkitOutputPathPicker::OnButtonClicked()
+{
+	TSharedPtr<SWidget> PathPicker{nullptr};
+	if (FModuleManager::Get().IsModuleLoaded("ContentBrowser"))
+	{
+		FPathPickerConfig PathPickerConfig;
+		PathPickerConfig.DefaultPath = TEXT("/Game");
+		PathPickerConfig.OnPathSelected = FOnPathSelected::CreateRaw(this, &SAVVMEditorToolkitOutputPathPicker::OnOutputPathChanged);
+
+		auto& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+		PathPicker = ContentBrowserModule.Get().CreatePathPicker(PathPickerConfig);
+
+		// @gdemers reset output path
+		OnOutputPathChanged(PathPickerConfig.DefaultPath);
+	}
+
+	if (!PathPicker.IsValid())
+	{
+		return FReply::Unhandled();
+	}
+	else
+	{
+		SAssignNew(PathPickerWindow, SWindow)
+		.Title(NSLOCTEXT("AssetOutputPath", "WindowTile", "Choose Output Path"))
+		.ClientSize(FVector2D(400.0f, 500.0f))
+		.SizingRule(ESizingRule::UserSized)
+		[
+			SNew(SBorder)
+			.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+			.Padding(8.0f)
+			[
+				PathPicker->AsShared()
+			]
+		];
+
+		FSlateApplication::Get().AddWindow(PathPickerWindow.ToSharedRef());
+		return FReply::Handled();
+	}
 }
