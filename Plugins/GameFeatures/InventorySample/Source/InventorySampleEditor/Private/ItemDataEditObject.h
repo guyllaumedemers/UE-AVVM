@@ -44,7 +44,7 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
@@ -54,19 +54,10 @@ private:
 	TArray<FName> GetItemTypes() const;
 	FReply OnButtonClick_GenerateElementId();
 	bool OnDataCategoryTypeChanged(FName NewItemCategoryType);
-	void OnTextFieldChanged(const FText& NewText);
-	void OnAssetPathSelected(const FString& NewPath);
-	bool OnEnable_ButtonGenerateElementId() const;
-	bool OnEnable_EditableText() const;
 	bool OnEnable_BlueprintItemObjectDetailView() const;
 	bool OnEnable_TableRowItemObjectDetailView() const;
 	
-	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
-	
-	FText GetItemObjectNameGenerated() const;
-	FText GetAssetOutputPath() const;
-	
-	FString MakeNewItemObjectName() const;
+	FText StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	bool TryCreateNewItemObject();
 
@@ -77,8 +68,6 @@ private:
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
-	TSharedPtr<SAVVMEditorToolkitOutputPathPicker> OutputSelectorWidget{nullptr};
-	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
 	FName SelectedItemCategoryType{NAME_None};
 	FString ItemRowName{};
 	FString AssetOutputPath{};
@@ -96,7 +85,7 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };

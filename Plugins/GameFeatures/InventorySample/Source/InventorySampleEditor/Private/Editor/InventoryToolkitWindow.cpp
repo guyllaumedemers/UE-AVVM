@@ -29,9 +29,10 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
+#include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
+#include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
-#include "SWidgets/AVVMEditorToolkitPropertyTooltipPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Text/SRichTextBlock.h"
@@ -58,47 +59,40 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.FillWidth(0.5f)
-				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					.Padding(12.f)
-					.AutoHeight()
-					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Left)
-						.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-						.Text(NSLOCTEXT("AVVMEditorToolkit", "PropertyHeader", "Select a Data Source:"))
-					]
-					+ SVerticalBox::Slot()
-					.Padding(12.f)
-					.AutoHeight()
-					[
-						// @gdemers reusing data importer type here as a way of selecting from a collection
-						// of item types, instead of FDataRegistryType.
-						SNew(SAVVMEditorToolkitDataImporter)
-						.Elements(GetInventoryDataRegistryTypes())
-						.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataImporterSourceChanged)
-					]
-				]
-				+ SHorizontalBox::Slot()
-				.FillWidth(0.5f)
-				[
-					SNew(SAVVMEditorToolkitPropertyTooltipPanel)
-					.Tooltip(this, &SInventoryToolkitWindow::OnDataSourcePropertyTooltipChanged)
-				]
+				SNew(SAVVMEditorToolkitOutputPathPicker)
+				.OnPathSelected(this, &SInventoryToolkitWindow::OnOutputAssetPathSelected)
+				.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Select an Output Path:"))
 			]
 			+ SVerticalBox::Slot()
-			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
-			.FillContentHeight(1.f)
+			.Padding(12.f)
+			.AutoHeight()
 			[
-				SAssignNew(DataVisualizer, SAVVMEditorToolkitDataVisualizer)
-				.Visibility(this, &SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged)
-				.OnButtonClick_Create(this, &SInventoryToolkitWindow::OnButtonClick_Create)
-				.OnButtonClick_Edit(this, &SInventoryToolkitWindow::OnButtonClick_Edit)
-				.OnButtonClick_Delete(this, &SInventoryToolkitWindow::OnButtonClick_Delete)
+				SNew(SAVVMEditorToolkitDataImporter)
+				.Elements(GetInventoryDataRegistryTypes())
+				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
+				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataRegistrySelectionChanged)
+				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "DataImporterHeader", "Select a DataRegistry Source:"))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.FillHeight(1.f)
+			[
+				SAssignNew(DataTablePicker, SAVVMEditorToolkitDataTablePicker)
+				.RegistryType(this, &SInventoryToolkitWindow::GetDataRegistryType)
+				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
+				.OnSelectionChanged(this, &SInventoryToolkitWindow::OnDataTableSelectionChanged)
+				.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "Select a Data Table Source:"))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SButton)
+				.HAlign(EHorizontalAlignment::HAlign_Center)
+				.ButtonColorAndOpacity(FLinearColor::Green)
+				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged)
+				.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick)
+				.Text(this, &SInventoryToolkitWindow::GetButtonText)
 			]
 		]
 	];
@@ -122,6 +116,143 @@ FText SInventoryToolkitWindow::PluginVersion() const
 FSlateBrush* SInventoryToolkitWindow::PluginIcon() const
 {
 	return nullptr;
+}
+
+bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(FName SelectedRegistryType)
+{
+	SelectedDataRegistryType = FDataRegistryType{SelectedRegistryType};
+	if (DataTablePicker.IsValid() && SelectedDataRegistryType.IsValid())
+	{
+		bHasDataTableAvailable = DataTablePicker->UpdateDataTableCollection(SelectedDataRegistryType);
+	}
+
+	return SelectedDataRegistryType.IsValid();
+}
+
+void SInventoryToolkitWindow::OnOutputAssetPathSelected(const FString& NewPath)
+{
+	SelectedAssetPath = NewPath;
+}
+
+void SInventoryToolkitWindow::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection,
+														  ESelectInfo::Type SelectInfo)
+{
+	bShouldEditDataTable = NewSelection.IsValid();
+	if (bShouldEditDataTable)
+	{
+		SelectedDataTable = NewSelection;
+	}
+}
+
+EVisibility SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged() const
+{
+	return SelectedAssetPath.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+EVisibility SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged() const
+{
+	return (SelectedDataRegistryType.IsValid() && bHasDataTableAvailable) ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged() const
+{
+	return SelectedDataRegistryType.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
+{
+	return {
+			UInventorySettings::GetItemGroupRegistryType(),
+			UInventorySettings::GetItemRegistryType(),
+			UInventorySettings::GetFtueInventoryProviderRegistryType(),
+			UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
+	};
+}
+
+FDataRegistryType SInventoryToolkitWindow::GetDataRegistryType() const
+{
+	return SelectedDataRegistryType;
+}
+
+FReply SInventoryToolkitWindow::OnButtonClick()
+{
+	if (SelectedDataRegistryType.IsValid())
+	{
+		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
+		return FReply::Handled();
+	}
+	else
+	{
+		return FReply::Unhandled();
+	}
+}
+
+FText SInventoryToolkitWindow::GetButtonText() const
+{
+	return (bShouldEditDataTable && bHasDataTableAvailable) ? NSLOCTEXT("AVVMEditorToolkit", "DataTable_Edit", "Edit") : NSLOCTEXT("AVVMEditorToolkit", "DataTable_Create", "Create");
+}
+
+void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
+                                         const bool bShouldOpenInEditMode)
+{
+	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
+	                       *RegistryType.ToString());
+
+	FDisplayMetrics DisplayMetrics{};
+	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
+	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
+
+	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
+
+	auto NewFloatingWindow = SNew(SWindow)
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_Create", "SInventoryToolkitWindow::Factory"))
+		.CreateTitleBar(true)
+		.SupportsMaximize(true)
+		.SupportsMinimize(true)
+		.IsInitiallyMaximized(false)
+		.IsInitiallyMinimized(false)
+		.SizingRule(ESizingRule::UserSized)
+		.AutoCenter(EAutoCenter::PreferredWorkArea)
+		.ClientSize(ClientSize)
+		.AdjustInitialSizeAndPositionForDPIScale(false)
+		.Content()
+		[
+			SNew(SAVVMEditorToolkitDataEditor)
+			.SelectedDataRegistryType(FDataRegistryType{RegistryType})
+			.SelectedItemName(NAME_None)
+			.DataEditorObject(GetDataEditObject(RegistryType))
+			.OutputDataTable(SelectedDataTable)
+			.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create)
+		];
+
+	NewFloatingWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
+	NewFloatingWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
+
+	FloatingWindows.Add(NewFloatingWindow);
+
+	FSlateApplication::Get().AddWindow(NewFloatingWindow, true);
+	FGlobalTabmanager::Get()->SetRootWindow(NewFloatingWindow);
+	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
+	FSlateNotificationManager::Get().SetRootWindow(NewFloatingWindow);
+}
+
+void SInventoryToolkitWindow::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const
+{
+	const auto& CtxWindow = static_cast<const SAVVMEditorToolkitDataEditor&>(PendingCloseWindow->GetContent().Get());
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, CtxWindow.GetModalMessage_OnClosure(), CtxWindow.GetModalTitle_OnClosure());
+	if (Response == EAppReturnType::Yes)
+	{
+		PendingCloseWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
+		PendingCloseWindow->RequestDestroyWindow();
+	}
+}
+
+void SInventoryToolkitWindow::OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow)
+{
+	if (ensureAlwaysMsgf(FloatingWindows.Contains(PendingCloseWindow), TEXT("Attempt to remove Window multiple times.")))
+	{
+		FloatingWindows.Remove(PendingCloseWindow);
+	}
 }
 
 const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObject(const FName RegistryType) const
@@ -158,186 +289,4 @@ const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObje
 	}
 
 	return nullptr;
-}
-
-bool SInventoryToolkitWindow::OnDataImporterSourceChanged(FName SelectedRegistryType)
-{
-	SelectedDataRegistryType = FDataRegistryType{SelectedRegistryType};
-	if (DataVisualizer.IsValid())
-	{
-		DataVisualizer->UpdateDataVisualizer(SelectedDataRegistryType);
-	}
-
-	return SelectedDataRegistryType.IsValid();
-}
-
-EVisibility SInventoryToolkitWindow::OnDataVisualizerVisibilityStateChanged() const
-{
-	return SelectedDataRegistryType.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
-{
-	return {
-			UInventorySettings::GetItemGroupRegistryType(),
-			UInventorySettings::GetItemRegistryType(),
-			UInventorySettings::GetFtueInventoryProviderRegistryType(),
-			UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
-	};
-}
-
-FText SInventoryToolkitWindow::OnDataSourcePropertyTooltipChanged() const
-{
-	return NSLOCTEXT("AVVMEditorToolkit", "SInventoryToolkitWindow::OnDataImporterTooltipChanged", "Lorem ipsum");
-}
-
-FReply SInventoryToolkitWindow::OnButtonClick_Create()
-{
-	if (!SelectedDataRegistryType.IsValid())
-	{
-		return FReply::Unhandled();
-	}
-	else
-	{
-		OpenCreateWindow(SelectedDataRegistryType);
-		return FReply::Handled();
-	}
-}
-
-FReply SInventoryToolkitWindow::OnButtonClick_Edit()
-{
-	if (!SelectedDataRegistryType.IsValid() || !DataVisualizer.IsValid())
-	{
-		return FReply::Unhandled();
-	}
-
-	bool bResult{false};
-
-	TArray<FName> OutItemNames{};
-	bResult = DataVisualizer->GetSelectedItems(OutItemNames);
-
-	for (const auto& ItemName : OutItemNames)
-	{
-		OpenEditWindow(SelectedDataRegistryType, ItemName);
-	}
-
-	return bResult ? FReply::Handled() : FReply::Unhandled();
-}
-
-FReply SInventoryToolkitWindow::OnButtonClick_Delete()
-{
-	if (SelectedDataRegistryType.IsValid())
-	{
-		return FReply::Handled();
-	}
-	else
-	{
-		return FReply::Unhandled();
-	}
-}
-
-void SInventoryToolkitWindow::OpenCreateWindow(const FName RegistryType)
-{
-	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
-	                       *RegistryType.ToString());
-
-	FDisplayMetrics DisplayMetrics{};
-	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
-	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
-
-	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
-
-	auto NewFloatingWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_Create", "SInventoryToolkitWindow::Factory"))
-		.CreateTitleBar(true)
-		.SupportsMaximize(true)
-		.SupportsMinimize(true)
-		.IsInitiallyMaximized(false)
-		.IsInitiallyMinimized(false)
-		.SizingRule(ESizingRule::UserSized)
-		.AutoCenter(EAutoCenter::PreferredWorkArea)
-		.ClientSize(ClientSize)
-		.AdjustInitialSizeAndPositionForDPIScale(false)
-		.Content()
-		[
-			SNew(SAVVMEditorToolkitDataEditor)
-			.SelectedDataRegistryType(FDataRegistryType{RegistryType})
-			.SelectedItemName(NAME_None)
-			.DataEditObject(GetDataEditObject(RegistryType))
-			.Mode(EAVVMDataEditorModes::Create)
-		];
-
-	NewFloatingWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
-	NewFloatingWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
-
-	FloatingWindows.Add(NewFloatingWindow);
-
-	FSlateApplication::Get().AddWindow(NewFloatingWindow, true);
-	FGlobalTabmanager::Get()->SetRootWindow(NewFloatingWindow);
-	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
-	FSlateNotificationManager::Get().SetRootWindow(NewFloatingWindow);
-}
-
-void SInventoryToolkitWindow::OpenEditWindow(const FName RegistryType, const FName ItemName)
-{
-	AVVM_EDITOR_LOGGER_LOG(TEXT("Edit entry of RegistryType: %s, ItemName: %s."),
-	                       *RegistryType.ToString(),
-	                       *ItemName.ToString());
-	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
-	                       *RegistryType.ToString());
-
-	FDisplayMetrics DisplayMetrics{};
-	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
-	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
-
-	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
-
-	auto NewFloatingWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_Edit", "SInventoryToolkitWindow::Editing"))
-		.CreateTitleBar(true)
-		.SupportsMaximize(true)
-		.SupportsMinimize(true)
-		.IsInitiallyMaximized(false)
-		.IsInitiallyMinimized(false)
-		.SizingRule(ESizingRule::UserSized)
-		.AutoCenter(EAutoCenter::PreferredWorkArea)
-		.ClientSize(ClientSize)
-		.AdjustInitialSizeAndPositionForDPIScale(false)
-		.Content()
-		[
-			SNew(SAVVMEditorToolkitDataEditor)
-			.SelectedDataRegistryType(FDataRegistryType{RegistryType})
-			.SelectedItemName(ItemName)
-			.DataEditObject(GetDataEditObject(RegistryType))
-			.Mode(EAVVMDataEditorModes::Edit)
-		];
-
-	NewFloatingWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
-	NewFloatingWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
-
-	FloatingWindows.Add(NewFloatingWindow);
-
-	FSlateApplication::Get().AddWindow(NewFloatingWindow, true);
-	FGlobalTabmanager::Get()->SetRootWindow(NewFloatingWindow);
-	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
-	FSlateNotificationManager::Get().SetRootWindow(NewFloatingWindow);
-}
-
-void SInventoryToolkitWindow::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const
-{
-	const auto& CtxWindow = static_cast<const SAVVMEditorToolkitDataEditor&>(PendingCloseWindow->GetContent().Get());
-	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, CtxWindow.GetModalMessage_OnClosure(), CtxWindow.GetModalTitle_OnClosure());
-	if (Response == EAppReturnType::Yes)
-	{
-		PendingCloseWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
-		PendingCloseWindow->RequestDestroyWindow();
-	}
-}
-
-void SInventoryToolkitWindow::OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow)
-{
-	if (ensureAlwaysMsgf(FloatingWindows.Contains(PendingCloseWindow), TEXT("Attempt to remove Window multiple times.")))
-	{
-		FloatingWindows.Remove(PendingCloseWindow);
-	}
 }

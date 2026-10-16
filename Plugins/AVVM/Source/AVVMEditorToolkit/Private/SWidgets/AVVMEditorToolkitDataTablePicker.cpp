@@ -42,30 +42,38 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 	.OnSelectionChanged(InArgs._OnSelectionChanged);
 
 	ThumbnailPool = MakeShareable(new FAssetThumbnailPool(32));
-	UpdateDataTableCollection(InArgs._RegistryType.Get());
 
 	ChildSlot
 	[
 		SNew(SBorder)
 		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
-		.Padding(6.0f)
+		.Padding(8.0f)
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.AutoHeight()
-			.Padding(4.0f)
+			[
+				SNew(STextBlock)
+				.Justification(ETextJustify::Left)
+				.Font(FAppStyle::GetFontStyle("NormalFontBold"))
+				.Text(InArgs._PickerHeaderText)
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
 			[
 				SNew(SSearchBox)
 				.HintText(FText::FromString(TEXT("Search elements...")))
 				.OnTextChanged(this, &SAVVMEditorToolkitDataTablePicker::OnSearchTextChanged)
 			]
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.FillHeight(1.0f)
-			.Padding(0.f)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
-				.FillWidth(1)
+				.FillWidth(1.f)
 				[
 					ListViewWidget.ToSharedRef()
 				]
@@ -83,18 +91,18 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 	];
 }
 
-void SAVVMEditorToolkitDataTablePicker::UpdateDataTableCollection(const FDataRegistryType& NewRegistryType)
+bool SAVVMEditorToolkitDataTablePicker::UpdateDataTableCollection(const FDataRegistryType& NewRegistryType)
 {
 	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
 	                      TEXT("Invalid RegistryType.")))
 	{
-		return;
+		return false;
 	}
 
 	const TArray<const UDataRegistrySource_DataTable*> OutResult = UAVVMEditorToolkitUtils::GetDataTables(NewRegistryType);
 	if (OutResult.IsEmpty())
 	{
-		return;
+		return false;
 	}
 
 	SourceEntries.Empty(OutResult.Num());
@@ -111,6 +119,8 @@ void SAVVMEditorToolkitDataTablePicker::UpdateDataTableCollection(const FDataReg
 	{
 		ListViewWidget->RebuildList();
 	}
+
+	return (SourceEntries.Num() > 0);
 }
 
 TSharedRef<ITableRow> SAVVMEditorToolkitDataTablePicker::OnGenerateRow(TWeakObjectPtr<UDataTable> DataTable,

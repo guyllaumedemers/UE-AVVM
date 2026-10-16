@@ -42,11 +42,12 @@ public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataTablePicker){}
 	SLATE_EVENT(FOnDataTableSelectionChanged, OnSelectionChanged)
 	SLATE_ATTRIBUTE(FDataRegistryType, RegistryType)
+	SLATE_ATTRIBUTE(FText, PickerHeaderText)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-	void UpdateDataTableCollection(const FDataRegistryType& NewRegistryType);
+	bool UpdateDataTableCollection(const FDataRegistryType& NewRegistryType);
 
 private:
 	TSharedRef<ITableRow> OnGenerateRow(TWeakObjectPtr<UDataTable> DataTable,

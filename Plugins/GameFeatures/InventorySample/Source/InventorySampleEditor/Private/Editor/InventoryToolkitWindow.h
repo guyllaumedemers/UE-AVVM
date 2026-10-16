@@ -26,8 +26,9 @@
 #include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
 struct FSlateBrush;
-class SAVVMEditorToolkitDataVisualizer;
 class UAVVMEditorToolkitDataEditObject;
+class SAVVMEditorToolkitDataTablePicker;
+class UDataTable;
 
 /**
  *	Class description:
@@ -49,25 +50,29 @@ private:
 	FText PluginDescription() const;
 	FText PluginVersion() const;
 	FSlateBrush* PluginIcon() const;
-	
-	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
-	bool OnDataImporterSourceChanged(FName SelectedRegistryType);
-	EVisibility OnDataVisualizerVisibilityStateChanged() const;
-	TArray<FName> GetInventoryDataRegistryTypes() const;
-	FText OnDataSourcePropertyTooltipChanged() const;
-	
-	FReply OnButtonClick_Create();
-	FReply OnButtonClick_Edit();
-	FReply OnButtonClick_Delete();
 
-	void OpenCreateWindow(const FName RegistryType);
-	void OpenEditWindow(const FName RegistryType, const FName ItemName);
-	
-	/** Override to handle confirming if the user wants to quit. */
+	bool OnDataRegistrySelectionChanged(FName SelectedRegistryType);
+	void OnOutputAssetPathSelected(const FString& NewPath);
+	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
+	EVisibility OnVisibility_AssetPathSelectionChanged() const;
+	EVisibility OnVisibility_DataTableAvailableChanged() const;
+	EVisibility OnVisibility_DataRegistrySelectionChanged() const;
+	TArray<FName> GetInventoryDataRegistryTypes() const;
+	FDataRegistryType GetDataRegistryType() const;
+	FReply OnButtonClick();
+	FText GetButtonText() const;
+
+	void OpenWindow(const FName RegistryType, const bool bShouldOpenInEditMode);
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
 	
+	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
+	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
-	TSharedPtr<SAVVMEditorToolkitDataVisualizer> DataVisualizer{nullptr};
+	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker{nullptr};
 	FDataRegistryType SelectedDataRegistryType{};
+	FString SelectedAssetPath{};
+	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
+	bool bHasDataTableAvailable{false};
+	bool bShouldEditDataTable{false};
 };

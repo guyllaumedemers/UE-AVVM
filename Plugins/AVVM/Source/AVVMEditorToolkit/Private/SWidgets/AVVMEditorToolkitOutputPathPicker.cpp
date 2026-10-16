@@ -35,66 +35,74 @@ void SAVVMEditorToolkitOutputPathPicker::Construct(const FArguments& InArgs)
 		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
 		.Padding(8.0f)
 		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			.VAlign(VAlign_Center)
-			.Padding(0.0f, 0.0f, 8.0f, 0.0f)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
 			[
 				SNew(STextBlock)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "OutputLabel", "Output Path:"))
+				.Justification(ETextJustify::Left)
 				.Font(FAppStyle::GetFontStyle("NormalFontBold"))
+				.Text(InArgs._AssetPathHeaderText)
 			]
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0f)
-			.VAlign(VAlign_Center)
-			.Padding(0.0f, 0.0f, 8.0f, 0.0f)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
 			[
-				SNew(SBorder)
-				.Padding(6.0f)
-				.OnMouseDoubleClick(this, &SAVVMEditorToolkitOutputPathPicker::OnMouseDoubleClicked)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.VAlign(VAlign_Center)
+				.FillWidth(1.0f)
 				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					.VAlign(VAlign_Center)
+					SNew(SBorder)
+					.Padding(6.0f)
+					.OnMouseDoubleClick(this, &SAVVMEditorToolkitOutputPathPicker::OnMouseDoubleClicked)
 					[
-						SNew(SImage)
-						.Image(FAppStyle::GetBrush("Icons.Folder"))
-					]
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					.VAlign(VAlign_Center)
-					[
-						SNew(STextBlock)
-						.Text(this, &SAVVMEditorToolkitOutputPathPicker::GetOutputPathText)
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot()
+						.VAlign(VAlign_Center)
+						.Padding(8.0f, 0.0f, 8.0f, 0.0f)
+						.AutoWidth()
+						[
+							SNew(SImage)
+							.Image(FAppStyle::GetBrush("Icons.Folder"))
+						]
+						+ SHorizontalBox::Slot()
+						.VAlign(VAlign_Center)
+						.Padding(8.0f, 0.0f, 8.0f, 0.0f)
+						.AutoWidth()
+						[
+							SNew(STextBlock)
+							.Text(this, &SAVVMEditorToolkitOutputPathPicker::GetOutputPathText)
+						]
 					]
 				]
-			]
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			.VAlign(VAlign_Center)
-			[
-				SNew(SButton)
-				.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "BrowseTooltip", "Choose output directory"))
-				.OnClicked(this, &SAVVMEditorToolkitOutputPathPicker::OnButtonClicked)
-				.Content()
+				+ SHorizontalBox::Slot()
+				.VAlign(VAlign_Center)
+				.AutoWidth()
 				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					.VAlign(VAlign_Center)
-					.Padding(0.0f, 0.0f, 4.0f, 0.0f)
+					SNew(SButton)
+					.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "BrowseTooltip", "Choose output directory"))
+					.OnClicked(this, &SAVVMEditorToolkitOutputPathPicker::OnButtonClicked)
+					.Content()
 					[
-						SNew(SImage)
-						.Image(FAppStyle::GetBrush("Icons.Folder"))
-					]
-					+ SHorizontalBox::Slot()
-					.AutoWidth()
-					.VAlign(VAlign_Center)
-					[
-						SNew(STextBlock)
-						.Text(NSLOCTEXT("AVVMEditorToolkit", "BrowseButton", "Browse..."))
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot()
+						.VAlign(VAlign_Center)
+						.Padding(8.0f, 0.0f, 8.0f, 0.0f)
+						.AutoWidth()
+						[
+							SNew(SImage)
+							.Image(FAppStyle::GetBrush("Icons.Folder"))
+						]
+						+ SHorizontalBox::Slot()
+						.VAlign(VAlign_Center)
+						.Padding(8.0f, 0.0f, 8.0f, 0.0f)
+						.AutoWidth()
+						[
+							SNew(STextBlock)
+							.Text(NSLOCTEXT("AVVMEditorToolkit", "BrowseButton", "Browse..."))
+						]
 					]
 				]
 			]

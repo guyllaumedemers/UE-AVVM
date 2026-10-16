@@ -23,20 +23,21 @@
 
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 {
-	auto* Copy = DuplicateObject<UAVVMEditorToolkitDataEditObject>(InArgs._DataEditObject.Get().Get(), nullptr);
+	auto* Copy = DuplicateObject<UAVVMEditorToolkitDataEditObject>(InArgs._DataEditorObject.Get().Get(), nullptr);
 	DataEditObject = TStrongObjectPtr(Copy);
 
 	ChildSlot
 	[
-		GetDataEditContent(InArgs._Mode.Get()).ToSharedRef()
+		GetDataEditContent(InArgs._OutputDataTable.Get(), InArgs._Mode.Get()).ToSharedRef()
 	];
 }
 
-TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const EAVVMDataEditorModes CurrentMode) const
+TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                                     const EAVVMDataEditorModes CurrentMode) const
 {
 	if (DataEditObject.IsValid())
 	{
-		return DataEditObject->GetDataEditContent(CurrentMode);
+		return DataEditObject->GetDataEditContent(OutputDataTable, CurrentMode);
 	}
 	else
 	{

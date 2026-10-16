@@ -27,7 +27,7 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 {
 	OnDataSourceChangedDelegate = InArgs._OnDataImporterSourceChanged;
 	Elements = InArgs._Elements.Get();
-	
+
 	// Dropdown Button
 	SAssignNew(ComboButtonLabelWidget, STextBlock)
 	.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.NormalFont")))
@@ -62,10 +62,20 @@ void SAVVMEditorToolkitDataImporter::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		SNew(SOverlay)
-		+ SOverlay::Slot()
+		SNew(SBorder)
+		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+		.Padding(8.0f)
 		[
 			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.Justification(ETextJustify::Left)
+				.Font(FAppStyle::GetFontStyle("NormalFontBold"))
+				.Text(InArgs._DropDownHeaderText)
+			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
 			.AutoHeight()

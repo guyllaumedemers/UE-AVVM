@@ -36,6 +36,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitOutputPathPicker : public SCompoun
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitOutputPathPicker){}
 	SLATE_EVENT(FOnPathSelected, OnPathSelected)
+	SLATE_ATTRIBUTE(FText, AssetPathHeaderText)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */

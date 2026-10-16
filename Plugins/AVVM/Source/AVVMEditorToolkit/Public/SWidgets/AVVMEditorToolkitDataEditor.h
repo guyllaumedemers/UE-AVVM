@@ -28,6 +28,8 @@
 
 #include "AVVMEditorToolkitDataEditor.generated.h"
 
+class UDataTable;
+
 /**
  *	Class description:
  *	
@@ -53,7 +55,7 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
 };
@@ -69,14 +71,15 @@ public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataEditor){}
 	SLATE_ATTRIBUTE(FDataRegistryType, SelectedDataRegistryType)
 	SLATE_ATTRIBUTE(FName, SelectedItemName)
-	SLATE_ATTRIBUTE(TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject>, DataEditObject)
+	SLATE_ATTRIBUTE(TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject>, DataEditorObject)
+	SLATE_ATTRIBUTE(TWeakObjectPtr<UDataTable>, OutputDataTable)
 	SLATE_ATTRIBUTE(EAVVMDataEditorModes, Mode)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	TSharedPtr<SWidget> GetDataEditContent(const EAVVMDataEditorModes CurrentMode) const;
+	TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) const;
 	FText GetModalMessage_OnClosure() const;
 	FText GetModalTitle_OnClosure() const;
 	

@@ -41,6 +41,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataImporter : public SCompoundWid
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataImporter){};
 	SLATE_EVENT(SOnDataImporterSourceChangedDelegate, OnDataImporterSourceChanged)
+	SLATE_ATTRIBUTE(FText, DropDownHeaderText)
 	SLATE_ATTRIBUTE(TArray<FName>, Elements)
 	SLATE_END_ARGS()
 

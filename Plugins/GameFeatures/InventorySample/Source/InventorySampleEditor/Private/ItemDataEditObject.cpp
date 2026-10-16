@@ -36,10 +36,10 @@
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "Widgets/Images/SImage.h"
-#include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBorder.h"
 
-TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
+TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                            const EAVVMDataEditorModes CurrentMode)
 {
 	TSharedPtr<SWidget> Out{nullptr};
 	switch (CurrentMode)
@@ -101,32 +101,6 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			.AutoHeight()
 			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 			[
-				SAssignNew(OutputSelectorWidget, SAVVMEditorToolkitOutputPathPicker)
-				.OnPathSelected_UObject(this, &UItemDataEditObject::OnAssetPathSelected)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-			[
-				SNew(SAVVMEditorToolkitDataTablePicker)
-				.RegistryType(UInventorySettings::GetItemRegistryType())
-				.OnSelectionChanged_UObject(this, &UItemDataEditObject::OnDataTableSelectionChanged)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-			[
-				SNew(SButton)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::Create", "Create ItemObject"))
-				.TextStyle(FAppStyle::Get(), "DialogButtonText")
-				.HAlign(HAlign_Center)
-				.OnClicked_UObject(this, &UItemDataEditObject::OnButtonClick_GenerateElementId)
-				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_ButtonGenerateElementId)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
 				.FillWidth(0.5f)
@@ -170,59 +144,17 @@ bool UItemDataEditObject::OnDataCategoryTypeChanged(FName NewItemCategoryType)
 	return (false == SelectedItemCategoryType.IsNone());
 }
 
-void UItemDataEditObject::OnTextFieldChanged(const FText& NewText)
-{
-	ItemRowName = NewText.ToString().TrimStartAndEnd();
-}
-
-void UItemDataEditObject::OnAssetPathSelected(const FString& NewPath)
-{
-	AssetOutputPath = NewPath;
-}
-
-bool UItemDataEditObject::OnEnable_ButtonGenerateElementId() const
-{
-	return (false == SelectedItemCategoryType.IsNone()) && (false == ItemRowName.IsEmpty()) && (false == AssetOutputPath.IsEmpty()) && SelectedDataTable.IsValid();
-}
-
-bool UItemDataEditObject::OnEnable_EditableText() const
-{
-	return (false == SelectedItemCategoryType.IsNone());
-}
-
 bool UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView() const
 {
-	return OnEnable_ButtonGenerateElementId();
+	return false;
 }
 
 bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
 {
-	return OnEnable_ButtonGenerateElementId();
+	return false;
 }
 
-void UItemDataEditObject::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection,
-                                                      ESelectInfo::Type SelectInfo)
-{
-	if (ensureAlwaysMsgf(NewSelection.IsValid(),
-	                     TEXT("Failed to retrieve reference to Data Table.")))
-	{
-		SelectedDataTable = NewSelection;
-	}
-}
-
-FText UItemDataEditObject::GetItemObjectNameGenerated() const
-{
-	const FText OutputMsg = ItemRowName.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetItemObjectNameGenerated", "No Row Name provided.") : FText::FromString(MakeNewItemObjectName());
-	return FText::Format(FTextFormat::FromString(TEXT("Output Row Name:{0}")), OutputMsg);
-}
-
-FText UItemDataEditObject::GetAssetOutputPath() const
-{
-	const FText OutputMsg = AssetOutputPath.IsEmpty() ? NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::GetAssetOutputPath", "No Asset path provided.") : FText::FromString(AssetOutputPath);
-	return FText::Format(FTextFormat::FromString(TEXT("Asset Output Path:{0}")), OutputMsg);
-}
-
-FString UItemDataEditObject::MakeNewItemObjectName() const
+FText UItemDataEditObject::StandardizeItemObjectName() const
 {
 	static const FString ProjPrefix{TEXT("AVVM")};
 
@@ -234,7 +166,7 @@ FString UItemDataEditObject::MakeNewItemObjectName() const
 		PluginName = OwningPlugin->GetName();
 	}
 
-	return FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemCategoryType.ToString(), *ItemRowName);
+	return FText::FromString(FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemCategoryType.ToString(), *ItemRowName));
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
@@ -259,49 +191,49 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 
 bool UItemDataEditObject::TryCreateNewItemObject()
 {
-	if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
-	                      TEXT("Data Table Output missing. Please select a target.")))
-	{
-		return false;
-	}
+	// if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
+	//                       TEXT("Data Table Output missing. Please select a target.")))
+	// {
+	// 	return false;
+	// }
+	//
+	// const FString NewItemObjectName = MakeNewItemObjectName();
+	// const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
+	// if (!ensureAlwaysMsgf((false == bIsDuplicate),
+	//                       TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
+	// {
+	// 	return false;
+	// }
+	//
+	// auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable.Get(), FName(NewItemObjectName)));
+	// if (!ensureAlwaysMsgf(NewItemDefinition != nullptr,
+	//                       TEXT("Failed to cast Row Type.")))
+	// {
+	// 	return false;
+	// }
+	//
+	// bool bResult{false};
+	// if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	// {
+	// 	auto* Factory = NewObject<UItemDefinitionDataAssetFactory>();
+	// 	if (IsValid(Factory))
+	// 	{
+	// 		Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
+	// 	}
+	//
+	// 	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	// 	const FString ModifiedAssetName = NewItemObjectName.Replace(TEXT("BP"), TEXT("DA"));
+	//
+	// 	bResult = ensureAlwaysMsgf(AssetTools.Get().CreateAssetWithDialogAsync(ModifiedAssetName,
+	// 		                           AssetOutputPath,
+	// 		                           UItemDefinitionDataAsset::StaticClass(),
+	// 		                           Factory,
+	// 		                           FAssetCreateComplete::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCompleted, NewItemDefinition),
+	// 		                           FAssetCreateCancelled::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCancelled)),
+	// 	                           TEXT("Failed to create new Data Asset."));
+	// }
 
-	const FString NewItemObjectName = MakeNewItemObjectName();
-	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
-	if (!ensureAlwaysMsgf((false == bIsDuplicate),
-	                      TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
-	{
-		return false;
-	}
-
-	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable.Get(), FName(NewItemObjectName)));
-	if (!ensureAlwaysMsgf(NewItemDefinition != nullptr,
-	                      TEXT("Failed to cast Row Type.")))
-	{
-		return false;
-	}
-
-	bool bResult{false};
-	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		auto* Factory = NewObject<UItemDefinitionDataAssetFactory>();
-		if (IsValid(Factory))
-		{
-			Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
-		}
-
-		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-		const FString ModifiedAssetName = NewItemObjectName.Replace(TEXT("BP"), TEXT("DA"));
-
-		bResult = ensureAlwaysMsgf(AssetTools.Get().CreateAssetWithDialogAsync(ModifiedAssetName,
-			                           AssetOutputPath,
-			                           UItemDefinitionDataAsset::StaticClass(),
-			                           Factory,
-			                           FAssetCreateComplete::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCompleted, NewItemDefinition),
-			                           FAssetCreateCancelled::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCancelled)),
-		                           TEXT("Failed to create new Data Asset."));
-	}
-
-	return bResult;
+	return false;
 }
 
 void UItemDataEditObject::OnDataAssetCreationCompleted(UFactory* Factory,
@@ -337,7 +269,8 @@ int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
 	return INDEX_NONE;
 }
 
-TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const EAVVMDataEditorModes CurrentMode)
+TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                                 const EAVVMDataEditorModes CurrentMode)
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Blue);
