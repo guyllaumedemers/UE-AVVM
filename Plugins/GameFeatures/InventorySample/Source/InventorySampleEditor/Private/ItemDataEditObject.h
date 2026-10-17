@@ -44,18 +44,18 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes NewMode) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
 private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
-	TArray<FName> GetItemTypes() const;
-	FReply OnButtonClick_GenerateElementId();
-	bool OnDataCategoryTypeChanged(FName NewItemCategoryType);
+	bool OnItemTypeChanged(FName NewItemType);
 	bool OnEnable_BlueprintItemObjectDetailView() const;
 	bool OnEnable_TableRowItemObjectDetailView() const;
+	TArray<FName> GetItemTypes() const;
+	FReply OnButtonClick_GenerateElementId();
 	
 	FText StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
@@ -68,7 +68,7 @@ private:
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
-	FName SelectedItemCategoryType{NAME_None};
+	FName SelectedItemType{NAME_None};
 	FString ItemRowName{};
 	FString AssetOutputPath{};
 };

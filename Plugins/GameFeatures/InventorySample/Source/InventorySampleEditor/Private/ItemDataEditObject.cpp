@@ -33,16 +33,16 @@
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Factories/DataAssetFactory.h"
 #include "Interfaces/IPluginManager.h"
-#include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
+#include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SBorder.h"
 
 TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                            const EAVVMDataEditorModes CurrentMode)
+                                                            const EAVVMDataEditorModes NewMode)
 {
 	TSharedPtr<SWidget> Out{nullptr};
-	switch (CurrentMode)
+	switch (NewMode)
 	{
 		case EAVVMDataEditorModes::None:
 			break;
@@ -95,7 +95,8 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 			[
 				SNew(SAVVMEditorToolkitDataImporter)
 				.Elements(GetItemTypes())
-				.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnDataCategoryTypeChanged)
+				.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnItemTypeChanged)
+				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Select an Item Type:"))
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
@@ -120,8 +121,12 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 
 TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 {
-	return SNew(SImage)
-		.ColorAndOpacity(FLinearColor::Green);
+	return SNew(SBorder)
+		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
+		.Padding(6.0f)
+		[
+			SNew(SAVVMEditorToolkitDataVisualizer)
+		];
 }
 
 TArray<FName> UItemDataEditObject::GetItemTypes() const
@@ -138,10 +143,10 @@ FReply UItemDataEditObject::OnButtonClick_GenerateElementId()
 	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
 }
 
-bool UItemDataEditObject::OnDataCategoryTypeChanged(FName NewItemCategoryType)
+bool UItemDataEditObject::OnItemTypeChanged(FName NewItemType)
 {
-	SelectedItemCategoryType = NewItemCategoryType;
-	return (false == SelectedItemCategoryType.IsNone());
+	SelectedItemType = NewItemType;
+	return (false == SelectedItemType.IsNone());
 }
 
 bool UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView() const
@@ -166,7 +171,7 @@ FText UItemDataEditObject::StandardizeItemObjectName() const
 		PluginName = OwningPlugin->GetName();
 	}
 
-	return FText::FromString(FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemCategoryType.ToString(), *ItemRowName));
+	return FText::FromString(FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemType.ToString(), *ItemRowName));
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
