@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "AVVMDoesWidgetProvideModalMessaging.h"
 #include "AVVMEditorToolkitDataImporter.h"
 #include "DataRegistryId.h"
 #include "Factories/Factory.h"
@@ -57,7 +58,10 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewPackagePath,
+	                                               const EAVVMDataEditorModes NewMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
 };
@@ -67,12 +71,14 @@ public:
  *	
  *	SAVVMEditorToolkitDataEditor is a slate context handling data edit modes.
  */
-class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataEditor : public SCompoundWidget
+class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataEditor : public SCompoundWidget,
+                                                           public IAVVMDoesWidgetProvideModalMessaging
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataEditor){}
 	SLATE_ATTRIBUTE(FDataRegistryType, SelectedDataRegistryType)
 	SLATE_ATTRIBUTE(FName, SelectedItemName)
+	SLATE_ATTRIBUTE(FString, PackagePath)
 	SLATE_ATTRIBUTE(TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject>, DataEditorObject)
 	SLATE_ATTRIBUTE(TWeakObjectPtr<UDataTable>, OutputDataTable)
 	SLATE_ATTRIBUTE(EAVVMDataEditorModes, Mode)
@@ -81,10 +87,12 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) const;
-	FText GetModalMessage_OnClosure() const;
-	FText GetModalTitle_OnClosure() const;
+	TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                       const FString& NewPackagePath,
+	                                       const EAVVMDataEditorModes CurrentMode) const;
 	
+	virtual FText GetModalMessage_OnClosure() const override;
+	virtual FText GetModalTitle_OnClosure() const override;
 private:
 	TStrongObjectPtr<UAVVMEditorToolkitDataEditObject> DataEditObject{nullptr};
 };

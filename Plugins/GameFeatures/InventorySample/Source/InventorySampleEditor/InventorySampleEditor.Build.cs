@@ -27,6 +27,7 @@ public class InventorySampleEditor : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 		bWarningsAsErrors = true;
+		bUseRTTI = true;
 
 		PublicDependencyModuleNames.AddRange(
 			new string[]

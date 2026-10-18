@@ -20,6 +20,7 @@
 #include "InventoryToolkitWindow.h"
 
 #include "AssetToolsModule.h"
+#include "AVVMDoesWidgetProvideModalMessaging.h"
 #include "AVVMEditorToolkitModule.h"
 #include "AVVMEditorToolkitUtils.h"
 #include "AVVMLogger.h"
@@ -40,6 +41,7 @@
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
+#include "SWidgets/AVVMEditorToolkitPackagePathInput.h"
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
@@ -200,11 +202,13 @@ bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(const FName Selecte
 	{
 		return bResult;
 	}
+	
+	CreateDataRegistry();
 
 	SelectedDataRegistry = UAVVMEditorToolkitUtils::GetDataRegistry(SelectedDataRegistryType);
 	if (!SelectedDataRegistry.IsValid() && (bCheckBoxStates.IsValidIndex(1/*UDataRegistry*/) && bCheckBoxStates[1]))
 	{
-		bResult = CreateNewDataRegistry(SelectedRegistryTypeIndex);
+		bResult = CreateDataRegistry();
 	}
 	else if (SelectedDataRegistry.IsValid() && DataTablePicker.IsValid())
 	{
@@ -229,9 +233,30 @@ void SInventoryToolkitWindow::OnCheckBoxStateChanged(int32 Index)
 	}
 }
 
-void SInventoryToolkitWindow::OnOutputAssetPathSelected(const FString& NewPath)
+void SInventoryToolkitWindow::OnOutputAssetPathSelected(const FString& NewPackagePath)
 {
-	SelectedAssetPath = NewPath;
+	SelectedPackagePath = NewPackagePath;
+}
+
+void SInventoryToolkitWindow::OnDataRegistryAssetNameChanged(const FText& NewAssetName,
+                                                             ETextCommit::Type CommitType)
+{
+	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->DataRegistryClass = UDataRegistry::StaticClass();
+	}
+
+	// @gdemers create Data Registry Asset.
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	auto* DataRegistry = AssetTools.Get().CreateAsset(FString::Printf(TEXT("DR_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString()),
+	                                                  SelectedPackagePath,
+	                                                  UDataRegistry::StaticClass(),
+	                                                  Factory);
+
+	// @gdemers force open since we cannot default initialized it. the user should have read the modal, and know whats
+	// expected from them at this point.
+	AssetTools.Get().OpenEditorForAssets({DataRegistry});
 }
 
 void SInventoryToolkitWindow::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection,
@@ -246,7 +271,7 @@ void SInventoryToolkitWindow::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTa
 
 bool SInventoryToolkitWindow::IsEnabled_AssetPathSelectionChanged() const
 {
-	return (false == SelectedAssetPath.IsEmpty());
+	return (false == SelectedPackagePath.IsEmpty());
 }
 
 bool SInventoryToolkitWindow::IsEnabled_DataTableAvailableChanged() const
@@ -294,6 +319,11 @@ FDataRegistryType SInventoryToolkitWindow::GetDataRegistryType() const
 	return SelectedDataRegistryType;
 }
 
+FString SInventoryToolkitWindow::GetOutputPackagePath() const
+{
+	return SelectedPackagePath;
+}
+
 FReply SInventoryToolkitWindow::OnButtonClick_OpenWindow()
 {
 	if (!SelectedDataRegistryType.IsValid())
@@ -334,7 +364,7 @@ void SInventoryToolkitWindow::CreateDataTable()
 
 	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 	SelectedDataTable = Cast<UDataTable>(AssetTools.Get().CreateAsset(FString::Printf(TEXT("DT_%s"), PROJECT_ASSET_PREFIX),
-	                                                                  SelectedAssetPath,
+	                                                                  SelectedPackagePath,
 	                                                                  UDataTable::StaticClass(),
 	                                                                  Factory));
 
@@ -355,17 +385,13 @@ void SInventoryToolkitWindow::EditDataTable()
 void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
                                          const bool bShouldOpenInEditMode)
 {
-	AVVM_EDITOR_LOGGER_LOG(TEXT("Create new entry of RegistryType %s."),
-	                       *RegistryType.ToString());
-
 	FDisplayMetrics DisplayMetrics{};
 	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
 	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
-
 	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
 
 	auto NewFloatingWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_Create", "SInventoryToolkitWindow::Factory"))
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor"))
 		.CreateTitleBar(true)
 		.SupportsMaximize(true)
 		.SupportsMinimize(true)
@@ -382,6 +408,7 @@ void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
 			.SelectedItemName(NAME_None)
 			.DataEditorObject(GetDataEditObject(RegistryType))
 			.OutputDataTable(SelectedDataTable)
+			.PackagePath(this, &SInventoryToolkitWindow::GetOutputPackagePath)
 			.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create)
 		];
 
@@ -398,8 +425,13 @@ void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
 
 void SInventoryToolkitWindow::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const
 {
-	const auto& CtxWindow = static_cast<const SAVVMEditorToolkitDataEditor&>(PendingCloseWindow->GetContent().Get());
-	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, CtxWindow.GetModalMessage_OnClosure(), CtxWindow.GetModalTitle_OnClosure());
+	const auto* CtxWindow = dynamic_cast<IAVVMDoesWidgetProvideModalMessaging*>(&(PendingCloseWindow->GetContent().Get()));
+	if (!ensureAlwaysMsgf(CtxWindow != nullptr, TEXT("Failed to cast to interface type.")))
+	{
+		return;
+	}
+
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, CtxWindow->GetModalMessage_OnClosure(), CtxWindow->GetModalTitle_OnClosure());
 	if (Response == EAppReturnType::Yes)
 	{
 		PendingCloseWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
@@ -415,20 +447,15 @@ void SInventoryToolkitWindow::OnWindowClosed(const TSharedRef<SWindow>& PendingC
 	}
 }
 
-bool SInventoryToolkitWindow::CreateNewDataRegistry(const int32 NewSelectedRegistryTypeIndex) const
+bool SInventoryToolkitWindow::CreateDataRegistry()
 {
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		return false;
-	}
-
 	const auto RowTypes = GetInventoryRowTypes();
-	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(NewSelectedRegistryTypeIndex) ? RowTypes[NewSelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
 
 	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry");
 	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
-	                                                 "CreateNewDataRegistry",
-	                                                 "Data Registry missing.\n\nPress Ok, and create a Data Registry. Make sure the RegistryType is:{0}, and ScriptStruct:{1}."),
+	                                                 "CreateDataRegistry",
+	                                                 "Data Registry missing.\n\nPress Ok, and create a Data Registry. Make sure the RegistryType is:\n{0}, and ScriptStruct:{1}."),
 	                                       FText::FromName(SelectedDataRegistryType.GetName()),
 	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
 
@@ -437,24 +464,41 @@ bool SInventoryToolkitWindow::CreateNewDataRegistry(const int32 NewSelectedRegis
 	{
 		return false;
 	}
+	
+	SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
+	.OnTextCommited(this, &SInventoryToolkitWindow::OnDataRegistryAssetNameChanged);
 
-	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
-	if (IsValid(Factory))
-	{
-		Factory->DataRegistryClass = UDataRegistry::StaticClass();
-	}
+	FDisplayMetrics DisplayMetrics{};
+	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
+	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
+	const FVector2D ClientSize(600.0f * DPIScaleFactor, 400.0f * DPIScaleFactor);
 
-	// @gdemers create Data Registry Asset.
-	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	auto* DataRegistry = AssetTools.Get().CreateAsset(FString::Printf(TEXT("DR_%s"), PROJECT_ASSET_PREFIX),
-	                                                  SelectedAssetPath,
-	                                                  UDataRegistry::StaticClass(),
-	                                                  Factory);
+	auto ModalWindow = SNew(SWindow)
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataRegistry", "DataRegistry"))
+		.CreateTitleBar(true)
+		.SupportsMaximize(true)
+		.SupportsMinimize(true)
+		.IsInitiallyMaximized(false)
+		.IsInitiallyMinimized(false)
+		.SizingRule(ESizingRule::UserSized)
+		.AutoCenter(EAutoCenter::PreferredWorkArea)
+		.ClientSize(ClientSize)
+		.AdjustInitialSizeAndPositionForDPIScale(false)
+		.Content()
+		[
+			PackagePathInput.ToSharedRef()
+		];
 
-	// @gdemers force open since we cannot default initialized it. the user should have read the modal, and know whats
-	// expected from them at this point.
-	AssetTools.Get().OpenEditorForAssets({DataRegistry});
-	return IsValid(DataRegistry);
+	ModalWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
+	ModalWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
+
+	FloatingWindows.Add(ModalWindow);
+
+	FSlateApplication::Get().AddWindow(ModalWindow, true);
+	FGlobalTabmanager::Get()->SetRootWindow(ModalWindow);
+	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
+	FSlateNotificationManager::Get().SetRootWindow(ModalWindow);
+	return true;
 }
 
 const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObject(const FName RegistryType) const

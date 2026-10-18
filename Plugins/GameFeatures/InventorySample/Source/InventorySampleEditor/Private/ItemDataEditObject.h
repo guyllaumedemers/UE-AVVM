@@ -44,7 +44,10 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes NewMode) override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewPackagePath,
+	                                               const EAVVMDataEditorModes NewMode) override;
+	
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
@@ -52,17 +55,17 @@ private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
 	TArray<FName> GetItemTypes() const;
-	EVisibility OnVisibility_OnItemTypeChanged() const;
+	bool IsEnabled_OnItemTypeChanged() const;
 	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
 	bool OnEnable_BlueprintItemObjectDetailView() const;
 	bool OnEnable_TableRowItemObjectDetailView() const;
-	bool OnEnable_GenerateButton() const;
+	bool IsEnabled_GenerateButton() const;
 	void OnTextChanged_ItemName(const FText& NewItemName);
 	FReply OnButtonClick_GenerateItem();
 	
-	FText StandardizeItemObjectName() const;
+	FString StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
-	bool TryCreateNewItemObject();
+	bool TryCreateNewItemObject() const;
 
 	void OnDataAssetCreationCompleted(UFactory* Factory, UObject* NewObject, FItemDefinitionDataTableRow* NewElement);
 	void OnDataAssetCreationCancelled(UFactory* Factory);
@@ -71,6 +74,8 @@ private:
 	
 	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
+	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
+	FString SelectedPackagePath{};
 	FName SelectedItemType{NAME_None};
 	FString ItemRowName{};
 };
@@ -87,7 +92,10 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable, const EAVVMDataEditorModes CurrentMode) override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewPackagePath,
+	                                               const EAVVMDataEditorModes NewMode) override;
+	
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };

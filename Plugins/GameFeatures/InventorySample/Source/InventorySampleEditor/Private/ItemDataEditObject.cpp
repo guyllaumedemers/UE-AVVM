@@ -33,14 +33,19 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Interfaces/IPluginManager.h"
+#include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "Widgets/Images/SImage.h"
-#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SScrollBox.h"
 
 TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                            const FString& NewPackagePath,
                                                             const EAVVMDataEditorModes NewMode)
 {
+	SelectedDataTable = OutputDataTable;
+	SelectedPackagePath = NewPackagePath;
+	
 	TSharedPtr<SWidget> Out{nullptr};
 	switch (NewMode)
 	{
@@ -88,73 +93,87 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 	return SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
+			SNew(SScrollBox)
+			+ SScrollBox::Slot()
 			[
-				SNew(SAVVMEditorToolkitDataImporter)
-				.Elements(GetItemTypes())
-				.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnItemTypeChanged)
-				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Select an Item Type:"))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SBorder)
-				.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
-				.Padding(8.0f)
-				.Visibility_UObject(this, &UItemDataEditObject::OnVisibility_OnItemTypeChanged)
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
 				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
-					.Padding(12.f)
-					.AutoHeight()
+					SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step1", "Step 1: Select the Item Type to create."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SAVVMEditorToolkitDataImporter)
+					.Elements(GetItemTypes())
+					.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnItemTypeChanged)
+					.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Item Types:"))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step2", "Step 2: Set a unique RowName for the new Item."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SEditableTextBox)
+					.Justification(ETextJustify::Left)
+					.Font(FAppStyle::GetFontStyle("NormalFontBold"))
+					.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextChanged_ItemName)
+					.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_OnItemTypeChanged)
+					.HintText(NSLOCTEXT("AVVMEditorToolkit", "InputItemNameTooltip", "Note : Item Row Name are standardized under the hood."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "DefaultText", "..."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step3", "Step 3: Configure your Row entry, and Blueprint."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.FillHeight(1.f)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.5f)
+					.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 					[
-						SNew(STextBlock)
-						.Justification(ETextJustify::Left)
-						.Font(FAppStyle::GetFontStyle("NormalFontBold"))
-						.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "InputItemNameTooltip", "Note : Item Row Name are standardized under the hood."))
-						.Text(NSLOCTEXT("AVVMEditorToolkit", "InputItemNameHeader", "Input a unique Item Row Name:"))
+						BlueprintItemObjectPropertyView.ToSharedRef()
 					]
-					+ SVerticalBox::Slot()
-					.Padding(12.f)
-					.AutoHeight()
+					+ SHorizontalBox::Slot()
+					.FillWidth(0.5f)
+					.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 					[
-						SNew(SEditableTextBox)
-						.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextChanged_ItemName)
+						TableRowItemObjectPropertyView.ToSharedRef()
 					]
 				]
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.FillHeight(1.f)
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.FillWidth(0.5f)
-				.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
 				[
-					BlueprintItemObjectPropertyView.ToSharedRef()
+					SNew(SButton)
+					.HAlign(EHorizontalAlignment::HAlign_Center)
+					.ButtonColorAndOpacity(FLinearColor::Green)
+					.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_GenerateButton)
+					.OnClicked_UObject(this, &UItemDataEditObject::OnButtonClick_GenerateItem)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Generate"))
 				]
-				+ SHorizontalBox::Slot()
-				.FillWidth(0.5f)
-				.Padding(20.0f, 1.0f, 20.0f, 1.0f)
-				[
-					TableRowItemObjectPropertyView.ToSharedRef()
-				]
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SButton)
-				.HAlign(EHorizontalAlignment::HAlign_Center)
-				.ButtonColorAndOpacity(FLinearColor::Green)
-				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_GenerateButton)
-				.OnClicked_UObject(this, &UItemDataEditObject::OnButtonClick_GenerateItem)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Generate"))
 			]
 		];
 }
@@ -177,9 +196,9 @@ TArray<FName> UItemDataEditObject::GetItemTypes() const
 	};
 }
 
-EVisibility UItemDataEditObject::OnVisibility_OnItemTypeChanged() const
+bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
 {
-	return SelectedItemType.IsNone() ? EVisibility::Collapsed : EVisibility::Visible;
+	return (false == SelectedItemType.IsNone());
 }
 
 bool UItemDataEditObject::OnItemTypeChanged(const FName NewItemType,
@@ -199,7 +218,7 @@ bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
 	return false;
 }
 
-bool UItemDataEditObject::OnEnable_GenerateButton() const
+bool UItemDataEditObject::IsEnabled_GenerateButton() const
 {
 	return SelectedItemType.IsValid() && !ItemRowName.IsEmpty();
 }
@@ -214,17 +233,17 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
 }
 
-FText UItemDataEditObject::StandardizeItemObjectName() const
+FString UItemDataEditObject::StandardizeItemObjectName() const
 {
 	FString PluginName{TEXT("Error")};
-	
+
 	TSharedPtr<IPlugin> OwningPlugin = IPluginManager::Get().GetModuleOwnerPlugin(FName(TEXT("InventorySampleEditor")));
 	if (OwningPlugin.IsValid())
 	{
 		PluginName = OwningPlugin->GetName();
 	}
 
-	return FText::FromString(FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), PROJECT_ASSET_PREFIX, *PluginName, *SelectedItemType.ToString(), *ItemRowName));
+	return FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), PROJECT_ASSET_PREFIX, *PluginName, *SelectedItemType.ToString(), *ItemRowName);
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
@@ -247,51 +266,51 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 	return bResult;
 }
 
-bool UItemDataEditObject::TryCreateNewItemObject()
+bool UItemDataEditObject::TryCreateNewItemObject() const
 {
-	// if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
-	//                       TEXT("Data Table Output missing. Please select a target.")))
-	// {
-	// 	return false;
-	// }
-	//
-	// const FString NewItemObjectName = MakeNewItemObjectName();
-	// const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
-	// if (!ensureAlwaysMsgf((false == bIsDuplicate),
-	//                       TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
-	// {
-	// 	return false;
-	// }
-	//
-	// auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable.Get(), FName(NewItemObjectName)));
-	// if (!ensureAlwaysMsgf(NewItemDefinition != nullptr,
-	//                       TEXT("Failed to cast Row Type.")))
-	// {
-	// 	return false;
-	// }
-	//
-	// bool bResult{false};
-	// if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	// {
-	// 	auto* Factory = NewObject<UItemDefinitionDataAssetFactory>();
-	// 	if (IsValid(Factory))
-	// 	{
-	// 		Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
-	// 	}
-	//
-	// 	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	// 	const FString ModifiedAssetName = NewItemObjectName.Replace(TEXT("BP"), TEXT("DA"));
-	//
-	// 	bResult = ensureAlwaysMsgf(AssetTools.Get().CreateAssetWithDialogAsync(ModifiedAssetName,
-	// 		                           AssetOutputPath,
-	// 		                           UItemDefinitionDataAsset::StaticClass(),
-	// 		                           Factory,
-	// 		                           FAssetCreateComplete::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCompleted, NewItemDefinition),
-	// 		                           FAssetCreateCancelled::CreateUObject(this, &UItemDataEditObject::OnDataAssetCreationCancelled)),
-	// 	                           TEXT("Failed to create new Data Asset."));
-	// }
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		return false;
+	}
 
-	return false;
+	if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
+	                      TEXT("Data Table Output missing. Please select a target.")))
+	{
+		return false;
+	}
+
+	const FString NewItemObjectName = StandardizeItemObjectName();
+	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
+	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
+	{
+		FMessageDialog::Open(EAppMsgCategory::Error,
+							 EAppMsgType::Ok,
+							 NSLOCTEXT("AVVMEditorToolkit", "NotifyDataDuplicatedName", "Duplicated Name detected!\nChoose a different name."));
+		return false;
+	}
+
+	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable.Get(), FName(NewItemObjectName)));
+	if (!ensureAlwaysMsgf(NewItemDefinition != nullptr, TEXT("Failed to cast Row Type.")))
+	{
+		return false;
+	}
+
+	auto* Factory = NewObject<UItemDefinitionDataAssetFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
+	}
+
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	auto* ItemDefinitionDataAsset = AssetTools.Get().CreateAsset(NewItemObjectName.Replace(TEXT("BP"), TEXT("DA")),
+	                                                             SelectedPackagePath,
+	                                                             UItemDefinitionDataAsset::StaticClass(),
+	                                                             Factory);
+
+	// @gdemers force open since we cannot default initialized it. the user should have read the modal, and know whats
+	// expected from them at this point.
+	AssetTools.Get().OpenEditorForAssets({ItemDefinitionDataAsset});
+	return IsValid(ItemDefinitionDataAsset);
 }
 
 void UItemDataEditObject::OnDataAssetCreationCompleted(UFactory* Factory,
@@ -328,7 +347,8 @@ int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                 const EAVVMDataEditorModes CurrentMode)
+                                                                 const FString& NewPackagePath,
+                                                                 const EAVVMDataEditorModes NewMode)
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Blue);

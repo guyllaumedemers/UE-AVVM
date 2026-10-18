@@ -26,6 +26,7 @@
 
 struct FSlateBrush;
 class SAVVMEditorToolkitDataTablePicker;
+class SAVVMEditorToolkitRequiredUserInput;
 class SCheckBoxList;
 class UAVVMEditorToolkitDataEditObject;
 class UDataRegistry;
@@ -56,7 +57,8 @@ private:
 
 	bool OnDataRegistrySelectionChanged(const FName SelectedRegistryType, const int32 NewSelectedIndex);
 	void OnCheckBoxStateChanged(int32 Index);
-	void OnOutputAssetPathSelected(const FString& NewPath);
+	void OnOutputAssetPathSelected(const FString& NewPackagePath);
+	void OnDataRegistryAssetNameChanged(const FText& NewAssetName, ETextCommit::Type CommitType);
 	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_DataTableAvailableChanged() const;
@@ -65,26 +67,27 @@ private:
 	TArray<FName> GetInventoryDataRegistryTypes() const;
 	TArray<UScriptStruct*> GetInventoryRowTypes() const;
 	FDataRegistryType GetDataRegistryType() const;
+	FString GetOutputPackagePath() const;
 	FReply OnButtonClick_OpenWindow();
 	FText OnTextChanged_CreateOrEdit() const;
-
+	
+	bool CreateDataRegistry();
 	void CreateDataTable();
 	void EditDataTable();
 	void OpenWindow(const FName RegistryType, const bool bShouldOpenInEditMode);
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
 	
-	bool CreateNewDataRegistry(const int32 NewSelectedRegistryTypeIndex) const;
-	
 	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
 	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker{nullptr};
+	TSharedPtr<SAVVMEditorToolkitRequiredUserInput> PackagePathInput{nullptr};
 	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
 	TArray<bool> bCheckBoxStates{};
 	TWeakObjectPtr<UDataRegistry> SelectedDataRegistry{nullptr};
 	FDataRegistryType SelectedDataRegistryType{};
-	FString SelectedAssetPath{};
+	FString SelectedPackagePath{};
 	int32 SelectedRegistryTypeIndex{INDEX_NONE};
 	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
 	bool bHasDataTableAvailable{false};
