@@ -39,9 +39,19 @@ void SAVVMEditorToolkitRequiredUserInput::Construct(const FArguments& InArgs)
 				SNew(STextBlock)
 				.TextStyle(FAppStyle::Get(), "LargeText")
 				.TransformPolicy(ETextTransformPolicy::ToUpper)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "RequiredUserInput", "Choose an Asset name:"))
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "RequiredUserInput", "Step1: Choose an Asset name:"))
 			]
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), "NormalText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "Important", "Press Enter to confirm name selection."))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.AutoHeight()
 			[
 				SNew(STextBlock)
@@ -50,6 +60,7 @@ void SAVVMEditorToolkitRequiredUserInput::Construct(const FArguments& InArgs)
 				.Text(NSLOCTEXT("AVVMEditorToolkit", "RequiredInput", "Note : Asset names are standardized under the hood."))
 			]
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.AutoHeight()
 			[
 				SNew(SEditableTextBox)

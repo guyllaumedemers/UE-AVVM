@@ -202,8 +202,6 @@ bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(const FName Selecte
 	{
 		return bResult;
 	}
-	
-	CreateDataRegistry();
 
 	SelectedDataRegistry = UAVVMEditorToolkitUtils::GetDataRegistry(SelectedDataRegistryType);
 	if (!SelectedDataRegistry.IsValid() && (bCheckBoxStates.IsValidIndex(1/*UDataRegistry*/) && bCheckBoxStates[1]))
@@ -455,7 +453,7 @@ bool SInventoryToolkitWindow::CreateDataRegistry()
 	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry");
 	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
 	                                                 "CreateDataRegistry",
-	                                                 "Data Registry missing.\n\nPress Ok, and create a Data Registry. Make sure the RegistryType is:\n{0}, and ScriptStruct:{1}."),
+	                                                 "Data Registry missing.\n\nPress Ok, and create a Data Registry. Make sure the RegistryType is: {0},\nand ScriptStruct: {1}."),
 	                                       FText::FromName(SelectedDataRegistryType.GetName()),
 	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
 
