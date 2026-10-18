@@ -257,6 +257,33 @@ void SInventoryToolkitWindow::OnDataRegistryAssetNameChanged(const FText& NewAss
 	AssetTools.Get().OpenEditorForAssets({DataRegistry});
 }
 
+void SInventoryToolkitWindow::OnDataTableAssetNameChanged(const FText& NewAssetName,
+                                                          ETextCommit::Type CommitType)
+{
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		return;
+	}
+
+	auto* Factory = NewObject<UDataTableFactory>();
+	if (IsValid(Factory))
+	{
+		const auto RowTypes = GetInventoryRowTypes();
+		Factory->Struct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+	}
+
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	SelectedDataTable = Cast<UDataTable>(AssetTools.Get().CreateAsset(FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString()),
+	                                                                  SelectedPackagePath,
+	                                                                  UDataTable::StaticClass(),
+	                                                                  Factory));
+
+	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
+	{
+		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
+	}
+}
+
 void SInventoryToolkitWindow::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection,
                                                           ESelectInfo::Type SelectInfo)
 {
@@ -294,11 +321,12 @@ TArray<FName> SInventoryToolkitWindow::GetAssetTypeToDefaultGenerate() const
 
 TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
 {
+	// @gdemers hard coded names for undefined DataRegistryTypes.
 	return {
-			UInventorySettings::GetItemGroupRegistryType(),
-			UInventorySettings::GetItemRegistryType(),
-			UInventorySettings::GetFtueInventoryProviderRegistryType(),
-			UInventorySettings::GetStubDataInventoryDependencyGraphRegistryType()
+			TEXT("R_ItemGroup"),
+			TEXT("R_Item"),
+			TEXT("R_InventoryProviders"),
+			TEXT("R_InventoryDependencyGraph")
 	};
 }
 
@@ -348,28 +376,54 @@ FText SInventoryToolkitWindow::OnTextChanged_CreateOrEdit() const
 
 void SInventoryToolkitWindow::CreateDataTable()
 {
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	const auto RowTypes = GetInventoryRowTypes();
+	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+
+	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataTable_ModalTitle", "Data Table");
+	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
+	                                                 "CreateDataTable",
+	                                                 "Request new Data Table.\n\nPress Ok, and create a DataTable. Make sure the ScriptStruct: {0}."),
+	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
+
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, Title);
+	if (Response != EAppReturnType::Yes)
 	{
 		return;
 	}
 
-	auto* Factory = NewObject<UDataTableFactory>();
-	if (IsValid(Factory))
-	{
-		const auto RowTypes = GetInventoryRowTypes();
-		Factory->Struct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-	}
+	SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
+	.OnTextCommited(this, &SInventoryToolkitWindow::OnDataTableAssetNameChanged);
 
-	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	SelectedDataTable = Cast<UDataTable>(AssetTools.Get().CreateAsset(FString::Printf(TEXT("DT_%s"), PROJECT_ASSET_PREFIX),
-	                                                                  SelectedPackagePath,
-	                                                                  UDataTable::StaticClass(),
-	                                                                  Factory));
+	FDisplayMetrics DisplayMetrics{};
+	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
+	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
+	const FVector2D ClientSize(600.0f * DPIScaleFactor, 400.0f * DPIScaleFactor);
 
-	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
-	{
-		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
-	}
+	auto ModalWindow = SNew(SWindow)
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataRegistry", "DataRegistry"))
+		.CreateTitleBar(true)
+		.SupportsMaximize(true)
+		.SupportsMinimize(true)
+		.IsInitiallyMaximized(false)
+		.IsInitiallyMinimized(false)
+		.SizingRule(ESizingRule::UserSized)
+		.AutoCenter(EAutoCenter::PreferredWorkArea)
+		.ClientSize(ClientSize)
+		.AdjustInitialSizeAndPositionForDPIScale(false)
+		.Content()
+		[
+			PackagePathInput.ToSharedRef()
+		];
+
+	ModalWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
+	ModalWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
+
+	FloatingWindows.Add(ModalWindow);
+
+	FSlateApplication::Get().AddWindow(ModalWindow, true);
+	FGlobalTabmanager::Get()->SetRootWindow(ModalWindow);
+	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
+	FSlateNotificationManager::Get().SetRootWindow(ModalWindow);
 }
 
 void SInventoryToolkitWindow::EditDataTable()
@@ -453,7 +507,7 @@ bool SInventoryToolkitWindow::CreateDataRegistry()
 	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry");
 	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
 	                                                 "CreateDataRegistry",
-	                                                 "Data Registry missing.\n\nPress Ok, and create a Data Registry. Make sure the RegistryType is: {0},\nand ScriptStruct: {1}."),
+	                                                 "DataRegistry missing.\n\nPress Ok, and create a DataRegistry. Make sure the RegistryType is: {0},\nand ScriptStruct: {1}."),
 	                                       FText::FromName(SelectedDataRegistryType.GetName()),
 	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
 
