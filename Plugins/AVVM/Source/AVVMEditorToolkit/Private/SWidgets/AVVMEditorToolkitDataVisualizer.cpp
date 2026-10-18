@@ -44,8 +44,8 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SNew(SBorder)
-		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
-		.Padding(6.0f)
+		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+		.Padding(8.0f)
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()

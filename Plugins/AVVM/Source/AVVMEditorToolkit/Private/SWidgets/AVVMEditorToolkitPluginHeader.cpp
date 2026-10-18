@@ -30,7 +30,7 @@ void SAVVMEditorToolkitPluginHeader::Construct(const FArguments& InArgs)
 	[
 		SNew(SBorder)
 		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
-		.Padding(FMargin(12.0f, 10.0f))
+		.Padding(8.0f)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
@@ -71,6 +71,7 @@ void SAVVMEditorToolkitPluginHeader::Construct(const FArguments& InArgs)
 						.Justification(ETextJustify::Center)
 						.TextStyle(FAppStyle::Get(), "LargeText")
 						.ColorAndOpacity(FSlateColor::UseSubduedForeground())
+						.TransformPolicy(ETextTransformPolicy::ToUpper)
 						.Text(InArgs._Version)
 					]
 				]

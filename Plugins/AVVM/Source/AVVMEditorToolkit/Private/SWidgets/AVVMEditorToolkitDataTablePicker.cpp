@@ -31,6 +31,7 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 {
 	SAssignNew(ScrollBar, SScrollBar)
 	.AlwaysShowScrollbar(true)
+	.AlwaysShowScrollbarTrack(true)
 	.Orientation(EOrientation::Orient_Vertical);
 
 	SAssignNew(ListViewWidget, SListView<TWeakObjectPtr<UDataTable>>)
@@ -47,7 +48,7 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 	ChildSlot
 	[
 		SNew(SBorder)
-		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
+		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
 		.Padding(8.0f)
 		[
 			SNew(SVerticalBox)

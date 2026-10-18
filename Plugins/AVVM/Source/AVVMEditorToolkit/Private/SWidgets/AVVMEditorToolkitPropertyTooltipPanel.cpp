@@ -20,31 +20,37 @@
 #include "SWidgets/AVVMEditorToolkitPropertyTooltipPanel.h"
 
 #include "Components/VerticalBox.h"
+#include "Widgets/Layout/SBorder.h"
 #include "Widgets/Text/STextBlock.h"
 
 void SAVVMEditorToolkitPropertyTooltipPanel::Construct(const FArguments& InArgs)
 {
 	ChildSlot
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.Padding(12.f)
-		.AutoHeight()
+		SNew(SBorder)
+		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+		.Padding(8.0f)
 		[
-			SNew(STextBlock)
-			.Justification(ETextJustify::Left)
-			.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
-			.Text(NSLOCTEXT("AVVMEditorToolkit", "TooltipHeader", "Property Tooltip:"))
-		]
-		+ SVerticalBox::Slot()
-		.Padding(12.f)
-		.AutoHeight()
-		[
-			SNew(STextBlock)
-			.TextStyle(FAppStyle::Get(), "NormalText")
-			.ColorAndOpacity(FSlateColor::UseSubduedForeground())
-			.Text(InArgs._Tooltip)
-			.AutoWrapText(true)
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.Justification(ETextJustify::Left)
+				.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "TooltipHeader", "Property Tooltip:"))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), "NormalText")
+				.ColorAndOpacity(FSlateColor::UseSubduedForeground())
+				.Text(InArgs._Tooltip)
+				.AutoWrapText(true)
+			]
 		]
 	];
 }

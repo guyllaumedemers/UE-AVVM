@@ -43,6 +43,7 @@
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
+#include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Text/SRichTextBlock.h"
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
@@ -68,99 +69,103 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
+			SNew(SScrollBox)
+			+ SScrollBox::Slot()
 			[
-				SNew(SAVVMEditorToolkitPluginHeader)
-				.Title(this, &SInventoryToolkitWindow::PluginTitle)
-				.Description(this, &SInventoryToolkitWindow::PluginDescription)
-				.Version(this, &SInventoryToolkitWindow::PluginVersion)
-				.Icon(this, &SInventoryToolkitWindow::PluginIcon)
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(STextBlock)
-				.TextStyle(FAppStyle::Get(), "LargeText")
-				.TransformPolicy(ETextTransformPolicy::ToUpper)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step1", "Step 1: Enable or Disable automatic asset generation for each asset types."))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				CheckBoxList.ToSharedRef()
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(STextBlock)
-				.TextStyle(FAppStyle::Get(), "LargeText")
-				.TransformPolicy(ETextTransformPolicy::ToUpper)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step2", "Step 2: Select the Package Path where the automatically generated asset will be output."))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SAVVMEditorToolkitOutputPathPicker)
-				.OnPathSelected(this, &SInventoryToolkitWindow::OnOutputAssetPathSelected)
-				.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Double Click or Browse:"))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(STextBlock)
-				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
-				.TextStyle(FAppStyle::Get(), "LargeText")
-				.TransformPolicy(ETextTransformPolicy::ToUpper)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step3", "Step 3: Select the DataRegistryType to edit, or create if no references are found."))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SAVVMEditorToolkitDataImporter)
-				.Elements(GetInventoryDataRegistryTypes())
-				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
-				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataRegistrySelectionChanged)
-				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "DataImporterHeader", "DataRegistryTypes:"))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(STextBlock)
-				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
-				.TextStyle(FAppStyle::Get(), "LargeText")
-				.TransformPolicy(ETextTransformPolicy::ToUpper)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create a new DataTable."))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.FillHeight(1.f)
-			[
-				SAssignNew(DataTablePicker, SAVVMEditorToolkitDataTablePicker)
-				.RegistryType(this, &SInventoryToolkitWindow::GetDataRegistryType)
-				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
-				.OnSelectionChanged(this, &SInventoryToolkitWindow::OnDataTableSelectionChanged)
-				.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "DataTables:"))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SButton)
-				.HAlign(EHorizontalAlignment::HAlign_Center)
-				.ButtonColorAndOpacity(FLinearColor::Green)
-				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged)
-				.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick_OpenWindow)
-				.Text(this, &SInventoryToolkitWindow::OnTextChanged_CreateOrEdit)
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SAVVMEditorToolkitPluginHeader)
+					.Title(this, &SInventoryToolkitWindow::PluginTitle)
+					.Description(this, &SInventoryToolkitWindow::PluginDescription)
+					.Version(this, &SInventoryToolkitWindow::PluginVersion)
+					.Icon(this, &SInventoryToolkitWindow::PluginIcon)
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step1", "Step 1: Enable or Disable automatic asset generation for each asset types."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					CheckBoxList.ToSharedRef()
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step2", "Step 2: Select the Package Path where the automatically generated asset will be output."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SAVVMEditorToolkitOutputPathPicker)
+					.OnPathSelected(this, &SInventoryToolkitWindow::OnOutputAssetPathSelected)
+					.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Double Click or Browse:"))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step3", "Step 3: Select to edit, or create a new DataRegistryType."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SAVVMEditorToolkitDataImporter)
+					.Elements(GetInventoryDataRegistryTypes())
+					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
+					.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataRegistrySelectionChanged)
+					.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "DataImporterHeader", "DataRegistryTypes:"))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create a new DataTable."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.FillHeight(1.f)
+				[
+					SAssignNew(DataTablePicker, SAVVMEditorToolkitDataTablePicker)
+					.RegistryType(this, &SInventoryToolkitWindow::GetDataRegistryType)
+					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
+					.OnSelectionChanged(this, &SInventoryToolkitWindow::OnDataTableSelectionChanged)
+					.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "DataTables:"))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SButton)
+					.HAlign(EHorizontalAlignment::HAlign_Center)
+					.ButtonColorAndOpacity(FLinearColor::Green)
+					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged)
+					.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick_OpenWindow)
+					.Text(this, &SInventoryToolkitWindow::OnTextChanged_CreateOrEdit)
+				]
 			]
 		]
 	];
