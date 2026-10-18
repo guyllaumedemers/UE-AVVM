@@ -27,7 +27,7 @@
 class SComboButton;
 class STextBlock;
 
-DECLARE_DELEGATE_RetVal_OneParam(bool, SOnDataImporterSourceChangedDelegate, FName);
+DECLARE_DELEGATE_RetVal_TwoParams(bool, SOnDataImporterSourceChangedDelegate, const FName/*Element*/, const int32/*Index*/);
 
 /**
  *	Class description:

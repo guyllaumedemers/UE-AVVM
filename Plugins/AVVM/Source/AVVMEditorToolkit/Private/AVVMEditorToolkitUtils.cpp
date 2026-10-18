@@ -53,3 +53,9 @@ TArray<const UDataRegistrySource_DataTable*> UAVVMEditorToolkitUtils::GetDataTab
 
 	return OutResult;
 }
+
+UDataRegistry* UAVVMEditorToolkitUtils::GetDataRegistry(const FDataRegistryType& RegistryType)
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	return IsValid(Subsystem) ? Subsystem->GetRegistryForType(RegistryType) : nullptr;
+}

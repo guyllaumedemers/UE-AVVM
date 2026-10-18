@@ -23,12 +23,15 @@
 
 #include "DataRegistryId.h"
 #include "Widgets/SCompoundWidget.h"
-#include "SWidgets/AVVMEditorToolkitDataImporter.h"
 
 struct FSlateBrush;
-class UAVVMEditorToolkitDataEditObject;
 class SAVVMEditorToolkitDataTablePicker;
+class SCheckBoxList;
+class UAVVMEditorToolkitDataEditObject;
+class UDataRegistry;
 class UDataTable;
+class UDataTableFactory;
+class UFactory;
 
 /**
  *	Class description:
@@ -51,27 +54,38 @@ private:
 	FText PluginVersion() const;
 	FSlateBrush* PluginIcon() const;
 
-	bool OnDataRegistrySelectionChanged(FName SelectedRegistryType);
+	bool OnDataRegistrySelectionChanged(const FName SelectedRegistryType, const int32 NewSelectedIndex);
+	void OnCheckBoxStateChanged(int32 Index);
 	void OnOutputAssetPathSelected(const FString& NewPath);
 	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	EVisibility OnVisibility_AssetPathSelectionChanged() const;
 	EVisibility OnVisibility_DataTableAvailableChanged() const;
 	EVisibility OnVisibility_DataRegistrySelectionChanged() const;
+	TArray<FName> GetAssetTypeToDefaultGenerate() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;
+	TArray<UScriptStruct*> GetInventoryRowTypes() const;
 	FDataRegistryType GetDataRegistryType() const;
-	FReply OnButtonClick();
-	FText GetButtonText() const;
+	FReply OnButtonClick_OpenWindow();
+	FText OnTextChanged_CreateOrEdit() const;
 
+	void CreateDataTable();
+	void EditDataTable();
 	void OpenWindow(const FName RegistryType, const bool bShouldOpenInEditMode);
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
+	
+	bool CreateNewDataRegistry(const int32 NewSelectedRegistryTypeIndex) const;
 	
 	const UAVVMEditorToolkitDataEditObject* GetDataEditObject(const FName RegistryType) const;
 	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker{nullptr};
+	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
+	TArray<bool> bCheckBoxStates{};
+	TWeakObjectPtr<UDataRegistry> SelectedDataRegistry{nullptr};
 	FDataRegistryType SelectedDataRegistryType{};
 	FString SelectedAssetPath{};
+	int32 SelectedRegistryTypeIndex{INDEX_NONE};
 	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
 	bool bHasDataTableAvailable{false};
 	bool bShouldEditDataTable{false};

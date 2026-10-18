@@ -20,6 +20,7 @@
 #include "ItemDataEditObject.h"
 
 #include "AssetToolsModule.h"
+#include "AVVMEditorToolkitModule.h"
 #include "AVVMEditorToolkitUtils.h"
 #include "AVVMGameplaySettings.h"
 #include "ContentBrowserModule.h"
@@ -31,7 +32,6 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
-#include "Factories/DataAssetFactory.h"
 #include "Interfaces/IPluginManager.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
@@ -85,12 +85,12 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 		TableRowItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_TableRowItemObjectDetailView);
 	}
 
-	return SNew(SBorder)
-		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
-		.Padding(6.0f)
+	return SNew(SOverlay)
+		+ SOverlay::Slot()
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.AutoHeight()
 			[
 				SNew(SAVVMEditorToolkitDataImporter)
@@ -99,8 +99,37 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Select an Item Type:"))
 			]
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.AutoHeight()
-			.Padding(20.0f, 1.0f, 20.0f, 1.0f)
+			[
+				SNew(SBorder)
+				.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
+				.Padding(8.0f)
+				.Visibility_UObject(this, &UItemDataEditObject::OnVisibility_OnItemTypeChanged)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.Padding(12.f)
+					.AutoHeight()
+					[
+						SNew(STextBlock)
+						.Justification(ETextJustify::Left)
+						.Font(FAppStyle::GetFontStyle("NormalFontBold"))
+						.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "InputItemNameTooltip", "Note : Item Row Name are standardized under the hood."))
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "InputItemNameHeader", "Input a unique Item Row Name:"))
+					]
+					+ SVerticalBox::Slot()
+					.Padding(12.f)
+					.AutoHeight()
+					[
+						SNew(SEditableTextBox)
+						.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextChanged_ItemName)
+					]
+				]
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.FillHeight(1.f)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
@@ -116,14 +145,24 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					TableRowItemObjectPropertyView.ToSharedRef()
 				]
 			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SButton)
+				.HAlign(EHorizontalAlignment::HAlign_Center)
+				.ButtonColorAndOpacity(FLinearColor::Green)
+				.IsEnabled_UObject(this, &UItemDataEditObject::OnEnable_GenerateButton)
+				.OnClicked_UObject(this, &UItemDataEditObject::OnButtonClick_GenerateItem)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Generate"))
+			]
 		];
 }
 
 TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 {
-	return SNew(SBorder)
-		.BorderImage(FAppStyle::Get().GetBrush("Brushes.Recessed"))
-		.Padding(6.0f)
+	return SNew(SOverlay)
+		+ SOverlay::Slot()
 		[
 			SNew(SAVVMEditorToolkitDataVisualizer)
 		];
@@ -138,12 +177,13 @@ TArray<FName> UItemDataEditObject::GetItemTypes() const
 	};
 }
 
-FReply UItemDataEditObject::OnButtonClick_GenerateElementId()
+EVisibility UItemDataEditObject::OnVisibility_OnItemTypeChanged() const
 {
-	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
+	return SelectedItemType.IsNone() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
-bool UItemDataEditObject::OnItemTypeChanged(FName NewItemType)
+bool UItemDataEditObject::OnItemTypeChanged(const FName NewItemType,
+                                            const int32 NewSelectedIndex)
 {
 	SelectedItemType = NewItemType;
 	return (false == SelectedItemType.IsNone());
@@ -159,19 +199,32 @@ bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
 	return false;
 }
 
+bool UItemDataEditObject::OnEnable_GenerateButton() const
+{
+	return SelectedItemType.IsValid() && !ItemRowName.IsEmpty();
+}
+
+void UItemDataEditObject::OnTextChanged_ItemName(const FText& NewItemName)
+{
+	ItemRowName = NewItemName.ToString();
+}
+
+FReply UItemDataEditObject::OnButtonClick_GenerateItem()
+{
+	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
+}
+
 FText UItemDataEditObject::StandardizeItemObjectName() const
 {
-	static const FString ProjPrefix{TEXT("AVVM")};
-
 	FString PluginName{TEXT("Error")};
-
+	
 	TSharedPtr<IPlugin> OwningPlugin = IPluginManager::Get().GetModuleOwnerPlugin(FName(TEXT("InventorySampleEditor")));
 	if (OwningPlugin.IsValid())
 	{
 		PluginName = OwningPlugin->GetName();
 	}
 
-	return FText::FromString(FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), *ProjPrefix, *PluginName, *SelectedItemType.ToString(), *ItemRowName));
+	return FText::FromString(FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), PROJECT_ASSET_PREFIX, *PluginName, *SelectedItemType.ToString(), *ItemRowName));
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const

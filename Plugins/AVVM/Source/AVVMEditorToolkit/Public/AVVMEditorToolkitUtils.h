@@ -26,6 +26,7 @@
 
 #include "AVVMEditorToolkitUtils.generated.h"
 
+class UDataRegistry;
 class UDataRegistrySource_DataTable;
 
 /**
@@ -38,4 +39,5 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitUtils : public UBlueprintFunctionL
 	
 public:
 	static TArray<const UDataRegistrySource_DataTable*> GetDataTables(const FDataRegistryType& RegistryType);
+	static UDataRegistry* GetDataRegistry(const FDataRegistryType& RegistryType);
 };

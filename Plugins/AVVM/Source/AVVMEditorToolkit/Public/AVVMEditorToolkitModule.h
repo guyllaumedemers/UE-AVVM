@@ -27,6 +27,13 @@
 #include "Toolkits/AssetEditorToolkit.h"
 
 /**
+ *	@gdemers a macro that define the project prefix to be used during asset creation.
+ */
+#ifndef PROJECT_ASSET_PREFIX
+#define PROJECT_ASSET_PREFIX TEXT("AVVM")
+#endif
+
+/**
  *	@gdemers reusable macro for binding FUICommandInfo in external module/plugins.
  */
 #define BIND_NEW_BUTTON_COMMAND(OutCmd, CmdName, CmdLabel, CmdDesc)\

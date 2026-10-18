@@ -43,11 +43,13 @@ public class InventorySampleEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"ApplicationCore",
 				"AVVMGameplay",
 				"AVVMToolkit",
 				"DataRegistry",
 				"InventorySample",
 				"Projects",
+				"ToolWidgets",
 				"UnrealEd",
 			}
 		);

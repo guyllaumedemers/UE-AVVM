@@ -23,11 +23,13 @@
 
 #include "AVVMEditorToolkitDataImporter.h"
 #include "DataRegistryId.h"
+#include "Factories/Factory.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Widgets/SCompoundWidget.h"
 
 #include "AVVMEditorToolkitDataEditor.generated.h"
 
+class UDataRegistry;
 class UDataTable;
 
 /**
@@ -85,4 +87,24 @@ public:
 	
 private:
 	TStrongObjectPtr<UAVVMEditorToolkitDataEditObject> DataEditObject{nullptr};
+};
+
+/**
+ * 
+ */
+UCLASS(hidecategories = Object)
+class AVVMEDITORTOOLKIT_API UAVVMDataRegistryFactory : public UFactory
+{
+	GENERATED_UCLASS_BODY()
+
+	UPROPERTY(EditAnywhere, Category = DataRegistry)
+	TSubclassOf<UDataRegistry> DataRegistryClass{nullptr};
+
+	virtual bool ConfigureProperties() override;
+	virtual UObject* FactoryCreateNew(UClass* Class,
+	                                  UObject* InParent,
+	                                  FName Name,
+	                                  EObjectFlags Flags,
+	                                  UObject* Context,
+	                                  FFeedbackContext* Warn) override;
 };

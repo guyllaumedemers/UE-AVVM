@@ -19,14 +19,22 @@
 //SOFTWARE.
 #include "InventoryToolkitWindow.h"
 
+#include "AssetToolsModule.h"
+#include "AVVMEditorToolkitModule.h"
+#include "AVVMEditorToolkitUtils.h"
 #include "AVVMLogger.h"
 #include "InventoryProviderDataEditObject.h"
 #include "InventorySettings.h"
 #include "ItemDataEditObject.h"
-#include "Android/AndroidPlatformApplicationMisc.h"
+#include "SCheckBoxList.h"
+#include "Data/InventoryProviderTableRow.h"
+#include "Data/InventoryStubDataProviderTableRow.h"
+#include "Data/ItemDefinitionDataAsset.h"
+#include "Factories/DataTableFactory.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/Notifications/NotificationManager.h"
+#include "HAL/PlatformApplicationMisc.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
@@ -39,6 +47,22 @@
 
 void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 {
+	SAssignNew(CheckBoxList, SCheckBoxList)
+	.IncludeGlobalCheckBoxInHeaderRow(false)
+	.OnItemCheckStateChanged(this, &SInventoryToolkitWindow::OnCheckBoxStateChanged)
+	.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "ChecklistTooltip", "During the creation process, dependent assets will be created for the type selected. Unless unchecked!"))
+	.ItemHeaderLabel(NSLOCTEXT("AVVMEditorToolkit", "ChecklistHeader", "Generate Dependent Assets"));
+
+	if (CheckBoxList.IsValid())
+	{
+		for (const auto& Element : GetAssetTypeToDefaultGenerate())
+		{
+			CheckBoxList->AddItem(FText::FromName(Element), true);
+		}
+		
+		bCheckBoxStates = CheckBoxList->GetValues();
+	}
+	
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -54,6 +78,12 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.Description(this, &SInventoryToolkitWindow::PluginDescription)
 				.Version(this, &SInventoryToolkitWindow::PluginVersion)
 				.Icon(this, &SInventoryToolkitWindow::PluginIcon)
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				CheckBoxList.ToSharedRef()
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -91,8 +121,8 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.HAlign(EHorizontalAlignment::HAlign_Center)
 				.ButtonColorAndOpacity(FLinearColor::Green)
 				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged)
-				.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick)
-				.Text(this, &SInventoryToolkitWindow::GetButtonText)
+				.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick_OpenWindow)
+				.Text(this, &SInventoryToolkitWindow::OnTextChanged_CreateOrEdit)
 			]
 		]
 	];
@@ -118,15 +148,44 @@ FSlateBrush* SInventoryToolkitWindow::PluginIcon() const
 	return nullptr;
 }
 
-bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(FName SelectedRegistryType)
+bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(const FName SelectedRegistryType,
+                                                             const int32 NewSelectedIndex)
 {
 	SelectedDataRegistryType = FDataRegistryType{SelectedRegistryType};
-	if (DataTablePicker.IsValid() && SelectedDataRegistryType.IsValid())
+	SelectedRegistryTypeIndex = NewSelectedIndex;
+
+	bool bResult{false};
+	if (!ensureAlwaysMsgf(SelectedDataRegistryType.IsValid(), TEXT("Invalid RegistryType.")))
 	{
-		bHasDataTableAvailable = DataTablePicker->UpdateDataTableCollection(SelectedDataRegistryType);
+		return bResult;
 	}
 
-	return SelectedDataRegistryType.IsValid();
+	SelectedDataRegistry = UAVVMEditorToolkitUtils::GetDataRegistry(SelectedDataRegistryType);
+	if (!SelectedDataRegistry.IsValid() && (bCheckBoxStates.IsValidIndex(1/*UDataRegistry*/) && bCheckBoxStates[1]))
+	{
+		bResult = CreateNewDataRegistry(SelectedRegistryTypeIndex);
+	}
+	else if (SelectedDataRegistry.IsValid() && DataTablePicker.IsValid())
+	{
+		bResult = bHasDataTableAvailable = DataTablePicker->UpdateDataTableCollection(SelectedDataRegistryType);
+	}
+	else
+	{
+		FMessageDialog::Open(EAppMsgCategory::Error,
+		                     EAppMsgType::Ok,
+		                     NSLOCTEXT("AVVMEditorToolkit", "NotifyDataRegistryMissing", "Failed to retrieve valid Data Registry."));
+	}
+
+	return bResult;
+}
+
+void SInventoryToolkitWindow::OnCheckBoxStateChanged(int32 Index)
+{
+	if (bCheckBoxStates.IsValidIndex(Index))
+	{
+		bool& Value = bCheckBoxStates[Index];
+		Value = !Value;
+	}
 }
 
 void SInventoryToolkitWindow::OnOutputAssetPathSelected(const FString& NewPath)
@@ -159,6 +218,16 @@ EVisibility SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged()
 	return SelectedDataRegistryType.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
+TArray<FName> SInventoryToolkitWindow::GetAssetTypeToDefaultGenerate() const
+{
+	return {
+			GetFNameSafe(UDataRegistry::StaticClass()),
+			GetFNameSafe(UDataTable::StaticClass()),
+			GetFNameSafe(UDataAsset::StaticClass()),
+			GetFNameSafe(UBlueprint::StaticClass())
+	};
+}
+
 TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
 {
 	return {
@@ -169,27 +238,73 @@ TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
 	};
 }
 
+TArray<UScriptStruct*> SInventoryToolkitWindow::GetInventoryRowTypes() const
+{
+	return {
+			FItemGroupDefinitionDataTableRow::StaticStruct(),
+			FItemDefinitionDataTableRow::StaticStruct(),
+			FFtue_InventoryProviderTableRow::StaticStruct(),
+			FStubData_InventoryStubDataProviderTableRow::StaticStruct()
+	};
+}
+
 FDataRegistryType SInventoryToolkitWindow::GetDataRegistryType() const
 {
 	return SelectedDataRegistryType;
 }
 
-FReply SInventoryToolkitWindow::OnButtonClick()
+FReply SInventoryToolkitWindow::OnButtonClick_OpenWindow()
 {
-	if (SelectedDataRegistryType.IsValid())
-	{
-		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
-		return FReply::Handled();
-	}
-	else
+	if (!SelectedDataRegistryType.IsValid())
 	{
 		return FReply::Unhandled();
 	}
+
+	if (bShouldEditDataTable)
+	{
+		EditDataTable();
+	}
+	else
+	{
+		CreateDataTable();
+	}
+
+	return FReply::Handled();
 }
 
-FText SInventoryToolkitWindow::GetButtonText() const
+FText SInventoryToolkitWindow::OnTextChanged_CreateOrEdit() const
 {
 	return (bShouldEditDataTable && bHasDataTableAvailable) ? NSLOCTEXT("AVVMEditorToolkit", "DataTable_Edit", "Edit") : NSLOCTEXT("AVVMEditorToolkit", "DataTable_Create", "Create");
+}
+
+void SInventoryToolkitWindow::CreateDataTable()
+{
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		return;
+	}
+
+	auto* Factory = NewObject<UDataTableFactory>();
+	if (IsValid(Factory))
+	{
+		const auto RowTypes = GetInventoryRowTypes();
+		Factory->Struct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+	}
+
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	SelectedDataTable = Cast<UDataTable>(AssetTools.Get().CreateAsset(FString::Printf(TEXT("DT_%s"), PROJECT_ASSET_PREFIX),
+	                                                                  SelectedAssetPath,
+	                                                                  UDataTable::StaticClass(),
+	                                                                  Factory));
+
+	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
+	{
+		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
+	}
+}
+
+void SInventoryToolkitWindow::EditDataTable()
+{
 }
 
 void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
@@ -253,6 +368,48 @@ void SInventoryToolkitWindow::OnWindowClosed(const TSharedRef<SWindow>& PendingC
 	{
 		FloatingWindows.Remove(PendingCloseWindow);
 	}
+}
+
+bool SInventoryToolkitWindow::CreateNewDataRegistry(const int32 NewSelectedRegistryTypeIndex) const
+{
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		return false;
+	}
+
+	const auto RowTypes = GetInventoryRowTypes();
+	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(NewSelectedRegistryTypeIndex) ? RowTypes[NewSelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+
+	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry");
+	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
+	                                                 "CreateNewDataRegistry",
+	                                                 "Data Registry missing.\n\nPress Ok, and create a Data Registry. Make sure the RegistryType is:{0}, and ScriptStruct:{1}."),
+	                                       FText::FromName(SelectedDataRegistryType.GetName()),
+	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
+
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, Title);
+	if (Response != EAppReturnType::Yes)
+	{
+		return false;
+	}
+
+	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->DataRegistryClass = UDataRegistry::StaticClass();
+	}
+
+	// @gdemers create Data Registry Asset.
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	auto* DataRegistry = AssetTools.Get().CreateAsset(FString::Printf(TEXT("DR_%s"), PROJECT_ASSET_PREFIX),
+	                                                  SelectedAssetPath,
+	                                                  UDataRegistry::StaticClass(),
+	                                                  Factory);
+
+	// @gdemers force open since we cannot default initialized it. the user should have read the modal, and know whats
+	// expected from them at this point.
+	AssetTools.Get().OpenEditorForAssets({DataRegistry});
+	return IsValid(DataRegistry);
 }
 
 const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObject(const FName RegistryType) const

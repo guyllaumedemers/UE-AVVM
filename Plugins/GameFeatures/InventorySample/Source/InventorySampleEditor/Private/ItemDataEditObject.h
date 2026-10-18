@@ -20,8 +20,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Factories/DataAssetFactory.h"
 
+#include "Factories/DataAssetFactory.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
 #include "ItemDataEditObject.generated.h"
@@ -51,11 +51,14 @@ public:
 private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
-	bool OnItemTypeChanged(FName NewItemType);
+	TArray<FName> GetItemTypes() const;
+	EVisibility OnVisibility_OnItemTypeChanged() const;
+	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
 	bool OnEnable_BlueprintItemObjectDetailView() const;
 	bool OnEnable_TableRowItemObjectDetailView() const;
-	TArray<FName> GetItemTypes() const;
-	FReply OnButtonClick_GenerateElementId();
+	bool OnEnable_GenerateButton() const;
+	void OnTextChanged_ItemName(const FText& NewItemName);
+	FReply OnButtonClick_GenerateItem();
 	
 	FText StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
@@ -70,7 +73,6 @@ private:
 	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
 	FName SelectedItemType{NAME_None};
 	FString ItemRowName{};
-	FString AssetOutputPath{};
 };
 
 /**
@@ -91,7 +93,10 @@ public:
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UItemDefinitionDataAssetFactory is a factory class that extend UDataAssetFactory to support async
+ *	creation of asset.
  */
 UCLASS()
 class INVENTORYSAMPLEEDITOR_API UItemDefinitionDataAssetFactory : public UDataAssetFactory

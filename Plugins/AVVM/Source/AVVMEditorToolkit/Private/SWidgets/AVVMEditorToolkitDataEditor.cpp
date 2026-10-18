@@ -19,6 +19,11 @@
 //SOFTWARE.
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
+#include "ClassViewerFilter.h"
+#include "ClassViewerModule.h"
+#include "DataRegistry.h"
+#include "Kismet2/SClassPickerDialog.h"
+#include "Modules/ModuleManager.h"
 #include "Widgets/Images/SImage.h"
 
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
@@ -68,4 +73,90 @@ FText SAVVMEditorToolkitDataEditor::GetModalTitle_OnClosure() const
 	{
 		return NSLOCTEXT("AVVMEditorToolkitDataEditor", "DataEditor_ClosureTitle", "Missing Source!");
 	}
+}
+
+// @gdemers IMPORTANT : UDataRegistryFactory is Private which is why im duplicating the api here!
+UAVVMDataRegistryFactory::UAVVMDataRegistryFactory(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SupportedClass = UDataRegistry::StaticClass();
+	bCreateNew = true;
+	bEditAfterNew = true;
+}
+
+class FAVVMAssetClassParentFilter : public IClassViewerFilter
+{
+public:
+	FAVVMAssetClassParentFilter()
+		: DisallowedClassFlags(CLASS_None)
+	{}
+
+	/** All children of these classes will be included unless filtered out by another setting. */
+	TSet< const UClass* > AllowedChildrenOfClasses;
+
+	/** Disallowed class flags. */
+	EClassFlags DisallowedClassFlags;
+
+	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	{
+		bool bAllowed= !InClass->HasAnyClassFlags(DisallowedClassFlags)
+			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InClass) != EFilterReturn::Failed;
+
+		return bAllowed;
+	}
+
+	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef< const IUnloadedBlueprintData > InUnloadedClassData, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	{
+		return !InUnloadedClassData->HasAnyClassFlags(DisallowedClassFlags)
+			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InUnloadedClassData) != EFilterReturn::Failed;
+	}
+};
+
+bool UAVVMDataRegistryFactory::ConfigureProperties()
+{
+	// nullptr the DataRegistryClass so we can check for selection
+	DataRegistryClass = nullptr;
+
+	// Load the classviewer module to display a class picker
+	FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
+
+	// Fill in options
+	FClassViewerInitializationOptions Options;
+	Options.Mode = EClassViewerMode::ClassPicker;
+	// This doesn't currently seem to work
+	// Options.InitiallySelectedClass = UDataRegistry::StaticClass();
+
+	TSharedPtr<FAVVMAssetClassParentFilter> Filter = MakeShareable(new FAVVMAssetClassParentFilter);
+	Options.ClassFilters.Add(Filter.ToSharedRef());
+
+	Filter->DisallowedClassFlags = CLASS_Abstract | CLASS_Deprecated | CLASS_NewerVersionExists | CLASS_HideDropDown;
+	Filter->AllowedChildrenOfClasses.Add(UDataRegistry::StaticClass());
+
+	const FText TitleText = NSLOCTEXT("", "CreateDataRegistryOptions", "Pick Data Registry Base Class");
+	UClass* ChosenClass = nullptr;
+	const bool bPressedOk = SClassPickerDialog::PickClass(TitleText, Options, ChosenClass, UDataRegistry::StaticClass());
+
+	if (bPressedOk)
+	{
+		DataRegistryClass = ChosenClass;
+	}
+
+	return bPressedOk;
+}
+
+UObject* UAVVMDataRegistryFactory::FactoryCreateNew(UClass* Class,
+                                                    UObject* InParent,
+                                                    FName Name,
+                                                    EObjectFlags Flags,
+                                                    UObject* Context,
+                                                    FFeedbackContext* Warn)
+{
+	if (IsValid(DataRegistryClass))
+	{
+		Class = DataRegistryClass;
+	}
+
+	ensure(0 != (RF_Public & Flags));
+	UDataRegistry* DataRegistry = NewObject<UDataRegistry>(InParent, Class, Name, Flags | RF_Transactional);
+	return DataRegistry;
 }

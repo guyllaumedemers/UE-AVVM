@@ -122,7 +122,7 @@ void SAVVMEditorToolkitDataImporter::OnMouseButtonClick(FName Item)
 	}
 
 	ensureAlwaysMsgf(OnDataSourceChangedDelegate.IsBound() &&
-	                 OnDataSourceChangedDelegate.Execute(Item),
+	                 OnDataSourceChangedDelegate.Execute(Item, Elements.IndexOfByKey(Item)),
 	                 TEXT("Failed to update Registry Type selection."));
 }
 

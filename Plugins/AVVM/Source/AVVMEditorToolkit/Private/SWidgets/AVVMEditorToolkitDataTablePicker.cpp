@@ -22,6 +22,7 @@
 #include "AVVMEditorToolkitUtils.h"
 #include "DataRegistrySource_DataTable.h"
 #include "Engine/DataTable.h"
+#include "Factories/Factory.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBar.h"
 #include "Widgets/Views/SListView.h"
