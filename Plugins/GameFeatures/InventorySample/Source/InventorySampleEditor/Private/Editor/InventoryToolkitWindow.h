@@ -58,9 +58,9 @@ private:
 	void OnCheckBoxStateChanged(int32 Index);
 	void OnOutputAssetPathSelected(const FString& NewPath);
 	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
-	EVisibility OnVisibility_AssetPathSelectionChanged() const;
-	EVisibility OnVisibility_DataTableAvailableChanged() const;
-	EVisibility OnVisibility_DataRegistrySelectionChanged() const;
+	bool IsEnabled_AssetPathSelectionChanged() const;
+	bool IsEnabled_DataTableAvailableChanged() const;
+	bool IsEnabled_DataRegistrySelectionChanged() const;
 	TArray<FName> GetAssetTypeToDefaultGenerate() const;
 	TArray<FName> GetInventoryDataRegistryTypes() const;
 	TArray<UScriptStruct*> GetInventoryRowTypes() const;

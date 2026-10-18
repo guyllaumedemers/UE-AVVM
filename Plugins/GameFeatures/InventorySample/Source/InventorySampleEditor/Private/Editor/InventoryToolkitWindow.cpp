@@ -120,7 +120,6 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.AutoHeight()
 				[
 					SNew(STextBlock)
-					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step3", "Step 3: Select to edit, or create a new DataRegistryType."))
@@ -131,7 +130,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				[
 					SNew(SAVVMEditorToolkitDataImporter)
 					.Elements(GetInventoryDataRegistryTypes())
-					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
+					.IsEnabled(this, &SInventoryToolkitWindow::IsEnabled_AssetPathSelectionChanged)
 					.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataRegistrySelectionChanged)
 					.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "DataImporterHeader", "DataRegistryTypes:"))
 				]
@@ -140,7 +139,6 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.AutoHeight()
 				[
 					SNew(STextBlock)
-					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create a new DataTable."))
@@ -151,7 +149,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				[
 					SAssignNew(DataTablePicker, SAVVMEditorToolkitDataTablePicker)
 					.RegistryType(this, &SInventoryToolkitWindow::GetDataRegistryType)
-					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
+					.IsEnabled(this, &SInventoryToolkitWindow::IsEnabled_DataTableAvailableChanged)
 					.OnSelectionChanged(this, &SInventoryToolkitWindow::OnDataTableSelectionChanged)
 					.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "DataTables:"))
 				]
@@ -162,7 +160,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 					SNew(SButton)
 					.HAlign(EHorizontalAlignment::HAlign_Center)
 					.ButtonColorAndOpacity(FLinearColor::Green)
-					.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged)
+					.IsEnabled(this, &SInventoryToolkitWindow::IsEnabled_DataRegistrySelectionChanged)
 					.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick_OpenWindow)
 					.Text(this, &SInventoryToolkitWindow::OnTextChanged_CreateOrEdit)
 				]
@@ -246,19 +244,19 @@ void SInventoryToolkitWindow::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTa
 	}
 }
 
-EVisibility SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged() const
+bool SInventoryToolkitWindow::IsEnabled_AssetPathSelectionChanged() const
 {
-	return SelectedAssetPath.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
+	return (false == SelectedAssetPath.IsEmpty());
 }
 
-EVisibility SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged() const
+bool SInventoryToolkitWindow::IsEnabled_DataTableAvailableChanged() const
 {
-	return (SelectedDataRegistryType.IsValid() && bHasDataTableAvailable) ? EVisibility::Visible : EVisibility::Collapsed;
+	return (SelectedDataRegistryType.IsValid() && bHasDataTableAvailable);
 }
 
-EVisibility SInventoryToolkitWindow::OnVisibility_DataRegistrySelectionChanged() const
+bool SInventoryToolkitWindow::IsEnabled_DataRegistrySelectionChanged() const
 {
-	return SelectedDataRegistryType.IsValid() ? EVisibility::Visible : EVisibility::Collapsed;
+	return SelectedDataRegistryType.IsValid();
 }
 
 TArray<FName> SInventoryToolkitWindow::GetAssetTypeToDefaultGenerate() const
@@ -348,6 +346,10 @@ void SInventoryToolkitWindow::CreateDataTable()
 
 void SInventoryToolkitWindow::EditDataTable()
 {
+	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
+	{
+		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
+	}
 }
 
 void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
