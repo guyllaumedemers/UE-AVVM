@@ -79,6 +79,7 @@ void SAVVMEditorToolkitOutputPathPicker::Construct(const FArguments& InArgs)
 				]
 				+ SHorizontalBox::Slot()
 				.VAlign(VAlign_Center)
+				.Padding(12.f)
 				.AutoWidth()
 				[
 					SNew(SButton)

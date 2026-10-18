@@ -60,6 +60,7 @@ void SAVVMEditorToolkitPluginHeader::Construct(const FArguments& InArgs)
 						SNew(STextBlock)
 						.Justification(ETextJustify::Center)
 						.TextStyle(FAppStyle::Get(), "LargeText")
+						.TransformPolicy(ETextTransformPolicy::ToUpper)
 						.Text(InArgs._Title)
 					]
 					+ SHorizontalBox::Slot()

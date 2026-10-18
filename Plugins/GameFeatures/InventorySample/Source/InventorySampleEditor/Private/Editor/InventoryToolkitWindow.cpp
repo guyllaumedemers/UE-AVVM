@@ -59,10 +59,10 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 		{
 			CheckBoxList->AddItem(FText::FromName(Element), true);
 		}
-		
+
 		bCheckBoxStates = CheckBoxList->GetValues();
 	}
-	
+
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -83,7 +83,25 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
+				SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), "LargeText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step1", "Step 1: Enable or Disable automatic asset generation for each asset types."))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
 				CheckBoxList.ToSharedRef()
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), "LargeText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step2", "Step 2: Select the Package Path where the automatically generated asset will be output."))
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -91,7 +109,17 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 			[
 				SNew(SAVVMEditorToolkitOutputPathPicker)
 				.OnPathSelected(this, &SInventoryToolkitWindow::OnOutputAssetPathSelected)
-				.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Select an Output Path:"))
+				.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Double Click or Browse:"))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
+				.TextStyle(FAppStyle::Get(), "LargeText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step3", "Step 3: Select the DataRegistryType to edit, or create if no references are found."))
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -101,7 +129,17 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.Elements(GetInventoryDataRegistryTypes())
 				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_AssetPathSelectionChanged)
 				.OnDataImporterSourceChanged(this, &SInventoryToolkitWindow::OnDataRegistrySelectionChanged)
-				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "DataImporterHeader", "Select a DataRegistry Source:"))
+				.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "DataImporterHeader", "DataRegistryTypes:"))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
+				.TextStyle(FAppStyle::Get(), "LargeText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create a new DataTable."))
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -111,7 +149,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.RegistryType(this, &SInventoryToolkitWindow::GetDataRegistryType)
 				.Visibility(this, &SInventoryToolkitWindow::OnVisibility_DataTableAvailableChanged)
 				.OnSelectionChanged(this, &SInventoryToolkitWindow::OnDataTableSelectionChanged)
-				.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "Select a Data Table Source:"))
+				.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "DataTables:"))
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -194,7 +232,7 @@ void SInventoryToolkitWindow::OnOutputAssetPathSelected(const FString& NewPath)
 }
 
 void SInventoryToolkitWindow::OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection,
-														  ESelectInfo::Type SelectInfo)
+                                                          ESelectInfo::Type SelectInfo)
 {
 	bShouldEditDataTable = NewSelection.IsValid();
 	if (bShouldEditDataTable)
