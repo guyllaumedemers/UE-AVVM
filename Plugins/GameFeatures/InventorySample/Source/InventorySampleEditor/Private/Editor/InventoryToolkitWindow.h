@@ -58,8 +58,8 @@ private:
 	bool OnDataRegistrySelectionChanged(const FName SelectedRegistryType, const int32 NewSelectedIndex);
 	void OnCheckBoxStateChanged(int32 Index);
 	void OnOutputAssetPathSelected(const FString& NewPackagePath);
-	void OnDataRegistryAssetNameChanged(const FText& NewAssetName, ETextCommit::Type CommitType);
-	void OnDataTableAssetNameChanged(const FText& NewAssetName, ETextCommit::Type CommitType);
+	void OnTextCommited_DataRegistryNameSet(const FText& NewAssetName, ETextCommit::Type CommitType);
+	void OnTextCommited_DataTaleNameSet(const FText& NewAssetName, ETextCommit::Type CommitType);
 	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_DataTableAvailableChanged() const;
@@ -73,7 +73,7 @@ private:
 	FText OnTextChanged_CreateOrEdit() const;
 	
 	bool CreateDataRegistry();
-	void CreateDataTable();
+	bool CreateDataTable();
 	void EditDataTable();
 	void OpenWindow(const FName RegistryType, const bool bShouldOpenInEditMode);
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;

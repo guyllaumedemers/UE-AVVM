@@ -33,15 +33,13 @@
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Factories/DataTableFactory.h"
 #include "Framework/Application/SlateApplication.h"
-#include "Framework/Docking/TabManager.h"
 #include "Framework/Notifications/NotificationManager.h"
-#include "HAL/PlatformApplicationMisc.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
-#include "SWidgets/AVVMEditorToolkitPackagePathInput.h"
+#include "SWidgets/AVVMEditorToolkitRequiredUserInput.h"
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
@@ -236,47 +234,39 @@ void SInventoryToolkitWindow::OnOutputAssetPathSelected(const FString& NewPackag
 	SelectedPackagePath = NewPackagePath;
 }
 
-void SInventoryToolkitWindow::OnDataRegistryAssetNameChanged(const FText& NewAssetName,
-                                                             ETextCommit::Type CommitType)
+void SInventoryToolkitWindow::OnTextCommited_DataRegistryNameSet(const FText& NewAssetName,
+                                                                 ETextCommit::Type CommitType)
 {
 	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
 	if (IsValid(Factory))
 	{
 		Factory->DataRegistryClass = UDataRegistry::StaticClass();
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = FString::Printf(TEXT("DR_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString());
+		Params.PackagePath = SelectedPackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UDataRegistry::StaticClass();
+		UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
 	}
-
-	// @gdemers create Data Registry Asset.
-	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	auto* DataRegistry = AssetTools.Get().CreateAsset(FString::Printf(TEXT("DR_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString()),
-	                                                  SelectedPackagePath,
-	                                                  UDataRegistry::StaticClass(),
-	                                                  Factory);
-
-	// @gdemers force open since we cannot default initialized it. the user should have read the modal, and know whats
-	// expected from them at this point.
-	AssetTools.Get().OpenEditorForAssets({DataRegistry});
 }
 
-void SInventoryToolkitWindow::OnDataTableAssetNameChanged(const FText& NewAssetName,
-                                                          ETextCommit::Type CommitType)
+void SInventoryToolkitWindow::OnTextCommited_DataTaleNameSet(const FText& NewAssetName,
+                                                             ETextCommit::Type CommitType)
 {
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		return;
-	}
-
 	auto* Factory = NewObject<UDataTableFactory>();
 	if (IsValid(Factory))
 	{
 		const auto RowTypes = GetInventoryRowTypes();
 		Factory->Struct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-	}
 
-	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	SelectedDataTable = Cast<UDataTable>(AssetTools.Get().CreateAsset(FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString()),
-	                                                                  SelectedPackagePath,
-	                                                                  UDataTable::StaticClass(),
-	                                                                  Factory));
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString());
+		Params.PackagePath = SelectedPackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UDataTable::StaticClass();
+		SelectedDataTable = UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
+	}
 
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
@@ -374,56 +364,57 @@ FText SInventoryToolkitWindow::OnTextChanged_CreateOrEdit() const
 	return (bShouldEditDataTable && bHasDataTableAvailable) ? NSLOCTEXT("AVVMEditorToolkit", "DataTable_Edit", "Edit") : NSLOCTEXT("AVVMEditorToolkit", "DataTable_Create", "Create");
 }
 
-void SInventoryToolkitWindow::CreateDataTable()
+bool SInventoryToolkitWindow::CreateDataRegistry()
 {
 	const auto RowTypes = GetInventoryRowTypes();
 	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
 
-	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataTable_ModalTitle", "Data Table");
-	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
-	                                                 "CreateDataTable",
-	                                                 "Request new Data Table.\n\nPress Ok, and create a DataTable. Make sure the ScriptStruct: {0}."),
-	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
+	FFormatNamedArguments Args{};
+	Args.Add(TEXT("DataRegistryType"), FText::FromName(SelectedDataRegistryType.GetName()));
+	Args.Add(TEXT("Values"), FText::FromString(GetNameSafe(NewScriptStruct)));
+	const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "CreateDataRegistry", "DataRegistry missing.\n\nPress Ok, and create a DataRegistry. Make sure the RegistryType is: {DataRegistryType},\nand ScriptStruct is: {Values}."), Args);
 
-	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, Title);
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry"));
 	if (Response != EAppReturnType::Yes)
 	{
-		return;
+		return false;
 	}
 
-	SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
-	.OnTextCommited(this, &SInventoryToolkitWindow::OnDataTableAssetNameChanged);
+	FAVVMWindowContextArgs Params{};
+	Params.Content = SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
+		.bShouldCloseWindowOnCommit(true)
+		.OnTextCommited(this, &SInventoryToolkitWindow::OnTextCommited_DataRegistryNameSet);
+	
+	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride);
+	Params.OnWindowClosed = FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed);
+	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
+	return true;
+}
 
-	FDisplayMetrics DisplayMetrics{};
-	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
-	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
-	const FVector2D ClientSize(600.0f * DPIScaleFactor, 400.0f * DPIScaleFactor);
+bool SInventoryToolkitWindow::CreateDataTable()
+{
+	const auto RowTypes = GetInventoryRowTypes();
+	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
 
-	auto ModalWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataRegistry", "DataRegistry"))
-		.CreateTitleBar(true)
-		.SupportsMaximize(true)
-		.SupportsMinimize(true)
-		.IsInitiallyMaximized(false)
-		.IsInitiallyMinimized(false)
-		.SizingRule(ESizingRule::UserSized)
-		.AutoCenter(EAutoCenter::PreferredWorkArea)
-		.ClientSize(ClientSize)
-		.AdjustInitialSizeAndPositionForDPIScale(false)
-		.Content()
-		[
-			PackagePathInput.ToSharedRef()
-		];
+	FFormatNamedArguments Args{};
+	Args.Add(TEXT("Values"), FText::FromString(GetNameSafe(NewScriptStruct)));
+	const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "CreateDataTable", "Request new Data Table.\n\nPress Ok, and create a DataTable. Make sure the ScriptStruct is: {Values}."), Args);
 
-	ModalWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
-	ModalWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "DataTable_ModalTitle", "Data Table"));
+	if (Response != EAppReturnType::Yes)
+	{
+		return false;
+	}
 
-	FloatingWindows.Add(ModalWindow);
+	FAVVMWindowContextArgs Params{};
+	Params.Content = SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
+		.bShouldCloseWindowOnCommit(true)
+		.OnTextCommited(this, &SInventoryToolkitWindow::OnTextCommited_DataTaleNameSet);
 
-	FSlateApplication::Get().AddWindow(ModalWindow, true);
-	FGlobalTabmanager::Get()->SetRootWindow(ModalWindow);
-	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
-	FSlateNotificationManager::Get().SetRootWindow(ModalWindow);
+	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride);
+	Params.OnWindowClosed = FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed);
+	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
+	return true;
 }
 
 void SInventoryToolkitWindow::EditDataTable()
@@ -437,42 +428,18 @@ void SInventoryToolkitWindow::EditDataTable()
 void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
                                          const bool bShouldOpenInEditMode)
 {
-	FDisplayMetrics DisplayMetrics{};
-	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
-	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
-	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
+	FAVVMWindowContextArgs Params{};
+	Params.Content = SNew(SAVVMEditorToolkitDataEditor)
+		.SelectedDataRegistryType(FDataRegistryType{RegistryType})
+		.SelectedItemName(NAME_None)
+		.DataEditorObject(GetDataEditObject(RegistryType))
+		.OutputDataTable(SelectedDataTable)
+		.PackagePath(this, &SInventoryToolkitWindow::GetOutputPackagePath)
+		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create);
 
-	auto NewFloatingWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor"))
-		.CreateTitleBar(true)
-		.SupportsMaximize(true)
-		.SupportsMinimize(true)
-		.IsInitiallyMaximized(false)
-		.IsInitiallyMinimized(false)
-		.SizingRule(ESizingRule::UserSized)
-		.AutoCenter(EAutoCenter::PreferredWorkArea)
-		.ClientSize(ClientSize)
-		.AdjustInitialSizeAndPositionForDPIScale(false)
-		.Content()
-		[
-			SNew(SAVVMEditorToolkitDataEditor)
-			.SelectedDataRegistryType(FDataRegistryType{RegistryType})
-			.SelectedItemName(NAME_None)
-			.DataEditorObject(GetDataEditObject(RegistryType))
-			.OutputDataTable(SelectedDataTable)
-			.PackagePath(this, &SInventoryToolkitWindow::GetOutputPackagePath)
-			.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create)
-		];
-
-	NewFloatingWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
-	NewFloatingWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
-
-	FloatingWindows.Add(NewFloatingWindow);
-
-	FSlateApplication::Get().AddWindow(NewFloatingWindow, true);
-	FGlobalTabmanager::Get()->SetRootWindow(NewFloatingWindow);
-	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
-	FSlateNotificationManager::Get().SetRootWindow(NewFloatingWindow);
+	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride);
+	Params.OnWindowClosed = FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed);
+	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
 }
 
 void SInventoryToolkitWindow::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const
@@ -497,60 +464,6 @@ void SInventoryToolkitWindow::OnWindowClosed(const TSharedRef<SWindow>& PendingC
 	{
 		FloatingWindows.Remove(PendingCloseWindow);
 	}
-}
-
-bool SInventoryToolkitWindow::CreateDataRegistry()
-{
-	const auto RowTypes = GetInventoryRowTypes();
-	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-
-	const FText Title = NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry");
-	const FText Msg = FText::FormatOrdered(NSLOCTEXT("AVVMEditorToolkit",
-	                                                 "CreateDataRegistry",
-	                                                 "DataRegistry missing.\n\nPress Ok, and create a DataRegistry. Make sure the RegistryType is: {0},\nand ScriptStruct: {1}."),
-	                                       FText::FromName(SelectedDataRegistryType.GetName()),
-	                                       FText::FromString(GetNameSafe(NewScriptStruct)));
-
-	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, Title);
-	if (Response != EAppReturnType::Yes)
-	{
-		return false;
-	}
-	
-	SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
-	.OnTextCommited(this, &SInventoryToolkitWindow::OnDataRegistryAssetNameChanged);
-
-	FDisplayMetrics DisplayMetrics{};
-	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
-	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
-	const FVector2D ClientSize(600.0f * DPIScaleFactor, 400.0f * DPIScaleFactor);
-
-	auto ModalWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataRegistry", "DataRegistry"))
-		.CreateTitleBar(true)
-		.SupportsMaximize(true)
-		.SupportsMinimize(true)
-		.IsInitiallyMaximized(false)
-		.IsInitiallyMinimized(false)
-		.SizingRule(ESizingRule::UserSized)
-		.AutoCenter(EAutoCenter::PreferredWorkArea)
-		.ClientSize(ClientSize)
-		.AdjustInitialSizeAndPositionForDPIScale(false)
-		.Content()
-		[
-			PackagePathInput.ToSharedRef()
-		];
-
-	ModalWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride));
-	ModalWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed));
-
-	FloatingWindows.Add(ModalWindow);
-
-	FSlateApplication::Get().AddWindow(ModalWindow, true);
-	FGlobalTabmanager::Get()->SetRootWindow(ModalWindow);
-	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
-	FSlateNotificationManager::Get().SetRootWindow(ModalWindow);
-	return true;
 }
 
 const UAVVMEditorToolkitDataEditObject* SInventoryToolkitWindow::GetDataEditObject(const FName RegistryType) const

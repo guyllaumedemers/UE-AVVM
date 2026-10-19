@@ -46,6 +46,7 @@ public class AVVMEditorToolkit : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"ApplicationCore",
 				"AVVMGameplay",
 				"DataRegistry",
 				"InputCore",

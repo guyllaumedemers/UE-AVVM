@@ -26,7 +26,9 @@
 #include "Widgets/SCompoundWidget.h"
 
 /**
- * 
+ *	Class description:
+ *	
+ *	SAVVMEditorToolkitRequiredUserInput is a slate context for handling user input during asset naming.
  */
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRequiredUserInput : public SCompoundWidget,
                                                                   public IAVVMDoesWidgetProvideModalMessaging
@@ -34,10 +36,18 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRequiredUserInput : public SCompou
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitRequiredUserInput){}
 	SLATE_EVENT(FOnTextCommitted, OnTextCommited)
+	SLATE_ATTRIBUTE(bool, bShouldCloseWindowOnCommit)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
+	
+private:
+	FReply OnKeyDownHandler(const FGeometry& Geometry, const FKeyEvent& Event);
+	void OnTextChanged(const FText& NewText);
+	FOnTextCommitted OnTextCommitted{};
+	FText InputText{FText::GetEmpty()};
+	bool bShouldCloseWindowOnCommit{false};
 };

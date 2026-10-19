@@ -21,8 +21,11 @@
 
 #include "CoreMinimal.h"
 
+#include "AssetToolsModule.h"
 #include "DataRegistryId.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Modules/ModuleManager.h"
+#include "Widgets/SWindow.h"
 
 #include "AVVMEditorToolkitUtils.generated.h"
 
@@ -30,14 +33,62 @@ class UDataRegistry;
 class UDataRegistrySource_DataTable;
 
 /**
- * 
+ *	Class description:
+ *	
+ *	FAVVMWindowContextArgs is a context struct encapsulating parameters to an SWindow initialization.
+ */
+struct AVVMEDITORTOOLKIT_API FAVVMWindowContextArgs
+{
+	TSharedPtr<SWidget> Content{};
+	FRequestDestroyWindowOverride OnRequestDestroyWindowOverride{};
+	FOnWindowClosed OnWindowClosed{};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMWindowContextArgs is a context struct encapsulating parameters to an SWindow initialization.
+ */
+struct AVVMEDITORTOOLKIT_API FAVVMAssetFactoryContextArgs
+{
+	FString AssetName{};
+	FString PackagePath{};
+	UFactory* AssetFactory{nullptr};
+	UClass* AssetClass{nullptr};
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMEditorToolkitUtils is a function library for reusable api.
  */
 UCLASS()
 class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
+	static TSharedRef<SWindow> OpenWindow(const FAVVMWindowContextArgs& Params);
 	static TArray<const UDataRegistrySource_DataTable*> GetDataTables(const FDataRegistryType& RegistryType);
 	static UDataRegistry* GetDataRegistry(const FDataRegistryType& RegistryType);
+
+	template <typename TAsset>
+	static TAsset* CreateOpenAsset(const FAVVMAssetFactoryContextArgs& Params);
 };
+
+template <typename TAsset>
+TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMAssetFactoryContextArgs& Params)
+{
+	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+		UObject* NewAsset = AssetTools.Get().CreateAsset(Params.AssetName, Params.PackagePath, Params.AssetClass, Params.AssetFactory);
+		// TODO @gdemers This currently doesnt open new context window. fix it!
+		AssetTools.Get().OpenEditorForAssets({NewAsset});
+		return Cast<TAsset>(NewAsset);
+	}
+	else
+	{
+		return nullptr;
+	}
+}

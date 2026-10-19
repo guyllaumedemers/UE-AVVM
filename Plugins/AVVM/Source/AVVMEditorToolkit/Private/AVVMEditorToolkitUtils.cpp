@@ -21,6 +21,44 @@
 
 #include "DataRegistrySource_DataTable.h"
 #include "DataRegistrySubsystem.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Docking/TabManager.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "GenericPlatform/GenericApplication.h"
+#include "HAL/PlatformApplicationMisc.h"
+
+TSharedRef<SWindow> UAVVMEditorToolkitUtils::OpenWindow(const FAVVMWindowContextArgs& Params)
+{
+	FDisplayMetrics DisplayMetrics{};
+	FSlateApplication::Get().GetDisplayMetrics(DisplayMetrics);
+	const float DPIScaleFactor = FPlatformApplicationMisc::GetDPIScaleFactorAtPoint(DisplayMetrics.PrimaryDisplayWorkAreaRect.Left, DisplayMetrics.PrimaryDisplayWorkAreaRect.Top);
+	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
+
+	auto NewWindow = SNew(SWindow)
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor"))
+		.CreateTitleBar(true)
+		.SupportsMaximize(true)
+		.SupportsMinimize(true)
+		.IsInitiallyMaximized(false)
+		.IsInitiallyMinimized(false)
+		.SizingRule(ESizingRule::UserSized)
+		.AutoCenter(EAutoCenter::PreferredWorkArea)
+		.ClientSize(ClientSize)
+		.AdjustInitialSizeAndPositionForDPIScale(false)
+		.Content()
+		[
+			Params.Content.ToSharedRef()
+		];
+
+	NewWindow->SetRequestDestroyWindowOverride(Params.OnRequestDestroyWindowOverride);
+	NewWindow->SetOnWindowClosed(Params.OnWindowClosed);
+
+	FSlateApplication::Get().AddWindow(NewWindow, true);
+	FGlobalTabmanager::Get()->SetRootWindow(NewWindow);
+	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
+	FSlateNotificationManager::Get().SetRootWindow(NewWindow);
+	return NewWindow;
+}
 
 TArray<const UDataRegistrySource_DataTable*> UAVVMEditorToolkitUtils::GetDataTables(const FDataRegistryType& RegistryType)
 {

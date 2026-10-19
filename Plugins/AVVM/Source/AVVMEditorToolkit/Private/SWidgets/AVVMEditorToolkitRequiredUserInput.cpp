@@ -17,14 +17,19 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "SWidgets/AVVMEditorToolkitPackagePathInput.h"
+#include "SWidgets/AVVMEditorToolkitRequiredUserInput.h"
 
 #include "Components/VerticalBox.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Widgets/SWindow.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Text/STextBlock.h"
 
 void SAVVMEditorToolkitRequiredUserInput::Construct(const FArguments& InArgs)
 {
+	OnTextCommitted = InArgs._OnTextCommited;
+	bShouldCloseWindowOnCommit = InArgs._bShouldCloseWindowOnCommit.Get();
+	
 	ChildSlot
 	[
 		SNew(SBorder)
@@ -65,7 +70,8 @@ void SAVVMEditorToolkitRequiredUserInput::Construct(const FArguments& InArgs)
 			[
 				SNew(SEditableTextBox)
 				.Justification(ETextJustify::Left)
-				.OnTextCommitted(InArgs._OnTextCommited)
+				.OnKeyDownHandler(this, &SAVVMEditorToolkitRequiredUserInput::OnKeyDownHandler)
+				.OnTextChanged(this, &SAVVMEditorToolkitRequiredUserInput::OnTextChanged)
 				.Text(NSLOCTEXT("AVVMEditorToolkit", "DefaultText", "..."))
 			]
 		]
@@ -80,4 +86,33 @@ FText SAVVMEditorToolkitRequiredUserInput::GetModalMessage_OnClosure() const
 FText SAVVMEditorToolkitRequiredUserInput::GetModalTitle_OnClosure() const
 {
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "DataEditor_ClosureTitle", "Missing Source!");
+}
+
+FReply SAVVMEditorToolkitRequiredUserInput::OnKeyDownHandler(const FGeometry& Geometry,
+                                                             const FKeyEvent& Event)
+{
+	if (Event.GetKey() != EKeys::Enter)
+	{
+		return FReply::Unhandled();
+	}
+
+	OnTextCommitted.ExecuteIfBound(InputText, ETextCommit::OnEnter);
+	if (!bShouldCloseWindowOnCommit)
+	{
+		return FReply::Handled();
+	}
+
+	TSharedPtr<SWindow> ParentWindow = FSlateApplication::Get().FindWidgetWindow(AsShared());
+	if (ensureAlwaysMsgf(ParentWindow.IsValid(), TEXT("Failed to find bound SWindow.")))
+	{
+		ParentWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
+		ParentWindow->RequestDestroyWindow();
+	}
+
+	return FReply::Handled();
+}
+
+void SAVVMEditorToolkitRequiredUserInput::OnTextChanged(const FText& NewText)
+{
+	InputText = NewText;
 }
