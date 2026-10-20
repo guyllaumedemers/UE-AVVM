@@ -25,6 +25,7 @@
 #include "DataRegistryId.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Modules/ModuleManager.h"
+#include "UObject/SavePackage.h"
 #include "Widgets/SWindow.h"
 
 #include "AVVMEditorToolkitUtils.generated.h"
@@ -84,7 +85,28 @@ TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMAssetFactoryContextA
 	{
 		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 		UObject* NewAsset = AssetTools.Get().CreateAsset(Params.AssetName, Params.PackagePath, Params.AssetClass, Params.AssetFactory);
-		AssetTools.Get().OpenEditorForAssets({NewAsset});
+		if (!ensureAlwaysMsgf(IsValid(NewAsset), TEXT("Failed to create asset.")))
+		{
+			return nullptr;
+		}
+
+		const UPackage* Package = NewAsset->GetPackage();
+		if (!ensureAlwaysMsgf(IsValid(Package), TEXT("Failed to retrieve package.")))
+		{
+			return nullptr;
+		}
+
+		FSavePackageArgs SavePackageArgs{};
+		SavePackageArgs.TopLevelFlags = RF_Public | RF_Standalone;
+		SavePackageArgs.Error = GLog;
+
+		const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
+		const bool bSaved = UPackage::SavePackage(NewAsset->GetPackage(), NewAsset, *PackageFileName, MoveTemp(SavePackageArgs));
+		if (ensureAlwaysMsgf(bSaved, TEXT("Failed to save")))
+		{
+			AssetTools.Get().OpenEditorForAssets({NewAsset});
+		}
+
 		return Cast<TAsset>(NewAsset);
 	}
 	else

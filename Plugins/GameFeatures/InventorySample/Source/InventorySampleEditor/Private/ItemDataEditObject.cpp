@@ -268,11 +268,6 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 
 bool UItemDataEditObject::TryCreateNewItemObject() const
 {
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		return false;
-	}
-
 	if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
 	                      TEXT("Data Table Output missing. Please select a target.")))
 	{
@@ -284,8 +279,8 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
 	{
 		FMessageDialog::Open(EAppMsgCategory::Error,
-							 EAppMsgType::Ok,
-							 NSLOCTEXT("AVVMEditorToolkit", "NotifyDataDuplicatedName", "Duplicated Name detected!\nChoose a different name."));
+		                     EAppMsgType::Ok,
+		                     NSLOCTEXT("AVVMEditorToolkit", "NotifyDataDuplicatedName", "Duplicated Name detected!\nChoose a different name."));
 		return false;
 	}
 
@@ -295,22 +290,24 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 		return false;
 	}
 
-	auto* Factory = NewObject<UItemDefinitionDataAssetFactory>();
+	auto* Factory = NewObject<UDataAssetFactory>();
 	if (IsValid(Factory))
 	{
 		Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = NewItemObjectName.Replace(TEXT("BP"), TEXT("DA"));
+		Params.PackagePath = SelectedPackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UItemDefinitionDataAsset::StaticClass();
+		auto* DataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UItemDefinitionDataAsset>(Params);
+		NewItemDefinition->ItemDefinition = DataAsset;
+		return IsValid(DataAsset);
 	}
-
-	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-	auto* ItemDefinitionDataAsset = AssetTools.Get().CreateAsset(NewItemObjectName.Replace(TEXT("BP"), TEXT("DA")),
-	                                                             SelectedPackagePath,
-	                                                             UItemDefinitionDataAsset::StaticClass(),
-	                                                             Factory);
-
-	// @gdemers force open since we cannot default initialized it. the user should have read the modal, and know whats
-	// expected from them at this point.
-	AssetTools.Get().OpenEditorForAssets({ItemDefinitionDataAsset});
-	return IsValid(ItemDefinitionDataAsset);
+	else
+	{
+		return false;
+	}
 }
 
 void UItemDataEditObject::OnDataAssetCreationCompleted(UFactory* Factory,
@@ -362,13 +359,4 @@ FText UItemGroupDataEditObject::GetModalMessage_OnClosure() const
 FText UItemGroupDataEditObject::GetModalTitle_OnClosure() const
 {
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemGroupDataEditObject::DataEditor_ClosureTitle", "UItemGroupDataEditObject");
-}
-
-UItemDefinitionDataAssetFactory::UItemDefinitionDataAssetFactory(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-	bCreateNew = true;
-	bEditAfterNew = true;
-	SupportedClass = UItemDefinitionDataAsset::StaticClass();
-	SupportedWorkflows = static_cast<uint8>(EFactoryCreateWorkflow::Asynchronous);
 }

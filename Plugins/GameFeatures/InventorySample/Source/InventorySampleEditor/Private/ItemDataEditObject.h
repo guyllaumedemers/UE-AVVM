@@ -99,18 +99,3 @@ public:
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };
-
-/**
- *	Class description:
- *	
- *	UItemDefinitionDataAssetFactory is a factory class that extend UDataAssetFactory to support async
- *	creation of asset.
- */
-UCLASS()
-class INVENTORYSAMPLEEDITOR_API UItemDefinitionDataAssetFactory : public UDataAssetFactory
-{
-	GENERATED_BODY()
-
-public:
-	UItemDefinitionDataAssetFactory(const FObjectInitializer& ObjectInitializer);
-};
