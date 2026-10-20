@@ -35,7 +35,7 @@ TSharedRef<SWindow> UAVVMEditorToolkitUtils::OpenWindow(const FAVVMWindowContext
 	const FVector2D ClientSize(1200.0f * DPIScaleFactor, 800.0f * DPIScaleFactor);
 
 	auto NewWindow = SNew(SWindow)
-		.Title(NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor"))
+		.Title(Params.Title)
 		.CreateTitleBar(true)
 		.SupportsMaximize(true)
 		.SupportsMinimize(true)
@@ -54,9 +54,11 @@ TSharedRef<SWindow> UAVVMEditorToolkitUtils::OpenWindow(const FAVVMWindowContext
 	NewWindow->SetOnWindowClosed(Params.OnWindowClosed);
 
 	FSlateApplication::Get().AddWindow(NewWindow, true);
-	FGlobalTabmanager::Get()->SetRootWindow(NewWindow);
 	FGlobalTabmanager::Get()->SetAllowWindowMenuBar(true);
-	FSlateNotificationManager::Get().SetRootWindow(NewWindow);
+	// @gdemers IMPORTANT - Do not update the Window Root, otherwise closure events from calling parent
+	// will affect any subsequent (child) window opened following root change.
+	// FGlobalTabmanager::Get()->SetRootWindow(NewWindow);
+	// FSlateNotificationManager::Get().SetRootWindow(NewWindow);
 	return NewWindow;
 }
 

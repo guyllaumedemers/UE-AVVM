@@ -39,6 +39,7 @@ class UDataRegistrySource_DataTable;
  */
 struct AVVMEDITORTOOLKIT_API FAVVMWindowContextArgs
 {
+	FText Title{FText::GetEmpty()};
 	TSharedPtr<SWidget> Content{};
 	FRequestDestroyWindowOverride OnRequestDestroyWindowOverride{};
 	FOnWindowClosed OnWindowClosed{};
@@ -83,7 +84,6 @@ TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMAssetFactoryContextA
 	{
 		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 		UObject* NewAsset = AssetTools.Get().CreateAsset(Params.AssetName, Params.PackagePath, Params.AssetClass, Params.AssetFactory);
-		// TODO @gdemers This currently doesnt open new context window. fix it!
 		AssetTools.Get().OpenEditorForAssets({NewAsset});
 		return Cast<TAsset>(NewAsset);
 	}

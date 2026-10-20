@@ -381,6 +381,7 @@ bool SInventoryToolkitWindow::CreateDataRegistry()
 	}
 
 	FAVVMWindowContextArgs Params{};
+	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataRegistry", "DataRegistry");
 	Params.Content = SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
 		.bShouldCloseWindowOnCommit(true)
 		.OnTextCommited(this, &SInventoryToolkitWindow::OnTextCommited_DataRegistryNameSet);
@@ -407,6 +408,7 @@ bool SInventoryToolkitWindow::CreateDataTable()
 	}
 
 	FAVVMWindowContextArgs Params{};
+	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataTable", "DataTable");
 	Params.Content = SAssignNew(PackagePathInput, SAVVMEditorToolkitRequiredUserInput)
 		.bShouldCloseWindowOnCommit(true)
 		.OnTextCommited(this, &SInventoryToolkitWindow::OnTextCommited_DataTaleNameSet);
@@ -429,6 +431,7 @@ void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
                                          const bool bShouldOpenInEditMode)
 {
 	FAVVMWindowContextArgs Params{};
+	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor");
 	Params.Content = SNew(SAVVMEditorToolkitDataEditor)
 		.SelectedDataRegistryType(FDataRegistryType{RegistryType})
 		.SelectedItemName(NAME_None)
