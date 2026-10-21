@@ -50,10 +50,12 @@ void SAVVMEditorToolkitRequiredUserInput::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				SNew(STextBlock)
-				.TextStyle(FAppStyle::Get(), "NormalText")
-				.TransformPolicy(ETextTransformPolicy::ToUpper)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "Important", "Press Enter to confirm name selection."))
+				SNew(SEditableTextBox)
+				.Justification(ETextJustify::Left)
+				.OnKeyDownHandler(this, &SAVVMEditorToolkitRequiredUserInput::OnKeyDownHandler)
+				.OnTextChanged(this, &SAVVMEditorToolkitRequiredUserInput::OnTextChanged)
+				.HintText(NSLOCTEXT("AVVMEditorToolkit", "RequiredInput_HintText", "Press Enter to confirm name selection."))
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "RequiredInput_DefaultText", "..."))
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -63,16 +65,6 @@ void SAVVMEditorToolkitRequiredUserInput::Construct(const FArguments& InArgs)
 				.TextStyle(FAppStyle::Get(), "NormalText")
 				.ColorAndOpacity(FSlateColor::UseSubduedForeground())
 				.Text(NSLOCTEXT("AVVMEditorToolkit", "RequiredInput", "Note : Asset names are standardized under the hood."))
-			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SEditableTextBox)
-				.Justification(ETextJustify::Left)
-				.OnKeyDownHandler(this, &SAVVMEditorToolkitRequiredUserInput::OnKeyDownHandler)
-				.OnTextChanged(this, &SAVVMEditorToolkitRequiredUserInput::OnTextChanged)
-				.Text(NSLOCTEXT("AVVMEditorToolkit", "DefaultText", "..."))
 			]
 		]
 	];
