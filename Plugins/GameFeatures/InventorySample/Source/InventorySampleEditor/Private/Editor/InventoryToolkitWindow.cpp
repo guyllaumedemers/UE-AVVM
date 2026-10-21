@@ -371,7 +371,7 @@ bool SInventoryToolkitWindow::CreateDataRegistry()
 	Args.Add(TEXT("Values"), FText::FromString(GetNameSafe(NewScriptStruct)));
 	const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "CreateDataRegistry", "DataRegistry missing.\n\nPress Ok, and create a DataRegistry. Make sure the RegistryType is: {DataRegistryType},\nand ScriptStruct is: {Values}."), Args);
 
-	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "Data Registry"));
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "DataRegistry_ModalTitle", "DataRegistry"));
 	if (Response != EAppReturnType::Yes)
 	{
 		return false;
@@ -398,7 +398,7 @@ bool SInventoryToolkitWindow::CreateDataTable()
 	Args.Add(TEXT("Values"), FText::FromString(GetNameSafe(NewScriptStruct)));
 	const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "CreateDataTable", "Request new Data Table.\n\nPress Ok, and create a DataTable. Make sure the ScriptStruct is: {Values}."), Args);
 
-	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "DataTable_ModalTitle", "Data Table"));
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "DataTable_ModalTitle", "DataTable"));
 	if (Response != EAppReturnType::Yes)
 	{
 		return false;

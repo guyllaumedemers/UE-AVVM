@@ -33,6 +33,7 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "Engine/DataTable.h"
 #include "Factories/BlueprintFactory.h"
 #include "Factories/DataAssetFactory.h"
 #include "Interfaces/IPluginManager.h"
@@ -284,6 +285,19 @@ void UItemDataEditObject::OnTextChanged_ItemName(const FText& NewItemName)
 
 FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 {
+	if (!DataTablePicker_ActorIdentifiers.IsValid() || !DataTablePicker_ActorDefinitions.IsValid())
+	{
+		FFormatNamedArguments Args{};
+		const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::Generate", "A data table selection is missing. Should we handle the creation here?"), Args);
+
+		const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "ItemEdit_ModalTitle", "ItemObject"));
+		if (Response != EAppReturnType::Yes)
+		{
+			return false;
+		}
+	}
+
+	// @gdemers user made the required selection, and is creating a new entry in each Data Table.
 	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
 }
 
@@ -320,7 +334,7 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 	return bResult;
 }
 
-bool UItemDataEditObject::TryCreateNewItemObject() const
+bool UItemDataEditObject::TryCreateNewItemObject()
 {
 	if (!ensureAlwaysMsgf(SelectedDataTable_ItemDefinitions.IsValid(),
 	                      TEXT("Data Table Output missing. Please select a target.")))
@@ -369,14 +383,14 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 }
 
 bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset,
-                                                  const FString& AssetName) const
+                                                  const FString& AssetName)
 {
 	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == AssetName.IsEmpty()),
 	                                                           TEXT("Invalid Asset Name.")))
 	{
 		return false;
 	}
-	
+
 	auto* BP_Factory = NewObject<UBlueprintFactory>();
 	if (IsValid(BP_Factory))
 	{
@@ -394,7 +408,38 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		}
 	}
 
+	// @gdemers TODO define how we retrieve the asset name here!
+	if (!SelectedDataTable_ActorIdentifiers.IsValid())
+	{
+		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(), {});
+	}
+
+	if (!SelectedDataTable_ActorDefinitions.IsValid())
+	{
+		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(), {});
+	}
+
 	return true;
+}
+
+UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName) const
+{
+	auto* Factory = NewObject<UDataTableFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->Struct = ScriptStruct;
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, AssetName);
+		Params.PackagePath = SelectedPackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UDataTable::StaticClass();
+		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const

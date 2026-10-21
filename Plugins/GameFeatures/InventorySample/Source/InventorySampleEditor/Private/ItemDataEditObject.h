@@ -69,8 +69,10 @@ private:
 	
 	FString StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
-	bool TryCreateNewItemObject() const;
-	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FString& AssetName) const;
+	bool TryCreateNewItemObject();
+	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FString& AssetName);
+	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName) const;
+	
 	int32 GenerateNewPhysicalGlobalId() const;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
