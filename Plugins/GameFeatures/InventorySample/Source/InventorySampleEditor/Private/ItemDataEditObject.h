@@ -21,16 +21,17 @@
 
 #include "CoreMinimal.h"
 
-#include "Factories/DataAssetFactory.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
 #include "ItemDataEditObject.generated.h"
 
 struct FItemDefinitionDataTableRow;
-class IDetailsView;
 class UDataTable;
 class UFactory;
+class UItemDefinitionDataAsset;
+class SAVVMEditorToolkitDataTablePicker;
 class SAVVMEditorToolkitOutputPathPicker;
+class SCheckBoxList;
 
 /**
  *	Class description:
@@ -45,7 +46,6 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                               const FString& NewPackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 	
 	virtual FText GetModalMessage_OnClosure() const override;
@@ -54,11 +54,15 @@ public:
 private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
+	TArray<FName> GetAssetTypeToDefaultGenerate() const;
 	TArray<FName> GetItemTypes() const;
+	void OnCheckBoxStateChanged(int32 Index);
+	void OnOutputAssetPathSelected(const FString& NewPackagePath);
+	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_OnItemTypeChanged() const;
 	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
-	bool OnEnable_BlueprintItemObjectDetailView() const;
-	bool OnEnable_TableRowItemObjectDetailView() const;
+	void OnDataTableSelectionChanged_ActorIdentifiers(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
+	void OnDataTableSelectionChanged_ActorDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	bool IsEnabled_GenerateButton() const;
 	void OnTextChanged_ItemName(const FText& NewItemName);
 	FReply OnButtonClick_GenerateItem();
@@ -66,15 +70,16 @@ private:
 	FString StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	bool TryCreateNewItemObject() const;
-
-	void OnDataAssetCreationCompleted(UFactory* Factory, UObject* NewObject, FItemDefinitionDataTableRow* NewElement);
-	void OnDataAssetCreationCancelled(UFactory* Factory);
-	
+	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FString& AssetName) const;
 	int32 GenerateNewPhysicalGlobalId() const;
-	
-	TSharedPtr<IDetailsView> BlueprintItemObjectPropertyView{nullptr};
-	TSharedPtr<IDetailsView> TableRowItemObjectPropertyView{nullptr};
-	TWeakObjectPtr<UDataTable> SelectedDataTable{nullptr};
+
+	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
+	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};
+	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
+	TArray<bool> bCheckBoxStates{};
+	TWeakObjectPtr<UDataTable> SelectedDataTable_ItemDefinitions{nullptr};
+	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorIdentifiers{nullptr};
+	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorDefinitions{nullptr};
 	FString SelectedPackagePath{};
 	FName SelectedItemType{NAME_None};
 	FString ItemRowName{};
@@ -93,7 +98,6 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                               const FString& NewPackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 	
 	virtual FText GetModalMessage_OnClosure() const override;

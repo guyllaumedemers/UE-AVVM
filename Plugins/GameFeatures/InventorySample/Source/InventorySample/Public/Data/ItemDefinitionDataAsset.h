@@ -75,6 +75,8 @@ protected:
 	// Example : Tag.InTutorial
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	FGameplayTagContainer BlockingTagsForItemAccess{FGameplayTagContainer::EmptyContainer};
+	
+	friend class UItemDataEditObject;
 };
 
 /**

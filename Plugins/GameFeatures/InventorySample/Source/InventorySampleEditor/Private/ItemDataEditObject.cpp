@@ -27,24 +27,26 @@
 #include "DataRegistrySubsystem.h"
 #include "DataTableEditorUtils.h"
 #include "InventorySettings.h"
-#include "PropertyEditorModule.h"
+#include "ItemObject.h"
+#include "SCheckBoxList.h"
 #include "Components/VerticalBox.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
+#include "Factories/BlueprintFactory.h"
+#include "Factories/DataAssetFactory.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/MessageDialog.h"
+#include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SScrollBox.h"
 
 TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                            const FString& NewPackagePath,
                                                             const EAVVMDataEditorModes NewMode)
 {
-	SelectedDataTable = OutputDataTable;
-	SelectedPackagePath = NewPackagePath;
+	SelectedDataTable_ItemDefinitions = OutputDataTable;
 	
 	TSharedPtr<SWidget> Out{nullptr};
 	switch (NewMode)
@@ -74,20 +76,20 @@ FText UItemDataEditObject::GetModalTitle_OnClosure() const
 
 TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 {
-	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	SAssignNew(CheckBoxList, SCheckBoxList)
+	.IncludeGlobalCheckBoxInHeaderRow(false)
+	.OnItemCheckStateChanged_UObject(this, &UItemDataEditObject::OnCheckBoxStateChanged)
+	.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "ChecklistTooltip", "During the creation process, dependent assets will be created for the type selected. Unless unchecked!"))
+	.ItemHeaderLabel(NSLOCTEXT("AVVMEditorToolkit", "ChecklistHeader", "Generate Dependent Assets"));
+
+	if (CheckBoxList.IsValid())
 	{
-		auto& EditModule = FModuleManager::Get().GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+		for (const auto& Element : GetAssetTypeToDefaultGenerate())
+		{
+			CheckBoxList->AddItem(FText::FromName(Element), true);
+		}
 
-		FDetailsViewArgs DetailsViewArgs{};
-		DetailsViewArgs.bAllowSearch = false;
-		DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-		DetailsViewArgs.bHideSelectionTip = true;
-
-		BlueprintItemObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
-		BlueprintItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView);
-
-		TableRowItemObjectPropertyView = EditModule.CreateDetailView(DetailsViewArgs);
-		TableRowItemObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindUObject(this, &UItemDataEditObject::OnEnable_TableRowItemObjectDetailView);
+		bCheckBoxStates = CheckBoxList->GetValues();
 	}
 
 	return SNew(SOverlay)
@@ -104,7 +106,24 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step1", "Step 1: Select the Item Type to create."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step1", "Step 1: Select the Package Path where the automatically generated asset will be output."))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SAVVMEditorToolkitOutputPathPicker)
+					.OnPathSelected_UObject(this, &UItemDataEditObject::OnOutputAssetPathSelected)
+					.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Double Click or Browse:"))
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.TextStyle(FAppStyle::Get(), "LargeText")
+					.TransformPolicy(ETextTransformPolicy::ToUpper)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step2", "Step 2: Select the Item Type to create."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -112,6 +131,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 				[
 					SNew(SAVVMEditorToolkitDataImporter)
 					.Elements(GetItemTypes())
+					.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_AssetPathSelectionChanged)
 					.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnItemTypeChanged)
 					.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Item Types:"))
 				]
@@ -122,7 +142,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step2", "Step 2: Set a unique RowName for the new Item."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step3", "Step 3: Set a unique RowName for the new Item."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -143,7 +163,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::ItemCreation::Step3", "Step 3: Configure your Row entry, and Blueprint."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create a new DataTable."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -151,16 +171,20 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
-					.FillWidth(0.5f)
-					.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 					[
-						BlueprintItemObjectPropertyView.ToSharedRef()
+						SAssignNew(DataTablePicker_ActorIdentifiers, SAVVMEditorToolkitDataTablePicker)
+						.RegistryType(GetRegistryType_ActorIdentifiers())
+						.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_OnItemTypeChanged)
+						.OnSelectionChanged_UObject(this, &UItemDataEditObject::OnDataTableSelectionChanged_ActorIdentifiers)
+						.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "ActorIdentifiers:"))
 					]
 					+ SHorizontalBox::Slot()
-					.FillWidth(0.5f)
-					.Padding(20.0f, 1.0f, 20.0f, 1.0f)
 					[
-						TableRowItemObjectPropertyView.ToSharedRef()
+						SAssignNew(DataTablePicker_ActorDefinitions, SAVVMEditorToolkitDataTablePicker)
+						.RegistryType(GetRegistryType_ActorDefinitions())
+						.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_OnItemTypeChanged)
+						.OnSelectionChanged_UObject(this, &UItemDataEditObject::OnDataTableSelectionChanged_ActorDefinitions)
+						.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "ActorDefinitions:"))
 					]
 				]
 				+ SVerticalBox::Slot()
@@ -187,6 +211,15 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 		];
 }
 
+TArray<FName> UItemDataEditObject::GetAssetTypeToDefaultGenerate() const
+{
+	return {
+			GetFNameSafe(UDataTable::StaticClass()),
+			GetFNameSafe(UDataAsset::StaticClass()),
+			GetFNameSafe(UBlueprint::StaticClass())
+	};
+}
+
 TArray<FName> UItemDataEditObject::GetItemTypes() const
 {
 	return {
@@ -194,6 +227,25 @@ TArray<FName> UItemDataEditObject::GetItemTypes() const
 			TEXT("Attachment"),
 			TEXT("Storage")
 	};
+}
+
+void UItemDataEditObject::OnCheckBoxStateChanged(int32 Index)
+{
+	if (bCheckBoxStates.IsValidIndex(Index))
+	{
+		bool& Value = bCheckBoxStates[Index];
+		Value = !Value;
+	}
+}
+
+void UItemDataEditObject::OnOutputAssetPathSelected(const FString& NewPackagePath)
+{
+	SelectedPackagePath = NewPackagePath;
+}
+
+bool UItemDataEditObject::IsEnabled_AssetPathSelectionChanged() const
+{
+	return (false == SelectedPackagePath.IsEmpty());
 }
 
 bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
@@ -208,14 +260,16 @@ bool UItemDataEditObject::OnItemTypeChanged(const FName NewItemType,
 	return (false == SelectedItemType.IsNone());
 }
 
-bool UItemDataEditObject::OnEnable_BlueprintItemObjectDetailView() const
+void UItemDataEditObject::OnDataTableSelectionChanged_ActorIdentifiers(TWeakObjectPtr<UDataTable> NewSelection,
+                                                                       ESelectInfo::Type SelectInfo)
 {
-	return false;
+	SelectedDataTable_ActorIdentifiers = NewSelection;
 }
 
-bool UItemDataEditObject::OnEnable_TableRowItemObjectDetailView() const
+void UItemDataEditObject::OnDataTableSelectionChanged_ActorDefinitions(TWeakObjectPtr<UDataTable> NewSelection,
+                                                                       ESelectInfo::Type SelectInfo)
 {
-	return false;
+	SelectedDataTable_ActorDefinitions = NewSelection;
 }
 
 bool UItemDataEditObject::IsEnabled_GenerateButton() const
@@ -268,7 +322,7 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 
 bool UItemDataEditObject::TryCreateNewItemObject() const
 {
-	if (!ensureAlwaysMsgf(SelectedDataTable.IsValid(),
+	if (!ensureAlwaysMsgf(SelectedDataTable_ItemDefinitions.IsValid(),
 	                      TEXT("Data Table Output missing. Please select a target.")))
 	{
 		return false;
@@ -284,7 +338,7 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 		return false;
 	}
 
-	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable.Get(), FName(NewItemObjectName)));
+	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ItemDefinitions.Get(), FName(NewItemObjectName)));
 	if (!ensureAlwaysMsgf(NewItemDefinition != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		return false;
@@ -301,8 +355,12 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UItemDefinitionDataAsset::StaticClass();
 		auto* DataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UItemDefinitionDataAsset>(Params);
-		NewItemDefinition->ItemDefinition = DataAsset;
-		return IsValid(DataAsset);
+		if (ensureAlwaysMsgf(IsValid(DataAsset), TEXT("Failed to create New Data Asset.")))
+		{
+			NewItemDefinition->ItemDefinition = DataAsset;
+		}
+
+		return TryCreateDependentAsset(DataAsset, NewItemObjectName);
 	}
 	else
 	{
@@ -310,32 +368,33 @@ bool UItemDataEditObject::TryCreateNewItemObject() const
 	}
 }
 
-void UItemDataEditObject::OnDataAssetCreationCompleted(UFactory* Factory,
-                                                       UObject* NewObject,
-                                                       FItemDefinitionDataTableRow* NewElement)
+bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset,
+                                                  const FString& AssetName) const
 {
-	if (!ensureAlwaysMsgf(NewElement != nullptr,
-	                      TEXT("Invalid Row entry.")))
+	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == AssetName.IsEmpty()),
+	                                                           TEXT("Invalid Asset Name.")))
 	{
-		return;
+		return false;
+	}
+	
+	auto* BP_Factory = NewObject<UBlueprintFactory>();
+	if (IsValid(BP_Factory))
+	{
+		BP_Factory->ParentClass = UItemObject::StaticClass();
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = AssetName;
+		Params.PackagePath = SelectedPackagePath;
+		Params.AssetFactory = BP_Factory;
+		Params.AssetClass = UItemDefinitionDataAsset::StaticClass();
+		auto* ItemObject = UAVVMEditorToolkitUtils::CreateOpenAsset<UItemObject>(Params);
+		if (ensureAlwaysMsgf(IsValid(ItemObject), TEXT("Failed to create New Blueprint.")))
+		{
+			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
+		}
 	}
 
-	NewElement->ItemDefinition = Cast<UItemDefinitionDataAsset>(NewObject);
-
-	const int32 NewPhysicalGlobalId = GenerateNewPhysicalGlobalId();
-	if (!ensureAlwaysMsgf((NewPhysicalGlobalId > 1) && (NewPhysicalGlobalId < INT32_MAX),
-	                      TEXT("Failed to generate proper Physical Global Id.")))
-	{
-		return;
-	}
-
-	// TODO @gdemers run validation on new item object.
-	// i.e do we have remaining space in the bit encoding for the item object type
-	// does the name fits our requirements, etc...
-}
-
-void UItemDataEditObject::OnDataAssetCreationCancelled(UFactory* Factory)
-{
+	return true;
 }
 
 int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
@@ -344,7 +403,6 @@ int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                 const FString& NewPackagePath,
                                                                  const EAVVMDataEditorModes NewMode)
 {
 	return SNew(SImage)

@@ -59,9 +59,11 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                               const FString& NewPackagePath,
 	                                               const EAVVMDataEditorModes NewMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
 
+	FName GetRegistryType_ActorIdentifiers() const;
+	FName GetRegistryType_ActorDefinitions() const;
+	
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
 };
@@ -78,7 +80,6 @@ public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataEditor){}
 	SLATE_ATTRIBUTE(FDataRegistryType, SelectedDataRegistryType)
 	SLATE_ATTRIBUTE(FName, SelectedItemName)
-	SLATE_ATTRIBUTE(FString, PackagePath)
 	SLATE_ATTRIBUTE(TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject>, DataEditorObject)
 	SLATE_ATTRIBUTE(TWeakObjectPtr<UDataTable>, OutputDataTable)
 	SLATE_ATTRIBUTE(EAVVMDataEditorModes, Mode)
@@ -88,7 +89,6 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                       const FString& NewPackagePath,
 	                                       const EAVVMDataEditorModes CurrentMode) const;
 	
 	virtual FText GetModalMessage_OnClosure() const override;

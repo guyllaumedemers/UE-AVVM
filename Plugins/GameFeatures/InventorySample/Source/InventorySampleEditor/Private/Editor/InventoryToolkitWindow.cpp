@@ -302,10 +302,7 @@ bool SInventoryToolkitWindow::IsEnabled_DataRegistrySelectionChanged() const
 TArray<FName> SInventoryToolkitWindow::GetAssetTypeToDefaultGenerate() const
 {
 	return {
-			GetFNameSafe(UDataRegistry::StaticClass()),
-			GetFNameSafe(UDataTable::StaticClass()),
-			GetFNameSafe(UDataAsset::StaticClass()),
-			GetFNameSafe(UBlueprint::StaticClass())
+			GetFNameSafe(UDataRegistry::StaticClass())
 	};
 }
 
@@ -437,7 +434,6 @@ void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
 		.SelectedItemName(NAME_None)
 		.DataEditorObject(GetDataEditObject(RegistryType))
 		.OutputDataTable(SelectedDataTable)
-		.PackagePath(this, &SInventoryToolkitWindow::GetOutputPackagePath)
 		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create);
 
 	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride);

@@ -45,6 +45,11 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 
 	ThumbnailPool = MakeShareable(new FAssetThumbnailPool(32));
 
+	if (InArgs._RegistryType.Get().IsValid())
+	{
+		UpdateDataTableCollection(InArgs._RegistryType.Get());
+	}
+
 	ChildSlot
 	[
 		SNew(SBorder)

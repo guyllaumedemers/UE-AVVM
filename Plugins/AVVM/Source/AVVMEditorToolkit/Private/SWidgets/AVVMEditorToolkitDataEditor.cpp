@@ -26,6 +26,16 @@
 #include "Modules/ModuleManager.h"
 #include "Widgets/Images/SImage.h"
 
+FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorIdentifiers() const
+{
+	return TEXT("R_ActorIdentifier");
+}
+
+FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorDefinitions() const
+{
+	return TEXT("R_ActorDefinitions");
+}
+
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 {
 	auto* Copy = DuplicateObject<UAVVMEditorToolkitDataEditObject>(InArgs._DataEditorObject.Get().Get(), nullptr);
@@ -33,17 +43,16 @@ void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		GetDataEditContent(InArgs._OutputDataTable.Get(), InArgs._PackagePath.Get(), InArgs._Mode.Get()).ToSharedRef()
+		GetDataEditContent(InArgs._OutputDataTable.Get(), InArgs._Mode.Get()).ToSharedRef()
 	];
 }
 
 TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                     const FString& NewPackagePath,
                                                                      const EAVVMDataEditorModes CurrentMode) const
 {
 	if (DataEditObject.IsValid())
 	{
-		return DataEditObject->GetDataEditContent(OutputDataTable, NewPackagePath, CurrentMode);
+		return DataEditObject->GetDataEditContent(OutputDataTable, CurrentMode);
 	}
 	else
 	{
