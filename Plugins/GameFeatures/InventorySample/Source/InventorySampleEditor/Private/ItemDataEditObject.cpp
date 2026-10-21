@@ -163,7 +163,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create a new DataTable."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step4", "Step 4: Select to edit, or create the required DataTables."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
