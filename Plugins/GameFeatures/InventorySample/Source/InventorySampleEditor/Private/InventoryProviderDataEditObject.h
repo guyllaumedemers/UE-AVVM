@@ -38,6 +38,7 @@ class INVENTORYSAMPLEEDITOR_API UFtueInventoryProviderDataEditObject : public UA
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewDataTablePackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 
 	virtual FText GetModalMessage_OnClosure() const override;
@@ -57,6 +58,7 @@ class INVENTORYSAMPLEEDITOR_API UStubDataInventoryDependencyGraphEditObject : pu
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewDataTablePackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 
 	virtual FText GetModalMessage_OnClosure() const override;

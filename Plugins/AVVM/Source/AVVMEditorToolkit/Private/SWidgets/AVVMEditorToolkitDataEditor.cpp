@@ -43,16 +43,17 @@ void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		GetDataEditContent(InArgs._OutputDataTable.Get(), InArgs._Mode.Get()).ToSharedRef()
+		GetDataEditContent(InArgs._OutputDataTable.Get(), InArgs._DataTablePackagePath.Get(), InArgs._Mode.Get()).ToSharedRef()
 	];
 }
 
 TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                                     const FString& PackagePath,
                                                                      const EAVVMDataEditorModes CurrentMode) const
 {
 	if (DataEditObject.IsValid())
 	{
-		return DataEditObject->GetDataEditContent(OutputDataTable, CurrentMode);
+		return DataEditObject->GetDataEditContent(OutputDataTable, PackagePath, CurrentMode);
 	}
 	else
 	{

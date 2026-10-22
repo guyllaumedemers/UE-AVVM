@@ -270,7 +270,7 @@ void SInventoryToolkitWindow::OnTextCommited_DataTaleNameSet(const FText& NewAss
 
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
-		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
+		OpenWindow(SelectedDataTable, SelectedDataRegistryType, bShouldEditDataTable);
 	}
 }
 
@@ -420,20 +420,19 @@ void SInventoryToolkitWindow::EditDataTable()
 {
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
-		OpenWindow(SelectedDataRegistryType, bShouldEditDataTable);
+		OpenWindow(SelectedDataTable, SelectedDataRegistryType, bShouldEditDataTable);
 	}
 }
 
-void SInventoryToolkitWindow::OpenWindow(const FName RegistryType,
+void SInventoryToolkitWindow::OpenWindow(const TWeakObjectPtr<UDataTable>& DataTable,
+                                         const FName RegistryType,
                                          const bool bShouldOpenInEditMode)
 {
 	FAVVMWindowContextArgs Params{};
 	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor");
 	Params.Content = SNew(SAVVMEditorToolkitDataEditor)
-		.SelectedDataRegistryType(FDataRegistryType{RegistryType})
-		.SelectedItemName(NAME_None)
 		.DataEditorObject(GetDataEditObject(RegistryType))
-		.OutputDataTable(SelectedDataTable)
+		.OutputDataTable(DataTable)
 		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create);
 
 	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride);

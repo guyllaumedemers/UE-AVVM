@@ -29,6 +29,7 @@
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "SCheckBoxList.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Components/VerticalBox.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
@@ -37,6 +38,7 @@
 #include "Factories/BlueprintFactory.h"
 #include "Factories/DataAssetFactory.h"
 #include "Interfaces/IPluginManager.h"
+#include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
@@ -45,9 +47,11 @@
 #include "Widgets/Layout/SScrollBox.h"
 
 TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                            const FString& NewDataTablePackagePath,
                                                             const EAVVMDataEditorModes NewMode)
 {
 	SelectedDataTable_ItemDefinitions = OutputDataTable;
+	DataTablePackagePath = NewDataTablePackagePath;
 	
 	TSharedPtr<SWidget> Out{nullptr};
 	switch (NewMode)
@@ -293,7 +297,7 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 		const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "ItemEdit_ModalTitle", "ItemObject"));
 		if (Response != EAppReturnType::Yes)
 		{
-			return false;
+			return FReply::Unhandled();
 		}
 	}
 
@@ -374,7 +378,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 			NewItemDefinition->ItemDefinition = DataAsset;
 		}
 
-		return TryCreateDependentAsset(DataAsset, NewItemObjectName);
+		return TryCreateDependentAsset(DataAsset, SelectedItemType, NewItemObjectName, SelectedPackagePath);
 	}
 	else
 	{
@@ -383,10 +387,11 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 }
 
 bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset,
-                                                  const FString& AssetName)
+                                                  const FName NewItemType,
+                                                  const FString& AssetName,
+                                                  const FString& NewPackagePath)
 {
-	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == AssetName.IsEmpty()),
-	                                                           TEXT("Invalid Asset Name.")))
+	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == AssetName.IsEmpty()), TEXT("Invalid Asset Name.")))
 	{
 		return false;
 	}
@@ -396,33 +401,89 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	{
 		BP_Factory->ParentClass = UItemObject::StaticClass();
 
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = AssetName;
-		Params.PackagePath = SelectedPackagePath;
-		Params.AssetFactory = BP_Factory;
-		Params.AssetClass = UItemDefinitionDataAsset::StaticClass();
-		auto* ItemObject = UAVVMEditorToolkitUtils::CreateOpenAsset<UItemObject>(Params);
+		FAVVMAssetFactoryContextArgs BP_Params{};
+		BP_Params.AssetName = AssetName;
+		BP_Params.PackagePath = NewPackagePath; // Blueprint Package path, and DA should be grouped together 
+		BP_Params.AssetFactory = BP_Factory;
+		BP_Params.AssetClass = UBlueprint::StaticClass();
+
+		auto* BlueprintAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UBlueprint>(BP_Params);
+		if (!ensureAlwaysMsgf(IsValid(BlueprintAsset), TEXT("Failed to create New Blueprint.")))
+		{
+			return false;
+		}
+
+		auto* ItemObject = Cast<UItemObject>(BlueprintAsset->GeneratedClass.GetDefaultObject());
 		if (ensureAlwaysMsgf(IsValid(ItemObject), TEXT("Failed to create New Blueprint.")))
 		{
 			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
 		}
 	}
 
-	// @gdemers TODO define how we retrieve the asset name here!
 	if (!SelectedDataTable_ActorIdentifiers.IsValid())
 	{
-		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(), {});
+		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(),
+		                                                            DataTablePackagePath,
+		                                                            {});
 	}
 
 	if (!SelectedDataTable_ActorDefinitions.IsValid())
 	{
-		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(), {});
+		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(),
+		                                                            DataTablePackagePath,
+		                                                            {});
+	}
+
+	if (ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
+	{
+		auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(AssetName)));
+		if (ensureAlwaysMsgf(ActorIdentifier != nullptr, TEXT("Failed to cast Row Type.")))
+		{
+			// @gdemers generate new unique id within bounds of item type.
+			ActorIdentifier->UniqueId = TryGenerateNewPhysicalGlobalId(NewItemType);
+		}
+	}
+
+	if (ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
+	{
+		return false;
+	}
+
+	auto* ActorDefinition = reinterpret_cast<FAVVMActorDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorDefinitions.Get(), FName(AssetName)));
+	if (ensureAlwaysMsgf(ActorDefinition != nullptr, TEXT("Failed to cast Row Type.")))
+	{
+		auto* DA_Factory = NewObject<UDataAssetFactory>();
+		if (!IsValid(DA_Factory))
+		{
+			return false;
+		}
+
+		DA_Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
+
+		FAVVMAssetFactoryContextArgs DA_Params{};
+		DA_Params.AssetName = AssetName.Replace(TEXT("BP"), TEXT("DA"));
+		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
+		DA_Params.AssetFactory = DA_Factory;
+		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
+
+		auto* ActorDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorDefinitionDataAsset>(DA_Params);
+		if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
+		{
+			ActorDefinition->ActorDefinition = ActorDefinitionDataAsset;
+		}
 	}
 
 	return true;
 }
 
-UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName) const
+int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) const
+{
+	return INDEX_NONE;
+}
+
+UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,
+                                                        const FString& AssetName,
+                                                        const FString& NewDataTablePackagePath) const
 {
 	auto* Factory = NewObject<UDataTableFactory>();
 	if (IsValid(Factory))
@@ -430,8 +491,8 @@ UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* Scr
 		Factory->Struct = ScriptStruct;
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, AssetName);
-		Params.PackagePath = SelectedPackagePath;
+		Params.AssetName = FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, *AssetName);
+		Params.PackagePath = NewDataTablePackagePath;
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UDataTable::StaticClass();
 		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
@@ -442,12 +503,8 @@ UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* Scr
 	}
 }
 
-int32 UItemDataEditObject::GenerateNewPhysicalGlobalId() const
-{
-	return INDEX_NONE;
-}
-
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                                 const FString& NewDataTablePackagePath,
                                                                  const EAVVMDataEditorModes NewMode)
 {
 	return SNew(SImage)

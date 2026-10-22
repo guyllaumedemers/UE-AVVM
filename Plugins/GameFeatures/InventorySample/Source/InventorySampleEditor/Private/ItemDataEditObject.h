@@ -46,6 +46,7 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewDataTablePackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 	
 	virtual FText GetModalMessage_OnClosure() const override;
@@ -70,10 +71,9 @@ private:
 	FString StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	bool TryCreateNewItemObject();
-	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FString& AssetName);
-	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName) const;
-	
-	int32 GenerateNewPhysicalGlobalId() const;
+	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& AssetName, const FString& NewPackagePath);
+	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
+	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName, const FString& NewDataTablePackagePath) const;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};
@@ -82,6 +82,7 @@ private:
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ItemDefinitions{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorIdentifiers{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorDefinitions{nullptr};
+	FString DataTablePackagePath{};
 	FString SelectedPackagePath{};
 	FName SelectedItemType{NAME_None};
 	FString ItemRowName{};
@@ -100,6 +101,7 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+	                                               const FString& NewDataTablePackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 	
 	virtual FText GetModalMessage_OnClosure() const override;

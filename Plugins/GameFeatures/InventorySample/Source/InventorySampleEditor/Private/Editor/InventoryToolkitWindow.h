@@ -75,7 +75,7 @@ private:
 	bool CreateDataRegistry();
 	bool CreateDataTable();
 	void EditDataTable();
-	void OpenWindow(const FName RegistryType, const bool bShouldOpenInEditMode);
+	void OpenWindow(const TWeakObjectPtr<UDataTable>& DataTable, const FName RegistryType, const bool bShouldOpenInEditMode);
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
 	

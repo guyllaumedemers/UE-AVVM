@@ -22,6 +22,7 @@
 #include "Widgets/Images/SImage.h"
 
 TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                                             const FString& NewDataTablePackagePath,
                                                                              const EAVVMDataEditorModes NewMode)
 {
 	return SNew(SImage)
@@ -39,6 +40,7 @@ FText UFtueInventoryProviderDataEditObject::GetModalTitle_OnClosure() const
 }
 
 TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
+                                                                                    const FString& NewDataTablePackagePath,
                                                                                     const EAVVMDataEditorModes NewMode)
 {
 	return SNew(SImage)
