@@ -200,7 +200,7 @@ bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(const FName Selecte
 	}
 
 	SelectedDataRegistry = UAVVMEditorToolkitUtils::GetDataRegistry(SelectedDataRegistryType);
-	if (!SelectedDataRegistry.IsValid() && (bCheckBoxStates.IsValidIndex(1/*UDataRegistry*/) && bCheckBoxStates[1]))
+	if (!SelectedDataRegistry.IsValid() && (bCheckBoxStates.IsValidIndex(0/*UDataRegistry*/) && bCheckBoxStates[0]))
 	{
 		bResult = CreateDataRegistry();
 	}

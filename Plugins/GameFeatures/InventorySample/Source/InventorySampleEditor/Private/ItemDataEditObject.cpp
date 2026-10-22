@@ -68,6 +68,11 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr
 	return Out;
 }
 
+FName UItemDataEditObject::GetRegistryType_ItemDefinitions() const
+{
+	return TEXT("R_Item");
+}
+
 FText UItemDataEditObject::GetModalMessage_OnClosure() const
 {
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UItemDataEditObject::DataEditor_ClosureMessage", "Do you want to close this Window. Any unsaved Items will be lost?");
@@ -232,9 +237,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 TArray<FName> UItemDataEditObject::GetAssetTypeToDefaultGenerate() const
 {
 	return {
-			GetFNameSafe(UDataTable::StaticClass()),
-			GetFNameSafe(UDataAsset::StaticClass()),
-			GetFNameSafe(UBlueprint::StaticClass())
+			GetFNameSafe(UDataTable::StaticClass())
 	};
 }
 
@@ -325,7 +328,7 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
 }
 
-bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
+bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -334,13 +337,14 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue
 	}
 
 	bool bResult{false};
-	// @gdemers check if item object of name exist.
-	bResult |= (Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{UInventorySettings::GetItemRegistryType(), FName(NewValue)}) != nullptr);
+	bResult |= (Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ItemDefinitions(), FName(ItemObjectRowName)}) != nullptr);
 
-	// @gdemers check if actor of name exist.
-	const FString ModifiedString = NewValue.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
-	bResult |= (Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(FDataRegistryId{UAVVMGameplaySettings::GetActorIdentifierRegistryType(), FName(ModifiedString)}) != nullptr);
-	bResult |= (Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{UAVVMGameplaySettings::GetActorDefinitionRegistryType(), FName(ModifiedString)}) != nullptr);
+	const FString ItemActorRowName = ItemObjectRowName.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
+	bResult |= (Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(FDataRegistryId{GetRegistryType_ActorIdentifiers(), FName(ItemActorRowName)}) != nullptr);
+	bResult |= (Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorRowName)}) != nullptr);
+
+	const FString ItemActorUIRowName = ItemObjectRowName.Replace(TEXT("ItemObject"), TEXT("ItemActorUI"));
+	bResult |= (Subsystem->GetCachedItem<FAVVMActorUIDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorUIRowName)}) != nullptr);
 
 	return bResult;
 }
@@ -353,8 +357,8 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		return false;
 	}
 
-	const FString NewItemObjectName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("BP"), FString::Printf(TEXT("ItemObject_%s_%s_C"), *SelectedItemType.ToString(), *ItemRowName));
-	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
+	const FString ItemObjectRowName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("BP"), FString::Printf(TEXT("ItemObject_%s_%s_C"), *SelectedItemType.ToString(), *ItemRowName));
+	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(ItemObjectRowName);
 	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
 	{
 		FMessageDialog::Open(EAppMsgCategory::Error,
@@ -363,7 +367,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		return false;
 	}
 
-	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ItemDefinitions.Get(), FName(NewItemObjectName)));
+	auto* NewItemDefinition = reinterpret_cast<FItemDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ItemDefinitions.Get(), FName(ItemObjectRowName)));
 	if (!ensureAlwaysMsgf(NewItemDefinition != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		return false;
@@ -375,7 +379,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = NewItemObjectName.Replace(TEXT("BP"), TEXT("DA"));
+		Params.AssetName = ItemObjectRowName.Replace(TEXT("BP"), TEXT("DA"));
 		Params.PackagePath = SelectedPackagePath;
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UItemDefinitionDataAsset::StaticClass();
@@ -385,7 +389,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 			NewItemDefinition->ItemDefinition = DataAsset;
 		}
 
-		return TryCreateDependentAsset(DataAsset, SelectedItemType, NewItemObjectName, SelectedPackagePath);
+		return TryCreateDependentAsset(DataAsset, SelectedItemType, ItemObjectRowName, SelectedPackagePath);
 	}
 	else
 	{
@@ -395,24 +399,24 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 
 bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset,
                                                   const FName NewItemType,
-                                                  const FString& ItemObjectAssetName,
+                                                  const FString& ItemObjectRowName,
                                                   const FString& NewPackagePath)
 {
-	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == ItemObjectAssetName.IsEmpty()), TEXT("Invalid Asset Name.")))
+	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == ItemObjectRowName.IsEmpty()), TEXT("Invalid Asset Name.")))
 	{
 		return false;
 	}
 
-	const FString ItemActorUIAssetName = ItemObjectAssetName.Replace(TEXT("ItemObject"), TEXT("ItemActorUI"));
-	const FString ItemActorAssetName = ItemObjectAssetName.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
-	
+	const FString ItemActorUIRowName = ItemObjectRowName.Replace(TEXT("ItemObject"), TEXT("ItemActorUI"));
+	const FString ItemActorRowName = ItemObjectRowName.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
+
 	auto* BP_Factory = NewObject<UBlueprintFactory>();
 	if (IsValid(BP_Factory))
 	{
 		BP_Factory->ParentClass = UItemObject::StaticClass();
 
 		FAVVMAssetFactoryContextArgs BP_Params{};
-		BP_Params.AssetName = ItemObjectAssetName;
+		BP_Params.AssetName = ItemObjectRowName;
 		BP_Params.PackagePath = NewPackagePath; // Blueprint Package path, and DA should be grouped together 
 		BP_Params.AssetFactory = BP_Factory;
 		BP_Params.AssetClass = UBlueprint::StaticClass();
@@ -426,51 +430,53 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		auto* ItemObject = Cast<UItemObject>(BlueprintAsset->GeneratedClass.GetDefaultObject());
 		if (ensureAlwaysMsgf(IsValid(ItemObject), TEXT("Failed to create New Blueprint.")))
 		{
-			ItemObject->GetMutableItemSparseData()->ItemActorUIId = FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorUIAssetName)};
-			ItemObject->GetMutableItemSparseData()->ItemActorId = FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorAssetName)};
+			ItemObject->GetMutableItemSparseData()->ItemActorUIId = FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorUIRowName)};
+			ItemObject->GetMutableItemSparseData()->ItemActorId = FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorRowName)};
 			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
 		}
 	}
 
-	if (!SelectedDataTable_ActorIdentifiers.IsValid())
+	const bool bShouldCreateMissingDataTables = (bCheckBoxStates.IsValidIndex(0/*UDataTable*/) && bCheckBoxStates[0]);
+	if (!SelectedDataTable_ActorIdentifiers.IsValid() && bShouldCreateMissingDataTables)
 	{
 		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(),
 		                                                            UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorIdentifierDataTableRow::StaticStruct())),
 		                                                            DataTablePackagePath);
 	}
 
-	if (!SelectedDataTable_ActorDefinitions.IsValid())
+	if (!SelectedDataTable_ActorDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
 		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(),
 		                                                            UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct())),
 		                                                            DataTablePackagePath);
 	}
 
-	if (!SelectedDataTable_ActorUIDefinitions.IsValid())
+	if (!SelectedDataTable_ActorUIDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
 		SelectedDataTable_ActorUIDefinitions = CreateMissingDataTable(FAVVMActorUIDefinitionDataTableRow::StaticStruct(),
 		                                                              UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorUIDefinitionDataTableRow::StaticStruct())),
 		                                                              DataTablePackagePath);
 	}
 
-	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
+	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid() &&
+	                      SelectedDataTable_ActorDefinitions.IsValid() &&
+	                      SelectedDataTable_ActorUIDefinitions.IsValid(), TEXT("A Data Table is missing, and prevent us from proceeding.")))
 	{
+		FMessageDialog::Open(EAppMsgCategory::Error,
+		                     EAppMsgType::Ok,
+		                     NSLOCTEXT("AVVMEditorToolkit", "NotifyMissingDataTable", "DataTable missing!\nChoose or create the required DataTables."));
+
 		return false;
 	}
 
-	auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(ItemActorAssetName)));
+	auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(ItemActorRowName)));
 	if (ensureAlwaysMsgf(ActorIdentifier != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		// @gdemers generate new unique id within bounds of item type.
 		ActorIdentifier->UniqueId = TryGenerateNewPhysicalGlobalId(NewItemType);
 	}
 
-	if (!ensureAlwaysMsgf(SelectedDataTable_ActorDefinitions.IsValid(), TEXT("Failed to cache a valid DataTable.")))
-	{
-		return false;
-	}
-
-	auto* ActorDefinition = reinterpret_cast<FAVVMActorDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorDefinitions.Get(), FName(ItemActorAssetName)));
+	auto* ActorDefinition = reinterpret_cast<FAVVMActorDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorDefinitions.Get(), FName(ItemActorRowName)));
 	if (ensureAlwaysMsgf(ActorDefinition != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		auto* DA_Factory = NewObject<UDataAssetFactory>();
@@ -482,7 +488,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
 		FAVVMAssetFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = ItemActorAssetName.Replace(TEXT("BP"), TEXT("DA"));
+		DA_Params.AssetName = ItemActorRowName.Replace(TEXT("BP"), TEXT("DA"));
 		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
 		DA_Params.AssetFactory = DA_Factory;
 		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
@@ -494,12 +500,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		}
 	}
 
-	if (!ensureAlwaysMsgf(SelectedDataTable_ActorUIDefinitions.IsValid(), TEXT("Failed to cache a valid DataTable.")))
-	{
-		return false;
-	}
-
-	auto* ActorUIDefinition = reinterpret_cast<FAVVMActorUIDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorUIDefinitions.Get(), FName(ItemActorUIAssetName)));
+	auto* ActorUIDefinition = reinterpret_cast<FAVVMActorUIDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorUIDefinitions.Get(), FName(ItemActorUIRowName)));
 	if (ensureAlwaysMsgf(ActorUIDefinition != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		auto* DA_Factory = NewObject<UDataAssetFactory>();
@@ -511,7 +512,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		DA_Factory->DataAssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
 
 		FAVVMAssetFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = ItemActorUIAssetName.Replace(TEXT("BP"), TEXT("DA"));
+		DA_Params.AssetName = ItemActorUIRowName.Replace(TEXT("BP"), TEXT("DA"));
 		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
 		DA_Params.AssetFactory = DA_Factory;
 		DA_Params.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();

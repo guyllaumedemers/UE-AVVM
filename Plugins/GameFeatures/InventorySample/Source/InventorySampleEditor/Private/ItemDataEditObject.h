@@ -49,6 +49,8 @@ public:
 	                                               const FString& NewDataTablePackagePath,
 	                                               const EAVVMDataEditorModes NewMode) override;
 	
+	FName GetRegistryType_ItemDefinitions() const;
+	
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
@@ -69,9 +71,9 @@ private:
 	void OnTextChanged_ItemName(const FText& NewItemName);
 	FReply OnButtonClick_GenerateItem();
 	
-	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
+	bool DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const;
 	bool TryCreateNewItemObject();
-	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectAssetName, const FString& NewPackagePath);
+	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
 	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
 	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName, const FString& NewDataTablePackagePath) const;
 
