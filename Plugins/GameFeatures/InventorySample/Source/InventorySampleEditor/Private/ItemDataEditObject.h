@@ -57,8 +57,8 @@ public:
 private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
-	TArray<FName> GetAssetTypeToDefaultGenerate() const;
-	TArray<FName> GetItemTypes() const;
+	static const TArray<FName>& GetAssetTypeToDefaultGenerate();
+	static const TArray<FName>& GetItemTypes();
 	void OnCheckBoxStateChanged(int32 Index);
 	void OnOutputAssetPathSelected(const FString& NewPackagePath);
 	bool IsEnabled_AssetPathSelectionChanged() const;

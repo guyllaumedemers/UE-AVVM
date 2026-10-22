@@ -29,6 +29,8 @@
 #include "ItemObject.h"
 #include "SCheckBoxList.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
 #include "Components/VerticalBox.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
@@ -234,20 +236,24 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 		];
 }
 
-TArray<FName> UItemDataEditObject::GetAssetTypeToDefaultGenerate() const
+const TArray<FName>& UItemDataEditObject::GetAssetTypeToDefaultGenerate()
 {
-	return {
+	static TArray<FName> Result = {
 			GetFNameSafe(UDataTable::StaticClass())
 	};
+
+	return Result;
 }
 
-TArray<FName> UItemDataEditObject::GetItemTypes() const
+const TArray<FName>& UItemDataEditObject::GetItemTypes()
 {
-	return {
+	static TArray<FName> Result = {
 			TEXT("Item"),
 			TEXT("Attachment"),
 			TEXT("Storage")
 	};
+
+	return Result;
 }
 
 void UItemDataEditObject::OnCheckBoxStateChanged(int32 Index)
@@ -529,7 +535,63 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 
 int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) const
 {
-	return INDEX_NONE;
+	const TArray<FName>& ItemTypes = GetItemTypes();
+	if (!ItemTypes.Contains(ItemType))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	const UDataRegistry* ActorIdentifierRegistry = Subsystem->GetRegistryForType(GetRegistryType_ActorIdentifiers());
+	if (!IsValid(ActorIdentifierRegistry))
+	{
+		return INDEX_NONE;
+	}
+
+	TArray<const FAVVMActorIdentifierDataTableRow*> OutResults{};
+	ActorIdentifierRegistry->GetAllItems(TEXT(""), OutResults);
+	OutResults.Sort();
+
+	int32 LowerBounds{INDEX_NONE};
+	int32 UpperBounds{INDEX_NONE};
+
+	if (ItemType.IsEqual(TEXT("Item")))
+	{
+		LowerBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+	else if (ItemType.IsEqual(TEXT("Attachment")))
+	{
+		LowerBounds = GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+	else
+	{
+		LowerBounds = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+	}
+
+	int32 NextValidId{INDEX_NONE};
+	for (const FAVVMActorIdentifierDataTableRow* Row : OutResults)
+	{
+		if ((Row != nullptr) && ((Row->UniqueId >= LowerBounds) && (Row->UniqueId < UpperBounds)) && (Row->UniqueId > NextValidId))
+		{
+			NextValidId = Row->UniqueId;
+		}
+	}
+
+	if (!ensureAlwaysMsgf(NextValidId != UpperBounds,
+	                      TEXT("Failed to generate new unique Id. We have reach our limit. Reconfigure your bit encoding to int64, or remove deprecated entries.")))
+	{
+		return INDEX_NONE;
+	}
+
+	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
 }
 
 UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,

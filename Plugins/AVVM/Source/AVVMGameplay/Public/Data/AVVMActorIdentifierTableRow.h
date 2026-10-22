@@ -47,6 +47,8 @@ struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FAVVMDataTable
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 
+	bool operator<(const FAVVMActorIdentifierDataTableRow& Rhs) const;
+
 	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can target Attachment bits, Storage bits, and items.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0"))
 	int32 UniqueId{INDEX_NONE};

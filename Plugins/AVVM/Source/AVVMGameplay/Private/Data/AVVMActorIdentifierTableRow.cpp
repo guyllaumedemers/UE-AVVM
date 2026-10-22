@@ -32,3 +32,8 @@ EDataValidationResult FAVVMActorIdentifierDataTableRow::IsDataValid(class FDataV
 	return Result;
 }
 #endif
+
+bool FAVVMActorIdentifierDataTableRow::operator<(const FAVVMActorIdentifierDataTableRow& Rhs) const
+{
+	return UniqueId < Rhs.UniqueId;
+}

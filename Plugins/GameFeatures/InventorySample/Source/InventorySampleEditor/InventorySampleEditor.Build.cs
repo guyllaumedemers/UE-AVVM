@@ -45,6 +45,7 @@ public class InventorySampleEditor : ModuleRules
 			new string[]
 			{
 				"AVVMGameplay",
+				"AVVMOnline",
 				"AVVMToolkit",
 				"DataRegistry",
 				"InventorySample",
