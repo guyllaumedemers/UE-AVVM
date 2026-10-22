@@ -63,6 +63,7 @@ public:
 
 	FName GetRegistryType_ActorIdentifiers() const;
 	FName GetRegistryType_ActorDefinitions() const;
+	FName GetRegistryType_ActorUIDefinitions() const;
 	
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););

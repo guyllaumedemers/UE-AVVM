@@ -418,6 +418,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		auto* ItemObject = Cast<UItemObject>(BlueprintAsset->GeneratedClass.GetDefaultObject());
 		if (ensureAlwaysMsgf(IsValid(ItemObject), TEXT("Failed to create New Blueprint.")))
 		{
+			ItemObject->GetMutableItemSparseData()->ItemActorUIId = FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorAssetName)};
 			ItemObject->GetMutableItemSparseData()->ItemActorId = FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorAssetName)};
 			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
 		}

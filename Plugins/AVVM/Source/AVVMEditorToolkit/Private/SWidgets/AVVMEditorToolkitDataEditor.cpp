@@ -36,6 +36,11 @@ FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorDefinitions() const
 	return TEXT("R_ActorDefinitions");
 }
 
+FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorUIDefinitions() const
+{
+	return TEXT("R_ActorUIDefinitions");
+}
+
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 {
 	auto* Copy = DuplicateObject<UAVVMEditorToolkitDataEditObject>(InArgs._DataEditorObject.Get().Get(), nullptr);
