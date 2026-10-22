@@ -73,6 +73,7 @@ public:
 	static TSharedRef<SWindow> OpenWindow(const FAVVMWindowContextArgs& Params);
 	static TArray<const UDataRegistrySource_DataTable*> GetDataTables(const FDataRegistryType& RegistryType);
 	static UDataRegistry* GetDataRegistry(const FDataRegistryType& RegistryType);
+	static FString GetStandardizedName(const FString& PackagePath, FString&& AssetPrefix, FString&& AssetName);
 
 	template <typename TAsset>
 	static TAsset* CreateOpenAsset(const FAVVMAssetFactoryContextArgs& Params);

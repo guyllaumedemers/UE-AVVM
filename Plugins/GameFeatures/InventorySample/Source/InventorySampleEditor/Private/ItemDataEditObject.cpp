@@ -20,7 +20,6 @@
 #include "ItemDataEditObject.h"
 
 #include "AssetToolsModule.h"
-#include "AVVMEditorToolkitModule.h"
 #include "AVVMEditorToolkitUtils.h"
 #include "AVVMGameplaySettings.h"
 #include "ContentBrowserModule.h"
@@ -33,11 +32,11 @@
 #include "Components/VerticalBox.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/AVVMActorUIDefinitionDataAsset.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/DataTable.h"
 #include "Factories/BlueprintFactory.h"
 #include "Factories/DataAssetFactory.h"
-#include "Interfaces/IPluginManager.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
@@ -194,6 +193,20 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
+				.FillHeight(1.f)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					[
+						SAssignNew(DataTablePicker_ActorUIDefinitions, SAVVMEditorToolkitDataTablePicker)
+						.RegistryType(GetRegistryType_ActorUIDefinitions())
+						.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_OnItemTypeChanged)
+						.OnSelectionChanged_UObject(this, &UItemDataEditObject::OnDataTableSelectionChanged_ActorUIDefinitions)
+						.PickerHeaderText(NSLOCTEXT("AVVMEditorToolkit", "PickerHeader", "ActorUIDefinitions:"))
+					]
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
 				.AutoHeight()
 				[
 					SNew(SButton)
@@ -277,6 +290,11 @@ void UItemDataEditObject::OnDataTableSelectionChanged_ActorDefinitions(TWeakObje
 	SelectedDataTable_ActorDefinitions = NewSelection;
 }
 
+void UItemDataEditObject::OnDataTableSelectionChanged_ActorUIDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo)
+{
+	SelectedDataTable_ActorUIDefinitions = NewSelection;
+}
+
 bool UItemDataEditObject::IsEnabled_GenerateButton() const
 {
 	return SelectedItemType.IsValid() && !ItemRowName.IsEmpty();
@@ -289,7 +307,9 @@ void UItemDataEditObject::OnTextChanged_ItemName(const FText& NewItemName)
 
 FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 {
-	if (!DataTablePicker_ActorIdentifiers.IsValid() || !DataTablePicker_ActorDefinitions.IsValid())
+	if (!DataTablePicker_ActorIdentifiers.IsValid() ||
+		!DataTablePicker_ActorDefinitions.IsValid() ||
+		!DataTablePicker_ActorUIDefinitions.IsValid())
 	{
 		FFormatNamedArguments Args{};
 		const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::Generate", "A data table selection is missing. Should we handle the creation here?"), Args);
@@ -303,19 +323,6 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 
 	// @gdemers user made the required selection, and is creating a new entry in each Data Table.
 	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
-}
-
-FString UItemDataEditObject::StandardizeItemObjectName() const
-{
-	FString PluginName{TEXT("Error")};
-
-	TSharedPtr<IPlugin> OwningPlugin = IPluginManager::Get().GetModuleOwnerPlugin(FName(TEXT("InventorySampleEditor")));
-	if (OwningPlugin.IsValid())
-	{
-		PluginName = OwningPlugin->GetName();
-	}
-
-	return FString::Printf(TEXT("BP_%s_%s_ItemObject_%s_%s_C"), PROJECT_ASSET_PREFIX, *PluginName, *SelectedItemType.ToString(), *ItemRowName);
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& NewValue) const
@@ -346,7 +353,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		return false;
 	}
 
-	const FString NewItemObjectName = StandardizeItemObjectName();
+	const FString NewItemObjectName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("BP"), FString::Printf(TEXT("ItemObject_%s_%s_C"), *SelectedItemType.ToString(), *ItemRowName));
 	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(NewItemObjectName);
 	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
 	{
@@ -396,6 +403,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		return false;
 	}
 
+	const FString ItemActorUIAssetName = ItemObjectAssetName.Replace(TEXT("ItemObject"), TEXT("ItemActorUI"));
 	const FString ItemActorAssetName = ItemObjectAssetName.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
 	
 	auto* BP_Factory = NewObject<UBlueprintFactory>();
@@ -418,7 +426,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		auto* ItemObject = Cast<UItemObject>(BlueprintAsset->GeneratedClass.GetDefaultObject());
 		if (ensureAlwaysMsgf(IsValid(ItemObject), TEXT("Failed to create New Blueprint.")))
 		{
-			ItemObject->GetMutableItemSparseData()->ItemActorUIId = FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorAssetName)};
+			ItemObject->GetMutableItemSparseData()->ItemActorUIId = FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorUIAssetName)};
 			ItemObject->GetMutableItemSparseData()->ItemActorId = FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorAssetName)};
 			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
 		}
@@ -427,15 +435,22 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	if (!SelectedDataTable_ActorIdentifiers.IsValid())
 	{
 		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(),
-		                                                            DataTablePackagePath,
-		                                                            {});
+		                                                            UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorIdentifierDataTableRow::StaticStruct())),
+		                                                            DataTablePackagePath);
 	}
 
 	if (!SelectedDataTable_ActorDefinitions.IsValid())
 	{
 		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(),
-		                                                            DataTablePackagePath,
-		                                                            {});
+		                                                            UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct())),
+		                                                            DataTablePackagePath);
+	}
+
+	if (!SelectedDataTable_ActorUIDefinitions.IsValid())
+	{
+		SelectedDataTable_ActorUIDefinitions = CreateMissingDataTable(FAVVMActorUIDefinitionDataTableRow::StaticStruct(),
+		                                                              UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorUIDefinitionDataTableRow::StaticStruct())),
+		                                                              DataTablePackagePath);
 	}
 
 	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
@@ -443,7 +458,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		return false;
 	}
 
-	auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(ItemObjectAssetName)));
+	auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(ItemActorAssetName)));
 	if (ensureAlwaysMsgf(ActorIdentifier != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		// @gdemers generate new unique id within bounds of item type.
@@ -467,7 +482,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
 		FAVVMAssetFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = ItemActorAssetName;
+		DA_Params.AssetName = ItemActorAssetName.Replace(TEXT("BP"), TEXT("DA"));
 		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
 		DA_Params.AssetFactory = DA_Factory;
 		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
@@ -476,6 +491,35 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 		{
 			ActorDefinition->ActorDefinition = ActorDefinitionDataAsset;
+		}
+	}
+
+	if (!ensureAlwaysMsgf(SelectedDataTable_ActorUIDefinitions.IsValid(), TEXT("Failed to cache a valid DataTable.")))
+	{
+		return false;
+	}
+
+	auto* ActorUIDefinition = reinterpret_cast<FAVVMActorUIDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorUIDefinitions.Get(), FName(ItemActorUIAssetName)));
+	if (ensureAlwaysMsgf(ActorUIDefinition != nullptr, TEXT("Failed to cast Row Type.")))
+	{
+		auto* DA_Factory = NewObject<UDataAssetFactory>();
+		if (!IsValid(DA_Factory))
+		{
+			return false;
+		}
+
+		DA_Factory->DataAssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
+
+		FAVVMAssetFactoryContextArgs DA_Params{};
+		DA_Params.AssetName = ItemActorUIAssetName.Replace(TEXT("BP"), TEXT("DA"));
+		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
+		DA_Params.AssetFactory = DA_Factory;
+		DA_Params.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
+
+		auto* ActorUIDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorUIDefinitionDataAsset>(DA_Params);
+		if (ensureAlwaysMsgf(IsValid(ActorUIDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
+		{
+			ActorUIDefinition->ActorUIDefinition = ActorUIDefinitionDataAsset;
 		}
 	}
 
@@ -497,7 +541,7 @@ UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* Scr
 		Factory->Struct = ScriptStruct;
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, *AssetName);
+		Params.AssetName = AssetName;
 		Params.PackagePath = NewDataTablePackagePath;
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UDataTable::StaticClass();

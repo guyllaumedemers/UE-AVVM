@@ -64,11 +64,11 @@ private:
 	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
 	void OnDataTableSelectionChanged_ActorIdentifiers(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	void OnDataTableSelectionChanged_ActorDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
+	void OnDataTableSelectionChanged_ActorUIDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	bool IsEnabled_GenerateButton() const;
 	void OnTextChanged_ItemName(const FText& NewItemName);
 	FReply OnButtonClick_GenerateItem();
 	
-	FString StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectAssetName, const FString& NewPackagePath);
@@ -77,11 +77,13 @@ private:
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};
+	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorUIDefinitions{nullptr};
 	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
 	TArray<bool> bCheckBoxStates{};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ItemDefinitions{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorIdentifiers{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorDefinitions{nullptr};
+	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorUIDefinitions{nullptr};
 	FString DataTablePackagePath{};
 	FString SelectedPackagePath{};
 	FName SelectedItemType{NAME_None};

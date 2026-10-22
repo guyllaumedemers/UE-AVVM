@@ -48,7 +48,6 @@ public class InventorySampleEditor : ModuleRules
 				"AVVMToolkit",
 				"DataRegistry",
 				"InventorySample",
-				"Projects",
 				"ToolWidgets",
 				"UnrealEd",
 			}

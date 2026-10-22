@@ -50,6 +50,7 @@ public class AVVMEditorToolkit : ModuleRules
 				"AVVMGameplay",
 				"DataRegistry",
 				"InputCore",
+				"Projects",
 				"ToolMenus",
 				"TranslationEditor",
 				"WorkspaceMenuStructure",

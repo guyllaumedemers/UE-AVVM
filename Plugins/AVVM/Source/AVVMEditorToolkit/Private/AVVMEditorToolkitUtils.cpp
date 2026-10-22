@@ -19,13 +19,14 @@
 //SOFTWARE.
 #include "AVVMEditorToolkitUtils.h"
 
+#include "AVVMEditorToolkitModule.h"
 #include "DataRegistrySource_DataTable.h"
 #include "DataRegistrySubsystem.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Docking/TabManager.h"
-#include "Framework/Notifications/NotificationManager.h"
 #include "GenericPlatform/GenericApplication.h"
 #include "HAL/PlatformApplicationMisc.h"
+#include "Interfaces/IPluginManager.h"
 
 TSharedRef<SWindow> UAVVMEditorToolkitUtils::OpenWindow(const FAVVMWindowContextArgs& Params)
 {
@@ -98,4 +99,23 @@ UDataRegistry* UAVVMEditorToolkitUtils::GetDataRegistry(const FDataRegistryType&
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	return IsValid(Subsystem) ? Subsystem->GetRegistryForType(RegistryType) : nullptr;
+}
+
+FString UAVVMEditorToolkitUtils::GetStandardizedName(const FString& PackagePath,
+                                                     FString&& AssetPrefix,
+                                                     FString&& AssetName)
+{
+	FString PluginPath{TEXT("InventorySampleEditor")};
+
+	TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPluginFromPath(PackagePath);
+	if (Plugin.IsValid())
+	{
+		PluginPath = Plugin->GetName();
+	}
+
+	return FString::Printf(TEXT("%s_%s_%s_%s"),
+	                       *AssetPrefix,
+	                       PROJECT_ASSET_PREFIX,
+	                       *PluginPath,
+	                       *AssetName);
 }

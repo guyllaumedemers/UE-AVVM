@@ -21,7 +21,6 @@
 
 #include "AssetToolsModule.h"
 #include "AVVMDoesWidgetProvideModalMessaging.h"
-#include "AVVMEditorToolkitModule.h"
 #include "AVVMEditorToolkitUtils.h"
 #include "AVVMLogger.h"
 #include "InventoryProviderDataEditObject.h"
@@ -33,7 +32,6 @@
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Factories/DataTableFactory.h"
 #include "Framework/Application/SlateApplication.h"
-#include "Framework/Notifications/NotificationManager.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
@@ -243,7 +241,7 @@ void SInventoryToolkitWindow::OnTextCommited_DataRegistryNameSet(const FText& Ne
 		Factory->DataRegistryClass = UDataRegistry::StaticClass();
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = FString::Printf(TEXT("DR_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString());
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("DR"), *NewAssetName.ToString());
 		Params.PackagePath = SelectedPackagePath;
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UDataRegistry::StaticClass();
@@ -261,7 +259,7 @@ void SInventoryToolkitWindow::OnTextCommited_DataTaleNameSet(const FText& NewAss
 		Factory->Struct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = FString::Printf(TEXT("DT_%s_%s"), PROJECT_ASSET_PREFIX, *NewAssetName.ToString());
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("DT"), FString::Printf(TEXT("%s_%s"), *GetNameSafe(Factory->Struct), *NewAssetName.ToString()));
 		Params.PackagePath = SelectedPackagePath;
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UDataTable::StaticClass();
@@ -431,6 +429,7 @@ void SInventoryToolkitWindow::OpenWindow(const TWeakObjectPtr<UDataTable>& DataT
 	FAVVMWindowContextArgs Params{};
 	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor");
 	Params.Content = SNew(SAVVMEditorToolkitDataEditor)
+		.DataTablePackagePath(SelectedPackagePath)
 		.DataEditorObject(GetDataEditObject(RegistryType))
 		.OutputDataTable(DataTable)
 		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create);
