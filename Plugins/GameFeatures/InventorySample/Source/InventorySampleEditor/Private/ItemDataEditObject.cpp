@@ -388,21 +388,23 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 
 bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset,
                                                   const FName NewItemType,
-                                                  const FString& AssetName,
+                                                  const FString& ItemObjectAssetName,
                                                   const FString& NewPackagePath)
 {
-	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == AssetName.IsEmpty()), TEXT("Invalid Asset Name.")))
+	if (!IsValid(ItemDefinitionDataAsset) || !ensureAlwaysMsgf((false == ItemObjectAssetName.IsEmpty()), TEXT("Invalid Asset Name.")))
 	{
 		return false;
 	}
 
+	const FString ItemActorAssetName = ItemObjectAssetName.Replace(TEXT("ItemObject"), TEXT("ItemActor"));
+	
 	auto* BP_Factory = NewObject<UBlueprintFactory>();
 	if (IsValid(BP_Factory))
 	{
 		BP_Factory->ParentClass = UItemObject::StaticClass();
 
 		FAVVMAssetFactoryContextArgs BP_Params{};
-		BP_Params.AssetName = AssetName;
+		BP_Params.AssetName = ItemObjectAssetName;
 		BP_Params.PackagePath = NewPackagePath; // Blueprint Package path, and DA should be grouped together 
 		BP_Params.AssetFactory = BP_Factory;
 		BP_Params.AssetClass = UBlueprint::StaticClass();
@@ -416,6 +418,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		auto* ItemObject = Cast<UItemObject>(BlueprintAsset->GeneratedClass.GetDefaultObject());
 		if (ensureAlwaysMsgf(IsValid(ItemObject), TEXT("Failed to create New Blueprint.")))
 		{
+			ItemObject->GetMutableItemSparseData()->ItemActorId = FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorAssetName)};
 			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
 		}
 	}
@@ -434,22 +437,24 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		                                                            {});
 	}
 
-	if (ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
-	{
-		auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(AssetName)));
-		if (ensureAlwaysMsgf(ActorIdentifier != nullptr, TEXT("Failed to cast Row Type.")))
-		{
-			// @gdemers generate new unique id within bounds of item type.
-			ActorIdentifier->UniqueId = TryGenerateNewPhysicalGlobalId(NewItemType);
-		}
-	}
-
-	if (ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
+	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid(), TEXT("Failed to cache a valid DataTable.")))
 	{
 		return false;
 	}
 
-	auto* ActorDefinition = reinterpret_cast<FAVVMActorDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorDefinitions.Get(), FName(AssetName)));
+	auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(ItemObjectAssetName)));
+	if (ensureAlwaysMsgf(ActorIdentifier != nullptr, TEXT("Failed to cast Row Type.")))
+	{
+		// @gdemers generate new unique id within bounds of item type.
+		ActorIdentifier->UniqueId = TryGenerateNewPhysicalGlobalId(NewItemType);
+	}
+
+	if (!ensureAlwaysMsgf(SelectedDataTable_ActorDefinitions.IsValid(), TEXT("Failed to cache a valid DataTable.")))
+	{
+		return false;
+	}
+
+	auto* ActorDefinition = reinterpret_cast<FAVVMActorDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorDefinitions.Get(), FName(ItemActorAssetName)));
 	if (ensureAlwaysMsgf(ActorDefinition != nullptr, TEXT("Failed to cast Row Type.")))
 	{
 		auto* DA_Factory = NewObject<UDataAssetFactory>();
@@ -458,10 +463,10 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 			return false;
 		}
 
-		DA_Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
+		DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
 		FAVVMAssetFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = AssetName.Replace(TEXT("BP"), TEXT("DA"));
+		DA_Params.AssetName = ItemActorAssetName;
 		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
 		DA_Params.AssetFactory = DA_Factory;
 		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();

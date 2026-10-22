@@ -312,6 +312,7 @@ private:
 	// representation. (we do nullify during drop action but that imply we have already released our handle from backend.)
 	int32 PrivateItemId{INDEX_NONE};
 	friend class UItemObjectUtils;
+	friend class UItemDataEditObject;
 
 #if WITH_EDITORONLY_DATA
 	//~ These properties are moving out to the FMySparseClassData struct:

@@ -71,7 +71,7 @@ private:
 	FString StandardizeItemObjectName() const;
 	bool DoesItemObjectNameAlreadyExist(const FString& NewValue) const;
 	bool TryCreateNewItemObject();
-	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& AssetName, const FString& NewPackagePath);
+	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectAssetName, const FString& NewPackagePath);
 	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
 	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName, const FString& NewDataTablePackagePath) const;
 
