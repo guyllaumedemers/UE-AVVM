@@ -239,6 +239,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 const TArray<FName>& UItemDataEditObject::GetAssetTypeToDefaultGenerate()
 {
 	static TArray<FName> Result = {
+			GetFNameSafe(UDataRegistry::StaticClass()),
 			GetFNameSafe(UDataTable::StaticClass())
 	};
 
@@ -355,6 +356,12 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& ItemObje
 	return bResult;
 }
 
+bool UItemDataEditObject::DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType) const
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	return IsValid(Subsystem) ? IsValid(Subsystem->GetRegistryForType(RegistryType)) : false;
+}
+
 bool UItemDataEditObject::TryCreateNewItemObject()
 {
 	if (!ensureAlwaysMsgf(SelectedDataTable_ItemDefinitions.IsValid(),
@@ -442,7 +449,26 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		}
 	}
 
-	const bool bShouldCreateMissingDataTables = (bCheckBoxStates.IsValidIndex(0/*UDataTable*/) && bCheckBoxStates[0]);
+	const bool bShouldCreateMissingDataRegistry = (bCheckBoxStates.IsValidIndex(0/*UDataRegistry*/) && bCheckBoxStates[0]);
+	if (bShouldCreateMissingDataRegistry)
+	{
+		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorIdentifiers()))
+		{
+			CreateMissingDataRegistry(*GetNameSafe(FAVVMActorIdentifierDataTableRow::StaticStruct()), DataTablePackagePath);
+		}
+
+		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorDefinitions()))
+		{
+			CreateMissingDataRegistry(*GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct()), DataTablePackagePath);
+		}
+
+		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorUIDefinitions()))
+		{
+			CreateMissingDataRegistry(*GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct()), DataTablePackagePath);
+		}
+	}
+
+	const bool bShouldCreateMissingDataTables = (bCheckBoxStates.IsValidIndex(1/*UDataTable*/) && bCheckBoxStates[1]);
 	if (!SelectedDataTable_ActorIdentifiers.IsValid() && bShouldCreateMissingDataTables)
 	{
 		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(),
@@ -592,6 +618,27 @@ int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) 
 	}
 
 	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
+}
+
+UDataRegistry* UItemDataEditObject::CreateMissingDataRegistry(const FString& AssetName,
+                                                              const FString& NewDataRegistryPackagePath) const
+{
+	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->DataRegistryClass = UDataRegistry::StaticClass();
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataRegistryPackagePath, TEXT("DR"), *AssetName);
+		Params.PackagePath = NewDataRegistryPackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UDataRegistry::StaticClass();
+		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,

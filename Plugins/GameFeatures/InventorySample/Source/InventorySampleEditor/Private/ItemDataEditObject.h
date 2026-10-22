@@ -25,7 +25,9 @@
 
 #include "ItemDataEditObject.generated.h"
 
+struct FDataRegistryType;
 struct FItemDefinitionDataTableRow;
+class UDataRegistry;
 class UDataTable;
 class UFactory;
 class UItemDefinitionDataAsset;
@@ -72,9 +74,11 @@ private:
 	FReply OnButtonClick_GenerateItem();
 	
 	bool DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const;
+	bool DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType) const;
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
 	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
+	UDataRegistry* CreateMissingDataRegistry(const FString& AssetName, const FString& NewDataRegistryPackagePath) const;
 	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName, const FString& NewDataTablePackagePath) const;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
