@@ -22,6 +22,7 @@
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "DataRegistry.h"
+#include "Data/AVVMDataRegistry.h"
 #include "Kismet2/SClassPickerDialog.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/Images/SImage.h"
@@ -173,6 +174,12 @@ UObject* UAVVMDataRegistryFactory::FactoryCreateNew(UClass* Class,
 	}
 
 	ensure(0 != (RF_Public & Flags));
-	UDataRegistry* DataRegistry = NewObject<UDataRegistry>(InParent, Class, Name, Flags | RF_Transactional);
+	auto* DataRegistry = NewObject<UAVVMDataRegistry>(InParent, Class, Name, Flags | RF_Transactional);
+	if (ensureAlwaysMsgf(IsValid(DataRegistry), TEXT("Failed to cast to proper derived type.")))
+	{
+		DataRegistry->RegistryType = RegistryType;
+		DataRegistry->ItemStruct = ItemStruct;
+	}
+
 	return DataRegistry;
 }

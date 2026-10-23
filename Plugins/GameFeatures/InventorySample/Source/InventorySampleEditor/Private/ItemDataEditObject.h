@@ -78,8 +78,8 @@ private:
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
 	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
-	UDataRegistry* CreateMissingDataRegistry(const FString& AssetName, const FString& NewDataRegistryPackagePath) const;
-	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& AssetName, const FString& NewDataTablePackagePath) const;
+	UDataRegistry* CreateMissingDataRegistry(const UScriptStruct* ScriptStruct, const FDataRegistryType& RegistryType, const FString& NewDataRegistryPackagePath) const;
+	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& NewDataTablePackagePath) const;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};

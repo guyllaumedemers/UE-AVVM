@@ -58,8 +58,6 @@ private:
 	bool OnDataRegistrySelectionChanged(const FName SelectedRegistryType, const int32 NewSelectedIndex);
 	void OnCheckBoxStateChanged(int32 Index);
 	void OnOutputAssetPathSelected(const FString& NewPackagePath);
-	void OnTextCommited_DataRegistryNameSet(const FText& NewAssetName, ETextCommit::Type CommitType);
-	void OnTextCommited_DataTaleNameSet(const FText& NewAssetName, ETextCommit::Type CommitType);
 	void OnDataTableSelectionChanged(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_DataTableAvailableChanged() const;

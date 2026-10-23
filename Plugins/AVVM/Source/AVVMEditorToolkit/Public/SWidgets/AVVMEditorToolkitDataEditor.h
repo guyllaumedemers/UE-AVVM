@@ -94,26 +94,32 @@ public:
 	
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
+
 private:
 	TStrongObjectPtr<UAVVMEditorToolkitDataEditObject> DataEditObject{nullptr};
 };
 
 /**
- * 
+ *	Class description:
+ *	
+ *	UAVVMDataRegistryFactory is a custom factory class that mimic UDataRegistryFactory, and create new UDataRegistry Asset. This class
+ *	however goes one step further, and is able to resolve provided ItemStruct & RegistryType during initialization done in c++.
  */
 UCLASS(hidecategories = Object)
 class AVVMEDITORTOOLKIT_API UAVVMDataRegistryFactory : public UFactory
 {
 	GENERATED_UCLASS_BODY()
 
-	UPROPERTY(EditAnywhere, Category = DataRegistry)
+	virtual bool ConfigureProperties() override;
+	virtual UObject* FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
 	TSubclassOf<UDataRegistry> DataRegistryClass{nullptr};
 
-	virtual bool ConfigureProperties() override;
-	virtual UObject* FactoryCreateNew(UClass* Class,
-	                                  UObject* InParent,
-	                                  FName Name,
-	                                  EObjectFlags Flags,
-	                                  UObject* Context,
-	                                  FFeedbackContext* Warn) override;
+	/** Structure type of all for items in this registry */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	TObjectPtr<const UScriptStruct> ItemStruct{nullptr};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Designers")
+	FName RegistryType{NAME_None};
 };

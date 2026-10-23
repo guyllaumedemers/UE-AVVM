@@ -35,6 +35,7 @@
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/AVVMActorUIDefinitionDataAsset.h"
+#include "Data/AVVMDataRegistry.h"
 #include "Data/ItemDefinitionDataAsset.h"
 #include "Engine/DataTable.h"
 #include "Factories/BlueprintFactory.h"
@@ -454,40 +455,34 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	{
 		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorIdentifiers()))
 		{
-			CreateMissingDataRegistry(*GetNameSafe(FAVVMActorIdentifierDataTableRow::StaticStruct()), DataTablePackagePath);
+			CreateMissingDataRegistry(FAVVMActorIdentifierDataTableRow::StaticStruct(), GetRegistryType_ActorIdentifiers(), DataTablePackagePath);
 		}
 
 		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorDefinitions()))
 		{
-			CreateMissingDataRegistry(*GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct()), DataTablePackagePath);
+			CreateMissingDataRegistry(FAVVMActorDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorDefinitions(), DataTablePackagePath);
 		}
 
 		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorUIDefinitions()))
 		{
-			CreateMissingDataRegistry(*GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct()), DataTablePackagePath);
+			CreateMissingDataRegistry(FAVVMActorUIDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorUIDefinitions(), DataTablePackagePath);
 		}
 	}
 
 	const bool bShouldCreateMissingDataTables = (bCheckBoxStates.IsValidIndex(1/*UDataTable*/) && bCheckBoxStates[1]);
 	if (!SelectedDataTable_ActorIdentifiers.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(),
-		                                                            UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorIdentifierDataTableRow::StaticStruct())),
-		                                                            DataTablePackagePath);
+		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(), DataTablePackagePath);
 	}
 
 	if (!SelectedDataTable_ActorDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(),
-		                                                            UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorDefinitionDataTableRow::StaticStruct())),
-		                                                            DataTablePackagePath);
+		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(), DataTablePackagePath);
 	}
 
 	if (!SelectedDataTable_ActorUIDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorUIDefinitions = CreateMissingDataTable(FAVVMActorUIDefinitionDataTableRow::StaticStruct(),
-		                                                              UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("DT"), *GetNameSafe(FAVVMActorUIDefinitionDataTableRow::StaticStruct())),
-		                                                              DataTablePackagePath);
+		SelectedDataTable_ActorUIDefinitions = CreateMissingDataTable(FAVVMActorUIDefinitionDataTableRow::StaticStruct(), DataTablePackagePath);
 	}
 
 	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid() &&
@@ -620,19 +615,22 @@ int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) 
 	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
 }
 
-UDataRegistry* UItemDataEditObject::CreateMissingDataRegistry(const FString& AssetName,
+UDataRegistry* UItemDataEditObject::CreateMissingDataRegistry(const UScriptStruct* ScriptStruct,
+                                                              const FDataRegistryType& RegistryType,
                                                               const FString& NewDataRegistryPackagePath) const
 {
 	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
 	if (IsValid(Factory))
 	{
-		Factory->DataRegistryClass = UDataRegistry::StaticClass();
+		Factory->DataRegistryClass = UAVVMDataRegistry::StaticClass();
+		Factory->ItemStruct = ScriptStruct;
+		Factory->RegistryType = RegistryType;
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataRegistryPackagePath, TEXT("DR"), *AssetName);
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataRegistryPackagePath, TEXT("DR"), *GetNameSafe(ScriptStruct));
 		Params.PackagePath = NewDataRegistryPackagePath;
 		Params.AssetFactory = Factory;
-		Params.AssetClass = UDataRegistry::StaticClass();
+		Params.AssetClass = UAVVMDataRegistry::StaticClass();
 		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
 	}
 	else
@@ -642,7 +640,6 @@ UDataRegistry* UItemDataEditObject::CreateMissingDataRegistry(const FString& Ass
 }
 
 UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,
-                                                        const FString& AssetName,
                                                         const FString& NewDataTablePackagePath) const
 {
 	auto* Factory = NewObject<UDataTableFactory>();
@@ -651,7 +648,7 @@ UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* Scr
 		Factory->Struct = ScriptStruct;
 
 		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = AssetName;
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataTablePackagePath, TEXT("DT"), *GetNameSafe(ScriptStruct));
 		Params.PackagePath = NewDataTablePackagePath;
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UDataTable::StaticClass();
