@@ -24,6 +24,7 @@
 #include "Data/AVVMDataTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -45,7 +46,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 	{
 		UpdateDataVisualizer(InArgs._DataRegistryType.Get());
 	}
-	
+
 	ChildSlot
 	[
 		SNew(SBorder)
@@ -59,6 +60,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
+				.Padding(12.f)
 				[
 					SNew(SButton)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Create"))
@@ -68,6 +70,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 					.IsEnabled(this, &SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonCreate)
 				]
 				+ SHorizontalBox::Slot()
+				.Padding(12.f)
 				[
 					SNew(SButton)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Edit"))
@@ -77,6 +80,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 					.IsEnabled(this, &SAVVMEditorToolkitDataVisualizer::OnEnable_ButtonEdit)
 				]
 				+ SHorizontalBox::Slot()
+				.Padding(12.f)
 				[
 					SNew(SButton)
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Delete"))
@@ -87,16 +91,16 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 				]
 			]
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.AutoHeight()
-			.Padding(4.0f)
 			[
 				SNew(SSearchBox)
 				.HintText(FText::FromString(TEXT("Search elements...")))
 				.OnTextChanged(this, &SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged)
 			]
 			+ SVerticalBox::Slot()
+			.Padding(12.f)
 			.FillHeight(1.0f)
-			.Padding(0.f)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
@@ -112,6 +116,27 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 					[
 						ScrollBar.ToSharedRef()
 					]
+				]
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.Padding(12.f)
+				.HAlign(EHorizontalAlignment::HAlign_Left)
+				.AutoWidth()
+				[
+					SNew(SCheckBox)
+				]
+				+ SHorizontalBox::Slot()
+				.HAlign(EHorizontalAlignment::HAlign_Left)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				.AutoWidth()
+				[
+					SNew(STextBlock)
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Open Dependent Assets"))
 				]
 			]
 		]
@@ -147,7 +172,7 @@ TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName Regi
 void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryType& NewRegistryType)
 {
 	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
-						  TEXT("Invalid RegistryType.")))
+	                      TEXT("Invalid RegistryType.")))
 	{
 		return;
 	}

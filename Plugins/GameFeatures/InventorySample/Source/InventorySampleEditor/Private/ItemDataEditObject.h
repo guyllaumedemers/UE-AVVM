@@ -32,6 +32,7 @@ class UDataTable;
 class UFactory;
 class UItemDefinitionDataAsset;
 class SAVVMEditorToolkitDataTablePicker;
+class SAVVMEditorToolkitDataVisualizer;
 class SAVVMEditorToolkitOutputPathPicker;
 class SCheckBoxList;
 
@@ -74,16 +75,21 @@ private:
 	FReply OnButtonClick_GenerateItem();
 	
 	bool DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const;
-	bool DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType) const;
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
 	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
-	UDataRegistry* CreateMissingDataRegistry(const UScriptStruct* ScriptStruct, const FDataRegistryType& RegistryType, const FString& NewDataRegistryPackagePath) const;
-	UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& NewDataTablePackagePath) const;
+	
+	FReply EditMode_OnButtonClick_Create();
+	FReply EditMode_OnButtonClick_Edit();
+	FReply EditMode_OnButtonClick_Delete();
+	
+	bool OpenDependentAsset(const FName RowName);
+	TArray<TWeakObjectPtr<UObject>> GetDependentAssets(const FItemDefinitionDataTableRow& Row) const;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorUIDefinitions{nullptr};
+	TSharedPtr<SAVVMEditorToolkitDataVisualizer> EditMode_DataVisualizer{nullptr};
 	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
 	TArray<bool> bCheckBoxStates{};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ItemDefinitions{nullptr};

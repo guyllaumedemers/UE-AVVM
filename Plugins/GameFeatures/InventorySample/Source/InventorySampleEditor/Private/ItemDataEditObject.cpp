@@ -45,6 +45,7 @@
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
+#include "SWidgets/AVVMEditorToolkitSplitView.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SScrollBox.h"
 
@@ -233,8 +234,11 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 	return SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SAVVMEditorToolkitDataVisualizer)
+			SAssignNew(EditMode_DataVisualizer, SAVVMEditorToolkitDataVisualizer)
 			.DataRegistryType(GetRegistryType_ItemDefinitions())
+			.OnButtonClick_Create_UObject(this, &UItemDataEditObject::EditMode_OnButtonClick_Create)
+			.OnButtonClick_Edit_UObject(this, &UItemDataEditObject::EditMode_OnButtonClick_Edit)
+			.OnButtonClick_Delete_UObject(this, &UItemDataEditObject::EditMode_OnButtonClick_Delete)
 		];
 }
 
@@ -356,12 +360,6 @@ bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& ItemObje
 	bResult |= (Subsystem->GetCachedItem<FAVVMActorUIDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorUIRowName)}) != nullptr);
 
 	return bResult;
-}
-
-bool UItemDataEditObject::DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType) const
-{
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	return IsValid(Subsystem) ? IsValid(Subsystem->GetRegistryForType(RegistryType)) : false;
 }
 
 bool UItemDataEditObject::TryCreateNewItemObject()
@@ -616,49 +614,79 @@ int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) 
 	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
 }
 
-UDataRegistry* UItemDataEditObject::CreateMissingDataRegistry(const UScriptStruct* ScriptStruct,
-                                                              const FDataRegistryType& RegistryType,
-                                                              const FString& NewDataRegistryPackagePath) const
+FReply UItemDataEditObject::EditMode_OnButtonClick_Create()
 {
-	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
-	if (IsValid(Factory))
-	{
-		Factory->DataRegistryClass = UAVVMDataRegistry::StaticClass();
-		Factory->ItemStruct = ScriptStruct;
-		Factory->RegistryType = RegistryType;
+	return FReply::Unhandled();
+}
 
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataRegistryPackagePath, TEXT("DR"), *GetNameSafe(ScriptStruct));
-		Params.PackagePath = NewDataRegistryPackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UAVVMDataRegistry::StaticClass();
-		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
+FReply UItemDataEditObject::EditMode_OnButtonClick_Edit()
+{
+	TArray<FName> OutRowNames{};
+	if (!EditMode_DataVisualizer.IsValid() || !EditMode_DataVisualizer->GetSelectedItems(OutRowNames))
+	{
+		return FReply::Unhandled();
+	}
+
+	if (OutRowNames.IsEmpty())
+	{
+		return FReply::Unhandled();
+	}
+	
+	if (OutRowNames.Num() > 1)
+	{
+		FFormatNamedArguments Args{};
+		const FText Msg = FText::Format(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::EditMode_EditClicked", "Multiple Assets are selected for Edit. Do you want to continue?"), Args);
+
+		const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, Msg, NSLOCTEXT("AVVMEditorToolkit", "Edit_ModalTitle", "Edit"));
+		if (Response != EAppReturnType::Yes)
+		{
+			return FReply::Unhandled();
+		}
+	}
+	
+	for (const FName RowName : OutRowNames)
+	{
+		ensureAlwaysMsgf(OpenDependentAsset(RowName), TEXT("Failed to open Asset using RowName."));
+	}
+
+	return FReply::Unhandled();
+}
+
+FReply UItemDataEditObject::EditMode_OnButtonClick_Delete()
+{
+	return FReply::Unhandled();
+}
+
+bool UItemDataEditObject::OpenDependentAsset(const FName RowName)
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return false;
+	}
+
+	const auto* Row = Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName});
+	if (ensureAlwaysMsgf(Row != nullptr, TEXT("Failed to retrieved FDataRegistryId.")))
+	{
+		FAVVMWindowContextArgs Params{};
+		Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
+		Params.Content = SNew(SAVVMEditorToolkitSplitView)
+			.Assets(GetDependentAssets(*Row));
+
+		Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateUObject(this, &UItemDataEditObject::OnWindowClosedOverride);
+		Params.OnWindowClosed = FOnWindowClosed::CreateUObject(this, &UItemDataEditObject::OnWindowClosed);
+		FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
+		return true;
 	}
 	else
 	{
-		return nullptr;
+		return false;
 	}
 }
 
-UDataTable* UItemDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,
-                                                        const FString& NewDataTablePackagePath) const
+TArray<TWeakObjectPtr<UObject>> UItemDataEditObject::GetDependentAssets(const FItemDefinitionDataTableRow& Row) const
 {
-	auto* Factory = NewObject<UDataTableFactory>();
-	if (IsValid(Factory))
-	{
-		Factory->Struct = ScriptStruct;
-
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataTablePackagePath, TEXT("DT"), *GetNameSafe(ScriptStruct));
-		Params.PackagePath = NewDataTablePackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UDataTable::StaticClass();
-		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
-	}
-	else
-	{
-		return nullptr;
-	}
+	return {};
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,

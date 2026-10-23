@@ -38,7 +38,6 @@
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
-#include "SWidgets/AVVMEditorToolkitRequiredUserInput.h"
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
@@ -188,6 +187,40 @@ FSlateBrush* SInventoryToolkitWindow::PluginIcon() const
 	return nullptr;
 }
 
+TArray<FName> SInventoryToolkitWindow::GetAssetTypeToDefaultGenerate()
+{
+	static TArray<FName> Result = {
+			GetFNameSafe(UDataRegistry::StaticClass())
+	};
+
+	return Result;
+}
+
+TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes()
+{
+	// @gdemers hard coded names for undefined DataRegistryTypes.
+	static TArray<FName> Result = {
+			TEXT("R_ItemGroup"),
+			TEXT("R_Item"),
+			TEXT("R_InventoryProviders"),
+			TEXT("R_InventoryDependencyGraph")
+	};
+
+	return Result;
+}
+
+TArray<UScriptStruct*> SInventoryToolkitWindow::GetInventoryRowTypes()
+{
+	static TArray<UScriptStruct*> Result = {
+			FItemGroupDefinitionDataTableRow::StaticStruct(),
+			FItemDefinitionDataTableRow::StaticStruct(),
+			FFtue_InventoryProviderTableRow::StaticStruct(),
+			FStubData_InventoryStubDataProviderTableRow::StaticStruct()
+	};
+
+	return Result;
+}
+
 bool SInventoryToolkitWindow::OnDataRegistrySelectionChanged(const FName SelectedRegistryType,
                                                              const int32 NewSelectedIndex)
 {
@@ -256,34 +289,6 @@ bool SInventoryToolkitWindow::IsEnabled_DataTableAvailableChanged() const
 bool SInventoryToolkitWindow::IsEnabled_DataRegistrySelectionChanged() const
 {
 	return SelectedDataRegistryType.IsValid();
-}
-
-TArray<FName> SInventoryToolkitWindow::GetAssetTypeToDefaultGenerate() const
-{
-	return {
-			GetFNameSafe(UDataRegistry::StaticClass())
-	};
-}
-
-TArray<FName> SInventoryToolkitWindow::GetInventoryDataRegistryTypes() const
-{
-	// @gdemers hard coded names for undefined DataRegistryTypes.
-	return {
-			TEXT("R_ItemGroup"),
-			TEXT("R_Item"),
-			TEXT("R_InventoryProviders"),
-			TEXT("R_InventoryDependencyGraph")
-	};
-}
-
-TArray<UScriptStruct*> SInventoryToolkitWindow::GetInventoryRowTypes() const
-{
-	return {
-			FItemGroupDefinitionDataTableRow::StaticStruct(),
-			FItemDefinitionDataTableRow::StaticStruct(),
-			FFtue_InventoryProviderTableRow::StaticStruct(),
-			FStubData_InventoryStubDataProviderTableRow::StaticStruct()
-	};
 }
 
 FDataRegistryType SInventoryToolkitWindow::GetDataRegistryType() const

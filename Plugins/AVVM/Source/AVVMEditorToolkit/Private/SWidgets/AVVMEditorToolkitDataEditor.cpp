@@ -19,27 +19,108 @@
 //SOFTWARE.
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
+#include "AVVMDoesWidgetProvideModalMessaging.h"
+#include "AVVMEditorToolkitUtils.h"
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "DataRegistry.h"
+#include "DataRegistrySubsystem.h"
 #include "Data/AVVMDataRegistry.h"
+#include "Engine/DataTable.h"
+#include "Factories/DataTableFactory.h"
 #include "Kismet2/SClassPickerDialog.h"
+#include "Misc/MessageDialog.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/Images/SImage.h"
 
-FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorIdentifiers() const
+FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorIdentifiers()
 {
 	return TEXT("R_ActorIdentifier");
 }
 
-FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorDefinitions() const
+FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorDefinitions()
 {
 	return TEXT("R_ActorDefinitions");
 }
 
-FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorUIDefinitions() const
+FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorUIDefinitions()
 {
 	return TEXT("R_ActorUIDefinitions");
+}
+
+bool UAVVMEditorToolkitDataEditObject::DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType)
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	return IsValid(Subsystem) ? IsValid(Subsystem->GetRegistryForType(RegistryType)) : false;
+}
+
+UDataRegistry* UAVVMEditorToolkitDataEditObject::CreateMissingDataRegistry(const UScriptStruct* ScriptStruct,
+                                                                           const FDataRegistryType& RegistryType,
+                                                                           const FString& NewDataRegistryPackagePath)
+{
+	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->DataRegistryClass = UAVVMDataRegistry::StaticClass();
+		Factory->ItemStruct = ScriptStruct;
+		Factory->RegistryType = RegistryType;
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataRegistryPackagePath, TEXT("DR"), *GetNameSafe(ScriptStruct));
+		Params.PackagePath = NewDataRegistryPackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UAVVMDataRegistry::StaticClass();
+		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+UDataTable* UAVVMEditorToolkitDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,
+                                                                     const FString& NewDataTablePackagePath)
+{
+	auto* Factory = NewObject<UDataTableFactory>();
+	if (IsValid(Factory))
+	{
+		Factory->Struct = ScriptStruct;
+
+		FAVVMAssetFactoryContextArgs Params{};
+		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataTablePackagePath, TEXT("DT"), *GetNameSafe(ScriptStruct));
+		Params.PackagePath = NewDataTablePackagePath;
+		Params.AssetFactory = Factory;
+		Params.AssetClass = UDataTable::StaticClass();
+		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+void UAVVMEditorToolkitDataEditObject::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const
+{
+	const auto* CtxWindow = dynamic_cast<IAVVMDoesWidgetProvideModalMessaging*>(&(PendingCloseWindow->GetContent().Get()));
+	if (!ensureAlwaysMsgf(CtxWindow != nullptr, TEXT("Failed to cast to interface type.")))
+	{
+		return;
+	}
+
+	const EAppReturnType::Type Response = FMessageDialog::Open(EAppMsgCategory::Info, EAppMsgType::YesNo, CtxWindow->GetModalMessage_OnClosure(), CtxWindow->GetModalTitle_OnClosure());
+	if (Response == EAppReturnType::Yes)
+	{
+		PendingCloseWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
+		PendingCloseWindow->RequestDestroyWindow();
+	}
+}
+
+void UAVVMEditorToolkitDataEditObject::OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow)
+{
+	if (ensureAlwaysMsgf(FloatingWindows.Contains(PendingCloseWindow), TEXT("Attempt to remove Window multiple times.")))
+	{
+		FloatingWindows.Remove(PendingCloseWindow);
+	}
 }
 
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)

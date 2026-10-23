@@ -54,6 +54,9 @@ private:
 	FText PluginDescription() const;
 	FText PluginVersion() const;
 	FSlateBrush* PluginIcon() const;
+	static TArray<FName> GetAssetTypeToDefaultGenerate();
+	static TArray<FName> GetInventoryDataRegistryTypes();
+	static TArray<UScriptStruct*> GetInventoryRowTypes();
 
 	bool OnDataRegistrySelectionChanged(const FName SelectedRegistryType, const int32 NewSelectedIndex);
 	void OnCheckBoxStateChanged(int32 Index);
@@ -62,9 +65,6 @@ private:
 	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_DataTableAvailableChanged() const;
 	bool IsEnabled_DataRegistrySelectionChanged() const;
-	TArray<FName> GetAssetTypeToDefaultGenerate() const;
-	TArray<FName> GetInventoryDataRegistryTypes() const;
-	TArray<UScriptStruct*> GetInventoryRowTypes() const;
 	FDataRegistryType GetDataRegistryType() const;
 	FString GetOutputPackagePath() const;
 	FReply OnButtonClick_OpenWindow();

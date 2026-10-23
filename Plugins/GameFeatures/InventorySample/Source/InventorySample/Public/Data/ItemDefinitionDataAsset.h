@@ -97,6 +97,8 @@ struct INVENTORYSAMPLE_API FItemDefinitionDataTableRow : public FAVVMDataTableRo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TSoftObjectPtr<UItemDefinitionDataAsset> ItemDefinition = nullptr;
+	
+	friend class UItemDataEditObject;
 };
 
 /**

@@ -29,8 +29,10 @@
 
 #include "AVVMEditorToolkitDataEditor.generated.h"
 
+struct FDataRegistryType;
 class UDataRegistry;
 class UDataTable;
+class SWindow;
 
 /**
  *	Class description:
@@ -61,12 +63,21 @@ public:
 	                                               const FString& NewDataTablePackagePath,
 	                                               const EAVVMDataEditorModes NewMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
 
-	FName GetRegistryType_ActorIdentifiers() const;
-	FName GetRegistryType_ActorDefinitions() const;
-	FName GetRegistryType_ActorUIDefinitions() const;
-	
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
+
+protected:
+	static FName GetRegistryType_ActorIdentifiers();
+	static FName GetRegistryType_ActorDefinitions();
+	static FName GetRegistryType_ActorUIDefinitions();
+	static bool DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType);
+	static UDataRegistry* CreateMissingDataRegistry(const UScriptStruct* ScriptStruct, const FDataRegistryType& RegistryType, const FString& NewDataRegistryPackagePath);
+	static UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& NewDataTablePackagePath);
+	
+	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
+	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
+	
+	TArray<TSharedPtr<SWindow>> FloatingWindows{};
 };
 
 /**
