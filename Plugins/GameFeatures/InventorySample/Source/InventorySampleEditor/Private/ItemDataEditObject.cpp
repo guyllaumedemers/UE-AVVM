@@ -234,6 +234,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 		+ SOverlay::Slot()
 		[
 			SNew(SAVVMEditorToolkitDataVisualizer)
+			.DataRegistryType(GetRegistryType_ItemDefinitions())
 		];
 }
 
