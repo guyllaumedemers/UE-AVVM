@@ -24,10 +24,10 @@
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "DataRegistry.h"
-#include "DataRegistrySubsystem.h"
+#include "DataTableEditorUtils.h"
 #include "Data/AVVMDataRegistry.h"
 #include "Engine/DataTable.h"
-#include "Factories/DataTableFactory.h"
+#include "Factories/DataAssetFactory.h"
 #include "Kismet2/SClassPickerDialog.h"
 #include "Misc/MessageDialog.h"
 #include "Modules/ModuleManager.h"
@@ -46,57 +46,6 @@ FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorDefinitions()
 FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorUIDefinitions()
 {
 	return TEXT("R_ActorUIDefinitions");
-}
-
-bool UAVVMEditorToolkitDataEditObject::DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType)
-{
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	return IsValid(Subsystem) ? IsValid(Subsystem->GetRegistryForType(RegistryType)) : false;
-}
-
-UDataRegistry* UAVVMEditorToolkitDataEditObject::CreateMissingDataRegistry(const UScriptStruct* ScriptStruct,
-                                                                           const FDataRegistryType& RegistryType,
-                                                                           const FString& NewDataRegistryPackagePath)
-{
-	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
-	if (IsValid(Factory))
-	{
-		Factory->DataRegistryClass = UAVVMDataRegistry::StaticClass();
-		Factory->ItemStruct = ScriptStruct;
-		Factory->RegistryType = RegistryType;
-
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataRegistryPackagePath, TEXT("DR"), *GetNameSafe(ScriptStruct));
-		Params.PackagePath = NewDataRegistryPackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UAVVMDataRegistry::StaticClass();
-		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
-	}
-	else
-	{
-		return nullptr;
-	}
-}
-
-UDataTable* UAVVMEditorToolkitDataEditObject::CreateMissingDataTable(const UScriptStruct* ScriptStruct,
-                                                                     const FString& NewDataTablePackagePath)
-{
-	auto* Factory = NewObject<UDataTableFactory>();
-	if (IsValid(Factory))
-	{
-		Factory->Struct = ScriptStruct;
-
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(NewDataTablePackagePath, TEXT("DT"), *GetNameSafe(ScriptStruct));
-		Params.PackagePath = NewDataTablePackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UDataTable::StaticClass();
-		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
-	}
-	else
-	{
-		return nullptr;
-	}
 }
 
 void UAVVMEditorToolkitDataEditObject::OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const
@@ -134,17 +83,15 @@ void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		GetDataEditContent(InArgs._OutputDataTable.Get(), InArgs._DataTablePackagePath.Get(), InArgs._Mode.Get()).ToSharedRef()
+		GetDataEditContent({InArgs._OutputDataTable.Get(), InArgs._DataTablePackagePath.Get(), InArgs._Mode.Get()}).ToSharedRef()
 	];
 }
 
-TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                     const FString& PackagePath,
-                                                                     const EAVVMDataEditorModes CurrentMode) const
+TSharedPtr<SWidget> SAVVMEditorToolkitDataEditor::GetDataEditContent(const FAVVMEditContextArgs& Params) const
 {
 	if (DataEditObject.IsValid())
 	{
-		return DataEditObject->GetDataEditContent(OutputDataTable, PackagePath, CurrentMode);
+		return DataEditObject->GetDataEditContent(Params);
 	}
 	else
 	{
@@ -191,26 +138,27 @@ class FAVVMAssetClassParentFilter : public IClassViewerFilter
 public:
 	FAVVMAssetClassParentFilter()
 		: DisallowedClassFlags(CLASS_None)
-	{}
+	{
+	}
 
 	/** All children of these classes will be included unless filtered out by another setting. */
-	TSet< const UClass* > AllowedChildrenOfClasses;
+	TSet<const UClass*> AllowedChildrenOfClasses;
 
 	/** Disallowed class flags. */
 	EClassFlags DisallowedClassFlags;
 
-	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
 	{
-		bool bAllowed= !InClass->HasAnyClassFlags(DisallowedClassFlags)
-			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InClass) != EFilterReturn::Failed;
+		bool bAllowed = !InClass->HasAnyClassFlags(DisallowedClassFlags)
+				&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InClass) != EFilterReturn::Failed;
 
 		return bAllowed;
 	}
 
-	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef< const IUnloadedBlueprintData > InUnloadedClassData, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
+	virtual bool IsUnloadedClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData, TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
 	{
 		return !InUnloadedClassData->HasAnyClassFlags(DisallowedClassFlags)
-			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InUnloadedClassData) != EFilterReturn::Failed;
+				&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InUnloadedClassData) != EFilterReturn::Failed;
 	}
 };
 

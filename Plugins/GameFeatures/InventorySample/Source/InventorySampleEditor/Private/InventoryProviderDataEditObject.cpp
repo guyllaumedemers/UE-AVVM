@@ -21,9 +21,7 @@
 
 #include "Widgets/Images/SImage.h"
 
-TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                             const FString& NewDataTablePackagePath,
-                                                                             const EAVVMDataEditorModes NewMode)
+TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Yellow);
@@ -39,9 +37,7 @@ FText UFtueInventoryProviderDataEditObject::GetModalTitle_OnClosure() const
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "UFtueInventoryProviderDataEditObject::DataEditor_ClosureTitle", "UFtueInventoryProviderDataEditObject");
 }
 
-TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                                    const FString& NewDataTablePackagePath,
-                                                                                    const EAVVMDataEditorModes NewMode)
+TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Red);

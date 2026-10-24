@@ -327,57 +327,27 @@ FText SInventoryToolkitWindow::OnTextChanged_CreateOrEdit() const
 
 bool SInventoryToolkitWindow::CreateDataRegistry()
 {
-	bool bResult{false};
-	
-	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
-	if (IsValid(Factory))
-	{
-		const auto RowTypes = GetInventoryRowTypes();
-		UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-		
-		Factory->DataRegistryClass = UAVVMDataRegistry::StaticClass();
-		Factory->ItemStruct = NewScriptStruct;
-		Factory->RegistryType = SelectedDataRegistryType;
-
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("DR"), *GetNameSafe(NewScriptStruct));
-		Params.PackagePath = SelectedPackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UAVVMDataRegistry::StaticClass();
-		const auto* DataRegistry = UAVVMEditorToolkitUtils::CreateOpenAsset<UDataRegistry>(Params);
-		bResult = IsValid(DataRegistry);
-	}
-
-	return bResult;
+	const auto RowTypes = GetInventoryRowTypes();
+	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+	const auto* DataRegistry = UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{NewScriptStruct, SelectedDataRegistryType, SelectedPackagePath});
+	return IsValid(DataRegistry);
 }
 
 bool SInventoryToolkitWindow::CreateDataTable()
 {
-	bool bResult{false};
-
-	auto* Factory = NewObject<UDataTableFactory>();
-	if (IsValid(Factory))
-	{
-		const auto RowTypes = GetInventoryRowTypes();
-		UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-
-		Factory->Struct = NewScriptStruct;
-
-		FAVVMAssetFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("DT"), *GetNameSafe(NewScriptStruct));
-		Params.PackagePath = SelectedPackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UDataTable::StaticClass();
-		SelectedDataTable = UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
-		bResult = SelectedDataTable.IsValid();
-	}
+	const auto RowTypes = GetInventoryRowTypes();
+	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
+	SelectedDataTable = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{NewScriptStruct, SelectedPackagePath});
 
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
 		OpenWindow(SelectedDataTable, SelectedDataRegistryType, bShouldEditDataTable);
+		return true;
 	}
-
-	return bResult;
+	else
+	{
+		return false;
+	}
 }
 
 void SInventoryToolkitWindow::EditDataTable()
@@ -392,7 +362,7 @@ void SInventoryToolkitWindow::OpenWindow(const TWeakObjectPtr<UDataTable>& DataT
                                          const FName RegistryType,
                                          const bool bShouldOpenInEditMode)
 {
-	FAVVMWindowContextArgs Params{};
+	FAVVMEditorToolkitWindowContextArgs Params{};
 	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor");
 	Params.Content = SNew(SAVVMEditorToolkitDataEditor)
 		.DataTablePackagePath(SelectedPackagePath)

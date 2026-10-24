@@ -50,6 +50,26 @@ enum class EAVVMDataEditorModes : uint8
 /**
  *	Class description:
  *	
+ *	FAVVMEditContextArgs is a context struct encapsulating arguments.
+ */
+USTRUCT(BlueprintType)
+struct AVVMEDITORTOOLKIT_API FAVVMEditContextArgs
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<UDataTable> OutputDataTable{nullptr};
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString PackagePath{};
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	EAVVMDataEditorModes CurrentMode{EAVVMDataEditorModes::None};
+};
+
+/**
+ *	Class description:
+ *	
  *	UAVVMEditorToolkitDataEditObject is an abstract UObject type that define the internal behaviour
  *	to editing plugin specific data types.
  */
@@ -59,10 +79,8 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                               const FString& NewDataTablePackagePath,
-	                                               const EAVVMDataEditorModes NewMode) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
-
+	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+	virtual int32 GenerateActorIdentifier(const FName ActorType) const PURE_VIRTUAL(GenerateActorIdentifier, return INDEX_NONE;)
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
 
@@ -70,10 +88,7 @@ protected:
 	static FName GetRegistryType_ActorIdentifiers();
 	static FName GetRegistryType_ActorDefinitions();
 	static FName GetRegistryType_ActorUIDefinitions();
-	static bool DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType);
-	static UDataRegistry* CreateMissingDataRegistry(const UScriptStruct* ScriptStruct, const FDataRegistryType& RegistryType, const FString& NewDataRegistryPackagePath);
-	static UDataTable* CreateMissingDataTable(const UScriptStruct* ScriptStruct, const FString& NewDataTablePackagePath);
-	
+
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
 	virtual void OnPostWindowClosed() const PURE_VIRTUAL(OnPostWindowClosed, return;);
@@ -100,10 +115,9 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                       const FString& PackagePath,
-	                                       const EAVVMDataEditorModes CurrentMode) const;
-	
+	TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) const;
+
+	// IAVVMDoesWidgetProvideModalMessaging
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 

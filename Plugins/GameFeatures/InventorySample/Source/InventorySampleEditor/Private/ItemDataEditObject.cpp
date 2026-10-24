@@ -50,15 +50,13 @@
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SScrollBox.h"
 
-TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                            const FString& NewDataTablePackagePath,
-                                                            const EAVVMDataEditorModes NewMode)
+TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
 {
-	SelectedDataTable_ItemDefinitions = OutputDataTable;
-	DataTablePackagePath = NewDataTablePackagePath;
-	
+	SelectedDataTable_ItemDefinitions = Params.OutputDataTable;
+	DataTablePackagePath = Params.PackagePath;
+
 	TSharedPtr<SWidget> Out{nullptr};
-	switch (NewMode)
+	switch (Params.CurrentMode)
 	{
 		case EAVVMDataEditorModes::None:
 			break;
@@ -392,7 +390,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 	{
 		Factory->DataAssetClass = UItemDefinitionDataAsset::StaticClass();
 
-		FAVVMAssetFactoryContextArgs Params{};
+		FAVVMEditorToolkitFactoryContextArgs Params{};
 		Params.AssetName = ItemObjectRowName.Replace(TEXT("BP"), TEXT("DA"));
 		Params.PackagePath = SelectedPackagePath;
 		Params.AssetFactory = Factory;
@@ -429,7 +427,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	{
 		BP_Factory->ParentClass = UItemObject::StaticClass();
 
-		FAVVMAssetFactoryContextArgs BP_Params{};
+		FAVVMEditorToolkitFactoryContextArgs BP_Params{};
 		BP_Params.AssetName = ItemObjectRowName;
 		BP_Params.PackagePath = NewPackagePath; // Blueprint Package path, and DA should be grouped together 
 		BP_Params.AssetFactory = BP_Factory;
@@ -453,36 +451,36 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	const bool bShouldCreateMissingDataRegistry = (bCheckBoxStates.IsValidIndex(0/*UDataRegistry*/) && bCheckBoxStates[0]);
 	if (bShouldCreateMissingDataRegistry)
 	{
-		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorIdentifiers()))
+		if (!UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(GetRegistryType_ActorIdentifiers()))
 		{
-			CreateMissingDataRegistry(FAVVMActorIdentifierDataTableRow::StaticStruct(), GetRegistryType_ActorIdentifiers(), DataTablePackagePath);
+			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{FAVVMActorIdentifierDataTableRow::StaticStruct(), GetRegistryType_ActorIdentifiers(), DataTablePackagePath});
 		}
 
-		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorDefinitions()))
+		if (!UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(GetRegistryType_ActorDefinitions()))
 		{
-			CreateMissingDataRegistry(FAVVMActorDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorDefinitions(), DataTablePackagePath);
+			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{FAVVMActorDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorDefinitions(), DataTablePackagePath});
 		}
 
-		if (!DoesDataRegistryTypeExist(GetRegistryType_ActorUIDefinitions()))
+		if (!UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(GetRegistryType_ActorUIDefinitions()))
 		{
-			CreateMissingDataRegistry(FAVVMActorUIDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorUIDefinitions(), DataTablePackagePath);
+			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{FAVVMActorUIDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorUIDefinitions(), DataTablePackagePath});
 		}
 	}
 
 	const bool bShouldCreateMissingDataTables = (bCheckBoxStates.IsValidIndex(1/*UDataTable*/) && bCheckBoxStates[1]);
 	if (!SelectedDataTable_ActorIdentifiers.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorIdentifiers = CreateMissingDataTable(FAVVMActorIdentifierDataTableRow::StaticStruct(), DataTablePackagePath);
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{FAVVMActorIdentifierDataTableRow::StaticStruct(), DataTablePackagePath});
 	}
 
 	if (!SelectedDataTable_ActorDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorDefinitions = CreateMissingDataTable(FAVVMActorDefinitionDataTableRow::StaticStruct(), DataTablePackagePath);
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{FAVVMActorDefinitionDataTableRow::StaticStruct(), DataTablePackagePath});
 	}
 
 	if (!SelectedDataTable_ActorUIDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorUIDefinitions = CreateMissingDataTable(FAVVMActorUIDefinitionDataTableRow::StaticStruct(), DataTablePackagePath);
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{FAVVMActorUIDefinitionDataTableRow::StaticStruct(), DataTablePackagePath});
 	}
 
 	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid() &&
@@ -496,65 +494,14 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 		return false;
 	}
 
-	auto* ActorIdentifier = reinterpret_cast<FAVVMActorIdentifierDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorIdentifiers.Get(), FName(ItemActorRowName)));
-	if (ensureAlwaysMsgf(ActorIdentifier != nullptr, TEXT("Failed to cast Row Type.")))
-	{
-		// @gdemers generate new unique id within bounds of item type.
-		ActorIdentifier->UniqueId = TryGenerateNewPhysicalGlobalId(NewItemType);
-	}
-
-	auto* ActorDefinition = reinterpret_cast<FAVVMActorDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorDefinitions.Get(), FName(ItemActorRowName)));
-	if (ensureAlwaysMsgf(ActorDefinition != nullptr, TEXT("Failed to cast Row Type.")))
-	{
-		auto* DA_Factory = NewObject<UDataAssetFactory>();
-		if (!IsValid(DA_Factory))
-		{
-			return false;
-		}
-
-		DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
-
-		FAVVMAssetFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = ItemActorRowName.Replace(TEXT("BP"), TEXT("DA"));
-		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
-		DA_Params.AssetFactory = DA_Factory;
-		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
-
-		auto* ActorDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorDefinitionDataAsset>(DA_Params);
-		if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
-		{
-			ActorDefinition->ActorDefinition = ActorDefinitionDataAsset;
-		}
-	}
-
-	auto* ActorUIDefinition = reinterpret_cast<FAVVMActorUIDefinitionDataTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_ActorUIDefinitions.Get(), FName(ItemActorUIRowName)));
-	if (ensureAlwaysMsgf(ActorUIDefinition != nullptr, TEXT("Failed to cast Row Type.")))
-	{
-		auto* DA_Factory = NewObject<UDataAssetFactory>();
-		if (!IsValid(DA_Factory))
-		{
-			return false;
-		}
-
-		DA_Factory->DataAssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
-
-		FAVVMAssetFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = ItemActorUIRowName.Replace(TEXT("BP"), TEXT("DA"));
-		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
-		DA_Params.AssetFactory = DA_Factory;
-		DA_Params.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
-
-		auto* ActorUIDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorUIDefinitionDataAsset>(DA_Params);
-		if (ensureAlwaysMsgf(IsValid(ActorUIDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
-		{
-			ActorUIDefinition->ActorUIDefinition = ActorUIDefinitionDataAsset;
-		}
-	}
-
-	return true;
+	bool bResult{true};
+	bResult &= UAVVMEditorToolkitUtils::CreateActorIdentifierRow(FAVVMEditorDataTableActorIdentifierContextArgs{this, SelectedDataTable_ActorIdentifiers, FName(ItemActorRowName), NewItemType});
+	bResult &= UAVVMEditorToolkitUtils::CreateActorDefinitionRow(FAVVMEditorDataTableOutputContextArgs{SelectedDataTable_ActorDefinitions, FName(ItemActorRowName), NewPackagePath});
+	bResult &= UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(FAVVMEditorDataTableOutputContextArgs{SelectedDataTable_ActorUIDefinitions, FName(ItemActorUIRowName), NewPackagePath});
+	return bResult;
 }
 
-int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) const
+int32 UItemDataEditObject::GenerateActorIdentifier(const FName ItemType) const
 {
 	const TArray<FName>& ItemTypes = GetItemTypes();
 	if (!ItemTypes.Contains(ItemType))
@@ -617,7 +564,7 @@ int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) 
 
 FReply UItemDataEditObject::EditMode_OnButtonClick_Create()
 {
-	FAVVMWindowContextArgs Params{};
+	FAVVMEditorToolkitWindowContextArgs Params{};
 	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_CreateNewItem", "Factory");
 	Params.Content = SNew(SAVVMEditorToolkitFloatingModal)
 		.Title(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::EditMode_CreateClicked_Title", "..."))
@@ -684,7 +631,7 @@ FReply UItemDataEditObject::EditMode_OnButtonClick_Delete()
 	return FReply::Handled();
 }
 
-void UItemDataEditObject::CreateMissingDependencies(const FName RowName)
+void UItemDataEditObject::CreateMissingDependencies(const FName RowName) const
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -692,14 +639,28 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName)
 		return;
 	}
 
-	const auto* SearchResult = Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName});
-	if (SearchResult != nullptr)
+	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
+
+	const auto* SearchResult_ActorIdentifiers = Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName});
+	if (SearchResult_ActorIdentifiers == nullptr)
 	{
-		// TODO @gdemers resolve missing dependencies
+		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
 	}
-	else
+
+	FTableRowBase OutRowBase_ActorDefinition{};
+	const bool bDoesExit_ActorDefinition = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName}, OutRowBase_ActorDefinition);
+	if (!bDoesExit_ActorDefinition || !UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(OutRowBase_ActorDefinition, ItemActorRowName, SelectedPackagePath))
 	{
-		TryCreateNewItemObject();
+		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, SelectedPackagePath});
+	}
+
+	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
+
+	FTableRowBase OutRowBase_ActorUIDefinition{};
+	const bool bDoesExit_ActorUIDefinition = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName}, OutRowBase_ActorUIDefinition);
+	if (!bDoesExit_ActorUIDefinition || !UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(OutRowBase_ActorUIDefinition, ItemActorUIRowName, SelectedPackagePath))
+	{
+		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ItemDefinitions, ItemActorUIRowName, SelectedPackagePath});
 	}
 }
 
@@ -711,7 +672,7 @@ void UItemDataEditObject::EditDependentAsset(const FName RowName)
 		CreateMissingDependencies(RowName);
 	}
 
-	FAVVMWindowContextArgs Params{};
+	FAVVMEditorToolkitWindowContextArgs Params{};
 	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
 	Params.Content = SNew(SAVVMEditorToolkitSplitView)
 		.RegistryType_ViewEditDenyList(TArray<FName>{GetRegistryType_ActorIdentifiers()})
@@ -778,9 +739,7 @@ void UItemDataEditObject::OnPostWindowClosed() const
 	}
 }
 
-TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-                                                                 const FString& NewDataTablePackagePath,
-                                                                 const EAVVMDataEditorModes NewMode)
+TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
 {
 	return SNew(SImage)
 		.ColorAndOpacity(FLinearColor::Blue);

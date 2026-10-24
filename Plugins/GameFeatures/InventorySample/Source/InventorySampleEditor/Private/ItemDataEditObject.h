@@ -49,9 +49,7 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                               const FString& NewDataTablePackagePath,
-	                                               const EAVVMDataEditorModes NewMode) override;
+	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) override;
 	
 	FName GetRegistryType_ItemDefinitions() const;
 	
@@ -79,7 +77,7 @@ private:
 	bool DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const;
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
-	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
+	virtual int32 GenerateActorIdentifier(const FName ItemType) const override;
 	// END
 	
 	// BEGIN - @gdemers edit mode api
@@ -87,7 +85,7 @@ private:
 	FReply EditMode_OnButtonClick_Edit();
 	FReply EditMode_OnButtonClick_Delete();
 	
-	void CreateMissingDependencies(const FName RowName);
+	void CreateMissingDependencies(const FName RowName) const;
 	void EditDependentAsset(const FName RowName);
 	void DeleteDependentAsset(const FName RowName);
 	TArray<FDataRegistryId> GetDependentAssets(const FName RowName) const;
@@ -124,10 +122,7 @@ class INVENTORYSAMPLEEDITOR_API UItemGroupDataEditObject : public UAVVMEditorToo
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
-	                                               const FString& NewDataTablePackagePath,
-	                                               const EAVVMDataEditorModes NewMode) override;
-	
+	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 };

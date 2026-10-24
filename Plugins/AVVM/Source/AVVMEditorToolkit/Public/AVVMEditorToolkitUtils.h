@@ -30,15 +30,16 @@
 
 #include "AVVMEditorToolkitUtils.generated.h"
 
+class UAVVMEditorToolkitDataEditObject;
 class UDataRegistry;
 class UDataRegistrySource_DataTable;
 
 /**
  *	Class description:
  *	
- *	FAVVMWindowContextArgs is a context struct encapsulating parameters to an SWindow initialization.
+ *	FAVVMEditorToolkitWindowContextArgs is a context struct encapsulating parameters to an SWindow initialization.
  */
-struct AVVMEDITORTOOLKIT_API FAVVMWindowContextArgs
+struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitWindowContextArgs
 {
 	FText Title{FText::GetEmpty()};
 	TSharedPtr<SWidget> Content{};
@@ -49,14 +50,94 @@ struct AVVMEDITORTOOLKIT_API FAVVMWindowContextArgs
 /**
  *	Class description:
  *	
- *	FAVVMWindowContextArgs is a context struct encapsulating parameters to an SWindow initialization.
+ *	FAVVMEditorToolkitFactoryContextArgs is a context struct encapsulating parameters to an UFactory instance.
  */
-struct AVVMEDITORTOOLKIT_API FAVVMAssetFactoryContextArgs
+struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitFactoryContextArgs
 {
 	FString AssetName{};
 	FString PackagePath{};
 	UFactory* AssetFactory{nullptr};
 	UClass* AssetClass{nullptr};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMDataRegistryContextArgs is a context struct encapsulating parameters to an UDataRegistry UFactory.
+ */
+USTRUCT(BlueprintType)
+struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitDataRegistryContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UScriptStruct* ScriptStruct{nullptr};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FDataRegistryType RegistryType{};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString PackagePath{};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMDataTableContextArgs is a context struct encapsulating parameters to an UDataTable UFactory.
+ */
+USTRUCT(BlueprintType)
+struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitDataTableContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	UScriptStruct* ScriptStruct{nullptr};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString PackagePath{};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMEditorDataTableOutputContextArgs is a context struct encapsulating parameters output asset at path.
+ */
+USTRUCT(BlueprintType)
+struct AVVMEDITORTOOLKIT_API FAVVMEditorDataTableOutputContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<UDataTable> DataTable{nullptr};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FName RowName{NAME_None};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString PackagePath{};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMEditorDataTableActorIdentifierContextArgs is a context struct encapsulating parameters output for identifying.
+ */
+USTRUCT(BlueprintType)
+struct AVVMEDITORTOOLKIT_API FAVVMEditorDataTableActorIdentifierContextArgs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<const UAVVMEditorToolkitDataEditObject> EditObject{nullptr};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	TWeakObjectPtr<UDataTable> DataTable{nullptr};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FName RowName{NAME_None};
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FName ActorType{NAME_None};
 };
 
 /**
@@ -70,17 +151,46 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitUtils : public UBlueprintFunctionL
 	GENERATED_BODY()
 
 public:
-	static TSharedRef<SWindow> OpenWindow(const FAVVMWindowContextArgs& Params);
+	static TSharedRef<SWindow> OpenWindow(const FAVVMEditorToolkitWindowContextArgs& Params);
 	static TArray<const UDataRegistrySource_DataTable*> GetDataTables(const FDataRegistryType& RegistryType);
+
+	UFUNCTION(BlueprintCallable)
 	static UDataRegistry* GetDataRegistry(const FDataRegistryType& RegistryType);
 	static FString GetStandardizedName(const FString& PackagePath, FString&& AssetPrefix, FString&& AssetName);
 
+	UFUNCTION(BlueprintCallable)
+	static bool DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType);
+
+	UFUNCTION(BlueprintCallable)
+	static UDataRegistry* CreateMissingDataRegistry(const FAVVMEditorToolkitDataRegistryContextArgs& Params);
+
+	UFUNCTION(BlueprintCallable)
+	static UDataTable* CreateMissingDataTable(const FAVVMEditorToolkitDataTableContextArgs& Params);
+
+	UFUNCTION(BlueprintCallable)
+	static bool CreateActorIdentifierRow(const FAVVMEditorDataTableActorIdentifierContextArgs& Params);
+
+	UFUNCTION(BlueprintCallable)
+	static bool CreateActorDefinitionRow(const FAVVMEditorDataTableOutputContextArgs& Params);
+
+	UFUNCTION(BlueprintCallable)
+	static bool CreateActorUIDefinitionRow(const FAVVMEditorDataTableOutputContextArgs& Params);
+
+	UFUNCTION(BlueprintCallable)
+	static bool EditMutableActorIdentifierRow(FTableRowBase& NewRow, const FName NewRowName);
+
+	UFUNCTION(BlueprintCallable)
+	static bool EditMutableActorDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath);
+
+	UFUNCTION(BlueprintCallable)
+	static bool EditMutableActorUIDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath);
+
 	template <typename TAsset>
-	static TAsset* CreateOpenAsset(const FAVVMAssetFactoryContextArgs& Params);
+	static TAsset* CreateOpenAsset(const FAVVMEditorToolkitFactoryContextArgs& Params);
 };
 
 template <typename TAsset>
-TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMAssetFactoryContextArgs& Params)
+TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMEditorToolkitFactoryContextArgs& Params)
 {
 	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
 	{
