@@ -143,36 +143,10 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 	];
 }
 
-bool SAVVMEditorToolkitDataVisualizer::GetSelectedItems(TArray<FName>& OutSelectedItems) const
-{
-	if (ListViewWidget.IsValid())
-	{
-		return (ListViewWidget->GetSelectedItems(OutSelectedItems) > 0);
-	}
-	else
-	{
-		return false;
-	}
-}
-
-TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName RegistryItemName,
-                                                                      const TSharedRef<STableViewBase>& OwnerTable) const
-{
-	TSharedPtr<STableRow<FName>> OutListTableRow{};
-	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)
-	[
-		SNew(SAVVMEditorToolkitDataTableRowPreview)
-		.RegistryType(SelectedRegistryType)
-		.RegistryItemName(RegistryItemName)
-	];
-
-	return OutListTableRow.ToSharedRef();
-}
-
 void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryType& NewRegistryType)
 {
 	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
-	                      TEXT("Invalid RegistryType.")))
+						  TEXT("Invalid RegistryType.")))
 	{
 		return;
 	}
@@ -183,6 +157,9 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 		return;
 	}
 
+	// @gdemers ensure we always get latest state.
+	Subsystem->RefreshRegistryMap();
+	
 	DataRegistry = TStrongObjectPtr(Subsystem->GetRegistryForType(NewRegistryType));
 	if (!DataRegistry.IsValid())
 	{
@@ -208,6 +185,32 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 	{
 		ListViewWidget->RebuildList();
 	}
+}
+
+bool SAVVMEditorToolkitDataVisualizer::GetSelectedItems(TArray<FName>& OutSelectedItems) const
+{
+	if (ListViewWidget.IsValid())
+	{
+		return (ListViewWidget->GetSelectedItems(OutSelectedItems) > 0);
+	}
+	else
+	{
+		return false;
+	}
+}
+
+TSharedRef<ITableRow> SAVVMEditorToolkitDataVisualizer::OnGenerateRow(FName RegistryItemName,
+                                                                      const TSharedRef<STableViewBase>& OwnerTable) const
+{
+	TSharedPtr<STableRow<FName>> OutListTableRow{};
+	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)
+	[
+		SNew(SAVVMEditorToolkitDataTableRowPreview)
+		.RegistryType(SelectedRegistryType)
+		.RegistryItemName(RegistryItemName)
+	];
+
+	return OutListTableRow.ToSharedRef();
 }
 
 void SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged(const FText& NewText)

@@ -46,11 +46,11 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
+	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
 	bool GetSelectedItems(TArray<FName>& OutSelectedItems) const;
 
 private:
 	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName, const TSharedRef<STableViewBase>& OwnerTable) const;
-	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
 	void OnSearchTextChanged(const FText& NewText);
 
 	bool OnEnable_ButtonCreate() const;

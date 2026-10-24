@@ -113,6 +113,8 @@ void UAVVMEditorToolkitDataEditObject::OnWindowClosedOverride(const TSharedRef<S
 		PendingCloseWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
 		PendingCloseWindow->RequestDestroyWindow();
 	}
+
+	OnPostWindowClosed();
 }
 
 void UAVVMEditorToolkitDataEditObject::OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow)
@@ -121,6 +123,8 @@ void UAVVMEditorToolkitDataEditObject::OnWindowClosed(const TSharedRef<SWindow>&
 	{
 		FloatingWindows.Remove(PendingCloseWindow);
 	}
+
+	OnPostWindowClosed();
 }
 
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)

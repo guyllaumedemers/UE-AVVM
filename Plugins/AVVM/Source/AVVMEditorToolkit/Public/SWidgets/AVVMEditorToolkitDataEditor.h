@@ -76,6 +76,7 @@ protected:
 	
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
+	virtual void OnPostWindowClosed() const PURE_VIRTUAL(OnPostWindowClosed, return;);
 	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
 };

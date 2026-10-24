@@ -63,32 +63,38 @@ private:
 	TSharedPtr<SWidget> GetEditMode();
 	static const TArray<FName>& GetAssetTypeToDefaultGenerate();
 	static const TArray<FName>& GetItemTypes();
-	void OnCheckBoxStateChanged(int32 Index);
-	void OnOutputAssetPathSelected(const FString& NewPackagePath);
+	// BEGIN - @gdemers creation mode api
 	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_OnItemTypeChanged() const;
+	bool IsEnabled_GenerateButton() const;
+	void OnCheckBoxStateChanged(int32 Index);
+	void OnOutputAssetPathSelected(const FString& NewPackagePath);
 	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
 	void OnDataTableSelectionChanged_ActorIdentifiers(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	void OnDataTableSelectionChanged_ActorDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	void OnDataTableSelectionChanged_ActorUIDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
-	bool IsEnabled_GenerateButton() const;
-	void OnTextChanged_ItemName(const FText& NewItemName);
+	void OnTextChanged_SetItemRowName(const FText& NewItemName);
 	FReply OnButtonClick_GenerateItem();
 	
 	bool DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const;
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
 	int32 TryGenerateNewPhysicalGlobalId(const FName ItemType) const;
+	// END
 	
+	// BEGIN - @gdemers edit mode api
 	FReply EditMode_OnButtonClick_Create();
 	FReply EditMode_OnButtonClick_Edit();
 	FReply EditMode_OnButtonClick_Delete();
 	
-	void CreateDependentAsset(const FName RowName);
+	void CreateMissingDependencies(const FName RowName);
 	void EditDependentAsset(const FName RowName);
 	void DeleteDependentAsset(const FName RowName);
 	TArray<FDataRegistryId> GetDependentAssets(const FName RowName) const;
-	bool HasMissingAssets(const TArray<FDataRegistryId>& RegistryIds) const;
+	bool HasMissingDependencies(const TArray<FDataRegistryId>& RegistryIds) const;
+	// END
+	
+	virtual void OnPostWindowClosed() const override;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};

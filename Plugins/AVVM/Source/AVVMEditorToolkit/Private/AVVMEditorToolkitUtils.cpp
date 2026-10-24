@@ -67,11 +67,14 @@ TArray<const UDataRegistrySource_DataTable*> UAVVMEditorToolkitUtils::GetDataTab
 {
 	TArray<const UDataRegistrySource_DataTable*> OutResult{};
 
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
 	{
 		return OutResult;
 	}
+
+	// @gdemers ensure we always get latest state.
+	Subsystem->RefreshRegistryMap();
 
 	const auto* DataRegistry = Subsystem->GetRegistryForType(RegistryType);
 	if (!IsValid(DataRegistry))

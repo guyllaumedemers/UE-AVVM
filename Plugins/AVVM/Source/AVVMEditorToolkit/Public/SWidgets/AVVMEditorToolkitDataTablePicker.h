@@ -23,7 +23,6 @@
 
 #include "AssetThumbnail.h"
 #include "DataRegistryId.h"
-#include "Factories/DataTableFactory.h"
 #include "Framework/SlateDelegates.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Layout/SScrollBorder.h"

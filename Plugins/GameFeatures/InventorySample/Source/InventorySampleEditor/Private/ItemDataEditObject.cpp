@@ -44,6 +44,7 @@
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
+#include "SWidgets/AVVMEditorToolkitFloatingModal.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "SWidgets/AVVMEditorToolkitSplitView.h"
 #include "Widgets/Images/SImage.h"
@@ -164,7 +165,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					SNew(SEditableTextBox)
 					.Justification(ETextJustify::Left)
 					.Font(FAppStyle::GetFontStyle("NormalFontBold"))
-					.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextChanged_ItemName)
+					.OnTextChanged_UObject(this, &UItemDataEditObject::OnTextChanged_SetItemRowName)
 					.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_OnItemTypeChanged)
 					.HintText(NSLOCTEXT("AVVMEditorToolkit", "InputItemNameTooltip", "Note : Item Row Name are standardized under the hood."))
 					.Text(NSLOCTEXT("AVVMEditorToolkit", "DefaultText", "..."))
@@ -263,6 +264,21 @@ const TArray<FName>& UItemDataEditObject::GetItemTypes()
 	return Result;
 }
 
+bool UItemDataEditObject::IsEnabled_AssetPathSelectionChanged() const
+{
+	return (false == SelectedPackagePath.IsEmpty());
+}
+
+bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
+{
+	return (false == SelectedItemType.IsNone());
+}
+
+bool UItemDataEditObject::IsEnabled_GenerateButton() const
+{
+	return SelectedItemType.IsValid() && !ItemRowName.IsEmpty();
+}
+
 void UItemDataEditObject::OnCheckBoxStateChanged(int32 Index)
 {
 	if (bCheckBoxStates.IsValidIndex(Index))
@@ -275,16 +291,6 @@ void UItemDataEditObject::OnCheckBoxStateChanged(int32 Index)
 void UItemDataEditObject::OnOutputAssetPathSelected(const FString& NewPackagePath)
 {
 	SelectedPackagePath = NewPackagePath;
-}
-
-bool UItemDataEditObject::IsEnabled_AssetPathSelectionChanged() const
-{
-	return (false == SelectedPackagePath.IsEmpty());
-}
-
-bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
-{
-	return (false == SelectedItemType.IsNone());
 }
 
 bool UItemDataEditObject::OnItemTypeChanged(const FName NewItemType,
@@ -311,12 +317,7 @@ void UItemDataEditObject::OnDataTableSelectionChanged_ActorUIDefinitions(TWeakOb
 	SelectedDataTable_ActorUIDefinitions = NewSelection;
 }
 
-bool UItemDataEditObject::IsEnabled_GenerateButton() const
-{
-	return SelectedItemType.IsValid() && !ItemRowName.IsEmpty();
-}
-
-void UItemDataEditObject::OnTextChanged_ItemName(const FText& NewItemName)
+void UItemDataEditObject::OnTextChanged_SetItemRowName(const FText& NewItemName)
 {
 	ItemRowName = NewItemName.ToString();
 }
@@ -616,7 +617,17 @@ int32 UItemDataEditObject::TryGenerateNewPhysicalGlobalId(const FName ItemType) 
 
 FReply UItemDataEditObject::EditMode_OnButtonClick_Create()
 {
-	return FReply::Unhandled();
+	FAVVMWindowContextArgs Params{};
+	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_CreateNewItem", "Factory");
+	Params.Content = SNew(SAVVMEditorToolkitFloatingModal)
+		.Title(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::EditMode_CreateClicked_Title", "..."))
+		.Message(NSLOCTEXT("AVVMEditorToolkit", "UItemDataEditObject::EditMode_CreateClicked_Title", "..."))
+		.Content(GetCreationMode());
+
+	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateUObject(this, &UItemDataEditObject::OnWindowClosedOverride);
+	Params.OnWindowClosed = FOnWindowClosed::CreateUObject(this, &UItemDataEditObject::OnWindowClosed);
+	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
+	return FReply::Handled();
 }
 
 FReply UItemDataEditObject::EditMode_OnButtonClick_Edit()
@@ -673,16 +684,31 @@ FReply UItemDataEditObject::EditMode_OnButtonClick_Delete()
 	return FReply::Handled();
 }
 
-void UItemDataEditObject::CreateDependentAsset(const FName RowName)
+void UItemDataEditObject::CreateMissingDependencies(const FName RowName)
 {
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return;
+	}
+
+	const auto* SearchResult = Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName});
+	if (SearchResult != nullptr)
+	{
+		// TODO @gdemers resolve missing dependencies
+	}
+	else
+	{
+		TryCreateNewItemObject();
+	}
 }
 
 void UItemDataEditObject::EditDependentAsset(const FName RowName)
 {
 	const TArray<FDataRegistryId> DependentRegistryIds = GetDependentAssets(RowName);
-	if (HasMissingAssets(DependentRegistryIds))
+	if (HasMissingDependencies(DependentRegistryIds))
 	{
-		CreateDependentAsset(RowName);
+		CreateMissingDependencies(RowName);
 	}
 
 	FAVVMWindowContextArgs Params{};
@@ -712,7 +738,7 @@ TArray<FDataRegistryId> UItemDataEditObject::GetDependentAssets(const FName RowN
 	};
 }
 
-bool UItemDataEditObject::HasMissingAssets(const TArray<FDataRegistryId>& RegistryIds) const
+bool UItemDataEditObject::HasMissingDependencies(const TArray<FDataRegistryId>& RegistryIds) const
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -727,6 +753,29 @@ bool UItemDataEditObject::HasMissingAssets(const TArray<FDataRegistryId>& Regist
 	}
 
 	return (false == bResult);
+}
+
+void UItemDataEditObject::OnPostWindowClosed() const
+{
+	if (EditMode_DataVisualizer.IsValid())
+	{
+		EditMode_DataVisualizer->UpdateDataVisualizer(GetRegistryType_ItemDefinitions());
+	}
+
+	if (DataTablePicker_ActorIdentifiers.IsValid())
+	{
+		DataTablePicker_ActorIdentifiers->UpdateDataTableCollection(GetRegistryType_ActorIdentifiers());
+	}
+
+	if (DataTablePicker_ActorDefinitions.IsValid())
+	{
+		DataTablePicker_ActorDefinitions->UpdateDataTableCollection(GetRegistryType_ActorDefinitions());
+	}
+
+	if (DataTablePicker_ActorUIDefinitions.IsValid())
+	{
+		DataTablePicker_ActorUIDefinitions->UpdateDataTableCollection(GetRegistryType_ActorUIDefinitions());
+	}
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,
