@@ -31,6 +31,7 @@
 void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 {
 	RegistryId = FDataRegistryId{InArgs._RegistryType.Get(), InArgs._RegistryItemName.Get()};
+	bCanEditPreview = InArgs._bIsPreviewEditable.Get() && !InArgs._RegistryType_OnEnableDenyList.Get().Contains(RegistryId.RegistryType);
 
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
@@ -59,13 +60,25 @@ void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				SNew(STextBlock)
-				.Text(FText::FromName(RegistryId.ItemName))
-				.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.BoldFont")))
-			]
-			+ SVerticalBox::Slot()
-			[
-				SNew(SSplitter)
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.HAlign(EHorizontalAlignment::HAlign_Left)
+				.Padding(12.f)
+				.AutoWidth()
+				[
+					SNew(STextBlock)
+					.Text(FText::FromName(RegistryId.RegistryType))
+					.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.BoldFont")))
+				]
+				+ SHorizontalBox::Slot()
+				.HAlign(EHorizontalAlignment::HAlign_Left)
+				.Padding(12.f)
+				.AutoWidth()
+				[
+					SNew(STextBlock)
+					.Text(FText::FromName(RegistryId.ItemName))
+					.Font(FAppStyle::GetFontStyle(TEXT("PropertyWindow.NormalFont")))
+				]
 			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
@@ -85,7 +98,6 @@ TArray<UObject*> SAVVMEditorToolkitDataTableRowPreview::GetAssetsFromRegistryId(
 		return TArray<UObject*>{};
 	}
 
-	// TODO @gdemers make loading process more efficient using async query
 	const auto* RowData = Subsystem->GetCachedItem<FAVVMDataTableRow>(RegistryId);
 	if (ensureAlwaysMsgf(RowData != nullptr, TEXT("Invalid Payload.")))
 	{
@@ -105,5 +117,5 @@ TArray<UObject*> SAVVMEditorToolkitDataTableRowPreview::GetAssetsFromRegistryId(
 
 bool SAVVMEditorToolkitDataTableRowPreview::OnEnable_DetailView() const
 {
-	return false;
+	return bCanEditPreview;
 }

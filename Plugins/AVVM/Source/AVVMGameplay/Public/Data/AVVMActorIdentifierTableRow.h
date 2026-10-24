@@ -24,10 +24,29 @@
 #include "AVVMDataTableRow.h"
 
 #if WITH_EDITOR
+#include "Engine/DataAsset.h"
 #include "Misc/DataValidation.h"
 #endif
 
 #include "AVVMActorIdentifierTableRow.generated.h"
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMActorIdentifierPreviewDataAsset is a EDITOR ONLY UObject that
+ *	server as SWidget preview to the FAVVMActorIdentifierDataTableRow at Editor Time.
+ */
+#if WITH_EDITORONLY_DATA
+UCLASS(BlueprintType, NotBlueprintable)
+class AVVMGAMEPLAY_API UAVVMActorIdentifierPreviewDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
+	int32 UniqueId{INDEX_NONE};
+};
+#endif
 
 /**
  *	Class description:
@@ -45,11 +64,14 @@ struct AVVMGAMEPLAY_API FAVVMActorIdentifierDataTableRow : public FAVVMDataTable
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+	
+	// @gdemers IMPORTANT : We usually wouldnt define this api here, but for since AVVMEditorToolkit preview
+	// all dependent asset from a given Row type, we need to address the missing api call.
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 #endif
 
 	bool operator<(const FAVVMActorIdentifierDataTableRow& Rhs) const;
 
-	// TODO @gdemers make editor tooling that allow default assignment of next value in sequence, and can target Attachment bits, Storage bits, and items.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ClampMin="0"))
 	int32 UniqueId{INDEX_NONE};
 };

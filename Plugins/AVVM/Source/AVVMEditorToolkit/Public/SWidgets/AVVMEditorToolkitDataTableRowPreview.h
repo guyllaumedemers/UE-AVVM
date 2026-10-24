@@ -38,8 +38,10 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataTableRowPreview : public SComp
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataTableRowPreview){};
+	SLATE_ATTRIBUTE(TArray<FName>, RegistryType_OnEnableDenyList)
 	SLATE_ATTRIBUTE(FName, RegistryType)
 	SLATE_ATTRIBUTE(FName, RegistryItemName)
+	SLATE_ATTRIBUTE(bool, bIsPreviewEditable)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -52,4 +54,5 @@ private:
 	
 	TSharedPtr<IDetailsView> ObjectPropertyView{nullptr};
 	FDataRegistryId RegistryId{};
+	bool bCanEditPreview{false};
 };

@@ -22,7 +22,9 @@
 #include "CoreMinimal.h"
 
 #include "AVVMDoesWidgetProvideModalMessaging.h"
+#include "DataRegistryId.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Views/SListView.h"
 
 /**
  *	Class description:
@@ -35,7 +37,9 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitSplitView : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitSplitView){}
-	SLATE_ATTRIBUTE(TArray<TWeakObjectPtr<UObject>>, Assets)
+	SLATE_ATTRIBUTE(TArray<FDataRegistryId>, DependentRegistryIds)
+	SLATE_ATTRIBUTE(TArray<FName>, RegistryType_ViewEditDenyList)
+	SLATE_ATTRIBUTE(bool, bAreViewEditable)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
@@ -43,4 +47,16 @@ public:
 	
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
+
+private:
+	TSharedRef<ITableRow> OnGenerateRow(FName InItem, const TSharedRef<STableViewBase>& OwnerTable) const;
+	void UpdateSplitView(const TArray<FDataRegistryId>& NewRegistryIds);
+	
+	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
+	TSharedPtr<SScrollBar> ScrollBar{nullptr};
+	TArray<FDataRegistryId> RegistryIds{};
+	TArray<FName> FilteredEntries{};
+	TArray<FName> SourceEntries{};
+	TArray<FName> RegistryType_ViewEditDenyList{};
+	bool bCanEditSplitView{false};
 };

@@ -19,14 +19,37 @@
 //SOFTWARE.
 #include "SWidgets/AVVMEditorToolkitSplitView.h"
 
+#include "DataRegistrySubsystem.h"
+#include "Data/AVVMDataTableRow.h"
+#include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
+
 void SAVVMEditorToolkitSplitView::Construct(const FArguments& InArgs)
 {
-	/*
+	RegistryType_ViewEditDenyList = InArgs._RegistryType_ViewEditDenyList.Get();
+	bCanEditSplitView = InArgs._bAreViewEditable.Get();
+	RegistryIds = InArgs._DependentRegistryIds.Get();
+
+	SAssignNew(ScrollBar, SScrollBar)
+	.AlwaysShowScrollbar(true)
+	.Orientation(EOrientation::Orient_Vertical);
+
+	// Name List
+	SAssignNew(ListViewWidget, SListView<FName>)
+	.ListItemsSource(&FilteredEntries)
+	.SelectionMode(ESelectionMode::Single)
+	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
+	.OnGenerateRow(this, &SAVVMEditorToolkitSplitView::OnGenerateRow);
+	
+	UpdateSplitView(RegistryIds);
+
 	ChildSlot
 	[
-		// Populate the widget
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		[
+			ListViewWidget.ToSharedRef()
+		]
 	];
-	*/
 }
 
 FText SAVVMEditorToolkitSplitView::GetModalMessage_OnClosure() const
@@ -37,4 +60,53 @@ FText SAVVMEditorToolkitSplitView::GetModalMessage_OnClosure() const
 FText SAVVMEditorToolkitSplitView::GetModalTitle_OnClosure() const
 {
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "SAVVMEditorToolkitSplitView::GetModalTitle_OnClosure", "Warning!");
+}
+
+TSharedRef<ITableRow> SAVVMEditorToolkitSplitView::OnGenerateRow(FName InItem, const TSharedRef<STableViewBase>& OwnerTable) const
+{
+	const FString AggregatedRegistryId{InItem.ToString()};
+
+	int32 OutSearchIndex{INDEX_NONE};
+	AggregatedRegistryId.FindChar(';', OutSearchIndex);
+
+	const FString Left = AggregatedRegistryId.Left(OutSearchIndex);
+	const FString Right = AggregatedRegistryId.Right(AggregatedRegistryId.Len() - 1 - OutSearchIndex);
+
+	TSharedPtr<STableRow<FName>> OutListTableRow{};
+	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)
+	[
+		SNew(SAVVMEditorToolkitDataTableRowPreview)
+		.RegistryType_OnEnableDenyList(RegistryType_ViewEditDenyList)
+		.bIsPreviewEditable(bCanEditSplitView)
+		.RegistryType(FName(Left))
+		.RegistryItemName(FName(Right))
+	];
+
+	return OutListTableRow.ToSharedRef();
+}
+
+void SAVVMEditorToolkitSplitView::UpdateSplitView(const TArray<FDataRegistryId>& NewRegistryIds)
+{
+	auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return;
+	}
+
+	SourceEntries.Empty(NewRegistryIds.Num());
+	for (const auto& RegistryId : NewRegistryIds)
+	{
+		const auto* Row = Subsystem->GetCachedItem<FAVVMDataTableRow>(RegistryId);
+		if (ensureAlwaysMsgf(Row != nullptr, TEXT("Failed to retrieved Row type.")))
+		{
+			FName AggregatedType{FString::Printf(TEXT("%s;%s"), *RegistryId.RegistryType.ToString(), *RegistryId.ItemName.ToString())};
+			SourceEntries.Add(MoveTemp(AggregatedType));
+		}
+	}
+
+	FilteredEntries = SourceEntries;
+	if (ListViewWidget.IsValid())
+	{
+		ListViewWidget->RebuildList();
+	}
 }

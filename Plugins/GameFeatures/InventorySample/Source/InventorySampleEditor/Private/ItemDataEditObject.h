@@ -25,6 +25,7 @@
 
 #include "ItemDataEditObject.generated.h"
 
+struct FDataRegistryId;
 struct FDataRegistryType;
 struct FItemDefinitionDataTableRow;
 class UDataRegistry;
@@ -83,8 +84,11 @@ private:
 	FReply EditMode_OnButtonClick_Edit();
 	FReply EditMode_OnButtonClick_Delete();
 	
-	bool OpenDependentAsset(const FName RowName);
-	TArray<TWeakObjectPtr<UObject>> GetDependentAssets(const FItemDefinitionDataTableRow& Row) const;
+	void CreateDependentAsset(const FName RowName);
+	void EditDependentAsset(const FName RowName);
+	void DeleteDependentAsset(const FName RowName);
+	TArray<FDataRegistryId> GetDependentAssets(const FName RowName) const;
+	bool HasMissingAssets(const TArray<FDataRegistryId>& RegistryIds) const;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};

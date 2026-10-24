@@ -31,6 +31,24 @@ EDataValidationResult FAVVMActorIdentifierDataTableRow::IsDataValid(class FDataV
 
 	return Result;
 }
+
+TArray<FSoftObjectPath> FAVVMActorIdentifierDataTableRow::GetResourcesPaths() const
+{
+	const auto* Class = UAVVMActorIdentifierPreviewDataAsset::StaticClass();
+	if (!IsValid(Class))
+	{
+		return {};
+	}
+
+	auto* CDO = Class->GetDefaultObject<UAVVMActorIdentifierPreviewDataAsset>();
+	if (!IsValid(CDO))
+	{
+		return {};
+	}
+
+	CDO->UniqueId = UniqueId;
+	return {FSoftObjectPath{CDO}};
+}
 #endif
 
 bool FAVVMActorIdentifierDataTableRow::operator<(const FAVVMActorIdentifierDataTableRow& Rhs) const

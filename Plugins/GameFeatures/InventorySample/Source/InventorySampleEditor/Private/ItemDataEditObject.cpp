@@ -646,47 +646,87 @@ FReply UItemDataEditObject::EditMode_OnButtonClick_Edit()
 	
 	for (const FName RowName : OutRowNames)
 	{
-		ensureAlwaysMsgf(OpenDependentAsset(RowName), TEXT("Failed to open Asset using RowName."));
+		EditDependentAsset(RowName);
 	}
 
-	return FReply::Unhandled();
+	return FReply::Handled();
 }
 
 FReply UItemDataEditObject::EditMode_OnButtonClick_Delete()
 {
-	return FReply::Unhandled();
+	TArray<FName> OutRowNames{};
+	if (!EditMode_DataVisualizer.IsValid() || !EditMode_DataVisualizer->GetSelectedItems(OutRowNames))
+	{
+		return FReply::Unhandled();
+	}
+
+	if (OutRowNames.IsEmpty())
+	{
+		return FReply::Unhandled();
+	}
+
+	for (const FName RowName : OutRowNames)
+	{
+		DeleteDependentAsset(RowName);
+	}
+
+	return FReply::Handled();
 }
 
-bool UItemDataEditObject::OpenDependentAsset(const FName RowName)
+void UItemDataEditObject::CreateDependentAsset(const FName RowName)
+{
+}
+
+void UItemDataEditObject::EditDependentAsset(const FName RowName)
+{
+	const TArray<FDataRegistryId> DependentRegistryIds = GetDependentAssets(RowName);
+	if (HasMissingAssets(DependentRegistryIds))
+	{
+		CreateDependentAsset(RowName);
+	}
+
+	FAVVMWindowContextArgs Params{};
+	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
+	Params.Content = SNew(SAVVMEditorToolkitSplitView)
+		.RegistryType_ViewEditDenyList(TArray<FName>{GetRegistryType_ActorIdentifiers()})
+		.bAreViewEditable(true)
+		.DependentRegistryIds(DependentRegistryIds);
+
+	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateUObject(this, &UItemDataEditObject::OnWindowClosedOverride);
+	Params.OnWindowClosed = FOnWindowClosed::CreateUObject(this, &UItemDataEditObject::OnWindowClosed);
+	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
+}
+
+void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
+{
+}
+
+TArray<FDataRegistryId> UItemDataEditObject::GetDependentAssets(const FName RowName) const
+{
+	const FName ItemActorRowName{RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor"))};
+	return {
+			FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName},
+			FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName},
+			FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName},
+			FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")))}
+	};
+}
+
+bool UItemDataEditObject::HasMissingAssets(const TArray<FDataRegistryId>& RegistryIds) const
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
 	{
-		return false;
-	}
-
-	const auto* Row = Subsystem->GetCachedItem<FItemDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName});
-	if (ensureAlwaysMsgf(Row != nullptr, TEXT("Failed to retrieved FDataRegistryId.")))
-	{
-		FAVVMWindowContextArgs Params{};
-		Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
-		Params.Content = SNew(SAVVMEditorToolkitSplitView)
-			.Assets(GetDependentAssets(*Row));
-
-		Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateUObject(this, &UItemDataEditObject::OnWindowClosedOverride);
-		Params.OnWindowClosed = FOnWindowClosed::CreateUObject(this, &UItemDataEditObject::OnWindowClosed);
-		FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
 		return true;
 	}
-	else
-	{
-		return false;
-	}
-}
 
-TArray<TWeakObjectPtr<UObject>> UItemDataEditObject::GetDependentAssets(const FItemDefinitionDataTableRow& Row) const
-{
-	return {};
+	bool bResult{true};
+	for (const auto& RegistryId : RegistryIds)
+	{
+		bResult &= (Subsystem->GetCachedItem<FAVVMDataTableRow>(RegistryId) != nullptr);
+	}
+
+	return (false == bResult);
 }
 
 TSharedPtr<SWidget> UItemGroupDataEditObject::GetDataEditContent(const TWeakObjectPtr<UDataTable>& OutputDataTable,

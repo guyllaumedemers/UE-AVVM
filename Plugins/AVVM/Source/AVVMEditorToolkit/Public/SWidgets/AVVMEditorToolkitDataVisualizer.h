@@ -49,9 +49,7 @@ public:
 	bool GetSelectedItems(TArray<FName>& OutSelectedItems) const;
 
 private:
-	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName,
-	                                    const TSharedRef<STableViewBase>& OwnerTable) const;
-	
+	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName, const TSharedRef<STableViewBase>& OwnerTable) const;
 	void UpdateDataVisualizer(const FDataRegistryType& NewRegistryType);
 	void OnSearchTextChanged(const FText& NewText);
 

@@ -35,6 +35,7 @@ public class AVVMEditorToolkit : ModuleRules
 				"Blutility",
 				"Core",
 				"CoreUObject",
+				"DataRegistry",
 				"EditorSubsystem",
 				"Engine",
 				"Slate",
@@ -49,7 +50,6 @@ public class AVVMEditorToolkit : ModuleRules
 			{
 				"ApplicationCore",
 				"AVVMGameplay",
-				"DataRegistry",
 				"InputCore",
 				"Projects",
 				"ToolMenus",
