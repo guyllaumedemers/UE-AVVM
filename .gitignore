@@ -551,3 +551,4 @@ Content/Developers
 !Build/BatchFiles/*
 !Build/Scripts/*
 Profiling/*
+PurgeArchivedAssets.bat
