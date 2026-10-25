@@ -175,36 +175,34 @@ public:
 template <typename TAsset>
 TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMEditorToolkitFactoryContextArgs& Params)
 {
-	if (FModuleManager::Get().IsModuleLoaded("AssetTools"))
-	{
-		auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-		UObject* NewAsset = AssetTools.Get().CreateAsset(Params.AssetName, Params.PackagePath, Params.AssetClass, Params.AssetFactory);
-		if (!ensureAlwaysMsgf(IsValid(NewAsset), TEXT("Failed to create asset.")))
-		{
-			return nullptr;
-		}
-
-		const UPackage* Package = NewAsset->GetPackage();
-		if (!ensureAlwaysMsgf(IsValid(Package), TEXT("Failed to retrieve package.")))
-		{
-			return nullptr;
-		}
-
-		FSavePackageArgs SavePackageArgs{};
-		SavePackageArgs.TopLevelFlags = RF_Public | RF_Standalone;
-		SavePackageArgs.Error = GLog;
-
-		const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
-		const bool bSaved = UPackage::SavePackage(NewAsset->GetPackage(), NewAsset, *PackageFileName, MoveTemp(SavePackageArgs));
-		if (ensureAlwaysMsgf(bSaved, TEXT("Failed to save")))
-		{
-			AssetTools.Get().OpenEditorForAssets({NewAsset});
-		}
-
-		return Cast<TAsset>(NewAsset);
-	}
-	else
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
 	{
 		return nullptr;
 	}
+
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	UObject* NewAsset = AssetTools.Get().CreateAsset(Params.AssetName, Params.PackagePath, Params.AssetClass, Params.AssetFactory);
+	if (!ensureAlwaysMsgf(IsValid(NewAsset), TEXT("Failed to create asset.")))
+	{
+		return nullptr;
+	}
+
+	const UPackage* Package = NewAsset->GetPackage();
+	if (!ensureAlwaysMsgf(IsValid(Package), TEXT("Failed to retrieve package.")))
+	{
+		return nullptr;
+	}
+
+	FSavePackageArgs SavePackageArgs{};
+	SavePackageArgs.TopLevelFlags = RF_Public | RF_Standalone;
+	SavePackageArgs.Error = GLog;
+
+	const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
+	const bool bSaved = UPackage::SavePackage(NewAsset->GetPackage(), NewAsset, *PackageFileName, MoveTemp(SavePackageArgs));
+	if (ensureAlwaysMsgf(bSaved, TEXT("Failed to save")))
+	{
+		AssetTools.Get().OpenEditorForAssets({NewAsset});
+	}
+
+	return Cast<TAsset>(NewAsset);
 }

@@ -99,8 +99,7 @@ void SAVVMEditorToolkitDataTablePicker::Construct(const FArguments& InArgs)
 
 bool SAVVMEditorToolkitDataTablePicker::UpdateDataTableCollection(const FDataRegistryType& NewRegistryType)
 {
-	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
-	                      TEXT("Invalid RegistryType.")))
+	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(), TEXT("Invalid RegistryType.")))
 	{
 		return false;
 	}
