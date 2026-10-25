@@ -156,9 +156,6 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 	{
 		return;
 	}
-
-	// @gdemers ensure we always get latest state.
-	Subsystem->RefreshRegistryMap();
 	
 	DataRegistry = TStrongObjectPtr(Subsystem->GetRegistryForType(NewRegistryType));
 	if (!DataRegistry.IsValid())

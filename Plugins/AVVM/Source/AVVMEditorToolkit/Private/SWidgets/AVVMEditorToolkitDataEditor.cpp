@@ -33,6 +33,12 @@
 #include "Modules/ModuleManager.h"
 #include "Widgets/Images/SImage.h"
 
+TSharedPtr<SWidget> UAVVMEditorToolkitDataEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
+{
+	OwningParent = Params.OwningParent;
+	return nullptr;
+}
+
 FName UAVVMEditorToolkitDataEditObject::GetRegistryType_ActorIdentifiers()
 {
 	return TEXT("R_ActorIdentifier");
@@ -81,9 +87,14 @@ void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)
 	auto* Copy = DuplicateObject<UAVVMEditorToolkitDataEditObject>(InArgs._DataEditorObject.Get().Get(), nullptr);
 	DataEditObject = TStrongObjectPtr(Copy);
 
+	if (DataEditObject.IsValid())
+	{
+		DataEditObject->OnRefreshAssetListRequested = InArgs._OnRefreshAssetListRequested;
+	}
+
 	ChildSlot
 	[
-		GetDataEditContent({InArgs._OutputDataTable.Get(), InArgs._DataTablePackagePath.Get(), InArgs._Mode.Get()}).ToSharedRef()
+		GetDataEditContent({InArgs._OutputDataTable.Get(), InArgs._DataTablePackagePath.Get(), InArgs._Mode.Get(), AsShared()}).ToSharedRef()
 	];
 }
 

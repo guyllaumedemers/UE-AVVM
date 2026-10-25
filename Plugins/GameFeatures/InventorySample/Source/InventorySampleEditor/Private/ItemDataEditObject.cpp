@@ -40,6 +40,7 @@
 #include "Engine/DataTable.h"
 #include "Factories/BlueprintFactory.h"
 #include "Factories/DataAssetFactory.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataTablePicker.h"
@@ -55,7 +56,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const FAVVMEditConte
 	SelectedDataTable_ItemDefinitions = Params.OutputDataTable;
 	DataTablePackagePath = Params.PackagePath;
 
-	TSharedPtr<SWidget> Out{nullptr};
+	TSharedPtr<SWidget> Out{Super::GetDataEditContent(Params)};
 	switch (Params.CurrentMode)
 	{
 		case EAVVMDataEditorModes::None:
@@ -337,7 +338,28 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 	}
 
 	// @gdemers user made the required selection, and is creating a new entry in each Data Table.
-	return TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
+	const FReply Result = TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
+	OnRefreshAssetListRequested.ExecuteIfBound();
+
+	struct FScoped
+	{
+		TSharedRef<SWidget> Widget{};
+
+		~FScoped()
+		{
+			// @gdemers enforce closing window upon completing the action.
+			TSharedPtr<SWindow> ParentWindow = FSlateApplication::Get().FindWidgetWindow(Widget);
+			if (ensureAlwaysMsgf(ParentWindow.IsValid(), TEXT("Failed to find bound SWindow.")))
+			{
+				ParentWindow->SetRequestDestroyWindowOverride(FRequestDestroyWindowOverride());
+				ParentWindow->RequestDestroyWindow();
+			}
+		}
+	};
+
+	// @gdemers Unsafe, but required for order of execution.
+	FScoped OnExit{OwningParent->AsShared()};
+	return Result;
 }
 
 bool UItemDataEditObject::DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const
@@ -453,34 +475,34 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	{
 		if (!UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(GetRegistryType_ActorIdentifiers()))
 		{
-			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{FAVVMActorIdentifierDataTableRow::StaticStruct(), GetRegistryType_ActorIdentifiers(), DataTablePackagePath});
+			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitScriptStructContextArgs{FAVVMActorIdentifierDataTableRow::StaticStruct(), GetRegistryType_ActorIdentifiers(), DataTablePackagePath});
 		}
 
 		if (!UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(GetRegistryType_ActorDefinitions()))
 		{
-			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{FAVVMActorDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorDefinitions(), DataTablePackagePath});
+			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitScriptStructContextArgs{FAVVMActorDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorDefinitions(), DataTablePackagePath});
 		}
 
 		if (!UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(GetRegistryType_ActorUIDefinitions()))
 		{
-			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{FAVVMActorUIDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorUIDefinitions(), DataTablePackagePath});
+			UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitScriptStructContextArgs{FAVVMActorUIDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorUIDefinitions(), DataTablePackagePath});
 		}
 	}
 
 	const bool bShouldCreateMissingDataTables = (bCheckBoxStates.IsValidIndex(1/*UDataTable*/) && bCheckBoxStates[1]);
 	if (!SelectedDataTable_ActorIdentifiers.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{FAVVMActorIdentifierDataTableRow::StaticStruct(), DataTablePackagePath});
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{FAVVMActorIdentifierDataTableRow::StaticStruct(), GetRegistryType_ActorIdentifiers(), DataTablePackagePath});
 	}
 
 	if (!SelectedDataTable_ActorDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{FAVVMActorDefinitionDataTableRow::StaticStruct(), DataTablePackagePath});
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{FAVVMActorDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorDefinitions(), DataTablePackagePath});
 	}
 
 	if (!SelectedDataTable_ActorUIDefinitions.IsValid() && bShouldCreateMissingDataTables)
 	{
-		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{FAVVMActorUIDefinitionDataTableRow::StaticStruct(), DataTablePackagePath});
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{FAVVMActorUIDefinitionDataTableRow::StaticStruct(), GetRegistryType_ActorUIDefinitions(), DataTablePackagePath});
 	}
 
 	if (!ensureAlwaysMsgf(SelectedDataTable_ActorIdentifiers.IsValid() &&
@@ -641,8 +663,9 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName) const
 
 	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
 
-	const auto* SearchResult_ActorIdentifiers = Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName});
-	if (SearchResult_ActorIdentifiers == nullptr)
+	FTableRowBase OutRowBase_ActorIdentifier{};
+	const bool bDoesExit_ActorIdentifier = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, OutRowBase_ActorIdentifier);
+	if (!bDoesExit_ActorIdentifier)
 	{
 		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
 	}

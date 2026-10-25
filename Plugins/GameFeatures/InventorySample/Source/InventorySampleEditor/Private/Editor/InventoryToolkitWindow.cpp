@@ -27,7 +27,6 @@
 #include "InventorySettings.h"
 #include "ItemDataEditObject.h"
 #include "SCheckBoxList.h"
-#include "Data/AVVMDataRegistry.h"
 #include "Data/InventoryProviderTableRow.h"
 #include "Data/InventoryStubDataProviderTableRow.h"
 #include "Data/ItemDefinitionDataAsset.h"
@@ -159,7 +158,7 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 					.HAlign(EHorizontalAlignment::HAlign_Center)
 					.ButtonColorAndOpacity(FLinearColor::Green)
 					.IsEnabled(this, &SInventoryToolkitWindow::IsEnabled_DataRegistrySelectionChanged)
-					.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick_OpenWindow)
+					.OnClicked(this, &SInventoryToolkitWindow::OnButtonClick_CreateOrEdit)
 					.Text(this, &SInventoryToolkitWindow::OnTextChanged_CreateOrEdit)
 				]
 			]
@@ -301,7 +300,7 @@ FString SInventoryToolkitWindow::GetOutputPackagePath() const
 	return SelectedPackagePath;
 }
 
-FReply SInventoryToolkitWindow::OnButtonClick_OpenWindow()
+FReply SInventoryToolkitWindow::OnButtonClick_CreateOrEdit()
 {
 	if (!SelectedDataRegistryType.IsValid())
 	{
@@ -325,11 +324,14 @@ FText SInventoryToolkitWindow::OnTextChanged_CreateOrEdit() const
 	return (bShouldEditDataTable && bHasDataTableAvailable) ? NSLOCTEXT("AVVMEditorToolkit", "DataTable_Edit", "Edit") : NSLOCTEXT("AVVMEditorToolkit", "DataTable_Create", "Create");
 }
 
-bool SInventoryToolkitWindow::CreateDataRegistry()
+bool SInventoryToolkitWindow::CreateDataRegistry() const
 {
 	const auto RowTypes = GetInventoryRowTypes();
 	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-	const auto* DataRegistry = UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitDataRegistryContextArgs{NewScriptStruct, SelectedDataRegistryType, SelectedPackagePath});
+	
+	const auto* DataRegistry = UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitScriptStructContextArgs{NewScriptStruct, SelectedDataRegistryType, SelectedPackagePath});
+	OnRefreshAssetListRequested();
+	
 	return IsValid(DataRegistry);
 }
 
@@ -337,7 +339,9 @@ bool SInventoryToolkitWindow::CreateDataTable()
 {
 	const auto RowTypes = GetInventoryRowTypes();
 	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-	SelectedDataTable = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitDataTableContextArgs{NewScriptStruct, SelectedPackagePath});
+
+	SelectedDataTable = UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{NewScriptStruct, SelectedDataRegistryType, SelectedPackagePath});
+	OnRefreshAssetListRequested();
 
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
@@ -368,7 +372,8 @@ void SInventoryToolkitWindow::OpenWindow(const TWeakObjectPtr<UDataTable>& DataT
 		.DataTablePackagePath(SelectedPackagePath)
 		.DataEditorObject(GetDataEditObject(RegistryType))
 		.OutputDataTable(DataTable)
-		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create);
+		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create)
+		.OnRefreshAssetListRequested(this, &SInventoryToolkitWindow::OnRefreshAssetListRequested);
 
 	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosedOverride);
 	Params.OnWindowClosed = FOnWindowClosed::CreateRaw(this, &SInventoryToolkitWindow::OnWindowClosed);
@@ -396,6 +401,15 @@ void SInventoryToolkitWindow::OnWindowClosed(const TSharedRef<SWindow>& PendingC
 	if (ensureAlwaysMsgf(FloatingWindows.Contains(PendingCloseWindow), TEXT("Attempt to remove Window multiple times.")))
 	{
 		FloatingWindows.Remove(PendingCloseWindow);
+	}
+}
+
+void SInventoryToolkitWindow::OnRefreshAssetListRequested() const
+{
+	if (DataTablePicker.IsValid())
+	{
+		// @gdemers refresh any data table changes
+		DataTablePicker->UpdateDataTableCollection(SelectedDataRegistryType);
 	}
 }
 

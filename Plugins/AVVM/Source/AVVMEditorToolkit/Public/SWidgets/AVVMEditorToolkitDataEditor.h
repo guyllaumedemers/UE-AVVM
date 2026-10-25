@@ -65,6 +65,8 @@ struct AVVMEDITORTOOLKIT_API FAVVMEditContextArgs
 	
 	UPROPERTY(Transient, BlueprintReadWrite)
 	EAVVMDataEditorModes CurrentMode{EAVVMDataEditorModes::None};
+
+	TSharedPtr<SWidget> OwningParent{nullptr};
 };
 
 /**
@@ -79,10 +81,12 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitDataEditObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) PURE_VIRTUAL(GetDataEditContent, return nullptr;)
+	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params);
 	virtual int32 GenerateActorIdentifier(const FName ActorType) const PURE_VIRTUAL(GenerateActorIdentifier, return INDEX_NONE;)
 	virtual FText GetModalMessage_OnClosure() const PURE_VIRTUAL(GetModalMessage_OnClosure, return FText::GetEmpty(););
 	virtual FText GetModalTitle_OnClosure() const PURE_VIRTUAL(GetModalTitle_OnClosure, return FText::GetEmpty(););
+	
+	FSimpleDelegate OnRefreshAssetListRequested{};
 
 protected:
 	static FName GetRegistryType_ActorIdentifiers();
@@ -94,6 +98,7 @@ protected:
 	virtual void OnPostWindowClosed() const PURE_VIRTUAL(OnPostWindowClosed, return;);
 	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
+	TSharedPtr<SWidget> OwningParent{nullptr};
 };
 
 /**
@@ -110,6 +115,7 @@ public:
 	SLATE_ATTRIBUTE(TWeakObjectPtr<UDataTable>, OutputDataTable)
 	SLATE_ATTRIBUTE(FString, DataTablePackagePath)
 	SLATE_ATTRIBUTE(EAVVMDataEditorModes, Mode)
+	SLATE_EVENT(FSimpleDelegate, OnRefreshAssetListRequested)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */

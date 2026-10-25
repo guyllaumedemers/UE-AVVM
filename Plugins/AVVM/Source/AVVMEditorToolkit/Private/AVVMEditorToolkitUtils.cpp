@@ -82,16 +82,14 @@ TArray<const UDataRegistrySource_DataTable*> UAVVMEditorToolkitUtils::GetDataTab
 		return OutResult;
 	}
 
-	// @gdemers ensure we always get latest state.
-	Subsystem->RefreshRegistryMap();
-
-	const auto* DataRegistry = Subsystem->GetRegistryForType(RegistryType);
+	auto* DataRegistry = Subsystem->GetRegistryForType(RegistryType);
 	if (!IsValid(DataRegistry))
 	{
 		return OutResult;
 	}
 
-	// @gdemers sadly, the DataRegistry class doesnt allow direct access to the DataSources property.
+	DataRegistry->EditorRefreshRegistry();
+	// TODO @gdemers Fix this! Data Table newly added cannot refresh due to being empty. We should still be able to lookup from DataSource, but the api is protected.
 	TArray<FDataRegistrySourceItemId> OutElements{};
 	DataRegistry->GetAllSourceItems(OutElements);
 
@@ -138,7 +136,7 @@ bool UAVVMEditorToolkitUtils::DoesDataRegistryTypeExist(const FDataRegistryType&
 	return IsValid(Subsystem) ? IsValid(Subsystem->GetRegistryForType(RegistryType)) : false;
 }
 
-UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEditorToolkitDataRegistryContextArgs& Params)
+UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEditorToolkitScriptStructContextArgs& Params)
 {
 	auto* Factory = NewObject<UAVVMDataRegistryFactory>();
 	if (IsValid(Factory))
@@ -160,19 +158,33 @@ UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEdi
 	}
 }
 
-UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToolkitDataTableContextArgs& Params)
+UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params)
 {
 	auto* Factory = NewObject<UDataTableFactory>();
 	if (IsValid(Factory))
 	{
 		Factory->Struct = Params.ScriptStruct;
 
-		FAVVMEditorToolkitFactoryContextArgs Params{};
-		Params.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(Params.PackagePath, TEXT("DT"), *GetNameSafe(Factory->Struct));
-		Params.PackagePath = Params.PackagePath;
-		Params.AssetFactory = Factory;
-		Params.AssetClass = UDataTable::StaticClass();
-		return UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(Params);
+		FAVVMEditorToolkitFactoryContextArgs NewParams{};
+		NewParams.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(Params.PackagePath, TEXT("DT"), *GetNameSafe(Factory->Struct));
+		NewParams.PackagePath = Params.PackagePath;
+		NewParams.AssetFactory = Factory;
+		NewParams.AssetClass = UDataTable::StaticClass();
+		auto* DataTable = UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(NewParams);
+		if (!IsValid(DataTable))
+		{
+			return nullptr;
+		}
+
+		// @gdemers handle refreshing registry, and data table visibility.
+		auto* RegistrySubsystem = UDataRegistrySubsystem::Get();
+		if (IsValid(RegistrySubsystem))
+		{
+			FAssetData Asset{DataTable};
+			RegistrySubsystem->RegisterSpecificAsset(Params.RegistryType, Asset, 0);
+		}
+
+		return DataTable;
 	}
 	else
 	{
@@ -213,13 +225,13 @@ bool UAVVMEditorToolkitUtils::CreateActorDefinitionRow(const FAVVMEditorDataTabl
 
 		DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
-		FAVVMEditorToolkitFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = Params.RowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-		DA_Params.PackagePath = Params.PackagePath; // share same package path as Blueprint asset
-		DA_Params.AssetFactory = DA_Factory;
-		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
+		FAVVMEditorToolkitFactoryContextArgs NewParams{};
+		NewParams.AssetName = Params.RowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
+		NewParams.PackagePath = Params.PackagePath; // share same package path as Blueprint asset
+		NewParams.AssetFactory = DA_Factory;
+		NewParams.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
-		auto* ActorDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorDefinitionDataAsset>(DA_Params);
+		auto* ActorDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorDefinitionDataAsset>(NewParams);
 		if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 		{
 			Row->ActorDefinition = ActorDefinitionDataAsset;
@@ -245,13 +257,13 @@ bool UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(const FAVVMEditorDataTa
 
 		DA_Factory->DataAssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
 
-		FAVVMEditorToolkitFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = Params.RowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-		DA_Params.PackagePath = Params.PackagePath; // share same package path as Blueprint asset
-		DA_Params.AssetFactory = DA_Factory;
-		DA_Params.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
+		FAVVMEditorToolkitFactoryContextArgs NewParams{};
+		NewParams.AssetName = Params.RowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
+		NewParams.PackagePath = Params.PackagePath; // share same package path as Blueprint asset
+		NewParams.AssetFactory = DA_Factory;
+		NewParams.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
 
-		auto* ActorUIDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorUIDefinitionDataAsset>(DA_Params);
+		auto* ActorUIDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorUIDefinitionDataAsset>(NewParams);
 		if (ensureAlwaysMsgf(IsValid(ActorUIDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 		{
 			Row->ActorUIDefinition = ActorUIDefinitionDataAsset;
@@ -286,13 +298,13 @@ bool UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(FTableRowBase& NewRo
 	{
 		DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
-		FAVVMEditorToolkitFactoryContextArgs DA_Params{};
-		DA_Params.AssetName = NewRowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-		DA_Params.PackagePath = NewPackagePath; // share same package path as Blueprint asset
-		DA_Params.AssetFactory = DA_Factory;
-		DA_Params.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
+		FAVVMEditorToolkitFactoryContextArgs NewParams{};
+		NewParams.AssetName = NewRowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
+		NewParams.PackagePath = NewPackagePath; // share same package path as Blueprint asset
+		NewParams.AssetFactory = DA_Factory;
+		NewParams.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
-		auto* ActorDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorDefinitionDataAsset>(DA_Params);
+		auto* ActorDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorDefinitionDataAsset>(NewParams);
 		if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 		{
 			Row->ActorDefinition = ActorDefinitionDataAsset;

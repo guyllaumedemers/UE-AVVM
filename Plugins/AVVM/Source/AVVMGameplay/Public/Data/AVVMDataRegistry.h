@@ -36,4 +36,5 @@ class AVVMGAMEPLAY_API UAVVMDataRegistry : public UDataRegistry
 	GENERATED_BODY()
 	
 	friend class UAVVMDataRegistryFactory;
+	friend class UAVVMEditorToolkitUtils;
 };

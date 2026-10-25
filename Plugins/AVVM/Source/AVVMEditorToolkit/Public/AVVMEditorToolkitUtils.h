@@ -66,7 +66,7 @@ struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitFactoryContextArgs
  *	FAVVMDataRegistryContextArgs is a context struct encapsulating parameters to an UDataRegistry UFactory.
  */
 USTRUCT(BlueprintType)
-struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitDataRegistryContextArgs
+struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitScriptStructContextArgs
 {
 	GENERATED_BODY()
 
@@ -75,23 +75,6 @@ struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitDataRegistryContextArgs
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FDataRegistryType RegistryType{};
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString PackagePath{};
-};
-
-/**
- *	Class description:
- *	
- *	FAVVMDataTableContextArgs is a context struct encapsulating parameters to an UDataTable UFactory.
- */
-USTRUCT(BlueprintType)
-struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitDataTableContextArgs
-{
-	GENERATED_BODY()
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	UScriptStruct* ScriptStruct{nullptr};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString PackagePath{};
@@ -162,10 +145,10 @@ public:
 	static bool DoesDataRegistryTypeExist(const FDataRegistryType& RegistryType);
 
 	UFUNCTION(BlueprintCallable)
-	static UDataRegistry* CreateMissingDataRegistry(const FAVVMEditorToolkitDataRegistryContextArgs& Params);
+	static UDataRegistry* CreateMissingDataRegistry(const FAVVMEditorToolkitScriptStructContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
-	static UDataTable* CreateMissingDataTable(const FAVVMEditorToolkitDataTableContextArgs& Params);
+	static UDataTable* CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
 	static bool CreateActorIdentifierRow(const FAVVMEditorDataTableActorIdentifierContextArgs& Params);
