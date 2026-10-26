@@ -26,8 +26,6 @@
 #include "Modules/ModuleManager.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-class SAVVMEditorToolkitRoot;
-
 /**
  *	@gdemers a macro that define the project prefix to be used during asset creation.
  */
@@ -146,5 +144,4 @@ protected:
 	TSharedPtr<FExtensibilityManager> MenuExtensibilityManager{nullptr};
 	// @gdemers core object handle the toolkit cmds invocation.
 	TSharedPtr<FAVVMEditorToolkit_Core> Core{nullptr};
-	TSharedPtr<SAVVMEditorToolkitRoot> Root{nullptr};
 };

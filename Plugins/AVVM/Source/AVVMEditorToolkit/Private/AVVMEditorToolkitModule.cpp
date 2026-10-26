@@ -178,7 +178,7 @@ void FAVVMEditorToolkitModule::BindCommands()
 
 void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 {
-	const auto MakeWindowTabEntry = [&](const class FSpawnTabArgs& SpawnTabArgs,
+	const auto MakeWindowTabEntry = [](const class FSpawnTabArgs& SpawnTabArgs,
 	                                    int32 TabIndex,
 	                                    TSharedPtr<FExtensibilityManager> ExtensibilityManager,
 	                                    TSharedPtr<FAVVMEditorToolkit_Core> EditorToolkit)
@@ -187,7 +187,7 @@ void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 			.TabRole(ETabRole::NomadTab)
 			.Label(NS_AVVMEditorToolkit::Viewport_Label)
 			[
-				SAssignNew(Root, SAVVMEditorToolkitRoot)
+				SNew(SAVVMEditorToolkitRoot)
 				.MenuBarExtenders(ExtensibilityManager.IsValid() ? ExtensibilityManager->GetAllExtenders() : nullptr)
 				.Core(EditorToolkit)
 			];
