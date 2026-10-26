@@ -22,47 +22,13 @@
 #include "AVVMEditorToolkitContextWindow.h"
 #include "AVVMEditorToolkitToolbar.h"
 #include "Components/VerticalBox.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Framework/MultiBox/MultiBoxExtender.h"
 #include "Widgets/SOverlay.h"
-#include "Widgets/Images/SImage.h"
-#include "Widgets/Layout/SBorder.h"
 
 void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs)
 {
-}
-
-void SAVVMEditorToolkitRoot::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
-                                   TSharedPtr<FExtender> MenuBarExtenders)
-{
-	SecondaryMenuToolbarWidget = SNew(SBorder)
-		.Padding(0.f)
-		.BorderImage(FAppStyle::Get().GetBrush("NoBorder"));
-
-	{
-		const auto NewToolbar = SNew(SAVVMEditorToolkitToolbar);
-		NewToolbar->Setup(Core, MenuBarExtenders);
-		SecondaryMenuToolbarWidget->SetContent(NewToolbar);
-	}
-
-	SecondaryContextWindowWidget = SNew(SBorder)
-		.Padding(0.f)
-		.BorderImage(FAppStyle::Get().GetBrush("NoBorder"));
-
-	{
-		const auto NewWindowContext = SNew(SAVVMEditorToolkitContextWindow);
-		NewWindowContext->Setup(Core);
-		SecondaryContextWindowWidget->SetContent(NewWindowContext);
-	}
-	
 	ChildSlot
 	[
 		SNew(SOverlay)
-		+ SOverlay::Slot()
-		[
-			SNew(SImage)
-			.Image(&FCoreStyle::Get().GetWidgetStyle<FWindowStyle>("Window").BackgroundBrush)
-		]
 		+ SOverlay::Slot()
 		[
 			SNew(SVerticalBox)
@@ -70,20 +36,24 @@ void SAVVMEditorToolkitRoot::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				SecondaryMenuToolbarWidget.ToSharedRef()
+				SAssignNew(Toolbar, SAVVMEditorToolkitToolbar)
 			]
 			+ SVerticalBox::Slot()
-			.Padding(FMargin(0.0f, 0.0f, 0.0f, 2.0f))
+			.Padding(12.f)
 			.FillContentHeight(1.f)
 			[
-				SNew(SBorder)
-				.Padding(12.f)
-				.BorderImage(FAppStyle::Get().GetBrush("NoBorder"))
-				.IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
-				[
-					SecondaryContextWindowWidget.ToSharedRef()
-				]
+				SAssignNew(WindowContext, SAVVMEditorToolkitContextWindow)
 			]
 		]
 	];
+
+	if (ensureAlwaysMsgf(Toolbar.IsValid(), TEXT("Invalid Toolbar.")))
+	{
+		Toolbar->Setup(InArgs._Core, InArgs._MenuBarExtenders);
+	}
+
+	if (ensureAlwaysMsgf(WindowContext.IsValid(), TEXT("Invalid Window Context.")))
+	{
+		WindowContext->Setup(InArgs._Core);
+	}
 }

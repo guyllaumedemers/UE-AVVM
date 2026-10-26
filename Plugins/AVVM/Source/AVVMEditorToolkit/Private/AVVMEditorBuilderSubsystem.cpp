@@ -64,7 +64,7 @@ void UAVVMEditorBuilderSubsystem::Static_SelectBuilder(const UEditorEngine* Edit
                                                        const UAVVMEditorToolkitBuilderObject* Builder)
 {
 	auto* Subsystem = UAVVMEditorBuilderSubsystem::Get(Editor);
-	if (IsValid(Subsystem) && (Subsystem->ActiveToolkitBuilder != Builder))
+	if (IsValid(Subsystem))
 	{
 		Subsystem->ActiveToolkitBuilder = Builder;
 		Subsystem->OnBuildContextChanged.Broadcast(Builder);
@@ -119,9 +119,16 @@ void UAVVMEditorBuilderSubsystem::OnSoftObjectAcquired()
 		}
 	}
 
-	if (!ToolkitBuilders.IsEmpty())
+	if (ToolkitBuilders.IsEmpty())
 	{
-		ActiveToolkitBuilder.Reset();
-		ActiveToolkitBuilder = ToolkitBuilders[0];
+		return;
+	}
+
+	ActiveToolkitBuilder.Reset();
+	
+	ActiveToolkitBuilder = ToolkitBuilders[0];
+	if (ActiveToolkitBuilder.IsValid())
+	{
+		ActiveToolkitBuilder->SetActiveSelf();
 	}
 }

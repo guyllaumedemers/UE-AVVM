@@ -26,6 +26,8 @@
 #include "Modules/ModuleManager.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
+class SAVVMEditorToolkitRoot;
+
 /**
  *	@gdemers a macro that define the project prefix to be used during asset creation.
  */
@@ -131,17 +133,18 @@ protected:
 		TAttribute<FText> Label{FText::GetEmpty()};
 		TAttribute<FText> Tooltips{FText::GetEmpty()};
 
-		TSharedPtr<FExtensibilityManager> ExtensibilityManager = nullptr;
+		TSharedPtr<FExtensibilityManager> ExtensibilityManager{nullptr};
 		TArray<TSharedPtr<FUICommandInfo>> Commands{};
-		TSharedPtr<FUICommandList> CommandList = nullptr;
+		TSharedPtr<FUICommandList> CommandList{nullptr};
 	};
 
 	static void MakeNewPullDownMenuEntries(const FAVVMExtensibilityContext& Ctx);
 	static void MakeNewPullDownMenu(FMenuBarBuilder& Builder, FAVVMExtensibilityContext Ctx);
 	static void MakeNewMenuEntry(FMenuBuilder& Builder, TArray<TSharedPtr<FUICommandInfo>> Commands);
 
-	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager = nullptr;
-	TSharedPtr<FExtensibilityManager> MenuExtensibilityManager = nullptr;
+	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager{nullptr};
+	TSharedPtr<FExtensibilityManager> MenuExtensibilityManager{nullptr};
 	// @gdemers core object handle the toolkit cmds invocation.
-	TSharedPtr<FAVVMEditorToolkit_Core> Core = nullptr;
+	TSharedPtr<FAVVMEditorToolkit_Core> Core{nullptr};
+	TSharedPtr<SAVVMEditorToolkitRoot> Root{nullptr};
 };

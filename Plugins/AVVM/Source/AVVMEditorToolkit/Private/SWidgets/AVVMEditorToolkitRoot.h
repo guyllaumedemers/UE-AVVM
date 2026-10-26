@@ -20,11 +20,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Widgets/SCompoundWidget.h"
 
 class FAVVMEditorToolkit_Core;
 class FExtender;
-class SBorder;
+class SAVVMEditorToolkitContextWindow;
+class SAVVMEditorToolkitToolbar;
 
 /**
  *	Class description:
@@ -36,14 +38,13 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitRoot : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitRoot) {}
+	SLATE_ARGUMENT(TSharedPtr<FAVVMEditorToolkit_Core>, Core)
+	SLATE_ARGUMENT(TSharedPtr<FExtender>, MenuBarExtenders)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
-
+	
 protected:
-	/** Pointer to the widget that houses the level editor's mode context window */
-	TSharedPtr<SBorder> SecondaryContextWindowWidget = nullptr;
-	/** Pointer to the widget that houses the level editor's mode toolbar */
-	TSharedPtr<SBorder> SecondaryMenuToolbarWidget = nullptr;
+	TSharedPtr<SAVVMEditorToolkitContextWindow> WindowContext{nullptr};
+	TSharedPtr<SAVVMEditorToolkitToolbar> Toolbar{nullptr};
 };

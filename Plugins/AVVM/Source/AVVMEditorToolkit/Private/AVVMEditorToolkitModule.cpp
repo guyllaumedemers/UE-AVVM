@@ -178,25 +178,19 @@ void FAVVMEditorToolkitModule::BindCommands()
 
 void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 {
-	struct FAVVMWindowTabBuilder
+	const auto MakeWindowTabEntry = [&](const class FSpawnTabArgs& SpawnTabArgs,
+	                                    int32 TabIndex,
+	                                    TSharedPtr<FExtensibilityManager> ExtensibilityManager,
+	                                    TSharedPtr<FAVVMEditorToolkit_Core> EditorToolkit)
 	{
-		static TSharedRef<class SDockTab> MakeWindowTabEntry(const class FSpawnTabArgs& SpawnTabArgs,
-		                                                     int32 TabIndex,
-		                                                     TSharedPtr<FExtensibilityManager> ExtensibilityManager,
-		                                                     TSharedPtr<FAVVMEditorToolkit_Core> EditorToolkit)
-		{
-			const auto NewRoot = SNew(SAVVMEditorToolkitRoot);
-			TSharedRef<SDockTab> ResultTab = SNew(SDockTab)
-				.TabRole(ETabRole::NomadTab)
-				.Label(NS_AVVMEditorToolkit::Viewport_Label)
-				[
-					NewRoot
-				];
-
-			// @gdemers configure our internal layout.
-			NewRoot->Setup(EditorToolkit, ExtensibilityManager.IsValid() ? ExtensibilityManager->GetAllExtenders() : nullptr);
-			return ResultTab;
-		}
+		return SNew(SDockTab)
+			.TabRole(ETabRole::NomadTab)
+			.Label(NS_AVVMEditorToolkit::Viewport_Label)
+			[
+				SAssignNew(Root, SAVVMEditorToolkitRoot)
+				.MenuBarExtenders(ExtensibilityManager.IsValid() ? ExtensibilityManager->GetAllExtenders() : nullptr)
+				.Core(EditorToolkit)
+			];
 	};
 
 	TSharedRef<FWorkspaceItem> ToolGroup = WorkspaceMenu::GetMenuStructure()
@@ -207,7 +201,7 @@ void FAVVMEditorToolkitModule::RegisterUnderWindowTab()
 	                                                  true);
 
 	FGlobalTabmanager::Get()
-			->RegisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab_Name, FOnSpawnTab::CreateStatic(&FAVVMWindowTabBuilder::MakeWindowTabEntry, 0, GetMenuExtensibilityManager(), Core))
+			->RegisterNomadTabSpawner(NS_AVVMEditorToolkit::MainTab_Name, FOnSpawnTab::CreateLambda(MakeWindowTabEntry, 0, GetMenuExtensibilityManager(), Core))
 			.SetDisplayName(NS_AVVMEditorToolkit::DataTableEditor_Label)
 			.SetTooltipText(NS_AVVMEditorToolkit::DataTableEditor_Tooltips)
 			.SetIcon(NS_AVVMEditorToolkit::DataTableEditor_Icon)
