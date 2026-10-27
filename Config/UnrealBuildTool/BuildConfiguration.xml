@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration xmlns="https://www.unrealengine.com/BuildConfiguration">
+  
+  <!-- General Build Optimization -->
+  <BuildConfiguration>
+    <!-- Use all available CPU logical cores for parallel compilation -->
+    <MaxParallelActions>0</MaxParallelActions>
+  </BuildConfiguration>
+
+  <!-- Control Unity and Adaptive Builds for Iteration -->
+  <BuildMode>
+    <!-- Keep Unity builds ON for bulk compilation speed -->
+    <bUseUnityBuild>true</bUseUnityBuild>
+
+    <!-- Keep Adaptive Unity builds ON to extract actively modified files out of unity blobs -->
+    <bUseAdaptiveUnityBuild>true</bUseAdaptiveUnityBuild>
+
+    <!-- Lower the threshold so edited files immediately become non-unity files -->
+    <MinFilesInWorkingSet>1</MinFilesInWorkingSet>
+  </BuildMode>
+
+  <!-- Linker & PDB Optimizations (Windows / MSVC) -->
+  <WindowsPlatform>
+    <!-- Use fast PDB linking for Debug/Development builds -->
+    <bFastPDBLinking>true</bFastPDBLinking>
+  </WindowsPlatform>
+
+</Configuration>
