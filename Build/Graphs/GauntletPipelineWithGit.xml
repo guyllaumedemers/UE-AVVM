@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<BuildGraph xmlns="http://www.epicgames.com/CE/UE4/BuildGraph">
+
+	<!-- Define an option for the project directory, defaulting to a relative or standard path -->
+    <Option Name="EngineDir" DefaultValue="C:\Program Files\Epic Games\UE_5.8\Engine" Description="Path to the Unreal Engine root directory" />
+    <Option Name="ProjectDir" DefaultValue="" Description="Path to the project directory" />
+	<Option Name="ProjectName" DefaultValue="" Description="Name of the project" />
+    <Option Name="UProjectPath" DefaultValue="$(ProjectDir)\$(ProjectName).uproject" Description="Path to uproject" />
+	
+    <!-- Configurable Options -->
+    <Option Name="Project" DefaultValue="$(UProjectPath)" Description="Path to the uproject file" />
+    <Option Name="Platform" DefaultValue="Win64" Description="Target platform" />
+    <Option Name="Configuration" Restrict="Debug|DebugGame|Development|Shipping|Test" DefaultValue="Development" Description="Build configuration (Debug|DebugGame|Development|Shipping|Test)" />
+    <Option Name="TestName" DefaultValue="MultiMapTestSuiteGauntletTest" Description="Name of the Gauntlet test suite to execute" />
+    <Option Name="BaseArchiveDir" DefaultValue="$(ProjectDir)\Saved\CI_Archives" Description="Base directory to store archived test logs and reports" />
+    <Option Name="SharedDDCPath" DefaultValue="\\YourNetworkShare\UnrealSharedDDC" Description="Path to the shared network Derived Data Cache folder" />
+    <Option Name="LocalDDCPath" DefaultValue="$(ProjectDir)\Saved\LocalDDC" Description="Path to the isolated local Derived Data Cache folder" />
+    <Option Name="RetainDays" DefaultValue="7" Description="Number of days to keep old archived logs before cleanup" />
+
+    <!-- Agent and Node Definitions -->
+    <Agent Name="LocalAgent" Type="Win64">
+        
+        <!-- Step 1: Compile Game Binaries with FASTBuild & Dual DDC -->
+        <Node Name="CompileBinaries">
+            <Spawn Exe="$(EngineDir)\Build\BatchFiles\RunUAT.bat" 
+                   Arguments="BuildCookRun -project=&quot;$(Project)&quot; -platform=$(Platform) -configuration=$(Configuration) -build -nocook -nostage -nopackage -FASTBuild"
+                   Environment="UE-SharedDataCachePath=$(SharedDDCPath);UE-LocalDataCachePath=$(LocalDDCPath)" />
+        </Node>
+
+        <!-- Step 2a: Fast Iterative Cook with Dual DDC -->
+        <Node Name="CookContent" Requires="CompileBinaries">
+            <Spawn Exe="$(EngineDir)\Build\BatchFiles\RunUAT.bat" 
+                   Arguments="Cook -project=&quot;$(Project)&quot; -platform=$(Platform) -iterate -unattended"
+                   Environment="UE-SharedDataCachePath=$(SharedDDCPath);UE-LocalDataCachePath=$(LocalDDCPath)" />
+        </Node>
+
+        <!-- Step 2b: Package Pre-Cooked Content -->
+        <Node Name="PackageBuild" Requires="CookContent">
+            <Spawn Exe="$(EngineDir)\Build\BatchFiles\RunUAT.bat" 
+                   Arguments="BuildCookRun -project=&quot;$(Project)&quot; -platform=$(Platform) -configuration=$(Configuration) -nocompile -nocook -stage -pak -package"
+                   Environment="UE-SharedDataCachePath=$(SharedDDCPath);UE-LocalDataCachePath=$(LocalDDCPath)" />
+        </Node>
+
+        <!-- Step 3: Execute Gauntlet Tests -->
+        <Node Name="RunGauntlet" Requires="PackageBuild">
+            <Spawn Exe="$(EngineDir)\Build\BatchFiles\RunUAT.bat" 
+                   Arguments="RunUnrealTests -project=&quot;$(Project)&quot; -platform=$(Platform) -configuration=$(Configuration) -nocompile -nocook -nostage -nopackage -test=&quot;$(TestName)&quot; -server -client -log"
+                   Environment="UE-SharedDataCachePath=$(SharedDDCPath);UE-LocalDataCachePath=$(LocalDDCPath)" />
+        </Node>
+
+        <!-- Step 4: Capture Git Metadata & Archive Artifacts -->
+        <Node Name="ArchiveArtifacts" Requires="RunGauntlet">
+            <!-- Extract Git commit info, create a version-stamped subfolder, and write build info -->
+            <Spawn Exe="powershell.exe" 
+                   Arguments="-NoProfile -Command &quot;$gitHash = (git rev-parse --short HEAD); $gitBranch = (git branch --show-current); $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'; $targetDir = '$(BaseArchiveDir)/${gitBranch}_${gitHash}_${timestamp}'; New-Item -ItemType Directory -Force -Path $targetDir | Out-Null; Copy-Item -Path '$(EngineDir)/../Saved/Logs/*' -Destination $targetDir -Recurse -Force; &quot;`
+                              &quot;[Build Metadata]`nGit Branch: $gitBranch`nCommit Hash: $gitHash`nTimestamp: $timestamp`nTest Suite: $(TestName)&quot; | Set-Content -Path &quot;$targetDir/build_info.txt&quot;&quot;" />
+        </Node>
+
+        <!-- Step 5: Automated Disk Space Management (Prune Old Archives) -->
+        <Node Name="CleanOldArchives" Requires="ArchiveArtifacts">
+            <Spawn Exe="powershell.exe" 
+                   Arguments="-NoProfile -Command &quot;Get-ChildItem -Path '$(BaseArchiveDir)' -Recurse -File | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-$(RetainDays)) } | Remove-Item -Force; Get-ChildItem -Path '$(BaseArchiveDir)' -Recurse -Directory | Where-Object { (Get-ChildItem $_.FullName).Count -eq 0 } | Remove-Item -Force&quot;" />
+        </Node>
+
+    </Agent>
+
+    <!-- Main Orchestration Target -->
+    <Target Name="CI_FullPipeline" Agents="LocalAgent">
+        <Node Name="CompileBinaries" />
+        <Node Name="CookContent" />
+        <Node Name="PackageBuild" />
+        <Node Name="RunGauntlet" />
+        <Node Name="ArchiveArtifacts" />
+        <Node Name="CleanOldArchives" />
+    </Target>
+</BuildGraph>
