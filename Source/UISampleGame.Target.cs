@@ -34,6 +34,7 @@ public class UISampleGameTarget : TargetRules
 		BuildEnvironment = TargetBuildEnvironment.Unique;
 		
 		//StaticAnalyzer = StaticAnalyzer.PVSStudio;
+		bUseAdaptiveUnityBuild = false;
 		bUseUnityBuild = false;
 		bUsePCHFiles = false;
 		

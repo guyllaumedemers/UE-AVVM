@@ -24,7 +24,9 @@ public class UISample : ModuleRules
 {
 	public UISample(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
+		bUseUnity = false;
+		bWarningsAsErrors = true;
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{

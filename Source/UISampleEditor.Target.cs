@@ -34,6 +34,7 @@ public class UISampleEditorTarget : TargetRules
 		BuildEnvironment = TargetBuildEnvironment.Unique;
 		
 		//StaticAnalyzer = StaticAnalyzer.PVSStudio;
+		bUseAdaptiveUnityBuild = false;
 		bUseUnityBuild = false;
 		bUsePCHFiles = false;
 		
