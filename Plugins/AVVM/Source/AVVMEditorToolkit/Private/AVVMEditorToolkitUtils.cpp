@@ -203,7 +203,7 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 	RegistrySubsystem->RegisterSpecificAsset(Params.RegistryType, Asset, 0);
 
 	auto* DataRegistry = RegistrySubsystem->GetRegistryForType(Params.RegistryType);
-	if (IsValid(DataRegistry))
+	if (ensureAlwaysMsgf(IsValid(DataRegistry), TEXT("Failed to retrieve valid DataRegistry.")))
 	{
 		// @gdemers handle refreshing registry, and data table visibility.
 		DataRegistry->EditorRefreshRegistry();
@@ -225,6 +225,7 @@ bool UAVVMEditorToolkitUtils::CreateActorIdentifierRow(const FAVVMEditorDataTabl
 	{
 		Row->UniqueId = Params.EditObject->GenerateActorIdentifier(Params.ActorType);
 		bResult = (Row->UniqueId != INDEX_NONE);
+		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(Params.DataTable.Get()), TEXT("Failed to save Package."));
 	}
 
 	return bResult;
@@ -259,6 +260,7 @@ bool UAVVMEditorToolkitUtils::CreateActorDefinitionRow(const FAVVMEditorDataTabl
 	{
 		Row->ActorDefinition = ActorDefinitionDataAsset;
 		bResult = (false == Row->ActorDefinition.IsNull());
+		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(Params.DataTable.Get()), TEXT("Failed to save Package."));
 	}
 
 	return bResult;
@@ -293,6 +295,7 @@ bool UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(const FAVVMEditorDataTa
 	{
 		Row->ActorUIDefinition = ActorUIDefinitionDataAsset;
 		bResult = (false == Row->ActorUIDefinition.IsNull());
+		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(Params.DataTable.Get()), TEXT("Failed to save Package."));
 	}
 
 	return bResult;
@@ -343,4 +346,21 @@ bool UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(FTableRowBase& NewRo
 bool UAVVMEditorToolkitUtils::EditMutableActorUIDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath)
 {
 	return true;
+}
+
+bool UAVVMEditorToolkitUtils::SaveDirtyPackage(UObject* Asset)
+{
+	UPackage* Package = IsValid(Asset) ? Asset->GetPackage() : nullptr;
+	if (!ensureAlwaysMsgf(IsValid(Package), TEXT("Failed to retrieve package.")))
+	{
+		return false;
+	}
+
+	FSavePackageArgs SavePackageArgs{};
+	SavePackageArgs.TopLevelFlags = RF_Public | RF_Standalone;
+	SavePackageArgs.SaveFlags = SAVE_FromAutosave;
+	SavePackageArgs.Error = GLog;
+
+	const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
+	return UPackage::SavePackage(Package, Asset, *PackageFileName, MoveTemp(SavePackageArgs));
 }

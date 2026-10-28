@@ -421,6 +421,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		if (ensureAlwaysMsgf(IsValid(DataAsset), TEXT("Failed to create New Data Asset.")))
 		{
 			NewItemDefinition->ItemDefinition = DataAsset;
+			ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(SelectedDataTable_ItemDefinitions.Get()), TEXT("Failed to save Package."));
 		}
 
 		return TryCreateDependentAsset(DataAsset, SelectedItemType, ItemObjectRowName, SelectedPackagePath);

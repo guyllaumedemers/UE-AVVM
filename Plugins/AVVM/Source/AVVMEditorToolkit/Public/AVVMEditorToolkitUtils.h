@@ -170,6 +170,8 @@ public:
 
 	template <typename TAsset>
 	static TAsset* CreateOpenAsset(const FAVVMEditorToolkitFactoryContextArgs& Params);
+	
+	static bool SaveDirtyPackage(UObject* Asset);
 };
 
 template <typename TAsset>
@@ -187,19 +189,8 @@ TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMEditorToolkitFactory
 		return nullptr;
 	}
 
-	const UPackage* Package = NewAsset->GetPackage();
-	if (!ensureAlwaysMsgf(IsValid(Package), TEXT("Failed to retrieve package.")))
-	{
-		return nullptr;
-	}
-
-	FSavePackageArgs SavePackageArgs{};
-	SavePackageArgs.TopLevelFlags = RF_Public | RF_Standalone;
-	SavePackageArgs.Error = GLog;
-
-	const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
-	const bool bSaved = UPackage::SavePackage(NewAsset->GetPackage(), NewAsset, *PackageFileName, MoveTemp(SavePackageArgs));
-	if (ensureAlwaysMsgf(bSaved, TEXT("Failed to save")))
+	const bool bSuccess = UAVVMEditorToolkitUtils::SaveDirtyPackage(NewAsset);
+	if (ensureAlwaysMsgf(bSuccess, TEXT("Failed to save")))
 	{
 		AssetTools.Get().OpenEditorForAssets({NewAsset});
 	}
