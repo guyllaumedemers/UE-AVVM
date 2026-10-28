@@ -36,6 +36,7 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "Interfaces/IPluginManager.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
+#include "UObject/AssetRegistryTagsContext.h"
 
 TSharedRef<SWindow> UAVVMEditorToolkitUtils::OpenWindow(const FAVVMEditorToolkitWindowContextArgs& Params)
 {
@@ -198,7 +199,7 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 		return DataTable;
 	}
 
-	FAssetData Asset{DataTable};
+	FAssetData Asset{DataTable, FAssetData::ECreationFlags::None, EAssetRegistryTagsCaller::FullUpdate};
 	RegistrySubsystem->RegisterSpecificAsset(Params.RegistryType, Asset, 0);
 
 	auto* DataRegistry = RegistrySubsystem->GetRegistryForType(Params.RegistryType);
