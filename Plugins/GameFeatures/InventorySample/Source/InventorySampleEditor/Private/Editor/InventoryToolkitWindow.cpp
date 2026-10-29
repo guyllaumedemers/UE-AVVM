@@ -23,6 +23,7 @@
 #include "AVVMDoesWidgetProvideModalMessaging.h"
 #include "AVVMEditorToolkitUtils.h"
 #include "AVVMLogger.h"
+#include "DataRegistrySettings.h"
 #include "InventoryProviderDataEditObject.h"
 #include "InventorySettings.h"
 #include "ItemDataEditObject.h"
@@ -38,6 +39,7 @@
 #include "SWidgets/AVVMEditorToolkitDataVisualizer.h"
 #include "SWidgets/AVVMEditorToolkitOutputPathPicker.h"
 #include "SWidgets/AVVMEditorToolkitPluginHeader.h"
+#include "SWidgets/AVVMEditorToolkitPluginLegend.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Layout/SScrollBox.h"
@@ -79,6 +81,12 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 					.Description(this, &SInventoryToolkitWindow::PluginDescription)
 					.Version(this, &SInventoryToolkitWindow::PluginVersion)
 					.Icon(this, &SInventoryToolkitWindow::PluginIcon)
+				]
+				+ SVerticalBox::Slot()
+				.Padding(12.f)
+				.AutoHeight()
+				[
+					SNew(SAVVMEditorToolkitPluginLegend)
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -328,10 +336,9 @@ bool SInventoryToolkitWindow::CreateDataRegistry() const
 {
 	const auto RowTypes = GetInventoryRowTypes();
 	UScriptStruct* NewScriptStruct = RowTypes.IsValidIndex(SelectedRegistryTypeIndex) ? RowTypes[SelectedRegistryTypeIndex] : FAVVMDataTableRow::StaticStruct();
-	
+
 	const auto* DataRegistry = UAVVMEditorToolkitUtils::CreateMissingDataRegistry(FAVVMEditorToolkitScriptStructContextArgs{NewScriptStruct, SelectedDataRegistryType, SelectedPackagePath});
 	OnRefreshAssetListRequested();
-	
 	return IsValid(DataRegistry);
 }
 
