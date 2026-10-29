@@ -148,6 +148,9 @@ public:
 	static UDataRegistry* CreateMissingDataRegistry(const FAVVMEditorToolkitScriptStructContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
+	static bool AppendDataRegistryScanDirectories(const FString& DataRegistryPathName);
+
+	UFUNCTION(BlueprintCallable)
 	static UDataTable* CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)

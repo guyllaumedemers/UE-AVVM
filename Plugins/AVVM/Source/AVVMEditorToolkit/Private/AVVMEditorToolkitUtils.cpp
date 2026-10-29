@@ -20,6 +20,7 @@
 #include "AVVMEditorToolkitUtils.h"
 
 #include "AVVMEditorToolkitModule.h"
+#include "DataRegistrySettings.h"
 #include "DataRegistrySource_DataTable.h"
 #include "DataRegistrySubsystem.h"
 #include "DataTableEditorUtils.h"
@@ -35,6 +36,7 @@
 #include "GenericPlatform/GenericApplication.h"
 #include "HAL/PlatformApplicationMisc.h"
 #include "Interfaces/IPluginManager.h"
+#include "Misc/MessageDialog.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 #include "UObject/AssetRegistryTagsContext.h"
 
@@ -152,10 +154,17 @@ UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEdi
 	NewParams.PackagePath = Params.PackagePath;
 	NewParams.AssetFactory = Factory;
 	NewParams.AssetClass = UAVVMDataRegistry::StaticClass();
+	
 	auto* DataRegistry = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMDataRegistry>(NewParams);
-	if (!IsValid(DataRegistry))
+	if (!ensureAlwaysMsgf(IsValid(DataRegistry), TEXT("Failed to create new DataRegistry.")))
 	{
 		return nullptr;
+	}
+
+	const bool bResult = UAVVMEditorToolkitUtils::AppendDataRegistryScanDirectories(DataRegistry->GetPathName());
+	if (!ensureAlwaysMsgf(bResult, TEXT("Failed to append DataRegistrySettings scan directories.")))
+	{
+		return DataRegistry;
 	}
 
 	auto* MetaSource_DataTable = NewObject<UMetaDataRegistrySource_DataTable>(DataRegistry);
@@ -176,6 +185,46 @@ UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEdi
 	return DataRegistry;
 }
 
+bool UAVVMEditorToolkitUtils::AppendDataRegistryScanDirectories(const FString& DataRegistryPathName)
+{
+	auto* MutableSettings = GetMutableDefault<UDataRegistrySettings>();
+	if (!ensureAlwaysMsgf(IsValid(MutableSettings), TEXT("Failed to add the missing DataRegistry Path")))
+	{
+		return false;
+	}
+
+	const auto* SearchResult = MutableSettings->DirectoriesToScan.FindByPredicate([&DataRegistryPathName](const FDirectoryPath& DirPath)
+	{
+		return FPaths::IsUnderDirectory(DirPath.Path, DataRegistryPathName);
+	});
+
+	if (SearchResult != nullptr)
+	{
+		// @gdemers path already exist which isnt considered failure.
+		return true;
+	}
+	
+	FStringView OutRoot{};
+	FPackageName::SplitPackageName(DataRegistryPathName, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
+	MutableSettings->DirectoriesToScan.Add(FDirectoryPath{FString{OutRoot}});
+	ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(MutableSettings), TEXT("Failed to save modified Settings."));
+
+	FFormatNamedArguments Args{};
+	Args.Add(TEXT("Directory"), FText::FromStringView(OutRoot));
+
+	FMessageDialog::Open(EAppMsgCategory::Warning,
+						 EAppMsgType::Ok,
+						 FText::Format(NSLOCTEXT("AVVMEditorToolkit", "NotifyDataRegistryAddedAtPAth", "Adding a new Top-level directory {Directory} to the DataRegistry Settings."), Args));
+
+	auto* RegistrySubsystem = UDataRegistrySubsystem::Get();
+	if (IsValid(RegistrySubsystem))
+	{
+		RegistrySubsystem->ReinitializeFromConfig();
+	}
+
+	return true;
+}
+
 UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params)
 {
 	auto* Factory = NewObject<UDataTableFactory>();
@@ -191,7 +240,12 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 	NewParams.PackagePath = Params.PackagePath;
 	NewParams.AssetFactory = Factory;
 	NewParams.AssetClass = UDataTable::StaticClass();
+
 	auto* DataTable = UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(NewParams);
+	if (!ensureAlwaysMsgf(IsValid(DataTable), TEXT("Failed to create new DataTable.")))
+	{
+		return nullptr;
+	}
 
 	auto* RegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(RegistrySubsystem))
@@ -199,7 +253,7 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 		return DataTable;
 	}
 
-	FAssetData Asset{DataTable, FAssetData::ECreationFlags::None, EAssetRegistryTagsCaller::FullUpdate};
+	FAssetData Asset{DataTable, FAssetData::ECreationFlags::None, EAssetRegistryTagsCaller::AssetRegistryLoad};
 	RegistrySubsystem->RegisterSpecificAsset(Params.RegistryType, Asset, 0);
 
 	auto* DataRegistry = RegistrySubsystem->GetRegistryForType(Params.RegistryType);
