@@ -84,9 +84,9 @@ private:
 	FReply EditMode_OnButtonClick_Create();
 	FReply EditMode_OnButtonClick_Edit();
 	FReply EditMode_OnButtonClick_Delete();
-	
-	void CreateMissingDependencies(const FName RowName) const;
-	void EditDependentAsset(const FName RowName);
+
+	void EditDependentAsset(const TWeakObjectPtr<UDataTable>& ItemDefinitionDataTable, const FName RowName);
+	void CreateMissingDependencies(const FName RowName, FString&& TopLevelPath);
 	void DeleteDependentAsset(const FName RowName);
 	TArray<FDataRegistryId> GetDependentAssets(const FName RowName) const;
 	bool HasMissingDependencies(const TArray<FDataRegistryId>& RegistryIds) const;

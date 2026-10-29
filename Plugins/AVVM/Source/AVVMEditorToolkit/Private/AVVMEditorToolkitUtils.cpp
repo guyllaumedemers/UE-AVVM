@@ -266,6 +266,13 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 	return DataTable;
 }
 
+UDataTable* UAVVMEditorToolkitUtils::GetDependentDataTable(const FDataRegistryType& RegistryType,
+                                                           const FString& TopLevelPath)
+{
+	// TODO @gdemers search for DT under this directory
+	return nullptr;
+}
+
 bool UAVVMEditorToolkitUtils::CreateActorIdentifierRow(const FAVVMEditorDataTableActorIdentifierContextArgs& Params)
 {
 	bool bResult{false};
@@ -355,12 +362,9 @@ bool UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(const FAVVMEditorDataTa
 	return bResult;
 }
 
-bool UAVVMEditorToolkitUtils::EditMutableActorIdentifierRow(FTableRowBase& NewRow, const FName NewRowName)
-{
-	return true;
-}
-
-bool UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath)
+bool UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(const FString& NewPackagePath,
+                                                             const FName NewRowName,
+                                                             FTableRowBase& NewRow)
 {
 	auto* Row = StaticCast<FAVVMActorDefinitionDataTableRow*>(&NewRow);
 	if (Row == nullptr)
@@ -368,9 +372,9 @@ bool UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(FTableRowBase& NewRo
 		return false;
 	}
 
+	// @gdemers we expect a non-null entry to NOT trigger a creation of a new row entry.
 	if (!Row->ActorDefinition.IsNull())
 	{
-		// @gdemers we expect a non-null entry to NOT trigger a creation of a new row entry.
 		return true;
 	}
 
@@ -392,13 +396,49 @@ bool UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(FTableRowBase& NewRo
 	if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 	{
 		Row->ActorDefinition = ActorDefinitionDataAsset;
+		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(ActorDefinitionDataAsset), TEXT("Failed to save Package."));
 	}
 
 	return true;
 }
 
-bool UAVVMEditorToolkitUtils::EditMutableActorUIDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath)
+bool UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(const FString& NewPackagePath,
+                                                               const FName NewRowName,
+                                                               FTableRowBase& NewRow)
 {
+	auto* Row = StaticCast<FAVVMActorUIDefinitionDataTableRow*>(&NewRow);
+	if (Row == nullptr)
+	{
+		return false;
+	}
+
+	// @gdemers we expect a non-null entry to NOT trigger a creation of a new row entry.
+	if (!Row->ActorUIDefinition.IsNull())
+	{
+		return true;
+	}
+
+	auto* DA_Factory = NewObject<UDataAssetFactory>();
+	if (!IsValid(DA_Factory))
+	{
+		return false;
+	}
+
+	DA_Factory->DataAssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
+
+	FAVVMEditorToolkitFactoryContextArgs NewParams{};
+	NewParams.AssetName = NewRowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
+	NewParams.PackagePath = NewPackagePath; // share same package path as Blueprint asset
+	NewParams.AssetFactory = DA_Factory;
+	NewParams.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
+
+	auto* ActorUIDefinitionDataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMActorUIDefinitionDataAsset>(NewParams);
+	if (ensureAlwaysMsgf(IsValid(ActorUIDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
+	{
+		Row->ActorUIDefinition = ActorUIDefinitionDataAsset;
+		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(ActorUIDefinitionDataAsset), TEXT("Failed to save Package."));
+	}
+
 	return true;
 }
 

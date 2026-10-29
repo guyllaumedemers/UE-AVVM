@@ -627,7 +627,7 @@ FReply UItemDataEditObject::EditMode_OnButtonClick_Edit()
 	
 	for (const FName RowName : OutRowNames)
 	{
-		EditDependentAsset(RowName);
+		EditDependentAsset(SelectedDataTable_ItemDefinitions.Get(), RowName);
 	}
 
 	return FReply::Handled();
@@ -654,7 +654,34 @@ FReply UItemDataEditObject::EditMode_OnButtonClick_Delete()
 	return FReply::Handled();
 }
 
-void UItemDataEditObject::CreateMissingDependencies(const FName RowName) const
+void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& ItemDefinitionDataTable,
+											 const FName RowName)
+{
+	const TArray<FDataRegistryId> DependentRegistryIds = GetDependentAssets(RowName);
+	if (HasMissingDependencies(DependentRegistryIds) && ensureAlwaysMsgf(ItemDefinitionDataTable.IsValid(), TEXT("Invalid DataTable.")))
+	{
+		// @gdemers required to prevent FStringView from pointing to garbage memory.
+		const FString PathName = ItemDefinitionDataTable->GetPathName();
+		
+		FStringView OutRoot{};
+		FPackageName::SplitPackageName(PathName, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
+		CreateMissingDependencies(RowName, FString{OutRoot});
+	}
+
+	FAVVMEditorToolkitWindowContextArgs Params{};
+	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
+	Params.Content = SNew(SAVVMEditorToolkitSplitView)
+		.RegistryType_ViewEditDenyList(TArray<FName>{GetRegistryType_ActorIdentifiers()})
+		.bAreViewEditable(true)
+		.DependentRegistryIds(DependentRegistryIds);
+
+	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateUObject(this, &UItemDataEditObject::OnWindowClosedOverride);
+	Params.OnWindowClosed = FOnWindowClosed::CreateUObject(this, &UItemDataEditObject::OnWindowClosed);
+	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
+}
+
+void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
+                                                    FString&& TopLevelPath)
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -668,13 +695,15 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName) const
 	const bool bDoesExit_ActorIdentifier = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, OutRowBase_ActorIdentifier);
 	if (!bDoesExit_ActorIdentifier)
 	{
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath);
 		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
 	}
 
 	FTableRowBase OutRowBase_ActorDefinition{};
 	const bool bDoesExit_ActorDefinition = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName}, OutRowBase_ActorDefinition);
-	if (!bDoesExit_ActorDefinition || !UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(OutRowBase_ActorDefinition, ItemActorRowName, SelectedPackagePath))
+	if (!bDoesExit_ActorDefinition || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(SelectedPackagePath, ItemActorRowName, OutRowBase_ActorDefinition))
 	{
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath);
 		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, SelectedPackagePath});
 	}
 
@@ -682,30 +711,11 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName) const
 
 	FTableRowBase OutRowBase_ActorUIDefinition{};
 	const bool bDoesExit_ActorUIDefinition = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName}, OutRowBase_ActorUIDefinition);
-	if (!bDoesExit_ActorUIDefinition || !UAVVMEditorToolkitUtils::EditMutableActorDefinitionRow(OutRowBase_ActorUIDefinition, ItemActorUIRowName, SelectedPackagePath))
+	if (!bDoesExit_ActorUIDefinition || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(SelectedPackagePath, ItemActorUIRowName, OutRowBase_ActorUIDefinition))
 	{
-		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ItemDefinitions, ItemActorUIRowName, SelectedPackagePath});
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath);
+		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ActorUIDefinitions, ItemActorUIRowName, SelectedPackagePath});
 	}
-}
-
-void UItemDataEditObject::EditDependentAsset(const FName RowName)
-{
-	const TArray<FDataRegistryId> DependentRegistryIds = GetDependentAssets(RowName);
-	if (HasMissingDependencies(DependentRegistryIds))
-	{
-		CreateMissingDependencies(RowName);
-	}
-
-	FAVVMEditorToolkitWindowContextArgs Params{};
-	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
-	Params.Content = SNew(SAVVMEditorToolkitSplitView)
-		.RegistryType_ViewEditDenyList(TArray<FName>{GetRegistryType_ActorIdentifiers()})
-		.bAreViewEditable(true)
-		.DependentRegistryIds(DependentRegistryIds);
-
-	Params.OnRequestDestroyWindowOverride = FRequestDestroyWindowOverride::CreateUObject(this, &UItemDataEditObject::OnWindowClosedOverride);
-	Params.OnWindowClosed = FOnWindowClosed::CreateUObject(this, &UItemDataEditObject::OnWindowClosed);
-	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
 }
 
 void UItemDataEditObject::DeleteDependentAsset(const FName RowName)

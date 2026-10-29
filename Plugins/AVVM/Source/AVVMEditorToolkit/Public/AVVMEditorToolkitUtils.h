@@ -154,6 +154,9 @@ public:
 	static UDataTable* CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
+	static UDataTable* GetDependentDataTable(const FDataRegistryType& RegistryType, const FString& TopLevelPath);
+
+	UFUNCTION(BlueprintCallable)
 	static bool CreateActorIdentifierRow(const FAVVMEditorDataTableActorIdentifierContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
@@ -163,13 +166,10 @@ public:
 	static bool CreateActorUIDefinitionRow(const FAVVMEditorDataTableOutputContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
-	static bool EditMutableActorIdentifierRow(FTableRowBase& NewRow, const FName NewRowName);
+	static bool DoesActorDefinitionRowHaveData(const FString& NewPackagePath, const FName NewRowName, FTableRowBase& NewRow);
 
 	UFUNCTION(BlueprintCallable)
-	static bool EditMutableActorDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath);
-
-	UFUNCTION(BlueprintCallable)
-	static bool EditMutableActorUIDefinitionRow(FTableRowBase& NewRow, const FName NewRowName, const FString& NewPackagePath);
+	static bool DoesActorUIDefinitionRowHaveData(const FString& NewPackagePath, const FName NewRowName, FTableRowBase& NewRow);
 
 	template <typename TAsset>
 	static TAsset* CreateOpenAsset(const FAVVMEditorToolkitFactoryContextArgs& Params);
