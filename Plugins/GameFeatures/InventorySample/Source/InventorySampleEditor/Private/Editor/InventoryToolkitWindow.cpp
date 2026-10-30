@@ -352,7 +352,7 @@ bool SInventoryToolkitWindow::CreateDataTable()
 
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
-		OpenWindow(SelectedDataTable, SelectedDataRegistryType, bShouldEditDataTable);
+		OpenWindow(SelectedDataTable, SelectedDataTable->GetPathName(), SelectedDataRegistryType, bShouldEditDataTable);
 		return true;
 	}
 	else
@@ -365,18 +365,19 @@ void SInventoryToolkitWindow::EditDataTable()
 {
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
-		OpenWindow(SelectedDataTable, SelectedDataRegistryType, bShouldEditDataTable);
+		OpenWindow(SelectedDataTable, SelectedDataTable->GetPathName(), SelectedDataRegistryType, bShouldEditDataTable);
 	}
 }
 
 void SInventoryToolkitWindow::OpenWindow(const TWeakObjectPtr<UDataTable>& DataTable,
+                                         const FString& DataTablePackagePath,
                                          const FName RegistryType,
                                          const bool bShouldOpenInEditMode)
 {
 	FAVVMEditorToolkitWindowContextArgs Params{};
 	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_DataEditor", "DataEditor");
 	Params.Content = SNew(SAVVMEditorToolkitDataEditor)
-		.DataTablePackagePath(SelectedPackagePath)
+		.DataTablePackagePath(DataTablePackagePath)
 		.DataEditorObject(GetDataEditObject(RegistryType))
 		.OutputDataTable(DataTable)
 		.Mode(bShouldOpenInEditMode ? EAVVMDataEditorModes::Edit : EAVVMDataEditorModes::Create)

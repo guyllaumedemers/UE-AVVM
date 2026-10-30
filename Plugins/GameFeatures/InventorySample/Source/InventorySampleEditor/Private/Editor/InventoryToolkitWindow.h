@@ -73,7 +73,7 @@ private:
 	bool CreateDataRegistry() const;
 	bool CreateDataTable();
 	void EditDataTable();
-	void OpenWindow(const TWeakObjectPtr<UDataTable>& DataTable, const FName RegistryType, const bool bShouldOpenInEditMode);
+	void OpenWindow(const TWeakObjectPtr<UDataTable>& DataTable, const FString& DataTablePackagePath, const FName RegistryType, const bool bShouldOpenInEditMode);
 	void OnWindowClosedOverride(const TSharedRef<SWindow>& PendingCloseWindow) const;
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
 	void OnRefreshAssetListRequested() const;

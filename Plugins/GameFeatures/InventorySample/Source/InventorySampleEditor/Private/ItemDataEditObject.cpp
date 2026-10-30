@@ -660,10 +660,8 @@ void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& I
 	const TArray<FDataRegistryId> DependentRegistryIds = GetDependentAssets(RowName);
 	if (HasMissingDependencies(DependentRegistryIds) && ensureAlwaysMsgf(ItemDefinitionDataTable.IsValid(), TEXT("Invalid DataTable.")))
 	{
-		SelectedPackagePath = ItemDefinitionDataTable->GetPathName();
-		
 		FStringView OutRoot{};
-		FPackageName::SplitPackageName(SelectedPackagePath, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
+		FPackageName::SplitPackageName(DataTablePackagePath, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
 		CreateMissingDependencies(RowName, FString{OutRoot});
 	}
 
