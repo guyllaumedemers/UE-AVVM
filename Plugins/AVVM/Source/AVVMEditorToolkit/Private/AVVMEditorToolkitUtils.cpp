@@ -267,7 +267,8 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 }
 
 UDataTable* UAVVMEditorToolkitUtils::GetDependentDataTable(const FDataRegistryType& RegistryType,
-                                                           const FString& TopLevelPath)
+                                                           const FString& TopLevelPath,
+                                                           const FString& OutputPackagePath)
 {
 	auto* RegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(RegistrySubsystem))
@@ -279,6 +280,11 @@ UDataTable* UAVVMEditorToolkitUtils::GetDependentDataTable(const FDataRegistryTy
 	if (!IsValid(DataRegistry))
 	{
 		return nullptr;
+	}
+	
+	if (DataRegistry->RuntimeSources.IsEmpty())
+	{
+		UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{DataRegistry->GetItemStruct(), RegistryType, OutputPackagePath});
 	}
 
 	const auto* SearchResult = DataRegistry->RuntimeSources.FindByPredicate([&TopLevelPath](const UDataRegistrySource* DataSource)

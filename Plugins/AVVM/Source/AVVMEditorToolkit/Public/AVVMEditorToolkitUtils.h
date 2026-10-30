@@ -71,7 +71,7 @@ struct AVVMEDITORTOOLKIT_API FAVVMEditorToolkitScriptStructContextArgs
 	GENERATED_BODY()
 
 	UPROPERTY(Transient, BlueprintReadWrite)
-	UScriptStruct* ScriptStruct{nullptr};
+	const UScriptStruct* ScriptStruct{nullptr};
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FDataRegistryType RegistryType{};
@@ -154,7 +154,7 @@ public:
 	static UDataTable* CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params);
 
 	UFUNCTION(BlueprintCallable)
-	static UDataTable* GetDependentDataTable(const FDataRegistryType& RegistryType, const FString& TopLevelPath);
+	static UDataTable* GetDependentDataTable(const FDataRegistryType& RegistryType, const FString& TopLevelPath, const FString& OutputPackagePath);
 
 	UFUNCTION(BlueprintCallable)
 	static bool CreateActorIdentifierRow(const FAVVMEditorDataTableActorIdentifierContextArgs& Params);

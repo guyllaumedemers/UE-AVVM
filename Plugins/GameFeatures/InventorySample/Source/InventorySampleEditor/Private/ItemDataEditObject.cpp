@@ -734,36 +734,27 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
 
 	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
 
-	EDataRegistrySubsystemGetItemResult OutResult_ActorIdentifier{};
-	FTableRowBase OutRowBase_ActorIdentifier{};
-
-	Subsystem->FindCachedItemBP(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, OutResult_ActorIdentifier, OutRowBase_ActorIdentifier);
-	if (OutResult_ActorIdentifier == EDataRegistrySubsystemGetItemResult::NotFound)
+	const auto* Row_ActorIdentifier = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName});
+	if (Row_ActorIdentifier == nullptr)
 	{
-		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath);
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath, DataTablePackagePath);
 		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
 	}
 
-	EDataRegistrySubsystemGetItemResult OutResult_ActorDefinition{};
-	FTableRowBase OutRowBase_ActorDefinition{};
-
-	Subsystem->FindCachedItemBP(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName}, OutResult_ActorDefinition, OutRowBase_ActorDefinition);
-	if ((OutResult_ActorIdentifier == EDataRegistrySubsystemGetItemResult::NotFound) || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(SelectedPackagePath, ItemActorRowName, OutRowBase_ActorDefinition))
+	const auto* Row_ActorDefinition = Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName});
+	if ((Row_ActorDefinition == nullptr) || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(DataTablePackagePath, ItemActorRowName, *const_cast<FAVVMActorDefinitionDataTableRow*>(Row_ActorDefinition)))
 	{
-		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath);
-		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, SelectedPackagePath});
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath, DataTablePackagePath);
+		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, DataTablePackagePath});
 	}
 
 	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
 
-	EDataRegistrySubsystemGetItemResult OutResult_ActorUIDefinition{};
-	FTableRowBase OutRowBase_ActorUIDefinition{};
-
-	Subsystem->FindCachedItemBP(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName}, OutResult_ActorUIDefinition, OutRowBase_ActorUIDefinition);
-	if ((OutResult_ActorUIDefinition == EDataRegistrySubsystemGetItemResult::NotFound) || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(SelectedPackagePath, ItemActorUIRowName, OutRowBase_ActorUIDefinition))
+	const auto* Row_ActorUIDefinition = Subsystem->GetCachedItem<FAVVMActorUIDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName});
+	if ((Row_ActorUIDefinition == nullptr) || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(DataTablePackagePath, ItemActorUIRowName, *const_cast<FAVVMActorUIDefinitionDataTableRow*>(Row_ActorUIDefinition)))
 	{
-		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath);
-		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ActorUIDefinitions, ItemActorUIRowName, SelectedPackagePath});
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath, DataTablePackagePath);
+		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ActorUIDefinitions, ItemActorUIRowName, DataTablePackagePath});
 	}
 }
 
