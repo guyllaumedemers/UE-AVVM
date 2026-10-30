@@ -86,10 +86,11 @@ private:
 	FReply EditMode_OnButtonClick_Delete();
 
 	void EditDependentAsset(const TWeakObjectPtr<UDataTable>& ItemDefinitionDataTable, const FName RowName);
-	void CreateMissingDependencies(const FName RowName, FString&& TopLevelPath);
-	void DeleteDependentAsset(const FName RowName);
+	FName ParseItemType(const FName RowName) const;
 	TArray<FDataRegistryId> GetDependentAssets(const FName RowName) const;
 	bool HasMissingDependencies(const TArray<FDataRegistryId>& RegistryIds) const;
+	void CreateMissingDependencies(const FName RowName, FString&& TopLevelPath);
+	void DeleteDependentAsset(const FName RowName);
 	// END
 	
 	virtual void OnPostWindowClosed() const override;

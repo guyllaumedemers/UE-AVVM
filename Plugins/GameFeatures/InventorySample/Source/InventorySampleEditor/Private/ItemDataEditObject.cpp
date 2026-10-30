@@ -661,6 +661,8 @@ void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& I
 	const TArray<FDataRegistryId> DependentRegistryIds = GetDependentAssets(RowName);
 	if (HasMissingDependencies(DependentRegistryIds) && ensureAlwaysMsgf(ItemDefinitionDataTable.IsValid(), TEXT("Invalid DataTable.")))
 	{
+		SelectedItemType = ParseItemType(RowName);
+
 		FStringView OutRoot{};
 		FPackageName::SplitPackageName(DataTablePackagePath, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
 		CreateMissingDependencies(RowName, FString{OutRoot});
@@ -678,56 +680,29 @@ void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& I
 	FloatingWindows.Add(UAVVMEditorToolkitUtils::OpenWindow(Params));
 }
 
-void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
-                                                    FString&& TopLevelPath)
+FName UItemDataEditObject::ParseItemType(const FName RowName) const
 {
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
+	const FString RowEntry = RowName.ToString();
+	for (const FName ItemType : GetItemTypes())
 	{
-		return;
+		const bool bContains = RowEntry.Contains(FString::Printf(TEXT("ItemActor_%s"), *ItemType.ToString()));
+		if (bContains)
+		{
+			return ItemType;
+		}
 	}
 
-	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
-
-	FTableRowBase OutRowBase_ActorIdentifier{};
-	const bool bDoesExit_ActorIdentifier = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, OutRowBase_ActorIdentifier);
-	if (!bDoesExit_ActorIdentifier)
-	{
-		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath);
-		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
-	}
-
-	FTableRowBase OutRowBase_ActorDefinition{};
-	const bool bDoesExit_ActorDefinition = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName}, OutRowBase_ActorDefinition);
-	if (!bDoesExit_ActorDefinition || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(SelectedPackagePath, ItemActorRowName, OutRowBase_ActorDefinition))
-	{
-		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath);
-		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, SelectedPackagePath});
-	}
-
-	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
-
-	FTableRowBase OutRowBase_ActorUIDefinition{};
-	const bool bDoesExit_ActorUIDefinition = Subsystem->GetCachedItemBP(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName}, OutRowBase_ActorUIDefinition);
-	if (!bDoesExit_ActorUIDefinition || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(SelectedPackagePath, ItemActorUIRowName, OutRowBase_ActorUIDefinition))
-	{
-		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath);
-		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ActorUIDefinitions, ItemActorUIRowName, SelectedPackagePath});
-	}
-}
-
-void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
-{
+	return NAME_None;
 }
 
 TArray<FDataRegistryId> UItemDataEditObject::GetDependentAssets(const FName RowName) const
 {
 	const FName ItemActorRowName{RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor"))};
 	return {
-			FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName},
-			FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName},
-			FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName},
-			FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")))}
+		FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName},
+		FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName},
+		FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName},
+		FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")))}
 	};
 }
 
@@ -746,6 +721,54 @@ bool UItemDataEditObject::HasMissingDependencies(const TArray<FDataRegistryId>& 
 	}
 
 	return (false == bResult);
+}
+
+void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
+                                                    FString&& TopLevelPath)
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return;
+	}
+
+	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
+
+	EDataRegistrySubsystemGetItemResult OutResult_ActorIdentifier{};
+	FTableRowBase OutRowBase_ActorIdentifier{};
+
+	Subsystem->FindCachedItemBP(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, OutResult_ActorIdentifier, OutRowBase_ActorIdentifier);
+	if (OutResult_ActorIdentifier == EDataRegistrySubsystemGetItemResult::NotFound)
+	{
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath);
+		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
+	}
+
+	EDataRegistrySubsystemGetItemResult OutResult_ActorDefinition{};
+	FTableRowBase OutRowBase_ActorDefinition{};
+
+	Subsystem->FindCachedItemBP(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName}, OutResult_ActorDefinition, OutRowBase_ActorDefinition);
+	if ((OutResult_ActorIdentifier == EDataRegistrySubsystemGetItemResult::NotFound) || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(SelectedPackagePath, ItemActorRowName, OutRowBase_ActorDefinition))
+	{
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath);
+		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, SelectedPackagePath});
+	}
+
+	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
+
+	EDataRegistrySubsystemGetItemResult OutResult_ActorUIDefinition{};
+	FTableRowBase OutRowBase_ActorUIDefinition{};
+
+	Subsystem->FindCachedItemBP(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName}, OutResult_ActorUIDefinition, OutRowBase_ActorUIDefinition);
+	if ((OutResult_ActorUIDefinition == EDataRegistrySubsystemGetItemResult::NotFound) || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(SelectedPackagePath, ItemActorUIRowName, OutRowBase_ActorUIDefinition))
+	{
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath);
+		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ActorUIDefinitions, ItemActorUIRowName, SelectedPackagePath});
+	}
+}
+
+void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
+{
 }
 
 void UItemDataEditObject::OnPostWindowClosed() const
