@@ -269,8 +269,33 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 UDataTable* UAVVMEditorToolkitUtils::GetDependentDataTable(const FDataRegistryType& RegistryType,
                                                            const FString& TopLevelPath)
 {
-	// TODO @gdemers search for DT under this directory
-	return nullptr;
+	auto* RegistrySubsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(RegistrySubsystem))
+	{
+		return nullptr;
+	}
+
+	auto* DataRegistry = Cast<UAVVMDataRegistry>(RegistrySubsystem->GetRegistryForType(RegistryType));
+	if (!IsValid(DataRegistry))
+	{
+		return nullptr;
+	}
+
+	const auto* SearchResult = DataRegistry->RuntimeSources.FindByPredicate([&TopLevelPath](const UDataRegistrySource* DataSource)
+	{
+		return IsValid(DataSource) && FPaths::IsUnderDirectory(DataSource->GetSourceAssetPath().GetLongPackageName(), TopLevelPath);
+	});
+
+	const auto* Source = Cast<UDataRegistrySource_DataTable>((SearchResult != nullptr) ? *SearchResult : nullptr);
+	if (ensureAlwaysMsgf(IsValid(Source), TEXT("Failed to retrieve valid DataTable under Path.")))
+	{
+		// @gdemers safe to access. already loaded in memory.
+		return Source->SourceTable.Get();
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 
 bool UAVVMEditorToolkitUtils::CreateActorIdentifierRow(const FAVVMEditorDataTableActorIdentifierContextArgs& Params)
