@@ -30,6 +30,8 @@
 
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 {
+	DataTable_ExplicitSourceEntries = InArgs._DataTable_ExplicitSourceEntries.Get();
+	
 	SAssignNew(ScrollBar, SScrollBar)
 	.AlwaysShowScrollbar(true)
 	.Orientation(EOrientation::Orient_Vertical);
@@ -176,8 +178,7 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 		SourceEntries.Add(RegistryId.ItemName);
 	}
 
-	// @gdemers copy dont move
-	FilteredEntries = SourceEntries;
+	FilteredEntries = GetSourceEntries();
 	if (ListViewWidget.IsValid())
 	{
 		ListViewWidget->RebuildList();
@@ -217,11 +218,11 @@ void SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged(const FText& NewText)
 	const FString FilterString = NewText.ToString().TrimStartAndEnd();
 	if (FilterString.IsEmpty())
 	{
-		FilteredEntries = SourceEntries;
+		FilteredEntries = GetSourceEntries();
 	}
 	else
 	{
-		for (const auto& Item : SourceEntries)
+		for (const auto& Item : GetSourceEntries())
 		{
 			if (Item.IsValid() && Item.ToString().Contains(FilterString, ESearchCase::IgnoreCase))
 			{
@@ -233,6 +234,18 @@ void SAVVMEditorToolkitDataVisualizer::OnSearchTextChanged(const FText& NewText)
 	if (ListViewWidget.IsValid())
 	{
 		ListViewWidget->RequestListRefresh();
+	}
+}
+
+TArray<FName> SAVVMEditorToolkitDataVisualizer::GetSourceEntries() const
+{
+	if (DataTable_ExplicitSourceEntries.IsValid())
+	{
+		return DataTable_ExplicitSourceEntries->GetRowNames();
+	}
+	else
+	{
+		return SourceEntries;
 	}
 }
 

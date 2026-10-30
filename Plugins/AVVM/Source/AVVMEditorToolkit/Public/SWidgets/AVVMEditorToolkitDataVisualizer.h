@@ -24,10 +24,10 @@
 #include "DataRegistry.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Widgets/SCompoundWidget.h"
-#include "Widgets/Layout/SScrollBorder.h"
 #include "Widgets/Views/SListView.h"
 
 struct FDataRegistryType;
+class UDataTable;
 
 /**
  *	Class description:
@@ -39,6 +39,7 @@ class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitDataVisualizer : public SCompoundW
 public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitDataVisualizer){};
 	SLATE_ATTRIBUTE(FDataRegistryType, DataRegistryType)
+	SLATE_ATTRIBUTE(TWeakObjectPtr<const UDataTable>, DataTable_ExplicitSourceEntries)
 	SLATE_EVENT(FOnClicked, OnButtonClick_Create)
 	SLATE_EVENT(FOnClicked, OnButtonClick_Edit)
 	SLATE_EVENT(FOnClicked, OnButtonClick_Delete)
@@ -52,6 +53,7 @@ public:
 private:
 	TSharedRef<ITableRow> OnGenerateRow(FName RegistryItemName, const TSharedRef<STableViewBase>& OwnerTable) const;
 	void OnSearchTextChanged(const FText& NewText);
+	TArray<FName> GetSourceEntries() const;
 
 	bool OnEnable_ButtonCreate() const;
 	bool OnEnable_ButtonEdit() const;
@@ -61,6 +63,7 @@ private:
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
 	TSharedPtr<SScrollBar> ScrollBar{nullptr};
 	TStrongObjectPtr<const UDataRegistry> DataRegistry{nullptr};
+	TWeakObjectPtr<const UDataTable> DataTable_ExplicitSourceEntries{nullptr};
 	TArray<FDataRegistryId> RegistryIds{};
 	FName SelectedRegistryType{NAME_None};
 	TArray<FName> FilteredEntries{};

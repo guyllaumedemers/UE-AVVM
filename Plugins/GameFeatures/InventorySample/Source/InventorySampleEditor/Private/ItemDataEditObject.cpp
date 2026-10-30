@@ -236,6 +236,7 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 		[
 			SAssignNew(EditMode_DataVisualizer, SAVVMEditorToolkitDataVisualizer)
 			.DataRegistryType(GetRegistryType_ItemDefinitions())
+			.DataTable_ExplicitSourceEntries(SelectedDataTable_ItemDefinitions)
 			.OnButtonClick_Create_UObject(this, &UItemDataEditObject::EditMode_OnButtonClick_Create)
 			.OnButtonClick_Edit_UObject(this, &UItemDataEditObject::EditMode_OnButtonClick_Edit)
 			.OnButtonClick_Delete_UObject(this, &UItemDataEditObject::EditMode_OnButtonClick_Delete)
