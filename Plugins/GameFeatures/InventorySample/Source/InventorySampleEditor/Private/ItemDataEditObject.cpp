@@ -119,15 +119,13 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step1", "Step 1: Select the Package Path where the automatically generated asset will be output."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step1", "Step 1: Enable or Disable automatic asset generation for each asset types."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
 				.AutoHeight()
 				[
-					SNew(SAVVMEditorToolkitOutputPathPicker)
-					.OnPathSelected_UObject(this, &UItemDataEditObject::OnOutputAssetPathSelected)
-					.AssetPathHeaderText(NSLOCTEXT("AVVMEditorToolkit", "AssetPathHeader", "Double Click or Browse:"))
+					CheckBoxList.ToSharedRef()
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -144,7 +142,6 @@ TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 				[
 					SNew(SAVVMEditorToolkitDataImporter)
 					.Elements(GetItemTypes())
-					.IsEnabled_UObject(this, &UItemDataEditObject::IsEnabled_AssetPathSelectionChanged)
 					.OnDataImporterSourceChanged_UObject(this, &UItemDataEditObject::OnItemTypeChanged)
 					.DropDownHeaderText(NSLOCTEXT("AVVMEditorToolkit", "ItemTypeDropDownHeader", "Item Types:"))
 				]
@@ -264,11 +261,6 @@ const TArray<FName>& UItemDataEditObject::GetItemTypes()
 	return Result;
 }
 
-bool UItemDataEditObject::IsEnabled_AssetPathSelectionChanged() const
-{
-	return (false == SelectedPackagePath.IsEmpty());
-}
-
 bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
 {
 	return (false == SelectedItemType.IsNone());
@@ -286,11 +278,6 @@ void UItemDataEditObject::OnCheckBoxStateChanged(int32 Index)
 		bool& Value = bCheckBoxStates[Index];
 		Value = !Value;
 	}
-}
-
-void UItemDataEditObject::OnOutputAssetPathSelected(const FString& NewPackagePath)
-{
-	SelectedPackagePath = NewPackagePath;
 }
 
 bool UItemDataEditObject::OnItemTypeChanged(const FName NewItemType,
@@ -392,7 +379,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		return false;
 	}
 
-	const FString ItemObjectRowName = UAVVMEditorToolkitUtils::GetStandardizedName(SelectedPackagePath, TEXT("BP"), FString::Printf(TEXT("ItemObject_%s_%s_C"), *SelectedItemType.ToString(), *ItemRowName));
+	const FString ItemObjectRowName = UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("BP"), FString::Printf(TEXT("ItemObject_%s_%s_C"), *SelectedItemType.ToString(), *ItemRowName));
 	const bool bIsDuplicate = DoesItemObjectNameAlreadyExist(ItemObjectRowName);
 	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid ItemObject FName provided. Duplicated entry found.")))
 	{
@@ -415,7 +402,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 
 		FAVVMEditorToolkitFactoryContextArgs Params{};
 		Params.AssetName = ItemObjectRowName.Replace(TEXT("BP"), TEXT("DA"));
-		Params.PackagePath = SelectedPackagePath;
+		Params.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(DataTablePackagePath, DATA_ASSET_DIRECTORY);
 		Params.AssetFactory = Factory;
 		Params.AssetClass = UItemDefinitionDataAsset::StaticClass();
 		auto* DataAsset = UAVVMEditorToolkitUtils::CreateOpenAsset<UItemDefinitionDataAsset>(Params);
@@ -425,7 +412,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 			ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(SelectedDataTable_ItemDefinitions.Get()), TEXT("Failed to save Package."));
 		}
 
-		return TryCreateDependentAsset(DataAsset, SelectedItemType, ItemObjectRowName, SelectedPackagePath);
+		return TryCreateDependentAsset(DataAsset, SelectedItemType, ItemObjectRowName, DataTablePackagePath);
 	}
 	else
 	{
@@ -453,7 +440,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 
 		FAVVMEditorToolkitFactoryContextArgs BP_Params{};
 		BP_Params.AssetName = ItemObjectRowName;
-		BP_Params.PackagePath = NewPackagePath; // Blueprint Package path, and DA should be grouped together 
+		BP_Params.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(NewPackagePath, DATA_ASSET_DIRECTORY); // Blueprint Package path, and DA should be grouped together 
 		BP_Params.AssetFactory = BP_Factory;
 		BP_Params.AssetClass = UBlueprint::StaticClass();
 
@@ -665,7 +652,7 @@ void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& I
 
 		FStringView OutRoot{};
 		FPackageName::SplitPackageName(DataTablePackagePath, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
-		CreateMissingDependencies(RowName, FString{OutRoot});
+		CreateMissingDependencies(RowName, FString{OutRoot}, DataTablePackagePath);
 	}
 
 	FAVVMEditorToolkitWindowContextArgs Params{};
@@ -724,7 +711,8 @@ bool UItemDataEditObject::HasMissingDependencies(const TArray<FDataRegistryId>& 
 }
 
 void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
-                                                    FString&& TopLevelPath)
+                                                    const FString& TopLevelPath,
+                                                    const FString& PackagePath)
 {
 	const auto* Subsystem = UDataRegistrySubsystem::Get();
 	if (!IsValid(Subsystem))
@@ -737,23 +725,23 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
 	const auto* Row_ActorIdentifier = Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName});
 	if (Row_ActorIdentifier == nullptr)
 	{
-		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath, DataTablePackagePath);
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), TopLevelPath, PackagePath);
 		UAVVMEditorToolkitUtils::CreateActorIdentifierRow({this, SelectedDataTable_ActorIdentifiers, ItemActorRowName, SelectedItemType});
 	}
 
 	const auto* Row_ActorDefinition = Subsystem->GetCachedItem<FAVVMActorDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName});
-	if ((Row_ActorDefinition == nullptr) || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(DataTablePackagePath, ItemActorRowName, *const_cast<FAVVMActorDefinitionDataTableRow*>(Row_ActorDefinition)))
+	if ((Row_ActorDefinition == nullptr) || !UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(PackagePath, ItemActorRowName, *const_cast<FAVVMActorDefinitionDataTableRow*>(Row_ActorDefinition)))
 	{
-		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath, DataTablePackagePath);
-		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, DataTablePackagePath});
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), TopLevelPath, PackagePath);
+		UAVVMEditorToolkitUtils::CreateActorDefinitionRow({SelectedDataTable_ActorDefinitions, ItemActorRowName, PackagePath});
 	}
 
 	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
 
 	const auto* Row_ActorUIDefinition = Subsystem->GetCachedItem<FAVVMActorUIDefinitionDataTableRow>(FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName});
-	if ((Row_ActorUIDefinition == nullptr) || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(DataTablePackagePath, ItemActorUIRowName, *const_cast<FAVVMActorUIDefinitionDataTableRow*>(Row_ActorUIDefinition)))
+	if ((Row_ActorUIDefinition == nullptr) || !UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(PackagePath, ItemActorUIRowName, *const_cast<FAVVMActorUIDefinitionDataTableRow*>(Row_ActorUIDefinition)))
 	{
-		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath, DataTablePackagePath);
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), TopLevelPath, PackagePath);
 		UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow({SelectedDataTable_ActorUIDefinitions, ItemActorUIRowName, DataTablePackagePath});
 	}
 }

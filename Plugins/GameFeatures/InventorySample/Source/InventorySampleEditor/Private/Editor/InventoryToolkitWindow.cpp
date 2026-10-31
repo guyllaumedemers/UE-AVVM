@@ -107,10 +107,22 @@ void SInventoryToolkitWindow::Construct(const FArguments& InArgs)
 				.Padding(12.f)
 				.AutoHeight()
 				[
-					SNew(STextBlock)
-					.TextStyle(FAppStyle::Get(), "LargeText")
-					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step2", "Step 2: Select the Package Path where the automatically generated asset will be output."))
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					[
+						SNew(STextBlock)
+						.TextStyle(FAppStyle::Get(), "LargeText")
+						.TransformPolicy(ETextTransformPolicy::ToUpper)
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step2", "Step 2: Select the Top-level directory for automatically generated asset output."))
+					]
+					+ SVerticalBox::Slot()
+					[
+						SNew(STextBlock)
+						.TextStyle(FAppStyle::Get(), "NormalText")
+						.ColorAndOpacity(FSlateColor::UseSubduedForeground())
+						.TransformPolicy(ETextTransformPolicy::ToUpper)
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::Step2::Hint", "Required directories will be created for DataRegistries, DataTables & DataAssets."))
+					]
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -352,7 +364,7 @@ bool SInventoryToolkitWindow::CreateDataTable()
 
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
-		OpenWindow(SelectedDataTable, SelectedDataTable->GetPathName(), SelectedDataRegistryType, bShouldEditDataTable);
+		OpenWindow(SelectedDataTable, SelectedPackagePath, SelectedDataRegistryType, bShouldEditDataTable);
 		return true;
 	}
 	else
@@ -363,9 +375,15 @@ bool SInventoryToolkitWindow::CreateDataTable()
 
 void SInventoryToolkitWindow::EditDataTable()
 {
+	// @gdemers a selected data table for edit should enforce outputting dependent files to same directory
 	if (ensureAlwaysMsgf(SelectedDataTable.IsValid(), TEXT("Failed to create new Data Table.")))
 	{
-		OpenWindow(SelectedDataTable, SelectedDataTable->GetPathName(), SelectedDataRegistryType, bShouldEditDataTable);
+		const FString PackagePath = SelectedDataTable->GetPathName();
+
+		FStringView OutRoot{};
+		FStringView OutPackagePath{};
+		FPackageName::SplitPackageName(PackagePath, &OutRoot, &OutPackagePath, nullptr, FPackageName::EPathFormatFlags::MountPointSlashes);
+		OpenWindow(SelectedDataTable, FString{OutRoot} + FString{OutPackagePath}, SelectedDataRegistryType, bShouldEditDataTable);
 	}
 }
 

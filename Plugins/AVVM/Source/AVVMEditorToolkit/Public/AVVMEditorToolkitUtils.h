@@ -35,6 +35,22 @@ class UDataRegistry;
 class UDataRegistrySource_DataTable;
 
 /**
+ *	@gdemers explicit directory for defined project structure,
+ *	and asset generation output.
+ */
+#ifndef DATA_REGISTRY_DIRECTORY
+#define DATA_REGISTRY_DIRECTORY TEXT("DataRegistries/")
+#endif
+
+#ifndef DATA_TABLE_DIRECTORY
+#define DATA_TABLE_DIRECTORY TEXT("DataTables/")
+#endif
+
+#ifndef DATA_ASSET_DIRECTORY
+#define DATA_ASSET_DIRECTORY TEXT("DataAssets/")
+#endif
+
+/**
  *	Class description:
  *	
  *	FAVVMEditorToolkitWindowContextArgs is a context struct encapsulating parameters to an SWindow initialization.
@@ -174,6 +190,10 @@ public:
 	template <typename TAsset>
 	static TAsset* CreateOpenAsset(const FAVVMEditorToolkitFactoryContextArgs& Params);
 	
+	UFUNCTION(BlueprintCallable)
+	static FString CreateTopLevelDirectory(const FString& PackagePath, const FString& DirectoryName);
+	
+	UFUNCTION(BlueprintCallable)
 	static bool SaveDirtyPackage(UObject* Asset);
 };
 

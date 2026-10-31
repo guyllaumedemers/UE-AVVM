@@ -62,11 +62,9 @@ private:
 	static const TArray<FName>& GetAssetTypeToDefaultGenerate();
 	static const TArray<FName>& GetItemTypes();
 	// BEGIN - @gdemers creation mode api
-	bool IsEnabled_AssetPathSelectionChanged() const;
 	bool IsEnabled_OnItemTypeChanged() const;
 	bool IsEnabled_GenerateButton() const;
 	void OnCheckBoxStateChanged(int32 Index);
-	void OnOutputAssetPathSelected(const FString& NewPackagePath);
 	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
 	void OnDataTableSelectionChanged_ActorIdentifiers(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	void OnDataTableSelectionChanged_ActorDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
@@ -89,7 +87,7 @@ private:
 	FName ParseItemType(const FName RowName) const;
 	TArray<FDataRegistryId> GetDependentAssets(const FName RowName) const;
 	bool HasMissingDependencies(const TArray<FDataRegistryId>& RegistryIds) const;
-	void CreateMissingDependencies(const FName RowName, FString&& TopLevelPath);
+	void CreateMissingDependencies(const FName RowName, const FString& TopLevelPath, const FString& PackagePath);
 	void DeleteDependentAsset(const FName RowName);
 	// END
 	
@@ -106,7 +104,6 @@ private:
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorDefinitions{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorUIDefinitions{nullptr};
 	FString DataTablePackagePath{};
-	FString SelectedPackagePath{};
 	FName SelectedItemType{NAME_None};
 	FString ItemRowName{};
 };

@@ -151,7 +151,7 @@ UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEdi
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(Params.PackagePath, TEXT("DR"), *GetNameSafe(Factory->ItemStruct));
-	NewParams.PackagePath = Params.PackagePath;
+	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(Params.PackagePath, DATA_REGISTRY_DIRECTORY);
 	NewParams.AssetFactory = Factory;
 	NewParams.AssetClass = UAVVMDataRegistry::StaticClass();
 	
@@ -237,7 +237,7 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(Params.PackagePath, TEXT("DT"), *GetNameSafe(Factory->Struct));
-	NewParams.PackagePath = Params.PackagePath;
+	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(Params.PackagePath, DATA_TABLE_DIRECTORY);
 	NewParams.AssetFactory = Factory;
 	NewParams.AssetClass = UDataTable::StaticClass();
 
@@ -343,7 +343,7 @@ bool UAVVMEditorToolkitUtils::CreateActorDefinitionRow(const FAVVMEditorDataTabl
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = Params.RowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-	NewParams.PackagePath = Params.PackagePath; // share same package path as Blueprint asset
+	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(Params.PackagePath, DATA_ASSET_DIRECTORY); // share same package path as Blueprint asset
 	NewParams.AssetFactory = DA_Factory;
 	NewParams.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
@@ -378,7 +378,7 @@ bool UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(const FAVVMEditorDataTa
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = Params.RowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-	NewParams.PackagePath = Params.PackagePath; // share same package path as Blueprint asset
+	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(Params.PackagePath, DATA_ASSET_DIRECTORY); // share same package path as Blueprint asset
 	NewParams.AssetFactory = DA_Factory;
 	NewParams.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
 
@@ -419,7 +419,7 @@ bool UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(const FString& NewP
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = NewRowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-	NewParams.PackagePath = NewPackagePath; // share same package path as Blueprint asset
+	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(NewPackagePath, DATA_ASSET_DIRECTORY); // share same package path as Blueprint asset
 	NewParams.AssetFactory = DA_Factory;
 	NewParams.AssetClass = UAVVMActorDefinitionDataAsset::StaticClass();
 
@@ -459,7 +459,7 @@ bool UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(const FString& Ne
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = NewRowName.ToString().Replace(TEXT("BP"), TEXT("DA"));
-	NewParams.PackagePath = NewPackagePath; // share same package path as Blueprint asset
+	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(NewPackagePath, DATA_ASSET_DIRECTORY); // share same package path as Blueprint asset
 	NewParams.AssetFactory = DA_Factory;
 	NewParams.AssetClass = UAVVMActorUIDefinitionDataAsset::StaticClass();
 
@@ -471,6 +471,13 @@ bool UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(const FString& Ne
 	}
 
 	return true;
+}
+
+FString UAVVMEditorToolkitUtils::CreateTopLevelDirectory(const FString& PackagePath, const FString& DirectoryName)
+{
+	FStringView OutRoot{};
+	FPackageName::SplitPackageName(PackagePath, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointSlashes);
+	return FString{OutRoot} + DirectoryName;
 }
 
 bool UAVVMEditorToolkitUtils::SaveDirtyPackage(UObject* Asset)
