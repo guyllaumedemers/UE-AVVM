@@ -749,6 +749,38 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
 
 void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
 {
+	if (!ensureAlwaysMsgf(SelectedDataTable_ItemDefinitions.IsValid(), TEXT("Attempting to delete dependent assets using invalid source")))
+	{
+		return;
+	}
+
+	FStringView OutRoot{};
+	FStringView OutPackagePath{};
+	FPackageName::SplitPackageName(DataTablePackagePath, &OutRoot, &OutPackagePath, nullptr, FPackageName::EPathFormatFlags::MountPointSlashes);
+	
+	if (!SelectedDataTable_ActorUIDefinitions.IsValid())
+	{
+		SelectedDataTable_ActorUIDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorUIDefinitions(), FString{OutRoot}, FString{OutRoot} + FString{OutPackagePath});
+	}
+	
+	if (!SelectedDataTable_ActorDefinitions.IsValid())
+	{
+		SelectedDataTable_ActorDefinitions = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorDefinitions(), FString{OutRoot}, FString{OutRoot} + FString{OutPackagePath});
+	}
+	
+	if (!SelectedDataTable_ActorIdentifiers.IsValid())
+	{
+		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), FString{OutRoot}, FString{OutRoot} + FString{OutPackagePath});
+	}
+	
+	// @gdemers we delete in reverse order for safety.
+	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
+	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
+
+	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ActorUIDefinitions.Get(), FDataRegistryId{GetRegistryType_ActorUIDefinitions(), ItemActorUIRowName});
+	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ActorDefinitions.Get(), FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName});
+	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ActorIdentifiers.Get(), FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, true/*has no asset reference*/);
+	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ItemDefinitions.Get(), FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName});
 }
 
 FReply UItemDataEditObject::OnButtonClick_SaveEdits() const

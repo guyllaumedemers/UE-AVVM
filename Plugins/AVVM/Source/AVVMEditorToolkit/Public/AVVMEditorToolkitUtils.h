@@ -195,6 +195,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static bool SaveDirtyPackage(UObject* Asset);
+	
+	UFUNCTION(BlueprintCallable)
+	static bool DeleteDataRegistryId(UDataTable* DataTable, const FDataRegistryId& RegistryId, const bool bShouldRemoveRowOnly = false);
 };
 
 template <typename TAsset>

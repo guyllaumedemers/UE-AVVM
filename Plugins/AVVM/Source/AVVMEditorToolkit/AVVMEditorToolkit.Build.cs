@@ -50,6 +50,7 @@ public class AVVMEditorToolkit : ModuleRules
 			{
 				"ApplicationCore",
 				"AVVMGameplay",
+				"EditorScriptingUtilities",
 				"InputCore",
 				"Projects",
 				"ToolMenus",

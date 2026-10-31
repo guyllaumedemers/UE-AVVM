@@ -24,6 +24,8 @@
 #include "DataRegistrySource_DataTable.h"
 #include "DataRegistrySubsystem.h"
 #include "DataTableEditorUtils.h"
+#include "EditorAssetLibrary.h"
+#include "ObjectTools.h"
 #include "Data/AVVMActorDefinitionDataAsset.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/AVVMActorUIDefinitionDataAsset.h"
@@ -491,4 +493,37 @@ bool UAVVMEditorToolkitUtils::SaveDirtyPackage(UObject* Asset)
 
 	const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
 	return UPackage::SavePackage(Package, Asset, *PackageFileName, MoveTemp(SavePackageArgs));
+}
+
+bool UAVVMEditorToolkitUtils::DeleteDataRegistryId(UDataTable* DataTable,
+                                                   const FDataRegistryId& RegistryId,
+                                                   const bool bShouldRemoveRowOnly)
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return false;
+	}
+
+	const auto* Row = Subsystem->GetCachedItem<FAVVMDataTableRow>(RegistryId);
+	if (!ensureAlwaysMsgf(Row != nullptr, TEXT("Failed to retrieve Row from DataTable.")))
+	{
+		return false;
+	}
+
+	bool bResult{true};
+	if (false == bShouldRemoveRowOnly)
+	{
+		for (const FSoftObjectPath& SoftObjectPath : Row->GetResourcesPaths())
+		{
+			bResult &= (SoftObjectPath.IsNull() || UEditorAssetLibrary::DeleteAsset(SoftObjectPath.ToString()));
+		}
+	}
+
+	if (ensureAlwaysMsgf(bResult, TEXT("Failed to remove Row from DataTable.")))
+	{
+		FDataTableEditorUtils::RemoveRow(DataTable, RegistryId.ItemName);
+	}
+
+	return bResult;
 }
