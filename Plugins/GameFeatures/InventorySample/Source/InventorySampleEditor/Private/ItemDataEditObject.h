@@ -89,6 +89,7 @@ private:
 	bool HasMissingDependencies(const TArray<FDataRegistryId>& RegistryIds) const;
 	void CreateMissingDependencies(const FName RowName, const FString& TopLevelPath, const FString& PackagePath);
 	void DeleteDependentAsset(const FName RowName);
+	FReply OnButtonClick_SaveEdits() const;
 	// END
 	
 	virtual void OnPostWindowClosed() const override;

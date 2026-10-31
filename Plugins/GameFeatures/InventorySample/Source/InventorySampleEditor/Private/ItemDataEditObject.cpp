@@ -656,8 +656,9 @@ void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& I
 	}
 
 	FAVVMEditorToolkitWindowContextArgs Params{};
-	Params.Title = NSLOCTEXT("AVVMEditorToolkit", "WindowTitle_SplitView", "SplitView");
+	Params.Title = FText::FromName(RowName);
 	Params.Content = SNew(SAVVMEditorToolkitSplitView)
+		.OnSaveClicked_UObject(this, &UItemDataEditObject::OnButtonClick_SaveEdits)
 		.RegistryType_ViewEditDenyList(TArray<FName>{GetRegistryType_ActorIdentifiers()})
 		.bAreViewEditable(true)
 		.DependentRegistryIds(DependentRegistryIds);
@@ -748,6 +749,11 @@ void UItemDataEditObject::CreateMissingDependencies(const FName RowName,
 
 void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
 {
+}
+
+FReply UItemDataEditObject::OnButtonClick_SaveEdits() const
+{
+	return FReply::Unhandled();
 }
 
 void UItemDataEditObject::OnPostWindowClosed() const

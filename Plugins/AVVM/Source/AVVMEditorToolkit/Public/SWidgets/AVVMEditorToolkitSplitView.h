@@ -39,6 +39,7 @@ public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitSplitView){}
 	SLATE_ATTRIBUTE(TArray<FDataRegistryId>, DependentRegistryIds)
 	SLATE_ATTRIBUTE(TArray<FName>, RegistryType_ViewEditDenyList)
+	SLATE_EVENT(FOnClicked, OnSaveClicked)
 	SLATE_ATTRIBUTE(bool, bAreViewEditable)
 	SLATE_END_ARGS()
 

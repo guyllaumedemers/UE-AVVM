@@ -22,6 +22,7 @@
 #include "DataRegistrySubsystem.h"
 #include "Data/AVVMDataTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
+#include "Widgets/Input/SButton.h"
 
 void SAVVMEditorToolkitSplitView::Construct(const FArguments& InArgs)
 {
@@ -36,18 +37,70 @@ void SAVVMEditorToolkitSplitView::Construct(const FArguments& InArgs)
 	// Name List
 	SAssignNew(ListViewWidget, SListView<FName>)
 	.ListItemsSource(&FilteredEntries)
+	.ExternalScrollbar(ScrollBar)
+	.ConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible)
 	.SelectionMode(ESelectionMode::Single)
 	.ListViewStyle(&FAppStyle::Get().GetWidgetStyle<FTableViewStyle>("SimpleListView"))
 	.OnGenerateRow(this, &SAVVMEditorToolkitSplitView::OnGenerateRow);
-	
-	UpdateSplitView(RegistryIds);
+
+	if (!RegistryIds.IsEmpty())
+	{
+		UpdateSplitView(RegistryIds);
+	}
 
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			ListViewWidget.ToSharedRef()
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.HAlign(EHorizontalAlignment::HAlign_Left)
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(SButton)
+				.HAlign(EHorizontalAlignment::HAlign_Center)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				.ButtonStyle(FAppStyle::Get(), "SimpleButton")
+				.ToolTipText(NSLOCTEXT("AVVMEditorToolit", "SaveDirtyPackagesTooltip", "Save all modified assets."))
+				.OnClicked(InArgs._OnSaveClicked)
+				[
+					SNew(SImage)
+					.DesiredSizeOverride(FVector2d{64.f, 64.f})
+					.Image(FAppStyle::Get().GetBrush("MainFrame.SaveAll"))
+					.ColorAndOpacity(FSlateColor::UseForeground())
+				]
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), "LargeText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "SplitView_Header", "Step 1: Modify or Save data source, and dependent assets."))
+			]
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.FillHeight(1.f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					ListViewWidget.ToSharedRef()
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SBox)
+					.WidthOverride(FOptionalSize(16))
+					[
+						ScrollBar.ToSharedRef()
+					]
+				]
+			]
 		]
 	];
 }

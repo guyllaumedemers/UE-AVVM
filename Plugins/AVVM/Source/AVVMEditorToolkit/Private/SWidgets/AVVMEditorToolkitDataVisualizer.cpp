@@ -31,7 +31,7 @@
 void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 {
 	DataTable_ExplicitSourceEntries = InArgs._DataTable_ExplicitSourceEntries.Get();
-	
+
 	SAssignNew(ScrollBar, SScrollBar)
 	.AlwaysShowScrollbar(true)
 	.Orientation(EOrientation::Orient_Vertical);
@@ -51,11 +51,19 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 
 	ChildSlot
 	[
-		SNew(SBorder)
-		.BorderImage(FAppStyle::GetBrush("ToolPanel.GroupBorder"))
-		.Padding(8.0f)
+		SNew(SOverlay)
+		+ SOverlay::Slot()
 		[
 			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.Padding(12.f)
+			.AutoHeight()
+			[
+				SNew(STextBlock)
+				.TextStyle(FAppStyle::Get(), "LargeText")
+				.TransformPolicy(ETextTransformPolicy::ToUpper)
+				.Text(NSLOCTEXT("AVVMEditorToolkit", "Visualizer_Header", "Step 1: Create, Edit or Delete element."))
+			]
 			+ SVerticalBox::Slot()
 			.Padding(12.f)
 			.AutoHeight()
@@ -120,27 +128,6 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 					]
 				]
 			]
-			+ SVerticalBox::Slot()
-			.Padding(12.f)
-			.AutoHeight()
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				.Padding(12.f)
-				.HAlign(EHorizontalAlignment::HAlign_Left)
-				.AutoWidth()
-				[
-					SNew(SCheckBox)
-				]
-				+ SHorizontalBox::Slot()
-				.HAlign(EHorizontalAlignment::HAlign_Left)
-				.VAlign(EVerticalAlignment::VAlign_Center)
-				.AutoWidth()
-				[
-					SNew(STextBlock)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "SAVVMEditorToolkitDataImporter", "Open Dependent Assets"))
-				]
-			]
 		]
 	];
 }
@@ -148,7 +135,7 @@ void SAVVMEditorToolkitDataVisualizer::Construct(const FArguments& InArgs)
 void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryType& NewRegistryType)
 {
 	if (!ensureAlwaysMsgf(NewRegistryType.IsValid(),
-						  TEXT("Invalid RegistryType.")))
+	                      TEXT("Invalid RegistryType.")))
 	{
 		return;
 	}
@@ -158,7 +145,7 @@ void SAVVMEditorToolkitDataVisualizer::UpdateDataVisualizer(const FDataRegistryT
 	{
 		return;
 	}
-	
+
 	DataRegistry = TStrongObjectPtr(Subsystem->GetRegistryForType(NewRegistryType));
 	if (!DataRegistry.IsValid())
 	{
