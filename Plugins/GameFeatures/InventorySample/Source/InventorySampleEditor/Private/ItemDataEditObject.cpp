@@ -772,7 +772,7 @@ void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
 	{
 		SelectedDataTable_ActorIdentifiers = UAVVMEditorToolkitUtils::GetDependentDataTable(GetRegistryType_ActorIdentifiers(), FString{OutRoot}, FString{OutRoot} + FString{OutPackagePath});
 	}
-	
+
 	// @gdemers we delete in reverse order for safety.
 	const auto ItemActorUIRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActorUI")));
 	const auto ItemActorRowName = FName(RowName.ToString().Replace(TEXT("ItemObject"), TEXT("ItemActor")));
@@ -781,6 +781,11 @@ void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
 	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ActorDefinitions.Get(), FDataRegistryId{GetRegistryType_ActorDefinitions(), ItemActorRowName});
 	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ActorIdentifiers.Get(), FDataRegistryId{GetRegistryType_ActorIdentifiers(), ItemActorRowName}, true/*has no asset reference*/);
 	UAVVMEditorToolkitUtils::DeleteDataRegistryId(SelectedDataTable_ItemDefinitions.Get(), FDataRegistryId{GetRegistryType_ItemDefinitions(), RowName});
+
+	if (EditMode_DataVisualizer.IsValid())
+	{
+		EditMode_DataVisualizer->UpdateDataVisualizer(GetRegistryType_ItemDefinitions());
+	}
 }
 
 FReply UItemDataEditObject::OnButtonClick_SaveEdits() const
