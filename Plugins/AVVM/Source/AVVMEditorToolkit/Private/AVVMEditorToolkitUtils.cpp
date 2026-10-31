@@ -178,6 +178,7 @@ UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEdi
 		MetaSource_DataTable->AssetUsage = EMetaDataRegistrySourceAssetUsage::SearchAndRegisterAssets;
 		MetaSource_DataTable->SearchRules = MoveTemp(SearchRules);
 		DataRegistry->DataSources.Add(MetaSource_DataTable);
+		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(DataRegistry), TEXT("Failed to save modified DataRegistry."));
 	}
 
 	// @gdemers handle refreshing registry, and data table visibility.
@@ -281,11 +282,6 @@ UDataTable* UAVVMEditorToolkitUtils::GetDependentDataTable(const FDataRegistryTy
 	{
 		return nullptr;
 	}
-	
-	if (DataRegistry->RuntimeSources.IsEmpty())
-	{
-		UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{DataRegistry->GetItemStruct(), RegistryType, OutputPackagePath});
-	}
 
 	const auto* SearchResult = DataRegistry->RuntimeSources.FindByPredicate([&TopLevelPath](const UDataRegistrySource* DataSource)
 	{
@@ -293,14 +289,14 @@ UDataTable* UAVVMEditorToolkitUtils::GetDependentDataTable(const FDataRegistryTy
 	});
 
 	const auto* Source = Cast<UDataRegistrySource_DataTable>((SearchResult != nullptr) ? *SearchResult : nullptr);
-	if (ensureAlwaysMsgf(IsValid(Source), TEXT("Failed to retrieve valid DataTable under Path.")))
+	if (IsValid(Source))
 	{
 		// @gdemers safe to access. already loaded in memory.
 		return Source->SourceTable.Get();
 	}
 	else
 	{
-		return nullptr;
+		return UAVVMEditorToolkitUtils::CreateMissingDataTable(FAVVMEditorToolkitScriptStructContextArgs{DataRegistry->GetItemStruct(), RegistryType, OutputPackagePath});
 	}
 }
 
