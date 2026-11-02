@@ -23,6 +23,7 @@
 
 #include "AssetToolsModule.h"
 #include "DataRegistryId.h"
+#include "EditorAssetLibrary.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/SavePackage.h"
@@ -194,9 +195,6 @@ public:
 	static FString CreateTopLevelDirectory(const FString& PackagePath, const FString& DirectoryName);
 	
 	UFUNCTION(BlueprintCallable)
-	static bool SaveDirtyPackage(UObject* Asset);
-	
-	UFUNCTION(BlueprintCallable)
 	static bool DeleteDataRegistryId(UDataTable* DataTable, const FDataRegistryId& RegistryId, const bool bShouldRemoveRowOnly = false);
 };
 
@@ -215,7 +213,7 @@ TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMEditorToolkitFactory
 		return nullptr;
 	}
 
-	const bool bSuccess = UAVVMEditorToolkitUtils::SaveDirtyPackage(NewAsset);
+	const bool bSuccess = UEditorAssetLibrary::SaveLoadedAsset(NewAsset, false);
 	if (ensureAlwaysMsgf(bSuccess, TEXT("Failed to save")))
 	{
 		AssetTools.Get().OpenEditorForAssets({NewAsset});

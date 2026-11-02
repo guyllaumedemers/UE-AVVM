@@ -20,6 +20,7 @@
 #include "SWidgets/AVVMEditorToolkitSplitView.h"
 
 #include "DataRegistrySubsystem.h"
+#include "EditorAssetLibrary.h"
 #include "Data/AVVMDataTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataTableRowPreview.h"
 #include "Widgets/Input/SButton.h"
@@ -64,7 +65,7 @@ void SAVVMEditorToolkitSplitView::Construct(const FArguments& InArgs)
 				.VAlign(EVerticalAlignment::VAlign_Center)
 				.ButtonStyle(FAppStyle::Get(), "SimpleButton")
 				.ToolTipText(NSLOCTEXT("AVVMEditorToolit", "SaveDirtyPackagesTooltip", "Save all modified assets."))
-				.OnClicked(InArgs._OnSaveClicked)
+				.OnClicked(this, &SAVVMEditorToolkitSplitView::OnButtonClick_SaveEdits)
 				[
 					SNew(SImage)
 					.DesiredSizeOverride(FVector2d{64.f, 64.f})
@@ -115,7 +116,7 @@ FText SAVVMEditorToolkitSplitView::GetModalTitle_OnClosure() const
 	return NSLOCTEXT("AVVMEditorToolkitDataEditor", "SAVVMEditorToolkitSplitView::GetModalTitle_OnClosure", "Warning!");
 }
 
-TSharedRef<ITableRow> SAVVMEditorToolkitSplitView::OnGenerateRow(FName InItem, const TSharedRef<STableViewBase>& OwnerTable) const
+TSharedRef<ITableRow> SAVVMEditorToolkitSplitView::OnGenerateRow(FName InItem, const TSharedRef<STableViewBase>& OwnerTable)
 {
 	const FString AggregatedRegistryId{InItem.ToString()};
 
@@ -129,6 +130,8 @@ TSharedRef<ITableRow> SAVVMEditorToolkitSplitView::OnGenerateRow(FName InItem, c
 	SAssignNew(OutListTableRow, STableRow<FName>, OwnerTable)
 	[
 		SNew(SAVVMEditorToolkitDataTableRowPreview)
+		.OnAssetModified(this, &SAVVMEditorToolkitSplitView::OnAssetModified)
+		.OnAssetReverted(this, &SAVVMEditorToolkitSplitView::OnAssetReverted)
 		.RegistryType_OnEnableDenyList(RegistryType_ViewEditDenyList)
 		.bIsPreviewEditable(bCanEditSplitView)
 		.RegistryType(FName(Left))
@@ -162,4 +165,31 @@ void SAVVMEditorToolkitSplitView::UpdateSplitView(const TArray<FDataRegistryId>&
 	{
 		ListViewWidget->RebuildList();
 	}
+}
+
+void SAVVMEditorToolkitSplitView::OnAssetModified(UObject* DirtyAsset)
+{
+	DirtyAssets.AddUnique(DirtyAsset);
+}
+
+void SAVVMEditorToolkitSplitView::OnAssetReverted(UObject* DirtyAsset)
+{
+	if (ensureAlwaysMsgf(DirtyAssets.Contains(DirtyAsset), TEXT("Doesnt contains asset.")))
+	{
+		DirtyAssets.Remove(DirtyAsset);
+	}
+}
+
+FReply SAVVMEditorToolkitSplitView::OnButtonClick_SaveEdits()
+{
+	TArray<UObject*> PendingObjects_Save{};
+	for (const auto& DirtyAssetWeakPtr : DirtyAssets)
+	{
+		if (ensureAlwaysMsgf(DirtyAssetWeakPtr.IsValid(), TEXT("Failed to retrieve object for save.")))
+		{
+			PendingObjects_Save.Add(DirtyAssetWeakPtr.Get());
+		}
+	}
+
+	return UEditorAssetLibrary::SaveLoadedAssets(PendingObjects_Save, false) ? FReply::Handled() : FReply::Unhandled();
 }

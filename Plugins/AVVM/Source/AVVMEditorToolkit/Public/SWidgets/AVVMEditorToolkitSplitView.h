@@ -39,7 +39,6 @@ public:
 	SLATE_BEGIN_ARGS(SAVVMEditorToolkitSplitView){}
 	SLATE_ATTRIBUTE(TArray<FDataRegistryId>, DependentRegistryIds)
 	SLATE_ATTRIBUTE(TArray<FName>, RegistryType_ViewEditDenyList)
-	SLATE_EVENT(FOnClicked, OnSaveClicked)
 	SLATE_ATTRIBUTE(bool, bAreViewEditable)
 	SLATE_END_ARGS()
 
@@ -50,9 +49,14 @@ public:
 	virtual FText GetModalTitle_OnClosure() const override;
 
 private:
-	TSharedRef<ITableRow> OnGenerateRow(FName InItem, const TSharedRef<STableViewBase>& OwnerTable) const;
+	TSharedRef<ITableRow> OnGenerateRow(FName InItem, const TSharedRef<STableViewBase>& OwnerTable);
 	void UpdateSplitView(const TArray<FDataRegistryId>& NewRegistryIds);
 	
+	void OnAssetModified(UObject* DirtyAsset);
+	void OnAssetReverted(UObject* DirtyAsset);
+	FReply OnButtonClick_SaveEdits();
+	
+	TArray<TWeakObjectPtr<UObject>> DirtyAssets{};
 	TSharedPtr<SListView<FName>> ListViewWidget{nullptr};
 	TSharedPtr<SScrollBar> ScrollBar{nullptr};
 	TArray<FDataRegistryId> RegistryIds{};

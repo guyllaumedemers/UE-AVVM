@@ -30,8 +30,10 @@
 
 void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 {
-	RegistryId = FDataRegistryId{InArgs._RegistryType.Get(), InArgs._RegistryItemName.Get()};
 	bCanEditPreview = InArgs._bIsPreviewEditable.Get() && !InArgs._RegistryType_OnEnableDenyList.Get().Contains(RegistryId.RegistryType);
+	RegistryId = FDataRegistryId{InArgs._RegistryType.Get(), InArgs._RegistryItemName.Get()};
+	OnAssetModified = InArgs._OnAssetModified;
+	OnAssetReverted = InArgs._OnAssetReverted;
 
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{
@@ -47,6 +49,7 @@ void SAVVMEditorToolkitDataTableRowPreview::Construct(const FArguments& InArgs)
 		{
 			ObjectPropertyView->SetObjects(GetAssetsFromRegistryId());
 			ObjectPropertyView->GetIsPropertyEditingEnabledDelegate().BindRaw(this, &SAVVMEditorToolkitDataTableRowPreview::OnEnable_DetailView);
+			ObjectPropertyView->OnFinishedChangingProperties().AddRaw(this, &SAVVMEditorToolkitDataTableRowPreview::OnPropertyChangedEvent);
 		}
 	}
 
@@ -118,4 +121,53 @@ TArray<UObject*> SAVVMEditorToolkitDataTableRowPreview::GetAssetsFromRegistryId(
 bool SAVVMEditorToolkitDataTableRowPreview::OnEnable_DetailView() const
 {
 	return bCanEditPreview;
+}
+
+void SAVVMEditorToolkitDataTableRowPreview::OnPropertyChangedEvent(const FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (!ObjectPropertyView.IsValid())
+	{
+		return;
+	}
+
+	const FProperty* Property = PropertyChangedEvent.Property;
+	if (!ensureAlwaysMsgf(Property != nullptr, TEXT("Invalid PropertyChangedEvent.")))
+	{
+		return;
+	}
+
+	const auto* SearchResult = ObjectPropertyView->GetSelectedObjects().FindByPredicate([OwnerStruct = Property->GetOwnerStruct()](const TWeakObjectPtr<UObject>& Object)
+	{
+		if (!IsValid(OwnerStruct) || !Object.IsValid())
+		{
+			return false;
+		}
+
+		// Verify if the UObject's class inherits from or is the owner class
+		const auto* OwnerClass = Cast<UClass>(OwnerStruct);
+		return Object->IsA(OwnerClass);
+	});
+
+	if (!ensureAlwaysMsgf(SearchResult != nullptr, TEXT("Invalid SearchResult.")))
+	{
+		return;
+	}
+
+	const UClass* Class = (*SearchResult)->GetClass();
+	if (!ensureAlwaysMsgf(IsValid(Class), TEXT("Invalid UClass.")))
+	{
+		return;
+	}
+
+	const void* DefaultValuePtr = Property->ContainerPtrToValuePtr<void>(Class->GetDefaultObject());
+	const void* InstanceValuePtr = Property->ContainerPtrToValuePtr<void>(SearchResult->Get());
+
+	if (Property->Identical(InstanceValuePtr, DefaultValuePtr))
+	{
+		OnAssetReverted.ExecuteIfBound(SearchResult->Get());
+	}
+	else
+	{
+		OnAssetModified.ExecuteIfBound(SearchResult->Get());
+	}
 }

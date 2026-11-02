@@ -43,11 +43,8 @@
       "Name": "InventorySampleEditor",
       "Type": "Editor",
       "LoadingPhase": "Default",
-      "TargetConfigurationDenyList": [
-        "Shipping"
-      ],
-      "TargetDenyList": [
-        "Server"
+      "TargetAllowList": [
+        "Editor"
       ]
     }
   ],
@@ -79,6 +76,13 @@
     {
       "Name": "CommonUI",
       "Enabled": true
+    },
+    {
+      "Name": "EditorScriptingUtilities",
+      "Enabled": true,
+      "TargetAllowList": [
+        "Editor"
+      ]
     },
     {
       "Name": "GameplayAbilities",

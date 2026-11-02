@@ -180,7 +180,7 @@ UDataRegistry* UAVVMEditorToolkitUtils::CreateMissingDataRegistry(const FAVVMEdi
 		MetaSource_DataTable->AssetUsage = EMetaDataRegistrySourceAssetUsage::SearchAndRegisterAssets;
 		MetaSource_DataTable->SearchRules = MoveTemp(SearchRules);
 		DataRegistry->DataSources.Add(MetaSource_DataTable);
-		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(DataRegistry), TEXT("Failed to save modified DataRegistry."));
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(DataRegistry), TEXT("Failed to save modified DataRegistry."));
 	}
 
 	// @gdemers handle refreshing registry, and data table visibility.
@@ -210,7 +210,7 @@ bool UAVVMEditorToolkitUtils::AppendDataRegistryScanDirectories(const FString& D
 	FStringView OutRoot{};
 	FPackageName::SplitPackageName(DataRegistryPathName, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointLeadingSlash);
 	MutableSettings->DirectoriesToScan.Add(FDirectoryPath{FString{OutRoot}});
-	ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(MutableSettings), TEXT("Failed to save modified Settings."));
+	ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(MutableSettings), TEXT("Failed to save modified Settings."));
 
 	FFormatNamedArguments Args{};
 	Args.Add(TEXT("Directory"), FText::FromStringView(OutRoot));
@@ -315,7 +315,7 @@ bool UAVVMEditorToolkitUtils::CreateActorIdentifierRow(const FAVVMEditorDataTabl
 	{
 		Row->UniqueId = Params.EditObject->GenerateActorIdentifier(Params.ActorType);
 		bResult = (Row->UniqueId != INDEX_NONE);
-		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(Params.DataTable.Get()), TEXT("Failed to save Package."));
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(Params.DataTable.Get()), TEXT("Failed to save Package."));
 	}
 
 	return bResult;
@@ -350,7 +350,7 @@ bool UAVVMEditorToolkitUtils::CreateActorDefinitionRow(const FAVVMEditorDataTabl
 	{
 		Row->ActorDefinition = ActorDefinitionDataAsset;
 		bResult = (false == Row->ActorDefinition.IsNull());
-		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(Params.DataTable.Get()), TEXT("Failed to save Package."));
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(Params.DataTable.Get()), TEXT("Failed to save Package."));
 	}
 
 	return bResult;
@@ -385,7 +385,7 @@ bool UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(const FAVVMEditorDataTa
 	{
 		Row->ActorUIDefinition = ActorUIDefinitionDataAsset;
 		bResult = (false == Row->ActorUIDefinition.IsNull());
-		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(Params.DataTable.Get()), TEXT("Failed to save Package."));
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(Params.DataTable.Get()), TEXT("Failed to save Package."));
 	}
 
 	return bResult;
@@ -425,7 +425,7 @@ bool UAVVMEditorToolkitUtils::DoesActorDefinitionRowHaveData(const FString& NewP
 	if (ensureAlwaysMsgf(IsValid(ActorDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 	{
 		Row->ActorDefinition = ActorDefinitionDataAsset;
-		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(ActorDefinitionDataAsset), TEXT("Failed to save Package."));
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(ActorDefinitionDataAsset), TEXT("Failed to save Package."));
 	}
 
 	return true;
@@ -465,7 +465,7 @@ bool UAVVMEditorToolkitUtils::DoesActorUIDefinitionRowHaveData(const FString& Ne
 	if (ensureAlwaysMsgf(IsValid(ActorUIDefinitionDataAsset), TEXT("Failed to create New Data Asset.")))
 	{
 		Row->ActorUIDefinition = ActorUIDefinitionDataAsset;
-		ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(ActorUIDefinitionDataAsset), TEXT("Failed to save Package."));
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(ActorUIDefinitionDataAsset), TEXT("Failed to save Package."));
 	}
 
 	return true;
@@ -476,23 +476,6 @@ FString UAVVMEditorToolkitUtils::CreateTopLevelDirectory(const FString& PackageP
 	FStringView OutRoot{};
 	FPackageName::SplitPackageName(PackagePath, &OutRoot, nullptr, nullptr, FPackageName::EPathFormatFlags::MountPointSlashes);
 	return FString{OutRoot} + DirectoryName;
-}
-
-bool UAVVMEditorToolkitUtils::SaveDirtyPackage(UObject* Asset)
-{
-	UPackage* Package = IsValid(Asset) ? Asset->GetPackage() : nullptr;
-	if (!ensureAlwaysMsgf(IsValid(Package), TEXT("Failed to retrieve package.")))
-	{
-		return false;
-	}
-
-	FSavePackageArgs SavePackageArgs{};
-	SavePackageArgs.TopLevelFlags = RF_Public | RF_Standalone;
-	SavePackageArgs.SaveFlags = SAVE_FromAutosave;
-	SavePackageArgs.Error = GLog;
-
-	const FString PackageFileName = FPackageName::LongPackageNameToFilename(Package->GetPathName(), FPackageName::GetAssetPackageExtension());
-	return UPackage::SavePackage(Package, Asset, *PackageFileName, MoveTemp(SavePackageArgs));
 }
 
 bool UAVVMEditorToolkitUtils::DeleteDataRegistryId(UDataTable* DataTable,

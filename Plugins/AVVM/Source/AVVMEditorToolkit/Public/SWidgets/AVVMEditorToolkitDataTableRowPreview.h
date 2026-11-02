@@ -26,6 +26,8 @@
 
 class IDetailsView;
 
+DECLARE_DELEGATE_OneParam(SOnObjectModified, UObject*);
+
 /**
  *	Class description:
  *	
@@ -42,17 +44,22 @@ public:
 	SLATE_ATTRIBUTE(FName, RegistryType)
 	SLATE_ATTRIBUTE(FName, RegistryItemName)
 	SLATE_ATTRIBUTE(bool, bIsPreviewEditable)
+	SLATE_EVENT(SOnObjectModified, OnAssetModified)
+	SLATE_EVENT(SOnObjectModified, OnAssetReverted)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-	
+
 private:
 	TArray<UObject*> GetAssetsFromRegistryId() const;
-	
+
 	bool OnEnable_DetailView() const;
+	void OnPropertyChangedEvent(const FPropertyChangedEvent& PropertyChangedEvent);
 	
 	TSharedPtr<IDetailsView> ObjectPropertyView{nullptr};
+	SOnObjectModified OnAssetModified{};
+	SOnObjectModified OnAssetReverted{};
 	FDataRegistryId RegistryId{};
 	bool bCanEditPreview{false};
 };

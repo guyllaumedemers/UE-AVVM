@@ -25,6 +25,7 @@
 #include "ContentBrowserModule.h"
 #include "DataRegistrySubsystem.h"
 #include "DataTableEditorUtils.h"
+#include "EditorAssetLibrary.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
 #include "SCheckBoxList.h"
@@ -409,7 +410,7 @@ bool UItemDataEditObject::TryCreateNewItemObject()
 		if (ensureAlwaysMsgf(IsValid(DataAsset), TEXT("Failed to create New Data Asset.")))
 		{
 			NewItemDefinition->ItemDefinition = DataAsset;
-			ensureAlwaysMsgf(UAVVMEditorToolkitUtils::SaveDirtyPackage(SelectedDataTable_ItemDefinitions.Get()), TEXT("Failed to save Package."));
+			ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(SelectedDataTable_ItemDefinitions.Get()), TEXT("Failed to save Package."));
 		}
 
 		return TryCreateDependentAsset(DataAsset, SelectedItemType, ItemObjectRowName, DataTablePackagePath);
@@ -456,6 +457,7 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 			ItemObject->GetMutableItemSparseData()->ItemActorUIId = FDataRegistryId{GetRegistryType_ActorUIDefinitions(), FName(ItemActorUIRowName)};
 			ItemObject->GetMutableItemSparseData()->ItemActorId = FDataRegistryId{GetRegistryType_ActorDefinitions(), FName(ItemActorRowName)};
 			ItemDefinitionDataAsset->ItemObjectClass = ItemObject->GetClass();
+			ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(ItemDefinitionDataAsset), TEXT("Failed to save Package."));
 		}
 	}
 
@@ -658,7 +660,6 @@ void UItemDataEditObject::EditDependentAsset(const TWeakObjectPtr<UDataTable>& I
 	FAVVMEditorToolkitWindowContextArgs Params{};
 	Params.Title = FText::FromName(RowName);
 	Params.Content = SNew(SAVVMEditorToolkitSplitView)
-		.OnSaveClicked_UObject(this, &UItemDataEditObject::OnButtonClick_SaveEdits)
 		.RegistryType_ViewEditDenyList(TArray<FName>{GetRegistryType_ActorIdentifiers()})
 		.bAreViewEditable(true)
 		.DependentRegistryIds(DependentRegistryIds);
@@ -786,11 +787,6 @@ void UItemDataEditObject::DeleteDependentAsset(const FName RowName)
 	{
 		EditMode_DataVisualizer->UpdateDataVisualizer(GetRegistryType_ItemDefinitions());
 	}
-}
-
-FReply UItemDataEditObject::OnButtonClick_SaveEdits() const
-{
-	return FReply::Unhandled();
 }
 
 void UItemDataEditObject::OnPostWindowClosed() const
