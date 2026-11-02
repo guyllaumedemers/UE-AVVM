@@ -24,6 +24,7 @@
 #include "Data/AVVMDataTableRow.h"
 #include "Editor/PropertyEditor/Private/SDetailsView.h"
 #include "Engine/AssetManager.h"
+#include "Engine/DataAsset.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
@@ -153,21 +154,31 @@ void SAVVMEditorToolkitDataTableRowPreview::OnPropertyChangedEvent(const FProper
 		return;
 	}
 
-	const UClass* Class = (*SearchResult)->GetClass();
-	if (!ensureAlwaysMsgf(IsValid(Class), TEXT("Invalid UClass.")))
-	{
-		return;
-	}
+	bool bIsDirty{false};
 
-	const void* DefaultValuePtr = Property->ContainerPtrToValuePtr<void>(Class->GetDefaultObject());
-	const void* InstanceValuePtr = Property->ContainerPtrToValuePtr<void>(SearchResult->Get());
-
-	if (Property->Identical(InstanceValuePtr, DefaultValuePtr))
+	const auto* DataAsset = Cast<UDataAsset>(*SearchResult);
+	if (IsValid(DataAsset))
 	{
-		OnAssetReverted.ExecuteIfBound(SearchResult->Get());
+		const auto* Package = DataAsset->GetPackage();
+		bIsDirty = IsValid(Package) && Package->IsDirty();
 	}
 	else
 	{
+		const UClass* Class = (*SearchResult)->GetClass();
+		if (ensureAlwaysMsgf(IsValid(Class), TEXT("Invalid UClass.")))
+		{
+			const void* DefaultValuePtr = Property->ContainerPtrToValuePtr<void>(Class->GetDefaultObject());
+			const void* InstanceValuePtr = Property->ContainerPtrToValuePtr<void>(SearchResult->Get());
+			bIsDirty = !Property->Identical(InstanceValuePtr, DefaultValuePtr);
+		}
+	}
+
+	if (bIsDirty)
+	{
 		OnAssetModified.ExecuteIfBound(SearchResult->Get());
+	}
+	else
+	{
+		OnAssetReverted.ExecuteIfBound(SearchResult->Get());
 	}
 }
