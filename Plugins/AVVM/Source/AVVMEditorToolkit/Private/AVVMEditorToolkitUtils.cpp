@@ -500,7 +500,7 @@ bool UAVVMEditorToolkitUtils::DeleteDataRegistryId(UDataTable* DataTable,
 	{
 		for (const FSoftObjectPath& SoftObjectPath : Row->GetResourcesPaths())
 		{
-			bResult &= (SoftObjectPath.IsNull() || UEditorAssetLibrary::DeleteAsset(SoftObjectPath.ToString()));
+			bResult &= (SoftObjectPath.IsNull() || UEditorAssetLibrary::DeleteAsset(SoftObjectPath.GetLongPackageName()));
 
 			const auto* SourcePaths = Row->g_EditorToolingDependencyReferences.Find(SoftObjectPath);
 			if (SourcePaths == nullptr)
@@ -510,7 +510,7 @@ bool UAVVMEditorToolkitUtils::DeleteDataRegistryId(UDataTable* DataTable,
 
 			for (const auto& DependencyPath : *SourcePaths)
 			{
-				bResult &= (DependencyPath.IsNull() || UEditorAssetLibrary::DeleteAsset(DependencyPath.ToString()));
+				bResult &= (DependencyPath.IsNull() || UEditorAssetLibrary::DeleteAsset(DependencyPath.GetLongPackageName()));
 			}
 		}
 	}
