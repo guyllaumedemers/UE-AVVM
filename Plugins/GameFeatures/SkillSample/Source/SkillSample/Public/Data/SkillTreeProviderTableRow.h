@@ -90,6 +90,8 @@ struct SKILLSAMPLE_API FFtue_SkillTreeProviderTableRow : public FAVVMDataTableRo
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+	
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	// @gdemers top-level actor that require a full definition rundown for ftue. example : a character of type.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers", meta=(ItemStruct="AVVMActorIdentifierDataTableRow"))

@@ -64,6 +64,11 @@ EDataValidationResult FAVVMGameModeAdditiveDefinitionDataTableRow::IsDataValid(c
 }
 #endif
 
+TArray<FSoftObjectPath> FAVVMGameModeAdditiveDefinitionDataTableRow::GetResourcesPaths() const
+{
+	return {GameModeAdditiveClass.ToSoftObjectPath()};
+}
+
 const TArray<FString> UAVVMGameModeAdditiveUtils::ParseCmdOptions(const FString& GameModeOptions)
 {
 	static const TCHAR* Delims[] = {TEXT(","), TEXT(";"), TEXT(" ")};

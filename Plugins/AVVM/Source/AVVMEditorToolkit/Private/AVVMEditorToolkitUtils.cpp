@@ -242,9 +242,9 @@ UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToo
 	NewParams.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(Params.PackagePath, TEXT("DT"), *GetNameSafe(Factory->Struct));
 	NewParams.PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(Params.PackagePath, DATA_TABLE_DIRECTORY);
 	NewParams.AssetFactory = Factory;
-	NewParams.AssetClass = UDataTable::StaticClass();
+	NewParams.AssetClass = UAVVMDataTable::StaticClass();
 
-	auto* DataTable = UAVVMEditorToolkitUtils::CreateOpenAsset<UDataTable>(NewParams);
+	auto* DataTable = UAVVMEditorToolkitUtils::CreateOpenAsset<UAVVMDataTable>(NewParams);
 	if (!ensureAlwaysMsgf(IsValid(DataTable), TEXT("Failed to create new DataTable.")))
 	{
 		return nullptr;

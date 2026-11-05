@@ -33,6 +33,11 @@ EDataValidationResult FFiringModeDefinitionDataTableRow::IsDataValid(class FData
 }
 #endif
 
+TArray<FSoftObjectPath> FFiringModeDefinitionDataTableRow::GetResourcesPaths() const
+{
+	return {FiringModeGameplayEffectClass.ToSoftObjectPath()};
+}
+
 const TSoftClassPtr<UGameplayEffect_FiringMode>& FFiringModeDefinitionDataTableRow::GetFiringModeGameplayEffectClass() const
 {
 	return FiringModeGameplayEffectClass;

@@ -32,3 +32,8 @@ EDataValidationResult FStubData_SkillDependencyGraphTableRow::IsDataValid(class 
 	return Result;
 }
 #endif
+
+TArray<FSoftObjectPath> FStubData_SkillDependencyGraphTableRow::GetResourcesPaths() const
+{
+	return {};
+}

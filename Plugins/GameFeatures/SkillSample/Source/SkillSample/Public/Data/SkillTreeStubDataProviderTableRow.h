@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "Data/AVVMDataTableRow.h"
 #include "Engine/DataTable.h"
 
 #if WITH_EDITOR
@@ -68,13 +69,15 @@ struct SKILLSAMPLE_API FStubData_SkillDependencyGraphElements
  *	and any actors.
  */
 USTRUCT(BlueprintType)
-struct SKILLSAMPLE_API FStubData_SkillDependencyGraphTableRow : public FTableRowBase
+struct SKILLSAMPLE_API FStubData_SkillDependencyGraphTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+	
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Designers")
 	TMap<TSoftClassPtr<UGameplayEffect>, FStubData_SkillDependencyGraphElements> SkillDependencyGraph{};

@@ -39,6 +39,8 @@ USTRUCT(BlueprintType)
 struct INVENTORYSAMPLE_API FItemStackTableRow : public FAVVMDataTableRow
 {
 	GENERATED_BODY()
+	
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;

@@ -22,6 +22,11 @@
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineInventory.h"
 
+TArray<FSoftObjectPath> FItemStackTableRow::GetResourcesPaths() const
+{
+	return {};
+}
+
 #if WITH_EDITOR
 EDataValidationResult FItemStackTableRow::IsDataValid(class FDataValidationContext& Context) const
 {

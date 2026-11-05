@@ -48,6 +48,8 @@ struct WEAPONSAMPLE_API FFiringModeDefinitionDataTableRow : public FAVVMDataTabl
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
+	
+	virtual TArray<FSoftObjectPath> GetResourcesPaths() const override;
 
 	const TSoftClassPtr<UGameplayEffect_FiringMode>& GetFiringModeGameplayEffectClass() const;
 

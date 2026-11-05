@@ -66,3 +66,8 @@ EDataValidationResult FFtue_SkillTreeProviderTableRow::IsDataValid(class FDataVa
 	return Result;
 }
 #endif
+
+TArray<FSoftObjectPath> FFtue_SkillTreeProviderTableRow::GetResourcesPaths() const
+{
+	return {};
+}
