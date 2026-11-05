@@ -230,13 +230,14 @@ bool UAVVMEditorToolkitUtils::AppendDataRegistryScanDirectories(const FString& D
 
 UDataTable* UAVVMEditorToolkitUtils::CreateMissingDataTable(const FAVVMEditorToolkitScriptStructContextArgs& Params)
 {
-	auto* Factory = NewObject<UDataTableFactory>();
+	auto* Factory = NewObject<UAVVMDataTableFactory>();
 	if (!IsValid(Factory))
 	{
 		return nullptr;
 	}
 
 	Factory->Struct = Params.ScriptStruct;
+	Factory->SupportedClass = UAVVMDataTable::StaticClass();
 
 	FAVVMEditorToolkitFactoryContextArgs NewParams{};
 	NewParams.AssetName = UAVVMEditorToolkitUtils::GetStandardizedName(Params.PackagePath, TEXT("DT"), *GetNameSafe(Factory->Struct));
@@ -520,4 +521,9 @@ bool UAVVMEditorToolkitUtils::DeleteDataRegistryId(UDataTable* DataTable,
 	}
 
 	return bResult;
+}
+
+UDataTable* UAVVMDataTableFactory::MakeNewDataTable(UObject* InParent, FName Name, EObjectFlags Flags)
+{
+	return NewObject<UAVVMDataTable>(InParent, Name, Flags);
 }

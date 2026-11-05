@@ -24,6 +24,7 @@
 #include "AssetToolsModule.h"
 #include "DataRegistryId.h"
 #include "EditorAssetLibrary.h"
+#include "Factories/DataTableFactory.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/SavePackage.h"
@@ -221,3 +222,17 @@ TAsset* UAVVMEditorToolkitUtils::CreateOpenAsset(const FAVVMEditorToolkitFactory
 
 	return Cast<TAsset>(NewAsset);
 }
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMDataTableFactory is a derived Factory class to enforce DataTable creation of custom asset type.
+ */
+UCLASS()
+class UAVVMDataTableFactory : public UDataTableFactory
+{
+	GENERATED_BODY()
+
+protected:
+	virtual UDataTable* MakeNewDataTable(UObject* InParent, FName Name, EObjectFlags Flags) override;
+};
