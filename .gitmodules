@@ -1,3 +1,9 @@
 [submodule "Plugins/ImGui"]
 	path = Plugins/ImGui
 	url = https://github.com/benui-dev/UnrealImGui.git
+[submodule "Plugins/UEPlugins_DisableDefault"]
+	path = Plugins/UEPlugins_DisableDefault
+	url = https://github.com/DarknessFX/UEPlugins_DisableDefault.git
+[submodule "Plugins/AsyncLoadingScreen"]
+	path = Plugins/AsyncLoadingScreen
+	url = https://github.com/truong-bui/AsyncLoadingScreen.git
