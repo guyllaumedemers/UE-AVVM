@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Engine/DataAsset.h"
 #include "Engine/DataTable.h"
 
 #include "AVVMDataTableRow.generated.h"
@@ -39,4 +40,44 @@ struct AVVMGAMEPLAY_API FAVVMDataTableRow : public FTableRowBase
 	GENERATED_BODY()
 
 	virtual TArray<FSoftObjectPath> GetResourcesPaths() const PURE_VIRTUAL(GetResourcesPaths, return TArray<FSoftObjectPath>{};);
+
+#if WITH_EDITOR
+	// @gdemers to initialize dependent FSoftObjectPath with our global map so our custom editor tool
+	// can modify property fields bound to data assets.
+	void CreateDependentReferenceGraph() const;
+
+private:
+	static TMap<FSoftObjectPath, TArray<FSoftObjectPath>> g_EditorToolingDependencyReferences;
+	friend class UAVVMEditorToolkitUtils;
+#endif
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMDataAsset define a derive Data Asset type to unify editor specific actions to be executed on DATA ASSET with our custom editor tooling.
+ */
+UCLASS(Abstract, BlueprintType, Blueprintable)
+class AVVMGAMEPLAY_API UAVVMDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+#if WITH_EDITOR
+
+public:
+	virtual TArray<FSoftObjectPath> GetBlueprintClassPaths() const;
+#endif
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMDataTable define a derive Data Table type to unify editor specific actions to be executed on DATA TABLE  with our custom editor tooling.
+ */
+UCLASS(BlueprintType, Blueprintable)
+class AVVMGAMEPLAY_API UAVVMDataTable : public UDataTable
+{
+	GENERATED_BODY()
+	
+	virtual void PostLoad() override;
 };

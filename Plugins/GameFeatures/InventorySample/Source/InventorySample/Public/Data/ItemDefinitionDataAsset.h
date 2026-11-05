@@ -48,12 +48,13 @@ class UItemObject;
  *	See UItemObject for details!
  */
 UCLASS(BlueprintType, Blueprintable)
-class INVENTORYSAMPLE_API UItemDefinitionDataAsset : public UDataAsset
+class INVENTORYSAMPLE_API UItemDefinitionDataAsset : public UAVVMDataAsset
 {
 	GENERATED_BODY()
 
 public:
 #if WITH_EDITOR
+	virtual TArray<FSoftObjectPath> GetBlueprintClassPaths() const override;
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif
 

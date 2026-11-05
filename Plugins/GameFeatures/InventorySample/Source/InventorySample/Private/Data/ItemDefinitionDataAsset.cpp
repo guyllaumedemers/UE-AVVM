@@ -20,6 +20,11 @@
 #include "Data/ItemDefinitionDataAsset.h"
 
 #if WITH_EDITOR
+TArray<FSoftObjectPath> UItemDefinitionDataAsset::GetBlueprintClassPaths() const
+{
+	return {ItemObjectClass.ToSoftObjectPath()};
+}
+
 EDataValidationResult UItemDefinitionDataAsset::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);

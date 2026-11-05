@@ -500,6 +500,17 @@ bool UAVVMEditorToolkitUtils::DeleteDataRegistryId(UDataTable* DataTable,
 		for (const FSoftObjectPath& SoftObjectPath : Row->GetResourcesPaths())
 		{
 			bResult &= (SoftObjectPath.IsNull() || UEditorAssetLibrary::DeleteAsset(SoftObjectPath.ToString()));
+
+			const auto* SourcePaths = Row->g_EditorToolingDependencyReferences.Find(SoftObjectPath);
+			if (SourcePaths == nullptr)
+			{
+				continue;
+			}
+
+			for (const auto& DependencyPath : *SourcePaths)
+			{
+				bResult &= (DependencyPath.IsNull() || UEditorAssetLibrary::DeleteAsset(DependencyPath.ToString()));
+			}
 		}
 	}
 

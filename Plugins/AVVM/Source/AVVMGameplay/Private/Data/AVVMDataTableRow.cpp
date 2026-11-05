@@ -18,3 +18,46 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 #include "Data/AVVMDataTableRow.h"
+
+#if WITH_EDITOR
+TMap<FSoftObjectPath, TArray<FSoftObjectPath>> FAVVMDataTableRow::g_EditorToolingDependencyReferences{};
+
+void FAVVMDataTableRow::CreateDependentReferenceGraph() const
+{
+	for (const FSoftObjectPath& Path : GetResourcesPaths())
+	{
+		Path.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateLambda([](const FSoftObjectPath& ObjectPath, UObject* Object)
+		{
+			const auto* DataAsset = Cast<UAVVMDataAsset>(Object);
+			if (IsValid(DataAsset))
+			{
+				auto& OutDependencies = g_EditorToolingDependencyReferences.FindOrAdd(ObjectPath);
+				OutDependencies.Append(DataAsset->GetBlueprintClassPaths());
+			}
+		}));
+	}
+}
+
+TArray<FSoftObjectPath> UAVVMDataAsset::GetBlueprintClassPaths() const
+{
+	return {};
+}
+#endif
+
+void UAVVMDataTable::PostLoad()
+{
+	Super::PostLoad();
+
+#if WITH_EDITOR
+	TArray<FAVVMDataTableRow*> OutRowArray{};
+	GetAllRows(TEXT(""), OutRowArray);
+
+	for (const auto* Row : OutRowArray)
+	{
+		if (ensureAlwaysMsgf(Row != nullptr, TEXT("Failed to retrieve valid Row.")))
+		{
+			Row->CreateDependentReferenceGraph();
+		}
+	}
+#endif
+}
