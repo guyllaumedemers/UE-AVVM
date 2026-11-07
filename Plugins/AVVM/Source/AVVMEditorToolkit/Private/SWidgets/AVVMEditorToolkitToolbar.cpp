@@ -22,114 +22,110 @@
 #include "AVVMEditorBuilderSubsystem.h"
 #include "AVVMEditorToolkitModule.h"
 #include "AVVMEditorToolkitBuilderObject.h"
+#include "LevelEditor.h"
 #include "ToolMenu.h"
 #include "ToolMenus.h"
 #include "Framework/Application/SlateApplication.h"
-#include "Styling/ToolBarStyle.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
 #include "Widgets/Images/SImage.h"
-
-#define LOCTEXT_NAMESPACE "AVVMEditorToolkit_ToolBar"
-
-/**
- *	@gdemers Private namespace for data that may be accessed extern to this source file.
- */
-namespace NS_AVVMEditorToolkit_ToolBar
-{
-	// @gdemers menu
-	const FName ToolkitMenu_Name = TEXT("Toolkit_Menu");
-}
+#include "Widgets/Input/SComboButton.h"
 
 void SAVVMEditorToolkitToolbar::Construct(const FArguments& InArgs)
 {
-}
-
-void SAVVMEditorToolkitToolbar::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core,
-                                      TSharedPtr<FExtender> MenuBarExtenders)
-{
-	if (!Core.IsValid() || !MenuBarExtenders.IsValid())
-	{
-		return;
-	}
-
-	UToolMenu* ToolkitMenuBar = UToolMenus::Get()->RegisterMenu(NS_AVVMEditorToolkit_ToolBar::ToolkitMenu_Name, NAME_None, EMultiBoxType::MenuBar);
-	if (IsValid(ToolkitMenuBar))
-	{
-		static const FName MainMenuStyleName("WindowMenuBar");
-		ToolkitMenuBar->SetStyleSet(&FAppStyle::Get());
-		ToolkitMenuBar->StyleName = MainMenuStyleName;
-
-		for (const auto* BuilderObject : UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(GEditor))
-		{
-			// @gdemers build module extensions using the provided builder object.
-			MakeGenericMenuEntry(BuilderObject, Core, *ToolkitMenuBar);
-		}
-	}
-
-	const auto Toolbar = UToolMenus::Get()->GenerateWidget(
-	                                                       NS_AVVMEditorToolkit_ToolBar::ToolkitMenu_Name,
-	                                                       FToolMenuContext{Core->GetToolkitCommands(), MenuBarExtenders});
-
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			SNew(SImage)
-			.Image(&FCoreStyle::Get().GetWidgetStyle<FWindowStyle>("Window").BackgroundBrush)
-		]
-		+ SOverlay::Slot()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(SBorder)
-				.Padding(0.f)
-				.BorderImage(FAppStyle::Get().GetBrush("NoBorder"))
-				.IsEnabled(FSlateApplication::Get().GetNormalExecutionAttribute())
-				[
-					Toolbar
-				]
-			]
+			SAssignNew(MenuBar, SHorizontalBox)
 		]
 	];
+
+	if (!Handle.IsValid())
+	{
+		const auto Callback = FOnBuildContextChangedDelegate::FDelegate::CreateRaw(this, &SAVVMEditorToolkitToolbar::OnBuilderObjectsAcquired, InArgs._Core.Get(), InArgs._MenuBarExtenders.Get());
+		Handle = UAVVMEditorBuilderSubsystem::Static_CallOrRegisterOnBuildContextChanged(GEditor, Callback);
+	}
+
+	OnBuilderObjectsAcquired(nullptr, InArgs._Core.Get(), InArgs._MenuBarExtenders.Get());
 }
 
 void SAVVMEditorToolkitToolbar::MakeGenericMenuEntry(const UAVVMEditorToolkitBuilderObject* BuilderObject,
                                                      TSharedPtr<FAVVMEditorToolkit_Core> Core,
-                                                     UToolMenu& OutMenu)
+                                                     TSharedPtr<FExtender> MenuBarExtenders)
 {
-	if (!IsValid(BuilderObject))
+	if (!Core.IsValid() || !ensureAlwaysMsgf(IsValid(BuilderObject),
+	                                         TEXT("Failed to retrieve valid Builder Object.")))
 	{
 		return;
 	}
 
-	FAVVMBuilderInfo OutBuilderInfo{};
-	BuilderObject->RegisterCommands(Core);
-	BuilderObject->GetBuilderInfo(OutBuilderInfo);
+	const FName MenuName = BuilderObject->GetMenuName();
+	const FName SectionName = BuilderObject->GetSectionName();
 
-	FToolMenuSection& NewSection = OutMenu.AddSection(OutBuilderInfo.SectionName);
-	NewSection.AddSubMenu(OutBuilderInfo.SubSectionName,
-	                      OutBuilderInfo.SubSection_Label,
-	                      OutBuilderInfo.SubSection_Tooltips,
-	                      FNewToolMenuDelegate::CreateStatic(&SAVVMEditorToolkitToolbar::FillNewSubMenu, OutBuilderInfo.SubSectionName, OutBuilderInfo.Commands),
-	                      true,
-	                      OutBuilderInfo.SubSection_Icon);
-}
-
-void SAVVMEditorToolkitToolbar::FillNewSubMenu(UToolMenu* InMenu, FName SectionName, TArray<TSharedPtr<FUICommandInfo>> Commands)
-{
-	if (!IsValid(InMenu))
+	UToolMenus* MenuManager = UToolMenus::Get();
+	if (!IsValid(MenuManager))
 	{
 		return;
 	}
 
-	for (const auto& Command : Commands)
+	const FToolMenuContext ToolMenuContext
 	{
-		FToolMenuSection& MenuBarSection = InMenu->FindOrAddSection(SectionName);
-		MenuBarSection.AddMenuEntry(Command);
+			Core->GetToolkitCommands(),
+			MenuBarExtenders,
+			const_cast<UAVVMEditorToolkitBuilderObject*>(BuilderObject)
+	};
+
+	if (!MenuManager->IsMenuRegistered(MenuName))
+	{
+		UToolMenu* MenuEntry = MenuManager->RegisterMenu(MenuName);
+		BuilderObject->RegisterCommands(Core);
+
+		FToolMenuSection& OptionsSection = MenuEntry->AddSection(SectionName);
+		for (const auto& UICommandInfo : BuilderObject->GetUICommands())
+		{
+			OptionsSection.AddMenuEntryWithCommandList(UICommandInfo, Core->GetToolkitCommands());
+		}
+
+		MenuManager->GenerateMenu(MenuName, ToolMenuContext);
 	}
+
+	if (!MenuBar.IsValid())
+	{
+		return;
+	}
+
+	MenuBar->AddSlot()
+	       .Padding(12.f)
+	       .AutoWidth()
+	       .AttachWidget(SNew(SComboButton)
+	       .HasDownArrow(false)
+	       .ContentPadding(FMargin(12.f))
+	       .ForegroundColor(FSlateColor::UseForeground())
+	       .ButtonStyle(FAppStyle::Get(), "SimpleButton")
+	       .ToolTipText(BuilderObject->GetSubSection_Tooltips())
+	       .MenuContent()
+	       [
+		       MenuManager->GenerateWidget(MenuName, ToolMenuContext)
+	       ]
+	       .ButtonContent()
+	       [
+		       SNew(STextBlock)
+		       .Text(BuilderObject->GetSubSection_Label())
+	       ]);
 }
 
-#undef LOCTEXT_NAMESPACE
+void SAVVMEditorToolkitToolbar::OnBuilderObjectsAcquired(const UAVVMEditorToolkitBuilderObject* BuilderContextObject,
+                                                         TSharedPtr<FAVVMEditorToolkit_Core> Core,
+                                                         TSharedPtr<FExtender> MenuBarExtenders)
+{
+	if (MenuBar.IsValid())
+	{
+		MenuBar->ClearChildren();
+	}
+	
+	for (const auto* BuilderObject : UAVVMEditorBuilderSubsystem::Static_GetAllBuilders(GEditor))
+	{
+		MakeGenericMenuEntry(BuilderObject, Core, MenuBarExtenders);
+	}
+}

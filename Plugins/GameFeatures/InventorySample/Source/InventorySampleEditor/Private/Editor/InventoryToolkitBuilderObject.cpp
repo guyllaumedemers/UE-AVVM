@@ -83,3 +83,28 @@ TArray<TSharedPtr<FUICommandInfo>> UInventoryToolkitBuilderObject::GetUICommands
 			OpenTool
 	};
 }
+
+FName UInventoryToolkitBuilderObject::GetMenuName() const
+{
+	return TEXT("Menu_InventorySample");
+}
+
+FName UInventoryToolkitBuilderObject::GetSectionName() const
+{
+	return TEXT("Section_InventorySample");
+}
+
+FName UInventoryToolkitBuilderObject::GetSubSectionName() const
+{
+	return TEXT("SubSection_InventorySampleEditor");
+}
+
+FText UInventoryToolkitBuilderObject::GetSubSection_Label() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "UInventoryToolkitBuilderObject::GetSubSection_Label", "InventorySampleEditor");
+}
+
+FText UInventoryToolkitBuilderObject::GetSubSection_Tooltips() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "UInventoryToolkitBuilderObject::GetSubSection_Tooltips", "Central hub in which designers can create/edit/delete elements from the inventory system.");
+}

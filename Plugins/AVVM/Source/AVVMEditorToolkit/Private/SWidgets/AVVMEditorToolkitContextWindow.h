@@ -23,6 +23,7 @@
 #include "Widgets/SCompoundWidget.h"
 
 class FAVVMEditorToolkit_Core;
+class SOverlay;
 class UAVVMEditorToolkitBuilderObject;
 
 /**
@@ -38,10 +39,9 @@ public:
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core);
-	
+	void OnBuilderObjectChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject) const;
+
 protected:
-	void OnBuildContextChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject);
-	
+	TSharedPtr<SOverlay> Layout{nullptr};
 	FDelegateHandle Handle{};
 };

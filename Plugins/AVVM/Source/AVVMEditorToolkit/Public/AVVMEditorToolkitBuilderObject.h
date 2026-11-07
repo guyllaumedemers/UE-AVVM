@@ -21,7 +21,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Textures/SlateIcon.h"
 #include "UObject/Object.h"
 
 #include "AVVMEditorToolkitBuilderObject.generated.h"
@@ -29,22 +28,6 @@
 class FAVVMEditorToolkit_Core;
 class FUICommandInfo;
 class SWidget;
-
-/**
- *	Class description:
- *	
- *	FAVVMBuilderInfo is a context object that encapsulate information required
- *	by Slate to extend specific Menus, SubMenus, etc...
- */
-struct AVVMEDITORTOOLKIT_API FAVVMBuilderInfo
-{
-	FName SectionName{NAME_None};
-	FName SubSectionName{NAME_None};
-	FText SubSection_Label{FText::GetEmpty()};
-	FText SubSection_Tooltips{FText::GetEmpty()};
-	FSlateIcon SubSection_Icon{};
-	TArray<TSharedPtr<FUICommandInfo>> Commands{};
-};
 
 /**
  *	Class description:
@@ -61,24 +44,15 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitBuilderObject : public UObject
 public:
 	virtual TSharedPtr<SWidget> BuildWidget() const PURE_VIRTUAL(BuildWidget, return BuilderContextWidget;);
 	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const PURE_VIRTUAL(RegisterCommands, return;);
-	void GetBuilderInfo(FAVVMBuilderInfo& OutBuilderInfo) const;
+	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const PURE_VIRTUAL(GetUICommands, return {};);
+	virtual FName GetMenuName() const PURE_VIRTUAL(GetMenuName, return NAME_None;)
+	virtual FName GetSectionName() const PURE_VIRTUAL(GetSectionName, return NAME_None;)
+	virtual FName GetSubSectionName() const PURE_VIRTUAL(GetSubSectionName, return NAME_None;)
+	virtual FText GetSubSection_Label() const PURE_VIRTUAL(GetSubSection_Label, return FText::GetEmpty();)
+	virtual FText GetSubSection_Tooltips() const PURE_VIRTUAL(GetSubSection_Tooltips, return FText::GetEmpty();)
 	void SetActiveSelf() const;
 
 protected:
-	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const PURE_VIRTUAL(GetUICommands, return {};);
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName SectionName{NAME_None};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FName SubSectionName{NAME_None};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText SubSection_Label{FText::GetEmpty()};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText SubSection_Tooltips{FText::GetEmpty()};
-
 	/** Pointer to the widget that houses the level editor's mode context window */
 	mutable TSharedPtr<SWidget> BuilderContextWidget = nullptr;
 };

@@ -101,8 +101,6 @@ public:
  *	Plugin Description :
  *
  *	AVVMEditorToolkit is a utility system that define a set of systems in Slate. This plugin will NOT be packaged with your client build!
- *
- *		TODO @gdemers do a rundown of all available utilities here as you go!
  */
 class FAVVMEditorToolkitModule : public IModuleInterface,
                                  public IHasMenuExtensibility,

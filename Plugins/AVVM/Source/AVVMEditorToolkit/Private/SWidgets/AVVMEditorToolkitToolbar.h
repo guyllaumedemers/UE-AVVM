@@ -23,10 +23,14 @@
 #include "Widgets/SCompoundWidget.h"
 
 class FAVVMEditorToolkit_Core;
+struct FAVVMBuilderInfo;
 class FExtender;
 class FUICommandInfo;
 class UAVVMEditorToolkitBuilderObject;
+class SHorizontalBox;
 class UToolMenu;
+
+DECLARE_DELEGATE_OneParam(FAVVMOnBuilderObjectChanged, const UAVVMEditorToolkitBuilderObject* BuilderObject);
 
 /**
  *	Class description:
@@ -37,13 +41,18 @@ class UToolMenu;
 class AVVMEDITORTOOLKIT_API SAVVMEditorToolkitToolbar : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SAVVMEditorToolkitToolbar){};
+	SLATE_BEGIN_ARGS(SAVVMEditorToolkitToolbar){}
+	SLATE_EVENT(FAVVMOnBuilderObjectChanged, OnBuilderObjectChanged)
+	SLATE_ATTRIBUTE(TSharedPtr<FAVVMEditorToolkit_Core>, Core)
+	SLATE_ATTRIBUTE(TSharedPtr<FExtender>, MenuBarExtenders)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-	void Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
 
 protected:
-	static void MakeGenericMenuEntry(const UAVVMEditorToolkitBuilderObject* BuilderObject, TSharedPtr<FAVVMEditorToolkit_Core> Core, UToolMenu& OutMenu);
-	static void FillNewSubMenu(UToolMenu* InMenu, FName SectionName, TArray<TSharedPtr<FUICommandInfo>> Commands);
+	void MakeGenericMenuEntry(const UAVVMEditorToolkitBuilderObject* BuilderObject, TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
+	void OnBuilderObjectsAcquired(const UAVVMEditorToolkitBuilderObject* BuilderContextObject, TSharedPtr<FAVVMEditorToolkit_Core> Core, TSharedPtr<FExtender> MenuBarExtenders);
+
+	TSharedPtr<SHorizontalBox> MenuBar{nullptr};
+	FDelegateHandle Handle{};
 };

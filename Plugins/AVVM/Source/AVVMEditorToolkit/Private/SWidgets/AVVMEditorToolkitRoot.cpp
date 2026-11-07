@@ -36,24 +36,24 @@ void SAVVMEditorToolkitRoot::Construct(const FArguments& InArgs)
 			.Padding(12.f)
 			.AutoHeight()
 			[
-				SAssignNew(Toolbar, SAVVMEditorToolkitToolbar)
+				SNew(SAVVMEditorToolkitToolbar)
+				.OnBuilderObjectChanged(this, &SAVVMEditorToolkitRoot::OnBuilderObjectChanged)
+				.MenuBarExtenders(InArgs._MenuBarExtenders)
+				.Core(InArgs._Core)
 			]
 			+ SVerticalBox::Slot()
-			.Padding(12.f)
 			.FillContentHeight(1.f)
 			[
 				SAssignNew(WindowContext, SAVVMEditorToolkitContextWindow)
 			]
 		]
 	];
+}
 
-	if (ensureAlwaysMsgf(Toolbar.IsValid(), TEXT("Invalid Toolbar.")))
+void SAVVMEditorToolkitRoot::OnBuilderObjectChanged(const UAVVMEditorToolkitBuilderObject* BuilderObject) const
+{
+	if (WindowContext.IsValid())
 	{
-		Toolbar->Setup(InArgs._Core, InArgs._MenuBarExtenders);
-	}
-
-	if (ensureAlwaysMsgf(WindowContext.IsValid(), TEXT("Invalid Window Context.")))
-	{
-		WindowContext->Setup(InArgs._Core);
+		WindowContext->OnBuilderObjectChanged(BuilderObject);
 	}
 }

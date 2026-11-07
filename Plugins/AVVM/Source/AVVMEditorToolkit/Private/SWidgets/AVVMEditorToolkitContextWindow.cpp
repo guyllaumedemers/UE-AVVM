@@ -22,24 +22,26 @@
 #include "AVVMEditorBuilderSubsystem.h"
 #include "AVVMEditorToolkitBuilderObject.h"
 #include "Editor.h"
+#include "Widgets/SWidget.h"
 
 void SAVVMEditorToolkitContextWindow::Construct(const FArguments& InArgs)
 {
-}
+	ChildSlot
+	[
+		SAssignNew(Layout, SOverlay)
+	];
 
-void SAVVMEditorToolkitContextWindow::Setup(TSharedPtr<FAVVMEditorToolkit_Core> Core)
-{
 	if (!Handle.IsValid())
 	{
-		const auto Callback = FOnBuildContextChangedDelegate::FDelegate::CreateRaw(this, &SAVVMEditorToolkitContextWindow::OnBuildContextChanged);
+		const auto Callback = FOnBuildContextChangedDelegate::FDelegate::CreateRaw(this, &SAVVMEditorToolkitContextWindow::OnBuilderObjectChanged);
 		Handle = UAVVMEditorBuilderSubsystem::Static_CallOrRegisterOnBuildContextChanged(GEditor, Callback);
 	}
 
 	const UAVVMEditorToolkitBuilderObject* BuilderObject = UAVVMEditorBuilderSubsystem::Static_GetActiveBuilder(GEditor);
-	OnBuildContextChanged(BuilderObject);
+	OnBuilderObjectChanged(BuilderObject);
 }
 
-void SAVVMEditorToolkitContextWindow::OnBuildContextChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject)
+void SAVVMEditorToolkitContextWindow::OnBuilderObjectChanged(const UAVVMEditorToolkitBuilderObject* BuilderContextObject) const
 {
 	if (!IsValid(BuilderContextObject))
 	{
@@ -47,17 +49,9 @@ void SAVVMEditorToolkitContextWindow::OnBuildContextChanged(const UAVVMEditorToo
 	}
 
 	TSharedPtr<SWidget> Widget = BuilderContextObject->BuildWidget();
-	if (!Widget.IsValid())
+	if (Widget.IsValid() && ensureAlwaysMsgf(Layout.IsValid(),
+	                                         TEXT("Failed to access layout for update.")))
 	{
-		return;
+		Layout->AddSlot().AttachWidget(Widget->AsShared());
 	}
-
-	ChildSlot
-	[
-		SNew(SOverlay)
-		+ SOverlay::Slot()
-		[
-			Widget->AsShared()
-		]
-	];
 }

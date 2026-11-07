@@ -26,7 +26,7 @@
 class FAVVMEditorToolkit_Core;
 class FExtender;
 class SAVVMEditorToolkitContextWindow;
-class SAVVMEditorToolkitToolbar;
+class UAVVMEditorToolkitBuilderObject;
 
 /**
  *	Class description:
@@ -43,8 +43,8 @@ public:
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
-	
-protected:
+
+private:
+	void OnBuilderObjectChanged(const UAVVMEditorToolkitBuilderObject* BuilderObject) const;
 	TSharedPtr<SAVVMEditorToolkitContextWindow> WindowContext{nullptr};
-	TSharedPtr<SAVVMEditorToolkitToolbar> Toolbar{nullptr};
 };
