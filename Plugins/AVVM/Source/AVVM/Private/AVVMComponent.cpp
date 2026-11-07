@@ -97,7 +97,10 @@ void UAVVMComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	for (TObjectPtr<UAVVMPresenter>& Presenter : TransientPresenters)
 	{
-		Presenter->SafeEndPlay();
+		if (IsValid(Presenter))
+		{
+			Presenter->SafeEndPlay();
+		}
 	}
 
 	TransientPresenters.Empty();

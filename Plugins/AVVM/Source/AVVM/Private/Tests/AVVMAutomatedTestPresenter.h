@@ -50,4 +50,7 @@ class AVVM_API UAVVMAutomatedTestPresenter : public UAVVMPresenter
 public:
 	virtual TSubclassOf<UMVVMViewModelBase> GetViewModelClass() const override;
 	virtual AActor* GetOuterKey() const override;
+	
+	virtual void StartPresenting() override;
+	virtual void StopPresenting() override;
 };

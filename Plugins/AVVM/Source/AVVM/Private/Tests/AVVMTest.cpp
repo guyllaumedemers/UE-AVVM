@@ -43,42 +43,44 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMNotificationSubsystemTest, "AutomatedTest.C
 bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
-	FTestWorldWrapper WorldWrapper;
-	WorldWrapper.CreateTestWorld(EWorldType::Game);
-	UWorld* World = WorldWrapper.GetTestWorld();
-	UTEST_NOT_NULL("UWorld.", World)
+	auto TestWorld = MakeShared<FTestWorldWrapper>();
+	TestWorld->CreateTestWorld(EWorldType::Game);
+	TestWorld->BeginPlayInTestWorld();
+
+	UWorld* ProxyWorld = TestWorld->GetTestWorld();
+	TestNotNull("UWorld.", ProxyWorld);
 
 	// @gdemers create test actors.
 	TArray<AAVVMAutomatedTestActor*> TestActors;
-	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
-	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
+	TestActors.Add(ProxyWorld->SpawnActor<AAVVMAutomatedTestActor>());
+	TestActors.Add(ProxyWorld->SpawnActor<AAVVMAutomatedTestActor>());
 
 	// @gdemers scoped instance.
 	FScopedCounterNotify ScopedInstance(TestActors.Num());
 
 	for (auto* TestActor : TestActors)
 	{
-		FAVVMObserverContextArgs ObserverContextArgs;
-		ObserverContextArgs.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
-
 		// Restore initialization state
 		TestActor->PreInitializeComponents();
 		TestActor->InitializeComponents();
 		TestActor->PostInitializeComponents();
 		TestActor->DispatchBeginPlay();
-		
+
+		FAVVMObserverContextArgs ObserverContextArgs;
+		ObserverContextArgs.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
+
 		TestActor->GetSetDelegate(&ScopedInstance, ObserverContextArgs.Callback);
 		UAVVMNotificationSubsystem::Static_RegisterObserver(TestActor, ObserverContextArgs);
 	}
 
 	// @gdemers test register.
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Registration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 1)
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Registration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), 2)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Registration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(ProxyWorld), 1)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Registration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(ProxyWorld, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), 2)
 
 	FAVVMNotificationContextArgs NotifierContextArgs_WithoutTarget;
 	NotifierContextArgs_WithoutTarget.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
 	NotifierContextArgs_WithoutTarget.Payload = FAVVMNotificationPayload::Empty;
-	UAVVMNotificationSubsystem::Static_BroadcastChannel(World, NotifierContextArgs_WithoutTarget);
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(ProxyWorld, NotifierContextArgs_WithoutTarget);
 
 	// @gdemers test broadcast.
 	UTEST_EQUAL("FScopedCounterNotify Count Changed {Post-generic notify}.", ScopedInstance.GetCount(), 0)
@@ -89,7 +91,7 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	NotifierContextArgs_WithTarget.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
 	NotifierContextArgs_WithTarget.Payload = FAVVMNotificationPayload::Empty;
 	NotifierContextArgs_WithTarget.Target = TestActors[0];
-	UAVVMNotificationSubsystem::Static_BroadcastChannel(World, NotifierContextArgs_WithTarget);
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(ProxyWorld, NotifierContextArgs_WithTarget);
 
 	// @gdemers test broadcast.
 	UTEST_EQUAL("FScopedCounterNotify Count {Post-targeted notify}.", ScopedInstance.GetCount(), TestActors.Num() - 1)
@@ -99,14 +101,14 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 		FAVVMObserverContextArgs ObserverContextArgs;
 		ObserverContextArgs.ChannelTag = TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG;
 		UAVVMNotificationSubsystem::Static_UnregisterObserver(TestActor, ObserverContextArgs);
-		TestActor->RouteEndPlay(EEndPlayReason::Destroyed);
+		TestActor->RouteEndPlay(EEndPlayReason::RemovedFromWorld);
 	}
 
 	// @gdemers test unregister.
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(World), 0)
-	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(World, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), INDEX_NONE)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers> Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelsCount(ProxyWorld), 0)
+	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(ProxyWorld, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), INDEX_NONE)
 
-	World->DestroyWorld(true);
+	TestWorld->EndPlayInTestWorld();
 #endif
 	return true;
 }
@@ -121,41 +123,50 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMSubsystemTest, "AutomatedTest.CustomGroup.A
 bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 {
 #if WITH_AUTOMATION_TESTS
-	FTestWorldWrapper WorldWrapper;
-	WorldWrapper.CreateTestWorld(EWorldType::Game);
-	UWorld* World = WorldWrapper.GetTestWorld();
-	UTEST_NOT_NULL("UWorld.", World)
+	auto TestWorld = MakeShared<FTestWorldWrapper>();
+	TestWorld->CreateTestWorld(EWorldType::Game);
+	TestWorld->BeginPlayInTestWorld();
+
+	UWorld* ProxyWorld = TestWorld->GetTestWorld();
+	TestNotNull("UWorld.", ProxyWorld);
 
 	// @gdemers create test actors.
 	TArray<AAVVMAutomatedTestActor*> TestActors;
-	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
-	TestActors.Add(World->SpawnActor<AAVVMAutomatedTestActor>());
+	TestActors.Add(ProxyWorld->SpawnActor<AAVVMAutomatedTestActor>());
+	TestActors.Add(ProxyWorld->SpawnActor<AAVVMAutomatedTestActor>());
 
 	for (auto* TestActor : TestActors)
 	{
+		// Restore initialization state
+		TestActor->PreInitializeComponents();
+		TestActor->InitializeComponents();
+		TestActor->PostInitializeComponents();
+		TestActor->DispatchBeginPlay();
+
 		FAVVMPresenterContextArgs PresenterContextArgs;
-		PresenterContextArgs.WorldContext = World;
+		PresenterContextArgs.WorldContext = ProxyWorld;
 		PresenterContextArgs.Presenter = UAVVMAutomatedTestUtils::GetSetPresenter(UAVVMAutomatedTestPresenter::StaticClass(), TestActor);
 		UAVVMSubsystem::Static_RegisterPresenter(PresenterContextArgs);
 	}
 
 	// @gdemers test register.
-	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Registration}.", UAVVMSubsystem::Static_GetActorCount(World), 2)
-	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Registration}.", UAVVMSubsystem::Static_GetPresentersCount(World), 2)
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Registration}.", UAVVMSubsystem::Static_GetActorCount(ProxyWorld), 2)
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Registration}.", UAVVMSubsystem::Static_GetPresentersCount(ProxyWorld), 2)
 
 	for (auto* TestActor : TestActors)
 	{
 		FAVVMPresenterContextArgs PresenterContextArgs;
-		PresenterContextArgs.WorldContext = World;
+		PresenterContextArgs.WorldContext = ProxyWorld;
 		PresenterContextArgs.Presenter = UAVVMAutomatedTestUtils::GetSetPresenter(UAVVMAutomatedTestPresenter::StaticClass(), TestActor);
 		UAVVMSubsystem::Static_UnregisterPresenter(PresenterContextArgs);
+		TestActor->RouteEndPlay(EEndPlayReason::RemovedFromWorld);
 	}
 
 	// @gdemers test unregister.
-	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetActorCount(World), 0)
-	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetPresentersCount(World), 0)
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP> Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetActorCount(ProxyWorld), 0)
+	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetPresentersCount(ProxyWorld), 0)
 
-	World->DestroyWorld(true);
+	TestWorld->EndPlayInTestWorld();
 #endif
 	return true;
 }

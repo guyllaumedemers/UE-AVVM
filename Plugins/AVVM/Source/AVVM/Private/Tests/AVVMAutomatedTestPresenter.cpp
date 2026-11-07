@@ -20,6 +20,8 @@
 #include "AVVMAutomatedTestPresenter.h"
 
 #include "AVVMAutomatedTestActor.h"
+#include "AVVMLogger.h"
+#include "AVVMModule.h"
 
 TSubclassOf<UMVVMViewModelBase> UAVVMAutomatedTestPresenter::GetViewModelClass() const
 {
@@ -29,4 +31,22 @@ TSubclassOf<UMVVMViewModelBase> UAVVMAutomatedTestPresenter::GetViewModelClass()
 AActor* UAVVMAutomatedTestPresenter::GetOuterKey() const
 {
 	return GetTypedOuter<AAVVMAutomatedTestActor>();
+}
+
+void UAVVMAutomatedTestPresenter::StartPresenting()
+{
+	AVVM_LOGGER_LOG(LogUI,
+	                GetTypedOuter<AActor>(),
+	                this,
+	                TEXT("Presenting %s."),
+	                *GetNameSafe(UAVVMPresenter::StaticClass()));
+}
+
+void UAVVMAutomatedTestPresenter::StopPresenting()
+{
+	AVVM_LOGGER_LOG(LogUI,
+	                GetTypedOuter<AActor>(),
+	                this,
+	                TEXT("Collapsing %s."),
+	                *GetNameSafe(UAVVMPresenter::StaticClass()));
 }
