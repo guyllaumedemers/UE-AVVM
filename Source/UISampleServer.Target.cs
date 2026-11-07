@@ -27,10 +27,10 @@ public class UISampleServerTarget : TargetRules
 	{
 		Type = TargetType.Server;
 		
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
-		DefaultBuildSettings = BuildSettingsVersion.V6;
-		CppStandardEngine = CppStandardVersion.Cpp20;
-		CppStandard = CppStandardVersion.Cpp20;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
+		CppStandardEngine = CppStandardVersion.Latest;
+		CppStandard = CppStandardVersion.Latest;
 		BuildEnvironment = TargetBuildEnvironment.Unique;
 		
 		//StaticAnalyzer = StaticAnalyzer.PVSStudio;

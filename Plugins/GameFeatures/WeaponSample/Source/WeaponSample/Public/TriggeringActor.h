@@ -30,11 +30,11 @@
 #include "AVVMModularActor.h"
 #include "AVVMSocketTargetingHelper.h"
 #include "GameplayAbilitySpecHandle.h"
-#include "InstancedStruct.h"
 #include "Ability/AVVMAttributeSet.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "GameFramework/Actor.h"
 #include "Resources/AVVMResourceProvider.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "TriggeringActor.generated.h"
 

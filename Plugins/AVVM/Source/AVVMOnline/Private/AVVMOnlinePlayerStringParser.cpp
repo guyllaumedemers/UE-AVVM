@@ -368,7 +368,7 @@ void UAVVMOnlinePlayerStringParser::ToString(const FAVVMPlayerPreset& NewPlayerP
 	{
 		TSharedPtr<FJsonObject> KVPJsonObject = MakeShareable(new FJsonObject);
 		KVPJsonObject->SetStringField(TEXT("SlotTag"), SlotTag.ToString());
-		KVPJsonObject->SetNumberField("ItemId", ItemId);
+		KVPJsonObject->SetNumberField(TEXT("ItemId"), ItemId);
 		EquippedItems.Add(MakeShareable(new FJsonValueObject(MoveTemp(KVPJsonObject))));
 	}
 

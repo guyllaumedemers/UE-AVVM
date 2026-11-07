@@ -25,11 +25,11 @@
 #include "AVVMSocketTargetingHelper.h"
 #include "DataRegistryId.h"
 #include "GameplayTagContainer.h"
-#include "InstancedStruct.h"
 #include "ModularCharacter.h"
 #include "Backend/AVVMDataResolverHelper.h"
 #include "Data/AVVMActorPayload.h"
 #include "Resources/AVVMResourceProvider.h"
+#include "StructUtils/InstancedStruct.h"
 
 #include "AVVMCharacter.generated.h"
 
