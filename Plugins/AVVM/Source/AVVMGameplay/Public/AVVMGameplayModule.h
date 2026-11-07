@@ -61,8 +61,6 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	static UDataRegistry* GetSetAutomatedTestDataRegistry();
-
 	static AVVMGAMEPLAY_API IConsoleVariable* GetCVarEnableOverrideTickSchedulerRule();
 	static AVVMGAMEPLAY_API IConsoleVariable* GetCVarOverrideTickSchedulerJobAllotment();
 	static AVVMGAMEPLAY_API IConsoleVariable* GetCVarOverrideTickSchedulerTickRate();

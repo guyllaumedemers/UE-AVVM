@@ -142,18 +142,6 @@ void FAVVMGameplayModule::ShutdownModule()
 	}
 }
 
-UDataRegistry* FAVVMGameplayModule::GetSetAutomatedTestDataRegistry()
-{
-	static TStrongObjectPtr<UDataRegistry> AutomatedTestDataRegistry = nullptr;
-	if (!AutomatedTestDataRegistry.IsValid())
-	{
-		// TODO @gdemers require fallback. we should always have our test case available,
-		// else we should create them.
-	}
-
-	return AutomatedTestDataRegistry.Get();
-}
-
 IConsoleVariable* FAVVMGameplayModule::GetCVarEnableOverrideTickSchedulerRule()
 {
 	return CEnableOverrideTickSchedulerRule->AsVariable();
