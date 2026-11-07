@@ -251,6 +251,8 @@ void FAVVMImGuiModule::ClearInputHandler()
 		Target->SafeEnd();
 	}
 
+	InputHandler.Reset();
+
 	const bool bIsAvailable = FImGuiModule::IsAvailable();
 	if (bIsAvailable)
 	{

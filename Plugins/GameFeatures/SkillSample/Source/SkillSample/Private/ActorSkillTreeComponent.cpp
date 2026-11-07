@@ -106,8 +106,11 @@ void UActorSkillTreeComponent::GetLifetimeReplicatedProps(TArray<class FLifetime
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
-	Params.Condition = COND_AutonomousOnly;
 
+	// @gdemers WARNING : Be mindful of replication COND_ here, the UActorSkillTreeComponent
+	// may be referenced by actors owned by a Character, or actor owned by a character, but this parent may also rebind to a different outer
+	// during the initialization phase, creating uses with the replication system.
+	// Better leave replication COND_ to default.
 	DOREPLIFETIME_WITH_PARAMS_FAST(UActorSkillTreeComponent, SkillTree, Params);
 }
 
@@ -152,6 +155,7 @@ void UActorSkillTreeComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
+	SkillTree.MarkArrayDirty();
 	SkillTree.SkillTreeNodeObjects.Reset();
 	SkillTreeNodeHandleSystem.Reset();
 	PrivateSkillTreeNodeIds.Reset();
@@ -206,8 +210,8 @@ void UActorSkillTreeComponent::RequestSkillTree(const AActor* Outer)
 		return;
 	}
 
-	SkillTree.SkillTreeNodeObjects.Reset();
 	SkillTree.MarkArrayDirty();
+	SkillTree.SkillTreeNodeObjects.Reset();
 
 	ESkillTreeSrcType OutSrcType = ESkillTreeSrcType::None;
 	const bool bIsValid = USkillTreeUtils::GetOuterSourceType(Outer, OutSrcType);
