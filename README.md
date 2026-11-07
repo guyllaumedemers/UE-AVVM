@@ -1,6 +1,6 @@
 # UE-AVVM (Framework)
 
-[![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7%20%2B-blue?logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
+[![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.8.4%20%2B-blue?logo=unrealengine&logoColor=white)](https://www.unrealengine.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-PC%20%20%7C%20Console-lightgrey.svg)]()
 [![GitHub issues](https://img.shields.io/github/issues/guyllaumedemers/UE-AVVM?style=flat-square)](https://github.com/guyllaumedemers/UE-AVVM/issues)
