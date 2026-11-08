@@ -35,7 +35,6 @@ class UItemDefinitionDataAsset;
 class SAVVMEditorToolkitDataTablePicker;
 class SAVVMEditorToolkitDataVisualizer;
 class SAVVMEditorToolkitOutputPathPicker;
-class SCheckBoxList;
 
 /**
  *	Class description:
@@ -59,12 +58,10 @@ public:
 private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
-	static const TArray<FName>& GetAssetTypeToDefaultGenerate();
 	static const TArray<FName>& GetItemTypes();
 	// BEGIN - @gdemers creation mode api
 	bool IsEnabled_OnItemTypeChanged() const;
 	bool IsEnabled_GenerateButton() const;
-	void OnCheckBoxStateChanged(int32 Index);
 	bool OnItemTypeChanged(const FName NewItemType, const int32 NewSelectedIndex);
 	void OnDataTableSelectionChanged_ActorIdentifiers(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	void OnDataTableSelectionChanged_ActorDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
@@ -97,8 +94,6 @@ private:
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorDefinitions{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorUIDefinitions{nullptr};
 	TSharedPtr<SAVVMEditorToolkitDataVisualizer> EditMode_DataVisualizer{nullptr};
-	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
-	TArray<bool> bCheckBoxStates{};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ItemDefinitions{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorIdentifiers{nullptr};
 	TWeakObjectPtr<UDataTable> SelectedDataTable_ActorDefinitions{nullptr};

@@ -54,6 +54,7 @@ public class AVVMEditorToolkit : ModuleRules
 				"InputCore",
 				"Projects",
 				"ToolMenus",
+				"ToolWidgets",
 				"TranslationEditor",
 				"WorkspaceMenuStructure",
 			}

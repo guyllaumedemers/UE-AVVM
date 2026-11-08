@@ -25,6 +25,7 @@
 #include "ClassViewerModule.h"
 #include "DataRegistry.h"
 #include "DataTableEditorUtils.h"
+#include "SCheckBoxList.h"
 #include "Data/AVVMDataRegistry.h"
 #include "Engine/DataTable.h"
 #include "Factories/DataAssetFactory.h"
@@ -36,6 +37,23 @@
 TSharedPtr<SWidget> UAVVMEditorToolkitDataEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
 {
 	OwningParent = Params.OwningParent;
+
+	SAssignNew(CheckBoxList, SCheckBoxList)
+	.IncludeGlobalCheckBoxInHeaderRow(false)
+	.OnItemCheckStateChanged_UObject(this, &UAVVMEditorToolkitDataEditObject::OnCheckBoxStateChanged)
+	.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "ChecklistTooltip", "During the creation process, dependent assets will be created for the type selected. Unless unchecked!"))
+	.ItemHeaderLabel(NSLOCTEXT("AVVMEditorToolkit", "ChecklistHeader", "Generate Dependent Assets"));
+
+	if (CheckBoxList.IsValid())
+	{
+		for (const auto& Element : GetAssetTypeToDefaultGenerate())
+		{
+			CheckBoxList->AddItem(FText::FromName(Element), true);
+		}
+
+		bCheckBoxStates = CheckBoxList->GetValues();
+	}
+
 	return nullptr;
 }
 
@@ -80,6 +98,25 @@ void UAVVMEditorToolkitDataEditObject::OnWindowClosed(const TSharedRef<SWindow>&
 	}
 
 	OnPostWindowClosed();
+}
+
+const TArray<FName>& UAVVMEditorToolkitDataEditObject::GetAssetTypeToDefaultGenerate()
+{
+	static TArray<FName> Result = {
+			GetFNameSafe(UDataRegistry::StaticClass()),
+			GetFNameSafe(UDataTable::StaticClass())
+	};
+
+	return Result;
+}
+
+void UAVVMEditorToolkitDataEditObject::OnCheckBoxStateChanged(int32 Index)
+{
+	if (bCheckBoxStates.IsValidIndex(Index))
+	{
+		bool& Value = bCheckBoxStates[Index];
+		Value = !Value;
+	}
 }
 
 void SAVVMEditorToolkitDataEditor::Construct(const FArguments& InArgs)

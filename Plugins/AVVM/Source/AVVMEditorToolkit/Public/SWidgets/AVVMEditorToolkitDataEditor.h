@@ -32,6 +32,7 @@
 struct FDataRegistryType;
 class UDataRegistry;
 class UDataTable;
+class SCheckBoxList;
 class SWindow;
 
 /**
@@ -97,8 +98,14 @@ protected:
 	void OnWindowClosed(const TSharedRef<SWindow>& PendingCloseWindow);
 	virtual void OnPostWindowClosed() const PURE_VIRTUAL(OnPostWindowClosed, return;);
 	
+	virtual const TArray<FName>& GetAssetTypeToDefaultGenerate();
+	void OnCheckBoxStateChanged(int32 Index);
+	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
 	TSharedPtr<SWidget> OwningParent{nullptr};
+	
+	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
+	TArray<bool> bCheckBoxStates{};
 };
 
 /**

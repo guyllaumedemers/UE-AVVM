@@ -21,9 +21,30 @@
 
 #include "CoreMinimal.h"
 
+#include "GameplayTagContainer.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
 #include "InventoryProviderDataEditObject.generated.h"
+
+class SCheckBoxList;
+class UAVVMTagArrayBuilder;
+class UItemObject;
+
+/**
+ *	Class description:
+ *	
+ *	UItemArrayBuilder is a wrapper type for exposing Array collection of items to the editor. Using UObject derive type,
+ *	we can use the FPropertyEditor, and the underline SExpandableArea + FDetailArrayBuilder to handle collection change actions such as Add/Remove.
+ */
+UCLASS(NotBlueprintable)
+class INVENTORYSAMPLEEDITOR_API UItemArrayBuilder : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<TSoftClassPtr<UItemObject>> DefaultItems{};
+};
 
 /**
  *	Class description:
@@ -41,6 +62,28 @@ public:
 
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
+
+private:
+	TSharedPtr<SWidget> GetCreationMode();
+	TSharedPtr<SWidget> GetEditMode();
+	// BEGIN - @gdemers creation mode api
+	bool IsEnabled_OnActorClassChanged() const;
+	bool IsEnabled_OnSlotTagRequirementsChanged() const;
+	bool IsEnabled_GenerateButton() const;
+	const UClass* OnGetClass() const;
+	void OnSetClass(const UClass* NewSelectedClass);
+	ECheckBoxState GetOnCheckboxState() const;
+	void OnCheckBoxStateChanged(ECheckBoxState NewState);
+	void OnTagComboChanged(const FGameplayTagContainer& TagContainer);
+	FGameplayTagContainer GetTagContainer() const;
+	void OnTagCleared();
+	FReply OnButtonClick_GenerateItem();
+	// END
+
+	FGameplayTagContainer LoadoutSlots{FGameplayTagContainer::EmptyContainer};
+	TStrongObjectPtr<UItemArrayBuilder> DefaultInventory{nullptr};
+	TWeakObjectPtr<const UClass> ActorClass{nullptr};
+	ECheckBoxState CheckboxState{ECheckBoxState::Unchecked};
 };
 
 /**

@@ -90,22 +90,6 @@ FText UItemDataEditObject::GetModalTitle_OnClosure() const
 
 TSharedPtr<SWidget> UItemDataEditObject::GetCreationMode()
 {
-	SAssignNew(CheckBoxList, SCheckBoxList)
-	.IncludeGlobalCheckBoxInHeaderRow(false)
-	.OnItemCheckStateChanged_UObject(this, &UItemDataEditObject::OnCheckBoxStateChanged)
-	.ToolTipText(NSLOCTEXT("AVVMEditorToolkit", "ChecklistTooltip", "During the creation process, dependent assets will be created for the type selected. Unless unchecked!"))
-	.ItemHeaderLabel(NSLOCTEXT("AVVMEditorToolkit", "ChecklistHeader", "Generate Dependent Assets"));
-
-	if (CheckBoxList.IsValid())
-	{
-		for (const auto& Element : GetAssetTypeToDefaultGenerate())
-		{
-			CheckBoxList->AddItem(FText::FromName(Element), true);
-		}
-
-		bCheckBoxStates = CheckBoxList->GetValues();
-	}
-
 	return SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
@@ -241,16 +225,6 @@ TSharedPtr<SWidget> UItemDataEditObject::GetEditMode()
 		];
 }
 
-const TArray<FName>& UItemDataEditObject::GetAssetTypeToDefaultGenerate()
-{
-	static TArray<FName> Result = {
-			GetFNameSafe(UDataRegistry::StaticClass()),
-			GetFNameSafe(UDataTable::StaticClass())
-	};
-
-	return Result;
-}
-
 const TArray<FName>& UItemDataEditObject::GetItemTypes()
 {
 	static TArray<FName> Result = {
@@ -270,15 +244,6 @@ bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
 bool UItemDataEditObject::IsEnabled_GenerateButton() const
 {
 	return SelectedItemType.IsValid() && !ItemRowName.IsEmpty();
-}
-
-void UItemDataEditObject::OnCheckBoxStateChanged(int32 Index)
-{
-	if (bCheckBoxStates.IsValidIndex(Index))
-	{
-		bool& Value = bCheckBoxStates[Index];
-		Value = !Value;
-	}
 }
 
 bool UItemDataEditObject::OnItemTypeChanged(const FName NewItemType,

@@ -36,6 +36,7 @@ public class InventorySampleEditor : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"GameplayTags",
 				"Slate",
 				"SlateCore",
 			}
@@ -49,7 +50,9 @@ public class InventorySampleEditor : ModuleRules
 				"AVVMToolkit",
 				"DataRegistry",
 				"EditorScriptingUtilities",
+				"GameplayTagsEditor",
 				"InventorySample",
+				"PropertyEditor",
 				"ToolWidgets",
 				"UnrealEd",
 			}
