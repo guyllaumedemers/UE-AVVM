@@ -23,29 +23,6 @@
 #include "InventoryToolkitWindow.h"
 #include "Framework/Commands/UICommandInfo.h"
 
-/**
- *	@gdemers Private namespace for reusable api specific to the AVVM DataTableEditor toolkit.
- *	
- *	Note : Inline namespace expose the internal content to the parent scope, allowing me
- *	to declare a name for accessing the nested content without affecting linkage properties.
- */
-inline namespace NS_InventoryDataTableEditor
-{
-	// @gdemers anonymous namespace provide support for implicit internal linkage (no static required),
-	// and expose to the parent scope.
-	namespace
-	{
-		void OpenTool(const UInventoryToolkitBuilderObject* BuilderContextObject)
-		{
-			if (IsValid(BuilderContextObject))
-			{
-				UE_LOG(LogTemp, Log, TEXT("NS_AVVMDataTableEditor::OpenTool"));
-				BuilderContextObject->SetActiveSelf();
-			}
-		}
-	}
-}
-
 TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget() const
 {
 	if (!BuilderContextWidget.IsValid())
@@ -54,26 +31,6 @@ TSharedPtr<SWidget> UInventoryToolkitBuilderObject::BuildWidget() const
 	}
 
 	return BuilderContextWidget;
-}
-
-void UInventoryToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const
-{
-	if (OpenTool.IsValid())
-	{
-		return;
-	}
-
-	BIND_NEW_BUTTON_COMMAND(OpenTool,
-	                        FName("InventorySample_OpenTool"),
-	                        NSLOCTEXT("AVVMEditorToolkit", "Open InventorySample", "Open InventorySample"),
-	                        NSLOCTEXT("AVVMEditorToolkit", "Lorem Ipsum", "Lorem Ipsum"));
-
-	if (Core.IsValid())
-	{
-		Core->GetToolkitCommands()->MapAction(OpenTool,
-		                                      FExecuteAction::CreateStatic(&NS_InventoryDataTableEditor::OpenTool, this),
-		                                      FCanExecuteAction{});
-	}
 }
 
 TArray<TSharedPtr<FUICommandInfo>> UInventoryToolkitBuilderObject::GetUICommands() const
@@ -107,4 +64,19 @@ FText UInventoryToolkitBuilderObject::GetSubSection_Label() const
 FText UInventoryToolkitBuilderObject::GetSubSection_Tooltips() const
 {
 	return NSLOCTEXT("AVVMEditorToolkit", "UInventoryToolkitBuilderObject::GetSubSection_Tooltips", "Central hub in which designers can create/edit/delete elements from the inventory system.");
+}
+
+FName UInventoryToolkitBuilderObject::GetOpenCommandName() const
+{
+	return TEXT("Open_InventorySample");
+}
+
+FText UInventoryToolkitBuilderObject::GetOpenCommand_Label() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "UInventoryToolkitBuilderObject::GetOpenCommand_Label", "Open InventorySample");
+}
+
+FText UInventoryToolkitBuilderObject::GetOpenCommand_Tooltips() const
+{
+	return NSLOCTEXT("AVVMEditorToolkit", "UInventoryToolkitBuilderObject::GetOpenCommand_Tooltips", "Allow opening the context tooling required for data editing asset specific to the inventory system.");
 }

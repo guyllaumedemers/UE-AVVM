@@ -20,9 +20,27 @@
 #include "AVVMEditorToolkitBuilderObject.h"
 
 #include "AVVMEditorBuilderSubsystem.h"
+#include "AVVMEditorToolkitModule.h"
 #include "Editor.h"
 
-void UAVVMEditorToolkitBuilderObject::SetActiveSelf() const
+void UAVVMEditorToolkitBuilderObject::RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const
 {
-	UAVVMEditorBuilderSubsystem::Static_SelectBuilder(GEditor, this);
+	if (OpenTool.IsValid())
+	{
+		return;
+	}
+
+	BIND_NEW_BUTTON_COMMAND(OpenTool, GetOpenCommandName(), GetOpenCommand_Label(), GetOpenCommand_Tooltips());
+
+	if (Core.IsValid())
+	{
+		Core->GetToolkitCommands()->MapAction(OpenTool,
+		                                      FExecuteAction::CreateStatic(&UAVVMEditorToolkitBuilderObjectUtils::SetBuilderObjectActive, this),
+		                                      FCanExecuteAction{});
+	}
+}
+
+void UAVVMEditorToolkitBuilderObjectUtils::SetBuilderObjectActive(const UAVVMEditorToolkitBuilderObject* BuilderObject)
+{
+	UAVVMEditorBuilderSubsystem::Static_SelectBuilder(GEditor, BuilderObject);
 }

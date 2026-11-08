@@ -27,6 +27,7 @@
 #include "ToolMenus.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/MultiBox/MultiBoxExtender.h"
+#include "Styling/ToolBarStyle.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SComboButton.h"
 
@@ -95,14 +96,12 @@ void SAVVMEditorToolkitToolbar::MakeGenericMenuEntry(const UAVVMEditorToolkitBui
 		return;
 	}
 
+	const FToolBarStyle& ToolBarStyle = FAppStyle::Get().GetWidgetStyle<FToolBarStyle>("ToolBar");
 	MenuBar->AddSlot()
-	       .Padding(12.f)
 	       .AutoWidth()
 	       .AttachWidget(SNew(SComboButton)
-	       .HasDownArrow(false)
-	       .ContentPadding(FMargin(12.f))
-	       .ForegroundColor(FSlateColor::UseForeground())
-	       .ButtonStyle(FAppStyle::Get(), "SimpleButton")
+	       .HasDownArrow(true)
+	       .ComboButtonStyle(&ToolBarStyle.ComboButtonStyle)
 	       .ToolTipText(BuilderObject->GetSubSection_Tooltips())
 	       .MenuContent()
 	       [
@@ -111,6 +110,8 @@ void SAVVMEditorToolkitToolbar::MakeGenericMenuEntry(const UAVVMEditorToolkitBui
 	       .ButtonContent()
 	       [
 		       SNew(STextBlock)
+		       .ColorAndOpacity(FSlateColor::UseForeground())
+		       .TextStyle(&ToolBarStyle.LabelStyle)
 		       .Text(BuilderObject->GetSubSection_Label())
 	       ]);
 }

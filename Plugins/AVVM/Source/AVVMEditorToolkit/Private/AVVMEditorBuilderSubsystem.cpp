@@ -119,16 +119,8 @@ void UAVVMEditorBuilderSubsystem::OnSoftObjectAcquired()
 		}
 	}
 
-	if (ToolkitBuilders.IsEmpty())
+	if (!ToolkitBuilders.IsEmpty())
 	{
-		return;
-	}
-
-	ActiveToolkitBuilder.Reset();
-	
-	ActiveToolkitBuilder = ToolkitBuilders[0];
-	if (ActiveToolkitBuilder.IsValid())
-	{
-		ActiveToolkitBuilder->SetActiveSelf();
+		UAVVMEditorToolkitBuilderObjectUtils::SetBuilderObjectActive(ToolkitBuilders[0]);
 	}
 }

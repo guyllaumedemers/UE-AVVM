@@ -40,11 +40,13 @@ class SKILLSAMPLEEDITOR_API USkillToolkitBuilderObject : public UAVVMEditorToolk
 
 public:
 	virtual TSharedPtr<SWidget> BuildWidget() const override;
-	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const override;
 	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const override;
 	virtual FName GetMenuName() const override;
 	virtual FName GetSectionName() const override;
 	virtual FName GetSubSectionName() const override;
 	virtual FText GetSubSection_Label() const override;
 	virtual FText GetSubSection_Tooltips() const override;
+	virtual FName GetOpenCommandName() const override;
+	virtual FText GetOpenCommand_Label() const override;
+	virtual FText GetOpenCommand_Tooltips() const override;
 };

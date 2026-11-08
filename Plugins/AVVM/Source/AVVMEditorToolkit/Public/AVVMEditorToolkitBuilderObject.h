@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "UObject/Object.h"
 
 #include "AVVMEditorToolkitBuilderObject.generated.h"
@@ -43,14 +44,16 @@ class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitBuilderObject : public UObject
 
 public:
 	virtual TSharedPtr<SWidget> BuildWidget() const PURE_VIRTUAL(BuildWidget, return BuilderContextWidget;);
-	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const PURE_VIRTUAL(RegisterCommands, return;);
+	virtual void RegisterCommands(TSharedPtr<FAVVMEditorToolkit_Core> Core) const;
 	virtual TArray<TSharedPtr<FUICommandInfo>> GetUICommands() const PURE_VIRTUAL(GetUICommands, return {};);
 	virtual FName GetMenuName() const PURE_VIRTUAL(GetMenuName, return NAME_None;)
 	virtual FName GetSectionName() const PURE_VIRTUAL(GetSectionName, return NAME_None;)
 	virtual FName GetSubSectionName() const PURE_VIRTUAL(GetSubSectionName, return NAME_None;)
 	virtual FText GetSubSection_Label() const PURE_VIRTUAL(GetSubSection_Label, return FText::GetEmpty();)
 	virtual FText GetSubSection_Tooltips() const PURE_VIRTUAL(GetSubSection_Tooltips, return FText::GetEmpty();)
-	void SetActiveSelf() const;
+	virtual FName GetOpenCommandName() const PURE_VIRTUAL(GetOpenCommandName, return NAME_None;)
+	virtual FText GetOpenCommand_Label() const PURE_VIRTUAL(GetOpenCommand_Label, return FText::GetEmpty();)
+	virtual FText GetOpenCommand_Tooltips() const PURE_VIRTUAL(GetOpenCommand_Tooltips, return FText::GetEmpty();)
 
 protected:
 	/** Pointer to the widget that houses the level editor's mode context window */
@@ -58,4 +61,19 @@ protected:
 	// @gdemers UICommand that execute Opening the window context
 	// for the sample editor tool impl.
 	mutable TSharedPtr<FUICommandInfo> OpenTool = nullptr;
+};
+
+/**
+ *	Class description:
+ *	
+ *	UAVVMEditorToolkitBuilderObjectUtils is a blueprint function library for reusable api specific to Editor Builder Objects.
+ */
+UCLASS()
+class AVVMEDITORTOOLKIT_API UAVVMEditorToolkitBuilderObjectUtils : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable)
+	static void SetBuilderObjectActive(const UAVVMEditorToolkitBuilderObject* BuilderObject);
 };
