@@ -55,4 +55,7 @@ public:
 protected:
 	/** Pointer to the widget that houses the level editor's mode context window */
 	mutable TSharedPtr<SWidget> BuilderContextWidget = nullptr;
+	// @gdemers UICommand that execute Opening the window context
+	// for the sample editor tool impl.
+	mutable TSharedPtr<FUICommandInfo> OpenTool = nullptr;
 };

@@ -52,6 +52,7 @@ void SAVVMEditorToolkitContextWindow::OnBuilderObjectChanged(const UAVVMEditorTo
 	if (Widget.IsValid() && ensureAlwaysMsgf(Layout.IsValid(),
 	                                         TEXT("Failed to access layout for update.")))
 	{
+		Layout->ClearChildren();
 		Layout->AddSlot().AttachWidget(Widget->AsShared());
 	}
 }

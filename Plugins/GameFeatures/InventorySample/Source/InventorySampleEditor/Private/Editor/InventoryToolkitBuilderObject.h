@@ -47,9 +47,4 @@ public:
 	virtual FName GetSubSectionName() const override;
 	virtual FText GetSubSection_Label() const override;
 	virtual FText GetSubSection_Tooltips() const override;
-
-protected:
-	// @gdemers UICommand that execute Opening the window context
-	// for the inventory sample editor tool.
-	mutable TSharedPtr<FUICommandInfo> OpenTool = nullptr;
 };
