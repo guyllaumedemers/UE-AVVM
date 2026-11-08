@@ -49,7 +49,7 @@ public class CosmeticSampleEditor : ModuleRules
 				"AVVMToolkit",
 				"DataRegistry",
 				"EditorScriptingUtilities",
-				"SkillSample",
+				"CosmeticSample",
 				"ToolWidgets",
 				"UnrealEd",
 			}
