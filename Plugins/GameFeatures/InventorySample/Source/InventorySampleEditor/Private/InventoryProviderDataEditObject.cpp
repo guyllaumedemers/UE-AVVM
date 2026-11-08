@@ -19,7 +19,6 @@
 //SOFTWARE.
 #include "InventoryProviderDataEditObject.h"
 
-#include "DataRegistry.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SCheckBoxList.h"
 #include "SGameplayTagContainerCombo.h"
@@ -149,7 +148,7 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetCreationMode()
 					[
 						SNew(STextBlock)
 						.ColorAndOpacity(FSlateColor::UseSubduedForeground())
-						.Text(NSLOCTEXT("AVVMEditorToolkit", "LoadoutSlotTags", "Can Inventory Provider equip Items in loadout?"))
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "LoadoutSlotTags", "Does Provider equip items?"))
 					]
 				]
 				+ SVerticalBox::Slot()
@@ -159,7 +158,7 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::InventoryProvider::Step4", "Step 4: Define the Loadout Slots of your Provider inventory."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::InventoryProvider::Step4", "Step 4 (Optional): Define the Loadout Slots of your Provider inventory."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -179,7 +178,7 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetCreationMode()
 					SNew(STextBlock)
 					.TextStyle(FAppStyle::Get(), "LargeText")
 					.TransformPolicy(ETextTransformPolicy::ToUpper)
-					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::InventoryProvider::Step4", "Step 4: Define the Loadout Slots of your Provider inventory."))
+					.Text(NSLOCTEXT("AVVMEditorToolkit", "Guide::InventoryProvider::Step5", "Step 5: Define the default inventory content your Provider holds on FTUE."))
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
