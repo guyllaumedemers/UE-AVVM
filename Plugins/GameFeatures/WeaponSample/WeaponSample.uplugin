@@ -1,75 +1,80 @@
 ﻿{
-  "FileVersion": 3,
-  "Version": 1,
-  "VersionName": "1.0",
-  "FriendlyName": "WeaponSample",
-  "Description": "",
-  "Category": "Game Features",
-  "CreatedBy": "@gdemers",
-  "CreatedByURL": "",
-  "DocsURL": "",
-  "MarketplaceURL": "",
-  "EnabledByDefault": false,
-  "CanContainContent": true,
-  "IsBetaVersion": false,
-  "IsExperimentalVersion": false,
-  "Installed": false,
-  "ExplicitlyLoaded": true,
-  "BuiltInInitialFeatureState": "Active",
-  "Modules": [
-    {
-      "Name": "WeaponSample",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    },
-    {
-      "Name": "WeaponSampleDebug",
-      "Type": "Runtime",
-      "LoadingPhase": "Default",
-      "TargetConfigurationDenyList": [
-        "Shipping"
-      ],
-      "TargetDenyList": [
-        "Server"
-      ]
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "AVVM",
-      "Enabled": true
-    },
-    {
-      "Name": "AVVMImGui",
-      "Enabled": true,
-      "TargetConfigurationDenyList": [
-        "Shipping"
-      ],
-      "TargetDenyList": [
-        "Server"
-      ]
-    },
-    {
-      "Name": "AVVMSlateIM",
-      "Enabled": true,
-      "TargetConfigurationDenyList": [
-        "Shipping"
-      ],
-      "TargetDenyList": [
-        "Server"
-      ]
-    },
-    {
-      "Name": "DataRegistry",
-      "Enabled": true
-    },
-    {
-      "Name": "GameplayAbilities",
-      "Enabled": true
-    },
-    {
-      "Name": "Iris",
-      "Enabled": true
-    }
-  ]
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "WeaponSample",
+	"Description": "",
+	"Category": "Game Features",
+	"CreatedBy": "@gdemers",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"ExplicitlyLoaded": true,
+	"BuiltInInitialFeatureState": "Active",
+	"Modules": [
+		{
+			"Name": "WeaponSample",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "WeaponSampleDebug",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
+		},
+		{
+			"Name": "WeaponSampleEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "AVVM",
+			"Enabled": true
+		},
+		{
+			"Name": "AVVMImGui",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
+		},
+		{
+			"Name": "AVVMSlateIM",
+			"Enabled": true,
+			"TargetConfigurationDenyList": [
+				"Shipping"
+			],
+			"TargetDenyList": [
+				"Server"
+			]
+		},
+		{
+			"Name": "DataRegistry",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "Iris",
+			"Enabled": true
+		}
+	]
 }
