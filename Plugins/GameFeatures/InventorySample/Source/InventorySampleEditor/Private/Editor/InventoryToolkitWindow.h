@@ -26,7 +26,6 @@
 
 struct FSlateBrush;
 class SAVVMEditorToolkitDataTablePicker;
-class SAVVMEditorToolkitRequiredUserInput;
 class SCheckBoxList;
 class UAVVMEditorToolkitDataEditObject;
 class UDataRegistry;
@@ -82,7 +81,6 @@ private:
 	
 	TArray<TSharedPtr<SWindow>> FloatingWindows{};
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker{nullptr};
-	TSharedPtr<SAVVMEditorToolkitRequiredUserInput> PackagePathInput{nullptr};
 	TSharedPtr<SCheckBoxList> CheckBoxList{nullptr};
 	TArray<bool> bCheckBoxStates{};
 	TWeakObjectPtr<UDataRegistry> SelectedDataRegistry{nullptr};

@@ -70,6 +70,7 @@ private:
 	static const TArray<FName>& GetActorTypes();
 	static FName GetActorType(const UClass* ActorClass);
 	// BEGIN - @gdemers creation mode api
+	bool IsEnabled_OnActorClassMissing() const;
 	bool IsEnabled_OnActorClassChanged() const;
 	bool IsEnabled_OnSlotTagRequirementsChanged() const;
 	bool IsEnabled_GenerateButton() const;
@@ -80,6 +81,7 @@ private:
 	void OnTagComboChanged(const FGameplayTagContainer& TagContainer);
 	FGameplayTagContainer GetTagContainer() const;
 	void OnTagCleared();
+	FReply OnButtonClick_GenerateActorClass();
 	FReply OnButtonClick_GenerateItem();
 	
 	bool DoesInventoryProviderAlreadyExist(const FName InventoryProviderRowName) const;

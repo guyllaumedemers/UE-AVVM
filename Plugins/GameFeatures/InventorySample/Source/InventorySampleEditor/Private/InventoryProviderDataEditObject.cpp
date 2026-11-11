@@ -20,9 +20,10 @@
 #include "InventoryProviderDataEditObject.h"
 
 #include "AVVMEditorToolkitUtils.h"
-#include "AVVMGameplayUtils.h"
+#include "ContentBrowserModule.h"
 #include "DataRegistrySubsystem.h"
 #include "DataTableEditorUtils.h"
+#include "IContentBrowserSingleton.h"
 #include "InventoryProvider.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SCheckBoxList.h"
@@ -31,9 +32,11 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/InventoryProviderTableRow.h"
+#include "Factories/BlueprintFactory.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "Misc/MessageDialog.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/SOverlay.h"
@@ -187,14 +190,29 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetCreationMode()
 				.Padding(12.f)
 				.AutoHeight()
 				[
-					SNew(SClassPropertyEntryBox)
-					.MetaClass(AActor::StaticClass())
-					.RequiredInterface(UInventoryProvider::StaticClass())
-					.IsBlueprintBaseOnly(true)
-					.AllowAbstract(false)
-					.AllowNone(true)
-					.SelectedClass_UObject(this, &UFtueInventoryProviderDataEditObject::OnGetClass)
-					.OnSetClass_UObject(this, &UFtueInventoryProviderDataEditObject::OnSetClass)
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.FillWidth(1.f)
+					[
+						SNew(SClassPropertyEntryBox)
+						.MetaClass(AActor::StaticClass())
+						.RequiredInterface(UInventoryProvider::StaticClass())
+						.IsBlueprintBaseOnly(true)
+						.AllowAbstract(false)
+						.AllowNone(true)
+						.SelectedClass_UObject(this, &UFtueInventoryProviderDataEditObject::OnGetClass)
+						.OnSetClass_UObject(this, &UFtueInventoryProviderDataEditObject::OnSetClass)
+					]
+					+ SHorizontalBox::Slot()
+					.Padding(FMargin{12.f, 0.f})
+					.AutoWidth()
+					[
+						SNew(SButton)
+						.HAlign(EHorizontalAlignment::HAlign_Center)
+						.IsEnabled_UObject(this, &UFtueInventoryProviderDataEditObject::IsEnabled_OnActorClassMissing)
+						.OnClicked_UObject(this, &UFtueInventoryProviderDataEditObject::OnButtonClick_GenerateActorClass)
+						.Text(NSLOCTEXT("AVVMEditorToolkit", "GenerateProviderClass", "Create Inventory Provider Class"))
+					]
 				]
 				+ SVerticalBox::Slot()
 				.Padding(12.f)
@@ -320,6 +338,11 @@ FName UFtueInventoryProviderDataEditObject::GetActorType(const UClass* ActorClas
 	}
 }
 
+bool UFtueInventoryProviderDataEditObject::IsEnabled_OnActorClassMissing() const
+{
+	return (false == ActorClass.IsValid());
+}
+
 bool UFtueInventoryProviderDataEditObject::IsEnabled_OnActorClassChanged() const
 {
 	return ActorClass.IsValid();
@@ -375,6 +398,41 @@ FGameplayTagContainer UFtueInventoryProviderDataEditObject::GetTagContainer() co
 void UFtueInventoryProviderDataEditObject::OnTagCleared()
 {
 	LoadoutSlots.Reset();
+}
+
+FReply UFtueInventoryProviderDataEditObject::OnButtonClick_GenerateActorClass()
+{
+	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+	{
+		return FReply::Unhandled();
+	}
+
+	auto* BlueprintFactory = NewObject<UBlueprintFactory>();
+	if (IsValid(BlueprintFactory))
+	{
+		BlueprintFactory->ParentClass = AActor::StaticClass();
+	}
+
+	// @gdemers we don't define the asset name since we are opening a context window.
+	const FString ProviderRowName = UAVVMEditorToolkitUtils::GetStandardizedName(DataTablePackagePath, TEXT("BP"), {});
+	const FString PackagePath = UAVVMEditorToolkitUtils::CreateTopLevelDirectory(DataTablePackagePath, DATA_ASSET_DIRECTORY); // Blueprint Package path, and DA should be grouped together 
+
+	auto& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	auto* NewBlueprint = Cast<UBlueprint>(AssetTools.Get().CreateAssetWithDialog(ProviderRowName, PackagePath, UBlueprint::StaticClass(), BlueprintFactory, FName("Create Inventory Provider Actor Blueprint")));
+	if (IsValid(NewBlueprint))
+	{
+		FBPInterfaceDescription ProviderInterface{};
+		ProviderInterface.Interface = UInventoryProvider::StaticClass();
+		NewBlueprint->ImplementedInterfaces.Add({MoveTemp(ProviderInterface)});
+		ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(NewBlueprint), TEXT("Failed to save Package."));
+
+		AssetTools.Get().OpenEditorForAssets({NewBlueprint});
+		return FReply::Handled();
+	}
+	else
+	{
+		return FReply::Unhandled();
+	}
 }
 
 FReply UFtueInventoryProviderDataEditObject::OnButtonClick_GenerateItem()
