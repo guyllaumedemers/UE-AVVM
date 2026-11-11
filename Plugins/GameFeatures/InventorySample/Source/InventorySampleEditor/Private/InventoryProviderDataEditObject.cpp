@@ -19,11 +19,22 @@
 //SOFTWARE.
 #include "InventoryProviderDataEditObject.h"
 
+#include "AVVMEditorToolkitUtils.h"
+#include "AVVMGameplayUtils.h"
+#include "DataRegistrySubsystem.h"
+#include "DataTableEditorUtils.h"
+#include "InventoryProvider.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SCheckBoxList.h"
 #include "SGameplayTagContainerCombo.h"
-#include "Engine/DataTable.h"
+#include "Backend/AVVMOnlineEncodingUtils.h"
+#include "Backend/AVVMOnlineInventory.h"
+#include "Data/AVVMActorIdentifierTableRow.h"
+#include "Data/InventoryProviderTableRow.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/Pawn.h"
+#include "Misc/MessageDialog.h"
 #include "Modules/ModuleManager.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Images/SImage.h"
@@ -34,6 +45,9 @@
 
 TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)
 {
+	SelectedDataTable_InventoryProviderDefinitions = Params.OutputDataTable;
+	DataTablePackagePath = Params.PackagePath;
+		
 	TSharedPtr<SWidget> Out{Super::GetDataEditContent(Params)};
 	switch (Params.CurrentMode)
 	{
@@ -48,6 +62,67 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetDataEditContent(con
 	}
 
 	return Out;
+}
+
+int32 UFtueInventoryProviderDataEditObject::GenerateActorIdentifier(const FName ActorType) const
+{
+	const TArray<FName>& ActorTypes = GetActorTypes();
+	if (!ActorTypes.Contains(ActorType))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	const UDataRegistry* ActorIdentifierRegistry = Subsystem->GetRegistryForType(GetRegistryType_ActorIdentifiers());
+	if (!IsValid(ActorIdentifierRegistry))
+	{
+		return INDEX_NONE;
+	}
+
+	TArray<const FAVVMActorIdentifierDataTableRow*> OutResults{};
+	ActorIdentifierRegistry->GetAllItems(TEXT(""), OutResults);
+	OutResults.Sort();
+
+	int32 LowerBounds{INDEX_NONE};
+	int32 UpperBounds{INDEX_NONE};
+
+	if (ActorType.IsEqual(TEXT("Playable")))
+	{
+		LowerBounds = GET_PLAYABLE_CHARACTER_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_PLAYABLE_CHARACTER_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+	else if (ActorType.IsEqual(TEXT("NPC")))
+	{
+		LowerBounds = GET_NPC_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_NPC_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+	else
+	{
+		LowerBounds = GET_WORLD_ACTOR_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_WORLD_ACTOR_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+
+	int32 NextValidId{INDEX_NONE};
+	for (const FAVVMActorIdentifierDataTableRow* Row : OutResults)
+	{
+		if ((Row != nullptr) && ((Row->UniqueId >= LowerBounds) && (Row->UniqueId < UpperBounds)) && (Row->UniqueId > NextValidId))
+		{
+			NextValidId = Row->UniqueId;
+		}
+	}
+
+	if (!ensureAlwaysMsgf(NextValidId != UpperBounds,
+	                      TEXT("Failed to generate new unique Id. We have reach our limit. Reconfigure your bit encoding to int64, or remove deprecated entries.")))
+	{
+		return INDEX_NONE;
+	}
+
+	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
 }
 
 FText UFtueInventoryProviderDataEditObject::GetModalMessage_OnClosure() const
@@ -70,7 +145,7 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetCreationMode()
 		DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 		DetailsViewArgs.bAllowFavoriteSystem = false;
 
-		DefaultInventory = TStrongObjectPtr(NewObject<UItemArrayBuilder>());
+		DefaultInventory = TStrongObjectPtr(NewObject<UInventoryProviderArrayBuilder>());
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		ItemArrayDetailView = PropertyModule.CreateDetailView(DetailsViewArgs);
 		ItemArrayDetailView->SetObject(DefaultInventory.Get());
@@ -114,8 +189,10 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetCreationMode()
 				[
 					SNew(SClassPropertyEntryBox)
 					.MetaClass(AActor::StaticClass())
-					.AllowNone(true)
+					.RequiredInterface(UInventoryProvider::StaticClass())
+					.IsBlueprintBaseOnly(true)
 					.AllowAbstract(false)
+					.AllowNone(true)
 					.SelectedClass_UObject(this, &UFtueInventoryProviderDataEditObject::OnGetClass)
 					.OnSetClass_UObject(this, &UFtueInventoryProviderDataEditObject::OnSetClass)
 				]
@@ -206,6 +283,43 @@ TSharedPtr<SWidget> UFtueInventoryProviderDataEditObject::GetEditMode()
 	return SNew(SOverlay);
 }
 
+const TArray<FName>& UFtueInventoryProviderDataEditObject::GetActorTypes()
+{
+	static TArray<FName> Result = {
+			TEXT("Playable"),
+			TEXT("NPC"),
+			TEXT("World")
+	};
+
+	return Result;
+}
+
+FName UFtueInventoryProviderDataEditObject::GetActorType(const UClass* ActorClass)
+{
+	if (!IsValid(ActorClass))
+	{
+		return NAME_None;
+	}
+
+	const TArray<FName>& ActorTypes = GetActorTypes();
+	// @gdemers GetDefaultObject<APawn> will assert on failure to cast to non-Pawn actors.
+	const auto* CDO = ActorClass->GetDefaultObject<UObject>();
+	const auto* PawnCDO = IsValid(CDO) && CDO->IsA<APawn>() ? Cast<APawn>(CDO) : nullptr;
+
+	if (!IsValid(PawnCDO))
+	{
+		return ActorTypes[2/*World*/];
+	}
+	else if (IsValid(PawnCDO->AIControllerClass))
+	{
+		return ActorTypes[1/*NPC*/];
+	}
+	else
+	{
+		return ActorTypes[0/*Playable*/];
+	}
+}
+
 bool UFtueInventoryProviderDataEditObject::IsEnabled_OnActorClassChanged() const
 {
 	return ActorClass.IsValid();
@@ -220,11 +334,11 @@ bool UFtueInventoryProviderDataEditObject::IsEnabled_GenerateButton() const
 {
 	if ((CheckboxState == ECheckBoxState::Checked))
 	{
-		return !LoadoutSlots.IsEmpty() && DefaultInventory.IsValid() && !DefaultInventory->DefaultItems.IsEmpty();
+		return !LoadoutSlots.IsEmpty() && DefaultInventory.IsValid() && !DefaultInventory->FtueInventory.IsEmpty();
 	}
 	else
 	{
-		return DefaultInventory.IsValid() && !DefaultInventory->DefaultItems.IsEmpty();
+		return DefaultInventory.IsValid() && !DefaultInventory->FtueInventory.IsEmpty();
 	}
 }
 
@@ -265,7 +379,64 @@ void UFtueInventoryProviderDataEditObject::OnTagCleared()
 
 FReply UFtueInventoryProviderDataEditObject::OnButtonClick_GenerateItem()
 {
-	return FReply::Unhandled();
+	return TryCreateNewInventoryProvider() ? FReply::Handled() : FReply::Unhandled();
+}
+
+bool UFtueInventoryProviderDataEditObject::DoesInventoryProviderAlreadyExist(const FName InventoryProviderRowName) const
+{
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return true;
+	}
+
+	const bool bResult = (Subsystem->GetCachedItem<FAVVMActorIdentifierDataTableRow>(FDataRegistryId{GetRegistryType_ActorIdentifiers(), InventoryProviderRowName}) != nullptr);
+	return bResult;
+}
+
+bool UFtueInventoryProviderDataEditObject::TryCreateNewInventoryProvider()
+{
+	if (!ActorClass.IsValid() || !ensureAlwaysMsgf(SelectedDataTable_InventoryProviderDefinitions.IsValid(),
+	                                               TEXT("Data Table Output missing. Please select a target.")))
+	{
+		return false;
+	}
+
+	const FName RowName{ActorClass->GetFName()};
+
+	const bool bIsDuplicate = DoesInventoryProviderAlreadyExist(RowName);
+	if (!ensureAlwaysMsgf((false == bIsDuplicate), TEXT("Invalid Actor Class selected. Duplicated InventoryProvider entry found.")))
+	{
+		FMessageDialog::Open(EAppMsgCategory::Error,
+		                     EAppMsgType::Ok,
+		                     NSLOCTEXT("AVVMEditorToolkit", "NotifyProviderDuplicatedName", "Duplicated entry detected!\nChoose a different Actor Class."));
+		return false;
+	}
+
+	const bool bResult = UAVVMEditorToolkitUtils::CreateActorIdentifierRow(FAVVMEditorDataTableActorIdentifierContextArgs{this, SelectedDataTable_InventoryProviderDefinitions, RowName, GetActorType(ActorClass.Get())});
+	if (!ensureAlwaysMsgf(bResult, TEXT("Failed to create new InventoryProvider UniqueId entry.")))
+	{
+		return false;
+	}
+
+	auto* NewInventoryProvider = reinterpret_cast<FFtue_InventoryProviderTableRow*>(FDataTableEditorUtils::AddRow(SelectedDataTable_InventoryProviderDefinitions.Get(), RowName));
+	if (!ensureAlwaysMsgf(NewInventoryProvider != nullptr, TEXT("Failed to cast Row Type.")))
+	{
+		return false;
+	}
+
+	const bool bRequireSlotDefinition = (GetOnCheckboxState() == ECheckBoxState::Checked);
+	NewInventoryProvider->ParentActorIdentifierId = {GetRegistryType_ActorIdentifiers(), RowName};
+	NewInventoryProvider->bCanInventoryProviderEquipItems = bRequireSlotDefinition;
+	// TODO @gdemers Rework so defining those properties is easier for user, and we take them by the hand as they add new entries.
+	NewInventoryProvider->ParentFtueInventory = DefaultInventory.IsValid() ? DefaultInventory->FtueInventory : TMap<TSoftClassPtr<UItemObject>, FFtue_ItemObjectProperties>{};
+	if (bRequireSlotDefinition)
+	{
+		NewInventoryProvider->DefaultSlotTags = LoadoutSlots.GetGameplayTagArray();
+	}
+
+	ensureAlwaysMsgf(UEditorAssetLibrary::SaveLoadedAsset(SelectedDataTable_InventoryProviderDefinitions.Get()), TEXT("Failed to save Package."));
+	return true;
 }
 
 TSharedPtr<SWidget> UStubDataInventoryDependencyGraphEditObject::GetDataEditContent(const FAVVMEditContextArgs& Params)

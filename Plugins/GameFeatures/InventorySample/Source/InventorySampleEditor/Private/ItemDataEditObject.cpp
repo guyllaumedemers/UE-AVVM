@@ -73,9 +73,65 @@ TSharedPtr<SWidget> UItemDataEditObject::GetDataEditContent(const FAVVMEditConte
 	return Out;
 }
 
-FName UItemDataEditObject::GetRegistryType_ItemDefinitions() const
+int32 UItemDataEditObject::GenerateActorIdentifier(const FName ItemType) const
 {
-	return TEXT("R_Item");
+	const TArray<FName>& ItemTypes = GetItemTypes();
+	if (!ItemTypes.Contains(ItemType))
+	{
+		return INDEX_NONE;
+	}
+
+	const auto* Subsystem = UDataRegistrySubsystem::Get();
+	if (!IsValid(Subsystem))
+	{
+		return INDEX_NONE;
+	}
+
+	const UDataRegistry* ActorIdentifierRegistry = Subsystem->GetRegistryForType(GetRegistryType_ActorIdentifiers());
+	if (!IsValid(ActorIdentifierRegistry))
+	{
+		return INDEX_NONE;
+	}
+
+	TArray<const FAVVMActorIdentifierDataTableRow*> OutResults{};
+	ActorIdentifierRegistry->GetAllItems(TEXT(""), OutResults);
+	OutResults.Sort();
+
+	int32 LowerBounds{INDEX_NONE};
+	int32 UpperBounds{INDEX_NONE};
+
+	if (ItemType.IsEqual(TEXT("Item")))
+	{
+		LowerBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+	else if (ItemType.IsEqual(TEXT("Attachment")))
+	{
+		LowerBounds = GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
+	}
+	else
+	{
+		LowerBounds = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET;
+		UpperBounds = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
+	}
+
+	int32 NextValidId{INDEX_NONE};
+	for (const FAVVMActorIdentifierDataTableRow* Row : OutResults)
+	{
+		if ((Row != nullptr) && ((Row->UniqueId >= LowerBounds) && (Row->UniqueId < UpperBounds)) && (Row->UniqueId > NextValidId))
+		{
+			NextValidId = Row->UniqueId;
+		}
+	}
+
+	if (!ensureAlwaysMsgf(NextValidId != UpperBounds,
+	                      TEXT("Failed to generate new unique Id. We have reach our limit. Reconfigure your bit encoding to int64, or remove deprecated entries.")))
+	{
+		return INDEX_NONE;
+	}
+
+	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
 }
 
 FText UItemDataEditObject::GetModalMessage_OnClosure() const
@@ -236,6 +292,11 @@ const TArray<FName>& UItemDataEditObject::GetItemTypes()
 	return Result;
 }
 
+FName UItemDataEditObject::GetRegistryType_ItemDefinitions()
+{
+	return TEXT("R_Item");
+}
+
 bool UItemDataEditObject::IsEnabled_OnItemTypeChanged() const
 {
 	return (false == SelectedItemType.IsNone());
@@ -291,10 +352,6 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 		}
 	}
 
-	// @gdemers user made the required selection, and is creating a new entry in each Data Table.
-	const FReply Result = TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
-	OnRefreshAssetListRequested.ExecuteIfBound();
-
 	struct FScoped
 	{
 		TSharedRef<SWidget> Widget{};
@@ -310,7 +367,11 @@ FReply UItemDataEditObject::OnButtonClick_GenerateItem()
 			}
 		}
 	};
-
+	
+	// @gdemers user made the required selection, and is creating a new entry in each Data Table.
+	FReply Result = TryCreateNewItemObject() ? FReply::Handled() : FReply::Unhandled();
+	OnRefreshAssetListRequested.ExecuteIfBound();
+	
 	// @gdemers Unsafe, but required for order of execution.
 	FScoped OnExit{OwningParent->AsShared()};
 	return Result;
@@ -477,67 +538,6 @@ bool UItemDataEditObject::TryCreateDependentAsset(UItemDefinitionDataAsset* Item
 	bResult &= UAVVMEditorToolkitUtils::CreateActorDefinitionRow(FAVVMEditorDataTableOutputContextArgs{SelectedDataTable_ActorDefinitions, FName(ItemActorRowName), NewPackagePath});
 	bResult &= UAVVMEditorToolkitUtils::CreateActorUIDefinitionRow(FAVVMEditorDataTableOutputContextArgs{SelectedDataTable_ActorUIDefinitions, FName(ItemActorUIRowName), NewPackagePath});
 	return bResult;
-}
-
-int32 UItemDataEditObject::GenerateActorIdentifier(const FName ItemType) const
-{
-	const TArray<FName>& ItemTypes = GetItemTypes();
-	if (!ItemTypes.Contains(ItemType))
-	{
-		return INDEX_NONE;
-	}
-
-	const auto* Subsystem = UDataRegistrySubsystem::Get();
-	if (!IsValid(Subsystem))
-	{
-		return INDEX_NONE;
-	}
-
-	const UDataRegistry* ActorIdentifierRegistry = Subsystem->GetRegistryForType(GetRegistryType_ActorIdentifiers());
-	if (!IsValid(ActorIdentifierRegistry))
-	{
-		return INDEX_NONE;
-	}
-
-	TArray<const FAVVMActorIdentifierDataTableRow*> OutResults{};
-	ActorIdentifierRegistry->GetAllItems(TEXT(""), OutResults);
-	OutResults.Sort();
-
-	int32 LowerBounds{INDEX_NONE};
-	int32 UpperBounds{INDEX_NONE};
-
-	if (ItemType.IsEqual(TEXT("Item")))
-	{
-		LowerBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET;
-		UpperBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
-	}
-	else if (ItemType.IsEqual(TEXT("Attachment")))
-	{
-		LowerBounds = GET_ATTACHMENT_PHYSICAL_ADDRESSING_OFFSET;
-		UpperBounds = GET_ITEM_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_ELEMENT_VIRTUAL_GLOBAL_ID_BIT_RANGE);
-	}
-	else
-	{
-		LowerBounds = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET;
-		UpperBounds = GET_STORAGE_PHYSICAL_ADDRESSING_OFFSET + UAVVMOnlineEncodingUtils::GetRangeAsBitMask(GET_STORAGE_POSITION_BIT_RANGE);
-	}
-
-	int32 NextValidId{INDEX_NONE};
-	for (const FAVVMActorIdentifierDataTableRow* Row : OutResults)
-	{
-		if ((Row != nullptr) && ((Row->UniqueId >= LowerBounds) && (Row->UniqueId < UpperBounds)) && (Row->UniqueId > NextValidId))
-		{
-			NextValidId = Row->UniqueId;
-		}
-	}
-
-	if (!ensureAlwaysMsgf(NextValidId != UpperBounds,
-	                      TEXT("Failed to generate new unique Id. We have reach our limit. Reconfigure your bit encoding to int64, or remove deprecated entries.")))
-	{
-		return INDEX_NONE;
-	}
-
-	return (NextValidId == INDEX_NONE) ? (LowerBounds + 1) : (NextValidId + 1);
 }
 
 FReply UItemDataEditObject::EditMode_OnButtonClick_Create()

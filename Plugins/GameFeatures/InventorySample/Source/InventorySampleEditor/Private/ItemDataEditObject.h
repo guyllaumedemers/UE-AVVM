@@ -49,9 +49,7 @@ class INVENTORYSAMPLEEDITOR_API UItemDataEditObject : public UAVVMEditorToolkitD
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) override;
-	
-	FName GetRegistryType_ItemDefinitions() const;
-	
+	virtual int32 GenerateActorIdentifier(const FName ItemType) const override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
@@ -59,6 +57,7 @@ private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
 	static const TArray<FName>& GetItemTypes();
+	static FName GetRegistryType_ItemDefinitions();
 	// BEGIN - @gdemers creation mode api
 	bool IsEnabled_OnItemTypeChanged() const;
 	bool IsEnabled_GenerateButton() const;
@@ -68,13 +67,12 @@ private:
 	void OnDataTableSelectionChanged_ActorUIDefinitions(TWeakObjectPtr<UDataTable> NewSelection, ESelectInfo::Type SelectInfo);
 	void OnTextChanged_SetItemRowName(const FText& NewItemName);
 	FReply OnButtonClick_GenerateItem();
-	
+
 	bool DoesItemObjectNameAlreadyExist(const FString& ItemObjectRowName) const;
 	bool TryCreateNewItemObject();
 	bool TryCreateDependentAsset(UItemDefinitionDataAsset* ItemDefinitionDataAsset, const FName NewItemType, const FString& ItemObjectRowName, const FString& NewPackagePath);
-	virtual int32 GenerateActorIdentifier(const FName ItemType) const override;
 	// END
-	
+
 	// BEGIN - @gdemers edit mode api
 	FReply EditMode_OnButtonClick_Create();
 	FReply EditMode_OnButtonClick_Edit();
@@ -87,7 +85,7 @@ private:
 	void CreateMissingDependencies(const FName RowName, const FString& TopLevelPath, const FString& PackagePath);
 	void DeleteDependentAsset(const FName RowName);
 	// END
-	
+
 	virtual void OnPostWindowClosed() const override;
 
 	TSharedPtr<SAVVMEditorToolkitDataTablePicker> DataTablePicker_ActorIdentifiers{nullptr};

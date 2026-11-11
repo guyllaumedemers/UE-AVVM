@@ -22,28 +22,29 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "Data/InventoryProviderTableRow.h"
 #include "SWidgets/AVVMEditorToolkitDataEditor.h"
 
 #include "InventoryProviderDataEditObject.generated.h"
 
 class SCheckBoxList;
-class UAVVMTagArrayBuilder;
+class UDataTable;
 class UItemObject;
 
 /**
  *	Class description:
  *	
- *	UItemArrayBuilder is a wrapper type for exposing Array collection of items to the editor. Using UObject derive type,
+ *	UInventoryProviderArrayBuilder is a wrapper type for exposing Array collection of items to the editor. Using UObject derive type,
  *	we can use the FPropertyEditor, and the underline SExpandableArea + FDetailArrayBuilder to handle collection change actions such as Add/Remove.
  */
 UCLASS(NotBlueprintable)
-class INVENTORYSAMPLEEDITOR_API UItemArrayBuilder : public UObject
+class INVENTORYSAMPLEEDITOR_API UInventoryProviderArrayBuilder : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TArray<TSoftClassPtr<UItemObject>> DefaultItems{};
+	TMap<TSoftClassPtr<UItemObject>, FFtue_ItemObjectProperties> FtueInventory{};
 };
 
 /**
@@ -59,13 +60,15 @@ class INVENTORYSAMPLEEDITOR_API UFtueInventoryProviderDataEditObject : public UA
 
 public:
 	virtual TSharedPtr<SWidget> GetDataEditContent(const FAVVMEditContextArgs& Params) override;
-
+	virtual int32 GenerateActorIdentifier(const FName ActorType) const override;
 	virtual FText GetModalMessage_OnClosure() const override;
 	virtual FText GetModalTitle_OnClosure() const override;
 
 private:
 	TSharedPtr<SWidget> GetCreationMode();
 	TSharedPtr<SWidget> GetEditMode();
+	static const TArray<FName>& GetActorTypes();
+	static FName GetActorType(const UClass* ActorClass);
 	// BEGIN - @gdemers creation mode api
 	bool IsEnabled_OnActorClassChanged() const;
 	bool IsEnabled_OnSlotTagRequirementsChanged() const;
@@ -78,12 +81,17 @@ private:
 	FGameplayTagContainer GetTagContainer() const;
 	void OnTagCleared();
 	FReply OnButtonClick_GenerateItem();
+	
+	bool DoesInventoryProviderAlreadyExist(const FName InventoryProviderRowName) const;
+	bool TryCreateNewInventoryProvider();
 	// END
 
+	TWeakObjectPtr<UDataTable> SelectedDataTable_InventoryProviderDefinitions{nullptr};
 	FGameplayTagContainer LoadoutSlots{FGameplayTagContainer::EmptyContainer};
-	TStrongObjectPtr<UItemArrayBuilder> DefaultInventory{nullptr};
+	TStrongObjectPtr<UInventoryProviderArrayBuilder> DefaultInventory{nullptr};
 	TWeakObjectPtr<const UClass> ActorClass{nullptr};
 	ECheckBoxState CheckboxState{ECheckBoxState::Unchecked};
+	FString DataTablePackagePath{};
 };
 
 /**
