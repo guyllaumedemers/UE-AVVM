@@ -26,7 +26,7 @@
 #include "NativeGameplayTags.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/AssetManager.h"
-#include "Export/Export.h"
+#include "Export/InventoryExport.h"
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
 

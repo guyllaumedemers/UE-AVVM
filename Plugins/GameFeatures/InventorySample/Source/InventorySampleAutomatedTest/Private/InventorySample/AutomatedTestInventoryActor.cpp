@@ -29,7 +29,7 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/StreamableManager.h"
-#include "Export/Export.h"
+#include "Export/InventoryExport.h"
 #include "Resources/InventoryResourceHandlingImpl.h"
 #include "Tags/InventoryTags.h"
 

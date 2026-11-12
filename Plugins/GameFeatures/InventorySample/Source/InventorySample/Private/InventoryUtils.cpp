@@ -35,7 +35,7 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/InventoryProviderTableRow.h"
 #include "Dom/JsonObject.h"
-#include "Export/Export.h"
+#include "Export/InventoryExport.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 #include "Tags/InventoryTags.h"

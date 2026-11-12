@@ -42,7 +42,7 @@
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/World.h"
-#include "Export/Export.h"
+#include "Export/InventoryExport.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceProvider.h"
 #include "Tags/InventoryTags.h"
