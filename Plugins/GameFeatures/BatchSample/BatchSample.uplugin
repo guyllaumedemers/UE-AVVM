@@ -23,6 +23,14 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "BatchSampleAutomatedTest",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ]
+    },
+    {
       "Name": "BatchSampleDebug",
       "Type": "Runtime",
       "LoadingPhase": "Default",
@@ -31,14 +39,6 @@
       ],
       "TargetDenyList": [
         "Server"
-      ]
-    },
-    {
-      "Name": "BatchSampleAutomatedTest",
-      "Type": "Runtime",
-      "LoadingPhase": "Default",
-      "TargetConfigurationDenyList": [
-        "Shipping"
       ]
     }
   ],

@@ -27,6 +27,8 @@ public class AVVMGameplay : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 		bWarningsAsErrors = true;
+		
+		SetupIrisSupport(Target);
 
 		if (Target.bBuildDeveloperTools)
 		{
@@ -36,6 +38,15 @@ public class AVVMGameplay : ModuleRules
 				new string[]
 				{
 					"WITH_SIMULATED_BACKEND"
+				});
+		}
+
+		if (Target.WithAutomationTests)
+		{
+			PublicDependencyModuleNames.AddRange(
+				new string[]
+				{
+					"FunctionalTesting",
 				});
 		}
 

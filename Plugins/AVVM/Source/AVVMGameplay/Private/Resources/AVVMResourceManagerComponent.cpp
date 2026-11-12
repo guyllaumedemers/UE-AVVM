@@ -31,8 +31,11 @@
 #include "Resources/AVVMResourceProvider.h"
 
 #if !UE_BUILD_SHIPPING
-#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #include "Misc/AutomationTest.h"
+#endif
+
+#if WITH_AUTOMATION_TESTS
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #endif
 
 // @gdemers extern symbol for global access to custom LLM_tag
