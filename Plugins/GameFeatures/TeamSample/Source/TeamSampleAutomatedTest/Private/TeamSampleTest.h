@@ -38,7 +38,7 @@ class UTeamRule;
 *	a ULevel::WorldSetting to be configured with the proper "Team" Rule referenced.
  */
 UCLASS()
-class TEAMSAMPLE_API ATeamSampleTest : public AFunctionalTest
+class TEAMSAMPLEAUTOMATEDTEST_API ATeamSampleTest : public AFunctionalTest
 {
 	GENERATED_BODY()
 

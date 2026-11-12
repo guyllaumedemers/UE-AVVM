@@ -30,9 +30,5 @@ AAutomatedTestPlayerStateTeamActor::AAutomatedTestPlayerStateTeamActor(const FOb
 
 bool AAutomatedTestPlayerStateTeamActor::HasTeam() const
 {
-#if WITH_AUTOMATION_TESTS
 	return IsValid(TeamComponent) ? TeamComponent->OwningTeam.IsValid() : false;
-#else
-	return false;
-#endif
 }

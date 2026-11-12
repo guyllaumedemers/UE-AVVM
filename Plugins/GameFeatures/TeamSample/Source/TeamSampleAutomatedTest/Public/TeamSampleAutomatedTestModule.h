@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,32 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "GameFramework/GameState.h"
-#include "GameFramework/PlayerState.h"
-
-#include "AutomatedTestTeamActor.generated.h"
-
-class UPlayerStateTeamComponent;
-
-/**
- *	Class description:
- *
- *	AAutomatedTestPlayerStateTeamActor is an Actor class to run behaviour during Automated Testing.
- */
-UCLASS()
-class TEAMSAMPLE_API AAutomatedTestPlayerStateTeamActor : public APlayerState
-{
-	GENERATED_BODY()
-
-public:
-	AAutomatedTestPlayerStateTeamActor(const FObjectInitializer& ObjectInitializer);
-	bool HasTeam() const;
-
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<UPlayerStateTeamComponent> TeamComponent = nullptr;
-};
+#include "Modules/ModuleManager.h"

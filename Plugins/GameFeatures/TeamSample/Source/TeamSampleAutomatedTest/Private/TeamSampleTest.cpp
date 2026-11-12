@@ -249,7 +249,6 @@ void ATeamSampleTest::EvaluateTestPredicate()
 		return;
 	}
 
-#if WITH_AUTOMATION_TESTS
 	bool bHasTeamAssigned = true;
 	for (TActorIterator<AAutomatedTestPlayerStateTeamActor> Iterator(World); Iterator; ++Iterator)
 	{
@@ -263,7 +262,4 @@ void ATeamSampleTest::EvaluateTestPredicate()
 	const EFunctionalTestResult TestResult = bHasTeamAssigned ? EFunctionalTestResult::Succeeded : EFunctionalTestResult::Failed;
 	const FString Msg = bHasTeamAssigned ? TEXT("Team Assignment process behaved has expected.") : TEXT("Team Assignment process didn't complete for all APlayerState.");
 	FinishTest(TestResult, Msg);
-#else
-	FinishTest(EFunctionalTestResult::Succeeded, TEXT("Team Assignment process behaved has expected."));
-#endif
 }
