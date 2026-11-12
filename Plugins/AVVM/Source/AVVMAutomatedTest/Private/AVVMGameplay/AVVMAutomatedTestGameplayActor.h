@@ -37,41 +37,41 @@ class UAVVMAbilitySystemComponent;
  *	on the ResourceManagerComponent.
  */
 UCLASS()
-class AVVMGAMEPLAY_API AAVVMAutomatedTestGameplayActor : public AActor,
-                                                         public IAbilitySystemInterface,
-                                                         public IAVVMResourceProvider
+class AVVMAUTOMATEDTEST_API AAVVMAutomatedTestGameplayActor : public AActor,
+                                                              public IAbilitySystemInterface,
+                                                              public IAVVMResourceProvider
 {
 	GENERATED_BODY()
 
 public:
 	AAVVMAutomatedTestGameplayActor(const FObjectInitializer& ObjectInitializer);
-	
+
 	// IAVVMResourceProvider
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
-	
+
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
+
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
 	bool CheckASCIntegrity() const;
-	
+
 	bool HasASCFinishedAllStreaming() const;
 	void ForceCompletion() const;
-	
+
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
-	
+
 protected:
 	UFUNCTION(CallInEditor)
 	void OnRequestCompleted();
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMResourceManagerComponent> ResourceManagerComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAVVMAbilitySystemComponent> AbilitySystemComponent = nullptr;
-	
+
 	TSharedPtr<bool> bIsAsyncProcessCompleted;
 };

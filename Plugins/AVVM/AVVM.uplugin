@@ -20,6 +20,14 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "AVVMAutomatedTest",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ]
+    },
+    {
       "Name": "AVVMEditorToolkit",
       "Type": "Editor",
       "LoadingPhase": "Default",

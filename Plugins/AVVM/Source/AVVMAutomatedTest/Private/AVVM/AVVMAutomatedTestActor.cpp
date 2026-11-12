@@ -50,7 +50,6 @@ void AAVVMAutomatedTestActor::OnInvokeCallback(const TInstancedStruct<FAVVMNotif
 UAVVMPresenter* UAVVMAutomatedTestUtils::GetSetPresenter(const TSubclassOf<UAVVMPresenter>& PresenterClass,
                                                          AAVVMAutomatedTestActor* Actor)
 {
-#if WITH_AUTOMATION_TESTS
 	if (!IsValid(Actor))
 	{
 		return nullptr;
@@ -63,7 +62,4 @@ UAVVMPresenter* UAVVMAutomatedTestUtils::GetSetPresenter(const TSubclassOf<UAVVM
 	}
 
 	return nullptr;
-#else
-	return nullptr;
-#endif
 }

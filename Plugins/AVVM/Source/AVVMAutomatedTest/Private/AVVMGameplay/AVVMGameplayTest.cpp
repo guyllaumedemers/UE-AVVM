@@ -23,10 +23,8 @@
 #include "AVVMToolkitUtils.h"
 #include "Engine/AssetManager.h"
 #include "Resources/AVVMResourceManagerComponent.h"
-
-#if WITH_AUTOMATION_TESTS
+#include "Resources/AVVMResourceProvider.h"
 #include "Tests/AutomationCommon.h"
-#endif
 
 namespace
 {
@@ -188,7 +186,6 @@ public:
 IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(AVVMResourceManagerComponentTest, FTestAVVMGameplayPluginBase, "AutomatedTest.CustomGroup.AVVMResourceManagerComponentTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter);
 bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 {
-#if WITH_AUTOMATION_TESTS
 	Setup();
 	LatentExecuteResourceLoading();
 	LatentWait();
@@ -196,7 +193,6 @@ bool AVVMResourceManagerComponentTest::RunTest(const FString& Parameters)
 	LatentWaitASCStreamingHandleComplete();
 	LatentASCCompare();
 	LatentCleanup();
-#endif
 	return true;
 }
 

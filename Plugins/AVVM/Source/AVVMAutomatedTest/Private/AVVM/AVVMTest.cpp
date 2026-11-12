@@ -25,10 +25,7 @@
 #include "AVVMSubsystem.h"
 #include "NativeGameplayTags.h"
 #include "Archetypes/AVVMPresenter.h"
-
-#if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
-#endif
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG, "FunctionalTest.NotificationSubsystem.TestChannel");
@@ -42,7 +39,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMNotificationSubsystemTest, "AutomatedTest.C
 
 bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 {
-#if WITH_AUTOMATION_TESTS
 	auto TestWorld = MakeShared<FTestWorldWrapper>();
 	TestWorld->CreateTestWorld(EWorldType::Game);
 	TestWorld->BeginPlayInTestWorld();
@@ -109,7 +105,6 @@ bool AVVMNotificationSubsystemTest::RunTest(const FString& Parameters)
 	UTEST_EQUAL("TMap<const FGameplayTag, FAVVMObservers>::ValueType Collection Changed {Post-Unregistration}.", UAVVMNotificationSubsystem::Static_GetChannelCount(ProxyWorld, TAG_FUNCTIONAL_TEST_AVVM_CHANNELTAG), INDEX_NONE)
 
 	TestWorld->EndPlayInTestWorld();
-#endif
 	return true;
 }
 
@@ -122,7 +117,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMSubsystemTest, "AutomatedTest.CustomGroup.A
 
 bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 {
-#if WITH_AUTOMATION_TESTS
 	auto TestWorld = MakeShared<FTestWorldWrapper>();
 	TestWorld->CreateTestWorld(EWorldType::Game);
 	TestWorld->BeginPlayInTestWorld();
@@ -167,6 +161,5 @@ bool AVVMSubsystemTest::RunTest(const FString& Parameters)
 	UTEST_EQUAL("TMap<TWeakObjectPtr<const AActor>, FAVVMViewModelKVP>::ValueType Collection Changed {Post-Unregistration}.", UAVVMSubsystem::Static_GetPresentersCount(ProxyWorld), 0)
 
 	TestWorld->EndPlayInTestWorld();
-#endif
 	return true;
 }

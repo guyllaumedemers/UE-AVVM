@@ -20,16 +20,13 @@
 
 #include "Misc/AutomationTest.h"
 
-#include "AVVMOnlineModule.h"
 #include "AVVMOnlineInterface.h"
+#include "AVVMOnlineModule.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "NativeGameplayTags.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
-
-#if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
-#endif
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_AVVMONLINE_TEST_A, "AVVMOnline.AutomatedTest.A");
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_AVVMONLINE_TEST_B, "AVVMOnline.AutomatedTest.B");
@@ -43,7 +40,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMOnlineTest, "AutomatedTest.CustomGroup.AVVM
 
 bool AVVMOnlineTest::RunTest(const FString& Parameters)
 {
-#if WITH_AUTOMATION_TESTS
 	const UAVVMOnlinePlayerStringParser* Parser = FAVVMOnlineModule::GetJsonParser_Player();
 	UTEST_NOT_NULL("UAVVMOnlineStringParser", Parser);
 
@@ -388,7 +384,6 @@ bool AVVMOnlineTest::RunTest(const FString& Parameters)
 
 		UTEST_EQUAL("FAVVMHostConfigurationProxy", A, B);
 	}
-
-#endif
+	
 	return true;
 }

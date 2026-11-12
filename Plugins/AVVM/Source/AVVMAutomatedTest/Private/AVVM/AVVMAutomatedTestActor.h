@@ -35,7 +35,7 @@ class UAVVMPresenter;
  *	
  *	FScopedCounterNotify is a scoped class to track amount of notification executed based on user expectation.
  */
-struct FScopedCounterNotify
+struct AVVMAUTOMATEDTEST_API FScopedCounterNotify
 {
 	explicit FScopedCounterNotify(const int32 NewCounter)
 		: Counter(NewCounter), Default(NewCounter)
@@ -68,7 +68,7 @@ private:
  *	AAVVMAutomatedTestActor is an Actor class to run behaviour during Automated Testing.
  */
 UCLASS()
-class AVVM_API AAVVMAutomatedTestActor : public AActor
+class AVVMAUTOMATEDTEST_API AAVVMAutomatedTestActor : public AActor
 {
 	GENERATED_BODY()
 
@@ -98,7 +98,7 @@ private:
  *	UAVVMAutomatedTestUtils is a blueprint function library for Automated test.
  */
 UCLASS()
-class AVVM_API UAVVMAutomatedTestUtils : public UBlueprintFunctionLibrary
+class AVVMAUTOMATEDTEST_API UAVVMAutomatedTestUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
