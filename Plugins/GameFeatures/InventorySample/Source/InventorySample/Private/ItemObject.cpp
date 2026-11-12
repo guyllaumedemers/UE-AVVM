@@ -42,12 +42,10 @@
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/World.h"
+#include "Export/Export.h"
 #include "Net/UnrealNetwork.h"
 #include "Resources/AVVMResourceProvider.h"
-#include "Tags/PrivateTags.h"
-
-// @gdemers external linkage for property FName sharing.
-extern const FName InventoryProviderPayloads;
+#include "Tags/InventoryTags.h"
 
 void UItemObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {

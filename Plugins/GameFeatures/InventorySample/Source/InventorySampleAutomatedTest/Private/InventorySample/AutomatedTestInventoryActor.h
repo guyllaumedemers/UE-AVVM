@@ -38,21 +38,21 @@ class UActorInventoryComponent;
  *	on the ActorInventoryComponent.
  */
 UCLASS()
-class INVENTORYSAMPLE_API AAutomatedTestInventoryActor : public AActor,
-                                                         public IAVVMResourceProvider,
-                                                         public IInventoryProvider
+class INVENTORYSAMPLEAUTOMATEDTEST_API AAutomatedTestInventoryActor : public AActor,
+                                                                      public IAVVMResourceProvider,
+                                                                      public IInventoryProvider
 {
 	GENERATED_BODY()
 
 public:
 	AAutomatedTestInventoryActor(const FObjectInitializer& ObjectInitializer);
-	
+
 	// IAVVMResourceProvider
 	virtual int32 GetProviderUniqueId_Implementation() const override;
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
-	
+
 	// IInventoryProvider
 	virtual EItemSrcType GetItemSrcType_Implementation() const override;
 	virtual bool DoesSupportSpawnOnLoad_Implementation() const override;
@@ -65,7 +65,7 @@ public:
 	void ForceCompletion() const;
 
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
-	
+
 	bool RunTest_ItemUniqueId(const TArray<const FAVVMActorIdentifierDataTableRow*>& ActorIdentifiers) const;
 	bool RunTest_ItemStorageReference() const;
 	bool RunTest_ItemStacking() const;

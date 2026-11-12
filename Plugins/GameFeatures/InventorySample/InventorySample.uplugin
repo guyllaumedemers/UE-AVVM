@@ -29,6 +29,14 @@
       "LoadingPhase": "Default"
     },
     {
+      "Name": "InventorySampleAutomatedTest",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ]
+    },
+    {
       "Name": "InventorySampleDebug",
       "Type": "Runtime",
       "LoadingPhase": "Default",

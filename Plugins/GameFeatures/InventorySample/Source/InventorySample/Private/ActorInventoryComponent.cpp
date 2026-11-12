@@ -51,18 +51,17 @@
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
-#include "Tags/PrivateTags.h"
+#include "Tags/InventoryTags.h"
 #include "UI/InventoryNotificationPayload.h"
 
-#if !UE_BUILD_SHIPPING
+#if WITH_AUTOMATION_TESTS
 #include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
-#include "Misc/AutomationTest.h"
-#include "Tests/AutomatedTestInventoryValidationManager.h"
+#include "AutomatedTest/AutomatedTestInventoryValidationManager.h"
 #endif
 
 TRACE_DECLARE_INT_COUNTER(UActorInventoryComponent_InstanceCounter, TEXT("Inventory Component Instance Counter"));
 // @gdemers external linkage for property FName sharing.
-INVENTORYSAMPLE_API const FName InventoryProviderPayloads = TEXT("InventoryProviderPayloads");
+INVENTORYSAMPLE_API extern const FName InventoryProviderPayloads{TEXT("InventoryProviderPayloads")};
 
 TArray<int32> FInventoryDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {

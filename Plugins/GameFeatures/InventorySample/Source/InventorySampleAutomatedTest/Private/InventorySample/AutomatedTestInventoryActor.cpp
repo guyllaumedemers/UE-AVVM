@@ -29,11 +29,9 @@
 #include "Backend/AVVMOnlineInventory.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/StreamableManager.h"
+#include "Export/Export.h"
 #include "Resources/InventoryResourceHandlingImpl.h"
-#include "Tags/PrivateTags.h"
-
-// @gdemers external linkage for property FName sharing.
-extern const FName InventoryProviderPayloads;
+#include "Tags/InventoryTags.h"
 
 AAutomatedTestInventoryActor::AAutomatedTestInventoryActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

@@ -26,11 +26,9 @@
 #include "NativeGameplayTags.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/AssetManager.h"
+#include "Export/Export.h"
 #include "Misc/AutomationTest.h"
-
-#if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
-#endif
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_AUTOMATED_TEST, "InventorySample.AutomatedTest.Tag");
 
@@ -51,9 +49,6 @@ namespace
 		return Function();
 	}
 }
-
-// @gdemers external linkage for property FName sharing.
-extern const FName InventoryProviderPayloads;
 
 /**
  *	Class description:
@@ -334,8 +329,6 @@ bool InventorySampleTest::RunTest(const FString& Parameters)
 	// test f : testing the loadout object
 	
 	// Note : Test related to gameplay behaviour should be run on the functional test
-
-#if WITH_AUTOMATION_TESTS
 	UnitTest_PreResourceLoaded();
 	Setup();
 	LatentExecuteResourceLoading();
@@ -345,6 +338,5 @@ bool InventorySampleTest::RunTest(const FString& Parameters)
 	LatentInventoryCompare();
 	LatentUnitTests();
 	LatentCleanup();
-#endif
 	return true;
 }

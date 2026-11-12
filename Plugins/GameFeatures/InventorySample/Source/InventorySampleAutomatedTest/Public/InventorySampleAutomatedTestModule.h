@@ -1,4 +1,4 @@
-//Copyright(c) 2025 gdemers
+﻿//Copyright(c) 2025 gdemers
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -17,22 +17,8 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
+
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "ScreenshotFunctionalTest.h"
-
-#include "InventoryFunctionTest.generated.h"
-
-/**
- * 
- */
-UCLASS()
-class INVENTORYSAMPLE_API AInventorySampleFunctionTest : public AScreenshotFunctionalTest
-{
-	GENERATED_BODY()
-	
-protected:
-	virtual bool RunTest(const TArray<FString>& Params = TArray<FString>()) override;
-};
+#include "Modules/ModuleManager.h"

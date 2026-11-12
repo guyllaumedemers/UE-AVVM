@@ -30,22 +30,6 @@ public class InventorySample : ModuleRules
 		
 		SetupIrisSupport(Target);
 
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"AVVMEditorToolkit"
-				});
-
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"Slate",
-					"SlateCore",
-				});
-		}
-
 		if (Target.WithAutomationTests)
 		{
 			PublicDependencyModuleNames.AddRange(

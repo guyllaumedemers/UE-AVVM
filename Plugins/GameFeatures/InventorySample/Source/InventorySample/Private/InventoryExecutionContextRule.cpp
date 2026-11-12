@@ -26,7 +26,7 @@
 #include "InventoryExecutionContextParams.h"
 #include "InventorySettings.h"
 #include "ItemObject.h"
-#include "Tags/PrivateTags.h"
+#include "Tags/InventoryTags.h"
 
 bool FDropRule::Predicate(const UObject* WorldContextObject,
                           const TInstancedStruct<FAVVMExecutionContextParams>& Params) const

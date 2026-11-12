@@ -35,9 +35,10 @@
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Data/InventoryProviderTableRow.h"
 #include "Dom/JsonObject.h"
+#include "Export/Export.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
-#include "Tags/PrivateTags.h"
+#include "Tags/InventoryTags.h"
 
 /**
  *	Class description:
@@ -128,9 +129,6 @@ namespace NSJsonInventory
 		OutInventoryProvider = InventoryProvider;
 	}
 }
-
-// @gdemers external linkage for property FName sharing.
-extern const FName InventoryProviderPayloads;
 
 FString UInventoryUtils::CreateDefaultInventoryProviders()
 {

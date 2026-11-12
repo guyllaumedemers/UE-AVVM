@@ -35,7 +35,7 @@
 #include "Iris/ReplicationSystem/ReplicationSystem.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
-#include "Tags/PrivateTags.h"
+#include "Tags/InventoryTags.h"
 #include "UI/LoadoutNotificationPayload.h"
 
 void UNonReplicatedLoadoutObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
