@@ -33,6 +33,11 @@
 			"TargetDenyList": [
 				"Server"
 			]
+		},
+		{
+			"Name": "TransactionSampleAutomatedTest",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [

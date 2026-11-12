@@ -22,11 +22,8 @@
 #include "AutomatedTestTransactionActor.h"
 #include "GameStateTransactionHistory.h"
 #include "GameFramework/GameStateBase.h"
-#include "Tests/TransactionFactoryImplTest.h"
-
-#if WITH_AUTOMATION_TESTS
+#include "TransactionFactoryImplTest.h"
 #include "Tests/AutomationCommon.h"
-#endif
 
 /**
  *	Class description:
@@ -37,7 +34,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(TransactionSampleTest, "AutomatedTest.CustomGro
 
 bool TransactionSampleTest::RunTest(const FString& Parameters)
 {
-#if WITH_AUTOMATION_TESTS
 	FTestWorldWrapper WorldWrapper;
 	WorldWrapper.CreateTestWorld(EWorldType::Game);
 	WorldWrapper.BeginPlayInTestWorld();
@@ -123,6 +119,5 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 
 	// @gdemers cleanup.
 	WorldWrapper.EndPlayInTestWorld();
-#endif
 	return true;
 }

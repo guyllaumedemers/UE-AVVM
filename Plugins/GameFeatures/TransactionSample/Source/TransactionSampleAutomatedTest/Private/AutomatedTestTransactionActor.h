@@ -32,8 +32,8 @@
  *	AAutomatedTestTransactionActor is an Actor class to run behaviour during Automated Testing.
  */
 UCLASS()
-class TRANSACTIONSAMPLE_API AAutomatedTestTransactionActor : public AActor,
-                                                             public IDoesTransactionProviderSupportIdentifier
+class TRANSACTIONSAMPLEAUTOMATEDTEST_API AAutomatedTestTransactionActor : public AActor,
+                                                                          public IDoesTransactionProviderSupportIdentifier
 {
 	GENERATED_BODY()
 

@@ -27,7 +27,7 @@
 #include "Containers/StringFwd.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
-#include "Tests/TransactionFactoryImplTest.h"
+#include "TransactionFactoryImplTest.h"
 
 void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 {
