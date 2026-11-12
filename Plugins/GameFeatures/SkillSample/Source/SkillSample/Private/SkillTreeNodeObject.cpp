@@ -20,7 +20,6 @@
 #include "SkillTreeNodeObject.h"
 
 #include "AbilitySystemComponent.h"
-#include "AVVMDoesActorSupportInstanceIdentifier.h"
 #include "AVVMGameplayUtils.h"
 #include "AVVMSaveGame.h"
 #include "AVVMToolkitUtils.h"
@@ -29,10 +28,8 @@
 #include "Backend/AVVMOnlineEncodingUtils.h"
 #include "Backend/AVVMOnlineSkillTree.h"
 #include "Engine/AssetManager.h"
+#include "Export/SkillExport.h"
 #include "Resources/AVVMResourceProvider.h"
-
-// @gdemers external linkage for property FName sharing.
-extern const FName SkillTreeProviderPayloads;
 
 FSkillTreeNodeObject::FSkillTreeNodeObject(const int32 NewPrivateTreeNodeId,
                                            const FGameplayEffectSpec& NewGameplayEffectSpec)

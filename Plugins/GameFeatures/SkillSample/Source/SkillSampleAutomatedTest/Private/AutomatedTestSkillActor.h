@@ -40,10 +40,10 @@ class UAVVMAbilitySystemComponent;
  *	on the ActorSkillTreeComponent.
  */
 UCLASS()
-class SKILLSAMPLE_API AAutomatedTestSkillActor : public AActor,
-                                                 public IAbilitySystemInterface,
-                                                 public IAVVMResourceProvider,
-                                                 public ISkillTreeProvider
+class SKILLSAMPLEAUTOMATEDTEST_API AAutomatedTestSkillActor : public AActor,
+                                                              public IAbilitySystemInterface,
+                                                              public IAVVMResourceProvider,
+                                                              public ISkillTreeProvider
 {
 	GENERATED_BODY()
 
@@ -55,22 +55,22 @@ public:
 	virtual UAVVMResourceManagerComponent* GetResourceManagerComponent_Implementation() const override;
 	virtual TArray<FDataRegistryId> GetResourceDefinitionRegistryIds_Implementation() const override;
 	virtual TArray<FDataRegistryId> CheckIsDoneAcquiringResources_Implementation(const TArray<UObject*>& Resources) const override;
-	
+
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
+
 	// ISkillTreeProvider
 	virtual ESkillTreeSrcType GetSkillTreeSrcType_Implementation() const override;
 
 	void SetTestFlag(TSharedRef<bool> bNewIsAsyncProcessCompleted);
 	bool CheckContentIntegrity() const;
 	bool CheckSkillTreeIntegrity() const;
-	
+
 	bool HasSkillTreeFinishedAllStreaming() const;
 	void ForceCompletion() const;
 
 	FOnResourceAsyncLoadingComplete GetOnCompleteDelegate();
-	
+
 	bool RunTest_SkillTreeNodeUniqueId(const TArray<const FAVVMGameplayEffectIdentifierDataTableRow*>& GameplayEffectIdentifiers) const;
 
 protected:

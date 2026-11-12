@@ -1,81 +1,89 @@
 ﻿{
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "1.0",
-	"FriendlyName": "SkillSample",
-	"Description": "",
-	"Category": "Game Features",
-	"CreatedBy": "@gdemers",
-	"CreatedByURL": "",
-	"DocsURL": "",
-	"MarketplaceURL": "",
-	"SupportURL": "",
-	"EnabledByDefault": false,
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false,
-	"ExplicitlyLoaded": true,
-	"BuiltInInitialFeatureState": "Active",
-	"Modules": [
-		{
-			"Name": "SkillSample",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "SkillSampleDebug",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"TargetConfigurationDenyList": [
-				"Shipping"
-			],
-			"TargetDenyList": [
-				"Server"
-			]
-		},
-		{
-			"Name": "SkillSampleEditor",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "AVVM",
-			"Enabled": true
-		},
-		{
-			"Name": "AVVMImGui",
-			"Enabled": true,
-			"TargetConfigurationDenyList": [
-				"Shipping"
-			],
-			"TargetDenyList": [
-				"Server"
-			]
-		},
-		{
-			"Name": "AVVMSlateIM",
-			"Enabled": true,
-			"TargetConfigurationDenyList": [
-				"Shipping"
-			],
-			"TargetDenyList": [
-				"Server"
-			]
-		},
-		{
-			"Name": "CommonUI",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayAbilities",
-			"Enabled": true
-		},
-		{
-			"Name": "Iris",
-			"Enabled": true
-		}
-	]
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "SkillSample",
+  "Description": "",
+  "Category": "Game Features",
+  "CreatedBy": "@gdemers",
+  "CreatedByURL": "",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "EnabledByDefault": false,
+  "CanContainContent": true,
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "ExplicitlyLoaded": true,
+  "BuiltInInitialFeatureState": "Active",
+  "Modules": [
+    {
+      "Name": "SkillSample",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "SkillSampleAutomatedTest",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ]
+    },
+    {
+      "Name": "SkillSampleDebug",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
+    },
+    {
+      "Name": "SkillSampleEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "AVVM",
+      "Enabled": true
+    },
+    {
+      "Name": "AVVMImGui",
+      "Enabled": true,
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
+    },
+    {
+      "Name": "AVVMSlateIM",
+      "Enabled": true,
+      "TargetConfigurationDenyList": [
+        "Shipping"
+      ],
+      "TargetDenyList": [
+        "Server"
+      ]
+    },
+    {
+      "Name": "CommonUI",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayAbilities",
+      "Enabled": true
+    },
+    {
+      "Name": "Iris",
+      "Enabled": true
+    }
+  ]
 }

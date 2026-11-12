@@ -27,12 +27,10 @@
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Misc/AutomationTest.h"
 #include "Engine/AssetManager.h"
+#include "Export/SkillExport.h"
 #include "Resources/AVVMResourceManagerComponent.h"
 #include "Resources/AVVMResourceProvider.h"
-
-#if WITH_AUTOMATION_TESTS
 #include "Tests/AutomationCommon.h"
-#endif
 
 namespace
 {
@@ -51,9 +49,6 @@ namespace
 		return Function();
 	}
 }
-
-// @gdemers external linkage for property FName sharing.
-extern const FName SkillTreeProviderPayloads;
 
 /**
  *	Class description:
@@ -308,7 +303,6 @@ public:
 IMPLEMENT_CUSTOM_SIMPLE_AUTOMATION_TEST(SkillSampleTest, FTestSkillSamplePluginBase, "AutomatedTest.CustomGroup.SkillSampleTest", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool SkillSampleTest::RunTest(const FString& Parameters)
 {
-#if WITH_AUTOMATION_TESTS
 	UnitTest_PreResourceLoaded();
 	Setup();
 	LatentExecuteResourceLoading();
@@ -318,6 +312,5 @@ bool SkillSampleTest::RunTest(const FString& Parameters)
 	LatentSkillTreeCompare();
 	LatentUnitTests();
 	LatentCleanup();
-#endif
 	return true;
 }

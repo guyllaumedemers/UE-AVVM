@@ -43,17 +43,20 @@
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "ProfilingDebugging/CountersTrace.h"
-#include "Tags/PrivateTags.h"
+#include "Tags/SkillTags.h"
 
 #if !UE_BUILD_SHIPPING
-#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
 #include "Misc/AutomationTest.h"
-#include "Tests/AutomatedTestSkillTreeValidationManager.h"
+#endif
+
+#if WITH_AUTOMATION_TESTS
+#include "AutomatedTest/AVVMAutomatedTestResourceValidationManager.h"
+#include "AutomatedTest/AutomatedTestSkillTreeValidationManager.h"
 #endif
 
 TRACE_DECLARE_INT_COUNTER(UActorSkillTreeComponent_InstanceCounter, TEXT("SkillTree Component Instance Counter"));
 // @gdemers external linkage for property FName sharing.
-SKILLSAMPLE_API const FName SkillTreeProviderPayloads = TEXT("SkillTreeProviderPayloads");
+SKILLSAMPLE_API extern const FName SkillTreeProviderPayloads{TEXT("SkillTreeProviderPayloads")};
 
 TArray<int32> FSkillTreeDataResolverHelper::GetElementDependencies(const UObject* Outer, const int32 ElementId) const
 {

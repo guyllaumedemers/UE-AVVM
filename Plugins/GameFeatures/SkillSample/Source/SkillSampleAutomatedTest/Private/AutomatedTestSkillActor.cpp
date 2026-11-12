@@ -29,7 +29,7 @@
 #include "Data/AVVMGameplayEffectIdentifierDataTableRow.h"
 #include "Engine/StreamableManager.h"
 #include "Resources/SkillTreeResourceHandlingImpl.h"
-#include "Tags/PrivateTags.h"
+#include "Tags/SkillTags.h"
 
 AAutomatedTestSkillActor::AAutomatedTestSkillActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
