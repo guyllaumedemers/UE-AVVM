@@ -32,8 +32,8 @@
  *	AAutomatedTestBatchableActor is an Actor class to run behaviour during Automated Testing.
  */
 UCLASS()
-class BATCHSAMPLE_API AAutomatedTestBatchableActor : public AActor,
-                                                     public IBatchable
+class BATCHSAMPLEAUTOMATEDTEST_API AAutomatedTestBatchableActor : public AActor,
+                                                                  public IBatchable
 {
 	GENERATED_BODY()
 

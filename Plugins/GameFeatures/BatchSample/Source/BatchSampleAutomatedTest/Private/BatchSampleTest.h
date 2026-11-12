@@ -38,7 +38,7 @@ class UBatchingRule;
  *	TODO @gdemers Convert the following functional test into a server-client test.
  */
 UCLASS()
-class BATCHSAMPLE_API ABatchSampleTest : public AFunctionalTest
+class BATCHSAMPLEAUTOMATEDTEST_API ABatchSampleTest : public AFunctionalTest
 {
 	GENERATED_BODY()
 
