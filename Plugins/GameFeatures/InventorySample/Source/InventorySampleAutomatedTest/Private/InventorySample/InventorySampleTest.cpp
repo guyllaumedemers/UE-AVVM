@@ -23,14 +23,12 @@
 #include "AVVMSaveGame.h"
 #include "DataRegistrySubsystem.h"
 #include "InventoryUtils.h"
-#include "NativeGameplayTags.h"
 #include "Data/AVVMActorIdentifierTableRow.h"
 #include "Engine/AssetManager.h"
 #include "Export/InventoryExport.h"
 #include "Misc/AutomationTest.h"
+#include "Tags/InventoryTestTags.h"
 #include "Tests/AutomationCommon.h"
-
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_AUTOMATED_TEST, "InventorySample.AutomatedTest.Tag");
 
 namespace
 {

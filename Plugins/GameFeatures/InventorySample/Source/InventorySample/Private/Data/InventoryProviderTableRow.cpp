@@ -19,11 +19,7 @@
 //SOFTWARE.
 #include "Data/InventoryProviderTableRow.h"
 
-#include "NativeGameplayTags.h"
-
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT("PrivateItemId.Relationship.Attachment"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateItemId.Relationship.Character"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_INVENTORYSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateItemId.Relationship.Item"));
+#include "Tags/InventoryTags.h"
 
 const int32 FFtue_ItemObjectProperties::Static_GetRelationshipBitmask(const FFtue_ItemObjectProperties& ItemProperties)
 {

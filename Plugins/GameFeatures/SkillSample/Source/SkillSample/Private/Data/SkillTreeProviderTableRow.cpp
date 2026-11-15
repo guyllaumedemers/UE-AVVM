@@ -19,11 +19,7 @@
 //SOFTWARE.
 #include "Data/SkillTreeProviderTableRow.h"
 
-#include "NativeGameplayTags.h"
-
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ATTACHMENT, TEXT("PrivateTreeNodeId.Relationship.Attachment"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_CHARACTER, TEXT("PrivateTreeNodeId.Relationship.Character"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_SKILLSAMPLE_ITEM_RELATIONSHIP_ITEM, TEXT("PrivateTreeNodeId.Relationship.Item"));
+#include "Tags/SkillTags.h"
 
 const int32 FFtue_SkillTreeNodeDefinition::Static_GetRelationshipBitmask(const FFtue_SkillTreeNodeDefinition& SkillTreeNodeDefinition)
 {

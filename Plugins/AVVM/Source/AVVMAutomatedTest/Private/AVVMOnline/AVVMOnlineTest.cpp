@@ -23,13 +23,11 @@
 #include "AVVMOnlineInterface.h"
 #include "AVVMOnlineModule.h"
 #include "AVVMOnlinePlayerStringParser.h"
+#include "AVVMTestTags.h"
 #include "NativeGameplayTags.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Tests/AutomationCommon.h"
-
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_AVVMONLINE_TEST_A, "AVVMOnline.AutomatedTest.A");
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_AVVMONLINE_TEST_B, "AVVMOnline.AutomatedTest.B");
 
 /**
  *	Class description:
