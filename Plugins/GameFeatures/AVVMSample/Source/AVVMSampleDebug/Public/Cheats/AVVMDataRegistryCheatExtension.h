@@ -42,8 +42,11 @@ public:
 	virtual void AddedToCheatManager_Implementation() override;
 	virtual void RemovedFromCheatManager_Implementation() override;
 
-	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.DataRegistry.DumpItems")
-	void DumpCachedItems(const FString& DataRegistryType);
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.DataRegistry.DumpTypeSummary")
+	void DumpRegistryTypeSummary() const;
+
+	UFUNCTION(Exec, BlueprintCallable, Category="AVVM|Cheats", DisplayName="AVVM.DataRegistry.DumpCachedItems")
+	void DumpCachedItems(const FString& DataRegistryType) const;
 
 	virtual void Draw() override;
 };

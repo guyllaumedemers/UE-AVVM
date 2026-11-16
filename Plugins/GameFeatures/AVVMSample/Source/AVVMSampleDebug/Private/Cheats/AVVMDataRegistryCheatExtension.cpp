@@ -22,6 +22,7 @@
 #include "AVVMGameplayModule.h"
 #include "AVVMLogger.h"
 #include <imgui.h>
+#include "DataRegistrySubsystem.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -47,7 +48,12 @@ void UAVVMDataRegistryCheatExtension::RemovedFromCheatManager_Implementation()
 	FAVVMImGuiModule::Get().GetDebuggerContext().RemoveDescriptor(this);
 }
 
-void UAVVMDataRegistryCheatExtension::DumpCachedItems(const FString& DataRegistryType)
+void UAVVMDataRegistryCheatExtension::DumpRegistryTypeSummary() const
+{
+	UDataRegistrySubsystem::DumpRegistryTypeSummary();
+}
+
+void UAVVMDataRegistryCheatExtension::DumpCachedItems(const FString& DataRegistryType) const
 {
 	if (IsValid(GEngine))
 	{
@@ -67,7 +73,9 @@ void UAVVMDataRegistryCheatExtension::Draw()
 		ImGui::Separator();
 
 		ImGui::BeginGroup();
-		
+
+		if (ImGui::Button("DumpRegistryTypeSummary")) { SERVER_EXECUTE_CHEAT("DumpRegistryTypeSummary"); }
+
 		static char str0[128] = "Input Registry Type!";
 		ImGui::InputText("DataRegistry Type", str0, IM_ARRAYSIZE(str0));
 
