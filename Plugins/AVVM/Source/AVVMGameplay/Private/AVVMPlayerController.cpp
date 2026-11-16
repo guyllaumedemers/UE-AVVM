@@ -80,6 +80,9 @@ void AAVVMPlayerController::ReceivedPlayer()
 void AAVVMPlayerController::AddCheats(bool bForce)
 {
 #if UE_WITH_CHEAT_MANAGER
+	// @gdemers launching dedicated server under separate process in PIE fails to
+	// define a cheat manager if we dont enforce it.
+	bForce = true;
 	if (IsNetMode(NM_Client))
 	{
 		CheatManager = NewObject<UCheatManager>(this, CheatClass);
