@@ -78,3 +78,12 @@ protected:
 	// @gdemers fast access lookup into the replicated array of a player transactions
 	TMap<FUniqueNetIdRepl, FLightweightTransactionObject*> FastLookup{};
 };
+
+template <>
+struct TStructOpsTypeTraits<FLightweightTransactionObjectFastArray> : public TStructOpsTypeTraitsBase2<FLightweightTransactionObjectFastArray>
+{
+	enum
+	{
+		WithNetDeltaSerializer = true,
+	};
+};
