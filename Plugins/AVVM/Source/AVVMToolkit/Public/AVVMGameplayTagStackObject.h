@@ -81,6 +81,8 @@ struct AVVMTOOLKIT_API FAVVMGameplayTagStackObjectFastArray : public FIrisFastAr
 	             const int32 DeltaValue/* +/- */,
 	             const bool bHasAuthority);
 
+	const TArray<FAVVMGameplayTagStackObject>& GetGameplayTagStackObjects() const;
+
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnGameplayTagStackObjectChanged, const FGameplayTag&, const int32 NewValue);
 	FAVVMOnGameplayTagStackObjectChanged OnGameplayTagStackObjectChanged{};
 

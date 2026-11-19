@@ -129,3 +129,8 @@ int32 FAVVMGameplayTagStackObjectFastArray::Modify(const FGameplayTag& Tag,
 
 	return DeltaValue;
 }
+
+const TArray<FAVVMGameplayTagStackObject>& FAVVMGameplayTagStackObjectFastArray::GetGameplayTagStackObjects() const
+{
+	return GameplayTagStackObjects;
+}
