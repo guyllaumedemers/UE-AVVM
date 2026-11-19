@@ -67,8 +67,10 @@ public class AVVMGameplay : ModuleRules
 				"GameplayAbilities",
 				"GameplayTags",
 				"GameplayTasks",
+				"IrisCore",
 				"ModularGameplayActors",
 				"ModelViewViewModel",
+				"NetCore",
 			}
 		);
 
@@ -77,7 +79,6 @@ public class AVVMGameplay : ModuleRules
 			{
 				"AVVMToolkit",
 				"ModularGameplay",
-				"NetCore",
 				"UIExtension",
 				"UMG"
 			}

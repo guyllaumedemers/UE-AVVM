@@ -38,7 +38,9 @@ public class AVVMToolkit : ModuleRules
 				"Engine",
 				"FieldNotification",
 				"GameplayTags",
+				"IrisCore",
 				"ModelViewViewModel",
+				"NetCore",
 				"UIExtension",
 				"UMG",
 				"Slate",
@@ -49,8 +51,6 @@ public class AVVMToolkit : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"IrisCore",
-				"NetCore"
 			}
 		);
 	}
