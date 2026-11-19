@@ -23,12 +23,13 @@
 
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
 
-#include "GameplayTagStackContainer.generated.h"
+#include "AVVMGameplayTagStackObject.generated.h"
 
 /**
  *	Class description:
  *	
- *	FAVVMGameplayTagStackObject
+ *	FAVVMGameplayTagStackObject is a FFastArraySerializerItem that identify a gameplay event, stat, score, etc... via tag, and predict server
+ *	updates.
  */
 USTRUCT(BlueprintType)
 struct AVVMTOOLKIT_API FAVVMGameplayTagStackObject : public FFastArraySerializerItem
@@ -46,10 +47,10 @@ struct AVVMTOOLKIT_API FAVVMGameplayTagStackObject : public FFastArraySerializer
 	                                     const int32 NewPredictedStackCount);
 
 	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);
+	void PreReplicatedRemove(const struct FFastArraySerializer& InArraySerializer);
 	void PostReplicatedChange(const struct FFastArraySerializer& InArraySerializer);
 	bool operator==(const FAVVMGameplayTagStackObject& Rhs) const;
 
-protected:
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FGameplayTag Tag{FGameplayTag::EmptyTag};
 
@@ -63,7 +64,8 @@ protected:
 /**
  *	Class description:
  *	
- *	FAVVMGameplayTagStackObjectFastArray
+ *	FAVVMGameplayTagStackObjectFastArray is a FastArraySerializer derived class that pack data sequentially, and
+ *	is optimized for network serialization.
  */
 USTRUCT(BlueprintType)
 struct AVVMTOOLKIT_API FAVVMGameplayTagStackObjectFastArray : public FIrisFastArraySerializer
@@ -74,11 +76,24 @@ struct AVVMTOOLKIT_API FAVVMGameplayTagStackObjectFastArray : public FIrisFastAr
 	{
 		return FIrisFastArraySerializer::FastArrayDeltaSerialize<FAVVMGameplayTagStackObject, FAVVMGameplayTagStackObjectFastArray>(GameplayTagStackObjects, DeltaParams, *this);
 	}
-	
+
+	int32 Modify(const FGameplayTag& Tag,
+	             const int32 DeltaValue/* +/- */,
+	             const bool bHasAuthority);
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnGameplayTagStackObjectChanged, const FGameplayTag&, const int32 NewValue);
+	FAVVMOnGameplayTagStackObjectChanged OnGameplayTagStackObjectChanged{};
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FAVVMOnGameplayTagStackObjectRemoved, const FGameplayTag&);
+	FAVVMOnGameplayTagStackObjectRemoved OnGameplayTagStackObjectRemoved{};
+
+protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<FAVVMGameplayTagStackObject> GameplayTagStackObjects{};
 
-	TMap<FGameplayTag/*ComposedTag:Tag+Player*/, FAVVMGameplayTagStackObject*> FastLookup{};
+	// @gdemers fast access lookup into the replicated array
+	TMap<FGameplayTag, FAVVMGameplayTagStackObject*> FastLookup{};
+	friend struct FAVVMGameplayTagStackObject;
 };
 
 template <>
