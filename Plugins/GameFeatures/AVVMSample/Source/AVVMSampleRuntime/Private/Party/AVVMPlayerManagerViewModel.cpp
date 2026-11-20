@@ -21,6 +21,7 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "AVVMOnlinePlayerStringParser.h"
+#include "Payloads/AVVMComplexPayloads.h"
 
 void UAVVMPlayerManagerViewModel::SetPlayerConnections(const UAVVMOnlinePlayerStringParser* JsonParser,
                                                        const TInstancedStruct<FAVVMNotificationPayload>& Payload)

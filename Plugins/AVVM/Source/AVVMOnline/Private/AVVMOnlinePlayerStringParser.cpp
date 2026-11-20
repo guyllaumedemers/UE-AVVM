@@ -24,6 +24,7 @@
 #include "Backend/AVVMOnlinePlayerProxy.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Payloads/AVVMComplexPayloads.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -389,7 +390,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FAVVMStringPayload& NewPayl
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Value);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return;
@@ -469,7 +470,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FAVVMStringPayload& NewPayl
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Value);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return;
@@ -549,7 +550,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FAVVMStringPayload& NewPayl
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Value);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return;
@@ -646,7 +647,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FAVVMStringPayload& NewPayl
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Value);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return;
@@ -999,7 +1000,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FAVVMStringPayload& NewPayl
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Value);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return;
@@ -1099,7 +1100,7 @@ void UAVVMOnlinePlayerStringParser::FromString(const FAVVMStringPayload& NewPayl
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
 
-	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Payload);
+	auto JsonReaderRef = TJsonReaderFactory<TCHAR>::Create(NewPayload.Value);
 	if (!FJsonSerializer::Deserialize(JsonReaderRef, JsonData))
 	{
 		return;

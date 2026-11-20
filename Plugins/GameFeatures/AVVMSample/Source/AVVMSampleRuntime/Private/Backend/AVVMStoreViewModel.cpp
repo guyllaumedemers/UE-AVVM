@@ -20,8 +20,8 @@
 #include "Backend/AVVMStoreViewModel.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlineInterface.h"
 #include "AVVMOnlinePlayerStringParser.h"
+#include "Payloads/AVVMComplexPayloads.h"
 
 void UAVVMStoreViewModel::SetStoreItems(const UAVVMOnlinePlayerStringParser* JsonParser,
                                         const TInstancedStruct<FAVVMNotificationPayload>& Payload)

@@ -31,7 +31,7 @@
  *
  *	FAVVMPlayerAccountProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -71,7 +71,7 @@ struct AVVMONLINE_API FAVVMPlayerAccountProxy : public FAVVMNotificationPayload
  *
  *	FAVVMPlayerWalletProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerWalletProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -96,7 +96,7 @@ struct AVVMONLINE_API FAVVMPlayerWalletProxy : public FAVVMNotificationPayload
  *
  *	FAVVMPlayerProfileProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -137,7 +137,7 @@ struct AVVMONLINE_API FAVVMPlayerProfileProxy : public FAVVMNotificationPayload
  *
  *	FAVVMPlayerPresetProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -166,7 +166,7 @@ struct AVVMONLINE_API FAVVMPlayerPresetProxy : public FAVVMNotificationPayload
  *
  *	FAVVMPartyProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPartyProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -207,7 +207,7 @@ struct AVVMONLINE_API FAVVMPartyProxy : public FAVVMNotificationPayload
  *
  *	FAVVMPlayerConnectionProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerConnectionProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -239,7 +239,7 @@ struct AVVMONLINE_API FAVVMPlayerConnectionProxy : public FAVVMNotificationPaylo
  *
  *	FAVVMHostConfigurationProxy is the POD representation of the RESOLVED data returned by the backend following user request.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMHostConfigurationProxy : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()

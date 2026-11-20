@@ -44,7 +44,7 @@ AVVMONLINE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_AVVMONLINE_BACKEND_STUB_SKILL_
  *	FAVVMPlayerLoginContext encapsulate information about the user input when trying to login. This POD defines the data layout stored
  *	on the backend.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerLoginContext : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -287,7 +287,7 @@ struct AVVMONLINE_API FAVVMPlayerPreset
  *	
  *	example : Gear, Weapon, Ammunition, Skills, Potions, etc...
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -317,7 +317,7 @@ struct AVVMONLINE_API FAVVMPlayerResource : public FAVVMNotificationPayload
  *	FAVVMPlayerChallenge is a POD representation of a challenge. It contains details information WITHOUT progression. This POD defines the data layout stored
  *	on the backend.
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerChallenge : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()

@@ -20,8 +20,8 @@
 #include "Backend/AVVMChallengeManagerViewModel.h"
 
 #include "AVVMNotificationSubsystem.h"
-#include "AVVMOnlineInterface.h"
 #include "AVVMOnlinePlayerStringParser.h"
+#include "Payloads/AVVMComplexPayloads.h"
 
 void UAVVMChallengeManagerViewModel::SetChallenges(const UAVVMOnlinePlayerStringParser* JsonParser,
                                                    const TInstancedStruct<FAVVMNotificationPayload>& Payload)

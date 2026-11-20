@@ -87,7 +87,7 @@ inline const TCHAR* EnumToString(EAVVMPlayerRequestType State)
  *
  *	example : kick player out of party, invite friend, etc...
  */
-USTRUCT(BlueprintType)
+USTRUCT()
 struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 {
 	GENERATED_BODY()
@@ -117,37 +117,6 @@ struct AVVMONLINE_API FAVVMPlayerRequest : public FAVVMNotificationPayload
 	EAVVMPlayerRequestType RequestType{EAVVMPlayerRequestType::None};
 
 	// @gdemers payload can represent any data sent over the network, maybe during a trade, etc...
-	UPROPERTY(Transient, BlueprintReadWrite)
-	FString Payload{};
-};
-
-/**
- *	Class description:
- *
- *	FAVVMStringPayload encapsulate a string representation for a collection of user defined types. example : TArray<FAVVMPlayerConnections>. When unfold, the
- *	FString returned from backend should resolve like so.
- *
- *	example : TArray<FAVVMPlayerConnections> PlayerConnections = USomeUtilsApi::FromJson(InputStringPayload);
- *
- *	IMPORTANT : For single types, the Online Subsystem service should manage forwarding already resolved types. To maintain our system simple,
- *	a collection types should be resolved at the View Model level when receiving the "erase" type. i.e handled through TInstancedStruct<FAVVMNotificationPayload> which
- *	would in that case be resolved as such : TInstancedStruct<FAVVMNotificationPayload>()->GetPtr<FAVVMStringPayload>().
- */
-USTRUCT(BlueprintType)
-struct AVVMONLINE_API FAVVMStringPayload : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-
-	FAVVMStringPayload() = default;
-	FAVVMStringPayload(const FAVVMStringPayload&) = default;
-	FAVVMStringPayload(FAVVMStringPayload&&) noexcept = default;
-	FAVVMStringPayload& operator=(const FAVVMStringPayload&) = default;
-	FAVVMStringPayload& operator=(FAVVMStringPayload&&) noexcept = default;
-	
-	explicit FAVVMStringPayload(FString&& NewPayload);
-	bool operator==(const FAVVMStringPayload& Rhs) const;
-
-	// @gdemers used to prevent creation of an explicit type wrapping a collection of user defined structs.
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Payload{};
 };

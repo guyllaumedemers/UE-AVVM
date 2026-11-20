@@ -20,13 +20,13 @@
 
 #include "Misc/AutomationTest.h"
 
-#include "AVVMOnlineInterface.h"
 #include "AVVMOnlineModule.h"
 #include "AVVMOnlinePlayerStringParser.h"
 #include "AVVMTestTags.h"
 #include "NativeGameplayTags.h"
 #include "Backend/AVVMOnlinePlayer.h"
 #include "Backend/AVVMOnlinePlayerProxy.h"
+#include "Payloads/AVVMComplexPayloads.h"
 #include "Tests/AutomationCommon.h"
 
 /**
