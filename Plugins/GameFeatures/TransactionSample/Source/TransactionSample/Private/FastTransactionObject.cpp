@@ -25,6 +25,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Payloads/AVVMPrimitivePayloads.h"
 
 FLightweightTransactionObject::FLightweightTransactionObject(const FUniqueNetIdRepl& PlayerUniqueId)
 {
@@ -43,7 +44,7 @@ void FLightweightTransactionObject::OnGameplayTagStackObjectChanged(const FGamep
 {
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = Tag;
-	ContextArgs.Payload = FAVVMNotificationPayload::Make<FFastTransactionPayload>(NewValue);
+	ContextArgs.Payload = FAVVMNotificationPayload::Make<FAVVMInt32Payload>(NewValue);
 	ContextArgs.Target = GetSetPlayerState(GEngine);
 
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(GEngine, ContextArgs);
@@ -102,9 +103,4 @@ int32 FLightweightTransactionObjectFastArray::Modify(const FUniqueNetIdRepl& Pla
 	}
 
 	return DeltaValue;
-}
-
-FFastTransactionPayload::FFastTransactionPayload(const int32 NewValue)
-	: Value(NewValue)
-{
 }

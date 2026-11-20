@@ -29,7 +29,6 @@
 #include "SkillTreeExecutionContextParams.h"
 #include "SkillTreeExecutionContextRule.h"
 #include "SkillTreeNodeObject.h"
-#include "SkillTreeNotificationPayload.h"
 #include "SkillTreeProvider.h"
 #include "SkillTreeUtils.h"
 #include "Ability/AVVMAbilitySystemComponent.h"
@@ -42,6 +41,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "Payloads/AVVMPrimitivePayloads.h"
 #include "ProfilingDebugging/CountersTrace.h"
 #include "Tags/SkillTags.h"
 
@@ -265,7 +265,7 @@ void UActorSkillTreeComponent::GrantTreeNodeObject(const FSkillTreeNodeObject& N
 		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_GRANT,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>(bWasSuccess));
+		                                        FAVVMNotificationPayload::Make<FAVVMBoolPayload>(bWasSuccess));
 	}
 }
 
@@ -294,7 +294,7 @@ void UActorSkillTreeComponent::RevokeTreeNodeObject(const FSkillTreeNodeObject& 
 		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_REVOKE,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>(bWasSuccess));
+		                                        FAVVMNotificationPayload::Make<FAVVMBoolPayload>(bWasSuccess));
 	}
 }
 
@@ -323,7 +323,7 @@ void UActorSkillTreeComponent::ModifyTreeNodeObject(const FSkillTreeModification
 		                                        TAG_SKILLSAMPLE_TREENODE_NOTIFICATION_MODIFY,
 		                                        GetTypedOuter<APlayerController>(),
 		                                        GetTypedOuter<AActor>(),
-		                                        FAVVMNotificationPayload::Make<FSkillTreeNotificationPayload>(bWasSuccess));
+		                                        FAVVMNotificationPayload::Make<FAVVMBoolPayload>(bWasSuccess));
 	}
 }
 

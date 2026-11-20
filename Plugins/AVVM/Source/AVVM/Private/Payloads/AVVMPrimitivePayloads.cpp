@@ -17,31 +17,19 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#pragma once
+#include "Payloads/AVVMPrimitivePayloads.h"
 
-#include "CoreMinimal.h"
-
-#include "AVVMNotificationSubsystem.h"
-
-#include "SkillTreeNotificationPayload.generated.h"
-
-/**
- *	Class description:
- *
- *	FSkillTreeNotificationPayload is a context payload encapsulating action end-points for UI updates.
- */
-USTRUCT()
-struct SKILLSAMPLE_API FSkillTreeNotificationPayload : public FAVVMNotificationPayload
+FAVVMFloatPayload::FAVVMFloatPayload(const float NewValue)
+	: Value(NewValue)
 {
-	GENERATED_BODY()
+}
 
-	FSkillTreeNotificationPayload() = default;
-	FSkillTreeNotificationPayload(const FSkillTreeNotificationPayload&) = default;
-	FSkillTreeNotificationPayload(FSkillTreeNotificationPayload&&) noexcept = default;
-	FSkillTreeNotificationPayload& operator=(const FSkillTreeNotificationPayload&) = default;
-	FSkillTreeNotificationPayload& operator=(FSkillTreeNotificationPayload&&) noexcept = default;
-	explicit FSkillTreeNotificationPayload(const bool bNewWasSuccess);
+FAVVMInt32Payload::FAVVMInt32Payload(const int32 NewValue)
+	: Value(NewValue)
+{
+}
 
-	UPROPERTY(Transient, BlueprintReadWrite)
-	bool bWasSuccess{false};
-};
+FAVVMBoolPayload::FAVVMBoolPayload(const bool bNewValue)
+	: bValue(bNewValue)
+{
+}

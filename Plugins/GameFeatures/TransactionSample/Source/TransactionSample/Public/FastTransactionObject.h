@@ -22,7 +22,6 @@
 #include "CoreMinimal.h"
 
 #include "AVVMGameplayTagStackObject.h"
-#include "AVVMNotificationSubsystem.h"
 #include "GameFramework/OnlineReplStructs.h"
 
 #include "FastTransactionObject.generated.h"
@@ -104,25 +103,4 @@ struct TStructOpsTypeTraits<FLightweightTransactionObjectFastArray> : public TSt
 	{
 		WithNetDeltaSerializer = true,
 	};
-};
-
-/**
- *	Class description:
- *	
- *	FFastTransactionPayload
- */
-USTRUCT()
-struct TRANSACTIONSAMPLE_API FFastTransactionPayload : public FAVVMNotificationPayload
-{
-	GENERATED_BODY()
-
-	FFastTransactionPayload() = default;
-	FFastTransactionPayload(const FFastTransactionPayload&) = default;
-	FFastTransactionPayload(FFastTransactionPayload&&) noexcept = default;
-	FFastTransactionPayload& operator=(const FFastTransactionPayload&) = default;
-	FFastTransactionPayload& operator=(FFastTransactionPayload&&) noexcept = default;
-	explicit FFastTransactionPayload(const int32 NewValue);
-
-	UPROPERTY(Transient, BlueprintReadWrite)
-	int32 Value{INDEX_NONE};
 };

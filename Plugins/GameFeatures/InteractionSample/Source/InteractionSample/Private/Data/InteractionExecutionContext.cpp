@@ -21,9 +21,9 @@
 
 #include "AVVMNotificationSubsystem.h"
 #include "Data/AVVMHandshakePayload.h"
-#include "Data/AVVMHearbeatPayload.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
+#include "Payloads/AVVMPrimitivePayloads.h"
 
 UScriptStruct* TBaseStructure<FInteractionExecutionContext>::Get()
 {
@@ -48,7 +48,7 @@ void FInteractionExecutionContextAVVMNotify::PumpHeartbeat(const AActor* NewInst
 		                                        PumpHeartbeatChannelTag,
 		                                        PC,
 		                                        NewInstigator,
-		                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(NewDelta));
+		                                        FAVVMNotificationPayload::Make<FAVVMFloatPayload>(NewDelta));
 	}
 }
 
@@ -90,6 +90,6 @@ void FInteractionExecutionContextAVVMNotify::Kill(const AActor* NewInstigator,
 		                                        KillChannelTag,
 		                                        PC,
 		                                        NewInstigator,
-		                                        FAVVMNotificationPayload::Make<FAVVMHearbeatPayload>(static_cast<float>(INDEX_NONE)));
+		                                        FAVVMNotificationPayload::Make<FAVVMFloatPayload>(static_cast<float>(INDEX_NONE)));
 	}
 }

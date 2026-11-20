@@ -26,8 +26,8 @@
 #include "MVVMViewModelBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
-#include "Data/AVVMHearbeatPayload.h"
 #include "Engine/AssetManager.h"
+#include "Payloads/AVVMPrimitivePayloads.h"
 #include "UI/InteractionViewModel.h"
 
 AActor* UInteractionPresenter::GetOuterKey() const
@@ -77,7 +77,7 @@ void UInteractionPresenter::BP_OnNotificationReceived_PumpHeartbeat(const TInsta
 	if (ensureAlwaysMsgf(IsValid(InteractionViewModel),
 	                     TEXT("UInteractionPresenter::ViewModel doesn't derive from UInteractionViewModel!")))
 	{
-		const auto* NewHeartbeat = Payload.GetPtr<FAVVMHearbeatPayload>();
+		const auto* NewHeartbeat = Payload.GetPtr<FAVVMFloatPayload>();
 		InteractionViewModel->PumpHeartbeat((NewHeartbeat != nullptr) ? NewHeartbeat->Value : static_cast<float>(INDEX_NONE));
 	}
 }
