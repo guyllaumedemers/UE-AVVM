@@ -22,9 +22,12 @@
 #include "CoreMinimal.h"
 
 #include "AVVMGameplayTagStackObject.h"
+#include "AVVMNotificationSubsystem.h"
 #include "GameFramework/OnlineReplStructs.h"
 
 #include "FastTransactionObject.generated.h"
+
+class APlayerState;
 
 /**
  *	Class description:
@@ -44,10 +47,25 @@ struct TRANSACTIONSAMPLE_API FLightweightTransactionObject : public FFastArraySe
 	FLightweightTransactionObject(FLightweightTransactionObject&&) noexcept = default;
 	FLightweightTransactionObject& operator=(const FLightweightTransactionObject&) = default;
 	FLightweightTransactionObject& operator=(FLightweightTransactionObject&&) noexcept = default;
+
+	explicit FLightweightTransactionObject(const FUniqueNetIdRepl& NewPlayerUniqueId);
 	bool operator==(const FLightweightTransactionObject& Rhs) const;
+
+	// @gdemers manage broadcasting to the AVVMNotificationSubsystem 
+	void OnGameplayTagStackObjectChanged(const FGameplayTag& Tag, const int32 NewValue) const;
+	void OnGameplayTagStackObjectRemoved(const FGameplayTag& Tag) const;
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FAVVMGameplayTagStackObjectFastArray PlayerTransactions{};
+
+protected:
+	const APlayerState* GetSetPlayerState(const UObject* WorldContextObject) const;
+	
+	UPROPERTY(Transient, BlueprintReadWrite, NotReplicated)
+	FUniqueNetIdRepl PlayerUniqueId{};
+
+	UPROPERTY(Transient, BlueprintReadWrite, NotReplicated)
+	mutable TWeakObjectPtr<const APlayerState> PlayerState{nullptr};
 };
 
 /**
@@ -86,4 +104,25 @@ struct TStructOpsTypeTraits<FLightweightTransactionObjectFastArray> : public TSt
 	{
 		WithNetDeltaSerializer = true,
 	};
+};
+
+/**
+ *	Class description:
+ *	
+ *	FFastTransactionPayload
+ */
+USTRUCT()
+struct TRANSACTIONSAMPLE_API FFastTransactionPayload : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	FFastTransactionPayload() = default;
+	FFastTransactionPayload(const FFastTransactionPayload&) = default;
+	FFastTransactionPayload(FFastTransactionPayload&&) noexcept = default;
+	FFastTransactionPayload& operator=(const FFastTransactionPayload&) = default;
+	FFastTransactionPayload& operator=(FFastTransactionPayload&&) noexcept = default;
+	explicit FFastTransactionPayload(const int32 NewValue);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 Value{INDEX_NONE};
 };

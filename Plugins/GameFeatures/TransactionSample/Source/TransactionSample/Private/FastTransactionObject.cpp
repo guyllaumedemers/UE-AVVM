@@ -20,12 +20,53 @@
 #include "FastTransactionObject.h"
 
 #include "AVVMLogger.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitModule.h"
 #include "Engine/Engine.h"
+#include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
+
+FLightweightTransactionObject::FLightweightTransactionObject(const FUniqueNetIdRepl& PlayerUniqueId)
+{
+	PlayerTransactions.OnGameplayTagStackObjectChanged.Clear();
+	PlayerTransactions.OnGameplayTagStackObjectRemoved.Clear();
+	PlayerTransactions.OnGameplayTagStackObjectChanged.AddRaw(this, &FLightweightTransactionObject::OnGameplayTagStackObjectChanged);
+	PlayerTransactions.OnGameplayTagStackObjectRemoved.AddRaw(this, &FLightweightTransactionObject::OnGameplayTagStackObjectRemoved);
+}
 
 bool FLightweightTransactionObject::operator==(const FLightweightTransactionObject& Rhs) const
 {
 	return (PlayerTransactions.GetGameplayTagStackObjects() == Rhs.PlayerTransactions.GetGameplayTagStackObjects());
+}
+
+void FLightweightTransactionObject::OnGameplayTagStackObjectChanged(const FGameplayTag& Tag, const int32 NewValue) const
+{
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = Tag;
+	ContextArgs.Payload = FAVVMNotificationPayload::Make<FFastTransactionPayload>(NewValue);
+	ContextArgs.Target = GetSetPlayerState(GEngine);
+
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(GEngine, ContextArgs);
+}
+
+void FLightweightTransactionObject::OnGameplayTagStackObjectRemoved(const FGameplayTag& Tag) const
+{
+	FAVVMNotificationContextArgs ContextArgs;
+	ContextArgs.ChannelTag = Tag;
+	ContextArgs.Payload = {};
+	ContextArgs.Target = GetSetPlayerState(GEngine);
+
+	UAVVMNotificationSubsystem::Static_BroadcastChannel(GEngine, ContextArgs);
+}
+
+const APlayerState* FLightweightTransactionObject::GetSetPlayerState(const UObject* WorldContextObject) const
+{
+	if (!PlayerState.IsValid())
+	{
+		PlayerState = UGameplayStatics::GetPlayerStateFromUniqueNetId(WorldContextObject, PlayerUniqueId);
+	}
+
+	return PlayerState.Get();
 }
 
 int32 FLightweightTransactionObjectFastArray::Modify(const FUniqueNetIdRepl& PlayerUniqueId,
@@ -38,7 +79,7 @@ int32 FLightweightTransactionObjectFastArray::Modify(const FUniqueNetIdRepl& Pla
 	{
 		MarkArrayDirty();
 
-		auto& Value = PerPlayerTransactions.Add_GetRef(FLightweightTransactionObject{});
+		auto& Value = PerPlayerTransactions.Add_GetRef(FLightweightTransactionObject{PlayerUniqueId});
 		Value.PlayerTransactions.Modify(Tag, DeltaValue, bHasAuthority);
 		FastLookup.Add(PlayerUniqueId, &Value);
 	}
@@ -61,4 +102,9 @@ int32 FLightweightTransactionObjectFastArray::Modify(const FUniqueNetIdRepl& Pla
 	}
 
 	return DeltaValue;
+}
+
+FFastTransactionPayload::FFastTransactionPayload(const int32 NewValue)
+	: Value(NewValue)
+{
 }

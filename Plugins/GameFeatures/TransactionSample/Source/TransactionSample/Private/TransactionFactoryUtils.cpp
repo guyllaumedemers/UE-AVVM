@@ -29,6 +29,8 @@ TInstancedStruct<FTransactionPayload> UTransactionFactoryUtils::CreatePayloadFro
 
 FString UTransactionFactoryUtils::CreateStringPayload(const TInstancedStruct<FTransactionPayload>& NewPayload)
 {
+	static constexpr FStringView Empty{TEXT("")};
+	
 	const auto* Payload = NewPayload.GetPtr<FTransactionPayload>();
-	return (Payload != nullptr) ? Payload->ToString() : FString();
+	return (Payload != nullptr) ? Payload->ToString() : Empty.GetData();
 }
