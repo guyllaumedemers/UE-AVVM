@@ -36,7 +36,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AVVMGameplayTagStackObjectTest, "AutomatedTest.
 
 bool AVVMGameplayTagStackObjectTest::RunTest(const FString& Parameters)
 {
-	UE::Net::FScopedTestSettings ScopedSettings;
 	UE::Net::FTestWorlds TestWorlds(TEXT("/Engine/Maps/Entry"), TEXT("/Script/AVVMAutomatedTest.NetTestGameMode"), EReplicationSystem::Iris);
 
 	UWorld* ServerWorld = TestWorlds.Server.GetWorld();

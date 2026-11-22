@@ -230,25 +230,23 @@ void FAVVMImGuiModule::ClearImGuiDelegates()
 
 void FAVVMImGuiModule::CreateInputHandler()
 {
-	UAVVMImGuiInputHandler* Target = InputHandler.Get();
-	if (!IsValid(Target))
+	if (!InputHandler.IsValid())
 	{
-		Target = NewObject<UAVVMImGuiInputHandler>(GEngine, UAVVMImGuiSettings::GetInputHandlerClass());
+		auto* Target = NewObject<UAVVMImGuiInputHandler>(GEngine, UAVVMImGuiSettings::GetInputHandlerClass());
 		InputHandler = TStrongObjectPtr<UAVVMImGuiInputHandler>(Target);
 	}
 
-	if (ensureAlways(IsValid(Target)))
+	if (ensureAlways(InputHandler.IsValid()))
 	{
-		Target->SafeBegin(FSimpleDelegate::CreateRaw(this, &FAVVMImGuiModule::OnToggleDebugContext));
+		InputHandler->SafeBegin(FSimpleDelegate::CreateRaw(this, &FAVVMImGuiModule::OnToggleDebugContext));
 	}
 }
 
 void FAVVMImGuiModule::ClearInputHandler()
 {
-	UAVVMImGuiInputHandler* Target = InputHandler.Get();
-	if (IsValid(Target))
+	if (InputHandler.IsValid())
 	{
-		Target->SafeEnd();
+		InputHandler->SafeEnd();
 	}
 
 	InputHandler.Reset();
