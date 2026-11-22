@@ -27,12 +27,44 @@
 #include "Kismet/GameplayStatics.h"
 #include "Payloads/AVVMPrimitivePayloads.h"
 
-FLightweightTransactionObject::FLightweightTransactionObject(const FUniqueNetIdRepl& PlayerUniqueId)
+FLightweightTransactionObject::FLightweightTransactionObject(const FUniqueNetIdRepl& NewPlayerUniqueId)
+	: PlayerUniqueId(NewPlayerUniqueId)
 {
 	PlayerTransactions.OnGameplayTagStackObjectChanged.Clear();
 	PlayerTransactions.OnGameplayTagStackObjectRemoved.Clear();
 	PlayerTransactions.OnGameplayTagStackObjectChanged.AddRaw(this, &FLightweightTransactionObject::OnGameplayTagStackObjectChanged);
 	PlayerTransactions.OnGameplayTagStackObjectRemoved.AddRaw(this, &FLightweightTransactionObject::OnGameplayTagStackObjectRemoved);
+}
+
+void FLightweightTransactionObject::PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer)
+{
+	AVVM_LOGGER_LOG(LogToolkit,
+	                GEngine,
+	                GEngine,
+	                TEXT("New FLightweightTransactionObject::%s Detected!"),
+	                *PlayerUniqueId.ToString());
+
+	auto* FastArraySerializer = StaticCast<FLightweightTransactionObjectFastArray*>(const_cast<FFastArraySerializer*>(&InArraySerializer));
+	if (ensureAlwaysMsgf(FastArraySerializer != nullptr, TEXT("Failed to cast to owning type.")))
+	{
+		auto*& OutValue = FastArraySerializer->FastLookup.FindOrAdd(PlayerUniqueId);
+		OutValue = this;
+	}
+}
+
+void FLightweightTransactionObject::PreReplicatedRemove(const struct FFastArraySerializer& InArraySerializer)
+{
+	AVVM_LOGGER_LOG(LogToolkit,
+	                GEngine,
+	                GEngine,
+	                TEXT("Removing FLightweightTransactionObject::%s Detected!"),
+	                *PlayerUniqueId.ToString());
+
+	auto* FastArraySerializer = StaticCast<FLightweightTransactionObjectFastArray*>(const_cast<FFastArraySerializer*>(&InArraySerializer));
+	if (ensureAlwaysMsgf(FastArraySerializer != nullptr, TEXT("Failed to cast to owning type.")) && FastArraySerializer->FastLookup.Contains(PlayerUniqueId))
+	{
+		FastArraySerializer->FastLookup.Remove(PlayerUniqueId);
+	}
 }
 
 bool FLightweightTransactionObject::operator==(const FLightweightTransactionObject& Rhs) const

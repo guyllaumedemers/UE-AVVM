@@ -48,6 +48,9 @@ struct TRANSACTIONSAMPLE_API FLightweightTransactionObject : public FFastArraySe
 	FLightweightTransactionObject& operator=(FLightweightTransactionObject&&) noexcept = default;
 
 	explicit FLightweightTransactionObject(const FUniqueNetIdRepl& NewPlayerUniqueId);
+
+	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);
+	void PreReplicatedRemove(const struct FFastArraySerializer& InArraySerializer);
 	bool operator==(const FLightweightTransactionObject& Rhs) const;
 
 	// @gdemers manage broadcasting to the AVVMNotificationSubsystem 
@@ -57,11 +60,11 @@ struct TRANSACTIONSAMPLE_API FLightweightTransactionObject : public FFastArraySe
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FAVVMGameplayTagStackObjectFastArray PlayerTransactions{};
 
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FUniqueNetIdRepl PlayerUniqueId{};
+
 protected:
 	const APlayerState* GetSetPlayerState(const UObject* WorldContextObject) const;
-	
-	UPROPERTY(Transient, BlueprintReadWrite, NotReplicated)
-	FUniqueNetIdRepl PlayerUniqueId{};
 
 	UPROPERTY(Transient, BlueprintReadWrite, NotReplicated)
 	mutable TWeakObjectPtr<const APlayerState> PlayerState{nullptr};
@@ -94,6 +97,7 @@ protected:
 
 	// @gdemers fast access lookup into the replicated array of a player transactions
 	TMap<FUniqueNetIdRepl, FLightweightTransactionObject*> FastLookup{};
+	friend struct FLightweightTransactionObject;
 };
 
 template <>

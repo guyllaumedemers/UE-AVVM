@@ -30,15 +30,6 @@ public class TransactionSample : ModuleRules
 		
 		SetupIrisSupport(Target);
 
-		if (Target.bBuildEditor)
-		{
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"UnrealEd",
-				});
-		}
-
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -46,7 +37,6 @@ public class TransactionSample : ModuleRules
 				"AVVMGameplay",
 				"Core",
 				"CoreUObject",
-				"DeveloperSettings",
 				"Engine",
 				"Json",
 			}
@@ -57,6 +47,7 @@ public class TransactionSample : ModuleRules
 			new string[]
 			{
 				"AVVMToolkit",
+				"CoreOnline",
 				"GameplayTags",
 				"NetCore"
 			}
