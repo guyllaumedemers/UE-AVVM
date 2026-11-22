@@ -27,6 +27,8 @@ public class UISample : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.NoPCHs;
 		bUseUnity = false;
 		bWarningsAsErrors = true;
+		
+		SetupIrisSupport(Target);
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
@@ -46,6 +48,7 @@ public class UISample : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
+			"CommonLoadingScreen"
 		});
 	}
 }

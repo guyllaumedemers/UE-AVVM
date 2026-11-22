@@ -28,6 +28,8 @@ public class AVVMAutomatedTest : ModuleRules
 		bUseUnity = false;
 		bWarningsAsErrors = true;
 
+		SetupIrisSupport(Target);
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
@@ -36,12 +38,16 @@ public class AVVMAutomatedTest : ModuleRules
 				"AVVMOnline",
 				"AVVMToolkit",
 				"Core",
+				"CoreOnline",
 				"CoreUObject",
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",
+				"IrisCore",
 				"Json",
 				"ModelViewViewModel",
+				"ModularGameplayActors",
+				"NetCore"
 			}
 		);
 	}

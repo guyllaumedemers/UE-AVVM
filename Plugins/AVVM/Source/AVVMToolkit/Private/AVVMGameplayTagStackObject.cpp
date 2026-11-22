@@ -54,6 +54,7 @@ void FAVVMGameplayTagStackObject::PostReplicatedAdd(const struct FFastArraySeria
 		auto*& OutValue = FastArraySerializer->FastLookup.FindOrAdd(Tag);
 		OutValue = this;
 
+		PredictedStackCount = ReplicatedStackCount;
 		FastArraySerializer->OnGameplayTagStackObjectChanged.Broadcast(Tag, PredictedStackCount);
 	}
 }
@@ -130,7 +131,18 @@ int32 FAVVMGameplayTagStackObjectFastArray::Modify(const FGameplayTag& Tag,
 	return DeltaValue;
 }
 
+bool FAVVMGameplayTagStackObjectFastArray::operator==(const FAVVMGameplayTagStackObjectFastArray& Rhs) const
+{
+	return (GameplayTagStackObjects == Rhs.GameplayTagStackObjects) &&
+			FastLookup.OrderIndependentCompareEqual(Rhs.FastLookup);
+}
+
 const TArray<FAVVMGameplayTagStackObject>& FAVVMGameplayTagStackObjectFastArray::GetGameplayTagStackObjects() const
 {
 	return GameplayTagStackObjects;
+}
+
+const FAVVMGameplayTagStackObject* FAVVMGameplayTagStackObjectFastArray::GetFastLookupTag(const FGameplayTag& Tag) const
+{
+	return FastLookup.Contains(Tag) ? FastLookup[Tag] : nullptr;
 }

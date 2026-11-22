@@ -80,8 +80,11 @@ struct AVVMTOOLKIT_API FAVVMGameplayTagStackObjectFastArray : public FIrisFastAr
 	int32 Modify(const FGameplayTag& Tag,
 	             const int32 DeltaValue/* +/- */,
 	             const bool bHasAuthority);
+	
+	bool operator==(const FAVVMGameplayTagStackObjectFastArray& Rhs) const;
 
 	const TArray<FAVVMGameplayTagStackObject>& GetGameplayTagStackObjects() const;
+	const FAVVMGameplayTagStackObject* GetFastLookupTag(const FGameplayTag& Tag) const;
 
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnGameplayTagStackObjectChanged, const FGameplayTag&, const int32 NewValue);
 	FAVVMOnGameplayTagStackObjectChanged OnGameplayTagStackObjectChanged{};
