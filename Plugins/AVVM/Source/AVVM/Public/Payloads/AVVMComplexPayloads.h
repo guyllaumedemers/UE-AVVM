@@ -80,6 +80,14 @@ struct AVVM_API FAVVMJsonPayload : public FAVVMNotificationPayload
 };
 
 template <>
+FORCEINLINE TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(bool NewValue)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetBoolField(TEXT("Value"), NewValue);
+	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(JsonData);
+}
+
+template <>
 FORCEINLINE TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(int32 NewValue)
 {
 	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
@@ -95,10 +103,31 @@ FORCEINLINE TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(doub
 	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(JsonData);
 }
 
+template <>
+FORCEINLINE TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(FString NewValue)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetStringField(TEXT("Value"), NewValue);
+	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(JsonData);
+}
+
 template <typename TJsonObject>
 TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(TJsonObject NewValue)
 {
 	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(NewValue.GetJsonObject());
+}
+
+template <>
+FORCEINLINE bool FAVVMJsonPayload::From(const FAVVMJsonPayload* Payload)
+{
+	if (ensureAlwaysMsgf(Payload != nullptr, TEXT("Failed to cast retrieved FAVVMJsonPayload object.")))
+	{
+		return Payload->Value.IsValid() ? Payload->Value->GetBoolField(TEXT("Value")) : false;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 template <>
@@ -124,6 +153,20 @@ FORCEINLINE double FAVVMJsonPayload::From(const FAVVMJsonPayload* Payload)
 	else
 	{
 		return INDEX_NONE;
+	}
+}
+
+template <>
+FORCEINLINE FString FAVVMJsonPayload::From(const FAVVMJsonPayload* Payload)
+{
+	static FStringView EmptyString{TEXT("")};
+	if (ensureAlwaysMsgf(Payload != nullptr, TEXT("Failed to cast retrieved FAVVMJsonPayload object.")))
+	{
+		return Payload->Value.IsValid() ? Payload->Value->GetStringField(TEXT("Value")) : EmptyString.GetData();
+	}
+	else
+	{
+		return EmptyString.GetData();
 	}
 }
 
