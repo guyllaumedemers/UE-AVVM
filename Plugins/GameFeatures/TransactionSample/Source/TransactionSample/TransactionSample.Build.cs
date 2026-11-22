@@ -48,6 +48,7 @@ public class TransactionSample : ModuleRules
 				"CoreUObject",
 				"DeveloperSettings",
 				"Engine",
+				"Json",
 			}
 		);
 
@@ -57,7 +58,6 @@ public class TransactionSample : ModuleRules
 			{
 				"AVVMToolkit",
 				"GameplayTags",
-				"Json",
 				"NetCore"
 			}
 		);

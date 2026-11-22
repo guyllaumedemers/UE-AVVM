@@ -40,6 +40,7 @@ struct AVVM_API FAVVMFloatPayload : public FAVVMNotificationPayload
 	FAVVMFloatPayload(FAVVMFloatPayload&&) noexcept = default;
 	FAVVMFloatPayload& operator=(const FAVVMFloatPayload&) = default;
 	FAVVMFloatPayload& operator=(FAVVMFloatPayload&&) noexcept = default;
+	bool operator==(const FAVVMFloatPayload& Rhs) const;
 	explicit FAVVMFloatPayload(const float NewValue);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -61,6 +62,7 @@ struct AVVM_API FAVVMInt32Payload : public FAVVMNotificationPayload
 	FAVVMInt32Payload(FAVVMInt32Payload&&) noexcept = default;
 	FAVVMInt32Payload& operator=(const FAVVMInt32Payload&) = default;
 	FAVVMInt32Payload& operator=(FAVVMInt32Payload&&) noexcept = default;
+	bool operator==(const FAVVMInt32Payload& Rhs) const;
 	explicit FAVVMInt32Payload(const int32 NewValue);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
@@ -82,6 +84,7 @@ struct AVVM_API FAVVMBoolPayload : public FAVVMNotificationPayload
 	FAVVMBoolPayload(FAVVMBoolPayload&&) noexcept = default;
 	FAVVMBoolPayload& operator=(const FAVVMBoolPayload&) = default;
 	FAVVMBoolPayload& operator=(FAVVMBoolPayload&&) noexcept = default;
+	bool operator==(const FAVVMBoolPayload& Rhs) const;
 	explicit FAVVMBoolPayload(const bool bNewValue);
 
 	UPROPERTY(Transient, BlueprintReadWrite)

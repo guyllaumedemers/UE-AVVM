@@ -40,6 +40,7 @@ public class AVVMAutomatedTest : ModuleRules
 				"Engine",
 				"GameplayAbilities",
 				"GameplayTags",
+				"Json",
 				"ModelViewViewModel",
 			}
 		);

@@ -39,7 +39,7 @@ class UGameInstance;
 *	Class description:
 *
 *	UAVVMImGuiDescriptor is an interface to be implemented by CheatExtensions and allow drawing ImGui content on screen.
-*	Important : Make sure to conditionally include #include "AVVMDebugger.h" wrapped with #ifdef UE_ENABLE_AVVM_DEBUGGER in your header file,
+*	Important : To sure to conditionally include #include "AVVMDebugger.h" wrapped with #ifdef UE_ENABLE_AVVM_DEBUGGER in your header file,
 *	and wrap the interface with #if WITH_AVVM_DEBUGGER so symbols can be properly stripped out when required.
 *
 *	See AVVMSampleRuntime/Cheats for examples!

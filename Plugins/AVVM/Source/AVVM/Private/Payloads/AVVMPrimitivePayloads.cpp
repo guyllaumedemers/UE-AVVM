@@ -19,14 +19,29 @@
 //SOFTWARE.
 #include "Payloads/AVVMPrimitivePayloads.h"
 
+bool FAVVMFloatPayload::operator==(const FAVVMFloatPayload& Rhs) const
+{
+	return FMath::IsNearlyEqual(Value, Rhs.Value);
+}
+
 FAVVMFloatPayload::FAVVMFloatPayload(const float NewValue)
 	: Value(NewValue)
 {
 }
 
+bool FAVVMInt32Payload::operator==(const FAVVMInt32Payload& Rhs) const
+{
+	return (Value == Rhs.Value);
+}
+
 FAVVMInt32Payload::FAVVMInt32Payload(const int32 NewValue)
 	: Value(NewValue)
 {
+}
+
+bool FAVVMBoolPayload::operator==(const FAVVMBoolPayload& Rhs) const
+{
+	return (bValue == Rhs.bValue);
 }
 
 FAVVMBoolPayload::FAVVMBoolPayload(const bool bNewValue)

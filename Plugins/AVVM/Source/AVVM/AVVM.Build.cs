@@ -48,6 +48,7 @@ public class AVVM : ModuleRules
 				"Engine",
 				"FieldNotification",
 				"GameplayTags",
+				"Json",
 				"ModelViewViewModel",
 				"UIExtension"
 			});

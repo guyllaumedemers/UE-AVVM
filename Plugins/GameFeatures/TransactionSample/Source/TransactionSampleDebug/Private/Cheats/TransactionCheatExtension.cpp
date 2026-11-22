@@ -22,12 +22,10 @@
 #include "AVVMLogger.h"
 #include "GameStateTransactionHistory.h"
 #include <imgui.h>
-#include "TransactionFactoryUtils.h"
 #include "TransactionSampleModule.h"
 #include "Containers/StringFwd.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
-#include "TransactionFactoryImplTest.h"
 
 void UTransactionCheatExtension::AddedToCheatManager_Implementation()
 {
@@ -85,13 +83,14 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	                EnumToString(NewType),
 	                PlayerIndex);
 
-	const TInstancedStruct<FTransactionPayload> InputPayload = FTransactionPayload::Make<FTransactionPayloadTest>(StaticCast<int32>(NewType));
+	const TInstancedStruct<FAVVMNotificationPayload> InputPayload = FAVVMJsonPayload::To<int32>(StaticCast<int32>(NewType));
+	const auto* JSonPayload = InputPayload.GetPtr<FAVVMJsonPayload>();
 
 	FTransactionContextArgs Args;
 	Args.Instigator = nullptr;
 	Args.Target = UGameplayStatics::GetPlayerState(this, PlayerIndex);
 	Args.TransactionType = NewType;
-	Args.Payload = UTransactionFactoryUtils::CreateStringPayload(InputPayload);
+	Args.Payload = JSonPayload != nullptr ? JSonPayload->JsonPayload : TEXT("");
 
 	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(this, Args);
 }
@@ -127,7 +126,7 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 		                nullptr,
 		                this,
 		                TEXT("%s"),
-		                *UTransactionObjectUtils::ToString(*Transaction));
+		                *Transaction->Payload);
 	}
 }
 

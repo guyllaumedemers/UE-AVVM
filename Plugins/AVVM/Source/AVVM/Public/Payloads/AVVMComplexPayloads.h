@@ -22,6 +22,7 @@
 #include "CoreMinimal.h"
 
 #include "AVVMNotificationSubsystem.h"
+#include "Dom/JsonObject.h"
 
 #include "AVVMComplexPayloads.generated.h"
 
@@ -40,8 +41,101 @@ struct AVVM_API FAVVMStringPayload : public FAVVMNotificationPayload
 	FAVVMStringPayload(FAVVMStringPayload&&) noexcept = default;
 	FAVVMStringPayload& operator=(const FAVVMStringPayload&) = default;
 	FAVVMStringPayload& operator=(FAVVMStringPayload&&) noexcept = default;
+	bool operator==(const FAVVMStringPayload& Rhs) const;
 	explicit FAVVMStringPayload(FString&& NewValue);
 
 	UPROPERTY(Transient, BlueprintReadWrite)
 	FString Value{};
 };
+
+/**
+ *	Class description:
+ *	
+ *	FAVVMJsonPayload is an FAVVMNotificationPayload type carrying an TSharedPtr<FJsonObject> property.
+ */
+USTRUCT()
+struct AVVM_API FAVVMJsonPayload : public FAVVMNotificationPayload
+{
+	GENERATED_BODY()
+
+	FAVVMJsonPayload() = default;
+	FAVVMJsonPayload(const FAVVMJsonPayload&) = default;
+	FAVVMJsonPayload(FAVVMJsonPayload&&) noexcept = default;
+	FAVVMJsonPayload& operator=(const FAVVMJsonPayload&) = default;
+	FAVVMJsonPayload& operator=(FAVVMJsonPayload&&) noexcept = default;
+	bool operator==(const FAVVMJsonPayload& Rhs) const;
+	explicit FAVVMJsonPayload(const FString& NewValue);
+	explicit FAVVMJsonPayload(TSharedPtr<FJsonObject> NewValue);
+
+	template <typename TJsonObject>
+	static TJsonObject From(const FAVVMJsonPayload* Payload);
+
+	template <typename TJsonObject>
+	static TInstancedStruct<FAVVMNotificationPayload> To(TJsonObject NewValue);
+
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FString JsonPayload{};
+
+	TSharedPtr<FJsonObject> Value{};
+};
+
+template <>
+FORCEINLINE TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(int32 NewValue)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("Value"), NewValue);
+	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(JsonData);
+}
+
+template <>
+FORCEINLINE TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(double NewValue)
+{
+	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
+	JsonData->SetNumberField(TEXT("Value"), NewValue);
+	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(JsonData);
+}
+
+template <typename TJsonObject>
+TInstancedStruct<FAVVMNotificationPayload> FAVVMJsonPayload::To(TJsonObject NewValue)
+{
+	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(NewValue.GetJsonObject());
+}
+
+template <>
+FORCEINLINE int32 FAVVMJsonPayload::From(const FAVVMJsonPayload* Payload)
+{
+	if (ensureAlwaysMsgf(Payload != nullptr, TEXT("Failed to cast retrieved FAVVMJsonPayload object.")))
+	{
+		return Payload->Value.IsValid() ? Payload->Value->GetIntegerField(TEXT("Value")) : INDEX_NONE;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+template <>
+FORCEINLINE double FAVVMJsonPayload::From(const FAVVMJsonPayload* Payload)
+{
+	if (ensureAlwaysMsgf(Payload != nullptr, TEXT("Failed to cast retrieved FAVVMJsonPayload object.")))
+	{
+		return Payload->Value.IsValid() ? Payload->Value->GetNumberField(TEXT("Value")) : INDEX_NONE;
+	}
+	else
+	{
+		return INDEX_NONE;
+	}
+}
+
+template <typename TJsonObject>
+TJsonObject FAVVMJsonPayload::From(const FAVVMJsonPayload* Payload)
+{
+	if (ensureAlwaysMsgf(Payload != nullptr, TEXT("Failed to cast retrieved FAVVMJsonPayload object.")))
+	{
+		return TJsonObject{Payload->Value};
+	}
+	else
+	{
+		return TJsonObject{};
+	}
+}

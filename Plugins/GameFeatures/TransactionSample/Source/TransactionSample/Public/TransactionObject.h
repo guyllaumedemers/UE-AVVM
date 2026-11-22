@@ -23,8 +23,9 @@
 
 #include "CoreMinimal.h"
 
-#include "TransactionFactoryUtils.h"
+#include "AVVMNotificationSubsystem.h"
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "StructUtils/InstancedStruct.h"
 #include "UObject/Object.h"
 
@@ -98,15 +99,21 @@ struct TRANSACTIONSAMPLE_API FTransactionObject : public FFastArraySerializerIte
 	FTransactionObject& operator=(const FTransactionObject&) = default;
 	FTransactionObject& operator=(FTransactionObject&&) noexcept = default;
 
-	explicit FTransactionObject(FString&& NewInstigatorId,
-	                            FString&& NewTargetId,
-	                            const ETransactionType NewTransactionType,
-	                            FString&& NewPayload);
-	
+	explicit FTransactionObject(const ETransactionType NewTransactionType,
+	                            FString&& NewPayload,
+	                            FString&& NewInstigatorId,
+	                            FString&& NewTargetId);
+
 	void PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer);
 	bool operator==(const FTransactionObject& Rhs) const;
 
 protected:
+	UPROPERTY(Transient, BlueprintReadOnly)
+	ETransactionType TransactionType{ETransactionType::None};
+
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FString Payload{};
+
 	// @gdemers he who triggered/caused this transaction event.
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString InstigatorId{};
@@ -115,12 +122,7 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	FString TargetId{};
 
-	UPROPERTY(Transient, BlueprintReadOnly)
-	ETransactionType TransactionType{ETransactionType::None};
-
-	UPROPERTY(Transient, BlueprintReadOnly)
-	FString Payload{};
-
+	friend class UTransactionCheatExtension;
 	friend class UTransactionObjectUtils;
 };
 
@@ -174,11 +176,11 @@ public:
 	                             const FString& NewTargetId);
 
 	UFUNCTION(BlueprintCallable)
-	static FString ToString(const FTransactionObject& NewTransactionObject);
-
-	UFUNCTION(BlueprintCallable)
-	static TInstancedStruct<FTransactionPayload> GetValue(const FTransactionObject& NewTransactionObject);
+	static TInstancedStruct<FAVVMNotificationPayload> GetValue(const FTransactionObject& NewTransactionObject);
 
 	UFUNCTION(BlueprintCallable)
 	static FString GetUniqueId(const AActor* NewTarget);
+	
+	UFUNCTION(BlueprintCallable)
+	static FString ToString(const FTransactionObject& Transaction);
 };

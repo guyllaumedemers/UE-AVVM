@@ -39,6 +39,7 @@ public class AVVMSampleRuntime : ModuleRules
 				"DeveloperSettings",
 				"Engine",
 				"GameplayTags",
+				"Json",
 				"ModularGameplayActors",
 				"ModelViewViewModel",
 				"OnlineSubsystem",

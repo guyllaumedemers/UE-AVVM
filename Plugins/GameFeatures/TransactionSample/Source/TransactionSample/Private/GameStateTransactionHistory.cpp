@@ -73,15 +73,9 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 
 	Transactions.TransactionObjects.Reset();
 
-	const auto* Outer = OwningOuter.Get();
-	if (!ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		return;
-	}
-
 	AVVM_LOGGER_LOG(LogTransactionSample,
-	                Outer,
-	                Outer,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
 	                TEXT("Removing %s."),
 	                *GetNameSafe(UGameStateTransactionHistory::StaticClass()));
 }
@@ -159,24 +153,20 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(FTransactionContex
 
 	FTransactionObject Transaction
 	{
-			UTransactionObjectUtils::GetUniqueId(Args.Instigator.Get()),
-			UTransactionObjectUtils::GetUniqueId(Args.Target.Get()),
 			Args.TransactionType,
-			MoveTemp(Args.Payload)
+			MoveTemp(Args.Payload),
+			UTransactionObjectUtils::GetUniqueId(Args.Instigator.Get()),
+			UTransactionObjectUtils::GetUniqueId(Args.Target.Get())
 	};
-	
+
 	Transactions.MarkArrayDirty();
 	Transactions.TransactionObjects.Add(MoveTemp(Transaction));
 
-	const auto* Outer = OwningOuter.Get();
-	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		AVVM_LOGGER_LOG(LogTransactionSample,
-		                Outer,
-		                Outer,
-		                TEXT("Creating new Record %s."),
-		                *UTransactionObjectUtils::ToString(Transaction));
-	}
+	AVVM_LOGGER_LOG(LogTransactionSample,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Creating new Record %s."),
+	                *UTransactionObjectUtils::ToString(Transaction));
 #endif
 }
 
@@ -198,16 +188,12 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 		}
 	}
 
-	const auto* Outer = OwningOuter.Get();
-	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		AVVM_LOGGER_LOG(LogTransactionSample,
-		                Outer,
-		                Outer,
-		                TEXT("Remove all transactions of type %s from %s."),
-		                EnumToString(NewTransactionType),
-		                *GetNameSafe(NewTarget));
-	}
+	AVVM_LOGGER_LOG(LogTransactionSample,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Remove all transactions of type %s from %s."),
+	                EnumToString(NewTransactionType),
+	                *GetNameSafe(NewTarget));
 #endif
 }
 
@@ -228,15 +214,11 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 		}
 	}
 
-	const auto* Outer = OwningOuter.Get();
-	if (ensureAlwaysMsgf(IsValid(Outer), TEXT("Invalid Outer!")))
-	{
-		AVVM_LOGGER_LOG(LogTransactionSample,
-		                Outer,
-		                Outer,
-		                TEXT("Remove all transactions from %s."),
-		                *GetNameSafe(NewTarget));
-	}
+	AVVM_LOGGER_LOG(LogTransactionSample,
+	                OwningOuter.Get(),
+	                OwningOuter.Get(),
+	                TEXT("Remove all transactions from %s."),
+	                *GetNameSafe(NewTarget));
 #endif
 }
 

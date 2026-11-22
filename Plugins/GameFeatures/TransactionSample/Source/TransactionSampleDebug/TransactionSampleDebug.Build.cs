@@ -55,17 +55,19 @@ public class TransactionSampleDebug : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVMToolkit",
 				"Core",
 				"CoreUObject",
 				"Engine",
-				"TransactionSample"
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AVVMToolkit",
+				"AVVM",
+				"Json",
+				"TransactionSample"
 			}
 		);
 	}

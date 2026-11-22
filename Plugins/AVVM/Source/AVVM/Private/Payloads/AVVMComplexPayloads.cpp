@@ -19,7 +19,37 @@
 //SOFTWARE.
 #include "Payloads/AVVMComplexPayloads.h"
 
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+
+bool FAVVMStringPayload::operator==(const FAVVMStringPayload& Rhs) const
+{
+	return Value.Equals(Rhs.Value);
+}
+
 FAVVMStringPayload::FAVVMStringPayload(FString&& NewValue)
 	: Value(MoveTemp(NewValue))
 {
+}
+
+bool FAVVMJsonPayload::operator==(const FAVVMJsonPayload& Rhs) const
+{
+	return JsonPayload.Equals(Rhs.JsonPayload) &&
+			(Value.IsValid() && Rhs.Value.IsValid());
+}
+
+FAVVMJsonPayload::FAVVMJsonPayload(const FString& NewValue)
+	: JsonPayload(NewValue),
+	  Value(nullptr)
+{
+	ensureAlwaysMsgf(FJsonSerializer::Deserialize(TJsonReaderFactory<TCHAR>::Create(NewValue), Value),
+	                 TEXT("Failed to create FJsonObject from payload string."));
+}
+
+FAVVMJsonPayload::FAVVMJsonPayload(TSharedPtr<FJsonObject> NewValue)
+	: JsonPayload(TEXT("")),
+	  Value(NewValue)
+{
+	ensureAlwaysMsgf(FJsonSerializer::Serialize(Value.ToSharedRef(), TJsonWriterFactory<TCHAR>::Create(&JsonPayload)),
+	                 TEXT("Failed to parse JSonObject as String."));
 }

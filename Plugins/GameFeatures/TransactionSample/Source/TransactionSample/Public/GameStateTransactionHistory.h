@@ -22,8 +22,8 @@
 #include "CoreMinimal.h"
 
 #include "TransactionObject.h"
-#include "TransactionFactoryUtils.h"
 #include "Components/ActorComponent.h"
+#include "Payloads/AVVMComplexPayloads.h"
 #include "StructUtils/InstancedStruct.h"
 
 #include "GameStateTransactionHistory.generated.h"
@@ -84,7 +84,7 @@ public:
 	static void Static_RemoveAllTransactions(const UObject* WorldContextObject,
 	                                         const AActor* NewTarget);
 
-	template <typename TDerivedPayload, typename TValue>
+	template <typename TValue>
 	static void Static_GetAggregatedValues(const UObject* WorldContextObject,
 	                                       const FString& NewTargetId,
 	                                       const ETransactionType TransactionType,
@@ -105,7 +105,7 @@ protected:
 	TArray<const FTransactionObject*> GetAllTransactionsOfType(const FString& NewTargetId, const ETransactionType TransactionType) const;
 	TArray<const FTransactionObject*> GetAllTransactions(const FString& NewTargetId) const;
 
-	template <typename TDerivedPayload, typename TValue>
+	template <typename TValue>
 	void GetAggregatedValues(const FString& NewTargetId,
 	                         const ETransactionType TransactionType,
 	                         TValue& OutResult) const;
@@ -117,7 +117,7 @@ protected:
 	TWeakObjectPtr<const AGameStateBase> OwningOuter = nullptr;
 };
 
-template <typename TDerivedPayload, typename TValue>
+template <typename TValue>
 void UGameStateTransactionHistory::Static_GetAggregatedValues(const UObject* WorldContextObject,
                                                               const FString& NewTargetId,
                                                               const ETransactionType TransactionType,
@@ -126,19 +126,15 @@ void UGameStateTransactionHistory::Static_GetAggregatedValues(const UObject* Wor
 	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
 	if (IsValid(TransactionHistory))
 	{
-		TransactionHistory->GetAggregatedValues<TDerivedPayload, TValue>(NewTargetId, TransactionType, OutResult);
+		TransactionHistory->GetAggregatedValues<TValue>(NewTargetId, TransactionType, OutResult);
 	}
 }
 
-template <typename TDerivedPayload, typename TValue>
+template <typename TValue>
 void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetId,
                                                        const ETransactionType TransactionType,
                                                        TValue& OutResult) const
 {
-	// @gdemers define three policies within this function template.
-	// A) TDerivedPayload must derived from FTransactionPayload. *Can be enforced via metaprogramming or concepts later.
-	// B) TDerivedPayload must have a property named Value.
-	// C) TValue overload the operator+=().
 	for (const auto* Transaction : GetAllTransactionsOfType(NewTargetId, TransactionType))
 	{
 		if (!ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
@@ -146,11 +142,8 @@ void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetI
 			continue;
 		}
 
-		const TInstancedStruct<FTransactionPayload> InstancedPayload = UTransactionObjectUtils::GetValue(*Transaction);
-		const auto* Payload = InstancedPayload.GetPtr<TDerivedPayload>();
-		if (Payload != nullptr)
-		{
-			OutResult += Payload->Value;
-		}
+		const TInstancedStruct<FAVVMNotificationPayload> InstancedPayload = UTransactionObjectUtils::GetValue(*Transaction);
+		const auto Value = FAVVMJsonPayload::From<TValue>(InstancedPayload.GetPtr<FAVVMJsonPayload>());
+		OutResult += Value;
 	}
 }

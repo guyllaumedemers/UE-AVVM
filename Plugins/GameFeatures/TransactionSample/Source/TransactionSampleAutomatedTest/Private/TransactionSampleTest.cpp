@@ -22,7 +22,6 @@
 #include "AutomatedTestTransactionActor.h"
 #include "GameStateTransactionHistory.h"
 #include "GameFramework/GameStateBase.h"
-#include "TransactionFactoryImplTest.h"
 #include "Tests/AutomationCommon.h"
 
 /**
@@ -61,32 +60,28 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 	UTEST_NOT_EQUAL("Checking UniqueId property Equality.", TestActorUniqueId, FString::FromInt(INDEX_NONE))
 
 	// @gdemers create dummy payload.
-	const TInstancedStruct<FTransactionPayload> InputPayload = FTransactionPayload::Make<FTransactionPayloadTest>(1);
-	const auto* PolymorphicPayload = InputPayload.GetPtr<FTransactionPayloadTest>();
+	const auto InputPayload = FAVVMJsonPayload::To<int32>(1);
+	const FAVVMJsonPayload* PolymorphicPayload = InputPayload.GetPtr<FAVVMJsonPayload>();
 	UTEST_NOT_NULL("FTransactionPayload.", PolymorphicPayload)
 
-	// @gdemers testing utility api.
-	const FString StringInput = UTransactionFactoryUtils::CreateStringPayload(InputPayload);
-	const TInstancedStruct<FTransactionPayload> OutputPayload = UTransactionFactoryUtils::CreatePayloadFromString(UTransactionFactoryImplTest::StaticClass(), StringInput);
-	const auto* OtherPolymorphicPayload = OutputPayload.GetPtr<FTransactionPayloadTest>();
-	UTEST_NOT_NULL("FTransactionPayload.", OtherPolymorphicPayload)
+	const int32 OutOtherValue = FAVVMJsonPayload::From<int32>(PolymorphicPayload);
 
 	// @gdemers property comparison.
-	UTEST_EQUAL("Checking Payload property Equality.", PolymorphicPayload->Value, OtherPolymorphicPayload->Value)
+	UTEST_EQUAL("Checking Payload property Equality.", 1, OutOtherValue)
 
 	// @gdemers testing registration system.
 	FTransactionContextArgs Args_A;
 	Args_A.Instigator = nullptr;
 	Args_A.Target = TestActor;
 	Args_A.TransactionType = ETransactionType::Kill;
-	Args_A.Payload = StringInput;
+	Args_A.Payload = PolymorphicPayload->JsonPayload;
 	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(World, Args_A);
 
 	FTransactionContextArgs Args_B;
 	Args_B.Instigator = nullptr;
 	Args_B.Target = TestActor;
 	Args_B.TransactionType = ETransactionType::Killstreak;
-	Args_B.Payload = StringInput;
+	Args_B.Payload = PolymorphicPayload->JsonPayload;
 	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(World, Args_B);
 
 	// @gdemers increment existing entry.
@@ -94,14 +89,14 @@ bool TransactionSampleTest::RunTest(const FString& Parameters)
 	Args_C.Instigator = nullptr;
 	Args_C.Target = TestActor;
 	Args_C.TransactionType = ETransactionType::Kill;
-	Args_C.Payload = StringInput;
+	Args_C.Payload = PolymorphicPayload->JsonPayload;
 	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(World, Args_C);
 
 	TArray<const FTransactionObject*> OutResult_A = UGameStateTransactionHistory::Static_GetAllTransactionsOfType(World, TestActorUniqueId, ETransactionType::Kill);
 	UTEST_EQUAL("Post-Addition, ETransactionType::Kill Count.", OutResult_A.Num(), 2)
 
 	int32 OutResult = 0;
-	UGameStateTransactionHistory::Static_GetAggregatedValues<FTransactionPayloadTest, int32>(World, TestActorUniqueId, ETransactionType::Kill, OutResult);
+	UGameStateTransactionHistory::Static_GetAggregatedValues<int32>(World, TestActorUniqueId, ETransactionType::Kill, OutResult);
 	UTEST_EQUAL("Aggregate values, ETransactionType::Kill Total Value.", OutResult, 2)
 
 	TArray<const FTransactionObject*> OutResult_B = UGameStateTransactionHistory::Static_GetAllTransactions(World, TestActorUniqueId);

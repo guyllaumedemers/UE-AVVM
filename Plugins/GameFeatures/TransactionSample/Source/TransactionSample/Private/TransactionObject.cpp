@@ -20,40 +20,39 @@
 #include "TransactionObject.h"
 
 #include "AVVMLogger.h"
+#include "AVVMNotificationSubsystem.h"
 #include "AVVMToolkitUtils.h"
 #include "DoesTransactionProviderSupportIdentifier.h"
 #include "NativeGameplayTags.h"
 #include "TransactionSampleModule.h"
-#include "TransactionSettings.h"
 #include "Dom/JsonObject.h"
 #include "Engine/Engine.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "Serialization/JsonSerializer.h"
-#include "Serialization/JsonWriter.h"
+#include "Payloads/AVVMComplexPayloads.h"
 
 // @gdemers WARNING : Careful about Server-Client mismatch. Server grants tags so this module has to be available there.
 UE_DEFINE_GAMEPLAY_TAG(TAG_TRANSACTION_NOTIFICATION, "TransactionSample.UIChannel.Notification.Transaction");
 
-FTransactionObject::FTransactionObject(FString&& NewInstigatorId,
-                                       FString&& NewTargetId,
-                                       const ETransactionType NewTransactionType,
-                                       FString&& NewPayload)
-	: InstigatorId(NewInstigatorId),
-	  TargetId(NewTargetId),
-	  TransactionType(NewTransactionType),
-	  Payload(NewPayload)
+FTransactionObject::FTransactionObject(const ETransactionType NewTransactionType,
+                                       FString&& NewPayload,
+                                       FString&& NewInstigatorId,
+                                       FString&& NewTargetId)
+	: TransactionType(NewTransactionType),
+	  Payload(NewPayload),
+	  InstigatorId(NewInstigatorId),
+	  TargetId(NewTargetId)
 {
 }
 
 bool FTransactionObject::operator==(const FTransactionObject& Rhs) const
 {
-	return InstigatorId.Equals(Rhs.InstigatorId) &&
-			TargetId.Equals(Rhs.TargetId) &&
-			(TransactionType == Rhs.TransactionType) &&
-			Payload.Equals(Rhs.Payload);
+	return (TransactionType == Rhs.TransactionType) &&
+			Payload.Equals(Rhs.Payload) &&
+			InstigatorId.Equals(Rhs.InstigatorId) &&
+			TargetId.Equals(Rhs.TargetId);
 }
 
 void FTransactionObject::PostReplicatedAdd(const struct FFastArraySerializer& InArraySerializer)
@@ -64,13 +63,13 @@ void FTransactionObject::PostReplicatedAdd(const struct FFastArraySerializer& In
 	                GEngine,
 	                GEngine,
 	                TEXT("New Transaction Detected! \r\n Value: %s."),
-	                *UTransactionObjectUtils::ToString(*this));
+	                *Payload);
 
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_TRANSACTION_NOTIFICATION;
 	ContextArgs.Payload = UTransactionObjectUtils::GetValue(*this);
 	ContextArgs.Target = nullptr;
-	
+
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(GEngine, ContextArgs);
 }
 
@@ -87,38 +86,9 @@ bool UTransactionObjectUtils::DoesPartialMatch(const FTransactionObject& NewTran
 	return NewTransactionObject.TargetId.Equals(NewTargetId);
 }
 
-FString UTransactionObjectUtils::ToString(const FTransactionObject& NewTransactionObject)
+TInstancedStruct<FAVVMNotificationPayload> UTransactionObjectUtils::GetValue(const FTransactionObject& NewTransactionObject)
 {
-	TSharedPtr<FJsonObject> JsonData = MakeShareable(new FJsonObject);
-	JsonData->SetStringField(TEXT("Instigator"), NewTransactionObject.InstigatorId);
-	JsonData->SetStringField(TEXT("Target"), NewTransactionObject.TargetId);
-	JsonData->SetStringField(TEXT("TransactionType"), EnumToString(NewTransactionObject.TransactionType));
-	JsonData->SetStringField(TEXT("Payload"), NewTransactionObject.Payload);
-
-	FString JsonOutput;
-
-	auto JsonWriterRef = TJsonWriterFactory<TCHAR>::Create(&JsonOutput);
-	if (FJsonSerializer::Serialize(JsonData.ToSharedRef(), JsonWriterRef))
-	{
-		return JsonOutput;
-	}
-
-	return TEXT("Unknown");
-}
-
-TInstancedStruct<FTransactionPayload> UTransactionObjectUtils::GetValue(const FTransactionObject& NewTransactionObject)
-{
-	const TSubclassOf<UTransactionFactoryImpl> FactoryImpl = UTransactionSettings::GetFactoryImpl(NewTransactionObject.TransactionType);
-	if (ensureAlwaysMsgf(IsValid(FactoryImpl),
-	                     TEXT("Match not found. Missing FactoryImpl Class for Transaction Type \"%s\"."),
-	                     EnumToString(NewTransactionObject.TransactionType)))
-	{
-		return UTransactionFactoryUtils::CreatePayloadFromString(FactoryImpl, NewTransactionObject.Payload);
-	}
-	else
-	{
-		return FTransactionPayload::Empty;
-	}
+	return FAVVMNotificationPayload::Make<FAVVMJsonPayload>(NewTransactionObject.Payload);
 }
 
 FString UTransactionObjectUtils::GetUniqueId(const AActor* NewTarget)
@@ -169,7 +139,12 @@ FString UTransactionObjectUtils::GetUniqueId(const AActor* NewTarget)
 		}
 	};
 
-	FString OutActorId;
+	FString OutActorId{};
 	FindActorId(NewTarget, OutActorId);
 	return OutActorId;
+}
+
+FString UTransactionObjectUtils::ToString(const FTransactionObject& Transaction)
+{
+	return Transaction.Payload;
 }

@@ -31,6 +31,7 @@ public class TransactionSampleAutomatedTest : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"AVVM",
 				"AVVMGameplay",
 				"AVVMOnline",
 				"AVVMToolkit",
@@ -40,6 +41,7 @@ public class TransactionSampleAutomatedTest : ModuleRules
 				"Engine",
 				"FunctionalTesting",
 				"GameplayTags",
+				"Json",
 				"TransactionSample",
 			}
 		);
