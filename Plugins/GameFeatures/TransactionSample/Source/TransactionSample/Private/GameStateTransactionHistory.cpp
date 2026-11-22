@@ -166,7 +166,7 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(FTransactionContex
 	                OwningOuter.Get(),
 	                OwningOuter.Get(),
 	                TEXT("Creating new Record %s."),
-	                *UTransactionObjectUtils::ToString(Transaction));
+	                *UTransactionObjectUtils::ToString(Transactions.TransactionObjects.Last()));
 #endif
 }
 
