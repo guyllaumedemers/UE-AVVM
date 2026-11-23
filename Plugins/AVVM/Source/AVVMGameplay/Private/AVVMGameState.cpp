@@ -46,6 +46,8 @@ void AAVVMGameState::AddPlayerState(APlayerState* PlayerState)
 {
 	// @gdemers IMPORTANT : player rejection cannot be handled here as we dont yet have a valid UniqueNetId.
 	Super::AddPlayerState(PlayerState);
+	
+	GetOnPlayerArrayResized().Broadcast(Cast<AAVVMPlayerState>(PlayerState), true);
 
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_AVVMGAMEPLAY_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
@@ -57,6 +59,8 @@ void AAVVMGameState::AddPlayerState(APlayerState* PlayerState)
 void AAVVMGameState::RemovePlayerState(APlayerState* PlayerState)
 {
 	Super::RemovePlayerState(PlayerState);
+	
+	GetOnPlayerArrayResized().Broadcast(Cast<AAVVMPlayerState>(PlayerState), false);
 
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = TAG_AVVMGAMEPLAY_GAMESTATE_ONPLAYERSTATE_ADDED_OR_REMOVED;
@@ -156,6 +160,11 @@ bool AAVVMGameState::Server_HandleRejectedLogin(APlayerState* PlayerState)
 
 	Multicast_NotifyPlayerStateRejection(PlayerState);
 	return true;
+}
+
+FAVVMOnPlayerArrayResizedDelegate& AAVVMGameState::GetOnPlayerArrayResized()
+{
+	return OnPlayerArrayResized;
 }
 
 void AAVVMGameState::Multicast_NotifyPlayerStateRejection_Implementation(APlayerState* PlayerState)

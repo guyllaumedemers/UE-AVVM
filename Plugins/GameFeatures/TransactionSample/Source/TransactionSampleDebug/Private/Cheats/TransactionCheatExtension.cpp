@@ -20,7 +20,7 @@
 #include "Cheats/TransactionCheatExtension.h"
 
 #include "AVVMLogger.h"
-#include "GameStateTransactionHistory.h"
+#include "TransactionHistoryComponent.h"
 #include <imgui.h>
 #include "TransactionSampleModule.h"
 #include "Containers/StringFwd.h"
@@ -59,7 +59,7 @@ void UTransactionCheatExtension::RemoveAllTransactionsOfType(const ETransactionT
 	                PlayerIndex);
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	UGameStateTransactionHistory::Static_RemoveAllTransactionOfType(this, PlayerState, NewType);
+	UTransactionHistoryComponent::Static_RemoveAllTransactionOfType(this, PlayerState, NewType);
 }
 
 void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
@@ -71,7 +71,7 @@ void UTransactionCheatExtension::RemoveAllTransactions(const int32 PlayerIndex)
 	                PlayerIndex);
 
 	const APlayerState* PlayerState = UGameplayStatics::GetPlayerState(this, PlayerIndex);
-	UGameStateTransactionHistory::Static_RemoveAllTransactions(this, PlayerState);
+	UTransactionHistoryComponent::Static_RemoveAllTransactions(this, PlayerState);
 }
 
 void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, const int32 PlayerIndex)
@@ -92,7 +92,7 @@ void UTransactionCheatExtension::AddTransaction(const ETransactionType NewType, 
 	Args.TransactionType = NewType;
 	Args.Payload = JSonPayload != nullptr ? JSonPayload->JsonPayload : TEXT("");
 
-	UGameStateTransactionHistory::Static_CreateAndRecordTransaction(this, Args);
+	UTransactionHistoryComponent::Static_CreateAndRecordTransaction(this, Args);
 }
 
 void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
@@ -115,7 +115,7 @@ void UTransactionCheatExtension::PrintAll(const int32 PlayerIndex)
 		return;
 	}
 
-	for (const FTransactionObject* Transaction : UGameStateTransactionHistory::Static_GetAllTransactions(this, UniqueNetId->ToString()))
+	for (const FTransactionObject* Transaction : UTransactionHistoryComponent::Static_GetAllTransactions(this, UniqueNetId->ToString()))
 	{
 		if (!ensureAlwaysMsgf(Transaction != nullptr, TEXT("Invalid Memory access.")))
 		{

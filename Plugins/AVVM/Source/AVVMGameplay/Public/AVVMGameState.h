@@ -26,6 +26,10 @@
 
 #include "AVVMGameState.generated.h"
 
+class AAVVMPlayerState;
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnPlayerArrayResizedDelegate, AAVVMPlayerState* PlayerArray, const bool bExpanded);
+
 /**
  *	Class description:
  *
@@ -44,6 +48,8 @@ class AVVMGAMEPLAY_API AAVVMGameState : public AModularGameState,
 {
 	GENERATED_BODY()
 
+	FAVVMOnPlayerArrayResizedDelegate OnPlayerArrayResized{};
+
 public:
 	AAVVMGameState(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -59,6 +65,8 @@ public:
 
 	void RejectPlayerUniqueNetId(const FUniqueNetIdRepl& UniqueNetId);
 	bool Server_HandleRejectedLogin(APlayerState* PlayerState);
+	
+	FAVVMOnPlayerArrayResizedDelegate& GetOnPlayerArrayResized();
 
 protected:
 	UFUNCTION(NetMulticast, Reliable)

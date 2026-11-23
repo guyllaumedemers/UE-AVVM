@@ -26,7 +26,7 @@
 #include "Payloads/AVVMComplexPayloads.h"
 #include "StructUtils/InstancedStruct.h"
 
-#include "GameStateTransactionHistory.generated.h"
+#include "TransactionHistoryComponent.generated.h"
 
 class AGameStateBase;
 enum class ETransactionType : uint8;
@@ -57,16 +57,18 @@ struct TRANSACTIONSAMPLE_API FTransactionContextArgs
 /**
  *	Class description:
  *
- *	UGameStateTransactionHistory capture UTransaction object. It exists on the AGameStateBase and is pushed via GFP.
- *	During gameplay, it aggregates statistics for later access and display with UI or third party service.
+ *	UTransactionHistoryComponent is a component system that capture gameplay statistics
+ *	based on the player gameplay experience.
+ *	
+ *	Note : Use this system for persistent statistics with complex payload. example : FAVVMJsonPayload.
  */
 UCLASS(ClassGroup=("Transaction"), Blueprintable, meta=(BlueprintSpawnableComponent))
-class TRANSACTIONSAMPLE_API UGameStateTransactionHistory : public UActorComponent
+class TRANSACTIONSAMPLE_API UTransactionHistoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer);
+	UTransactionHistoryComponent(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -98,7 +100,7 @@ public:
 	                                                                   const FString& NewTargetId);
 
 protected:
-	static UGameStateTransactionHistory* GetActorComponent(const UObject* WorldContextObject);
+	static UTransactionHistoryComponent* GetActorComponent(const UObject* WorldContextObject);
 	void CreateAndRecordTransaction(FTransactionContextArgs&& Args);
 	void RemoveAllTransactionOfType(const AActor* NewTarget, const ETransactionType NewTransactionType);
 	void RemoveAllTransactions(const AActor* NewTarget);
@@ -118,12 +120,12 @@ protected:
 };
 
 template <typename TValue>
-void UGameStateTransactionHistory::Static_GetAggregatedValues(const UObject* WorldContextObject,
+void UTransactionHistoryComponent::Static_GetAggregatedValues(const UObject* WorldContextObject,
                                                               const FString& NewTargetId,
                                                               const ETransactionType TransactionType,
                                                               TValue& OutResult)
 {
-	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	const auto* TransactionHistory = UTransactionHistoryComponent::GetActorComponent(WorldContextObject);
 	if (IsValid(TransactionHistory))
 	{
 		TransactionHistory->GetAggregatedValues<TValue>(NewTargetId, TransactionType, OutResult);
@@ -131,7 +133,7 @@ void UGameStateTransactionHistory::Static_GetAggregatedValues(const UObject* Wor
 }
 
 template <typename TValue>
-void UGameStateTransactionHistory::GetAggregatedValues(const FString& NewTargetId,
+void UTransactionHistoryComponent::GetAggregatedValues(const FString& NewTargetId,
                                                        const ETransactionType TransactionType,
                                                        TValue& OutResult) const
 {

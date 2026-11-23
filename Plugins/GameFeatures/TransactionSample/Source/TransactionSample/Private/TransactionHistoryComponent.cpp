@@ -17,7 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-#include "GameStateTransactionHistory.h"
+#include "TransactionHistoryComponent.h"
 
 #include "AVVMLogger.h"
 #include "TransactionObject.h"
@@ -26,7 +26,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
-UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitializer& ObjectInitializer)
+UTransactionHistoryComponent::UTransactionHistoryComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -38,17 +38,17 @@ UGameStateTransactionHistory::UGameStateTransactionHistory(const FObjectInitiali
 	bReplicateUsingRegisteredSubObjectList = true;
 }
 
-void UGameStateTransactionHistory::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UTransactionHistoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(UGameStateTransactionHistory, Transactions, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UTransactionHistoryComponent, Transactions, Params);
 }
 
-void UGameStateTransactionHistory::BeginPlay()
+void UTransactionHistoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -62,12 +62,12 @@ void UGameStateTransactionHistory::BeginPlay()
 	                Outer,
 	                Outer,
 	                TEXT("Adding %s."),
-	                *GetNameSafe(UGameStateTransactionHistory::StaticClass()));
+	                *GetNameSafe(UTransactionHistoryComponent::StaticClass()));
 
 	OwningOuter = Outer;
 }
 
-void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UTransactionHistoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -77,58 +77,58 @@ void UGameStateTransactionHistory::EndPlay(const EEndPlayReason::Type EndPlayRea
 	                OwningOuter.Get(),
 	                OwningOuter.Get(),
 	                TEXT("Removing %s."),
-	                *GetNameSafe(UGameStateTransactionHistory::StaticClass()));
+	                *GetNameSafe(UTransactionHistoryComponent::StaticClass()));
 }
 
-void UGameStateTransactionHistory::Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
+void UTransactionHistoryComponent::Static_CreateAndRecordTransaction(const UObject* WorldContextObject,
                                                                      FTransactionContextArgs Args)
 {
-	auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	auto* TransactionHistory = UTransactionHistoryComponent::GetActorComponent(WorldContextObject);
 	if (IsValid(TransactionHistory))
 	{
 		TransactionHistory->CreateAndRecordTransaction(MoveTemp(Args));
 	}
 }
 
-void UGameStateTransactionHistory::Static_RemoveAllTransactionOfType(const UObject* WorldContextObject,
+void UTransactionHistoryComponent::Static_RemoveAllTransactionOfType(const UObject* WorldContextObject,
                                                                      const AActor* NewTarget,
                                                                      const ETransactionType NewTransactionType)
 {
-	auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	auto* TransactionHistory = UTransactionHistoryComponent::GetActorComponent(WorldContextObject);
 	if (IsValid(TransactionHistory))
 	{
 		TransactionHistory->RemoveAllTransactionOfType(NewTarget, NewTransactionType);
 	}
 }
 
-void UGameStateTransactionHistory::Static_RemoveAllTransactions(const UObject* WorldContextObject,
+void UTransactionHistoryComponent::Static_RemoveAllTransactions(const UObject* WorldContextObject,
                                                                 const AActor* NewTarget)
 {
-	auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	auto* TransactionHistory = UTransactionHistoryComponent::GetActorComponent(WorldContextObject);
 	if (IsValid(TransactionHistory))
 	{
 		TransactionHistory->RemoveAllTransactions(NewTarget);
 	}
 }
 
-TArray<const FTransactionObject*> UGameStateTransactionHistory::Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
+TArray<const FTransactionObject*> UTransactionHistoryComponent::Static_GetAllTransactionsOfType(const UObject* WorldContextObject,
                                                                                                 const FString& NewTargetId,
                                                                                                 const ETransactionType TransactionType)
 {
-	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	const auto* TransactionHistory = UTransactionHistoryComponent::GetActorComponent(WorldContextObject);
 	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactionsOfType(NewTargetId, TransactionType) : TArray<const FTransactionObject*>{};
 }
 
-TArray<const FTransactionObject*> UGameStateTransactionHistory::Static_GetAllTransactions(const UObject* WorldContextObject,
+TArray<const FTransactionObject*> UTransactionHistoryComponent::Static_GetAllTransactions(const UObject* WorldContextObject,
                                                                                           const FString& NewTargetId)
 {
-	const auto* TransactionHistory = UGameStateTransactionHistory::GetActorComponent(WorldContextObject);
+	const auto* TransactionHistory = UTransactionHistoryComponent::GetActorComponent(WorldContextObject);
 	return IsValid(TransactionHistory) ? TransactionHistory->GetAllTransactions(NewTargetId) : TArray<const FTransactionObject*>{};
 }
 
-UGameStateTransactionHistory* UGameStateTransactionHistory::GetActorComponent(const UObject* WorldContextObject)
+UTransactionHistoryComponent* UTransactionHistoryComponent::GetActorComponent(const UObject* WorldContextObject)
 {
-	static TWeakObjectPtr<UGameStateTransactionHistory> TransactionHistory = nullptr;
+	static TWeakObjectPtr<UTransactionHistoryComponent> TransactionHistory = nullptr;
 	if (TransactionHistory.IsValid())
 	{
 		return TransactionHistory.Get();
@@ -137,13 +137,13 @@ UGameStateTransactionHistory* UGameStateTransactionHistory::GetActorComponent(co
 	const AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject);
 	if (IsValid(GameState))
 	{
-		TransactionHistory = GameState->GetComponentByClass<UGameStateTransactionHistory>();
+		TransactionHistory = GameState->GetComponentByClass<UTransactionHistoryComponent>();
 	}
 
 	return TransactionHistory.Get();
 }
 
-void UGameStateTransactionHistory::CreateAndRecordTransaction(FTransactionContextArgs&& Args)
+void UTransactionHistoryComponent::CreateAndRecordTransaction(FTransactionContextArgs&& Args)
 {
 #if WITH_SERVER_CODE
 	if (!Args.Target.IsValid() || !Args.Target->HasAuthority())
@@ -170,7 +170,7 @@ void UGameStateTransactionHistory::CreateAndRecordTransaction(FTransactionContex
 #endif
 }
 
-void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewTarget,
+void UTransactionHistoryComponent::RemoveAllTransactionOfType(const AActor* NewTarget,
                                                               const ETransactionType NewTransactionType)
 {
 #if WITH_SERVER_CODE
@@ -197,7 +197,7 @@ void UGameStateTransactionHistory::RemoveAllTransactionOfType(const AActor* NewT
 #endif
 }
 
-void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget)
+void UTransactionHistoryComponent::RemoveAllTransactions(const AActor* NewTarget)
 {
 #if WITH_SERVER_CODE
 	if (!IsValid(NewTarget) || !NewTarget->HasAuthority())
@@ -222,7 +222,7 @@ void UGameStateTransactionHistory::RemoveAllTransactions(const AActor* NewTarget
 #endif
 }
 
-TArray<const FTransactionObject*> UGameStateTransactionHistory::GetAllTransactionsOfType(const FString& NewTargetId,
+TArray<const FTransactionObject*> UTransactionHistoryComponent::GetAllTransactionsOfType(const FString& NewTargetId,
                                                                                          const ETransactionType TransactionType) const
 {
 	TArray<const FTransactionObject*> OutResult;
@@ -237,7 +237,7 @@ TArray<const FTransactionObject*> UGameStateTransactionHistory::GetAllTransactio
 	return OutResult;
 }
 
-TArray<const FTransactionObject*> UGameStateTransactionHistory::GetAllTransactions(const FString& NewTargetId) const
+TArray<const FTransactionObject*> UTransactionHistoryComponent::GetAllTransactions(const FString& NewTargetId) const
 {
 	TArray<const FTransactionObject*> OutResult;
 	for (const auto& TransactionObject : Transactions.TransactionObjects)

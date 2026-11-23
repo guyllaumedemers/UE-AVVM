@@ -55,7 +55,7 @@ void FAVVMGameplayTagStackObject::PostReplicatedAdd(const struct FFastArraySeria
 		OutValue = this;
 
 		PredictedStackCount = ReplicatedStackCount;
-		FastArraySerializer->OnGameplayTagStackObjectChanged.Broadcast(Tag, PredictedStackCount);
+		FastArraySerializer->OnGameplayTagStackObjectChanged.Broadcast(FastArraySerializer, Tag, PredictedStackCount);
 	}
 }
 
@@ -71,7 +71,7 @@ void FAVVMGameplayTagStackObject::PreReplicatedRemove(const struct FFastArraySer
 	if (ensureAlwaysMsgf(FastArraySerializer != nullptr, TEXT("Failed to cast to owning type.")) && FastArraySerializer->FastLookup.Contains(Tag))
 	{
 		FastArraySerializer->FastLookup.Remove(Tag);
-		FastArraySerializer->OnGameplayTagStackObjectRemoved.Broadcast(Tag);
+		FastArraySerializer->OnGameplayTagStackObjectRemoved.Broadcast(FastArraySerializer, Tag);
 	}
 }
 
@@ -88,7 +88,7 @@ void FAVVMGameplayTagStackObject::PostReplicatedChange(const struct FFastArraySe
 	if (ensureAlwaysMsgf(FastArraySerializer != nullptr, TEXT("Failed to cast to owning type.")))
 	{
 		PredictedStackCount = ReplicatedStackCount;
-		FastArraySerializer->OnGameplayTagStackObjectChanged.Broadcast(Tag, PredictedStackCount);
+		FastArraySerializer->OnGameplayTagStackObjectChanged.Broadcast(FastArraySerializer, Tag, PredictedStackCount);
 	}
 }
 

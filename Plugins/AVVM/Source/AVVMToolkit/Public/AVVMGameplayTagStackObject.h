@@ -25,6 +25,9 @@
 
 #include "AVVMGameplayTagStackObject.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FAVVMOnGameplayTagStackObjectChanged, const FAVVMGameplayTagStackObjectFastArray* FastArray, const FGameplayTag&, const int32 NewValue);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnGameplayTagStackObjectRemoved, const FAVVMGameplayTagStackObjectFastArray* FastArray, const FGameplayTag&);
+
 /**
  *	Class description:
  *	
@@ -86,10 +89,7 @@ struct AVVMTOOLKIT_API FAVVMGameplayTagStackObjectFastArray : public FIrisFastAr
 	const TArray<FAVVMGameplayTagStackObject>& GetGameplayTagStackObjects() const;
 	const FAVVMGameplayTagStackObject* GetFastLookupTag(const FGameplayTag& Tag) const;
 
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FAVVMOnGameplayTagStackObjectChanged, const FGameplayTag&, const int32 NewValue);
 	FAVVMOnGameplayTagStackObjectChanged OnGameplayTagStackObjectChanged{};
-
-	DECLARE_MULTICAST_DELEGATE_OneParam(FAVVMOnGameplayTagStackObjectRemoved, const FGameplayTag&);
 	FAVVMOnGameplayTagStackObjectRemoved OnGameplayTagStackObjectRemoved{};
 
 protected:

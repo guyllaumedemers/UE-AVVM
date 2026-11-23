@@ -42,6 +42,7 @@ public class TransactionSampleAutomatedTest : ModuleRules
 				"FunctionalTesting",
 				"GameplayTags",
 				"Json",
+				"ModularGameplayActors",
 				"TransactionSample",
 			}
 		);
