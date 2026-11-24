@@ -56,8 +56,7 @@ class ATransactionNetTestReplicatedGameState : public AAVVMGameState
 
 public:
 	ATransactionNetTestReplicatedGameState(const FObjectInitializer& ObjectInitializer);
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly)
 	TObjectPtr<UFastTransactionHistoryComponent> FastTransactionHistoryComponent{nullptr};
 };

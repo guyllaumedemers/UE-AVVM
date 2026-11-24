@@ -36,8 +36,3 @@ ATransactionNetTestReplicatedGameState::ATransactionNetTestReplicatedGameState(c
 	FastTransactionHistoryComponent = CreateDefaultSubobject<UFastTransactionHistoryComponent>(TEXT("FastTransactionHistoryComponent"));
 	SetReplicates(true);
 }
-
-void ATransactionNetTestReplicatedGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-}

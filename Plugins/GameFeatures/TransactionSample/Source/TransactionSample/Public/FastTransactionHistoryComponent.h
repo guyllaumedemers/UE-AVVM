@@ -108,7 +108,8 @@ protected:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AAVVMGameState> OwningOuter = nullptr;
 
-	// @gdemers fast access lookup into the replicated array of a player transactions
+	// TODO @gdemers impl Reverse lookup to support notifying all tag channels
 	TMap<const FAVVMGameplayTagStackObjectFastArray*, const FUniqueNetIdRepl> ReverseFastLookup{};
+	// @gdemers fast access lookup into the replicated array of a player transactions
 	TMap<FUniqueNetIdRepl, FAVVMGameplayTagStackObjectFastArray*> FastLookup{};
 };
