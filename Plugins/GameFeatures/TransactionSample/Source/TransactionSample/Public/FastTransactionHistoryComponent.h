@@ -32,6 +32,26 @@ class AAVVMPlayerState;
 
 /**
  *	Class description:
+ *	
+ *	FClientFastTransactionDecompilation is a context class that encapsulate player mapping, and provide support for constructing fast access lookup on for clients
+ *	by allowing retrieval of mapping between UniqueNetIdRepl and the FFastArraySerializer we replicate from server.
+ */
+USTRUCT(BlueprintType)
+struct TRANSACTIONSAMPLE_API FClientFastTransactionDecompilation
+{
+	GENERATED_BODY()
+	
+	bool operator==(const FClientFastTransactionDecompilation& Rhs) const;
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	FUniqueNetIdRepl UniqueNetId{};
+	
+	UPROPERTY(Transient, BlueprintReadWrite)
+	int32 ArrayIndex{INDEX_NONE};
+};
+
+/**
+ *	Class description:
  *
  *	UFastTransactionHistoryComponent is a component system that capture gameplay statistics tied to player state in-play.
  *	
@@ -91,9 +111,15 @@ protected:
 
 	UFUNCTION()
 	void OnPlayerUniqueNetIdReady(const FUniqueNetIdRepl& UniqueNetIdRepl);
-	
+
+	UFUNCTION()
+	void OnPlayerUniqueNetIdLeaving(const FUniqueNetIdRepl& UniqueNetIdRepl);
+
 	UFUNCTION()
 	void OnRep_OnPerPlayerTransactionsResize();
+
+	UFUNCTION()
+	void OnRep_OnClientDecompilationModified();
 
 	// @gdemers manage broadcasting to the AVVMNotificationSubsystem 
 	void OnGameplayTagStackObjectChanged(const FAVVMGameplayTagStackObjectFastArray* FastArray, const FGameplayTag& Tag, const int32 NewValue) const;
@@ -102,14 +128,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldReleasePlayerStatisticsOnEarlyLeave{false};
 
-	UPROPERTY(Transient, BlueprintReadOnly, Replicated)
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnPerPlayerTransactionsResize")
 	TArray<FAVVMGameplayTagStackObjectFastArray> PerPlayerTransactions{};
 
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TWeakObjectPtr<const AAVVMGameState> OwningOuter = nullptr;
 
-	// TODO @gdemers impl Reverse lookup to support notifying all tag channels
-	TMap<const FAVVMGameplayTagStackObjectFastArray*, const FUniqueNetIdRepl> ReverseFastLookup{};
+	TMap<const FAVVMGameplayTagStackObjectFastArray*, const FClientFastTransactionDecompilation*> ReverseFastLookup{};
 	// @gdemers fast access lookup into the replicated array of a player transactions
 	TMap<FUniqueNetIdRepl, FAVVMGameplayTagStackObjectFastArray*> FastLookup{};
+
+private:
+	// @gdemers NOBODY should ever touch this!
+	UPROPERTY(Transient, BlueprintReadOnly, ReplicatedUsing="OnRep_OnClientDecompilationModified", meta=(AllowPrivateAccess))
+	TArray<FClientFastTransactionDecompilation> ClientDecompilation{};
 };

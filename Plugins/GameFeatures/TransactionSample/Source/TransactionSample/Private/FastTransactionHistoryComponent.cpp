@@ -28,6 +28,12 @@
 #include "Net/UnrealNetwork.h"
 #include "Payloads/AVVMPrimitivePayloads.h"
 
+bool FClientFastTransactionDecompilation::operator==(const FClientFastTransactionDecompilation& Rhs) const
+{
+	return (UniqueNetId == Rhs.UniqueNetId) &&
+			(ArrayIndex == Rhs.ArrayIndex);
+}
+
 UFastTransactionHistoryComponent::UFastTransactionHistoryComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -47,7 +53,8 @@ void UFastTransactionHistoryComponent::GetLifetimeReplicatedProps(TArray<class F
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(UFastTransactionHistoryComponent, PerPlayerTransactions, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(UFastTransactionHistoryComponent, PerPlayerTransactions, Params)
+	DOREPLIFETIME_WITH_PARAMS_FAST(UFastTransactionHistoryComponent, ClientDecompilation, Params);
 }
 
 void UFastTransactionHistoryComponent::BeginPlay()
@@ -65,9 +72,14 @@ void UFastTransactionHistoryComponent::BeginPlay()
 	                Outer,
 	                TEXT("Adding %s."),
 	                *GetNameSafe(UFastTransactionHistoryComponent::StaticClass()));
+	
+	OwningOuter = Outer;
 
 	Outer->GetOnPlayerArrayResized().AddUObject(this, &UFastTransactionHistoryComponent::OnPlayerArrayResized);
-	OwningOuter = Outer;
+	for (const auto& PlayerState : Outer->PlayerArray)
+	{
+		OnPlayerArrayResized(Cast<AAVVMPlayerState>(PlayerState), true);
+	}
 }
 
 void UFastTransactionHistoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -184,12 +196,27 @@ int32 UFastTransactionHistoryComponent::ModifyTransaction(const FUniqueNetIdRepl
                                                           const int32 DeltaValue,
                                                           const bool bHasAuthority)
 {
+	if (!ensureAlwaysMsgf(PlayerUniqueId.IsValid(),
+	                      TEXT("Attempting PlayerUniqueId access too early")))
+	{
+		return INDEX_NONE;
+	}
+
 	FAVVMGameplayTagStackObjectFastArray** SearchResult = FastLookup.Find(PlayerUniqueId);
 	if ((SearchResult == nullptr) && bHasAuthority)
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(UFastTransactionHistoryComponent, PerPlayerTransactions, this);
 		auto& Value = PerPlayerTransactions.Add_GetRef(FAVVMGameplayTagStackObjectFastArray{});
-		Value.Modify(Tag, DeltaValue, bHasAuthority);
+
+		MARK_PROPERTY_DIRTY_FROM_NAME(UFastTransactionHistoryComponent, ClientDecompilation, this);
+		auto& DecompValue = ClientDecompilation.Add_GetRef(FClientFastTransactionDecompilation{PlayerUniqueId, PerPlayerTransactions.Num() - 1});
+
+		if (Tag.IsValid())
+		{
+			Value.Modify(Tag, DeltaValue, bHasAuthority);
+		}
+
+		ReverseFastLookup.Add(&Value, &DecompValue);
 		FastLookup.Add(PlayerUniqueId, &Value);
 	}
 	else if (SearchResult == nullptr)
@@ -233,38 +260,86 @@ void UFastTransactionHistoryComponent::OnPlayerArrayResized(AAVVMPlayerState* Ne
 	{
 		OnPlayerUniqueNetIdReady(UniqueNetIdRef);
 	}
-	else if (bShouldReleasePlayerStatisticsOnEarlyLeave)
+	else if ((GetOwnerRole() == ROLE_Authority) && bShouldReleasePlayerStatisticsOnEarlyLeave)
 	{
-		auto* SearchResult = FastLookup.Find(UniqueNetIdRef);
-		if (ensureAlwaysMsgf(SearchResult != nullptr,
-		                     TEXT("Player was never registered, or already removed.")))
-		{
-			(**SearchResult) = FAVVMGameplayTagStackObjectFastArray{};
-			FastLookup.Remove(UniqueNetIdRef);
-		}
+		OnPlayerUniqueNetIdLeaving(UniqueNetIdRef);
 	}
 }
 
 void UFastTransactionHistoryComponent::OnPlayerUniqueNetIdReady(const FUniqueNetIdRepl& UniqueNetIdRepl)
 {
+	if (!ensureAlwaysMsgf(UniqueNetIdRepl.IsValid(),
+	                      TEXT("Attempting to access UniqueNetId while waiting for its initialization.")))
+	{
+		return;
+	}
+
 	ModifyTransaction(UniqueNetIdRepl,
 	                  FGameplayTag::EmptyTag,
 	                  0,
 	                  (GetOwnerRole() == ROLE_Authority));
 }
 
+void UFastTransactionHistoryComponent::OnPlayerUniqueNetIdLeaving(const FUniqueNetIdRepl& UniqueNetIdRepl)
+{
+	auto* SearchResult = FastLookup.Find(UniqueNetIdRepl);
+	if (!ensureAlwaysMsgf(SearchResult != nullptr,
+	                      TEXT("Player was never registered, or already removed.")))
+	{
+		return;
+	}
+
+	const auto* const* DecompValue = ReverseFastLookup.Find(*SearchResult);
+	if (!ensureAlwaysMsgf(DecompValue != nullptr,
+	                      TEXT("Player could not find a decompilation object.")))
+	{
+		return;
+	}
+
+	const int32 DecompRemovalIndex = ClientDecompilation.IndexOfByKey(**DecompValue);
+	if (ensureAlwaysMsgf(DecompRemovalIndex != INDEX_NONE, TEXT("Failed to access Decomp Array Index.")))
+	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(UFastTransactionHistoryComponent, ClientDecompilation, this);
+		ClientDecompilation.RemoveAtSwap(DecompRemovalIndex);
+	}
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(UFastTransactionHistoryComponent, PerPlayerTransactions, this);
+	const int32 PlayerTransactionArrayIndex = (*DecompValue)->ArrayIndex;
+	if (ensureAlwaysMsgf(PlayerTransactionArrayIndex != INDEX_NONE, TEXT("Failed to access Player Transaction Array Index.")))
+	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(UFastTransactionHistoryComponent, PerPlayerTransactions, this);
+		PerPlayerTransactions.RemoveAtSwap(PlayerTransactionArrayIndex);
+	}
+
+	ReverseFastLookup.Remove(*SearchResult);
+	FastLookup.Remove(UniqueNetIdRepl);
+}
+
 void UFastTransactionHistoryComponent::OnRep_OnPerPlayerTransactionsResize()
 {
-	for (auto& FastArray : PerPlayerTransactions)
+	for (auto& FastTransactionObject : PerPlayerTransactions)
 	{
-		if (!FastArray.OnGameplayTagStackObjectChanged.IsBoundToObject(this))
+		if (!FastTransactionObject.OnGameplayTagStackObjectChanged.IsBoundToObject(this))
 		{
-			FastArray.OnGameplayTagStackObjectChanged.AddUObject(this, &UFastTransactionHistoryComponent::OnGameplayTagStackObjectChanged);
+			FastTransactionObject.OnGameplayTagStackObjectChanged.AddUObject(this, &UFastTransactionHistoryComponent::OnGameplayTagStackObjectChanged);
 		}
 
-		if (!FastArray.OnGameplayTagStackObjectRemoved.IsBoundToObject(this))
+		if (!FastTransactionObject.OnGameplayTagStackObjectRemoved.IsBoundToObject(this))
 		{
-			FastArray.OnGameplayTagStackObjectRemoved.AddUObject(this, &UFastTransactionHistoryComponent::OnGameplayTagStackObjectRemoved);
+			FastTransactionObject.OnGameplayTagStackObjectRemoved.AddUObject(this, &UFastTransactionHistoryComponent::OnGameplayTagStackObjectRemoved);
+		}
+	}
+}
+
+void UFastTransactionHistoryComponent::OnRep_OnClientDecompilationModified()
+{
+	for (const auto& DecompiledTransaction : ClientDecompilation)
+	{
+		if (ensureAlwaysMsgf(PerPlayerTransactions.IsValidIndex(DecompiledTransaction.ArrayIndex),
+		                     TEXT("Out-of-Order access.")))
+		{
+			ReverseFastLookup.FindOrAdd(&PerPlayerTransactions[DecompiledTransaction.ArrayIndex], &DecompiledTransaction);
+			FastLookup.FindOrAdd(DecompiledTransaction.UniqueNetId, &PerPlayerTransactions[DecompiledTransaction.ArrayIndex]);
 		}
 	}
 }
@@ -273,9 +348,9 @@ void UFastTransactionHistoryComponent::OnGameplayTagStackObjectChanged(const FAV
                                                                        const FGameplayTag& Tag,
                                                                        const int32 NewValue) const
 {
-	const FUniqueNetIdRepl* UniqueNetIdRep = ReverseFastLookup.Find(FastArray);
-	if (!ensureAlwaysMsgf(UniqueNetIdRep != nullptr,
-	                      TEXT("Failed to retrieve valid UniqueNetId")))
+	const auto* const* DecompValue = ReverseFastLookup.Find(FastArray);
+	if (!ensureAlwaysMsgf(DecompValue != nullptr, TEXT("Failed to retrieve valid Decompilation Value")) ||
+		!ensureAlwaysMsgf(((*DecompValue) != nullptr), TEXT("Decomp value was nullptr.")))
 	{
 		return;
 	}
@@ -283,17 +358,16 @@ void UFastTransactionHistoryComponent::OnGameplayTagStackObjectChanged(const FAV
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = Tag;
 	ContextArgs.Payload = FAVVMNotificationPayload::Make<FAVVMInt32Payload>(NewValue);
-	ContextArgs.Target = UGameplayStatics::GetPlayerStateFromUniqueNetId(this, *UniqueNetIdRep);
-
+	ContextArgs.Target = UGameplayStatics::GetPlayerStateFromUniqueNetId(this, (*DecompValue)->UniqueNetId);
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
 
 void UFastTransactionHistoryComponent::OnGameplayTagStackObjectRemoved(const FAVVMGameplayTagStackObjectFastArray* FastArray,
                                                                        const FGameplayTag& Tag) const
 {
-	const auto* UniqueNetIdRep = ReverseFastLookup.Find(FastArray);
-	if (!ensureAlwaysMsgf(UniqueNetIdRep != nullptr,
-	                      TEXT("Failed to retrieve valid UniqueNetId")))
+	const auto* const* DecompValue = ReverseFastLookup.Find(FastArray);
+	if (!ensureAlwaysMsgf(DecompValue != nullptr, TEXT("Failed to retrieve valid Decompilation Value")) ||
+		!ensureAlwaysMsgf(((*DecompValue) != nullptr), TEXT("Decomp value was nullptr.")))
 	{
 		return;
 	}
@@ -301,7 +375,6 @@ void UFastTransactionHistoryComponent::OnGameplayTagStackObjectRemoved(const FAV
 	FAVVMNotificationContextArgs ContextArgs;
 	ContextArgs.ChannelTag = Tag;
 	ContextArgs.Payload = {};
-	ContextArgs.Target = UGameplayStatics::GetPlayerStateFromUniqueNetId(this, *UniqueNetIdRep);
-
+	ContextArgs.Target = UGameplayStatics::GetPlayerStateFromUniqueNetId(this, (*DecompValue)->UniqueNetId);
 	UAVVMNotificationSubsystem::Static_BroadcastChannel(this, ContextArgs);
 }
